@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using Npgsql.Bulk;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.DataInitializers;
 using TGS.Core.DataServices.Tgs.Models;
@@ -154,11 +152,8 @@ namespace TGS.Core.DataServices.Tgs
 
     public class TgsRepository : DbContext, ITgsRepository
     {
-        private readonly NpgsqlBulkUploader _uploader;
-
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
-            _uploader = new(this);
         }
 
         public DbSet<Reseller> Resellers { get; set; }
@@ -307,12 +302,6 @@ namespace TGS.Core.DataServices.Tgs
 
         public IDbConnection GetDbConnection() =>
             Database.GetDbConnection();
-
-        public Task BulkInsertAsync<T>(IEnumerable<T> entities) where T : class =>
-            _uploader.InsertAsync(entities);
-
-        public Task BulkUpdateAsync<T>(IEnumerable<T> entities) where T : class =>
-            _uploader.UpdateAsync(entities);
 
         public async Task ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {

@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.DataInitializers;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using static TGS.Core.Models.Enums.GameType;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -112,7 +112,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Console.WriteLine(logBuilder.ToString());
         }
 
-        private Task GenerateCurrenciesAsync()
+        private async Task GenerateCurrenciesAsync()
         {
             var currencies = _currencies
                 .Select(c => new Currency
@@ -127,7 +127,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     UpdatedOn = Now
                 }).ToArray();
 
-            return _repository.BulkInsertAsync(currencies);
+            await _repository.Currencies.AddRangeAsync(currencies);
+            await _repository.SaveChangesAsync();
         }
 
         private async Task GenerateAgentsAsync()
@@ -156,11 +157,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     chiefId));
             }
 
-            await _repository.BulkInsertAsync(_agents);
-            await _repository.BulkInsertAsync(_agents.SelectMany(a => a.Wallets).ToArray());
+            await _repository.Agents.AddRangeAsync(_agents);
+            await _repository.SaveChangesAsync();
         }
 
-        private Task GenerateVipLevelsAsync()
+        private async Task GenerateVipLevelsAsync()
         {
             _vipLevels = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
                 .Distinct()
@@ -182,10 +183,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 })
                 .ToArray();
 
-            return _repository.BulkInsertAsync(_vipLevels);
+            await _repository.VipLevels.AddRangeAsync(_vipLevels);
+            await _repository.SaveChangesAsync();
         }
 
-        private Task GenerateLanguagesAsync()
+        private async Task GenerateLanguagesAsync()
         {
             var languages = new[]
                 {
@@ -258,7 +260,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     UpdatedOn = Now
                 }).ToArray();
 
-            return _repository.BulkInsertAsync(languages);
+            await _repository.Languages.AddRangeAsync(languages);
+            await _repository.SaveChangesAsync();
         }
 
         private async Task GenerateBetLimitsAsync()
@@ -272,7 +275,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new("USD", 1, 200, 1000), new("VND", 1000, 200000, 1000000), new("VND_1000", 1, 200, 1000)
             };
 
-            var betLimits = limits.Select(b => new BetLimit
+            _betLimits = limits.Select(b => new BetLimit
             {
                 CurrencyCode = b.CurrencyCode,
                 MinBet = b.MinBet,
@@ -284,9 +287,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedByUsername = AdminUsername
             }).ToArray();
 
-            await _repository.BulkInsertAsync(betLimits);
-
-            _betLimits = await _repository.BetLimits.ToArrayAsync();
+            await _repository.BetLimits.AddRangeAsync(_betLimits);
+            await _repository.SaveChangesAsync();
         }
 
         private async Task GeneratePlayersAsync()
@@ -314,18 +316,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     new("4E86719F-243F-46F6-B010-5C758B7285AF"), null)
             };
 
-            var rnd = new Random();
             var (salt, password) = _passwordHandler.GenerateCredential("TgsP@ssw0rd");
-            var addedPlayers = new List<PlayerDefined>();
 
             _players = playerDefined.Select(p =>
             {
-                var players = addedPlayers.Where(a => a.BrandId == p.BrandId).ToArray();
-
                 var playerCode = p.PlayerCode;
-
-                addedPlayers.Add(p);
-
                 var brandId = p.BrandId;
                 var username = p.PlayerCode;
                 var realName = Generator.RandomString(12);
@@ -335,9 +330,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     PlayerType.RealPlayer, p.AgentId);
             }).ToArray();
 
-            await _repository.BulkInsertAsync(_players);
-            await _repository.BulkInsertAsync(_players.SelectMany(p => p.Wallets).ToArray());
-            await _repository.BulkInsertAsync(_players.SelectMany(p => p.Banks).ToArray());
+            await _repository.Players.AddRangeAsync(_players);
+            await _repository.SaveChangesAsync();
         }
 
         private Player CreatePlayer(string playerCode,
@@ -416,14 +410,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var gameProviders = _gameProvidersCreated.Values.ToArray();
 
-            // since there is a issue that makes game provider configurations returning wrong data
-            // after use BulkInsertAsync, change to add entities directly.
-            foreach (var gp in gameProviders)
-            {
-                _gameProvidersCreated[gp.Code] = gp;
-                await _repository.GameProviders.AddAsync(gp);
-            }
-
+            await _repository.GameProviders.AddRangeAsync(gameProviders);
             await _repository.SaveChangesAsync();
         }
 
@@ -432,20 +419,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             // resellers
             var resellers = Resellers.Select(CreateResellerWithLicensees).ToArray();
 
-            await _repository.BulkInsertAsync(resellers);
-            await _repository.BulkInsertAsync(resellers.SelectMany(r => r.Currencies).ToArray());
-            await _repository.BulkInsertAsync(resellers.SelectMany(r => r.Languages).ToArray());
-            await _repository.BulkInsertAsync(resellers.SelectMany(r => r.GameProviders).ToArray());
-            await _repository.BulkInsertAsync(resellers.SelectMany(r => r.BetLimits).ToArray());
+            await _repository.Resellers.AddRangeAsync(resellers);
 
             // licensees
             var licensees = resellers.SelectMany(r => r.Licensees).ToArray();
-
-            await _repository.BulkInsertAsync(licensees);
-            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Currencies).ToArray());
-            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.Languages).ToArray());
-            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.GameProviders).ToArray());
-            await _repository.BulkInsertAsync(licensees.SelectMany(l => l.BetLimits).ToArray());
+            await _repository.Licensees.AddRangeAsync(licensees);
 
             // brands
             var brands = licensees.SelectMany(l => l.Brands).ToArray();
@@ -454,27 +432,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 _brandCreated.Add(b.Code, b);
             }
 
-            await _repository.BulkInsertAsync(brands);
-            await _repository.BulkInsertAsync(brands.SelectMany(b => b.Currencies).ToArray());
-            await _repository.BulkInsertAsync(brands.SelectMany(b => b.Languages).ToArray());
-            await _repository.BulkInsertAsync(brands.SelectMany(b => b.GameProviders).ToArray());
-            await _repository.BulkInsertAsync(brands.SelectMany(b => b.Games).ToArray());
-            await _repository.BulkInsertAsync(brands.SelectMany(b =>
-                b.GameProviders.SelectMany(p => p.Schedules)).ToArray());
-            await _repository.BulkInsertAsync(brands.SelectMany(b => b.BetLimits).ToArray());
-
-            // brand groups
-            await _repository.BulkInsertAsync(brands.SelectMany(b => b.BrandGroups).ToArray());
-            await _repository.BulkInsertAsync(brands.SelectMany(b =>
-                b.BrandGroups.SelectMany(g => g.BrandGames)).ToArray());
-            await _repository.BulkInsertAsync(brands.SelectMany(b =>
-                b.BrandGroups.SelectMany(g => g.BrandGroupBetLimits)).ToArray());
-            await _repository.BulkInsertAsync(brands.SelectMany(b =>
-                b.BrandGroups.SelectMany(g => g.BrandGroupBetLimits)
-                    .SelectMany(g => g.GameProviderBetLimits)).ToArray());
+            await _repository.Brands.AddRangeAsync(brands);
+            await _repository.SaveChangesAsync();
         }
 
-        private Task GenerateLocalizedStringsAsync()
+        private async Task GenerateLocalizedStringsAsync()
         {
             var localizedStrings = new List<LocalizedString>();
 
@@ -491,7 +453,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 }
             }
 
-            return _repository.BulkInsertAsync(localizedStrings);
+            await _repository.LocalizedStrings.AddRangeAsync(localizedStrings);
+            await _repository.SaveChangesAsync();
         }
 
         private async Task GenerateSportTypesAndMarketTypesAsync()
@@ -524,12 +487,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             })
                 .ToArray();
 
-            await _repository.BulkInsertAsync(sports);
-            await _repository.BulkInsertAsync(markets);
-            await _repository.BulkInsertAsync(relation);
+            await _repository.SportTypes.AddRangeAsync(sports);
+            await _repository.MarketTypes.AddRangeAsync(markets);
+            await _repository.SportMarketTypes.AddRangeAsync(relation);
+            await _repository.SaveChangesAsync();
         }
 
-        private Task GeneratePlayerSportsBetLimitsAsync()
+        private async Task GeneratePlayerSportsBetLimitsAsync()
         {
             var relation = _repository.SportMarketTypes.ToArray();
 
@@ -549,7 +513,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                               MaxBetPerMatch = 5000
                           }).ToArray();
 
-            return _repository.BulkInsertAsync(limits);
+
+            await _repository.PlayerSportsBetLimits.AddRangeAsync(limits);
+            await _repository.SaveChangesAsync();
         }
 
         private static GameProvider CreateGameProvider(IGameProvider gameProvider)
@@ -797,10 +763,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
-            var beforeFromDate = DateTimeOffset.Now.AddDays(-7);
-            var beforeToDate = DateTimeOffset.Now.AddDays(-1);
-            var afterFromDate = DateTimeOffset.Now;
-            var afterToDate = DateTimeOffset.Now.AddDays(6);
+            var (beforeFromDate, beforeToDate, afterFromDate, afterToDate) =
+                BrandSettlementIntervalGenerator.GetInterval(brand.Type);
 
             return new()
             {
@@ -819,15 +783,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 ClientId = brand.ClientId,
                 SecretKey = brand.SecretKey,
                 ApiKey = brand.ApiKey,
-                SettlementIntervalType = SettlementIntervalType.Daily,
-                BeforeFromDateTime = new(beforeFromDate.Year, beforeFromDate.Month, beforeFromDate.Day, 0, 0, 0,
-                    beforeFromDate.Offset),
-                BeforeToDateTime = new(beforeToDate.Year, beforeToDate.Month, beforeToDate.Day, 0, 0, 0,
-                    beforeToDate.Offset),
-                AfterFromDateTime = new(afterFromDate.Year, afterFromDate.Month, afterFromDate.Day, 0, 0, 0,
-                    afterFromDate.Offset),
-                AfterToDateTime = new(afterToDate.Year, afterToDate.Month, afterToDate.Day, 0, 0, 0,
-                    afterToDate.Offset),
+                SettlementIntervalType = brand.Type,
+                BeforeFromDateTime = beforeFromDate,
+                BeforeToDateTime = beforeToDate,
+                AfterFromDateTime = afterFromDate,
+                AfterToDateTime = afterToDate,
                 Currencies =
                     brand.Currencies.Select(curr => new BrandCurrency
                     {
@@ -971,13 +931,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 RoleType = role.RoleType
             }).ToArray();
 
-        private Task GenerateRolesAsync()
+        private async Task GenerateRolesAsync()
         {
             var roles = CreateRoleWithMenus(_roles);
-            return _repository.BulkInsertAsync(roles);
+
+            await _repository.Roles.AddRangeAsync(roles);
+            await _repository.SaveChangesAsync();
         }
 
-        private Task GenerateUsersAsync()
+        private async Task GenerateUsersAsync()
         {
             string[] usernames = {"hank.wu", "lester.wei", "sam.chuang", "houdini.sheng", "rico.lin"};
 
@@ -996,7 +958,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             users.AddRange(usernames.Select(username =>
                 CreateUser(username, UserStatus.Enabled, Roles.Admin, Departments[ProductDepartment])));
 
-            return _repository.BulkInsertAsync(users);
+            await _repository.Users.AddRangeAsync(users);
+            await _repository.SaveChangesAsync();
         }
 
         private async Task GenerateBetDataAsync()

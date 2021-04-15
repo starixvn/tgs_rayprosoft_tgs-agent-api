@@ -13,11 +13,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private static readonly Dictionary<string, Guid> Departments = new()
         {
-            {MarketDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB")},
-            {ProductDepartment, new Guid("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA")}
+            {MarketDepartment, new("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DB")},
+            {ProductDepartment, new("5CBEDCF4-9BE7-4C1F-8627-CF2A0746C7DA")}
         };
 
-        private Task GenerateDepartmentsAsync()
+        private async Task GenerateDepartmentsAsync()
         {
             var departments = Departments.Select(p => new Department
             {
@@ -28,9 +28,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
-            });
+            }).ToArray();
 
-            return _repository.BulkInsertAsync(departments.ToArray());
+            await _repository.Departments.AddRangeAsync(departments);
+            await _repository.SaveChangesAsync();
         }
     }
 }

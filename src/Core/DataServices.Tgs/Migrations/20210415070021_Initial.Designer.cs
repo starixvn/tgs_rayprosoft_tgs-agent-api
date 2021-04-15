@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210414031627_Initial")]
+    [Migration("20210415070021_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,124 +27,157 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<int>("AgentStatus")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("agent_status");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<decimal>("CardGameRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("card_game_rebate_percentage");
 
                     b.Property<decimal>("CommissionPercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("commission_percentage");
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<Guid>("DefaultWalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("default_wallet_id");
 
                     b.Property<decimal>("DividendPercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("dividend_percentage");
 
                     b.Property<string>("Email")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("email");
 
                     b.Property<string>("InvitationCode")
                         .IsRequired()
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("invitation_code");
 
                     b.Property<int>("LevelType")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("level_type");
 
                     b.Property<decimal>("LiveDealerRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("live_dealer_rebate_percentage");
 
                     b.Property<decimal>("LotteryRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("lottery_rebate_percentage");
 
                     b.Property<Guid?>("ParentAgentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_agent_id");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("password");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("phone");
 
                     b.Property<string>("QQ")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("qq");
 
                     b.Property<string>("RealName")
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("real_name");
 
                     b.Property<DateTimeOffset>("RegisteredOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("registered_on");
 
                     b.Property<string>("Remarks")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("remarks");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("salt");
 
                     b.Property<decimal>("SlotRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("slot_rebate_percentage");
 
                     b.Property<decimal>("SportsRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("sports_rebate_percentage");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<short>("Type")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("username");
 
                     b.Property<decimal>("VirtualSportsRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("virtual_sports_rebate_percentage");
 
                     b.Property<string>("Wechat")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("wechat");
 
                     b.Property<byte[]>("WithdrawPassword")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("withdraw_password");
 
                     b.Property<byte[]>("WithdrawSalt")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("withdraw_salt");
 
                     b.HasKey("Id")
                         .HasName("pk_agents");
@@ -152,7 +185,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_agents_brand_id");
 
-                    b.HasIndex("ParentAgentId");
+                    b.HasIndex("ParentAgentId")
+                        .HasDatabaseName("ix_agents_parent_agent_id");
 
                     b.ToTable("agents");
                 });
@@ -161,27 +195,33 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("AgentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<short>("Operation")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("operation");
 
                     b.HasKey("Id")
                         .HasName("pk_agent_audit_logs");
 
-                    b.HasIndex("AgentId");
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_audit_logs_agent_id");
 
                     b.ToTable("agent_audit_logs");
                 });
@@ -190,37 +230,46 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("AgentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
 
                     b.Property<string>("BankAccount")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("bank_account");
 
                     b.Property<string>("BankName")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("bank_name");
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("RealName")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("real_name");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_agent_banks");
@@ -235,75 +284,96 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
 
                     b.Property<decimal>("Balance")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<DateTimeOffset>("ConfirmedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_on");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<string>("ExternalTransactionId")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("external_transaction_id");
 
                     b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
 
                     b.Property<DateTimeOffset>("SentOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
 
                     b.Property<int>("Type")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
                     b.Property<Guid>("WalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("wallet_id");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id")
+                        .HasName("pk_agent_transactions");
 
-                    b.HasIndex("BrandId");
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_agent_transactions_brand_id");
 
-                    b.HasIndex("WalletId");
+                    b.HasIndex("WalletId")
+                        .HasDatabaseName("ix_agent_transactions_wallet_id");
 
-                    b.ToTable("AgentTransactions");
+                    b.ToTable("agent_transactions");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentWallet", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("AgentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
 
                     b.Property<decimal>("Balance")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_agent_wallets");
 
-                    b.HasIndex("AgentId");
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_wallets_agent_id");
 
                     b.HasIndex("CurrencyCode")
                         .HasDatabaseName("ix_agent_wallets_currency_code");
@@ -315,54 +385,68 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("Content")
                         .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("content");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<short>("DisplayOrder")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("display_order");
 
                     b.Property<DateTimeOffset>("From")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("remarks");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.Property<string>("Subject")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("subject");
 
                     b.Property<DateTimeOffset>("To")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<string>("VerifiedByUsername")
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("verified_by_username");
 
                     b.HasKey("Id")
                         .HasName("pk_announcements");
@@ -378,37 +462,46 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
 
                     b.Property<int>("MaxBet")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("max_bet");
 
                     b.Property<int>("MaxBetPerMatch")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("max_bet_per_match");
 
                     b.Property<int>("MinBet")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("min_bet");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_bet_limits");
@@ -423,81 +516,101 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("AfterFromDateTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("after_from_date_time");
 
                     b.Property<DateTimeOffset>("AfterToDateTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("after_to_date_time");
 
                     b.Property<string>("ApiKey")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("api_key");
 
                     b.Property<DateTimeOffset>("BeforeFromDateTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("before_from_date_time");
 
                     b.Property<DateTimeOffset>("BeforeToDateTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("before_to_date_time");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("client_id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("description");
 
                     b.Property<Guid>("LicenseeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("licensee_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
 
                     b.Property<string>("OperationalEmail")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("operational_email");
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("secret_key");
 
                     b.Property<int>("SettlementIntervalType")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("settlement_interval_type");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<string>("TimeZoneId")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("time_zone_id");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_brands");
@@ -511,13 +624,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandBetLimit", b =>
                 {
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<int>("BetLimitId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("bet_limit_id");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_default");
 
                     b.HasKey("BrandId", "BetLimitId")
                         .HasName("pk_brand_bet_limits");
@@ -531,18 +647,22 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCurrency", b =>
                 {
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("CurrencyCode")
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
 
                     b.Property<string>("BrandCurrencyCode")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("brand_currency_code");
 
-                    b.HasKey("BrandId", "CurrencyCode");
+                    b.HasKey("BrandId", "CurrencyCode")
+                        .HasName("pk_brand_currencies");
 
                     b.HasIndex("CurrencyCode")
                         .HasDatabaseName("ix_brand_currencies_currency_code");
@@ -554,29 +674,37 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
 
                     b.Property<decimal>("EffectiveBettingPercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("effective_betting_percentage");
 
                     b.Property<int>("GameId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
 
                     b.Property<bool>("Rebate")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("rebate");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<byte>("Tag")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("tag");
 
                     b.HasKey("Id")
                         .HasName("pk_brand_games");
@@ -594,41 +722,50 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("DefaultLanguageCode")
                         .IsRequired()
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("default_language_code");
 
                     b.Property<string>("DesktopQueryString")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
-                        .HasDefaultValue("");
+                        .HasDefaultValue("")
+                        .HasColumnName("desktop_query_string");
 
                     b.Property<Guid>("GameProviderConfigurationId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_configuration_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<bool>("IsManualChangeStatus")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_manual_change_status");
 
                     b.Property<string>("MobileQueryString")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
-                        .HasDefaultValue("");
+                        .HasDefaultValue("")
+                        .HasColumnName("mobile_query_string");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.HasKey("Id")
                         .HasName("pk_brand_game_providers");
@@ -654,25 +791,32 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("BrandGameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_game_provider_id");
 
                     b.Property<int?>("DayOfWeek")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("day_of_week");
 
                     b.Property<DateTimeOffset>("From")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_default");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset>("To")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
 
                     b.HasKey("Id")
                         .HasName("pk_brand_game_provider_schedule");
@@ -687,37 +831,46 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<bool>("IsSports")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_sports");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_brand_groups");
@@ -732,13 +885,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<int>("BetLimitId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("bet_limit_id");
 
                     b.Property<Guid>("BrandGroupId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_group_id");
 
                     b.HasKey("Id")
                         .HasName("pk_brand_group_bet_limits");
@@ -758,10 +914,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandGroupGame", b =>
                 {
                     b.Property<Guid>("BrandGroupId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_group_id");
 
                     b.Property<Guid>("BrandGameId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_game_id");
 
                     b.HasKey("BrandGroupId", "BrandGameId")
                         .HasName("pk_brand_group_games");
@@ -775,10 +933,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandGroupGameProviderBetLimit", b =>
                 {
                     b.Property<Guid>("BrandGroupBetLimitId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_group_bet_limit_id");
 
                     b.Property<Guid>("GameProviderBetLimitId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_bet_limit_id");
 
                     b.HasKey("BrandGroupBetLimitId", "GameProviderBetLimitId")
                         .HasName("pk_brand_group_game_provider_bet_limits");
@@ -792,17 +952,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandLanguage", b =>
                 {
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("CultureCode")
                         .HasMaxLength(6)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("culture_code");
 
                     b.Property<string>("BrandCultureCode")
                         .IsRequired()
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("brand_culture_code");
 
                     b.HasKey("BrandId", "CultureCode")
                         .HasName("pk_brand_languages");
@@ -817,103 +980,129 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<bool>("AllPlayers")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("all_players");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("ChannelName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("channel_name");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
                     b.Property<decimal>("DepositedAmountMax")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("deposited_amount_max");
 
                     b.Property<decimal>("DepositedAmountMin")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("deposited_amount_min");
 
                     b.Property<bool>("DepositedAmountUnlimited")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("deposited_amount_unlimited");
 
                     b.Property<int>("DisplayOrder")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("display_order");
 
                     b.Property<string>("ExtendedData")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("extended_data");
 
                     b.Property<decimal?>("FeePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("fee_percentage");
 
                     b.Property<decimal?>("HighestFee")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("highest_fee");
 
                     b.Property<bool>("IdentityAuthentication")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("identity_authentication");
 
                     b.Property<decimal?>("LowestFee")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("lowest_fee");
 
                     b.Property<Guid>("PaymentMethodChannelId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_method_channel_id");
 
                     b.Property<int>("PaymentStatus")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("payment_status");
 
                     b.Property<bool>("PhoneAuthentication")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("phone_authentication");
 
                     b.Property<int>("PlayerListCondition")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("player_list_condition");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("reason");
 
                     b.Property<decimal>("TransferLimitFrom")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("transfer_limit_from");
 
                     b.Property<decimal>("TransferLimitTo")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("transfer_limit_to");
 
                     b.Property<int>("TransferType")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("transfer_type");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on")
                         .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
                         .HasName("pk_brand_payments");
 
-                    b.HasIndex("BrandId");
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_brand_payments_brand_id");
 
                     b.HasIndex("PaymentMethodChannelId")
                         .HasDatabaseName("ix_brand_payments_payment_method_channel_id");
@@ -925,38 +1114,47 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("After")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("after");
 
                     b.Property<string>("Before")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("before");
 
                     b.Property<Guid>("BrandPaymentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_payment_id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<short>("Operation")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("operation");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("reason");
 
                     b.HasKey("Id")
                         .HasName("pk_brand_payment_audit_logs");
 
-                    b.HasIndex("BrandPaymentId");
+                    b.HasIndex("BrandPaymentId")
+                        .HasDatabaseName("ix_brand_payment_audit_logs_brand_payment_id");
 
                     b.ToTable("brand_payment_audit_logs");
                 });
@@ -964,13 +1162,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPaymentPlayer", b =>
                 {
                     b.Property<Guid>("BrandPaymentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_payment_id");
 
                     b.Property<string>("PlayerCode")
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
 
                     b.Property<short>("ListType")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("list_type");
 
                     b.HasKey("BrandPaymentId", "PlayerCode")
                         .HasName("pk_brand_payment_players");
@@ -984,10 +1185,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPaymentVipLevel", b =>
                 {
                     b.Property<Guid>("BrandPaymentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_payment_id");
 
                     b.Property<Guid>("VipLevelId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("vip_level_id");
 
                     b.HasKey("BrandPaymentId", "VipLevelId")
                         .HasName("pk_brand_payment_vip_levels");
@@ -1002,36 +1205,44 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<string>("Code")
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("name");
 
                     b.Property<string>("NativeName")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("native_name");
 
                     b.Property<string>("Symbol")
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("symbol");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Code")
                         .HasName("pk_currencies");
@@ -1043,42 +1254,52 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid?>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description");
 
                     b.Property<Guid?>("LicenseeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("licensee_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
 
                     b.Property<Guid?>("ResellerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reseller_id");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_departments");
@@ -1099,49 +1320,61 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
 
                     b.Property<string>("BankAccount")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("bank_account");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<Guid>("BrandPaymentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_payment_id");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
                     b.Property<string>("ManualReceiptExternalUrl")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("manual_receipt_external_url");
 
                     b.Property<string>("ManualReceiptFileId")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("manual_receipt_file_id");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
 
                     b.Property<string>("Remark")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
-                        .HasDefaultValue(0);
+                        .HasDefaultValue(0)
+                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset>("UpdateOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("update_on")
                         .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
@@ -1162,81 +1395,101 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Game", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     b.Property<string>("AvailableCurrencies")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(1024)
                         .HasColumnType("character varying(1024)")
-                        .HasDefaultValue("");
+                        .HasDefaultValue("")
+                        .HasColumnName("available_currencies");
 
                     b.Property<bool>("AvailableToBrand")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("available_to_brand");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("code");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description");
 
                     b.Property<string>("EndpointPath")
                         .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)");
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("endpoint_path");
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("external_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<bool>("HasTurnoverOnTieBet")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("has_turnover_on_tie_bet");
 
                     b.Property<bool>("Html5")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("html5");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
 
                     b.Property<byte>("PlatformType")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("platform_type");
 
                     b.Property<string>("RuleUrl")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("rule_url");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<bool>("SubGame")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("sub_game");
 
                     b.Property<short>("Type")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_games");
@@ -1251,86 +1504,108 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
 
                     b.Property<decimal>("Balance")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
 
                     b.Property<string>("BetType")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("bet_type");
 
                     b.Property<bool?>("ClosingRoundExplicitRequest")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("closing_round_explicit_request");
 
                     b.Property<string>("ExternalBetId")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("external_bet_id");
 
                     b.Property<string>("ExternalGameActionGroupId")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("external_game_action_group_id");
 
                     b.Property<string>("ExternalTransactionId")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("external_transaction_id");
 
                     b.Property<string>("ExtraData")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("extra_data");
 
                     b.Property<Guid?>("GameActionBatchId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_action_batch_id");
 
                     b.Property<bool>("IsClosingRound")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_closing_round");
 
                     b.Property<string>("JackpotContribution")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("jackpot_contribution");
 
                     b.Property<string>("PlayerIp")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("player_ip");
 
                     b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
 
                     b.Property<Guid?>("ReferencedGameActionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("referenced_game_action_id");
 
                     b.Property<Guid>("RoundId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("round_id");
 
                     b.Property<DateTimeOffset?>("SentOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
 
                     b.Property<DateTimeOffset>("StoredOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("stored_on")
                         .HasDefaultValueSql("now()");
 
                     b.Property<decimal>("Turnover")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("turnover");
 
                     b.Property<short>("Type")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
 
                     b.Property<decimal>("UnsettledBets")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("unsettled_bets");
 
                     b.Property<decimal>("WinLoss")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("win_loss");
 
                     b.HasKey("Id")
                         .HasName("pk_game_actions");
@@ -1351,31 +1626,39 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<short>("Error")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("error");
 
                     b.Property<string>("ErrorMessage")
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)");
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("error_message");
 
                     b.Property<string>("ErrorsJson")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("errors_json");
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("external_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<int>("TransactionsCount")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("transactions_count");
 
                     b.HasKey("Id")
                         .HasName("pk_game_action_batches");
@@ -1390,62 +1673,77 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<bool>("AllowKickPlayer")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("allow_kick_player");
 
                     b.Property<bool>("AutoCloseRound")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("auto_close_round");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
 
                     b.Property<short>("PlaceBetTimeout")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint")
-                        .HasDefaultValue((short)0);
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("place_bet_timeout");
 
                     b.Property<short>("SettleBetTimeout")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint")
-                        .HasDefaultValue((short)0);
+                        .HasDefaultValue((short)0)
+                        .HasColumnName("settle_bet_timeout");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<bool>("SupportTestPlayer")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("support_test_player");
 
                     b.Property<short>("UniqueId")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("unique_id");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_game_providers");
@@ -1457,28 +1755,35 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("CurrencyCode")
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
 
                     b.Property<string>("ExternalSetting")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("external_setting");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<int>("MaxBet")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("max_bet");
 
                     b.Property<int?>("MaxBetPerMatch")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("max_bet_per_match");
 
                     b.Property<int>("MinBet")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("min_bet");
 
                     b.HasKey("Id")
                         .HasName("pk_game_provider_bet_limits");
@@ -1496,65 +1801,80 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("client_id");
 
                     b.Property<string>("ConfigurationData")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("configuration_data");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("description");
 
                     b.Property<string>("DesktopEndpoint")
                         .IsRequired()
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)");
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("desktop_endpoint");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_default");
 
                     b.Property<string>("MobileEndpoint")
                         .IsRequired()
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)");
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("mobile_endpoint");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("name");
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("secret_key");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_game_provider_configurations");
@@ -1568,16 +1888,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderCurrency", b =>
                 {
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<string>("CurrencyCode")
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
 
                     b.Property<string>("GameProviderCurrencyCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("game_provider_currency_code");
 
                     b.HasKey("GameProviderId", "CurrencyCode")
                         .HasName("pk_game_provider_currencies");
@@ -1591,16 +1914,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderLanguage", b =>
                 {
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<string>("CultureCode")
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("culture_code");
 
                     b.Property<string>("GameProviderCultureCode")
                         .IsRequired()
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("game_provider_culture_code");
 
                     b.HasKey("GameProviderId", "CultureCode")
                         .HasName("pk_game_provider_languages");
@@ -1615,38 +1941,46 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<string>("CultureCode")
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("culture_code");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("LanguageCode")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("language_code");
 
                     b.Property<string>("LocalizedName")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("localized_name");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("name");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("CultureCode")
                         .HasName("pk_languages");
@@ -1658,47 +1992,58 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
 
                     b.Property<string>("OperationalEmail")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("operational_email");
 
                     b.Property<Guid>("ResellerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reseller_id");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_licensees");
@@ -1712,10 +2057,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.LicenseeBetLimit", b =>
                 {
                     b.Property<Guid>("LicenseeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("licensee_id");
 
                     b.Property<int>("BetLimitId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("bet_limit_id");
 
                     b.HasKey("LicenseeId", "BetLimitId")
                         .HasName("pk_licensee_bet_limits");
@@ -1729,11 +2076,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.LicenseeCurrency", b =>
                 {
                     b.Property<Guid>("LicenseeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("licensee_id");
 
                     b.Property<string>("CurrencyCode")
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
 
                     b.HasKey("LicenseeId", "CurrencyCode")
                         .HasName("pk_licensee_currencies");
@@ -1747,10 +2096,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.LicenseeGameProvider", b =>
                 {
                     b.Property<Guid>("LicenseeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("licensee_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.HasKey("LicenseeId", "GameProviderId")
                         .HasName("pk_licensee_game_providers");
@@ -1764,16 +2115,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.LicenseeLanguage", b =>
                 {
                     b.Property<Guid>("LicenseeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("licensee_id");
 
                     b.Property<string>("CultureCode")
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("culture_code");
 
                     b.HasKey("LicenseeId", "CultureCode")
                         .HasName("pk_licensee_languages");
 
-                    b.HasIndex("CultureCode");
+                    b.HasIndex("CultureCode")
+                        .HasDatabaseName("ix_licensee_languages_culture_code");
 
                     b.ToTable("licensee_languages");
                 });
@@ -1782,20 +2136,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<string>("Key")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("key");
 
                     b.Property<string>("CultureCode")
                         .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("culture_code");
 
                     b.Property<string>("Context")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("context");
 
                     b.Property<string>("Translation")
                         .IsRequired()
                         .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)");
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("translation");
 
                     b.HasKey("Key", "CultureCode", "Context")
                         .HasName("pk_localized_strings");
@@ -1810,20 +2168,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code");
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("external_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.HasKey("Id")
                         .HasName("pk_market_types");
@@ -1838,46 +2200,56 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description");
 
                     b.Property<string>("ExtendData")
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("extend_data");
 
                     b.Property<string>("Name")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<short>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint")
+                        .HasColumnName("status")
                         .HasDefaultValueSql("0");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on")
                         .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
@@ -1890,16 +2262,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description");
 
                     b.HasKey("Id")
                         .HasName("pk_payment_channels");
@@ -1911,16 +2286,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description");
 
                     b.HasKey("Id")
                         .HasName("pk_payment_methods");
@@ -1932,40 +2310,49 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("ChannelId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("channel_id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
                     b.Property<Guid>("MethodId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("method_id");
 
                     b.Property<Guid>("PaymentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_id");
 
                     b.Property<short>("Status")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("smallint")
+                        .HasColumnName("status")
                         .HasDefaultValueSql("0");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on")
                         .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
@@ -1990,115 +2377,145 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<string>("PlayerCode")
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
 
                     b.Property<decimal>("AccumulatedDeposit")
                         .ValueGeneratedOnAdd()
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
-                        .HasDefaultValue(0m);
+                        .HasDefaultValue(0m)
+                        .HasColumnName("accumulated_deposit");
 
                     b.Property<Guid?>("AgentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
 
                     b.Property<int>("BetLimitId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("bet_limit_id");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("DefaultWalletCurrencyCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("default_wallet_currency_code");
 
                     b.Property<Guid>("DefaultWalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("default_wallet_id");
 
                     b.Property<string>("Email")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("email");
 
                     b.Property<DateTimeOffset?>("FirstDepositOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_deposit_on");
 
                     b.Property<string>("IdNumber")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("id_number");
 
                     b.Property<bool>("IdentityAuthentication")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("identity_authentication");
 
                     b.Property<DateTimeOffset>("LastActiveOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_active_on");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("password");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("phone");
 
                     b.Property<bool>("PhoneAuthentication")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("phone_authentication");
 
                     b.Property<string>("QQ")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("qq");
 
                     b.Property<string>("RealName")
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("real_name");
 
                     b.Property<DateTimeOffset>("RegisteredOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("registered_on");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("salt");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<byte>("Type")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("username");
 
                     b.Property<Guid?>("VipId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("vip_id");
 
                     b.Property<string>("Wechat")
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("wechat");
 
                     b.Property<byte[]>("WithdrawPassword")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("withdraw_password");
 
                     b.Property<byte[]>("WithdrawSalt")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("withdraw_salt");
 
                     b.HasKey("PlayerCode")
                         .HasName("pk_player_code");
 
-                    b.HasIndex("AgentId");
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_players_agent_id");
 
                     b.HasIndex("BetLimitId")
                         .HasDatabaseName("ix_players_bet_limit_id");
 
-                    b.HasIndex("BrandId");
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_players_brand_id");
 
                     b.HasIndex("VipId")
                         .HasDatabaseName("ix_players_vip_id");
@@ -2110,32 +2527,38 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("ModuleName")
                         .IsRequired()
                         .HasMaxLength(256)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("module_name");
 
                     b.Property<string>("Operation")
                         .HasMaxLength(256)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("operation");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("username");
 
                     b.HasKey("Id")
                         .HasName("pk_player_audit_logs");
@@ -2147,43 +2570,52 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("BankAccount")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("bank_account");
 
                     b.Property<string>("BankName")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("bank_name");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
 
                     b.Property<string>("RealName")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("real_name");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_player_banks");
@@ -2198,30 +2630,38 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<DateTimeOffset>("ExpiredOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expired_on");
 
                     b.Property<string>("IpAddress")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("ip_address");
 
                     b.Property<short>("PlatformType")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("platform_type");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.HasKey("Id")
                         .HasName("pk_player_login_records");
@@ -2238,19 +2678,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerSportsBetLimit", b =>
                 {
                     b.Property<string>("PlayerCode")
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
 
                     b.Property<Guid>("SportMarketTypeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("sport_market_type_id");
 
                     b.Property<int>("MaxBet")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("max_bet");
 
                     b.Property<int>("MaxBetPerMatch")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("max_bet_per_match");
 
                     b.Property<int>("MinBet")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("min_bet");
 
                     b.HasKey("PlayerCode", "SportMarketTypeId")
                         .HasName("pk_player_sports_bet_limits");
@@ -2265,69 +2710,88 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("AmountUsed")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount_used");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("CreatedByUsername")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<DateTimeOffset>("From")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
 
                     b.Property<short?>("GameType")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("name");
 
                     b.Property<decimal>("Percentage")
                         .HasPrecision(9, 6)
-                        .HasColumnType("numeric(9,6)");
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("percentage");
 
                     b.Property<decimal>("PromotionAmount")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("promotion_amount");
 
                     b.Property<string>("PromotionType")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("promotion_type");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<DateTimeOffset>("To")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
 
                     b.Property<decimal>("TotalAmountLimit")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("total_amount_limit");
 
                     b.Property<decimal>("TurnoverMultiple")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("turnover_multiple");
 
                     b.Property<short>("Unlimited")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("unlimited");
 
                     b.Property<string>("UpdatedByUsername")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<Guid?>("VipLevelId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("vip_level_id");
 
                     b.HasKey("Id")
                         .HasName("pk_promotions_id");
@@ -2335,7 +2799,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_promotions_brand_id");
 
-                    b.HasIndex("VipLevelId");
+                    b.HasIndex("VipLevelId")
+                        .HasDatabaseName("ix_promotions_vip_level_id");
 
                     b.ToTable("promotions");
                 });
@@ -2343,10 +2808,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionGameProvider", b =>
                 {
                     b.Property<Guid>("PromotionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.HasKey("PromotionId", "GameProviderId")
                         .HasName("pk_promotion_game_providers");
@@ -2360,13 +2827,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionVipLevel", b =>
                 {
                     b.Property<Guid>("PromotionId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
 
                     b.Property<Guid>("VipLevelId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("vip_level_id");
 
                     b.Property<int>("Level")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
 
                     b.HasKey("PromotionId", "VipLevelId")
                         .HasName("pk_promotion_vip_levels");
@@ -2374,7 +2844,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("Level")
                         .HasDatabaseName("ix_promotion_vip_level_vip_level_id");
 
-                    b.HasIndex("VipLevelId");
+                    b.HasIndex("VipLevelId")
+                        .HasDatabaseName("ix_promotion_vip_levels_vip_level_id");
 
                     b.ToTable("promotion_vip_levels");
                 });
@@ -2383,47 +2854,58 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<short>("BusinessType")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("business_type");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
 
                     b.Property<string>("OperationalEmail")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("operational_email");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_resellers");
@@ -2434,10 +2916,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.ResellerBetLimit", b =>
                 {
                     b.Property<Guid>("ResellerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reseller_id");
 
                     b.Property<int>("BetLimitId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("bet_limit_id");
 
                     b.HasKey("ResellerId", "BetLimitId")
                         .HasName("pk_reseller_bet_limits");
@@ -2451,10 +2935,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.ResellerCurrency", b =>
                 {
                     b.Property<Guid>("ResellerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reseller_id");
 
                     b.Property<string>("CurrencyCode")
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
 
                     b.HasKey("ResellerId", "CurrencyCode")
                         .HasName("pk_reseller_currencies");
@@ -2468,10 +2954,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.ResellerGameProvider", b =>
                 {
                     b.Property<Guid>("ResellerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reseller_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.HasKey("ResellerId", "GameProviderId")
                         .HasName("pk_reseller_game_providers");
@@ -2485,10 +2973,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.ResellerLanguage", b =>
                 {
                     b.Property<Guid>("ResellerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reseller_id");
 
                     b.Property<string>("CultureCode")
-                        .HasColumnType("character varying(6)");
+                        .HasColumnType("character varying(6)")
+                        .HasColumnName("culture_code");
 
                     b.HasKey("ResellerId", "CultureCode")
                         .HasName("pk_reseller_languages");
@@ -2503,58 +2993,73 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid?>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description");
 
                     b.Property<string>("DisplayName")
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("display_name");
 
                     b.Property<bool>("IsRoot")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_root");
 
                     b.Property<Guid?>("LicenseeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("licensee_id");
 
                     b.Property<string>("MenuSetting")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("jsonb")
+                        .HasColumnName("menu_setting");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("name");
 
                     b.Property<Guid?>("ResellerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reseller_id");
 
                     b.Property<short>("RoleType")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("role_type");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_roles");
@@ -2566,83 +3071,106 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal?>("BetAmount")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bet_amount");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<short>("ClientStatus")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("client_status");
 
                     b.Property<DateTimeOffset?>("ClosedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("closed_on");
 
                     b.Property<decimal?>("Commission")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("commission");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("currency_code");
 
                     b.Property<DateTimeOffset?>("ExternalClosedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("external_closed_on");
 
                     b.Property<DateTimeOffset?>("ExternalCreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("external_created_on");
 
                     b.Property<string>("ExternalRoundId")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("external_round_id");
 
                     b.Property<int>("GameId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
 
                     b.Property<Guid>("GameProviderConfigurationId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_configuration_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
 
                     b.Property<decimal?>("SettleAmount")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("settle_amount");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<decimal?>("TieBetAdjustment")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("tie_bet_adjustment");
 
                     b.Property<decimal?>("Turnover")
-                        .HasColumnType("numeric");
+                        .HasColumnType("numeric")
+                        .HasColumnName("turnover");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<decimal?>("ValidBetAmount")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("valid_bet_amount");
 
                     b.Property<Guid>("WalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("wallet_id");
 
                     b.Property<decimal?>("WinLoss")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("win_loss");
 
                     b.HasKey("Id")
                         .HasName("pk_rounds");
@@ -2674,11 +3202,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundDetail", b =>
                 {
                     b.Property<Guid>("RoundId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("round_id");
 
                     b.Property<string>("AdditionalData")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("additional_data");
 
                     b.HasKey("RoundId")
                         .HasName("pk_round_details");
@@ -2691,31 +3221,38 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Key")
                         .HasMaxLength(32)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("key");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("description");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("value");
 
                     b.HasKey("Key")
                         .HasName("pk_settings");
@@ -2727,13 +3264,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid>("MarketTypeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("market_type_id");
 
                     b.Property<Guid>("SportTypeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("sport_type_id");
 
                     b.HasKey("Id")
                         .HasName("pk_sport_market_types");
@@ -2751,20 +3291,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("code");
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("external_id");
 
                     b.Property<Guid>("GameProviderId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.HasKey("Id")
                         .HasName("pk_sport_types");
@@ -2782,48 +3326,60 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<bool>("AssignedAllPlayers")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("assigned_all_players");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("Content")
                         .HasMaxLength(4000)
-                        .HasColumnType("character varying(4000)");
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("content");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("remarks");
 
                     b.Property<int>("Status")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
 
                     b.Property<string>("Subject")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("subject");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<string>("VerifiedByUsername")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("verified_by_username");
 
                     b.HasKey("Id")
                         .HasName("pk_station_letters");
@@ -2837,16 +3393,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.StationLetterPlayer", b =>
                 {
                     b.Property<Guid>("StationLetterId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("station_letter_id");
 
                     b.Property<string>("PlayerCode")
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_read");
 
                     b.Property<DateTimeOffset?>("ReadOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("read_on");
 
                     b.HasKey("StationLetterId", "PlayerCode")
                         .HasName("pk_station_letter_players");
@@ -2861,39 +3421,50 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
 
                     b.Property<decimal>("Balance")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<DateTimeOffset>("ConfirmedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_on");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<string>("ExternalTransactionId")
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("external_transaction_id");
 
                     b.Property<DateTimeOffset>("RecordedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
 
                     b.Property<DateTimeOffset>("SentOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
 
                     b.Property<int>("Type")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
 
                     b.Property<Guid>("WalletId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("wallet_id");
 
                     b.HasKey("Id")
                         .HasName("pk_transactions");
@@ -2911,61 +3482,76 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<Guid>("DepartmentId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("department_id");
 
                     b.Property<string>("LastLoginIp")
                         .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("last_login_ip");
 
                     b.Property<DateTimeOffset?>("LastLoginTime")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_login_time");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("name");
 
                     b.Property<byte[]>("Password")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("password");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("role_id");
 
                     b.Property<byte[]>("Salt")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasColumnType("bytea")
+                        .HasColumnName("salt");
 
                     b.Property<short>("Status")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
 
                     b.Property<string>("TimeZone")
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("time_zone");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("username");
 
                     b.HasKey("Id")
                         .HasName("pk_users");
@@ -2983,84 +3569,105 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("BirthReward")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("birth_reward");
 
                     b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<decimal>("CardGameRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("card_game_rebate_percentage");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<int>("Level")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
 
                     b.Property<decimal>("LevelKeepAccumulateBetAmount")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_keep_accumulate_bet_amount");
 
                     b.Property<decimal>("LevelKeepAccumulateDeposit")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_keep_accumulate_deposit");
 
                     b.Property<bool>("LevelKeepCondition")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("level_keep_condition");
 
                     b.Property<decimal>("LevelUpAccumulateBetAmount")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_up_accumulate_bet_amount");
 
                     b.Property<decimal>("LevelUpAccumulateDeposit")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("level_up_accumulate_deposit");
 
                     b.Property<decimal>("LiveDealerRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("live_dealer_rebate_percentage");
 
                     b.Property<decimal>("LotteryRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("lottery_rebate_percentage");
 
                     b.Property<decimal>("PromotionReward")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("promotion_reward");
 
                     b.Property<decimal>("QuarterlyReward")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("quarterly_reward");
 
                     b.Property<decimal>("SlotRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("slot_rebate_percentage");
 
                     b.Property<decimal>("SportsRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("sports_rebate_percentage");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.Property<decimal>("VirtualSportsRebatePercentage")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("virtual_sports_rebate_percentage");
 
                     b.HasKey("Id")
                         .HasName("pk_vip_levels");
@@ -3075,32 +3682,39 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<decimal>("Balance")
                         .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)");
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("CurrencyCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("currency_code");
 
                     b.Property<string>("ExternalCurrencyCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("external_currency_code");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_wallets");
@@ -3108,7 +3722,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("CurrencyCode")
                         .HasDatabaseName("ix_wallets_currency_code");
 
-                    b.HasIndex("PlayerCode");
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_wallets_player_code");
 
                     b.ToTable("wallets");
                 });
@@ -3117,50 +3732,62 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<Guid?>("BrandId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
 
                     b.Property<DateTimeOffset>("CreatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("description");
 
                     b.Property<string>("InternalNote")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("internal_note");
 
                     b.Property<string>("IpAddress")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("ip_address");
 
                     b.Property<Guid?>("LicenseeId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("licensee_id");
 
                     b.Property<Guid?>("ResellerId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasColumnName("reseller_id");
 
                     b.Property<short>("Type")
-                        .HasColumnType("smallint");
+                        .HasColumnType("smallint")
+                        .HasColumnName("type");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
                         .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
 
                     b.HasKey("Id")
                         .HasName("pk_whitelists");
@@ -3225,12 +3852,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
                         .WithMany()
                         .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_agent_transactions_brands_brand_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.AgentWallet", "Wallet")
                         .WithMany()
                         .HasForeignKey("WalletId")
+                        .HasConstraintName("fk_agent_transactions_agent_wallets_wallet_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -3999,7 +4628,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.VipLevel", null)
                         .WithMany("Promotions")
-                        .HasForeignKey("VipLevelId");
+                        .HasForeignKey("VipLevelId")
+                        .HasConstraintName("fk_promotions_vip_levels_vip_level_id");
 
                     b.Navigation("Brand");
                 });

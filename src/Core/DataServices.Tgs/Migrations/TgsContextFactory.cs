@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -23,10 +22,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             var optionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
             optionsBuilder
-                .UseNpgsql(config.GetConnectionString("Tgs"))
+                .UseNpgsql(config.GetConnectionString("Tgs"), serverOption =>
+                {
+                    serverOption.SetPostgresVersion(12, 5);
+                    serverOption.CommandTimeout(180);
+                    serverOption.MigrationsHistoryTable(Core.Models.Consts.Db.MigrationsHistoryTable,
+                        Core.Models.Consts.Db.Schema);
+                    serverOption.UseTrigrams();
+                })
+                .UseSnakeCaseNamingConvention()
                 .UseLoggerFactory(loggerFactory);
 
-            return new TgsRepository(optionsBuilder.Options);
+            return new(optionsBuilder.Options);
         }
     }
 }
