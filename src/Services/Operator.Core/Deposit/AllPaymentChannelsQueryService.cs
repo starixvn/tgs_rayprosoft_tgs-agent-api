@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.BankDeposit
+namespace TGS.Services.Operator.Deposit
 {
-    internal class AllPaymentChannelsQueryService : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannel>>
+    internal class AllPaymentChannelsQueryService : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>>
     {
         private readonly IWalletRepository _walletRepository;
 
@@ -17,13 +17,13 @@ namespace TGS.Services.Operator.BankDeposit
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
-        public async ValueTask<IDictionary<Guid, PaymentChannel>> GetAsync(AllPaymentChannelsQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<IDictionary<Guid, PaymentChannelInfo>> GetAsync(AllPaymentChannelsQuery query, CancellationToken cancellationToken = default)
         {
             var allPaymentChannels = await _walletRepository.GetAllPaymentChannelsAsync()
                 .ToDictionaryAsync(method => method.Id)
                 .ConfigureAwait(false);
 
-            return new ReadOnlyDictionary<Guid, PaymentChannel>(allPaymentChannels);
+            return new ReadOnlyDictionary<Guid, PaymentChannelInfo>(allPaymentChannels);
         }
     }
 }

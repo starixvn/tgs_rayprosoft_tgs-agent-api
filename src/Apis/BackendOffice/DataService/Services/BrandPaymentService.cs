@@ -44,7 +44,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository = repository;
         }
 
-        async Task IBrandPaymentService.CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
+        Task IBrandPaymentService.CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
         {
             throw new NotImplementedException();
 

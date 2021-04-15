@@ -3,9 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.BankDeposit
+namespace TGS.Services.Operator.Deposit
 {
-    internal class GetBrandPaymentQueryService : IGetService<GetBrandPaymentQuery, BrandPayment>
+    internal class GetBrandPaymentQueryService : IGetService<GetBrandPaymentQuery, BrandPaymentInfo>
     {
         private readonly IWalletRepository _walletRepository;
 
@@ -14,7 +14,7 @@ namespace TGS.Services.Operator.BankDeposit
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
-        public ValueTask<BrandPayment> GetAsync(GetBrandPaymentQuery query, CancellationToken cancellationToken = default)
+        public ValueTask<BrandPaymentInfo> GetAsync(GetBrandPaymentQuery query, CancellationToken cancellationToken = default)
         {
             return _walletRepository.GetBrandPaymentByIdAsync(query.Id);
         }

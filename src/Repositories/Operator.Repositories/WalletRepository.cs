@@ -6,9 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operator;
-using BrandPayment = TGS.Services.Operator.BrandPayment;
-using PaymentChannel = TGS.Services.Operator.PaymentChannel;
-using PaymentMethod = TGS.Services.Operator.PaymentMethod;
 
 namespace TGS.Operator.Repositories
 {
@@ -50,19 +47,19 @@ namespace TGS.Operator.Repositories
             return new BalanceInfo(playerWallet.Balance);
         }
 
-        public IAsyncEnumerable<PaymentChannel> GetAllPaymentChannelsAsync()
+        public IAsyncEnumerable<PaymentChannelInfo> GetAllPaymentChannelsAsync()
         {
             return _tgsRepository.PaymentChannels.AsAsyncEnumerable()
-                .Select(row => new PaymentChannel(row.Id, row.Code));
+                .Select(row => new PaymentChannelInfo(row.Id, row.Code));
         }
 
-        public IAsyncEnumerable<PaymentMethod> GetAllPaymentMethodsAsync()
+        public IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync()
         {
             return _tgsRepository.PaymentMethods.AsAsyncEnumerable()
-                .Select(row => new PaymentMethod(row.Id, row.Code));
+                .Select(row => new PaymentMethodInfo(row.Id, row.Code));
         }
 
-        public async ValueTask<BrandPayment> GetBrandPaymentByIdAsync(Guid id)
+        public async ValueTask<BrandPaymentInfo> GetBrandPaymentByIdAsync(Guid id)
         {
             var row = await _tgsRepository.BrandPayments
                 .Include(bp => bp.PaymentMethodChannel)
@@ -70,14 +67,19 @@ namespace TGS.Operator.Repositories
                 .SingleAsync()
                 .ConfigureAwait(false);
 
-            return new BrandPayment(
+            return new BrandPaymentInfo(
                 row.Id,
                 row.PaymentMethodChannelId,
                 row.PaymentMethodChannel.PaymentId,
                 row.PaymentMethodChannel.MethodId,
                 row.PaymentMethodChannel.ChannelId,
                 row.ChannelName,
-                row.ExtendedData);
+                row.ExtendedData,
+                new ValueRange<decimal>
+                {
+                    From = row.TransferLimitFrom,
+                    To = row.TransferLimitTo
+                });
         }
 
         public async ValueTask<BankDepositForm> GetDepositFormByIdAsync(Guid id)
@@ -95,6 +97,40 @@ namespace TGS.Operator.Repositories
             formData.ManualReceiptFileId = remittanceReceiptFileId;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask<PaymentInfo> GetPaymentAsync(Guid id)
+        {
+            var payment = await _tgsRepository.Payments
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            return new PaymentInfo(
+                payment.Id,
+                payment.Code);
+        }
+
+        public IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId, string playerCode)
+        {
+            var query = from bp in _tgsRepository.BrandPayments
+                            .Include(bp => bp.PaymentMethodChannel)
+                            .AsAsyncEnumerable()
+                        where bp.BrandId == brandId
+                        select bp;
+
+            return query.Select(bp => new BrandPaymentInfo(
+                bp.Id,
+                bp.PaymentMethodChannelId,
+                bp.PaymentMethodChannel.PaymentId,
+                bp.PaymentMethodChannel.MethodId,
+                bp.PaymentMethodChannel.ChannelId,
+                bp.ChannelName,
+                bp.ExtendedData,
+                new ValueRange<decimal>
+                {
+                    From = bp.TransferLimitFrom,
+                    To = bp.TransferLimitTo
+                }));
         }
     }
 }

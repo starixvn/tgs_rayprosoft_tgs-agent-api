@@ -10,6 +10,7 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BankDeposit;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Deposit;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -46,9 +47,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async Task<DepositFormResponse> GetDepositFormAsync(
             [FromServices] IGetService<GetBankDepositFormQuery, BankDepositForm> getBankDepositService,
-            [FromServices] IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannel>> getAllPaymentChannelService,
-            [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethod>> getAllPaymentMethodService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPayment> getBrandPaymentService,
+            [FromServices] IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>> getAllPaymentChannelService,
+            [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IJsonSerializationProvider serializationProvider,
             Guid id)
         {
