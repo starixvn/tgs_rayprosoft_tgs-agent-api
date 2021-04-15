@@ -136,7 +136,9 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 .Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
             var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
             {
-                BrandPaymentId = payment.Id, VipLevelId = vip.Id, VipLevel = vip
+                BrandPaymentId = payment.Id,
+                VipLevelId = vip.Id,
+                VipLevel = vip
             }).ToArray();
 
             payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
@@ -185,9 +187,19 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             var ids = request.Orders.Select(q => q.Id);
             var payments = await _repository.BrandPayments.AsQueryable()
                 .Where(q => ids.Contains(q.Id)).ToListAsync();
-            payments.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
 
-            await _repository.BulkUpdateAsync(payments.ToArray());
+            payments.ForEach(p =>
+            {
+                var item = request.Orders.FirstOrDefault(x => x.Id == p.Id);
+
+                if (item != null)
+                {
+                    p.DisplayOrder = item.DisplayOrder;
+                }
+            });
+
+            _repository.BrandPayments.UpdateRange(payments);
+            await _repository.SaveChangesAsync();
         }
 
         Task IBrandPaymentService.ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)

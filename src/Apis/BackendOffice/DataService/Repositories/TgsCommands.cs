@@ -14,7 +14,11 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
             _repository = repository;
         }
 
-        Task ITgsCommands<TEntity>.BatchUpdateAsync(TEntity[] obj) => _repository.BulkUpdateAsync(obj);
+        async Task ITgsCommands<TEntity>.BatchUpdateAsync(TEntity[] obj)
+        {
+            _repository.Set<TEntity>().UpdateRange(obj);
+            await _repository.SaveChangesAsync();
+        }
 
         Task ITgsCommands<TEntity>.CreateAsync(TEntity obj)
         {

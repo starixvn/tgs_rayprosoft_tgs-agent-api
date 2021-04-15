@@ -11,7 +11,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
     partial class DataInitializer
     {
-        private Task GenerateSettingsAsync()
+        private async Task GenerateSettingsAsync()
         {
             var options = new JsonSerializerOptions {WriteIndented = false};
 
@@ -38,7 +38,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var settings = commonSettings.Concat(gameProviderSettings).ToArray();
 
-            return _repository.BulkInsertAsync(settings);
+            await _repository.Settings.AddRangeAsync(settings);
+            await _repository.SaveChangesAsync();
         }
 
         private static Setting CreateSetting(string key, string value, string description) =>
@@ -56,9 +57,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private static PromotionType[] GetPromotionTypes() =>
             new[]
             {
-                new PromotionType {Name = "Deposit", Types = new[] {"FirstDeposit", "SecondDeposit"}},
-                new PromotionType {Name = "Turnover", Types = new[] {"TurnoverRebate"}},
-                new PromotionType {Name = "ReliefMoney", Types = new[] {"ReliefMoneyDaily"}}
+                new PromotionType
+                {
+                    Name = "Deposit",
+                    Types = new[] {"FirstDeposit", "SecondDeposit"}
+                },
+                new PromotionType
+                {
+                    Name = "Turnover",
+                    Types = new[] {"TurnoverRebate"}
+                },
+                new PromotionType
+                {
+                    Name = "ReliefMoney",
+                    Types = new[] {"ReliefMoneyDaily"}
+                }
             };
 
         private static MenuSetting[] GetMenuSettings()
