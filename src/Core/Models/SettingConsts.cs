@@ -7,7 +7,8 @@ namespace TGS.Core.Models
     {
         public const string Menus = "Menus";
         public const string Vip = "Vip";
-        public const string SuperLicenseeCodes ="SuperLicenseeCodes";
+        public const string SuperLicenseeCodes = "SuperLicenseeCodes";
+        public const string PromotionType = "PromotionTypes";
 
         public static class GameProviderConfigurations
         {

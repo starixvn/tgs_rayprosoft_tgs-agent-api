@@ -183,7 +183,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             GameProviderRequest request)
         {
             var currencyCodes = request.Currencies.Select(x => x.Code);
-            var currencies = await _repository.Currencies.AsQueryable().Where(x => currencyCodes.Contains(x.Code)).ToArrayAsync();
+            var currencies = await _repository.Currencies.AsQueryable().Where(x => currencyCodes.Contains(x.Code))
+                .ToArrayAsync();
             var gameProviderCurrencies = currencies.Select(x => new GameProviderCurrency
             {
                 GameProviderId = gameProvider.Id,
@@ -198,7 +199,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             GameProviderRequest request)
         {
             var cultureCodes = request.Languages.Select(x => x.CultureCode);
-            var languages = await _repository.Languages.AsQueryable().Where(x => cultureCodes.Contains(x.CultureCode)).ToArrayAsync();
+            var languages = await _repository.Languages.AsQueryable().Where(x => cultureCodes.Contains(x.CultureCode))
+                .ToArrayAsync();
             var gameProviderLanguages = languages.Select(x => new GameProviderLanguage
             {
                 GameProviderId = gameProvider.Id,

@@ -44,59 +44,49 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository = repository;
         }
 
-        async Task IBrandPaymentService.CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
-        {
+        async Task IBrandPaymentService.CreatePaymentAsync(CreateBrandPaymentRequest request, string username) =>
             throw new NotImplementedException();
 
-            //var paymentId = Guid.NewGuid();
-            //var payment = new BrandPayment
-            //{
-            //    Id = paymentId,
-            //    DisplayOrder = 99,
-            //    PaymentId = request.PaymentId,
-            //    PaymentMethodId = request.PaymentMethodId,
-            //    PaymentChannelId = request.PaymentChannelId,
-            //    ChannelName = request.ChannelName,
-            //    TransferLimitFrom = request.TransferLimitFrom,
-            //    TransferLimitTo = request.TransferLimitTo,
-            //    PlayerListCondition = request.PlayerListCondition,
-            //    AllPlayers = request.AllPlayers,
-            //    IdentityAuthentication = request.IdentityAuthentication,
-            //    PhoneAuthentication = request.PhoneAuthentication,
-            //    DepositedAmountUnlimited = request.DepositedAmountUnlimited,
-            //    DepositedAmountMin = request.DepositedAmountMin,
-            //    DepositedAmountMax = request.DepositedAmountMax,
-            //    Reason = request.Reason,
-            //    CreatedByUsername = username,
-            //    UpdatedByUsername = username,
-            //    CreatedOn = DateTimeOffset.Now,
-            //    UpdatedOn = DateTimeOffset.Now
-            //};
-
-            //var whitelist = await GeneratePaymentPlayerListAsync(paymentId, request.Whitelist, PlayerListType.White);
-
-            //var blacklist = await GeneratePaymentPlayerListAsync(paymentId, request.Blacklist, PlayerListType.Black);
-
-            //var playerList = whitelist.Union(blacklist);
-
-            //payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
-
-            //var vips = await _repository.VipLevels.AsQueryable()
-            //    .Where(x => request.VipLevelIds.Contains(x.Id))
-            //    .ToArrayAsync();
-            //var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
-            //{
-            //    BrandPaymentId = paymentId,
-            //    VipLevelId = vip.Id,
-            //    VipLevel = vip
-            //}).ToArray();
-
-            //payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
-
-            //await _repository.BrandPayments.AddAsync(payment);
-            //await _repository.SaveChangesAsync();
-        }
-
+        //var paymentId = Guid.NewGuid();
+        //var payment = new BrandPayment
+        //{
+        //    Id = paymentId,
+        //    DisplayOrder = 99,
+        //    PaymentId = request.PaymentId,
+        //    PaymentMethodId = request.PaymentMethodId,
+        //    PaymentChannelId = request.PaymentChannelId,
+        //    ChannelName = request.ChannelName,
+        //    TransferLimitFrom = request.TransferLimitFrom,
+        //    TransferLimitTo = request.TransferLimitTo,
+        //    PlayerListCondition = request.PlayerListCondition,
+        //    AllPlayers = request.AllPlayers,
+        //    IdentityAuthentication = request.IdentityAuthentication,
+        //    PhoneAuthentication = request.PhoneAuthentication,
+        //    DepositedAmountUnlimited = request.DepositedAmountUnlimited,
+        //    DepositedAmountMin = request.DepositedAmountMin,
+        //    DepositedAmountMax = request.DepositedAmountMax,
+        //    Reason = request.Reason,
+        //    CreatedByUsername = username,
+        //    UpdatedByUsername = username,
+        //    CreatedOn = DateTimeOffset.Now,
+        //    UpdatedOn = DateTimeOffset.Now
+        //};
+        //var whitelist = await GeneratePaymentPlayerListAsync(paymentId, request.Whitelist, PlayerListType.White);
+        //var blacklist = await GeneratePaymentPlayerListAsync(paymentId, request.Blacklist, PlayerListType.Black);
+        //var playerList = whitelist.Union(blacklist);
+        //payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
+        //var vips = await _repository.VipLevels.AsQueryable()
+        //    .Where(x => request.VipLevelIds.Contains(x.Id))
+        //    .ToArrayAsync();
+        //var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
+        //{
+        //    BrandPaymentId = paymentId,
+        //    VipLevelId = vip.Id,
+        //    VipLevel = vip
+        //}).ToArray();
+        //payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
+        //await _repository.BrandPayments.AddAsync(payment);
+        //await _repository.SaveChangesAsync();
         async Task IBrandPaymentService.UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request,
             string username)
         {
@@ -146,9 +136,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 .Where(x => request.VipLevelIds.Contains(x.Id)).ToArrayAsync();
             var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
             {
-                BrandPaymentId = payment.Id,
-                VipLevelId = vip.Id,
-                VipLevel = vip
+                BrandPaymentId = payment.Id, VipLevelId = vip.Id, VipLevel = vip
             }).ToArray();
 
             payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
@@ -166,14 +154,18 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         Task<BrandPayment> IBrandPaymentService.GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
             Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery, bool tracking)
         {
-            var payment = tracking ? _repository.BrandPayments : _repository.BrandPayments.AsNoTracking();
+            var payment = tracking
+                ? _repository.BrandPayments
+                : _repository.BrandPayments.AsNoTracking();
             preQuery ??= c => c;
 
             return preQuery(payment).FirstOrDefaultAsync(predicate);
         }
 
         IQueryable<BrandPayment> IBrandPaymentService.GetPaymentQueries(bool tracking) =>
-            tracking ? _repository.BrandPayments : _repository.BrandPayments.AsNoTracking();
+            tracking
+                ? _repository.BrandPayments
+                : _repository.BrandPayments.AsNoTracking();
 
         Task<bool> IBrandPaymentService.ExistsAsync(Expression<Func<BrandPayment, bool>> predicate) =>
             _repository.BrandPayments.AnyAsync(predicate);
@@ -229,8 +221,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
         {
             var playerWhitelist = list != null
                 ? await _repository.Players.AsQueryable()
-                    .Where(x => list.Contains(x.Username))
-                    .ToArrayAsync()
+                    .Where(x => list.Contains(x.Username)).ToArrayAsync()
                 : Array.Empty<Player>();
             return playerWhitelist.Select(player => new BrandPaymentPlayer
             {

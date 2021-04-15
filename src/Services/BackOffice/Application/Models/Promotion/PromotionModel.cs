@@ -10,7 +10,7 @@ namespace TGS.Services.BackOffice.Application.Models.Promotion
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
         public SwitchStatus Status { get; set; }
-        public PromotionType PromotionType { get; set; }
+        public string PromotionType { get; set; }
         public decimal PromotionAmount { get; set; }
         public decimal AmountUsed { get; set; }
         public bool Unlimited { get; set; }
