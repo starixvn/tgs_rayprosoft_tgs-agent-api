@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.PlayerEmail
+namespace TGS.Services.Operator.Player
 {
     internal class CommitSetPlayerEmailCommandService : ICommandService<CommitSetPlayerEmailCommand>
     {

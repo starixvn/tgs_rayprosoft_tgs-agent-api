@@ -7,7 +7,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator.Properties;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.PlayerPassword
+namespace TGS.Services.Operator.Player
 {
     internal class ForgotPasswordCommandService : IGetService<ForgotPasswordCommand, string>
     {

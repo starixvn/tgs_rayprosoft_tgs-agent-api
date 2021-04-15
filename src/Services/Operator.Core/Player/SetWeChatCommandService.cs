@@ -4,18 +4,18 @@ using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.PlayerInfo
+namespace TGS.Services.Operator.Player
 {
-    internal class SetQqCommandService : ICommandService<SetQqCommand>
+    internal class SetWeChatCommandService : ICommandService<SetWeChatCommand>
     {
         private readonly IPlayerOperations _playerOperations;
 
-        public SetQqCommandService(IPlayerOperations playerOperations)
+        public SetWeChatCommandService(IPlayerOperations playerOperations)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
-        public async ValueTask ExecuteAsync(SetQqCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(SetWeChatCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)
@@ -23,7 +23,7 @@ namespace TGS.Services.Operator.PlayerInfo
 
             var updatedOn = DateTimeOffset.UtcNow;
             await _playerOperations
-                .SetQqAsync(command.PlayerCode, command.QqId, updatedOn)
+                .SetWeChatAsync(command.PlayerCode, command.WeChatId, updatedOn)
                 .ConfigureAwait(false);
         }
     }

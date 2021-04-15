@@ -5,7 +5,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.PlayerPassword
+namespace TGS.Services.Operator.Player
 {
     internal class ResetPasswordCommandService : ICommandService<ResetPasswordCommand>
     {

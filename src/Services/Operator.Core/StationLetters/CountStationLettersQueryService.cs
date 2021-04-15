@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.Operator.StationLetters;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.StationLatters
+namespace TGS.Services.Operator.StationLetters
 {
     internal class CountStationLettersQueryService : IGetService<GetStationLettersQuery, int>
     {

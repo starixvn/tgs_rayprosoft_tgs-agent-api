@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.PlayerPhone
+namespace TGS.Services.Operator.Player
 {
     internal class CommitSetPlayerPhoneCommandService : ICommandService<CommitSetPlayerPhoneCommand>
     {

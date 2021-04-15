@@ -2,38 +2,30 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
-using TGS.Services.Operations;
+using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.Properties;
 using TGS.ServiceUtility;
-using TGS.SmsService.Client;
 
-namespace TGS.Services.Operator.PlayerPhone
+namespace TGS.Services.Operator.Player
 {
-    internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPhoneCommand, string>
+    internal class StartSetPlayerEmailCommandService : IGetService<StartSetPlayerEmailCommand, string>
     {
-        private readonly IPlayerOperations _playerOperations;
+        private readonly IEmailManager _emailManager;
         private readonly IValidateCodeGenerator _codeGenerator;
-        private readonly ISmsServiceClient _smsServiceClient;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
-        public StartSetPlayerPhoneCommandService(
-            IPlayerOperations playerOperations,
+        public StartSetPlayerEmailCommandService(
+            IEmailManager emailManager,
             IValidateCodeGenerator codeGenerator,
-            IValidateCodeOperator validateCodeOperator,
-            ISmsServiceClient smsServiceClient)
+            IValidateCodeOperator validateCodeOperator)
         {
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _emailManager = emailManager ?? throw new ArgumentNullException(nameof(emailManager));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-            _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(StartSetPlayerPhoneCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask<string> GetAsync(StartSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
         {
-            var player = await _playerOperations
-                .GetPlayerByCodeAsync(command.PlayerCode)
-                .ConfigureAwait(false);
-
             var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
                 .RetryAsync(5)
                 .ExecuteAsync(async () =>
@@ -41,7 +33,7 @@ namespace TGS.Services.Operator.PlayerPhone
                     var validateCode = _codeGenerator.GenerateCode();
                     var token = _codeGenerator.GenerateSecurityKey();
 
-                    var data = new PhoneValidateData(command.Phone, command.PlayerCode);
+                    var data = new EmailValidateData(command.Email, command.PlayerCode);
 
                     var result = await _validateCodeOperator
                         .SaveValidateDataAsync(validateCode, token, data)
@@ -54,13 +46,17 @@ namespace TGS.Services.Operator.PlayerPhone
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            var shortMessage = string.Format(
+            var mailSubject = Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailSubject), command.CultureInfo)!;
+            var mailBody = string.Format(
                 Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
                 saveResult.ValidateCode);
 
-            await _smsServiceClient
-                .SendShortMessageAsync(command.Phone, shortMessage, player.DefaultWalletCurrencyCode, player.BrandId)
-                .ConfigureAwait(false);
+            var mailMessage = new EmailPackage(
+                new[] { command.Email },
+                mailSubject,
+                mailBody);
+
+            await _emailManager.SendEmailAsync(mailMessage).ConfigureAwait(false);
 
             return saveResult.SecurityKey;
         }

@@ -4,18 +4,18 @@ using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.PlayerInfo
+namespace TGS.Services.Operator.Player
 {
-    internal class SetWeChatCommandService : ICommandService<SetWeChatCommand>
+    internal class SetIdentityCommandService : ICommandService<SetIdentityCommand>
     {
         private readonly IPlayerOperations _playerOperations;
 
-        public SetWeChatCommandService(IPlayerOperations playerOperations)
+        public SetIdentityCommandService(IPlayerOperations playerOperations)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
-        public async ValueTask ExecuteAsync(SetWeChatCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(SetIdentityCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)
@@ -23,7 +23,12 @@ namespace TGS.Services.Operator.PlayerInfo
 
             var updatedOn = DateTimeOffset.UtcNow;
             await _playerOperations
-                .SetWeChatAsync(command.PlayerCode, command.WeChatId, updatedOn)
+                .SetIdentityAsync(
+                    command.PlayerCode,
+                    command.RealName,
+                    command.Identity,
+                    player.DefaultWalletCurrencyCode == "CNY" ? true : false,
+                    updatedOn)
                 .ConfigureAwait(false);
         }
     }

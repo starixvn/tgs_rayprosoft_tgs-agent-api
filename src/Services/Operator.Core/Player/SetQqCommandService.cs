@@ -4,18 +4,18 @@ using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.PlayerIdentity
+namespace TGS.Services.Operator.Player
 {
-    internal class SetIdentityCommandService : ICommandService<SetIdentityCommand>
+    internal class SetQqCommandService : ICommandService<SetQqCommand>
     {
         private readonly IPlayerOperations _playerOperations;
 
-        public SetIdentityCommandService(IPlayerOperations playerOperations)
+        public SetQqCommandService(IPlayerOperations playerOperations)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
-        public async ValueTask ExecuteAsync(SetIdentityCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(SetQqCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)
@@ -23,12 +23,7 @@ namespace TGS.Services.Operator.PlayerIdentity
 
             var updatedOn = DateTimeOffset.UtcNow;
             await _playerOperations
-                .SetIdentityAsync(
-                    command.PlayerCode,
-                    command.RealName,
-                    command.Identity,
-                    player.DefaultWalletCurrencyCode == "CNY" ? true : false,
-                    updatedOn)
+                .SetQqAsync(command.PlayerCode, command.QqId, updatedOn)
                 .ConfigureAwait(false);
         }
     }
