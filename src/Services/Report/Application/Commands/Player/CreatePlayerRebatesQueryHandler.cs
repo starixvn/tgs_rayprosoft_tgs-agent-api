@@ -112,7 +112,7 @@ namespace TGS.Services.Report.Application.Commands.Player
 
             if (playerRebates.Length <= 0)
             {
-                return new() {Valid = false, Message = "not any player rebate."};
+                return new() {Valid = false, Message = "Has no player rebate data."};
             }
 
             await using var reportTransaction =

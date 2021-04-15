@@ -223,9 +223,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 var player = players.FirstOrDefault(x => x.PlayerCode == playerAggregate.PlayerCode);
                 var playerRoundAggregates =
                     roundAggregates.Where(r => r.PlayerCode == playerAggregate.PlayerCode).ToArray();
-                var rebate = GetPlayerRebateAmount(player?.Vip, playerRoundAggregates);
+                var rebate = player?.Vip == null ? 0 : GetPlayerRebateAmount(player.Vip, playerRoundAggregates);
                 var agentDividend = (playerAggregate.WinLossAmount - playerAggregate.AdjustmentAmount -
-                    playerAggregate.BonusAmount - rebate) * player?.Agent.DividendPercentage / 100;
+                    playerAggregate.BonusAmount - rebate) * (player?.Agent?.DividendPercentage ?? 0) / 100;
 
                 playerAggregate.BetAmount =
                     playerRoundAggregates
@@ -236,7 +236,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 playerAggregate.WinLossAmount = playerRoundAggregates
                     .Sum(r => r.WinLoss);
                 playerAggregate.NetProfit = playerAggregate.WinLossAmount - playerAggregate.AdjustmentAmount -
-                    playerAggregate.BonusAmount - rebate - (agentDividend ?? 0);
+                    playerAggregate.BonusAmount - rebate - agentDividend;
             }
 
             playerAggregates = playerAggregates.Where(x =>
@@ -286,7 +286,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             return (playerAggregates, playerAggregateByGameType);
         }
 
-        private decimal GetPlayerRebateAmountByGameType(VipLevel vip, GameType type,
+        private static decimal GetPlayerRebateAmountByGameType(VipLevel vip, GameType type,
             IEnumerable<RoundAggregate> roundAggregates)
         {
             switch (type)
@@ -325,7 +325,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             }
         }
 
-        private decimal GetPlayerRebateAmount(VipLevel vip, IEnumerable<RoundAggregate> roundAggregates) =>
+        private static decimal GetPlayerRebateAmount(VipLevel vip, IEnumerable<RoundAggregate> roundAggregates) =>
             vip.SportsRebatePercentage * roundAggregates.Where(a =>
                     a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
                 .Sum(a => a.Turnover) / 100 +

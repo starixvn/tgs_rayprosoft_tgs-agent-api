@@ -42,9 +42,9 @@ namespace TGS.Core.DataServices.Base
             return _repository.SaveChangesAsync();
         }
 
-        public async Task UpdateEntitiesAsync<T>(IEnumerable<T> entities) where T : class
+        public async Task CreateEntitiesAsync<T>(IEnumerable<T> entities) where T : class
         {
-            _repository.Set<T>().UpdateRange(entities);
+            await _repository.Set<T>().AddRangeAsync(entities);
             await _repository.SaveChangesAsync();
         }
 
@@ -52,6 +52,12 @@ namespace TGS.Core.DataServices.Base
         {
             _repository.Entry(entity).State = EntityState.Modified;
             return _repository.SaveChangesAsync();
+        }
+
+        public async Task UpdateEntitiesAsync<T>(IEnumerable<T> entities) where T : class
+        {
+            _repository.Set<T>().UpdateRange(entities);
+            await _repository.SaveChangesAsync();
         }
 
         public Task DeleteEntityAsync<T>(T entity) where T : class
@@ -64,12 +70,6 @@ namespace TGS.Core.DataServices.Base
         {
             _repository.Set<T>().RemoveRange(entities);
             return _repository.SaveChangesAsync();
-        }
-
-        public async Task CreateEntitiesAsync<T>(IEnumerable<T> entities) where T : class
-        {
-            await _repository.Set<T>().AddRangeAsync(entities);
-            await _repository.SaveChangesAsync();
         }
     }
 }
