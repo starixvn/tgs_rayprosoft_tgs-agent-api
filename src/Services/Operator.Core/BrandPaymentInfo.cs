@@ -10,5 +10,10 @@ namespace TGS.Services.Operator
         Guid ChannelId,
         string ChannelName,
         string ExtendedData,
-        ValueRange<decimal> TransferLimit);
+        ValueRange<decimal> TransferLimit,
+        bool IsAllPlayers,
+        bool AuthenticateIdentity,
+        bool AuthenticatePhone,
+        ValueRange<decimal> DepositedAmountLimit,
+        ConditionMatchTypes ConditionMatchType);
 }

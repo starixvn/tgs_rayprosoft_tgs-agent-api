@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories
@@ -79,7 +80,16 @@ namespace TGS.Operator.Repositories
                 {
                     From = row.TransferLimitFrom,
                     To = row.TransferLimitTo
-                });
+                },
+                row.AllPlayers,
+                row.IdentityAuthentication,
+                row.PhoneAuthentication,
+                new ValueRange<decimal>
+                {
+                    From = row.DepositedAmountMin,
+                    To = row.DepositedAmountUnlimited ? decimal.MaxValue : row.DepositedAmountMax
+                },
+                row.PlayerListCondition == PlayerListCondition.Someone ? ConditionMatchTypes.SomeOne : ConditionMatchTypes.AllMatch);
         }
 
         public async ValueTask<BankDepositForm> GetDepositFormByIdAsync(Guid id)
@@ -110,7 +120,7 @@ namespace TGS.Operator.Repositories
                 payment.Code);
         }
 
-        public IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId, string playerCode)
+        public IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId)
         {
             var query = from bp in _tgsRepository.BrandPayments
                             .Include(bp => bp.PaymentMethodChannel)
@@ -130,7 +140,52 @@ namespace TGS.Operator.Repositories
                 {
                     From = bp.TransferLimitFrom,
                     To = bp.TransferLimitTo
-                }));
+                },
+                bp.AllPlayers,
+                bp.IdentityAuthentication,
+                bp.PhoneAuthentication,
+                new ValueRange<decimal>
+                {
+                    From = bp.DepositedAmountMin,
+                    To = bp.DepositedAmountUnlimited ? decimal.MaxValue : bp.DepositedAmountMax
+                },
+                bp.PlayerListCondition == PlayerListCondition.Someone ? ConditionMatchTypes.SomeOne : ConditionMatchTypes.AllMatch));
+        }
+
+        public IAsyncEnumerable<BrandPaymentAcl> GetBrandPaymentAclsAsync(IEnumerable<Guid> brandPaymentIds, string playerCode)
+        {
+            var ids = brandPaymentIds.ToArray();
+
+            var query = from acl in _tgsRepository.BrandPaymentPlayers.AsAsyncEnumerable()
+                        where acl.PlayerCode == playerCode
+                            && ids.Contains(acl.BrandPaymentId)
+                        select acl;
+
+            return query.Select(acl => new BrandPaymentAcl(
+                acl.BrandPaymentId,
+                acl.PlayerCode,
+                acl.ListType == PlayerListType.Black));
+        }
+
+        public IAsyncEnumerable<BrandPaymentVip> GetBrandPaymentVipListAsync(IEnumerable<Guid> brandPaymentIds)
+        {
+            var ids = brandPaymentIds.ToArray();
+
+            return _tgsRepository.BrandPaymentVipLevels.AsAsyncEnumerable()
+                .Where(v => ids.Contains(v.BrandPaymentId))
+                .Select(v => new BrandPaymentVip(v.BrandPaymentId, v.VipLevelId));
+        }
+
+        public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
+        {
+            var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
+
+            return new PlayerInfo(
+                playerData.PlayerCode,
+                playerData.AccumulatedDeposit,
+                playerData.IdentityAuthentication,
+                playerData.PhoneAuthentication,
+                playerData.VipId);
         }
     }
 }

@@ -1,13 +1,16 @@
-﻿using System.Threading.Tasks;
-
-namespace TGS.Services.Operator
+﻿namespace TGS.Services.Operator
 {
     internal class DepositedAmountCondition : IBrandPaymentCondition
     {
-        public ValueRange<decimal> DepositedAmountLimit { get; init; }
+        private ValueRange<decimal> _depositedAmountLimit;
 
-        public ValueTask<bool> IsValidAsync(PlayerInfo player)
-            => ValueTask.FromResult(player.DepositedAmount > DepositedAmountLimit.From
-                && player.DepositedAmount <= DepositedAmountLimit.To);
+        public DepositedAmountCondition(ValueRange<decimal> depositedAmountLimit)
+        {
+            _depositedAmountLimit = depositedAmountLimit;
+        }
+
+        public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+            => player.DepositedAmount > _depositedAmountLimit.From
+                && player.DepositedAmount <= _depositedAmountLimit.To;
     }
 }

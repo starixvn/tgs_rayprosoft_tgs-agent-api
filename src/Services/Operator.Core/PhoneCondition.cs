@@ -1,10 +1,15 @@
-﻿using System.Threading.Tasks;
-
-namespace TGS.Services.Operator
+﻿namespace TGS.Services.Operator
 {
     internal class PhoneCondition : IBrandPaymentCondition
     {
-        public ValueTask<bool> IsValidAsync(PlayerInfo player)
-            => ValueTask.FromResult(player.PhoneAuthentication);
+        private readonly bool _enabled;
+
+        public PhoneCondition(bool enabled)
+        {
+            _enabled = enabled;
+        }
+
+        public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
+            => _enabled ? player.PhoneAuthentication : true;
     }
 }

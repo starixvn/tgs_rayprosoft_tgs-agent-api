@@ -4,6 +4,6 @@ namespace TGS.Services.Operator
 {
     public interface IBrandPaymentCondition
     {
-        ValueTask<bool> IsValidAsync(PlayerInfo player);
+        bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player);
     }
 }

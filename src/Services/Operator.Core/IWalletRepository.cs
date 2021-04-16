@@ -22,6 +22,12 @@ namespace TGS.Services.Operator
 
         ValueTask<PaymentInfo> GetPaymentAsync(Guid id);
 
-        IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId, string playerCode);
+        IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId);
+
+        IAsyncEnumerable<BrandPaymentAcl> GetBrandPaymentAclsAsync(IEnumerable<Guid> brandPaymentIds, string playerCode);
+
+        IAsyncEnumerable<BrandPaymentVip> GetBrandPaymentVipListAsync(IEnumerable<Guid> brandPaymentIds);
+
+        ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode);
     }
 }

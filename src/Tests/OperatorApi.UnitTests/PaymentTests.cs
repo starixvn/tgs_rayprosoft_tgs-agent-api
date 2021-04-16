@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Deposit;
@@ -76,22 +78,26 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void User_Can_List_Available_BrandPayments()
+        public async Task User_Can_List_Available_BrandPayments()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var fakeWalletRepository = Substitute.For<IWalletRepository>();
 
-            var sut = new BrandPaymentsQueryService(moqWalletRepository.Object);
+            var sut = new BrandPaymentsQueryService(fakeWalletRepository);
 
             var brandId = Guid.NewGuid();
             var playerCode = "ThisIsPlayerCode";
 
             var query = new BrandPaymentsQuery(brandId, playerCode);
 
-            _ = sut.QueryAsync(query);
+            fakeWalletRepository
+                .GetBrandPaymentAclsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<string>())
+                .Returns(Array.Empty<BrandPaymentAcl>().ToAsyncEnumerable());
 
-            moqWalletRepository.Verify(
-                fake => fake.GetBrandPaymentsAsync(It.Is<Guid>(x => x == brandId), It.Is<string>(x => x == playerCode)),
-                Times.Exactly(1));
+            _ = await sut.QueryAsync(query).ToArrayAsync();
+
+            fakeWalletRepository
+                .Received(1)
+                .GetBrandPaymentAclsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<string>());
         }
     }
 }
