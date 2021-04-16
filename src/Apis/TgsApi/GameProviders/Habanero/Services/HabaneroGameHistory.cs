@@ -38,7 +38,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             _hashProvider = hashProvider;
         }
 
-        protected override async Task<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
             var configuration =

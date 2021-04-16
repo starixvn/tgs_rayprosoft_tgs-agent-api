@@ -143,6 +143,8 @@ namespace TGS.Services.GameOperations.Data
                 {
                     ExternalTransactionId = s.ExternalTransactionId,
                     InternalTransactionId = ga.Id,
+                    RoundId = ga.RoundId,
+                    GameId = s.GameId,
                     IsDuplicate = false
                 },
                 GameAction = ga,
@@ -392,13 +394,15 @@ namespace TGS.Services.GameOperations.Data
             !BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
         private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId,
-            string externalTransactionId) =>
+            string externalTransactionId, Guid roundId, int gameId) =>
             new()
             {
                 TransactionResult = new()
                 {
                     ExternalTransactionId = externalTransactionId,
                     InternalTransactionId = gameActionId,
+                    RoundId = roundId,
+                    GameId = gameId,
                     IsDuplicate = true
                 }
             };
@@ -666,10 +670,12 @@ namespace TGS.Services.GameOperations.Data
 
         private void FillClosedRoundBetValues(GameActionState s, BetActionData current, Round round)
         {
-            var hasFreeBet = current.Type == FreeBet ||
-                s.PreviousActions.Any(act => act.Type == FreeBet);
+            var gameActionWithSingleRound =
+                s.FreeBetAsSingleRound && current.Type == FreeBet && s.PreviousActions.Count == 0 ||
+                current.Type == WinJackpot;
 
-            var clientStatus = _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, hasFreeBet);
+            var clientStatus =
+                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, gameActionWithSingleRound);
 
             round.Status = s.NewRoundStatus;
             round.ClientStatus = clientStatus;

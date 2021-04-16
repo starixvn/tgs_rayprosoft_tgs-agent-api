@@ -7,14 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="DataInitializers\Games\SABA.csv" />
-    <None Remove="DataInitializers\Games\SBO.csv" />
-    <None Remove="SqlScripts\Functions\game_action_referenced_game_action_exists.sql" />
-    <None Remove="SqlScripts\Functions\report_get_round_aggregates.sql" />
-  </ItemGroup>
-
-  
-  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -23,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\PP.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />

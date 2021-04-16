@@ -44,7 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             _client = client;
         }
 
-        protected override async Task<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
             var configuration =
@@ -53,9 +53,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
             var protfolio = Utility.GetPortfolio(cachedGame.Type);
 
-            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-            var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId,
-                language);
+            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode).ConfigureAwait(false);
+            var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId, language)
+                .ConfigureAwait(false);
 
             var response =
                 await _client.GetRoundHistoryAsync(configuration.ApiUrl, new()
@@ -64,7 +64,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     Portfolio = protfolio,
                     ExternalRoundId = round.ExternalRoundId,
                     Language = culture
-                });
+                }).ConfigureAwait(false);
 
             if (response.Error.Code != ServiceApiError.None)
             {

@@ -11,13 +11,13 @@ namespace TGS.Services.GameOperations
         RoundStatus GetStatus(RoundStatusData data);
 
         ClientRoundStatus GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult,
-            bool roundHasFreeBet);
+            bool gameActionWithSingleRound);
     }
 
     internal sealed class RoundStatusManager : IRoundStatusManager
     {
         ClientRoundStatus IRoundStatusManager.
-            GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult, bool roundHasFreeBet)
+            GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult, bool gameActionWithSingleRound)
         {
             if (status == RoundStatus.New || status == RoundStatus.Open || betValuesResult == null)
             {
@@ -42,8 +42,8 @@ namespace TGS.Services.GameOperations
                 return ClientRoundStatus.Draw;
             }
 
-            // for free bet in a single round
-            if (roundHasFreeBet)
+            // for game action stays in a single round (eg. free bet / jackpot win)
+            if (gameActionWithSingleRound)
             {
                 return playerWinLoss switch
                 {

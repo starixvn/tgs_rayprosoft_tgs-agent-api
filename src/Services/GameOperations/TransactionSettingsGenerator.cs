@@ -29,15 +29,16 @@ namespace TGS.Services.GameOperations
                 {GameActionType.TieBet, TieBetTransactionSettings},
                 {GameActionType.CancelTransaction, CancelTransactionSettings},
                 {GameActionType.LockAmount, LockAmountTransactionSettings},
-                {GameActionType.UnlockAmount, UnlockAmountTransactionSettings}
+                {GameActionType.UnlockAmount, UnlockAmountTransactionSettings},
+                {GameActionType.WinJackpot, WinJackpotTransactionSettings}
             };
         }
 
         private TransactionSettings PlaceBetTransactionSettings => new()
         {
             GameActionType = GameActionType.PlaceBet,
-            ValidateAmount = _ => _amountValidator.ThrowIfAmountIsNotPositive,
-            HasWalletUpdate = _ => true,
+            ValidateAmount = _ => _amountValidator.ThrowIfAmountIsNegative,
+            HasWalletUpdate = t => t.Amount > 0,
             MustHaveExistingRound = false,
             MustHaveReferencedTransaction = false,
             GetTransactionAmount = a => -a // Get Transaction Amount - set parameter as negative
@@ -110,6 +111,16 @@ namespace TGS.Services.GameOperations
             ValidateAmount = _ => _amountValidator.ThrowIfAmountIsNotPositive,
             HasWalletUpdate = _ => true,
             MustHaveExistingRound = true,
+            MustHaveReferencedTransaction = false,
+            GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
+        };
+
+        private TransactionSettings WinJackpotTransactionSettings => new()
+        {
+            GameActionType = GameActionType.WinJackpot,
+            ValidateAmount = _ => _amountValidator.ThrowIfAmountIsNotPositive,
+            HasWalletUpdate = _ => true,
+            MustHaveExistingRound = false,
             MustHaveReferencedTransaction = false,
             GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
         };

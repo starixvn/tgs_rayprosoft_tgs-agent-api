@@ -81,11 +81,11 @@ namespace TGS.Apis.TgsApi.Commons
 
             app.UseApiLogger(LogPrefix, new[] {"/health", "/favicon.ico", "/metrics"});
 
-            UseCustomMiddlewares(app);
-
             app.UseRouting();
 
             app.UseHttpMetrics();
+
+            UseCustomMiddlewares(app);
 
             app.UseEndpoints(endpoints =>
             {

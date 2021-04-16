@@ -26,7 +26,7 @@ namespace TGS.UnitTests.Startups
             InitialStartupConfigureServices(services, configuration, envMock.Object);
 
             var sp = services.BuildServiceProvider();
-            
+
             var error = new StringBuilder();
 
             foreach (var service in services)
@@ -62,8 +62,9 @@ namespace TGS.UnitTests.Startups
             error.Length.Should().Be(0);
         }
 
-        public abstract void InitialStartupConfigureServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env);
-        
+        protected abstract void InitialStartupConfigureServices(IServiceCollection services,
+            IConfiguration configuration, IWebHostEnvironment env);
+
         protected virtual IConfiguration MockConfiguration()
         {
             var configurationMock = new Mock<IConfiguration>();

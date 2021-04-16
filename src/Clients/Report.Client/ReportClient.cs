@@ -37,122 +37,120 @@ namespace Report.Client
         {
         }
 
-        Task<PagedResponse<VipModel>> IReportClient.GetVipReportAsync(GetVipReportRequest request)
+        async Task<PagedResponse<VipModel>> IReportClient.GetVipReportAsync(GetVipReportRequest request)
         {
             var prefix = $"Report.{request.BrandId}.GetVipReport";
             var path = Path.AppendWithProperties("/api/vipReport?", request);
 
-            return ExecuteJsonRequestAsync<GetVipReportRequest, PagedResponse<VipModel>>(HttpMethod.Get,
+            return await ExecuteJsonRequestAsync<GetVipReportRequest, PagedResponse<VipModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<VipRebateModel>> IReportClient.GetVipRebateReportAsync(GetVipRebateReportRequest request)
+        async Task<PagedResponse<VipRebateModel>> IReportClient.GetVipRebateReportAsync(
+            GetVipRebateReportRequest request)
         {
             var prefix = $"Report.{request.BrandId}.GetVipRebateReport";
             var path = Path.AppendWithProperties($"/api/vipReport/{request.Username}?", request);
-
-            return ExecuteJsonRequestAsync<GetVipRebateReportRequest, PagedResponse<VipRebateModel>>(HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+            return await ExecuteJsonRequestAsync<GetVipRebateReportRequest, PagedResponse<VipRebateModel>>(
+                HttpMethod.Get, path, request, logPrefix: prefix, options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<RoundModel>> IReportClient.GetRoundsAsync(GetRoundsRequest request)
+        async Task<PagedResponse<RoundModel>> IReportClient.GetRoundsAsync(GetRoundsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetRounds";
             var path = Path.AppendWithProperties("/api/roundReport?", request);
 
-            return ExecuteJsonRequestAsync<GetRoundsRequest, PagedResponse<RoundModel>>(HttpMethod.Get,
+            return await ExecuteJsonRequestAsync<GetRoundsRequest, PagedResponse<RoundModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<GetRoundHistoryResponse> IReportClient.GetRoundHistoriesAsync(GetRoundHistoryRequest request)
+        async Task<GetRoundHistoryResponse> IReportClient.GetRoundHistoriesAsync(GetRoundHistoryRequest request)
         {
             var prefix = $"Report.RoundId.{request.RoundId}.GetRound";
             var path = Path.AppendWithProperties($"/api/roundReport/{request.RoundId}?", request);
 
-            return ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(HttpMethod.Get,
+            return await ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<MarketModel>> IReportClient.GetMarketsAsync(GetMarketsRequest request)
+        async Task<PagedResponse<MarketModel>> IReportClient.GetMarketsAsync(GetMarketsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetMarkets";
             var path = Path.AppendWithProperties("/api/marketReport?", request);
 
-            return ExecuteJsonRequestAsync<GetMarketsRequest, PagedResponse<MarketModel>>(HttpMethod.Get,
+            return await ExecuteJsonRequestAsync<GetMarketsRequest, PagedResponse<MarketModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<AgentContributionModel>> IReportClient.GetAgentContributionsAsync(
+        async Task<PagedResponse<AgentContributionModel>> IReportClient.GetAgentContributionsAsync(
             GetAgentContributionsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetAgentContributions";
             var path = Path.AppendWithProperties("/api/agentReport/contribution?", request);
-
-            return ExecuteJsonRequestAsync<GetAgentContributionsRequest, PagedResponse<AgentContributionModel>>(
-                HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+            return await ExecuteJsonRequestAsync<GetAgentContributionsRequest, PagedResponse<AgentContributionModel>>(
+                HttpMethod.Get, path, request, logPrefix: prefix, options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<PlayerContributionModel>> IReportClient.GetPlayerContributionsAsync(
+        async Task<PagedResponse<PlayerContributionModel>> IReportClient.GetPlayerContributionsAsync(
             GetPlayerContributionsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetPlayerContributions";
             var path = Path.AppendWithProperties("/api/playerReport/contribution?", request);
 
-            return ExecuteJsonRequestAsync<GetPlayerContributionsRequest, PagedResponse<PlayerContributionModel>>(
+            return await ExecuteJsonRequestAsync<GetPlayerContributionsRequest, PagedResponse<PlayerContributionModel>>(
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<TeamInfoModel>> IReportClient.GetAgentTeamInfoAsync(
+        async Task<PagedResponse<TeamInfoModel>> IReportClient.GetAgentTeamInfoAsync(
             GetAgentTeamInfoRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentTeamInfo";
             var path = Path.AppendWithProperties($"/api/agentReport/{request.AgentId}/teamInfo?", request);
 
-            return ExecuteJsonRequestAsync<GetAgentTeamInfoRequest, PagedResponse<TeamInfoModel>>(
+            return await ExecuteJsonRequestAsync<GetAgentTeamInfoRequest, PagedResponse<TeamInfoModel>>(
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<AgentDividendModel>> IReportClient.GetAgentDividendsAsync(GetAgentDividendsRequest request)
+        async Task<PagedResponse<AgentDividendModel>> IReportClient.GetAgentDividendsAsync(
+            GetAgentDividendsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetAgentDividends";
             var path = Path.AppendWithProperties("/api/agentReport/dividends?", request);
 
-            return ExecuteJsonRequestAsync<GetAgentDividendsRequest, PagedResponse<AgentDividendModel>>(
+            return await ExecuteJsonRequestAsync<GetAgentDividendsRequest, PagedResponse<AgentDividendModel>>(
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<AgentPlayerWinLossModel>> IReportClient.GetAgentPlayerWinLossAsync(
+        async Task<PagedResponse<AgentPlayerWinLossModel>> IReportClient.GetAgentPlayerWinLossAsync(
             GetAgentPlayerWinLossRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentPlayerWinLoss";
             var path = Path.AppendWithProperties($"/api/agentReport/{request.AgentId}/winLoss?", request);
 
-            return ExecuteJsonRequestAsync<GetAgentPlayerWinLossRequest, PagedResponse<AgentPlayerWinLossModel>>(
+            return await ExecuteJsonRequestAsync<GetAgentPlayerWinLossRequest, PagedResponse<AgentPlayerWinLossModel>>(
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<PagedResponse<AgentDividendDetailModel>> IReportClient.GetAgentDividendDetailsAsync(
+        async Task<PagedResponse<AgentDividendDetailModel>> IReportClient.GetAgentDividendDetailsAsync(
             GetAgentDividendDetailsRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentDividendDetails";
             var path = Path.AppendWithProperties("/api/agentReport/dividendDetails?", request);
 
-            return ExecuteJsonRequestAsync<GetAgentDividendDetailsRequest, PagedResponse<AgentDividendDetailModel>>(
+            return await ExecuteJsonRequestAsync<GetAgentDividendDetailsRequest, PagedResponse<AgentDividendDetailModel>
+            >(
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});

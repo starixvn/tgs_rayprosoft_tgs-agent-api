@@ -13,11 +13,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
     {
         PlayerValidationData Request(string playerCode, PlatformType platformType);
 
-        BetData Request(string playerCode, GameProviderConfigurationData data, FundTransferRequest r);
+        BetData Request(string playerCode, GameProviderConfigurationData data, FundTransferRequest request);
 
-        AuthorizePlayerResponse Response(string playerCode, PlayerValidationResult r);
+        AuthorizePlayerResponse Response(string playerCode, PlayerValidationResult result);
 
-        AuthorizePlayerResponse Response(string playerCode, GetBalanceResult r);
+        AuthorizePlayerResponse Response(string playerCode, GetBalanceResult result);
 
         AuthorizePlayerResponse Response(GameApiError error, string message);
 
@@ -41,29 +41,29 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 PlatformType = platformType
             };
 
-        AuthorizePlayerResponse IHabaneroActionModelMapper.Response(string playerCode, PlayerValidationResult r) =>
+        AuthorizePlayerResponse IHabaneroActionModelMapper.Response(string playerCode, PlayerValidationResult result) =>
             new()
             {
                 Result = new()
                 {
                     Status = new() {HasAuthenticationError = false},
                     PlayerCode = playerCode,
-                    PlayerUsername = r.Username,
-                    Balance = r.Balance,
-                    CurrencyCode = r.GameProviderCurrencyCode
+                    PlayerUsername = result.Username,
+                    Balance = result.Balance,
+                    CurrencyCode = result.GameProviderCurrencyCode
                 }
             };
 
         BetData IHabaneroActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
-            FundTransferRequest r)
+            FundTransferRequest request)
         {
             string currencyCode;
             TransactionData[] transactions;
 
-            if (r.Detail.IsCancel)
+            if (request.Detail.IsCancel)
             {
-                var trx = r.Detail.FundTransfer.CancelTransaction;
-                var clientRoundId = r.Detail.ClientRoundId.ToString();
+                var trx = request.Detail.FundTransfer.CancelTransaction;
+                var clientRoundId = request.Detail.ClientRoundId.ToString();
 
                 currencyCode = trx.CurrencyCode;
                 transactions = new TransactionData[]
@@ -74,9 +74,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                         ExternalTransactionId = trx.TransactionId,
                         ExternalTransactionReferenceId = trx.TransactionReferenceId,
                         ExternalGameActionGroupId = clientRoundId,
-                        ExternalBetId = r.Detail.RoundId,
+                        ExternalBetId = request.Detail.RoundId,
                         ExternalRoundId = clientRoundId,
-                        ExternalGameId = r.Game.ExternalId,
+                        ExternalGameId = request.Game.ExternalId,
                         GameActionType = GameActionType.CancelTransaction,
                         TimeStamp = DateTimeOffset.Parse(trx.Timestamp),
                         RoundClosed = trx.GameState is GameState.Completing or GameState.Expired
@@ -85,12 +85,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             }
             else
             {
-                var trxs = r.Detail.FundTransfer.Transactions;
+                var trxs = request.Detail.FundTransfer.Transactions;
                 currencyCode = trxs[0].CurrencyCode;
 
                 transactions = trxs.Select(t =>
                 {
-                    var clientRoundId = r.Detail.ClientRoundId.ToString();
+                    var clientRoundId = request.Detail.ClientRoundId.ToString();
 
                     return new TransactionData
                     {
@@ -98,13 +98,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                         ExternalTransactionId = t.TransactionId,
                         ExternalTransactionReferenceId = t.IsPlaceBet ? null : t.TransactionReferenceId,
                         ExternalGameActionGroupId = clientRoundId,
-                        ExternalBetId = r.Detail.RoundId,
+                        ExternalBetId = request.Detail.RoundId,
                         ExternalRoundId = clientRoundId,
-                        ExternalGameId = r.Game.ExternalId,
+                        ExternalGameId = request.Game.ExternalId,
                         GameActionType =
-                            t.IsPlaceBet                              ? PlaceBet :
-                            r.Detail.ActionType == ActionType.FreeBet ? FreeBet :
-                            t.Amount == 0                             ? LoseBet : WinBet,
+                            t.IsPlaceBet                                    ? PlaceBet :
+                            request.Detail.ActionType == ActionType.FreeBet ? FreeBet :
+                            t.Amount == 0                                   ? LoseBet : WinBet,
                         TimeStamp = DateTimeOffset.Parse(t.Timestamp),
                         RoundClosed = t.GameState is GameState.Completing or GameState.Expired
                     };
@@ -114,16 +114,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             return GetBetData(playerCode, currencyCode, data, transactions);
         }
 
-        AuthorizePlayerResponse IHabaneroActionModelMapper.Response(string playerCode, GetBalanceResult r) =>
+        AuthorizePlayerResponse IHabaneroActionModelMapper.Response(string playerCode, GetBalanceResult result) =>
             new()
             {
                 Result = new()
                 {
                     Status = new() {HasAuthenticationError = false},
                     PlayerCode = playerCode,
-                    PlayerUsername = r.Username,
-                    Balance = r.Balance,
-                    CurrencyCode = r.GameProviderCurrencyCode
+                    PlayerUsername = result.Username,
+                    Balance = result.Balance,
+                    CurrencyCode = result.GameProviderCurrencyCode
                 }
             };
 
