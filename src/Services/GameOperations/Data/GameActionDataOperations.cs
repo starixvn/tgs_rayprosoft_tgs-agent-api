@@ -140,6 +140,7 @@ namespace TGS.Services.GameOperations.Data
 
             var externalTransactionIds =
                 data.Transactions.Select(t => t.ExternalTransactionId).JoinAsStringBySemicolon();
+
             var transactionResult = await _transactionManager.ExecuteTransactionAsync(
                     _repoFactory,
                     IsolationLevel.RepeatableRead,

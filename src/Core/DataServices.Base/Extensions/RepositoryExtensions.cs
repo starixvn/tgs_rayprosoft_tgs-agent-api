@@ -9,8 +9,11 @@ namespace TGS.Core.DataServices.Base.Extensions
 {
     public static class RepositoryExtensions
     {
-        public static IServiceCollection AddRepository<TInterface, TRepository>(this IServiceCollection services,
-            IConfiguration configuration, string connectionName, int commandTimeout = 180)
+        public static IServiceCollection AddRepository<TInterface, TRepository>(
+            this IServiceCollection services,
+            IConfiguration configuration,
+            string connectionName,
+            int commandTimeout = 180)
             where TInterface : class
             where TRepository : DbContext, TInterface
         {
@@ -32,19 +35,24 @@ namespace TGS.Core.DataServices.Base.Extensions
                 });
 
                 option.UseSnakeCaseNamingConvention();
-            }, poolSize);
 
+
+            }, poolSize);
 
             services.AddDbContextFactory<TRepository>(option =>
             {
                 AddLogger(option);
 
-                option.UseNpgsql(connectionString, serverOption =>
-                {
-                    serverOption.SetPostgresVersion(12, 5);
-                    serverOption.CommandTimeout(commandTimeout);
-                });
-            }, ServiceLifetime.Transient);
+                option
+                    .UseNpgsql(connectionString, serverOption =>
+                    {
+                        serverOption.SetPostgresVersion(12, 5);
+                        serverOption.CommandTimeout(commandTimeout);
+                        serverOption.MigrationsHistoryTable(Consts.Db.MigrationsHistoryTable, Consts.Db.Schema);
+                        serverOption.UseTrigrams();
+                    })
+                    .UseSnakeCaseNamingConvention();
+            });
 
             services.AddScoped<TInterface>(c => c.GetRequiredService<TRepository>());
             services.AddTransient<Func<TInterface>>(c => () =>
