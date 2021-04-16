@@ -16,7 +16,7 @@ using TGS.Shared.Game.Models.PragmaticPlay.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
 {
-    [Route("api/provider")]
+    [Route("api/pp")]
     [ApiController]
     [Consumes("application/x-www-form-urlencoded")]
     [Produces(MediaTypeNames.Application.Json)]

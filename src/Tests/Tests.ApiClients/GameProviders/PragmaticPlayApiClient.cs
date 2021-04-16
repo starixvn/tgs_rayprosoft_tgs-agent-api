@@ -33,7 +33,7 @@ namespace TGS.Tests.ApiClients.GameProviders
 
     public sealed class PragmaticPlayApiClient : BaseApiClient, IPragmaticPlayApiClient
     {
-        private static readonly string RoutePrefix = "api/provider";
+        private static readonly string RoutePrefix = "api/pp";
 
         public PragmaticPlayApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
             : base(client, logger, json)

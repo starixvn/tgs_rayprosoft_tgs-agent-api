@@ -50,7 +50,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            const string Route = "/api/provider";
+            const string Route = "/api/pp";
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
