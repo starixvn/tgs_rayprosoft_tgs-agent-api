@@ -52,9 +52,5 @@
     </Compile>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="GameProviders\Saba\Middlewares\" />
-  </ItemGroup>
-
 
 </Project>

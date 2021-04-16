@@ -2,5 +2,6 @@
 {
     public record SabaConfiguration : PluggableConfigurationBase
     {
+        public string SecretKey { get; init; }
     }
 }

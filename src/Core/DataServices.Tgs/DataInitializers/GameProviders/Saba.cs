@@ -75,7 +75,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SabaConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new Uri("http://game-saba") : new("http://localhost:62330")
+                        _env.IsDocker() ? new Uri("http://game-saba") : new("http://localhost:62330"),
+                    SecretKey = "XXX"
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();
