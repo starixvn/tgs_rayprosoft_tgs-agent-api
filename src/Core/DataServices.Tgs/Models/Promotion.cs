@@ -27,5 +27,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string UpdatedByUsername { get; set; }
         public virtual ICollection<PromotionGameProvider> PromotionGameProviders { get; set; }
         public virtual ICollection<PromotionVipLevel> PromotionVipLevels { get; set; }
+        public virtual ICollection<PromotionPlayer> PromotionPlayers { get; set; }
     }
 }

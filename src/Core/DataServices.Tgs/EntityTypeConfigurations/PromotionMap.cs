@@ -73,6 +73,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .WithOne(p => p.Promotion)
                 .HasForeignKey(p => p.PromotionId);
 
+            builder.HasMany(p => p.PromotionPlayers)
+                .WithOne(p => p.Promotion)
+                .HasForeignKey(p => p.PromotionId);
+
             builder.HasIndex(c => c.BrandId)
                 .HasDatabaseName("ix_promotions_brand_id");
         }
