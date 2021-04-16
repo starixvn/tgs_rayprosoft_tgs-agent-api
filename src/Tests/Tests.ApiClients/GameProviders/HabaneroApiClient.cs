@@ -8,11 +8,11 @@ namespace TGS.Tests.ApiClients.GameProviders
 {
     public interface IHabaneroApiClient
     {
-        Task<AuthorizePlayerResponse> AuthorizePlayerAsync(AuthorizePlayerRequest request);
+        ValueTask<AuthorizePlayerResponse> AuthorizePlayerAsync(AuthorizePlayerRequest request);
 
-        Task<FundTransferResponse> FundTransferAsync(FundTransferRequest request);
+        ValueTask<FundTransferResponse> FundTransferAsync(FundTransferRequest request);
 
-        Task<QueryResponse> QueryGameActionAsync(QueryRequest queryRequest);
+        ValueTask<QueryResponse> QueryGameActionAsync(QueryRequest queryRequest);
     }
 
     public sealed class HabaneroApiClient : BaseApiClient, IHabaneroApiClient
@@ -24,15 +24,15 @@ namespace TGS.Tests.ApiClients.GameProviders
         {
         }
 
-        Task<AuthorizePlayerResponse> IHabaneroApiClient.AuthorizePlayerAsync(AuthorizePlayerRequest request) =>
+        ValueTask<AuthorizePlayerResponse> IHabaneroApiClient.AuthorizePlayerAsync(AuthorizePlayerRequest request) =>
             ExecuteJsonRequestAsync<AuthorizePlayerRequest, AuthorizePlayerResponse>(HttpMethod.Post,
                 $"{RoutePrefix}/authorize", request);
 
-        Task<FundTransferResponse> IHabaneroApiClient.FundTransferAsync(FundTransferRequest request) =>
+        ValueTask<FundTransferResponse> IHabaneroApiClient.FundTransferAsync(FundTransferRequest request) =>
             ExecuteJsonRequestAsync<FundTransferRequest, FundTransferResponse>(HttpMethod.Post,
                 $"{RoutePrefix}/transfer", request);
 
-        Task<QueryResponse> IHabaneroApiClient.QueryGameActionAsync(QueryRequest request) =>
+        ValueTask<QueryResponse> IHabaneroApiClient.QueryGameActionAsync(QueryRequest request) =>
             ExecuteJsonRequestAsync<QueryRequest, QueryResponse>(HttpMethod.Post,
                 $"{RoutePrefix}/transfer/query", request);
     }

@@ -248,3 +248,21 @@ Scenario: 20 - Bet with jackpot contribution, then Lose, cancel the Loss, then W
 	| 4  | 1      | WinBet            | 200    | 600          | 90       | -100    | 0                | -100           | Yes              |          |                           |
 	|    |        | Totals            | 100    | 600          | 90       | -100    | 0                | 0              |                  |          |                           |
 	Then the final bet amount is 100 and valid bet amount is 100 and settle amount is 200
+
+Scenario: 21 - Free Bet in a single round
+	Given initial balance of $500
+		And game with no turnover on tie bet
+	When I perform the following actions I will see the expected results
+	| Id | Ref Id | Type    | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
+	| 1  |        | FreeBet | 100    | 600          | 0        | -100    | 0                | 0              | Yes              |          |                           |
+	|    |        | Totals  | 100    | 600          | 0        | -100    | 0                | 0              |                  |          |                           |
+	Then the final bet amount is 0 and valid bet amount is 0 and settle amount is 100
+
+Scenario: 22 - Win Jackpot
+	Given initial balance of $500
+		And game with no turnover on tie bet
+	When I perform the following actions I will see the expected results
+	| Id | Ref Id | Type       | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
+	| 1  |        | WinJackpot | 100    | 600          | 0        | -100    | 0                | 0              | Yes              |          |                           |
+	|    |        | Totals     | 100    | 600          | 0        | -100    | 0                | 0              |                  |          |                           |
+	Then the final bet amount is 0 and valid bet amount is 0 and settle amount is 100

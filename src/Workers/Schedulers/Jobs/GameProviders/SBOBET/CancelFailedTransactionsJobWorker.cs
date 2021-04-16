@@ -80,10 +80,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET
                     return new();
                 }
 
-                var histories = await Task.WhenAll(GameTypes.Select(t =>
+                var histories = await Task.WhenAll(GameTypes.Select(async t =>
                 {
                     var portfolio = Utility.GetPortfolio(t);
-                    return _client.GetBetHistoryAsync(configuration.ApiUrl,
+                    return await _client.GetBetHistoryAsync(configuration.ApiUrl,
                         new()
                         {
                             CompanyKey = configuration.CompanyKey,

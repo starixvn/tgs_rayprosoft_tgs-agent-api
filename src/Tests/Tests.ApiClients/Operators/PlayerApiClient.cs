@@ -9,9 +9,12 @@ namespace TGS.Tests.ApiClients.Operators
 {
     public interface IPlayerApiClient
     {
-        Task<LoginResponse> PlayerLoginAsync(LoginRequest request, IReadOnlyDictionary<string, string> headers);
-        Task<CreatePlayerResponse> CreatePlayerAsync(CreatePlayerRequest request, IReadOnlyDictionary<string, string> headers);
-        Task<AuthResponse> GetBrandTokenAsync(AuthRequest request);
+        ValueTask<LoginResponse> PlayerLoginAsync(LoginRequest request, IReadOnlyDictionary<string, string> headers);
+
+        ValueTask<CreatePlayerResponse> CreatePlayerAsync(CreatePlayerRequest request,
+            IReadOnlyDictionary<string, string> headers);
+
+        ValueTask<AuthResponse> GetBrandTokenAsync(AuthRequest request);
     }
 
     public sealed class PlayerApiClient : BaseApiClient, IPlayerApiClient
@@ -21,14 +24,15 @@ namespace TGS.Tests.ApiClients.Operators
         {
         }
 
-        Task<AuthResponse> IPlayerApiClient.GetBrandTokenAsync(AuthRequest request) =>
+        ValueTask<AuthResponse> IPlayerApiClient.GetBrandTokenAsync(AuthRequest request) =>
             ExecuteJsonRequestAsync<AuthRequest, AuthResponse>(HttpMethod.Post, "api/auth/jwt", request);
 
-        Task<CreatePlayerResponse> IPlayerApiClient.CreatePlayerAsync(CreatePlayerRequest request,
+        ValueTask<CreatePlayerResponse> IPlayerApiClient.CreatePlayerAsync(CreatePlayerRequest request,
             IReadOnlyDictionary<string, string> headers) =>
-            ExecuteJsonRequestAsync<CreatePlayerRequest, CreatePlayerResponse>(HttpMethod.Post, "api/player/create", request, headers);
+            ExecuteJsonRequestAsync<CreatePlayerRequest, CreatePlayerResponse>(HttpMethod.Post, "api/player/create",
+                request, headers);
 
-        Task<LoginResponse> IPlayerApiClient.PlayerLoginAsync(LoginRequest request,
+        ValueTask<LoginResponse> IPlayerApiClient.PlayerLoginAsync(LoginRequest request,
             IReadOnlyDictionary<string, string> headers) =>
             ExecuteJsonRequestAsync<LoginRequest, LoginResponse>(HttpMethod.Post, "api/player/login", request, headers);
     }

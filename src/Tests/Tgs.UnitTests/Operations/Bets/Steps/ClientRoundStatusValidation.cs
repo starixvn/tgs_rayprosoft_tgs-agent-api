@@ -52,10 +52,13 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             var previousActions = Actions.Except(new[] {current}).ToArray();
             var betValuesResult = betValuesCalculator.Calculate(hasTurnoverOnTieBet, current, previousActions);
 
-            var hasFreeBet = Actions.Any(a => a.Type == GameActionType.FreeBet);
+            var gameActionWithSingleRound = Actions.Count == 1 &&
+                Actions.Any(a => a.Type is GameActionType.FreeBet or GameActionType.WinJackpot);
+
             var roundStatus = Get<RoundStatus>(SR.RoundStatus);
             var manager = (IRoundStatusManager)new RoundStatusManager();
-            var clientRoundStatus = manager.GetClientRoundStatus(roundStatus, betValuesResult, hasFreeBet);
+            var clientRoundStatus =
+                manager.GetClientRoundStatus(roundStatus, betValuesResult, gameActionWithSingleRound);
 
             Set(SR.ClientRoundStatus, clientRoundStatus);
         }

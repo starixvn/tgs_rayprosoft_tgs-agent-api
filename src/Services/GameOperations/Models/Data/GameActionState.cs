@@ -21,7 +21,7 @@ namespace TGS.Services.GameOperations.Models.Data
 
             GameActionType = td.GameActionType;
             Timestamp = td.TimeStamp;
-            ExtraData = td.ExtraData;
+            ExtraData = td.ExtraData ?? string.Empty;
             ExternalBetId = td.ExternalBetId;
             ExternalRoundId = td.ExternalRoundId;
             ExternalTransactionId = td.ExternalTransactionId;
@@ -66,12 +66,12 @@ namespace TGS.Services.GameOperations.Models.Data
         /// <summary>
         ///     all game actions in the same round
         /// </summary>
-        public IList<BetActionData> PreviousActions { get; set; }
+        public IList<BetActionData> PreviousActions { get; set; } = Array.Empty<BetActionData>();
 
         /// <summary>
         ///     game actions except that is cancelled in the same round
         /// </summary>
-        public IList<BetActionData> ValidPreviousActions { get; set; }
+        public IList<BetActionData> ValidPreviousActions { get; set; } = Array.Empty<BetActionData>();
 
         public Guid? ReferencedGameActionInternalId { get; set; }
         public BetActionData ReferencedGameAction { get; set; }

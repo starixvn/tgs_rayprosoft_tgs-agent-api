@@ -18,8 +18,8 @@ namespace TGS.Core.Infrastructures.ApiClient
 
         private readonly HttpClient _client;
 
-        protected IJsonSerializationProvider Json;
-        protected IApiClientLogger Logger;
+        protected readonly IJsonSerializationProvider Json;
+        protected readonly IApiClientLogger Logger;
 
         protected BaseApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
         {
@@ -28,51 +28,64 @@ namespace TGS.Core.Infrastructures.ApiClient
             _client = client;
         }
 
-        protected Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
+        protected ValueTask<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             string logPrefix, TimeSpan? timeout = null) =>
             Logger == null ? SendWithTimeoutAsync(request, timeout) : SendAndLogAsync(request, logPrefix, timeout);
 
-        protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(HttpMethod method, string path,
+        protected async ValueTask<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(HttpMethod method,
+            string path,
             TRequest request, IReadOnlyDictionary<string, string> headers = null,
             IReadOnlyDictionary<string, string> contentHeaders = null,
             string logPrefix = null, TimeSpan? timeout = null, JsonSerializerOptions options = null)
         {
             var requestMessage = CreateHttpRequestMessage(path, method);
-            var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
+            var httpRequestMessage = CreateJsonRequest(requestMessage, request, headers, contentHeaders);
             var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
             return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
 
-        protected async Task<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(HttpMethod method, Uri apiUrl,
+        protected async ValueTask<TResponse> ExecuteJsonRequestAsync<TRequest, TResponse>(HttpMethod method, Uri apiUrl,
             string path, TRequest request, IReadOnlyDictionary<string, string> headers = null,
             IReadOnlyDictionary<string, string> contentHeaders = null,
             string logPrefix = null, TimeSpan? timeout = null, JsonSerializerOptions options = null)
         {
-            var uriString = apiUrl.AbsoluteUri.Trim(UrlTrimChars);
-            if (!string.IsNullOrWhiteSpace(path))
-            {
-                uriString += $"{Slash}{path.TrimStart(UrlTrimChars)}";
-            }
-
+            var uriString = GetUriString(apiUrl, path);
             var requestMessage = CreateHttpRequestMessage(uriString, method);
-            var httpRequestMessage = CreateRequest(requestMessage, request, headers, contentHeaders);
+            var httpRequestMessage = CreateJsonRequest(requestMessage, request, headers, contentHeaders);
             var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
             return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
 
-        protected HttpRequestMessage CreateRequest(
-            HttpRequestMessage httpRequestMessage, object request,
-            IReadOnlyDictionary<string, string> headers,
-            IReadOnlyDictionary<string, string> contentHeaders)
+        protected async ValueTask<TResponse> ExecuteFormRequestAsync<TResponse>(Uri apiUrl, string path,
+            IReadOnlyDictionary<string, string> parameters,
+            IReadOnlyDictionary<string, string> headers = null,
+            IReadOnlyDictionary<string, string> contentHeaders = null,
+            string logPrefix = null, TimeSpan? timeout = null,
+            JsonSerializerOptions options = null)
         {
-            PrepareJsonRequest(httpRequestMessage, request);
-            AddHeaders(httpRequestMessage, headers, contentHeaders);
-            return httpRequestMessage;
+            var uriString = GetUriString(apiUrl, path);
+            var requestMessage = CreateHttpRequestMessage(uriString, HttpMethod.Post);
+            var httpRequestMessage = CreateFormRequest(requestMessage, headers, contentHeaders, parameters);
+            var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
+            return await ReadJsonContentAsync<TResponse>(response.Content, options);
+        }
+
+        protected async ValueTask<TResponse> ExecuteFormRequestAsync<TResponse>(string path,
+            IReadOnlyDictionary<string, string> parameters,
+            IReadOnlyDictionary<string, string> headers = null,
+            IReadOnlyDictionary<string, string> contentHeaders = null,
+            string logPrefix = null, TimeSpan? timeout = null,
+            JsonSerializerOptions options = null)
+        {
+            var requestMessage = CreateHttpRequestMessage(path, HttpMethod.Post);
+            var httpRequestMessage = CreateFormRequest(requestMessage, headers, contentHeaders, parameters);
+            var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
+            return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
 
         #region Private Methods
 
-        private async Task<HttpResponseMessage> SendAndLogAsync(HttpRequestMessage request, string logPrefix,
+        private async ValueTask<HttpResponseMessage> SendAndLogAsync(HttpRequestMessage request, string logPrefix,
             TimeSpan? timeout)
         {
             logPrefix ??= GetType().Name;
@@ -121,11 +134,11 @@ namespace TGS.Core.Infrastructures.ApiClient
             }
         }
 
-        private Task<HttpResponseMessage> SendWithTimeoutAsync(HttpRequestMessage request, TimeSpan? timeout)
+        private async ValueTask<HttpResponseMessage> SendWithTimeoutAsync(HttpRequestMessage request, TimeSpan? timeout)
         {
             timeout ??= DefaultTimeout;
             using var cts = new CancellationTokenSource(timeout.Value);
-            return _client.SendAsync(request, cts.Token);
+            return await _client.SendAsync(request, cts.Token);
         }
 
         private void PrepareJsonRequest(HttpRequestMessage request, object content)
@@ -144,6 +157,23 @@ namespace TGS.Core.Infrastructures.ApiClient
                 request.Content = new StringContent(Json.SerializeToString(content));
                 request.Content.Headers.Remove("Content-Type");
                 request.Content.Headers.Add("Content-Type", "application/json");
+            }
+        }
+
+        private static void PrepareFormRequest(HttpRequestMessage request,
+            IReadOnlyDictionary<string, string> parameters)
+        {
+            var method = request.Method;
+            if (HttpMethod.Post == method || HttpMethod.Put == method || HttpMethod.Delete == method)
+            {
+                if (parameters?.Count > 0)
+                {
+                    request.Content = new FormUrlEncodedContent(parameters);
+                }
+            }
+            else if (parameters != null)
+            {
+                throw new InvalidOperationException($"Unexpected to have content for method {method}");
             }
         }
 
@@ -186,6 +216,35 @@ namespace TGS.Core.Infrastructures.ApiClient
         {
             var json = await content.ReadAsStringAsync();
             return Json.DeserializeFromString<T>(json, options);
+        }
+
+        private HttpRequestMessage CreateJsonRequest(HttpRequestMessage httpRequestMessage, object request,
+            IReadOnlyDictionary<string, string> headers, IReadOnlyDictionary<string, string> contentHeaders)
+        {
+            PrepareJsonRequest(httpRequestMessage, request);
+            AddHeaders(httpRequestMessage, headers, contentHeaders);
+            return httpRequestMessage;
+        }
+
+        private static HttpRequestMessage CreateFormRequest(HttpRequestMessage httpRequestMessage,
+            IReadOnlyDictionary<string, string> headers, IReadOnlyDictionary<string, string> contentHeaders,
+            IReadOnlyDictionary<string, string> parameters)
+        {
+            PrepareFormRequest(httpRequestMessage, parameters);
+            AddHeaders(httpRequestMessage, headers, contentHeaders);
+            return httpRequestMessage;
+        }
+
+        private static string GetUriString(Uri apiUrl, string path)
+        {
+            var uriString = apiUrl.AbsoluteUri.Trim(UrlTrimChars);
+
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                uriString += $"{Slash}{path.TrimStart(UrlTrimChars)}";
+            }
+
+            return uriString;
         }
 
         #endregion Private Methods

@@ -27,56 +27,62 @@ namespace Report.Client
         {
         }
 
-        Task<MessageResponse> IReportAggregateClient.CreatePlayerAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.CreatePlayerAggregateAsync(
             CreateUpdatePlayerAggregateModel request)
         {
             var prefix = "Report.CreateUpdatePlayerAggregate";
-            return ExecuteJsonRequestAsync<CreateUpdatePlayerAggregateModel, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<CreateUpdatePlayerAggregateModel, MessageResponse>(
+                HttpMethod.Post,
                 "/api/playerAggregate", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
 
-        Task<MessageResponse> IReportAggregateClient.ManualCreatePlayerAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.ManualCreatePlayerAggregateAsync(
             ManualCreateUpdatePlayerAggregateModel request)
         {
             var prefix = $"Report.{request.Date}.{request.Hour}.ManualCreateUpdatePlayerAggregate";
-            return ExecuteJsonRequestAsync<ManualCreateUpdatePlayerAggregateModel, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<ManualCreateUpdatePlayerAggregateModel, MessageResponse>(
+                HttpMethod.Post,
                 "/api/playerAggregate/manual", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
 
-        Task<MessageResponse> IReportAggregateClient.CreateUpdateRoundAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.CreateUpdateRoundAggregateAsync(
             CreateUpdateRoundAggregateModel request)
         {
             var prefix = "Report.CreateUpdatePlayerAggregate";
-            return ExecuteJsonRequestAsync<CreateUpdateRoundAggregateModel, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<CreateUpdateRoundAggregateModel, MessageResponse>(
+                HttpMethod.Post,
                 "/api/roundAggregate", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
 
-        Task<MessageResponse> IReportAggregateClient.ManualCreateUpdateRoundAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.ManualCreateUpdateRoundAggregateAsync(
             ManualCreateUpdateRoundAggregateModel request)
         {
             var prefix = $"Report.{request.Date}.{request.Hour}.ManualCreateUpdatePlayerAggregate";
-            return ExecuteJsonRequestAsync<ManualCreateUpdateRoundAggregateModel, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<ManualCreateUpdateRoundAggregateModel, MessageResponse>(
+                HttpMethod.Post,
                 "/api/roundAggregate/manual", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
 
-        Task<MessageResponse> IReportAggregateClient.CreatePlayerRebateAsync(CreatePlayerRebateRequest request)
+        async Task<MessageResponse> IReportAggregateClient.CreatePlayerRebateAsync(CreatePlayerRebateRequest request)
         {
             var prefix = "Report.CreatePlayerRebate";
-            return ExecuteJsonRequestAsync<CreatePlayerRebateRequest, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<CreatePlayerRebateRequest, MessageResponse>(
+                HttpMethod.Post,
                 "/api/playerReport/rebates", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
 
-        Task<MessageResponse> IReportAggregateClient.CreateAgentDividendAsync(CreateAgentDividendsRequest request)
+        async Task<MessageResponse> IReportAggregateClient.CreateAgentDividendAsync(CreateAgentDividendsRequest request)
         {
             var prefix = "Report.CreateAgentDividend";
-            return ExecuteJsonRequestAsync<CreateAgentDividendsRequest, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<CreateAgentDividendsRequest, MessageResponse>(
+                HttpMethod.Post,
                 "/api/agentReport/dividends", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
     }
 }

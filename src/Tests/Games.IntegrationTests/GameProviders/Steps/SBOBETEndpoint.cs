@@ -251,7 +251,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task WhenIRequestThePlayerBalanceAsync()
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
+            var config = await GetConfigurationAsync();
 
             var client = _serviceProvider.GetRequiredService<ISBOBETApiClient>();
 
@@ -381,7 +381,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task WhenICancelTheSettleTransactionAsync()
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
+            var config = await GetConfigurationAsync();
 
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
 
@@ -409,7 +409,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task WhenICancelTheCancellation()
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
+            var config = await GetConfigurationAsync();
 
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
 
@@ -828,13 +828,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         private static string NewRoundId() =>
             Guid.NewGuid().ToString();
 
-        private Task<SBOConfiguration> GetSBOSetting() =>
+        private Task<SBOConfiguration> GetConfigurationAsync() =>
             GetSettingAsync<SBOConfiguration>(_serviceProvider, SettingConsts.GameProviderConfigurations.SBOBET);
 
         private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null)
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
+            var config = await GetConfigurationAsync();
 
             var types = externalGameId.SplitByUnderscore().Select(int.Parse).ToArray();
 
@@ -884,7 +884,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         private async Task SettleBetAsync(GameActionType type, decimal amount, string externalGameId = null)
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
+            var config = await GetConfigurationAsync();
 
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
 
@@ -951,7 +951,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             string externalGameId = null)
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
+            var config = await GetConfigurationAsync();
 
             var (gameType, productType) = GetGameTypeAndProductType(externalGameId, betRequest);
             var request = new CancelBetRequest
@@ -975,7 +975,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         private async Task GetBetStatusAsync(string externalGameId = null)
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetSBOSetting();
+            var config = await GetConfigurationAsync();
 
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
             var (gameType, productType) = GetGameTypeAndProductType(externalGameId, betRequest);

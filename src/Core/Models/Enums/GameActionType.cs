@@ -9,6 +9,7 @@
         TieBet = 4,
         CancelTransaction = 5,
         LockAmount = 6,
-        UnlockAmount = 7
+        UnlockAmount = 7,
+        WinJackpot = 8
     }
 }
