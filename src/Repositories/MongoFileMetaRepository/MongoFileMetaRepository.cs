@@ -37,6 +37,22 @@ namespace TGS.FileService.Repositories
         public async ValueTask DeleteFileMetaByIdsAsync(IEnumerable<string> fileIds)
             => await _mongoContext.DeleteManyAsync(fileIds.ToArray()).ConfigureAwait(false);
 
+        public ValueTask<FileMeta> FindByIdAsync(string objectId)
+        {
+            var row = _mongoContext.GetQueries()
+                .Where(file => file.Id == objectId)
+                .Single();
+
+            return ValueTask.FromResult(new FileMeta
+            {
+                Id = row.Id,
+                FileName = row.FileName,
+                ContentType = row.ContentType,
+                FileLength = row.FileLength,
+                CreatedOn = row.CreatedOn
+            });
+        }
+
         public IAsyncEnumerable<FileMeta> ListExpiredFileMetasAsync(string prefix, DateTimeOffset expireTime)
         {
             var query = _mongoContext.GetQueries().Where(row => row.CreatedOn < expireTime);

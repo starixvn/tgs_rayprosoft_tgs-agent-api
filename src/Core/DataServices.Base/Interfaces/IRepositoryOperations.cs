@@ -18,11 +18,9 @@ namespace TGS.Core.DataServices.Base.Interfaces
 
         public Task CreateEntityAsync<T>(T entity) where T : class;
 
+        public Task CreateEntitiesAsync<T>(IEnumerable<T> entities) where T : class;
+
         public Task UpdateEntitiesAsync<T>(IEnumerable<T> entities) where T : class;
-
-        public Task CreateEntitiesAsync<T>(T[] entities) where T : class;
-
-        public Task UpdateEntitiesAsync<T>(T[] entities) where T : class;
 
         public Task UpdateEntityAsync<T>(T entity) where T : class;
 

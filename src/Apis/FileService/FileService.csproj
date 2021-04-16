@@ -50,7 +50,6 @@
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="4.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
-    <PackageReference Include="Yarp.ReverseProxy" Version="1.0.0-preview.10.21168.2" />
   </ItemGroup>
 
   <ItemGroup>

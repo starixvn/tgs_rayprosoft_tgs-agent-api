@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using Npgsql.Bulk;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Report.Models;
 using TGS.Core.Models;
@@ -24,11 +22,8 @@ namespace TGS.Core.DataServices.Report
 
     public class ReportRepository : DbContext, IReportRepository
     {
-        private readonly NpgsqlBulkUploader _uploader;
-
         public ReportRepository(DbContextOptions<ReportRepository> options) : base(options)
         {
-            _uploader = new(this);
         }
 
         DbSet<RoundAggregate> IReportRepository.RoundAggregates { get; set; }
@@ -52,12 +47,6 @@ namespace TGS.Core.DataServices.Report
 
         Task<int> IBaseRepository.SaveChangesAsync(CancellationToken cancellationToken) =>
             SaveChangesAsync(cancellationToken);
-
-        Task IBaseRepository.BulkInsertAsync<T>(IEnumerable<T> entities) =>
-            _uploader.InsertAsync(entities);
-
-        Task IBaseRepository.BulkUpdateAsync<T>(IEnumerable<T> entities) =>
-            _uploader.UpdateAsync(entities);
 
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {

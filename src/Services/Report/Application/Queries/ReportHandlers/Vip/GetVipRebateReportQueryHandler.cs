@@ -43,7 +43,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Vip
 
             return await _service.GetPlayerGameTypeAggregateQueries()
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.ReportDate >= from && x.ReportDate <= to)
+                .Where(x => x.ReportDate >= from && x.ReportDate < to)
                 .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
                 .GroupBy(
                     x => new

@@ -45,7 +45,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Agent
             var players = agent.Players.GroupJoin(_service.GetPlayerAggregateQueries()
                         .Where(x => x.BrandId == request.BrandId)
                         .Where(x => x.AgentId == agent.Id)
-                        .Where(x => x.ReportDate >= request.From && x.ReportDate <= request.To), p => p.PlayerCode,
+                        .Where(x => x.ReportDate >= request.From && x.ReportDate < request.To), p => p.PlayerCode,
                     playerAggregate => playerAggregate.PlayerCode,
                     (player, players) => new {player, players})
                 .SelectMany(x => x.players.DefaultIfEmpty(),

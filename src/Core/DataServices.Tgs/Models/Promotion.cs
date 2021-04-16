@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public SwitchStatus Status { get; set; }
         public Guid BrandId { get; set; }
         public virtual Brand Brand { get; set; }
-        public PromotionType PromotionType { get; set; }
+        public string PromotionType { get; set; }
         public decimal PromotionAmount { get; set; }
         public decimal AmountUsed { get; set; }
         public bool Unlimited { get; set; }

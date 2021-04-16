@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,10 +22,6 @@ namespace TGS.Core.DataServices.Base.Interfaces
         Task<IDbContextTransaction> BeginTransactionAsync(IsolationLevel level);
 
         IDbConnection GetDbConnection();
-
-        Task BulkInsertAsync<T>(IEnumerable<T> entities) where T : class;
-
-        Task BulkUpdateAsync<T>(IEnumerable<T> entities) where T : class;
 
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

@@ -51,7 +51,7 @@ import { Checkbox } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
 import clone from "clone-deep"
 
-export const EditButton = ({ record, onSubmitted, ...props }) => {
+export const EditButton = ({ brandId, record, onSubmitted, ...props }) => {
     let dialog = useModalState()
 
     let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
@@ -64,6 +64,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
             <EditDisclosure {...dialog} />
             {dialog.visible && (
                 <EditDialog
+                    brandId={brandId}
                     record={record}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
@@ -73,7 +74,13 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
     )
 }
 
-const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
+const EditDialog = ({
+    brandId,
+    record = {},
+    onSubmitted,
+    dialog,
+    ...props
+}) => {
     let title = useTrans({
         zh: "编辑",
         en: "Edit"
@@ -114,6 +121,7 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
             })}
             onSubmit={(data) => {
                 setSubmit({
+                    brandId,
                     ...record,
                     /*
                     ...brandPaymentData.payment,
@@ -167,16 +175,15 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
             `}
             dialog={dialog}
         >
-            <EditBody record={record} />
+            <EditBody brandId={brandId} record={record} />
         </FormDialog>
     )
 }
 
-const EditBody = ({ record = {}, dialog, ...props }) => {
-    let { watch, setValue } = useFormContext()
+const EditBody = ({ brandId, record = {}, dialog, ...props }) => {
+    let { watch, setValue, getValues } = useFormContext()
     let transferLimitTo = watch("transferLimitTo")
     let transferLimitFrom = watch("transferLimitFrom")
-
     return (
         <Stack
             orientation="vertical"
@@ -297,8 +304,10 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
                             <VipLevelsText />
                         </Label>
                         <Box alignY="center">
-                            {/* TODO: brandId */}
-                            <VipLevelCheckboxGroup name="vipLevelIds" />
+                            <VipLevelCheckboxGroup
+                                name="vipLevelIds"
+                                brandId={brandId}
+                            />
                         </Box>
                     </FieldValues>
                 </Columns.Column>
