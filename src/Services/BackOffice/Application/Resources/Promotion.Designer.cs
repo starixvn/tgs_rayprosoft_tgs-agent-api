@@ -77,5 +77,14 @@ namespace TGS.Services.BackOffice.Application.Resources {
                 return ResourceManager.GetString("NotFound", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Promotion type is not found..
+        /// </summary>
+        internal static string PromotionTypeNotFound {
+            get {
+                return ResourceManager.GetString("PromotionTypeNotFound", resourceCulture);
+            }
+        }
     }
 }

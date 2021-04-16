@@ -17,12 +17,11 @@ namespace TGS.Services.BackOffice.Application.Queries.PaymentMethod
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public IAsyncEnumerable<PaymentMethodInfo> QueryAsync(PaymentMethodQuery query, CancellationToken cancellationToken = default)
-        {
-            return from paymentMethod in _tgsRepository.PaymentMethods.AsAsyncEnumerable()
-                   select new PaymentMethodInfo(
-                       paymentMethod.Id,
-                       paymentMethod.Code);
-        }
+        public IAsyncEnumerable<PaymentMethodInfo> QueryAsync(PaymentMethodQuery query,
+            CancellationToken cancellationToken = default) =>
+            from paymentMethod in _tgsRepository.PaymentMethods.AsAsyncEnumerable()
+            select new PaymentMethodInfo(
+                paymentMethod.Id,
+                paymentMethod.Code);
     }
 }

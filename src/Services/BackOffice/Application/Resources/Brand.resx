@@ -154,4 +154,7 @@
   <data name="GameProviderBetLimitCountIncorrect" xml:space="preserve">
     <value>Game provider bet limit count incorrect.</value>
   </data>
+  <data name="SettlementIntervalInvalid" xml:space="preserve">
+    <value>Settlement interval is invalid.</value>
+  </data>
 </root>

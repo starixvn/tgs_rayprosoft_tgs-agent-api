@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using Npgsql.Bulk;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Log.Models;
 
@@ -33,13 +32,8 @@ namespace TGS.Core.DataServices.Log
 
     public sealed class LogRepository : DbContext, ILogRepository
     {
-        private readonly NpgsqlBulkUploader _uploader;
-        private readonly IBaseRepository _repository;
-
         public LogRepository(DbContextOptions<LogRepository> options) : base(options)
         {
-            _uploader = new(this);
-            _repository = this;
         }
 
         private DbSet<ApiLog> ApiLogs { get; }
@@ -62,13 +56,13 @@ namespace TGS.Core.DataServices.Log
         IDbConnection IBaseRepository.GetDbConnection() =>
             Database.GetDbConnection();
 
-        void IBaseRepository.SetTimeoutToSeconds(int seconds)
-        {
-            Database.SetCommandTimeout(seconds);
-        }
+        void IBaseRepository.SetTimeoutToSeconds(int seconds) => Database.SetCommandTimeout(seconds);
 
-        Task ILogRepository.AddApiLogsAsync(IList<ApiLog> logs) =>
-            _repository.BulkInsertAsync(logs);
+        async Task ILogRepository.AddApiLogsAsync(IList<ApiLog> logs)
+        {
+            await ApiLogs.AddRangeAsync(logs);
+            await SaveChangesAsync();
+        }
 
         async Task ILogRepository.AddApiLogAsync(ApiLog log)
         {
@@ -79,8 +73,11 @@ namespace TGS.Core.DataServices.Log
         bool ILogRepository.HasDatabaseConnection() =>
             Database.CanConnect();
 
-        Task ILogRepository.AddLogRecordsAsync(IList<LogRecord> logs) =>
-            _repository.BulkInsertAsync(logs);
+        async Task ILogRepository.AddLogRecordsAsync(IList<LogRecord> logs)
+        {
+            await LogRecords.AddRangeAsync(logs);
+            await SaveChangesAsync();
+        }
 
         async Task ILogRepository.AddLogRecordAsync(LogRecord log)
         {
@@ -91,20 +88,17 @@ namespace TGS.Core.DataServices.Log
         Task<int> IBaseRepository.SaveChangesAsync(CancellationToken cancellationToken) =>
             SaveChangesAsync(cancellationToken);
 
-        Task ILogRepository.AddAdminLogsAsync(IList<AdminLog> logs) =>
-            _repository.BulkInsertAsync(logs);
+        async Task ILogRepository.AddAdminLogsAsync(IList<AdminLog> logs)
+        {
+            await AdminLogs.AddRangeAsync(logs);
+            await SaveChangesAsync();
+        }
 
         async Task ILogRepository.AddAdminLogAsync(AdminLog log)
         {
             await AdminLogs.AddAsync(log);
             await SaveChangesAsync();
         }
-
-        Task IBaseRepository.BulkInsertAsync<T>(IEnumerable<T> entities) =>
-            _uploader.InsertAsync(entities);
-
-        Task IBaseRepository.BulkUpdateAsync<T>(IEnumerable<T> entities) =>
-            _uploader.UpdateAsync(entities);
 
         async Task IBaseRepository.ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {

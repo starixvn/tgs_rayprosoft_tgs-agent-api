@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
@@ -39,7 +40,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
             CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
-            var brands = await _brandService.GetBrandQueries(q => q.Where(x => now > x.BeforeToDateTime))
+            var brands = await _brandService.GetBrandQueries(q => q.Where(x => now.Date > x.BeforeToDateTime))
                 .ToArrayAsync(cancellationToken);
 
             var createModels = new List<CreateAgentDividendModel>();
@@ -211,27 +212,13 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
                 createModels.AddRange(agentDividends);
 
-                switch (brand.SettlementIntervalType)
-                {
-                    case SettlementIntervalType.Daily:
-                        brand.BeforeFromDateTime = brand.AfterFromDateTime;
-                        brand.BeforeToDateTime = brand.AfterToDateTime;
-                        brand.AfterFromDateTime = brand.AfterToDateTime.AddDays(1);
-                        brand.AfterToDateTime = brand.AfterToDateTime.AddDays(1);
-                        break;
-                    case SettlementIntervalType.Weekly:
-                        brand.BeforeFromDateTime = brand.AfterFromDateTime;
-                        brand.BeforeToDateTime = brand.AfterToDateTime;
-                        brand.AfterFromDateTime = brand.AfterToDateTime.AddDays(1);
-                        brand.AfterToDateTime = brand.AfterToDateTime.AddDays(7);
-                        break;
-                    case SettlementIntervalType.Monthly:
-                        brand.BeforeFromDateTime = brand.AfterFromDateTime;
-                        brand.BeforeToDateTime = brand.AfterToDateTime;
-                        brand.AfterFromDateTime = brand.AfterToDateTime.AddDays(1);
-                        brand.AfterToDateTime = brand.AfterToDateTime.AddMonths(1);
-                        break;
-                }
+                var (beforeFromDate, beforeToDate, afterFromDate, afterToDate) =
+                    BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType);
+
+                brand.BeforeFromDateTime = beforeFromDate;
+                brand.BeforeToDateTime = beforeToDate;
+                brand.AfterFromDateTime = afterFromDate;
+                brand.AfterToDateTime = afterToDate;
             }
 
             await using var reportTransaction =
