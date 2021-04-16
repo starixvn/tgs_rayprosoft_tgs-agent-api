@@ -10,7 +10,7 @@ using TGS.Shared.Game.Models.Saba.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 {
-    [Route("api/provider")]
+    [Route("api/saba")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
