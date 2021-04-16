@@ -67,11 +67,6 @@ namespace TGS.Core.DataServices.Base.Extensions
         private static void AddLogger(DbContextOptionsBuilder option)
         {
 #if DEBUG
-            option.UseLoggerFactory(LoggerFactory.Create(builder =>
-            {
-                builder.AddConsole();
-                builder.SetMinimumLevel(LogLevel.Information);
-            }));
             option.EnableSensitiveDataLogging();
 #endif
         }
