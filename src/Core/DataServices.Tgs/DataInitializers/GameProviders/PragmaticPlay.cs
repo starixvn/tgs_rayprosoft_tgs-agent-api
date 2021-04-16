@@ -48,9 +48,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
                 new CNYCurrency("CNY"), new USDCurrency("USD"), new VNDCurrency("VND"), new IDRCurrency("IDR"),
-                //new VND1000Currency("VND2"), new IDR1000Currency("IDR2"), 
-                new JPYCurrency("JPY"), new EURCurrency("EUR"), new KRWCurrency("KRW"), new MYRCurrency("MYR"),
-                new THBCurrency("THB"), new GBPCurrency("GBP")
+                new VND1000Currency("VND2"), new IDR1000Currency("IDR2"), new JPYCurrency("JPY"),
+                new EURCurrency("EUR"), new KRWCurrency("KRW"), new MYRCurrency("MYR"), new THBCurrency("THB"),
+                new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
@@ -69,19 +69,19 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 ServiceEndpointUrl =
                     _env.IsDocker() ? new Uri("http://game-pragmaticplay") : new("http://localhost:62330"),
-                SecureLogin = "WG",
-                SecretKey = "E3zwYVhtUeFXG",
+                SecureLogin = "tgs_tgs",
+                SecretKey = "testKey",
                 ProviderId = "PragmaticPlay",
                 ApiUrl = new("https://api.prerelease-env.biz"),
                 GameUrlQueryStringTemplate =
-                    "token={TOKEN}&symbol={EXTERNALGAMEID}&technology={TECHNOLOGY}&platform={PLATFORM}&language={CULTURE}",
+                    "token={TOKEN}&symbol={EXTERNALGAMEID}&technology={TECHNOLOGY}&platform={PLATFORM}&language={CULTURE}&style",
                 DelaySecondsForPlaceBet = 0
             };
         }
 
         internal class PragmaticPlayGameProviderConfiguration : IGameProviderConfiguration
         {
-            private static readonly string _Endpoint = "https: //tgp-tw.prerelease-env.biz/gs2c/playGame.do";
+            private static readonly string _Endpoint = "https: //tgs.prerelease-env.biz/gs2c/playGame.do";
 
             Guid IGameProviderConfiguration.Id => new("455B0CA8-64B1-40A9-8C0A-FCFD3FE895FC");
 
