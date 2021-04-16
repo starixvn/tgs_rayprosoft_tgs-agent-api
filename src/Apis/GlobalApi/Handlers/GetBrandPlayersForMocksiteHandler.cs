@@ -48,7 +48,14 @@ namespace TGS.Apis.GlobalApi.Handlers
                 GetBrandPlayersRequest request, CancellationToken cancellationToken)
         {
             // if ShowAll = true, return the first page with default row counts
-            var newRequest = request.ShowAll ? request with {ShowAll = false, Page = 0, Rows = 10} : request;
+            var newRequest = request.ShowAll
+                ? request with
+                {
+                    ShowAll = false,
+                    Page = 0,
+                    Rows = 10
+                }
+                : request;
 
             var brandCode = newRequest.BrandCode;
             var currencyCode = newRequest.CurrencyCode;
@@ -65,7 +72,12 @@ namespace TGS.Apis.GlobalApi.Handlers
 
             return await query
                 .Select(p =>
-                    new BrandPlayersResult {Username = p.Username, PlayerCode = p.PlayerCode, Status = p.Status})
+                    new BrandPlayersResult
+                    {
+                        Username = p.Username,
+                        PlayerCode = p.PlayerCode,
+                        Status = p.Status
+                    })
                 .CreatePagedResponseAsync<PagedResponse<BrandPlayersResult>, BrandPlayersResult>(newRequest);
         }
 
@@ -82,8 +94,8 @@ namespace TGS.Apis.GlobalApi.Handlers
                 Guid.NewGuid().ToString(),
                 async repo =>
                 {
-                    await repo.BulkInsertAsync(players);
-                    await repo.BulkInsertAsync(players.SelectMany(p => p.Wallets).ToArray());
+                    await repo.Players.AddRangeAsync(players);
+                    await repo.SaveChangesAsync();
 
                     return Task.CompletedTask;
                 });

@@ -278,6 +278,65 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_banks");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("numeric")
+                        .HasColumnName("balance");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("ConfirmedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("confirmed_on");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("ExternalTransactionId")
+                        .HasColumnType("text")
+                        .HasColumnName("external_transaction_id");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
+
+                    b.Property<DateTimeOffset>("SentOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("wallet_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_transactions");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_agent_transactions_brand_id");
+
+                    b.HasIndex("WalletId")
+                        .HasDatabaseName("ix_agent_transactions_wallet_id");
+
+                    b.ToTable("agent_transactions");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentWallet", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2693,8 +2752,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("promotion_amount");
 
-                    b.Property<short>("PromotionType")
-                        .HasColumnType("smallint")
+                    b.Property<string>("PromotionType")
+                        .IsRequired()
+                        .HasColumnType("text")
                         .HasColumnName("promotion_type");
 
                     b.Property<short>("Status")
@@ -3783,6 +3843,27 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Agent");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentTransaction", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_agent_transactions_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.AgentWallet", "Wallet")
+                        .WithMany()
+                        .HasForeignKey("WalletId")
+                        .HasConstraintName("fk_agent_transactions_agent_wallets_wallet_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentWallet", b =>

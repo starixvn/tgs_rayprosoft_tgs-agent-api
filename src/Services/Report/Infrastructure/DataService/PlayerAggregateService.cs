@@ -45,14 +45,14 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 CreatedOn = model.CreatedOn,
                 RegisteredCount = model.RegisteredCount,
                 FirstFundInCount = model.FirstFundInCount,
-                DepositAmount = model.DepositAmount,
-                WithdrawalAmount = model.WithdrawalAmount,
-                AdjustmentAmount = model.AdjustmentAmount,
-                BonusAmount = model.BonusAmount,
-                BetAmount = model.BetAmount,
-                Turnover = model.ValidBetAmount,
-                WinLossAmount = model.WinLossAmount,
-                NetProfit = model.NetProfit
+                DepositAmount = decimal.Truncate(model.DepositAmount * 100) / 100,
+                WithdrawalAmount = decimal.Truncate(model.WithdrawalAmount * 100) / 100,
+                AdjustmentAmount = decimal.Truncate(model.AdjustmentAmount * 100) / 100,
+                BonusAmount = decimal.Truncate(model.BonusAmount * 100) / 100,
+                BetAmount = decimal.Truncate(model.BetAmount * 100) / 100,
+                Turnover = decimal.Truncate(model.Turnover * 100) / 100,
+                WinLossAmount = decimal.Truncate(model.WinLossAmount * 100) / 100,
+                NetProfit = decimal.Truncate(model.NetProfit * 100) / 100
             }).ToArray());
 
         Task IPlayerAggregateService.DeletePlayerAggregatesAsync(PlayerAggregate[] markets) =>

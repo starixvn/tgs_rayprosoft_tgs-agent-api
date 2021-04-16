@@ -45,7 +45,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Agent
             var playerAggregate = await _service
                 .GetPlayerGameTypeAggregateQueries(q =>
                     q.Where(x => x.AgentId == request.AgentId)
-                        .Where(x => x.ReportDate >= request.From && x.ReportDate <= request.To))
+                        .Where(x => x.ReportDate >= request.From && x.ReportDate < request.To))
                 .GroupBy(g => g.PlayerCode, (playerCode, aggregate) => new
                 {
                     playerCode,

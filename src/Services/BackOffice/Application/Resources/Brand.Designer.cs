@@ -223,6 +223,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Settlement interval is invalid..
+        /// </summary>
+        public static string SettlementIntervalInvalid {
+            get {
+                return ResourceManager.GetString("SettlementIntervalInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Status is required..
         /// </summary>
         public static string StatusRequired {

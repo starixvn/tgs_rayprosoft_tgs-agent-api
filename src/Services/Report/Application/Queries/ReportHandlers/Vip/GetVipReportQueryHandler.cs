@@ -88,7 +88,7 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Vip
                         pg
                     })
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.ReportDate >= from && x.ReportDate <= to)
+                .Where(x => x.ReportDate >= from && x.ReportDate < to)
                 .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
                 .Where(request.Level, x => tgsPlayers.Contains(x.PlayerCode))
                 .GroupBy(x => new

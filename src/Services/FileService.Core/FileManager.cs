@@ -47,13 +47,18 @@ namespace TGS.FileService
         public IAsyncEnumerable<FileMeta> FindExpiredFilesAsync(string prefix, DateTimeOffset expireTime)
             => _fileMetaRepository.ListExpiredFileMetasAsync(prefix, expireTime);
 
-        public Task<FileMeta> GetFileAsync(string filePath)
+        public async Task<FileMeta> GetFileMetaByObjectIdAsync(string objectId)
         {
-            throw new NotImplementedException();
+            return await _fileMetaRepository.FindByIdAsync(objectId).ConfigureAwait(false);
         }
 
         public IAsyncEnumerable<FileMeta> ListPathAsync(string prefix)
             => _fileMetaRepository.ListFileMetasAsync(prefix);
+
+        public Task<Stream> OpenFileStreamAsync(FileMeta meta)
+        {
+            return _amazonS3.GetObjectStreamAsync(_options.Bucket, meta.FileName, null);
+        }
 
         public async Task<FileMeta> SaveAsync(string filePath, string contentType, long contentLength, Stream fileStream)
         {
