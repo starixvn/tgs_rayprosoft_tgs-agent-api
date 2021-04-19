@@ -92,7 +92,8 @@ namespace TGS.Services.GameOperations.Data
                     FreeBetAsSingleRound = betData.FreeBetAsSingleRound,
                     AllowCancelCancelTransaction = betData.AllowCancelCancelTransaction,
                     AllowPlaceBetWithDifferentPlatformToken = betData.AllowPlaceBetWithDifferentPlatformToken,
-                    AutoCloseRound = betData.AutoCloseRound
+                    AutoCloseRound = betData.AutoCloseRound,
+                    OppositeBetRules = betData.OppositeBetRules ?? Array.Empty<OppositeBetRule>()
                 });
 
                 transactionResults.Add(result.TransactionResult);
@@ -467,8 +468,12 @@ namespace TGS.Services.GameOperations.Data
                 throw error;
             }
 
+            var oppositePatterns = s.OppositeBetRules
+                .Where(r => r.ExternalGameIds.IgnoreCaseContains(s.Game.ExternalId))
+                .SelectMany(r => r.Patterns).Select(p => new OppositeBetPattern(p.BetType, p.GroupId)).ToArray();
+
             var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
-                s.PreviousActions, s.OppositeBetPatterns);
+                s.PreviousActions, oppositePatterns);
 
             s.BetValueResult = betValues;
 
