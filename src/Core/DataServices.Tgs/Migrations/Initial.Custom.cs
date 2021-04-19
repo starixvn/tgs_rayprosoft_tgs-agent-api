@@ -97,8 +97,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "game_action_get_game_actions_by_external_round_id"));
 
-            //migrationBuilder.SqlResource(assembly,
-            //    string.Format(Consts.FunctionSqlFormat, "game_action_get_game_actions_by_external_transaction_id"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "game_action_get_game_actions_by_external_transaction_id"));
 
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "game_action_referenced_game_action_exists"));
