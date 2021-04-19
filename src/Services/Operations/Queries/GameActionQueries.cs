@@ -8,7 +8,6 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Data;
-using TGS.Core.Models.Services.Games;
 
 namespace TGS.Services.Operations.Queries
 {
@@ -28,6 +27,9 @@ namespace TGS.Services.Operations.Queries
 
         ValueTask<string[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId, string externalGameActionGroupId);
+
+        ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode,
+            string externalTransactionId);
     }
 
     public sealed class GameActionQueries : IGameActionQueries
@@ -159,5 +161,18 @@ namespace TGS.Services.Operations.Queries
                        ga.ExternalGameActionGroupId == externalGameActionGroupId
                    select ga.ExternalTransactionId).ToArrayAsync()
                 .ConfigureAwait(false);
+
+        async ValueTask<GameActionExternalIds> IGameActionQueries.GetGameActionExternalIdAsync(Guid gameProviderId,
+            string playerCode, string externalTransactionId)
+        {
+            const string spName = "bet.game_action_get_game_actions_by_external_transaction_id";
+            return await _repository.SqlQuerySingleAsync<GameActionExternalIds>(spName, parameters:
+                new Dictionary<string, object>
+                {
+                    {":game_provider_id", gameProviderId},
+                    {":player_code", playerCode},
+                    {":external_transaction_id", externalTransactionId}
+                });
+        }
     }
 }
