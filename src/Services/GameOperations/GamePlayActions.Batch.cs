@@ -5,17 +5,17 @@ namespace TGS.Services.GameOperations
 {
     public partial interface IGamePlayActions
     {
-        Task<BatchBetResult> SettleBatchAsync(BatchBetData data);
+        ValueTask<BatchBetResult> SettleBatchAsync(BatchBetData data);
 
-        Task<BatchBetResult> CancelBatchAsync(BatchBetData data);
+        ValueTask<BatchBetResult> CancelBatchAsync(BatchBetData data);
     }
 
     public sealed partial class GamePlayActions
     {
-        Task<BatchBetResult> IGamePlayActions.SettleBatchAsync(BatchBetData data) =>
+        ValueTask<BatchBetResult> IGamePlayActions.SettleBatchAsync(BatchBetData data) =>
             _operations.SettleBatchAsync(data);
 
-        Task<BatchBetResult> IGamePlayActions.CancelBatchAsync(BatchBetData data) =>
+        ValueTask<BatchBetResult> IGamePlayActions.CancelBatchAsync(BatchBetData data) =>
             _operations.CancelBatchAsync(data);
     }
 }

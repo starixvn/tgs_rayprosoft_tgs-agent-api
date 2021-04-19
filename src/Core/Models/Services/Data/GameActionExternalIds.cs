@@ -10,6 +10,7 @@ namespace TGS.Core.Models.Services.Data
         public string ExternalRoundId { get; init; }
         public string ExternalGameActionGroupId { get; init; }
         public string ExternalReferencedTransactionId { get; init; }
+        public string ExternalGameId { get; init; }
         public decimal Amount { get; init; }
         public DateTimeOffset RecordedOn { get; init; }
         public GameActionType GameActionType { get; init; }

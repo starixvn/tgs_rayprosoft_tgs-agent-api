@@ -167,7 +167,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Controllers
                 .ConfigureAwait(false);
 
             var betData = _map.Request(playerCode, data, request);
-            var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
 
             return _map.RefundResponse(r);
         }

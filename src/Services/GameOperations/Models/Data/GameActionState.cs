@@ -33,12 +33,6 @@ namespace TGS.Services.GameOperations.Models.Data
             RoundDetail = td.RoundDetail;
             RoundClosed = td.RoundClosed;
             BetType = td.BetType;
-            OppositeBetPatterns = td.OppositeBetPatterns == null
-                ? Array.Empty<OppositeBetPattern>()
-                : td.OppositeBetPatterns
-                    .Select(p => new OppositeBetPattern(p.BetType, p.GroupId))
-                    .ToArray();
-
             JackpotContribution = td.JackpotContribution;
 
             UtcNow = DateTimeOffset.UtcNow;
@@ -118,7 +112,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool AllowCancelCancelTransaction { get; init; }
         public bool AllowPlaceBetWithDifferentPlatformToken { get; init; }
 
-        public OppositeBetPattern[] OppositeBetPatterns { get; }
+        public OppositeBetRule[] OppositeBetRules { get; init; }
         public JackpotContribution JackpotContribution { get; }
     }
 }
