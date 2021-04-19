@@ -22,7 +22,7 @@ namespace TGS.Services.GameOperations.Data
 {
     internal interface IGameActionProcessor
     {
-        Task<BetResult> ExecuteAsync(ProcessorData data);
+        ValueTask<BetResult> ExecuteAsync(ProcessorData data);
     }
 
     internal sealed partial class GameActionProcessor : IGameActionProcessor
@@ -63,7 +63,7 @@ namespace TGS.Services.GameOperations.Data
             _json = json;
         }
 
-        async Task<BetResult> IGameActionProcessor.ExecuteAsync(ProcessorData data)
+        async ValueTask<BetResult> IGameActionProcessor.ExecuteAsync(ProcessorData data)
         {
             var transactionResults = new List<TransactionResult>();
             var betData = data.BetData;

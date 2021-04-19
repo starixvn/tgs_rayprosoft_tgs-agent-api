@@ -28,7 +28,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
     {
         private static readonly string GameProviderCode = Consts.GameProvider.Habanero;
 
-        private readonly IReadOnlyDictionary<ActionType, Func<BetData, Task<BetResult>>> _actionMapper;
+        private readonly IReadOnlyDictionary<ActionType, Func<BetData, ValueTask<BetResult>>> _actionMapper;
         private readonly IGamePlayActions _actions;
         private readonly IHabaneroActionModelMapper _map;
         private readonly IHabaneroServices _services;
@@ -45,7 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
             _map = map;
             _settingOperations = settingOperations;
 
-            _actionMapper = new Dictionary<ActionType, Func<BetData, Task<BetResult>>>
+            _actionMapper = new Dictionary<ActionType, Func<BetData, ValueTask<BetResult>>>
             {
                 {ActionType.PlaceBet, actions.PlaceBetAsync},
                 {ActionType.SettleBet, actions.SettleBetAsync},
