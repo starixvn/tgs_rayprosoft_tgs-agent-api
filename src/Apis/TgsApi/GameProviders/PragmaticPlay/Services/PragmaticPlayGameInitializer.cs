@@ -57,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<PragmaticPlayConfiguration>(SettingConsts
-                    .GameProviderConfigurations.Habanero);
+                    .GameProviderConfigurations.PragmaticPlay);
 
             var isMobile = token.PlatformType == PlatformType.Mobile;
 
