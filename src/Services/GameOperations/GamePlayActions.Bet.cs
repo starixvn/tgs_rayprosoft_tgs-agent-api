@@ -16,6 +16,8 @@ namespace TGS.Services.GameOperations
     {
         ValueTask<GetBalanceResult> GetBalanceAsync(string gameProviderCode, string playerCode);
 
+        ValueTask<BetResult> LockAmountAsync(BetData data);
+
         ValueTask<BetResult> PlaceBetAsync(BetData data);
 
         ValueTask<BetResult> SettleBetAsync(BetData data);
@@ -42,6 +44,15 @@ namespace TGS.Services.GameOperations
                 GameProviderCurrencyCode = cur
             };
         }
+
+        ValueTask<BetResult> IGamePlayActions.LockAmountAsync(BetData data) =>
+            ExecuteGamePlayActionAsync(data, _operations.LockAmountAsync, async player =>
+            {
+                await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
+                    data.PlatformType);
+
+                await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+            });
 
         ValueTask<BetResult> IGamePlayActions.PlaceBetAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.PlaceBetAsync, async player =>

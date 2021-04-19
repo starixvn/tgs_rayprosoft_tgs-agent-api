@@ -24,6 +24,8 @@ namespace TGS.Services.GameOperations.Data
 {
     public interface IGameActionDataOperations
     {
+        ValueTask<BetResult> LockAmountAsync(BetData data);
+
         ValueTask<BetResult> PlaceBetAsync(BetData data);
 
         ValueTask<BetResult> SettleBetAsync(BetData data);
@@ -77,8 +79,19 @@ namespace TGS.Services.GameOperations.Data
             _interface = this;
         }
 
-        ValueTask<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data) =>
+        ValueTask<BetResult> IGameActionDataOperations.LockAmountAsync(BetData data) =>
             ExecuteGameActionAsync(data);
+
+        ValueTask<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)
+        {
+            if (data.Transactions.Any(t => t.GameActionType.IsNotAllOf(UnlockAmount, PlaceBet)))
+            {
+                throw new InvalidOperationException(
+                    "Only allow game action type UnlockAmount / PlaceBet in place bet action");
+            }
+
+            return ExecuteGameActionAsync(data);
+        }
 
         ValueTask<BetResult> IGameActionDataOperations.SettleBetAsync(BetData data) =>
             ExecuteGameActionAsync(data);
