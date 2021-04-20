@@ -31,7 +31,7 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
             public decimal ActualAmount { get; init; }
 
             [JsonPropertyName("updateTime")]
-            public string Timestamp { get; init; }
+            public string UpdateTime { get; init; }
 
             [JsonPropertyName("tsId")]
             public string Token { get; init; }

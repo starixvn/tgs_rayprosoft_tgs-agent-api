@@ -62,5 +62,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 
             return _map.Response(playerCode, request.Body, r);
         }
+
+        [HttpPost]
+        [Route("confirmbet")]
+        [ResolveRequest(Type = typeof(ConfirmBetRequest))]
+        public async ValueTask<ConfirmBetResponse> PlaceBetAsync(ConfirmBetRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            //var betData = _map.Request(playerCode, data, request);
+            //var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+
+            //return _map.Response(playerCode, request.Body, r);
+        }
     }
 }
