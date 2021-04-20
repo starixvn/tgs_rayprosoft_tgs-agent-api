@@ -7,11 +7,6 @@ namespace TGS.Services.BackOffice.Application.Models.AgentAdjust
 {
     public class CreateAgentAdjustmentRequest : IRequest<MessageResponse>
     {
-        public CreateAgentAdjustmentRequest(Guid id)
-        {
-            AgentId = id;
-        }
-
         public Guid BrandId { get; set; }
         public Guid AgentId { get; set; }
         public AdjustType AdjustType { get; set; }

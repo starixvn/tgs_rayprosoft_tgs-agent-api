@@ -14,7 +14,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IAgentTransactionService
     {
-        Task CreateAgentTransactionAsync(Agent agent, CreateAgentTransactionRequest request);
+        Task CreateAgentTransactionAsync(Agent agent, CreateAgentAdjustmentRequest request);
     }
 
     public class AgentTransactionService : BaseRepositoryOperations<ITgsRepository>, IAgentTransactionService
@@ -31,7 +31,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _transactionManager = transactionManager;
         }
 
-        Task IAgentTransactionService.CreateAgentTransactionAsync(Agent agent, CreateAgentTransactionRequest request)
+        Task IAgentTransactionService.CreateAgentTransactionAsync(Agent agent, CreateAgentAdjustmentRequest request)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 

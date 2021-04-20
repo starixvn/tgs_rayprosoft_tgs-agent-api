@@ -10,7 +10,7 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 {
-    public class AdjustAgentAmountHandler : Handler<CreateAgentTransactionRequest, MessageResponse>
+    public class AdjustAgentAmountHandler : Handler<CreateAgentAdjustmentRequest, MessageResponse>
     {
         private readonly IAgentService _agentService;
         private readonly IAgentTransactionService _agentTransactionService;
@@ -22,7 +22,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             _agentTransactionService = agentTransactionService;
         }
 
-        public override async Task<MessageResponse> Handle(CreateAgentTransactionRequest request,
+        public override async Task<MessageResponse> Handle(CreateAgentAdjustmentRequest request,
             CancellationToken cancellationToken)
         {
             var agent = await _agentService.GetAgentAsync(x => x.Id == request.AgentId);
