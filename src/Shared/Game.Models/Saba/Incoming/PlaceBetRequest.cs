@@ -19,7 +19,7 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
             public int CurrencyCode { get; init; }
 
             [JsonPropertyName("matchId")]
-            public string MatchId { get; init; }
+            public int MatchId { get; init; }
 
             [JsonPropertyName("betTime")]
             public string BetTime { get; init; }

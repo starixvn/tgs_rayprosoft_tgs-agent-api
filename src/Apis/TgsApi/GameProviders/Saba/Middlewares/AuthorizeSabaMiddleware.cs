@@ -1,20 +1,31 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.GameProviders.Saba.Attributes;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Models;
+using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
+using TGS.Shared.Game.Models.Saba.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
 {
     public sealed class AuthorizeSabaMiddleware : IMiddleware
     {
         private readonly IBrandOperations _brandOperations;
+        private readonly IRedisCacheManager _cacheManger;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _json;
         private readonly IPlayerOperations _playerOperations;
+
+        private readonly IReadOnlyDictionary<Type, Func<string, ValueTask<(string, string, PlatformType)>>> _resolver;
         private readonly ISettingOperations _settingOperations;
-        private readonly ITokenProvider _tokenProvider;
 
         public AuthorizeSabaMiddleware(
             IJsonSerializationProvider json,
@@ -22,19 +33,98 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
-            ITokenProvider tokenProvider)
+            IRedisCacheManager cacheManger)
         {
             _json = json;
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
             _settingOperations = settingOperations;
-            _tokenProvider = tokenProvider;
+            _cacheManger = cacheManger;
+
+            _resolver = new Dictionary<Type, Func<string, ValueTask<(string, string, PlatformType)>>>
+            {
+                {typeof(GetBalanceRequest), ResolveGetBalanceRequestAsync},
+                {typeof(PlaceBetRequest), ResolvePlaceBetRequestAsync}
+            };
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
             var value = await context.Request.ReadAsStringAsync();
+
+            var attribute = context.GetEndpoint()?.Metadata?.GetMetadata<ResolveRequestAttribute>();
+
+            if (attribute == null)
+            {
+                throw new InvalidOperationException("Missing RequirePlayerTokenAttribute attribute settings");
+            }
+
+            if (!_resolver.TryGetValue(attribute.Type, out var execute))
+            {
+                throw new InvalidOperationException($"Unexpected resolver type: {attribute.Type.Name}");
+            }
+
+            var (secretKey, playerCode, platformType) = await execute(value);
+
+            var configuration = await _settingOperations
+                .GetValueFromJsonByKeyAsync<SabaConfiguration>(SettingConsts.GameProviderConfigurations
+                    .Saba);
+
+            if (configuration.SecretKey.NotEquals(secretKey))
+            {
+                throw new InvalidCredentialsException("Invalid key");
+            }
+
+            var gameProviderId =
+                await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Saba);
+            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
+            context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
+            context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+            context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
+            context.Items.Add(Consts.ContextItems.PlatformType, platformType);
+
+            await next(context);
+        }
+
+        private ValueTask<(string SecretKey, string PlayerCode, PlatformType PlatformType)>
+            ResolveGetBalanceRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<GetBalanceRequest>(value);
+            return ValueTask.FromResult((r.Key, r.Body.PlayerCode, PlatformType.Desktop));
+        }
+
+        private async ValueTask<(string SecretKey, string PlayerCode, PlatformType PlatformType)>
+            ResolvePlaceBetRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<PlaceBetRequest>(value);
+            var loginRecord = await DecryptTokenAsync(r.Body.Token);
+            var playerCode = loginRecord.PlayerCode;
+
+            var expiresOn = loginRecord.ExpiredOn - DateTimeOffset.Now;
+            await _cacheManger.SafeCacheAsync(SabaConsts.RedisKey.Token, playerCode, expiresOn, loginRecord);
+
+            return (r.Key, playerCode, loginRecord.PlatformType);
+        }
+
+        private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string token)
+        {
+            if (token.IsNullOrEmpty())
+            {
+                throw new MissingTokenException("empty token");
+            }
+
+            var loginRecordId = Guid.Parse(token);
+            var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+
+            if (loginRecord == null)
+            {
+                throw new PlayerLoginExpiredException();
+            }
+
+            return loginRecord;
         }
     }
 }
