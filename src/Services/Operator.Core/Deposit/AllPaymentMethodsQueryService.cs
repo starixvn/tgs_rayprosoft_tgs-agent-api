@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using TGS.ServiceUtility;
+
+namespace TGS.Services.Operator.Deposit
+{
+    internal class AllPaymentMethodsQueryService : IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>>
+    {
+        private readonly IWalletRepository _walletRepository;
+
+        public AllPaymentMethodsQueryService(IWalletRepository walletRepository)
+        {
+            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+        }
+
+        public async ValueTask<IDictionary<Guid, PaymentMethodInfo>> GetAsync(AllPaymentMethodsQuery query, CancellationToken cancellationToken = default)
+        {
+            var allPaymentMethods = await _walletRepository.GetAllPaymentMethodsAsync()
+                .ToDictionaryAsync(method => method.Id)
+                .ConfigureAwait(false);
+
+            return new ReadOnlyDictionary<Guid, PaymentMethodInfo>(allPaymentMethods);
+        }
+    }
+}
