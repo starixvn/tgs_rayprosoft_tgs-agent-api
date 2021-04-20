@@ -14,22 +14,22 @@ namespace TGS.Services.GameOperations
 {
     public partial interface IGamePlayActions
     {
-        Task<GetBalanceResult> GetBalanceAsync(string gameProviderCode, string playerCode);
+        ValueTask<GetBalanceResult> GetBalanceAsync(string gameProviderCode, string playerCode);
 
-        Task<BetResult> PlaceBetAsync(BetData data);
+        ValueTask<BetResult> LockAmountAsync(BetData data);
 
-        Task<BetResult> SettleBetAsync(BetData data);
+        ValueTask<BetResult> PlaceBetAsync(BetData data);
 
-        Task<BetResult> CancelTransactionAsync(BetData data);
+        ValueTask<BetResult> SettleBetAsync(BetData data);
 
-        Task<BetResult> PlaceAndSettleBetAsync(BetData data);
+        ValueTask<BetResult> CancelTransactionAsync(BetData data);
 
-        // TODO: Lock / Unlock
+        ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data);
     }
 
     public sealed partial class GamePlayActions : IGamePlayActions
     {
-        async Task<GetBalanceResult> IGamePlayActions.GetBalanceAsync(string gameProviderCode, string playerCode)
+        async ValueTask<GetBalanceResult> IGamePlayActions.GetBalanceAsync(string gameProviderCode, string playerCode)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
@@ -45,7 +45,16 @@ namespace TGS.Services.GameOperations
             };
         }
 
-        Task<BetResult> IGamePlayActions.PlaceBetAsync(BetData data) =>
+        ValueTask<BetResult> IGamePlayActions.LockAmountAsync(BetData data) =>
+            ExecuteGamePlayActionAsync(data, _operations.LockAmountAsync, async player =>
+            {
+                await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
+                    data.PlatformType);
+
+                await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+            });
+
+        ValueTask<BetResult> IGamePlayActions.PlaceBetAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.PlaceBetAsync, async player =>
             {
                 await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
@@ -54,13 +63,13 @@ namespace TGS.Services.GameOperations
                 await ThrowIfGameIsNotTakenByBrandAsync(player, data);
             });
 
-        Task<BetResult> IGamePlayActions.SettleBetAsync(BetData data) =>
+        ValueTask<BetResult> IGamePlayActions.SettleBetAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.SettleBetAsync);
 
-        Task<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data) =>
+        ValueTask<BetResult> IGamePlayActions.CancelTransactionAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.CancelTransactionAsync);
 
-        Task<BetResult> IGamePlayActions.PlaceAndSettleBetAsync(BetData data) =>
+        ValueTask<BetResult> IGamePlayActions.PlaceAndSettleBetAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.PlaceAndSettleBetAsync, async player =>
             {
                 await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
@@ -122,6 +131,7 @@ namespace TGS.Services.GameOperations
             }
 
             var gameStatuses = _validGameStatus.GetStatus(player.Type, type);
+
             foreach (var id in gameIds)
             {
                 var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, id);
@@ -146,7 +156,7 @@ namespace TGS.Services.GameOperations
             }
         }
 
-        private async Task<BetData> EnsureMappingsAsync(BetData data, string playerCurrencyCode)
+        private async ValueTask<BetData> EnsureMappingsAsync(BetData data, string playerCurrencyCode)
         {
             if (!data.HasCurrencyFromGameProvider)
             {
@@ -164,13 +174,14 @@ namespace TGS.Services.GameOperations
             return data;
         }
 
-        private async Task<BetResult> EnsureMappingsAsync(Guid gameProviderId, BetResult r)
+        private async ValueTask<BetResult> EnsureMappingsAsync(Guid gameProviderId, BetResult r)
         {
             var currencyCode = await _currencyMapper.InternalToExternalAsync(r.CurrencyCode, gameProviderId);
             return r with {GameProviderCurrencyCode = currencyCode};
         }
 
-        private async Task<BetResult> ExecuteGamePlayActionAsync(BetData data, Func<BetData, Task<BetResult>> execute,
+        private async ValueTask<BetResult> ExecuteGamePlayActionAsync(BetData data,
+            Func<BetData, ValueTask<BetResult>> execute,
             Func<CachedPlayer, Task> preAction = null)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(data.PlayerCode);

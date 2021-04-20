@@ -19,5 +19,6 @@ namespace TGS.Core.Models.Services.Games
         public bool FreeBetAsSingleRound { get; init; }
         public bool AllowPlaceBetWithDifferentPlatformToken { get; init; }
         public Guid? BatchId { get; init; }
+        public OppositeBetRule[] OppositeBetRules { get; init; }
     }
 }

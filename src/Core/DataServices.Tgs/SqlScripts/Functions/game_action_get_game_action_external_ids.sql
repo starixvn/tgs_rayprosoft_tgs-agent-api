@@ -12,7 +12,8 @@ RETURNS TABLE(
 	"GameActionType" smallint, 
 	"Amount" decimal,
 	"RecordedOn" timestamptz, 
-	"ExternalReferencedTransactionId" varchar)
+	"ExternalReferencedTransactionId" varchar,
+	"ExternalGameId" varchar)
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -26,7 +27,8 @@ BEGIN
 		ga."type" as "GameActionType",
 		ga.amount as "Amount",
 		ga.recorded_on as "RecordedOn",
-		(select g.external_transaction_id from bet.game_actions g where g.id = ga.referenced_game_action_id) as "ExternalReferencedTransactionId"
+		(select g.external_transaction_id from bet.game_actions g where g.id = ga.referenced_game_action_id) as "ExternalReferencedTransactionId",
+		(select g.external_id from dbo.games g where g.id = r.game_id) as "ExternalGameId"
 	from bet.game_actions ga 
 	join bet.rounds r on r.id = ga.round_id 
 	where r.external_round_id = $3
