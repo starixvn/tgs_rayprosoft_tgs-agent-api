@@ -38,12 +38,15 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
             var promotionTypes =
                 _jsonSerializationProvider.DeserializeFromString<PromotionType[]>(promotionsJson.Value);
 
-            if (promotionTypes.SelectMany(x => x.Types).All(x => x != request.PromotionType))
+            if (promotionTypes.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {
                 return CreateInvalidResponse<MessageResponse>(Promotion.PromotionTypeNotFound);
             }
 
-            await _service.CreatePromotionAsync(request);
+            var promotionType = promotionTypes.SelectMany(x => x.Types)
+                .First(x => x.Name == request.PromotionType);
+
+            await _service.CreatePromotionAsync(request, promotionType);
 
             return CreateValidResponse<MessageResponse>();
         }

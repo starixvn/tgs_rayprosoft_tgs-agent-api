@@ -62,19 +62,39 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Name = "Deposit",
                     Types = new[]
                     {
-                        new() {Name = "FirstDeposit", RebateMethod = "Instantly"},
-                        new PromotionTypeModel {Name = "SecondDeposit", RebateMethod = "Instantly"}
+                        new() {Name = "FirstDeposit", SettlementIntervalType = "Instantly"},
+                        new PromotionTypeModel
+                        {
+                            Name = "SecondDeposit", SettlementIntervalType = "Instantly"
+                        }
                     }
                 },
                 new PromotionType
                 {
                     Name = "Turnover",
-                    Types = new[] {new PromotionTypeModel {Name = "TurnoverRebate", RebateMethod = "Daily"}}
+                    Types = new[]
+                    {
+                        new PromotionTypeModel {Name = "TurnoverRebate", SettlementIntervalType = "Daily"}
+                    }
                 },
                 new PromotionType
                 {
                     Name = "ReliefMoney",
-                    Types = new[] {new PromotionTypeModel {Name = "ReliefMoneyDaily", RebateMethod = "Daily"}}
+                    Types = new[]
+                    {
+                        new PromotionTypeModel
+                        {
+                            Name = "ReliefMoneyDaily", SettlementIntervalType = "Daily"
+                        },
+                        new PromotionTypeModel
+                        {
+                            Name = "ReliefMoneyWeekly", SettlementIntervalType = "Weekly"
+                        },
+                        new PromotionTypeModel
+                        {
+                            Name = "ReliefMoneyMonthly", SettlementIntervalType = "Monthly"
+                        }
+                    }
                 }
             };
 

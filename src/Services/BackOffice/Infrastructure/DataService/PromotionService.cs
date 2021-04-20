@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Settings;
 using TGS.Services.BackOffice.Application.Models.Promotion;
 using TGS.Services.BackOffice.Infrastructure.Services;
 
@@ -21,7 +22,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         IQueryable<Promotion> GetPromotionQueries(Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery = null,
             bool tracking = false);
 
-        Task CreatePromotionAsync(CreatePromotionRequest request);
+        Task CreatePromotionAsync(CreatePromotionRequest request, PromotionTypeModel promotionTypeModel);
 
         Task UpdatePromotionAsync(Promotion promotion, UpdatePromotionRequest request);
 
@@ -95,7 +96,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await tran.CommitAsync();
         }
 
-        async Task IPromotionService.CreatePromotionAsync(CreatePromotionRequest request)
+        async Task IPromotionService.CreatePromotionAsync(CreatePromotionRequest request,
+            PromotionTypeModel promotionTypeModel)
         {
             var promotion = new Promotion
             {
@@ -107,6 +109,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 Status = request.Status,
                 PromotionType = request.PromotionType,
                 PromotionAmount = request.PromotionAmount,
+                SettlementIntervalType = promotionTypeModel.SettlementIntervalType,
                 AmountUsed = 0,
                 Unlimited = request.Unlimited,
                 GameType = request.GameType,

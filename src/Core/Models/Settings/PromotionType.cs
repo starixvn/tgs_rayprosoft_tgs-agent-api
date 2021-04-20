@@ -9,6 +9,6 @@
     public record PromotionTypeModel
     {
         public string Name { get; set; }
-        public string RebateMethod { get; set; }
+        public string SettlementIntervalType { get; set; }
     }
 }

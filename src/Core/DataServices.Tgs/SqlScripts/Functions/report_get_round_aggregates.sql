@@ -7,6 +7,7 @@
 RETURNS TABLE(
      "BrandId" uuid, 
 	 "AgentId" uuid, 
+	 "GameProviderId" uuid,
 	 "PlayerCode" varchar, 
 	 "GameType" smallint, 
 	 "Username" varchar, 
@@ -25,6 +26,7 @@ BEGIN
 	select 
 	p.brand_id "BrandId",
 	p.agent_id "AgentId", 
+	g.game_provider_id "GameProviderId",
 	p.player_code "PlayerCode", 
 	g.type "GameType", 
 	p.username "Username", 

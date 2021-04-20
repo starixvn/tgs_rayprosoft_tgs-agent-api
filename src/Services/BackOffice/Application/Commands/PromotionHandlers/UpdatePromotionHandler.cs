@@ -45,10 +45,15 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
             var promotionTypes =
                 _jsonSerializationProvider.DeserializeFromString<PromotionType[]>(promotionsJson.Value);
 
-            if (promotionTypes.SelectMany(x => x.Types).All(x => x != request.PromotionType))
+            if (promotionTypes.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {
                 return CreateInvalidResponse<MessageResponse>(Promotion.PromotionTypeNotFound);
             }
+
+            var promotionType = promotionTypes.SelectMany(x => x.Types)
+                .First(x => x.Name == request.PromotionType);
+
+            promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
 
             await _service.UpdatePromotionAsync(promotion, request);
 

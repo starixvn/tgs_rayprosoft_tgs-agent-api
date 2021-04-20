@@ -43,7 +43,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
             {
                 BrandId = model.BrandId,
                 AgentId = model.AgentId,
+                GameProviderId = model.GameProviderId,
                 PlayerCode = model.PlayerCode,
+                VipLevel = model.VipLevel,
                 GameType = model.GameType,
                 Hour = model.Hour,
                 ReportDate = model.ReportDate,

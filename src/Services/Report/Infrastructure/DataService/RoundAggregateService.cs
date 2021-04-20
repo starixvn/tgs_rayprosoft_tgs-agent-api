@@ -51,6 +51,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             {
                 BrandId = model.BrandId,
                 AgentId = model.AgentId,
+                GameProviderId = model.GameProviderId,
                 PlayerCode = model.PlayerCode,
                 GameType = model.GameType,
                 Hour = model.Hour,
@@ -168,6 +169,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                         x.r.BrandId,
                         x.r.AgentId,
                         x.r.PlayerCode,
+                        x.r.GameProviderId,
                         x.r.GameType,
                         x.Vip,
                         x.Agent
@@ -179,6 +181,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             BrandId = x.BrandId,
                             AgentId = x.AgentId,
                             PlayerCode = x.PlayerCode,
+                            VipLevel = x.Vip.Level,
+                            GameProviderId = x.GameProviderId,
                             GameType = x.GameType,
                             Hour = start.Hour,
                             VipSportsRebatePercentage = x.Vip.SportsRebatePercentage,

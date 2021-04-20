@@ -14,24 +14,27 @@ using TGS.Services.Report.Infrastructure.DataService;
 namespace TGS.Services.Report.Application.Commands.Player
 {
     public class
-        CreatePromotionBonusQueryHandler : Handler<CreatePlayerRebateRequest,
+        CreatePromotionBonusDailyQueryHandler : Handler<CreatePlayerRebateRequest,
             MessageResponse>
     {
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly IPlayerRebateService _playerRebateService;
         private readonly ITgsPlayerService _playerService;
         private readonly ITgsTransactionService _transactionService;
+        private readonly ITgsPromotionService _promotionService;
 
-        public CreatePromotionBonusQueryHandler(ITgsTransactionService transaction,
+        public CreatePromotionBonusDailyQueryHandler(ITgsTransactionService transaction,
             IPlayerRebateService playerRebateService,
             ITgsPlayerService player,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
+            ITgsPromotionService promotionService,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _transactionService = transaction;
             _playerService = player;
             _playerRebateService = playerRebateService;
             _playerGameTypeAggregateService = playerGameTypeAggregateService;
+            _promotionService = promotionService;
         }
 
         public override async Task<MessageResponse> Handle(CreatePlayerRebateRequest request,
@@ -47,6 +50,14 @@ namespace TGS.Services.Report.Application.Commands.Player
                 reportDate = new(result.Year, result.Month, result.Day, 0, 0, 0,
                     result.Offset);
             }
+
+            var promotions = await _promotionService.GetPromotionQueries()
+                .Where(x => x.PromotionType != "FirstDeposit" && x.PromotionType != "SecondDeposit")
+                .Where(x => x.From >= reportDate && x.To <= reportDate).ToArrayAsync(cancellationToken);
+
+            _playerGameTypeAggregateService.GetPlayerGameTypeAggregateQueries()
+                .Where(x => x.ReportDate == reportDate)
+                .Where(x => )
 
             var playerRebates = await _playerGameTypeAggregateService
                 .GetPlayerGameTypeAggregateQueries(q => q.Where(x => x.ReportDate == reportDate))
