@@ -69,6 +69,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 Status = Status.Active,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,
+                SettlementIntervalType = request.SettlementIntervalType,
                 ApiKey = _credentialGenerator.GetApiKey(),
                 ClientId = request.Code,
                 SecretKey = _credentialGenerator.GetSecretKey(),

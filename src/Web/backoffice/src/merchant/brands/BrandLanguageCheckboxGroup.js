@@ -20,6 +20,7 @@ export const BrandLanguageCheckboxGroupTable = ({
     fieldArrayContext,
     width = "100%",
     disabled = false,
+    showBrandCultureCode = false,
     ...props
 }) => {
     let { control, setValue, watch } = useFormContext()
@@ -40,9 +41,11 @@ export const BrandLanguageCheckboxGroupTable = ({
                             allChecked={allChecked}
                             disabled={disabled}
                             addonAfter={
-                                <Table.HeadCell textAlign="center">
-                                    <Trans zh="设定" en="Setting" />
-                                </Table.HeadCell>
+                                showBrandCultureCode ? (
+                                    <Table.HeadCell textAlign="center">
+                                        <Trans zh="设定" en="Setting" />
+                                    </Table.HeadCell>
+                                ) : null
                             }
                         />
                     </Table.Head>
@@ -57,77 +60,79 @@ export const BrandLanguageCheckboxGroupTable = ({
                                     index={index}
                                     checkedFieldName={checkedFieldName}
                                     addonAfter={
-                                        <Table.Cell textAlign="center">
-                                            <Controller
-                                                control={control}
-                                                name={brandCultureCodeFieldName(
-                                                    name,
-                                                    field,
-                                                    index
-                                                )}
-                                                defaultValue={
-                                                    field.brandCultureCode
-                                                }
-                                                render={({
-                                                    field: {
-                                                        onChange,
-                                                        onBlur,
-                                                        value,
-                                                        name: fieldName,
-                                                        ref
-                                                    },
-                                                    fieldState: {
-                                                        invalid,
-                                                        isTouched,
-                                                        isDirty
+                                        showBrandCultureCode ? (
+                                            <Table.Cell textAlign="center">
+                                                <Controller
+                                                    control={control}
+                                                    name={brandCultureCodeFieldName(
+                                                        name,
+                                                        field,
+                                                        index
+                                                    )}
+                                                    defaultValue={
+                                                        field.brandCultureCode
                                                     }
-                                                }) => {
-                                                    let dialog = useModalState()
-                                                    return (
-                                                        <Box>
-                                                            <Input
-                                                                type="hidden"
-                                                                name={`${name}[${index}].cultureCode`}
-                                                                value={
-                                                                    field.cultureCode
-                                                                }
-                                                            />
-                                                            <Disclosure
-                                                                {...dialog}
-                                                            >
-                                                                <Icon
-                                                                    icon={
-                                                                        faLanguage
-                                                                    }
-                                                                    type="font-awesome"
-                                                                />
-                                                            </Disclosure>
-                                                            {dialog.visible && (
-                                                                <CodeDialog
+                                                    render={({
+                                                        field: {
+                                                            onChange,
+                                                            onBlur,
+                                                            value,
+                                                            name: fieldName,
+                                                            ref
+                                                        },
+                                                        fieldState: {
+                                                            invalid,
+                                                            isTouched,
+                                                            isDirty
+                                                        }
+                                                    }) => {
+                                                        let dialog = useModalState()
+                                                        return (
+                                                            <Box>
+                                                                <Input
+                                                                    type="hidden"
+                                                                    name={`${name}[${index}].cultureCode`}
                                                                     value={
-                                                                        value
+                                                                        field.cultureCode
                                                                     }
-                                                                    disabled={
-                                                                        disabled
-                                                                    }
-                                                                    dialog={
-                                                                        dialog
-                                                                    }
-                                                                    onChange={(
-                                                                        code
-                                                                    ) => {
-                                                                        setValue(
-                                                                            fieldName,
-                                                                            code
-                                                                        )
-                                                                    }}
                                                                 />
-                                                            )}
-                                                        </Box>
-                                                    )
-                                                }}
-                                            />
-                                        </Table.Cell>
+                                                                <Disclosure
+                                                                    {...dialog}
+                                                                >
+                                                                    <Icon
+                                                                        icon={
+                                                                            faLanguage
+                                                                        }
+                                                                        type="font-awesome"
+                                                                    />
+                                                                </Disclosure>
+                                                                {dialog.visible && (
+                                                                    <CodeDialog
+                                                                        value={
+                                                                            value
+                                                                        }
+                                                                        disabled={
+                                                                            disabled
+                                                                        }
+                                                                        dialog={
+                                                                            dialog
+                                                                        }
+                                                                        onChange={(
+                                                                            code
+                                                                        ) => {
+                                                                            setValue(
+                                                                                fieldName,
+                                                                                code
+                                                                            )
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                            </Box>
+                                                        )
+                                                    }}
+                                                />
+                                            </Table.Cell>
+                                        ) : null
                                     }
                                 />
                             )
