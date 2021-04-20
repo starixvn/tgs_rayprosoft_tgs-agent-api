@@ -44,7 +44,7 @@ export const DateTimeInput = ({
                 if (disabled) {
                     return (
                         <Input
-                            defaultValue={format(value)}
+                            defaultValue={formatDateTime(dateFormat, value)}
                             disabled={disabled}
                         />
                     )

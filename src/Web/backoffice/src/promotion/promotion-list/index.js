@@ -268,6 +268,10 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                     Cell: ({ value: record }) => {
                         return (
                             <Set orientation="horizontal" alignX="center">
+                                <ViewPromotionDisclosure
+                                    brandId={brandId}
+                                    record={record}
+                                />
                                 <EditPromotionDisclosure
                                     brandId={brandId}
                                     record={record}

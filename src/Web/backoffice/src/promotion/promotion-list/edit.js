@@ -39,21 +39,17 @@ import {
     useGameTypeGroupValueOf
 } from "../../game/GameType"
 import Separator from "../../layout/Separator"
-import GameProviderFieldsBox from "../../merchant/GameProviderFieldsBox"
 import {
     PromotionTypeGroupSelect,
     PromotionTypeSelect,
-    usePromotionGroupLabelOf,
     usePromotionGroupValueOf
 } from "./PromotionType"
-import {
-    GameProviderCheckboxGroup,
-    toCheckedGameProviderIds
-} from "../../game/providers/GameProviderCheckboxGroup"
+import { toCheckedGameProviderIds } from "../../game/providers/GameProviderCheckboxGroup"
 import { BrandGameProviderCheckboxGroupTable } from "../../game/brandproviders/BrandGameProviderCheckboxGroup"
 import parseISO from "date-fns/parseISO"
 import { today } from "../../date/range"
 import { useBrandGameProviderList } from "../../game/brandproviders/client"
+import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -283,7 +279,7 @@ export const ViewPromotionDisclosure = ({
 }) => {
     let dialog = useModalState()
 
-    // let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
+    // let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
     // if (!isDisplay) {
     //     return null
     // }
@@ -299,26 +295,37 @@ export const ViewPromotionDisclosure = ({
 }
 
 const ViewDialog = ({ brandId, record, dialog, ...props }) => {
-    // let { data, isLoading, error, mutate, deleteCache } = usePromotion(
-    //     record?.id
-    // )
+    let { isLoading, data, error } = usePromotionFormData(brandId, record)
 
     let title = useTrans({
         zh: "查看活动",
         en: "View Promotion"
     })
 
-    // if (isLoading) {
-    //     return <LoadingBackdrop {...dialog} />
-    // }
+    if (isLoading) {
+        return <LoadingBackdrop {...dialog} />
+    }
 
-    // if (error) {
-    //     return <AlertDialog onClickClose={dialog.hide} />
-    // }
+    if (error) {
+        return <AlertDialog onClickClose={dialog.hide} />
+    }
 
     return (
-        <FormDialog defaultValues={clone(record)} title={title} dialog={dialog}>
-            <FormBody brandId={brandId} record={record} disabled />
+        <FormDialog
+            defaultValues={clone(data)}
+            title={title}
+            showActionButtons={false}
+            footer={<CloseButtonFooter dialog={dialog} alignX="right" />}
+            dialog={dialog}
+            maxWidth="80vw"
+            css={css`
+                & .bb-DialogContent {
+                    position: relative;
+                    padding: 1.5rem 3rem;
+                }
+            `}
+        >
+            <FormBody brandId={brandId} record={record} readonly />
         </FormDialog>
     )
 }
@@ -343,6 +350,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
 
     let disabled = readonly
     let editable = !readonly
+
     return (
         <FieldStack marginLeft="1rem">
             <FieldValues>
@@ -381,6 +389,8 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                         name="vipLevels"
                         valueFieldName="level"
                         brandId={brandId}
+                        required
+                        disabled={disabled}
                     />
                 </Box>
 
@@ -388,7 +398,10 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     <Trans zh="活动类型" en="Promotion Type Group" />
                 </NormalLabel>
                 <Box alignY="center">
-                    <PromotionTypeGroupSelect name="promotionTypeGroup" />
+                    <PromotionTypeGroupSelect
+                        name="promotionTypeGroup"
+                        disabled={disabled}
+                    />
                 </Box>
 
                 <NormalLabel>
@@ -399,6 +412,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                         name="promotionType"
                         group={promotionTypeGroup}
                         required
+                        disabled={disabled}
                     />
                 </Box>
 
@@ -418,30 +432,40 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                                 type="number"
                                 name="totalAmountLimit"
                                 required
+                                disabled={disabled}
                             />
                         </>
                     )}
                     <Checkbox
                         name="unlimited"
                         label={unlimiteTotalAmountLabel}
+                        disabled={disabled}
                     />
                 </Set>
 
                 <NormalLabel>
                     <Trans zh="活动游戏类型" en="Game Type Group" />
                 </NormalLabel>
-                <GameTypeGroupSelect name="gameTypeGroup" />
+                <GameTypeGroupSelect name="gameTypeGroup" disabled={disabled} />
 
                 <NormalLabel>
                     <Trans zh="活动游戏子类型" en="Game Type" />
                 </NormalLabel>
-                <GameTypeSelect name="gameType" group={gameTypeGroup} />
+                <GameTypeSelect
+                    name="gameType"
+                    group={gameTypeGroup}
+                    required
+                    disabled={disabled}
+                />
 
                 <NormalLabel>
                     <Trans zh="活动厂商" en="Game Providers" />
                 </NormalLabel>
                 <Box>
-                    <BrandGameProviderCheckboxGroupTable brandId={brandId} />
+                    <BrandGameProviderCheckboxGroupTable
+                        brandId={brandId}
+                        disabled={disabled}
+                    />
                 </Box>
             </FieldValues>
 
@@ -461,13 +485,25 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     name="percentage"
                     min="0"
                     max="100"
-                    addonAfter={<Button isStatic>%</Button>}
+                    required
+                    disabled={disabled}
+                    addonAfter={
+                        <Button isStatic tabIndex="-1">
+                            %
+                        </Button>
+                    }
                 />
 
                 <NormalLabel>
                     <Trans zh="彩金上限" en="Max Amount" />
                 </NormalLabel>
-                <InputField type="number" name="promotionAmount" min="0" />
+                <InputField
+                    type="number"
+                    name="promotionAmount"
+                    min="0"
+                    required
+                    disabled={disabled}
+                />
 
                 <NormalLabel>
                     <Trans zh="流水倍数" en="Turnover Multiple" />
@@ -476,8 +512,10 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     type="number"
                     name="turnoverMultiple"
                     min="0"
+                    required
+                    disabled={disabled}
                     addonAfter={
-                        <Button isStatic>
+                        <Button isStatic tabIndex="-1">
                             <Trans zh="倍" en="X" />
                         </Button>
                     }

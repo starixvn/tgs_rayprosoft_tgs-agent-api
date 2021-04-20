@@ -91,7 +91,10 @@ const Row = ({ name, gameProvider, index, disabled = false, ...props }) => {
         <Table.Row>
             <Table.Cell textAlign="center" width="fit-content">
                 <Box>
-                    <Checkbox name={`${gameProviderFieldName}.checked`} />
+                    <Checkbox
+                        name={`${gameProviderFieldName}.checked`}
+                        disabled={disabled}
+                    />
                     <Input
                         type="hidden"
                         name={`${gameProviderFieldName}.gameProviderId`}

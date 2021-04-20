@@ -108,6 +108,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     }
                 },
+                new MenuSetting("Promotion")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("PromotionList")
+                        {
+                            SubMenus = new[] {new MenuSetting("Update")}
+                        }
+                    }
+                },
                 new MenuSetting("PlayerManagement")
                 {
                     SubMenus = new[]

@@ -359,7 +359,7 @@ export const GameTypeGroupSelect = ({ placeholder, ...props }) => {
 export const GameTypeLabel = ({ value }) => {
     let locale = useLocale()
 
-    return findTrans(value)?.[locale] ?? value
+    return findTrans(value)?.[locale] ?? value ?? ""
 }
 
 export const GameTypeSelect = ({ placeholder, group, ...props }) => {

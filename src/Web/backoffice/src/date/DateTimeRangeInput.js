@@ -38,7 +38,8 @@ export const DateTimeRangeInput = ({
     maxRangeDays,
     dateFormat,
     showTimeInput = true,
-    required
+    required,
+    disabled
 } = {}) => {
     let startName = startProps?.name ?? "start"
     let endName = endProps?.name ?? "end"
@@ -84,9 +85,12 @@ export const DateTimeRangeInput = ({
                     minDate={minDate}
                     maxDate={startMaxDate([startProps?.maxDate, maxDate, end])}
                     required={required}
+                    disabled={disabled}
                     validate={validate}
                 />
-                <Button isStatic>-</Button>
+                <Button isStatic tabIndex="-1">
+                    -
+                </Button>
                 <DateTimeInput
                     name={endName}
                     dateFormat={dateFormat}
@@ -94,6 +98,7 @@ export const DateTimeRangeInput = ({
                     minDate={endMinDate([endProps?.minDate, minDate, start])}
                     maxDate={maxDate}
                     required={required}
+                    disabled={disabled}
                     validate={validate}
                 />
             </Group>
