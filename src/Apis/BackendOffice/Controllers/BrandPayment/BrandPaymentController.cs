@@ -300,7 +300,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             var vipLevelIds = brandPayment.VipLevels.Select(x => x.VipLevelId).ToArray();
             var playerCodes = brandPayment.BrandPaymentPlayers.Where(x => x.ListType == PlayerListType.White)
                 .Select(p => p.PlayerCode).ToArray();
-            var isAll = brandPayment.PlayerListCondition == PlayerListCondition.All;
+            var isAll = brandPayment.PlayerListCondition == PlayerListCondition.MatchAll;
 
             return brandPayment.BrandPaymentPlayers
                 .Where(x => playerCodes.Contains(x.PlayerCode))

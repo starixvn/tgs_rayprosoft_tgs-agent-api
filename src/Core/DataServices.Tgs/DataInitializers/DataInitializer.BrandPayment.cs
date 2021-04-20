@@ -133,7 +133,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                     PaymentStatus = SwitchStatus.Enabled,
                                     TransferLimitFrom = 10,
                                     TransferLimitTo = 100000,
-                                    PlayerListCondition = PlayerListCondition.All,
+                                    PlayerListCondition = PlayerListCondition.MatchAll,
                                     AllPlayers = true,
                                     IdentityAuthentication = true,
                                     PhoneAuthentication = true,

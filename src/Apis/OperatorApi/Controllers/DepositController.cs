@@ -8,6 +8,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Deposit;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers

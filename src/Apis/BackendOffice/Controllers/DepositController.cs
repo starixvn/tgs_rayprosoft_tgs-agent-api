@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Core.Models.Messages;
@@ -111,10 +109,10 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ChannelName = formDetail.ChannelName,
                     Amount = formDetail.Amount,
                     Remark = formDetail.Remark,
+                    ApplyInfo = formDetail.ApplyInfo,
+                    PaymentReturn = formDetail.PaymentReturn,
                     CreateOn = formDetail.CreateOn,
-                    UpdateOn = formDetail.UpdateOn,
-                    BrandPaymentExtendData = JsonDocument.Parse(formDetail.BrandPaymentExtendData),
-                    ManualReceiptFileId = formDetail.ManualReciptFileId
+                    UpdateOn = formDetail.UpdateOn
                 }
             };
         }

@@ -1,33 +1,43 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Json;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.BankDeposit
 {
     internal class CreateBankDepositFormCommandService : ICommandService<CreateBankDepositFormCommand>
     {
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
-        public CreateBankDepositFormCommandService(IWalletRepository walletRepository)
+        public CreateBankDepositFormCommandService(
+            IPaymentRepository paymentRepository,
+            IJsonSerializationProvider jsonSerializationProvider)
         {
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async ValueTask ExecuteAsync(CreateBankDepositFormCommand command, CancellationToken cancellationToken = default)
         {
-            var form = new BankDepositForm(
+            var createFormId = Guid.NewGuid();
+            var form = new DepositFormInfo(
                 command.PlayerCode,
                 command.BrandId,
                 command.BrandPaymentId,
-                command.BankAccount,
-                command.Amount);
+                command.Amount,
+                _jsonSerializationProvider.SerializeToString(new
+                {
+                    BankAccount = command.BankAccount
+                }));
 
-            var createdFormId = await _walletRepository
-                .CreateDepositFormAsync(form)
-                .ConfigureAwait(false);
+            await _paymentRepository
+               .CreateDepositFormAsync(createFormId, form)
+               .ConfigureAwait(false);
 
-            command.ReturnFormIdSource.SetResult(createdFormId);
+            command.ReturnFormIdSource.SetResult(createFormId);
         }
     }
 }

@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.BankDeposit
 {
-    internal class GetBankDepositFromQueryService : IGetService<GetBankDepositFormQuery, BankDepositForm>
+    internal class GetBankDepositFromQueryService : IGetService<GetBankDepositFormQuery, DepositFormInfo>
     {
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPaymentRepository _paymentRepository;
 
-        public GetBankDepositFromQueryService(IWalletRepository walletRepository)
+        public GetBankDepositFromQueryService(IPaymentRepository paymentRepository)
         {
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
         }
 
-        public async ValueTask<BankDepositForm> GetAsync(GetBankDepositFormQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<DepositFormInfo> GetAsync(GetBankDepositFormQuery query, CancellationToken cancellationToken = default)
         {
-            var form = await _walletRepository
+            var form = await _paymentRepository
                 .GetDepositFormByIdAsync(query.FormId)
                 .ConfigureAwait(false);
 

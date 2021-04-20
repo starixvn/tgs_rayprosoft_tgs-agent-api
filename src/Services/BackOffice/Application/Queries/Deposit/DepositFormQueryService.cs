@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Json;
 using TGS.Paging;
 using TGS.Services.BackOffice.Domain;
 using TGS.ServiceUtility;
@@ -15,10 +17,12 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
     internal class DepositFormQueryService : IQueryService<DepositFormQuery, DepositFormInfo>, IGetService<DepositFormQuery, int>
     {
         private readonly ITgsRepository _tgsRepository;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
-        public DepositFormQueryService(ITgsRepository tgsRepository)
+        public DepositFormQueryService(ITgsRepository tgsRepository, IJsonSerializationProvider jsonSerializationProvider)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async ValueTask<int> GetAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
@@ -50,9 +54,14 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     form.BrandPaymentId,
                     form.BrandPayment.ChannelName,
                     form.BrandPayment.PaymentMethodChannel.MethodId,
-                    form.BankAccount,
                     form.Amount,
                     form.Remark,
+                    string.IsNullOrWhiteSpace(form.ApplyInfo)
+                        ? null
+                        : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.ApplyInfo, null),
+                    string.IsNullOrWhiteSpace(form.PaymentReturn)
+                        ? null
+                        : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.PaymentReturn, null),
                     form.CreatedOn,
                     form.UpdateOn))
                 .AsAsyncEnumerable();

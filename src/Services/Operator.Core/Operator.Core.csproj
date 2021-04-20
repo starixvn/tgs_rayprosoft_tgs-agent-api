@@ -22,6 +22,7 @@
     <ProjectReference Include="..\..\Clients\FileService.Client\FileService.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\Operations\Operations.csproj" />
+    <ProjectReference Include="..\Payment.Core\Payment.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

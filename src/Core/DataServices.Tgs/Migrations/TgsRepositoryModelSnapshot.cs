@@ -1326,10 +1326,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("amount");
 
-                    b.Property<string>("BankAccount")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("bank_account");
+                    b.Property<string>("ApplyInfo")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("apply_info");
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
@@ -1345,13 +1344,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
-                    b.Property<string>("ManualReceiptExternalUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("manual_receipt_external_url");
-
-                    b.Property<string>("ManualReceiptFileId")
-                        .HasColumnType("text")
-                        .HasColumnName("manual_receipt_file_id");
+                    b.Property<string>("PaymentReturn")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payment_return");
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
