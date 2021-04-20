@@ -43,7 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             _client = client;
         }
 
-        async Task<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+        async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
@@ -70,7 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             var platform = request.Token.PlatformType;
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
-            var loginResponse = (LoginResponse) response;
+            var loginResponse = (LoginResponse)response;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId,
                 request.Language);
 

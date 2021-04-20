@@ -9,9 +9,9 @@ namespace TGS.Services.PluggableServices
 {
     public interface IPluggalbeGameProviderApiClient
     {
-        Task<GetGameUrlResponse> GetGameUrlAsync(Uri apiUrl, GetGameUrlRequest request);
+        ValueTask<GetGameUrlResponse> GetGameUrlAsync(Uri apiUrl, GetGameUrlRequest request);
 
-        Task<GetRoundHistoryResponse> GetGameProviderRoundHistory(Uri apiUrl, GetRoundHistoryRequest request);
+        ValueTask<GetRoundHistoryResponse> GetGameProviderRoundHistory(Uri apiUrl, GetRoundHistoryRequest request);
     }
 
     public sealed class PluggalbeGameProviderApiClient : BaseApiClient, IPluggalbeGameProviderApiClient
@@ -22,14 +22,15 @@ namespace TGS.Services.PluggableServices
         {
         }
 
-        Task<GetGameUrlResponse> IPluggalbeGameProviderApiClient.GetGameUrlAsync(Uri apiUrl, GetGameUrlRequest request)
+        ValueTask<GetGameUrlResponse> IPluggalbeGameProviderApiClient.GetGameUrlAsync(Uri apiUrl,
+            GetGameUrlRequest request)
         {
             var prefix = $"Pluggable.{request.GameProviderCode}.GetGameUrl";
             return ExecuteJsonRequestAsync<GetGameUrlRequest, GetGameUrlResponse>(HttpMethod.Post, apiUrl,
                 "/api/pluggable/gameurl", request, logPrefix: prefix);
         }
 
-        Task<GetRoundHistoryResponse> IPluggalbeGameProviderApiClient.GetGameProviderRoundHistory(Uri apiUrl,
+        ValueTask<GetRoundHistoryResponse> IPluggalbeGameProviderApiClient.GetGameProviderRoundHistory(Uri apiUrl,
             GetRoundHistoryRequest request)
         {
             var prefix = $"Pluggable.{request.GameProviderCode}.GetRoundHistory";

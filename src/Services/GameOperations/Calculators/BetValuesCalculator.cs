@@ -164,7 +164,7 @@ namespace TGS.Services.GameOperations.Calculators
         private static decimal CalculateSettleAmount(IList<BetActionData> allActions) =>
             // sum all amounts of settle actions without cancelled, include free bets
             allActions
-                .Where(a => a.Type.IsSettleBet() && a.IsCancelled == false)
+                .Where(a => (a.Type.IsSettleBet() || a.Type == WinJackpot) && a.IsCancelled == false)
                 .Sum(a => a.Amount);
 
         private static decimal CalculateTieBetAdjustment(bool hasTurnoverOnTieBet, IList<BetActionData> allActions) =>

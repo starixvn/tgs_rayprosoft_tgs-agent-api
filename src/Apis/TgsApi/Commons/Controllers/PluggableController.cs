@@ -18,21 +18,23 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
     {
         [HttpPost]
         [Route("gameurl")]
-        public Task<GetGameUrlResponse> GetGameUrlAsync(
+        public async ValueTask<GetGameUrlResponse> GetGameUrlAsync(
             [FromServices] Func<string, IGameInitializer> initializerFactory,
             GetGameUrlRequest request) =>
-            initializerFactory(request.GameProviderCode).GetGameUrlAsync(request);
+            await initializerFactory(request.GameProviderCode).GetGameUrlAsync(request)
+                .ConfigureAwait(false);
 
         [HttpPost]
         [Route("history/round")]
-        public Task<GetRoundHistoryResponse> GetRoundHistory(
+        public async ValueTask<GetRoundHistoryResponse> GetRoundHistory(
             [FromServices] Func<string, IGameHistory> historyFactory,
             GetRoundHistoryRequest request) =>
-            historyFactory(request.GameProviderCode).GetRoundHistoryAsync(request);
+            await historyFactory(request.GameProviderCode).GetRoundHistoryAsync(request)
+                .ConfigureAwait(false);
 
         [HttpPost]
         [Route("player/kick")]
-        public async Task<PlayerKickResponse> KickPlayerAsync(
+        public async ValueTask<PlayerKickResponse> KickPlayerAsync(
             [FromServices] IGameProviderOperations gameProviderOperations,
             [FromServices] Func<string, IPlayerAction> playerActionFactory,
             PlayerKickRequest request)

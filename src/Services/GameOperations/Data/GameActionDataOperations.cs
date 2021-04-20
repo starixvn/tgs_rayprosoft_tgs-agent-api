@@ -24,17 +24,19 @@ namespace TGS.Services.GameOperations.Data
 {
     public interface IGameActionDataOperations
     {
-        Task<BetResult> PlaceBetAsync(BetData data);
+        ValueTask<BetResult> LockAmountAsync(BetData data);
 
-        Task<BetResult> SettleBetAsync(BetData data);
+        ValueTask<BetResult> PlaceBetAsync(BetData data);
 
-        Task<BetResult> CancelTransactionAsync(BetData data);
+        ValueTask<BetResult> SettleBetAsync(BetData data);
 
-        Task<BetResult> PlaceAndSettleBetAsync(BetData data);
+        ValueTask<BetResult> CancelTransactionAsync(BetData data);
 
-        Task<BatchBetResult> SettleBatchAsync(BatchBetData data);
+        ValueTask<BetResult> PlaceAndSettleBetAsync(BetData data);
 
-        Task<BatchBetResult> CancelBatchAsync(BatchBetData data);
+        ValueTask<BatchBetResult> SettleBatchAsync(BatchBetData data);
+
+        ValueTask<BatchBetResult> CancelBatchAsync(BatchBetData data);
     }
 
     internal sealed class GameActionDataOperations : IGameActionDataOperations
@@ -77,25 +79,36 @@ namespace TGS.Services.GameOperations.Data
             _interface = this;
         }
 
-        Task<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data) =>
+        ValueTask<BetResult> IGameActionDataOperations.LockAmountAsync(BetData data) =>
             ExecuteGameActionAsync(data);
 
-        Task<BetResult> IGameActionDataOperations.SettleBetAsync(BetData data) =>
+        ValueTask<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)
+        {
+            if (data.Transactions.Any(t => t.GameActionType.IsNotAllOf(UnlockAmount, PlaceBet)))
+            {
+                throw new InvalidOperationException(
+                    "Only allow game action type UnlockAmount / PlaceBet in place bet action");
+            }
+
+            return ExecuteGameActionAsync(data);
+        }
+
+        ValueTask<BetResult> IGameActionDataOperations.SettleBetAsync(BetData data) =>
             ExecuteGameActionAsync(data);
 
-        Task<BetResult> IGameActionDataOperations.CancelTransactionAsync(BetData data) =>
+        ValueTask<BetResult> IGameActionDataOperations.CancelTransactionAsync(BetData data) =>
             ExecuteGameActionAsync(data);
 
-        Task<BetResult> IGameActionDataOperations.PlaceAndSettleBetAsync(BetData data) =>
+        ValueTask<BetResult> IGameActionDataOperations.PlaceAndSettleBetAsync(BetData data) =>
             ExecuteGameActionAsync(data);
 
-        Task<BatchBetResult> IGameActionDataOperations.SettleBatchAsync(BatchBetData data) =>
+        ValueTask<BatchBetResult> IGameActionDataOperations.SettleBatchAsync(BatchBetData data) =>
             ExecuteBatchAsync(data, betData => _interface.SettleBetAsync(betData));
 
-        Task<BatchBetResult> IGameActionDataOperations.CancelBatchAsync(BatchBetData data) =>
+        ValueTask<BatchBetResult> IGameActionDataOperations.CancelBatchAsync(BatchBetData data) =>
             ExecuteBatchAsync(data, betData => _interface.CancelTransactionAsync(betData));
 
-        private async Task<BetResult> ExecuteGameActionAsync(BetData data)
+        private async ValueTask<BetResult> ExecuteGameActionAsync(BetData data)
         {
             if (data?.Transactions == null || data.Transactions.Length == 0)
             {
@@ -167,7 +180,8 @@ namespace TGS.Services.GameOperations.Data
 
         #region Batch Actions
 
-        private async Task<BatchBetResult> ExecuteBatchAsync(BatchBetData data, Func<BetData, Task<BetResult>> execute)
+        private async ValueTask<BatchBetResult> ExecuteBatchAsync(BatchBetData data,
+            Func<BetData, ValueTask<BetResult>> execute)
         {
             await using var repo = _repoFactory();
             repo.ChangeTracker.AutoDetectChangesEnabled = false;
@@ -237,7 +251,7 @@ namespace TGS.Services.GameOperations.Data
             string gameProviderCode, bool autoCloseRound,
             bool hasCurrencyFromGameProvider,
             BatchTransactionData transaction,
-            BatchBetPartitionState state, Func<BetData, Task<BetResult>> execute,
+            BatchBetPartitionState state, Func<BetData, ValueTask<BetResult>> execute,
             IErrorMapper errorMapper)
         {
             try
@@ -283,7 +297,7 @@ namespace TGS.Services.GameOperations.Data
             }
         }
 
-        private static async Task<GameActionBatch> CreateBatchAsync(ITgsRepository repo,
+        private static async ValueTask<GameActionBatch> CreateBatchAsync(ITgsRepository repo,
             Guid gameProviderId, string externalBatchId)
         {
             var batch = await repo.GameActionBatches.FirstOrDefaultAsync(b =>

@@ -5,6 +5,6 @@ namespace TGS.Apis.TgsApi.Models.Interfaces
 {
     public interface IGameInitializer
     {
-        Task<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request);
+        ValueTask<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request);
     }
 }

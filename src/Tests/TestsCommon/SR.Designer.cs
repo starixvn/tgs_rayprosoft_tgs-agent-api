@@ -79,6 +79,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Amount.
+        /// </summary>
+        public static string Amount {
+            get {
+                return ResourceManager.GetString("Amount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AutoCloseRound.
         /// </summary>
         public static string AutoCloseRound {
@@ -93,6 +102,15 @@ namespace TGS.Tests.TestsCommon {
         public static string BetValuesResults {
             get {
                 return ResourceManager.GetString("BetValuesResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BonusCode.
+        /// </summary>
+        public static string BonusCode {
+            get {
+                return ResourceManager.GetString("BonusCode", resourceCulture);
             }
         }
         
@@ -129,6 +147,24 @@ namespace TGS.Tests.TestsCommon {
         public static string BrandTokenExpireTime {
             get {
                 return ResourceManager.GetString("BrandTokenExpireTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CampaignId.
+        /// </summary>
+        public static string CampaignId {
+            get {
+                return ResourceManager.GetString("CampaignId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CampaignType.
+        /// </summary>
+        public static string CampaignType {
+            get {
+                return ResourceManager.GetString("CampaignType", resourceCulture);
             }
         }
         
@@ -210,6 +246,15 @@ namespace TGS.Tests.TestsCommon {
         public static string HasTurnoverOnTieBet {
             get {
                 return ResourceManager.GetString("HasTurnoverOnTieBet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to JackpotContribution.
+        /// </summary>
+        public static string JackpotContribution {
+            get {
+                return ResourceManager.GetString("JackpotContribution", resourceCulture);
             }
         }
         

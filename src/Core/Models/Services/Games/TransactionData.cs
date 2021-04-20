@@ -19,7 +19,6 @@ namespace TGS.Core.Models.Services.Games
         public DateTimeOffset TimeStamp { get; init; }
         public string BetType { get; init; }
         public string RoundDetail { get; init; }
-        public OppositeBetPattern[] OppositeBetPatterns { get; init; }
         public JackpotContribution JackpotContribution { get; init; }
     }
 }
