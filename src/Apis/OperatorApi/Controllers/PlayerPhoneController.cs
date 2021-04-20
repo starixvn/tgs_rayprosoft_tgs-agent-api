@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator.PlayerPhone;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

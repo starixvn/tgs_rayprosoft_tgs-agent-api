@@ -12,12 +12,22 @@ namespace TGS.Services.Operator
 
         ValueTask<BankDepositForm> GetDepositFormByIdAsync(Guid id);
 
-        IAsyncEnumerable<PaymentMethod> GetAllPaymentMethodsAsync();
+        IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync();
 
-        IAsyncEnumerable<PaymentChannel> GetAllPaymentChannelsAsync();
+        IAsyncEnumerable<PaymentChannelInfo> GetAllPaymentChannelsAsync();
 
-        ValueTask<BrandPayment> GetBrandPaymentByIdAsync(Guid id);
+        ValueTask<BrandPaymentInfo> GetBrandPaymentByIdAsync(Guid id);
 
         ValueTask SubmitRemittanceReceiptToDepositFormAsync(Guid formId, string remittanceReceiptFileId);
+
+        ValueTask<PaymentInfo> GetPaymentAsync(Guid id);
+
+        IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId);
+
+        IAsyncEnumerable<BrandPaymentAcl> GetBrandPaymentAclsAsync(IEnumerable<Guid> brandPaymentIds, string playerCode);
+
+        IAsyncEnumerable<BrandPaymentVip> GetBrandPaymentVipListAsync(IEnumerable<Guid> brandPaymentIds);
+
+        ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode);
     }
 }
