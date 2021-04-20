@@ -21,8 +21,6 @@ import isValid from "date-fns/isValid"
 import addDays from "date-fns/addDays"
 import subDays from "date-fns/subDays"
 import differenceInDays from "date-fns/differenceInDays"
-import { startOfNextDay } from "./startOfNextDay"
-import { defaultFormatDate } from "./format"
 
 export const DateInputRange = ({ dateFormat = "yyyy/MM/dd", ...props }) => (
     <DateTimeRangeInput
@@ -33,15 +31,18 @@ export const DateInputRange = ({ dateFormat = "yyyy/MM/dd", ...props }) => (
 )
 
 export const DateTimeRangeInput = ({
-    startName = "start",
-    endName = "end",
+    startProps,
+    endProps,
     minDate,
     maxDate,
     maxRangeDays,
     dateFormat,
     showTimeInput = true,
     required
-}) => {
+} = {}) => {
+    let startName = startProps?.name ?? "start"
+    let endName = endProps?.name ?? "end"
+
     let formMethods = useFormContext()
     let start = toDate(formMethods?.watch(startName))
     let end = toDate(formMethods?.watch(endName))
@@ -81,7 +82,7 @@ export const DateTimeRangeInput = ({
                     dateFormat={dateFormat}
                     showTimeInput={showTimeInput}
                     minDate={minDate}
-                    maxDate={startMaxDate(maxDate, end)}
+                    maxDate={startMaxDate([startProps?.maxDate, maxDate, end])}
                     required={required}
                     validate={validate}
                 />
@@ -90,7 +91,7 @@ export const DateTimeRangeInput = ({
                     name={endName}
                     dateFormat={dateFormat}
                     showTimeInput={showTimeInput}
-                    minDate={endMinDate(minDate, start)}
+                    minDate={endMinDate([endProps?.minDate, minDate, start])}
                     maxDate={maxDate}
                     required={required}
                     validate={validate}
@@ -115,7 +116,11 @@ const validateRange = (maxRangeDays, start, end) => {
     }
 }
 
-const startMaxDate = (maxDate, end) => {
+const startMaxDate = (dates = []) => {
+    dates = dates.filter(isValid)
+    return min(dates)
+
+    /*
     let validMaxDate = isValid(maxDate)
     let validEnd = isValid(end)
     if (validMaxDate && validEnd) {
@@ -127,9 +132,14 @@ const startMaxDate = (maxDate, end) => {
     }
 
     return end
+    */
 }
 
-const endMinDate = (minDate, start) => {
+const endMinDate = (dates = []) => {
+    dates = dates.filter(isValid)
+    return max(dates)
+
+    /*
     let validMinDate = isValid(minDate)
     let validStart = isValid(start)
     if (validMinDate && validStart) {
@@ -141,6 +151,7 @@ const endMinDate = (minDate, start) => {
     }
 
     return start
+    */
 }
 
 export default DateTimeRangeInput

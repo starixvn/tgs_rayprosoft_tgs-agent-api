@@ -36,6 +36,7 @@ import { InputField } from "../../input/Input"
 import { BrandGameProviderSelect } from "../brandproviders/BrandGameProviderSelect"
 import AlertDialog from "../../dialog/Alert"
 import BrandBar from "../../report/BrandBar"
+import { AllGameTypeSelect } from "../GameType"
 
 export { Code } from "./menu"
 
@@ -248,7 +249,7 @@ const SearchBar = ({
                         name="gameProviderId"
                         brandId={brandId}
                     />
-                    <GameTypeSelect name="gameType" />
+                    <AllGameTypeSelect name="gameType" />
                     <InputField
                         name="keyword"
                         showEmptyFieldValueAddonAfter

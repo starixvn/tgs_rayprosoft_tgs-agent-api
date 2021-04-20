@@ -32,8 +32,30 @@ import { NormalLabel } from "../../form/Label"
 import { DateInputRange } from "../../date/DateTimeRangeInput"
 import { VipLevelCheckboxGroup } from "../../vip-levels/CheckboxGroup"
 import AlertDialog from "../../dialog/Alert"
+import Checkbox from "../../checkbox"
+import {
+    GameTypeGroupSelect,
+    GameTypeSelect,
+    useGameTypeGroupValueOf
+} from "../../game/GameType"
+import Separator from "../../layout/Separator"
+import GameProviderFieldsBox from "../../merchant/GameProviderFieldsBox"
+import {
+    PromotionTypeGroupSelect,
+    PromotionTypeSelect,
+    usePromotionGroupLabelOf,
+    usePromotionGroupValueOf
+} from "./PromotionType"
+import {
+    GameProviderCheckboxGroup,
+    toCheckedGameProviderIds
+} from "../../game/providers/GameProviderCheckboxGroup"
+import { BrandGameProviderCheckboxGroupTable } from "../../game/brandproviders/BrandGameProviderCheckboxGroup"
+import parseISO from "date-fns/parseISO"
+import { today } from "../../date/range"
+import { useBrandGameProviderList } from "../../game/brandproviders/client"
 
-export const AddPromotionDisclosure = ({ onSubmitted }) => {
+export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
 
     let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
@@ -45,13 +67,17 @@ export const AddPromotionDisclosure = ({ onSubmitted }) => {
         <>
             <AddDisclosure {...dialog} />
             {dialog.visible && (
-                <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+                <AddDialog
+                    brandId={brandId}
+                    onSubmitted={onSubmitted}
+                    dialog={dialog}
+                />
             )}
         </>
     )
 }
 
-const AddDialog = ({ onSubmitted, dialog, ...props }) => {
+const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     let [formData, setSubmit] = useState()
 
     let { result, isLoading, error, mutate, deleteCache } = useAddPromotion(
@@ -63,6 +89,14 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
         en: "Create Promotion"
     })
 
+    const onSubmit = (data) => {
+        let formData = normalizeFormData(data)
+        setSubmit({
+            ...formData,
+            brandId
+        })
+    }
+
     const reset = () => {
         deleteCache()
         mutate(undefined, false)
@@ -72,7 +106,7 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
     return (
         <FormDialog
             defaultValues={{}}
-            onSubmit={setSubmit}
+            onSubmit={onSubmit}
             isLoading={isLoading}
             result={result}
             error={error}
@@ -80,10 +114,29 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
             onSubmitted={onSubmitted}
             title={title}
             dialog={dialog}
+            maxWidth="80vw"
+            css={css`
+                & .bb-DialogContent {
+                    position: relative;
+                    padding: 1.5rem 3rem;
+                }
+            `}
         >
-            <FormBody isAdd />
+            <FormBody brandId={brandId} isAdd />
         </FormDialog>
     )
+}
+
+const normalizeFormData = ({ gameProviders = [], ...data }) => {
+    let gameProviderIds = toCheckedGameProviderIds(
+        "gameProviderId",
+        gameProviders
+    )
+
+    return {
+        gameProviderIds,
+        ...data
+    }
 }
 
 export const EditPromotionDisclosure = ({
@@ -117,6 +170,11 @@ export const EditPromotionDisclosure = ({
 const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
     let [formData, setSubmit] = useState()
 
+    let {
+        isLoading: isLoadingFormData,
+        data,
+        error: loadingFormDataError
+    } = usePromotionFormData(brandId, record)
     let { result, isLoading, error, mutate, deleteCache } = useUpdatePromotion(
         record?.id,
         formData
@@ -127,8 +185,21 @@ const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
         en: "Edit Promotion"
     })
 
+    if (isLoadingFormData) {
+        return <LoadingBackdrop {...dialog} />
+    }
+
+    if (loadingFormDataError) {
+        return (
+            <AlertDialog {...loadingFormDataError} onClickClose={dialog.hide} />
+        )
+    }
+
     const onSubmit = (data) => {
-        setSubmit(data)
+        setSubmit({
+            ...normalizeFormData(data),
+            brandId
+        })
     }
 
     const reset = () => {
@@ -139,7 +210,7 @@ const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
 
     return (
         <FormDialog
-            defaultValues={clone(record)}
+            defaultValues={clone(data)}
             onSubmit={onSubmit}
             isLoading={isLoading}
             result={result}
@@ -148,10 +219,60 @@ const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
             onSubmitted={onSubmitted}
             title={title}
             dialog={dialog}
+            maxWidth="80vw"
+            css={css`
+                & .bb-DialogContent {
+                    position: relative;
+                    padding: 1.5rem 3rem;
+                }
+            `}
         >
-            <FormBody />
+            <FormBody brandId={brandId} />
         </FormDialog>
     )
+}
+
+const usePromotionFormData = (
+    brandId,
+    { from, to, gameProviderIds = [], vipLevels = [], ...record } = {}
+) => {
+    let { data = {}, ...rest } = useBrandGameProviderList(
+        brandId
+            ? {
+                  brandId,
+                  showAll: true
+              }
+            : undefined
+    )
+
+    let gameProviders =
+        data?.items?.map((gameProvider) => {
+            let checked = gameProviderIds.includes(gameProvider.gameProviderId)
+            return {
+                ...gameProvider,
+                checked
+            }
+        }) ?? []
+
+    let promotionTypeGroup = usePromotionGroupValueOf(record?.promotionType)
+    let gameTypeGroup = useGameTypeGroupValueOf(record?.gameType)
+
+    vipLevels = vipLevels.map((vipLevel) => `${vipLevel}`)
+
+    data = {
+        ...record,
+        vipLevels,
+        gameProviders,
+        promotionTypeGroup,
+        gameTypeGroup,
+        from: parseISO(from),
+        to: parseISO(to)
+    }
+
+    return {
+        ...rest,
+        data
+    }
 }
 
 export const ViewPromotionDisclosure = ({
@@ -203,6 +324,23 @@ const ViewDialog = ({ brandId, record, dialog, ...props }) => {
 }
 
 const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
+    let { start: startOfToday } = today()
+    let { watch } = useFormContext()
+
+    let totalAmountLimit = watch("totalAmountLimit")
+    let unlimitedTotalAmount = watch("unlimited")
+    let limitedTotalAmount = !unlimitedTotalAmount
+
+    let unlimiteTotalAmountLabel = useTrans({
+        zh: "无限",
+        en: "Unlimited"
+    })
+
+    let promotionTypeGroup = watch("promotionTypeGroup")
+    let gameTypeGroup = watch("gameTypeGroup")
+
+    let promotionType = watch("promotionType")
+
     let disabled = readonly
     let editable = !readonly
     return (
@@ -223,8 +361,14 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 </NormalLabel>
                 <Box alignY="center">
                     <DateInputRange
-                        startName="from"
-                        endName="to"
+                        startProps={{
+                            name: "from"
+                        }}
+                        endProps={{
+                            name: "to",
+                            minDate: startOfToday
+                        }}
+                        minDate={isAdd ? startOfToday : undefined}
                         disabled={disabled}
                     />
                 </Box>
@@ -233,8 +377,111 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     <Trans zh="活动用户群" en="Promotion VIP Levels" />
                 </NormalLabel>
                 <Box alignY="center">
-                    <VipLevelCheckboxGroup name="vipIds" brandId={brandId} />
+                    <VipLevelCheckboxGroup
+                        name="vipLevels"
+                        valueFieldName="level"
+                        brandId={brandId}
+                    />
                 </Box>
+
+                <NormalLabel>
+                    <Trans zh="活动类型" en="Promotion Type Group" />
+                </NormalLabel>
+                <Box alignY="center">
+                    <PromotionTypeGroupSelect name="promotionTypeGroup" />
+                </Box>
+
+                <NormalLabel>
+                    <Trans zh="活动子类型" en="Promotion Type" />
+                </NormalLabel>
+                <Box alignY="center">
+                    <PromotionTypeSelect
+                        name="promotionType"
+                        group={promotionTypeGroup}
+                        required
+                    />
+                </Box>
+
+                <NormalLabel>
+                    <Trans zh="活动费用" en="Total Amount Limit" />
+                </NormalLabel>
+                <Set orientation="horizontal" alignY="center">
+                    {unlimitedTotalAmount && (
+                        <Box>
+                            <Input name="totalAmountLimit" type="hidden" />
+                            <Input value={totalAmountLimit} disabled />
+                        </Box>
+                    )}
+                    {limitedTotalAmount && (
+                        <>
+                            <Input
+                                type="number"
+                                name="totalAmountLimit"
+                                required
+                            />
+                        </>
+                    )}
+                    <Checkbox
+                        name="unlimited"
+                        label={unlimiteTotalAmountLabel}
+                    />
+                </Set>
+
+                <NormalLabel>
+                    <Trans zh="活动游戏类型" en="Game Type Group" />
+                </NormalLabel>
+                <GameTypeGroupSelect name="gameTypeGroup" />
+
+                <NormalLabel>
+                    <Trans zh="活动游戏子类型" en="Game Type" />
+                </NormalLabel>
+                <GameTypeSelect name="gameType" group={gameTypeGroup} />
+
+                <NormalLabel>
+                    <Trans zh="活动厂商" en="Game Providers" />
+                </NormalLabel>
+                <Box>
+                    <BrandGameProviderCheckboxGroupTable brandId={brandId} />
+                </Box>
+            </FieldValues>
+
+            <Separator />
+
+            <Heading use="h5">
+                <Trans zh="活动规则" en="Rules" />
+            </Heading>
+
+            <FieldValues>
+                <NormalLabel>
+                    <Trans zh="彩金百分比" en="Percentage" />
+                </NormalLabel>
+                <InputField
+                    type="number"
+                    step="0.01"
+                    name="percentage"
+                    min="0"
+                    max="100"
+                    addonAfter={<Button isStatic>%</Button>}
+                />
+
+                <NormalLabel>
+                    <Trans zh="彩金上限" en="Max Amount" />
+                </NormalLabel>
+                <InputField type="number" name="promotionAmount" min="0" />
+
+                <NormalLabel>
+                    <Trans zh="流水倍数" en="Turnover Multiple" />
+                </NormalLabel>
+                <InputField
+                    type="number"
+                    name="turnoverMultiple"
+                    min="0"
+                    addonAfter={
+                        <Button isStatic>
+                            <Trans zh="倍" en="X" />
+                        </Button>
+                    }
+                />
             </FieldValues>
         </FieldStack>
     )

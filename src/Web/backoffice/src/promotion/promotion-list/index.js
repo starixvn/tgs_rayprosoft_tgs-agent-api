@@ -27,6 +27,12 @@ import equals from "fast-deep-equal"
 import { usePromotionList } from "./client"
 import BrandBar from "../../report/BrandBar"
 import { formatDateTime, formatDayMonthYear } from "../../date/format"
+import { PromotionTypeLabel, usePromotionGroupLabelOf } from "./PromotionType"
+import { GameTypeLabel, useGameTypeGroupLabelOf } from "../../game/GameType"
+import { useGameTypeGroupList } from "../../game/client"
+import { GameProviderListDialogDisclosure } from "../../game/providers/GameProviderList"
+import { VipLevelListDialogDisclosure } from "../../vip-levels/VipLevelList"
+import { formatNumber } from "../../number/format"
 
 export { Code }
 
@@ -71,7 +77,7 @@ const BodyContent = ({ brandId }) => {
         toApiParams(state)
     )
 
-    let columns = useColumns({ mutate, items: data?.items })
+    let columns = useColumns({ mutate, brandId, items: data?.items })
     return (
         <PageContent
             title={<Trans zh="活动管理" en="Promotion" />}
@@ -97,7 +103,10 @@ const BodyContent = ({ brandId }) => {
                         }}
                         isLoading={isLoading}
                     />
-                    <AddPromotionDisclosure onSubmitted={mutate} />
+                    <AddPromotionDisclosure
+                        brandId={brandId}
+                        onSubmitted={mutate}
+                    />
                 </Flex>
             }
         >
@@ -148,28 +157,31 @@ const SearchBar = ({ name = "", search, isLoading }) => {
     )
 }
 
-const useColumns = ({ items = [], mutate }) => {
-    //TODO: view or update menu
-    return useMemo(
-        () => [
+const useColumns = ({ brandId, items = [], mutate }) => {
+    let hasAnyMenu = useHasSubMenuByRoute()
+    return useMemo(() => {
+        let columns = [
             textColumn({
                 accessor: "name",
                 Header: <Trans zh="活动名称" en="Name" />,
                 disableSortBy: true
             }),
             textColumn({
-                id: "promotionTypeGrup",
+                id: "promotionTypeGroup",
                 accessor: (row) => row,
                 Header: <Trans zh="活动类型" en="Promotion Type" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
-                    return <Text>TODO: map to group</Text>
+                    let group =
+                        usePromotionGroupLabelOf(value?.promotionType) ?? ""
+                    return group
                 }
             }),
             textColumn({
                 accessor: "promotionType",
                 Header: <Trans zh="活动子类型" en="Promotion Subtype" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => <PromotionTypeLabel value={value} />
             }),
             textColumn({
                 id: "promotionTime",
@@ -186,46 +198,88 @@ const useColumns = ({ items = [], mutate }) => {
                 id: "gameTypeGroup",
                 accessor: (row) => row,
                 Header: <Trans zh="游戏类型" en="Game Type Group" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => {
+                    let group = useGameTypeGroupLabelOf(value?.gameType) ?? ""
+                    return group
+                }
             }),
             textColumn({
                 accessor: "gameType",
                 Header: <Trans zh="游戏子类型" en="Game Type" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => <GameTypeLabel value={value} />
             }),
             textColumn({
                 accessor: "gameProviderIds",
                 Header: <Trans zh="活动厂商" en="Game Providers" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => {
+                    let dialogTitle = useTrans({
+                        zh: "活动厂商",
+                        en: "Game Providers"
+                    })
+                    return (
+                        <GameProviderListDialogDisclosure
+                            gameProviderIds={value}
+                            dialogTitle={dialogTitle}
+                        />
+                    )
+                }
             }),
             textColumn({
                 accessor: "vipLevels",
                 Header: <Trans zh="活动用户群" en="VIP Levels" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => {
+                    let dialogTitle = useTrans({
+                        zh: "活动用户群",
+                        en: "VIP Levels"
+                    })
+                    return (
+                        <VipLevelListDialogDisclosure
+                            dialogTitle={dialogTitle}
+                            vipLevels={value}
+                        />
+                    )
+                }
             }),
             textColumn({
                 id: "amounts",
                 accessor: (row) => row,
                 Header: <Trans zh="活动费用" en="Amount" />,
-                disableSortBy: true
-            }),
-            textColumn({
-                id: "actions",
-                Header: <Trans zh="操作" en="Actions" />,
-                accessor: (row) => row,
                 disableSortBy: true,
-                Cell: ({ value: record }) => {
-                    return (
-                        <Set orientation="horizontal">
-                            <EditPromotionDisclosure
-                                record={record}
-                                onSubmitted={mutate}
-                            />
-                        </Set>
-                    )
+                Cell: ({ value }) => {
+                    let unlimited = value?.unlimited
+                    let amountUsed = formatNumber(value?.amountUsed)
+                    let totalAmountLimit = formatNumber(value?.totalAmountLimit)
+                    return unlimited ? "-" : `${amountUsed}/${totalAmountLimit}`
                 }
             })
-        ],
-        [JSON.stringify(items)]
-    )
+        ]
+
+        if (hasAnyMenu) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    Header: <Trans zh="操作" en="Actions" />,
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Cell: ({ value: record }) => {
+                        return (
+                            <Set orientation="horizontal" alignX="center">
+                                <EditPromotionDisclosure
+                                    brandId={brandId}
+                                    record={record}
+                                    onSubmitted={mutate}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
 }

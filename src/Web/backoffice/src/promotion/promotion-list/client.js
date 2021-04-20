@@ -5,6 +5,10 @@ import {
     usePutData,
     useDelete
 } from "../../client"
+import {
+    useSystemSetting,
+    useSystemSettingValue
+} from "../../system-admin/setting/client"
 
 let API = "/api/promotion"
 
@@ -34,3 +38,6 @@ export const useChangePromotionStatus = (id, status) => {
 
     return usePut(url)
 }
+
+export const usePromotionTypeList = () =>
+    useSystemSettingValue("PromotionTypes")

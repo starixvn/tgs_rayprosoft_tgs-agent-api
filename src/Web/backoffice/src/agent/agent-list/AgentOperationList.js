@@ -101,7 +101,7 @@ const SearchBar = ({ start, end, search, isLoading, ...props }) => {
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
-                    <DateTimeRangeInput startName="start" endName="end" />
+                    <DateTimeRangeInput />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
             </form>

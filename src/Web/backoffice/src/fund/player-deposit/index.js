@@ -248,15 +248,23 @@ const SearchBar = ({
                     <Set orientation="horizontal">
                         <FieldWrapper label={createdOnLabel}>
                             <DateInputRange
-                                startName="createdOnStart"
-                                endName="createdOnEnd"
+                                startProps={{
+                                    name: "createdOnStart"
+                                }}
+                                endProps={{
+                                    name: "createdOnEnd"
+                                }}
                             />
                         </FieldWrapper>
 
                         <FieldWrapper label={updatedOnLabel}>
                             <DateInputRange
-                                startName="updatedOnStart"
-                                endName="updatedOnEnd"
+                                startProps={{
+                                    name: "updatedOnStart"
+                                }}
+                                endProps={{
+                                    name: "updatedOnEnd"
+                                }}
                             />
                         </FieldWrapper>
                         <SearchButton
