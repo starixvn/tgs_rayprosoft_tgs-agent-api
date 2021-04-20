@@ -238,24 +238,5 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     return 0;
             }
         }
-
-        private static decimal GetPlayerRebateAmount(VipLevel vip, IEnumerable<RoundAggregate> roundAggregates) =>
-            vip.SportsRebatePercentage * roundAggregates.Where(a =>
-                    a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
-                .Sum(a => a.Turnover) / 100 +
-            vip.VirtualSportsRebatePercentage * roundAggregates
-                .Where(a => a.GameType == GameType.VirtualSports)
-                .Sum(a => a.Turnover) / 100 +
-            vip.LiveDealerRebatePercentage * roundAggregates
-                .Where(a => a.GameType == GameType.LiveDealer)
-                .Sum(a => a.Turnover) / 100 +
-            vip.CardGameRebatePercentage * roundAggregates.Where(a => a.GameType == GameType.CardGame)
-                .Sum(a => a.Turnover) / 100 +
-            vip.SlotRebatePercentage * roundAggregates.Where(a =>
-                    a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
-                    a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
-                .Sum(a => a.Turnover) / 100 +
-            vip.LotteryRebatePercentage * roundAggregates.Where(a => a.GameType == GameType.Lottery)
-                .Sum(a => a.Turnover) / 100;
     }
 }

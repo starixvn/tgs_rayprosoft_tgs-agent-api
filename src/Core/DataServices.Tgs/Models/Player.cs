@@ -79,5 +79,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
         public virtual ICollection<PlayerSportsBetLimit> SportsBetLimits { get; set; }
+
+        public virtual ICollection<PlayerBucket> PlayerBuckets { get; set; }
     }
 }

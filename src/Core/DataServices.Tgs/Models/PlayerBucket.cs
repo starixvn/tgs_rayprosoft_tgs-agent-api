@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    class PlayerBucket
+    public class PlayerBucket
     {
+        public Guid Id { get; set; }
+        public decimal BucketAmount { get; set; }
+        public decimal TurnoverAmount { get; set; }
+        public BucketType BucketType { get; set; }
+        public DateTimeOffset CreatedOn { get; set; }
+        public virtual ICollection<PlayerBucketTurnoverRecord> PlayerBucketTurnoverRecord { get; set; }
     }
 }

@@ -14,6 +14,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public Guid BrandId { get; set; }
         public virtual Brand Brand { get; set; }
         public string PromotionType { get; set; }
+        public string PromotionRebateType { get; set; }
         public decimal PromotionAmount { get; set; }
         public decimal AmountUsed { get; set; }
         public bool Unlimited { get; set; }
