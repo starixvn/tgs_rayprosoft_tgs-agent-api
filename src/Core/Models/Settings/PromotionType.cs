@@ -3,6 +3,12 @@
     public record PromotionType
     {
         public string Name { get; set; }
-        public string[] Types { get; set; }
+        public PromotionTypeModel[] Types { get; set; }
+    }
+
+    public record PromotionTypeModel
+    {
+        public string Name { get; set; }
+        public string RebateMethod { get; set; }
     }
 }

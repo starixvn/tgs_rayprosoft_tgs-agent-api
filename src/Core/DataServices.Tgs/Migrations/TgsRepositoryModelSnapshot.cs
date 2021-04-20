@@ -2738,8 +2738,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
                         .HasColumnName("name");
 
                     b.Property<decimal>("Percentage")
@@ -2820,6 +2820,25 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_promotion_game_provider_game_provider_id");
 
                     b.ToTable("promotion_game_providers");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionPlayer", b =>
+                {
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.HasKey("PromotionId", "PlayerCode")
+                        .HasName("pk_promotion_players");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_promotion_player_player_code");
+
+                    b.ToTable("promotion_players");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionVipLevel", b =>
@@ -3474,6 +3493,32 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_transactions_wallet_id");
 
                     b.ToTable("transactions");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.TransactionPromotion", b =>
+                {
+                    b.Property<Guid>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.Property<string>("PromotionType")
+                        .HasColumnType("text")
+                        .HasColumnName("promotion_type");
+
+                    b.HasKey("TransactionId", "PromotionId")
+                        .HasName("pk_transaction_promotions");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_transaction_Promotion_id");
+
+                    b.HasIndex("TransactionId")
+                        .HasDatabaseName("ix_transactions_transaction_id");
+
+                    b.ToTable("transaction_promotions");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.User", b =>
@@ -4653,6 +4698,27 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Promotion");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionPlayer", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_promotion_player_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
+                        .WithMany("PromotionPlayers")
+                        .HasForeignKey("PromotionId")
+                        .HasConstraintName("fk_promotion_player_promotion_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Promotion");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionVipLevel", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
@@ -4855,6 +4921,27 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Brand");
 
                     b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.TransactionPromotion", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .HasConstraintName("fk_transaction_promotion_promotion_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Transaction", "Transaction")
+                        .WithMany()
+                        .HasForeignKey("TransactionId")
+                        .HasConstraintName("fk_transaction_promotion_transaction_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+
+                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.User", b =>
@@ -5138,6 +5225,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Promotion", b =>
                 {
                     b.Navigation("PromotionGameProviders");
+
+                    b.Navigation("PromotionPlayers");
 
                     b.Navigation("PromotionVipLevels");
                 });

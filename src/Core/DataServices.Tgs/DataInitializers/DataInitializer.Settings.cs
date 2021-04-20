@@ -60,17 +60,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new PromotionType
                 {
                     Name = "Deposit",
-                    Types = new[] {"FirstDeposit", "SecondDeposit"}
+                    Types = new[]
+                    {
+                        new() {Name = "FirstDeposit", RebateMethod = "Instantly"},
+                        new PromotionTypeModel {Name = "SecondDeposit", RebateMethod = "Instantly"}
+                    }
                 },
                 new PromotionType
                 {
                     Name = "Turnover",
-                    Types = new[] {"TurnoverRebate"}
+                    Types = new[] {new PromotionTypeModel {Name = "TurnoverRebate", RebateMethod = "Daily"}}
                 },
                 new PromotionType
                 {
                     Name = "ReliefMoney",
-                    Types = new[] {"ReliefMoneyDaily"}
+                    Types = new[] {new PromotionTypeModel {Name = "ReliefMoneyDaily", RebateMethod = "Daily"}}
                 }
             };
 

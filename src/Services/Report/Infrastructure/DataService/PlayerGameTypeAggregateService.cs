@@ -6,6 +6,7 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Report;
 using TGS.Core.DataServices.Report.Models;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Services.Report.Application.Models.Player;
 
 namespace TGS.Services.Report.Infrastructure.DataService
@@ -47,9 +48,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 Hour = model.Hour,
                 ReportDate = model.ReportDate,
                 CreatedOn = model.CreatedOn,
-                Turnover = decimal.Truncate(model.Turnover * 100) / 100,
-                WinLoss = decimal.Truncate(model.WinLoss * 100) / 100,
-                VipRebateAmount = decimal.Truncate(model.VipRebateAmount * 100) / 100,
+                Turnover = model.Turnover.Truncate(2),
+                WinLoss = model.WinLoss.Truncate(2),
+                VipRebateAmount = model.VipRebateAmount.Truncate(2),
                 VipLiveDealerRebatePercentage = model.VipLiveDealerRebatePercentage,
                 VipSlotRebatePercentage = model.VipSlotRebatePercentage,
                 VipCardGameRebatePercentage = model.VipCardGameRebatePercentage,

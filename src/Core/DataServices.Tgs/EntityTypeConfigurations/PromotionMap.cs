@@ -15,7 +15,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasName("pk_promotions_id");
 
             builder.Property(c => c.Name)
-                .HasMaxLength(32)
+                .HasMaxLength(64)
                 .IsRequired();
 
             builder.Property(c => c.From)
