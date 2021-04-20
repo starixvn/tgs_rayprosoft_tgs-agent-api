@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,11 +8,10 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
-using TGS.Services.Operator;
 using TGS.Services.Operator.BankDeposit;
-using TGS.ServiceUtility;
 using TGS.Services.Operator.Deposit;
 using TGS.Services.Payment;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -24,17 +24,30 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async ValueTask<Guid> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateBankDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
             [FromBody] SubmitDepositRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
             var command = new CreateBankDepositFormCommand(
                 playerTokenData.PlayerCode,
                 brandId,
                 request.BrandPaymentId,
-                request.BankAccount,
-                request.Amount);
+                request.Amount,
+                jsonSerializationProvider.SerializeToString(new
+                {
+                    SendBankAccount = request.BankAccount,
+                    ReceiveBankAccount = brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
+                    ReceiveAccountName = brandPaymentBankInfo.RootElement.GetProperty("name").GetString()
+                }));
 
             await createDepositFormService
                 .ExecuteAsync(command)

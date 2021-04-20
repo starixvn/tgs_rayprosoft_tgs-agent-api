@@ -29,8 +29,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "ThisIsPlayerCode",
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                "ThisIsBankAccount",
-                1000M);
+                1000M,
+                jsonSerializationProvider.SerializeToString(
+                    new
+                    {
+                        SendBankAccount = "ThisIsBankAccount",
+                        ReceiveBankAccount = "ThisIsReceiveBankAccount",
+                        ReceiveAccountName = "ReceiveAccountName"
+                    },
+                    null));
             var expected = new DepositFormInfo(
                 command.PlayerCode,
                 command.BrandId,
@@ -39,7 +46,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 jsonSerializationProvider.SerializeToString(
                     new
                     {
-                        BankAccount = command.BankAccount
+                        SendBankAccount = "ThisIsBankAccount",
+                        ReceiveBankAccount = "ThisIsReceiveBankAccount",
+                        ReceiveAccountName = "ReceiveAccountName"
                     },
                     null)).ToExpectedObject();
 

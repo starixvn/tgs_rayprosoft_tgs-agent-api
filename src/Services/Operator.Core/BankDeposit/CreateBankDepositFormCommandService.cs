@@ -28,10 +28,7 @@ namespace TGS.Services.Operator.BankDeposit
                 command.BrandId,
                 command.BrandPaymentId,
                 command.Amount,
-                _jsonSerializationProvider.SerializeToString(new
-                {
-                    BankAccount = command.BankAccount
-                }));
+                command.ApplyInfo);
 
             await _paymentRepository
                .CreateDepositFormAsync(createFormId, form)

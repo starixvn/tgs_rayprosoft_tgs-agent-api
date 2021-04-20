@@ -2,7 +2,6 @@
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
-using TGS.Services.Payment;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
