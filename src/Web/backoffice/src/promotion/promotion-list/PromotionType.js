@@ -144,12 +144,6 @@ export const usePromotionGroupValueOf = (promotionType) => {
         }
 
         if (group?.types?.includes(promotionType)) {
-            console.log(
-                "find group",
-                group,
-                " by promotionType: ",
-                promotionType
-            )
             return group
         }
     }, undefined)

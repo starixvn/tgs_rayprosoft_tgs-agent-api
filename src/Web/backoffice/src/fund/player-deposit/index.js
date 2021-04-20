@@ -197,7 +197,6 @@ const SearchBar = ({
     isLoading,
     ...props
 }) => {
-    console.log("createdOnStart", createdOnStart, "createdOnEnd", createdOnEnd)
     let formMethods = useForm({
         defaultValues: {
             username,
