@@ -48,7 +48,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.UserName,
                 request.ChannelName,
                 request.PaymentMethodId,
-                request.Status,
+                request.Status switch
+                {
+                    FlowStatus.Review => new[] { 0, 1000 },
+                    FlowStatus.Approved => new[] { 8000 },
+                    FlowStatus.Rejected => new[] { 7000 },
+                    _ => null
+                },
                 createOnRange,
                 updateOnRange,
                 paging);
@@ -69,7 +75,12 @@ namespace TGS.Apis.BackendOffice.Controllers
                         BrandPaymentId = form.BrandPaymentId,
                         PaymentMethodId = form.PaymentMethodId,
                         ChannelName = form.ChannelName,
-                        Status = form.Status,
+                        Status = form.Status switch
+                        {
+                            7000 => FlowStatus.Rejected,
+                            8000 => FlowStatus.Approved,
+                            _ => FlowStatus.Review
+                        },
                         Amount = form.Amount,
                         Remark = form.Remark,
                         CreatedOn = form.CreateOn,
@@ -113,6 +124,12 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ChannelName = formDetail.ChannelName,
                     Amount = formDetail.Amount,
                     Remark = formDetail.Remark,
+                    Status = formDetail.Status switch
+                    {
+                        7000 => FlowStatus.Rejected,
+                        8000 => FlowStatus.Approved,
+                        _ => FlowStatus.Review
+                    },
                     ApplyInfo = formDetail.ApplyInfo,
                     PaymentReturn = formDetail.PaymentReturn,
                     CreateOn = formDetail.CreateOn,

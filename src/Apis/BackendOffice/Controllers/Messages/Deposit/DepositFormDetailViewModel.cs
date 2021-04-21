@@ -23,6 +23,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         public string Remark { get; init; }
 
+        public FlowStatus Status { get; init; }
+
         public JsonDocument ApplyInfo { get; init; }
 
         public JsonDocument PaymentReturn { get; init; }

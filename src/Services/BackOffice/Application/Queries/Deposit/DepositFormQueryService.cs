@@ -52,7 +52,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                 dataQuery = dataQuery.ApplyOrderBy(dbPaging).ApplyPaging(dbPaging);
             }
 
-
             return dataQuery
                 .ToAsyncEnumerable()
                 .Select(form => new DepositFormInfo(
@@ -93,6 +92,14 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
 
             if (query.PaymentMethodId != null)
                 dataQuery = dataQuery.Where(form => form.BrandPayment.PaymentMethodChannel.MethodId == query.PaymentMethodId);
+
+            if (query.Status != null)
+            {
+                var statusList = query.Status.ToArray();
+
+                if (statusList.Length > 0)
+                    dataQuery = dataQuery.Where(form => statusList.Contains(form.Status));
+            }
 
             if (query.CreateOnRange != null)
                 dataQuery = dataQuery.Where(form => form.CreatedOn >= query.CreateOnRange.Value.Begin
