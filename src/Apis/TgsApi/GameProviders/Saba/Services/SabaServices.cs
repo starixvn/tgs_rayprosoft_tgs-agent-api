@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
@@ -13,6 +14,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
     public interface ISabaServices
     {
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
+
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes);
     }
 
     public sealed class SabaServices : ISabaServices
@@ -51,5 +55,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 PlatformType = platformType
             };
         }
+
+        ValueTask<GameActionExternalIds[]> ISabaServices.GetGameActionExternalIdsAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes) =>
+            _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId,
+                gameActionTypes);
     }
 }

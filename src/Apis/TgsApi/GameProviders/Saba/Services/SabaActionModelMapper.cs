@@ -12,36 +12,81 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
     {
         BetData Request(string playerCode, GameProviderConfigurationData data, PlaceBetRequest request);
 
+        BetData Request(string playerCode, GameProviderConfigurationData data, ConfirmBetRequest request,
+            decimal unlockAmount);
+
         GetBalanceResponse Response(string playerCode, GetBalanceResult result);
 
         PlaceBetResponse Response(string playerCode, PlaceBetRequest.Data body, BetResult r);
+
+        ConfirmBetResponse Response(string playerCode, ConfirmBetRequest.Data body, BetResult r);
     }
 
     public sealed class SabaActionModelMapper : ISabaActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.Saba;
-        private static readonly string ExternalGameId = "1";
-
         private static readonly TimeSpan TimeSpan = TimeSpan.FromHours(-4);
+
+        private readonly string _externalGameId = SabaConsts.ExternalGameId;
 
         BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
             PlaceBetRequest request)
         {
             var body = request.Body;
+            var externalRoundId = body.ExternalRoundId.ToString();
 
             var transaction = new TransactionData
             {
-                ExternalGameId = ExternalGameId,
+                ExternalGameId = _externalGameId,
                 ExternalBetId = string.Empty,
-                ExternalRoundId = body.TransactionId.ToString(),
-                ExternalTransactionId = body.TransactionId.ToString(),
-                ExternalGameActionGroupId = body.TransactionId.ToString(),
+                ExternalRoundId = externalRoundId,
+                ExternalTransactionId = externalRoundId,
+                ExternalGameActionGroupId = externalRoundId,
                 Amount = body.ActualAmount,
                 TimeStamp = GetTimestamp(body.BetTime),
                 GameActionType = GameActionType.LockAmount
             };
 
             return GetBetData(playerCode, body.CurrencyCode, data, new[] {transaction});
+        }
+
+        BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            ConfirmBetRequest request, decimal unlockAmount)
+        {
+            var body = request.Body;
+            var confirmBet = body.Transactions[0];
+
+            var externalTransactionId = confirmBet.ExternalTransactionId.ToString();
+            var externalRoundId = confirmBet.ExternalRoundId.ToString();
+
+            var transactions = new TransactionData[]
+            {
+                new()
+                {
+                    ExternalGameId = _externalGameId,
+                    ExternalBetId = string.Empty,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = $"{externalRoundId}_unlock",
+                    ExternalTransactionReferenceId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    Amount = unlockAmount,
+                    TimeStamp = GetTimestamp(body.UpdateTime),
+                    GameActionType = GameActionType.UnlockAmount
+                },
+                new()
+                {
+                    ExternalGameId = _externalGameId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    Amount = confirmBet.ActualAmount,
+                    TimeStamp = GetTimestamp(body.UpdateTime),
+                    GameActionType = GameActionType.PlaceBet
+                }
+            };
+
+            return GetBetData(playerCode, null, data, transactions);
         }
 
         GetBalanceResponse ISabaActionModelMapper.Response(string playerCode, GetBalanceResult result) =>
@@ -57,8 +102,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             new()
             {
                 Status = ((int)GameApiError.Success).ToString(),
-                ExternalRoundId = body.TransactionId,
-                TransactionId = body.TransactionId
+                ExternalRoundId = body.ExternalRoundId,
+                TransactionId = body.ExternalRoundId
+            };
+
+        ConfirmBetResponse ISabaActionModelMapper.
+            Response(string playerCode, ConfirmBetRequest.Data body, BetResult r) =>
+            new()
+            {
+                Status = ((int)GameApiError.Success).ToString(),
+                Balance = r.Balance
             };
 
         private static BetData GetBetData(string playerCode, int? currency, GameProviderConfigurationData data,

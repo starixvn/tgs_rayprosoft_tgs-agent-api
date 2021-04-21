@@ -2,6 +2,8 @@
 {
     public static class SabaConsts
     {
+        public static readonly string ExternalGameId = "1";
+
         public static class RedisKey
         {
             public static readonly string Token = "SabaTsId";

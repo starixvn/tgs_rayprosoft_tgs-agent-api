@@ -1,4 +1,5 @@
-﻿using System.Net.Mime;
+﻿using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +8,10 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Saba.Attributes;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Saba.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
@@ -23,15 +27,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
         private static readonly string GameProviderCode = Consts.GameProvider.Saba;
 
         private readonly IGamePlayActions _actions;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ISabaActionModelMapper _map;
         private readonly ISabaServices _services;
 
         public SabaGameController(
             IGamePlayActions actions,
+            IGameProviderOperations gameProviderOperations,
             ISabaActionModelMapper map,
             ISabaServices services)
         {
             _actions = actions;
+            _gameProviderOperations = gameProviderOperations;
             _map = map;
             _services = services;
         }
@@ -66,16 +73,45 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
         [HttpPost]
         [Route("confirmbet")]
         [ResolveRequest(Type = typeof(ConfirmBetRequest))]
-        public async ValueTask<ConfirmBetResponse> PlaceBetAsync(ConfirmBetRequest request)
+        public async ValueTask<ConfirmBetResponse> ConfirmBetAsync(ConfirmBetRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
 
-            //var betData = _map.Request(playerCode, data, request);
-            //var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+            decimal unlockAmount;
+            var confirmBet = request.Body.Transactions[0];
 
-            //return _map.Response(playerCode, request.Body, r);
+            if (confirmBet.IsOddsChanged)
+            {
+                var gameProviderId = data.GameProviderId;
+                var game = (await _gameProviderOperations
+                    .GetCachedGamesAsync(gameProviderId, SabaConsts.ExternalGameId)
+                    .ConfigureAwait(false)).FirstOrDefault();
+
+                var externalRoundId = confirmBet.ExternalRoundId.ToString();
+                var gameActionExternalId =
+                    (await _services.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId
+                        , game!.Id, new[] {GameActionType.LockAmount}).ConfigureAwait(false))
+                    .FirstOrDefault();
+
+                if (gameActionExternalId == null)
+                {
+                    throw new InvalidGameActionException($"No lock transaction is found in round '{externalRoundId}'",
+                        InvalidGameActionErrorCode.TransactionNotFound);
+                }
+
+                unlockAmount = gameActionExternalId.Amount;
+            }
+            else
+            {
+                unlockAmount = confirmBet.ActualAmount;
+            }
+
+            var betData = _map.Request(playerCode, data, request, unlockAmount);
+            var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+
+            return _map.Response(playerCode, request.Body, r);
         }
     }
 }

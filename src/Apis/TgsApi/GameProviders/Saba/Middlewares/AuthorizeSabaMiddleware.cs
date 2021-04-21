@@ -45,7 +45,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             _resolver = new Dictionary<Type, Func<string, ValueTask<(string, string, PlatformType)>>>
             {
                 {typeof(GetBalanceRequest), ResolveGetBalanceRequestAsync},
-                {typeof(PlaceBetRequest), ResolvePlaceBetRequestAsync}
+                {typeof(PlaceBetRequest), ResolvePlaceBetRequestAsync},
+                {typeof(ConfirmBetRequest), ResolveConfirmBetRequestAsync}
             };
         }
 
@@ -107,6 +108,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             await _cacheManger.SafeCacheAsync(SabaConsts.RedisKey.Token, playerCode, expiresOn, loginRecord);
 
             return (r.Key, playerCode, loginRecord.PlatformType);
+        }
+
+        private async ValueTask<(string, string, PlatformType)> ResolveConfirmBetRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<ConfirmBetRequest>(value);
+            var playerCode = r.Body.PlayerCode;
+
+            var loginRecord = await _cacheManger.SafeGetAsync<CachedPlayerLoginRecord>(SabaConsts.RedisKey.Token,
+                playerCode, () => null);
+
+            var platformType = loginRecord?.PlatformType ?? PlatformType.Desktop;
+            return (r.Key, playerCode, platformType);
         }
 
         private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string token)

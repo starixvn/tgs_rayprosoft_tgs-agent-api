@@ -15,9 +15,6 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
             [JsonPropertyName("userId")]
             public string PlayerCode { get; init; }
 
-            [JsonPropertyName("actualAmount")]
-            public decimal ActualAmount { get; init; }
-
             [JsonPropertyName("updateTime")]
             public string UpdateTime { get; init; }
 
