@@ -125,18 +125,22 @@ namespace TGS.Services.GameOperations.Data
 
         private static void VerifyLockedAndUnlockedAmounts(GameActionState s)
         {
+            // if still has amount to be locked, remainingLockedAmount is negative
+
             var remainingLockedAmount =
                 GetRemainingLockedAmount(s.ValidPreviousActions, s.GameActionType, s.ReferencedGameAction);
 
             if (s.GameActionType == UnlockAmount)
             {
-                if (s.Amount > 0 && s.Amount > remainingLockedAmount)
+                remainingLockedAmount += s.Amount;
+
+                // if remainingLockedAmount is positive, means the amount is over unlocked
+
+                if (s.Amount > 0 && remainingLockedAmount > 0)
                 {
                     throw new InvalidGameActionException(
                         $"Insufficient locked amount to be unlocked, locked amount left:{remainingLockedAmount}, amount intend to be unlocked:{s.Amount}");
                 }
-
-                remainingLockedAmount += s.Amount;
             }
 
             // closing round if there's amount still locked
