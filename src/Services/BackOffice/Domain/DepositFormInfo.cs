@@ -13,6 +13,7 @@ namespace TGS.Services.BackOffice.Domain
         Guid PaymentMethodId,
         decimal Amount,
         string Remark,
+        int Status,
         JsonDocument ApplyInfo,
         JsonDocument PaymentReturn,
         DateTimeOffset CreateOn,

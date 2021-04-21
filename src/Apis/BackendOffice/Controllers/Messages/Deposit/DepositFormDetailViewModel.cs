@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 {
-    public class DepositFormDetailViewModel
+    public record DepositFormDetailViewModel
     {
         public Guid Id { get; init; }
 

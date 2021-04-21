@@ -68,6 +68,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                         BrandId = form.BrandId,
                         BrandPaymentId = form.BrandPaymentId,
                         PaymentMethodId = form.PaymentMethodId,
+                        ChannelName = form.ChannelName,
+                        Status = form.Status,
                         Amount = form.Amount,
                         Remark = form.Remark,
                         CreateOn = form.CreateOn,

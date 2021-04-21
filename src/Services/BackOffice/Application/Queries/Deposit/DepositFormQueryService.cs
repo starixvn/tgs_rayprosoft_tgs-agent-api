@@ -65,6 +65,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     form.BrandPayment.PaymentMethodChannel.MethodId,
                     form.Amount,
                     form.Remark,
+                    form.Status,
                     string.IsNullOrWhiteSpace(form.ApplyInfo)
                         ? null
                         : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.ApplyInfo, null),

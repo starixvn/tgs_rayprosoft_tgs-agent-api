@@ -36,6 +36,7 @@ namespace TGS.BackOffice.Repositories
                             df.BrandPayment.PaymentMethodChannel.Id,
                             df.Amount,
                             df.Remark,
+                            df.Status,
                             string.IsNullOrWhiteSpace(df.ApplyInfo)
                                 ? null
                                 : JsonDocument.Parse(df.ApplyInfo),

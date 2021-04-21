@@ -22,6 +22,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         public string Remark { get; init; }
 
+        public int Status { get; init; }
+
         public DateTimeOffset CreateOn { get; init; }
 
         public DateTimeOffset UpdateOn { get; init; }
