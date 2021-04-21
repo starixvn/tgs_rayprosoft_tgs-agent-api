@@ -8,6 +8,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
+using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator.BankDeposit;
 using TGS.Services.Operator.Deposit;
 using TGS.Services.Payment;
@@ -42,12 +43,12 @@ namespace TGS.Apis.OperatorApi.Controllers
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
-                jsonSerializationProvider.SerializeToString(new
-                {
-                    SendBankAccount = request.BankAccount,
-                    ReceiveBankAccount = brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
-                    ReceiveAccountName = brandPaymentBankInfo.RootElement.GetProperty("name").GetString()
-                }));
+                jsonSerializationProvider.SerializeToString(
+                    new ManualDepositApplyInfo(
+                            request.BankAccount,
+                            brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
+                            brandPaymentBankInfo.RootElement.GetProperty("name").GetString()),
+                    JsonSerializationUtility.SerializerOption));
 
             await createDepositFormService
                 .ExecuteAsync(command)
@@ -86,15 +87,17 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(new GetBrandPaymentQuery(form.BrandPaymentId))
                 .ConfigureAwait(false);
 
-            var bankInfo = serializationProvider.DeserializeFromString<Dictionary<string, string>>(brandPayment.ExtendedData);
+            var bankInfo = serializationProvider.DeserializeFromString<ManualDepositApplyInfo>(
+                form.ApplyInfo,
+                JsonSerializationUtility.SerializerOption);
 
             return new DepositFormResponse
             {
                 MethodName = paymentMethods[brandPayment.MethodId].Name,
                 ChannelName = paymentChannels[brandPayment.ChannelId].Name,
                 Amount = form.Amount,
-                BankAccountName = bankInfo["name"].ToString(),
-                BankAccount = bankInfo["bankAccount"].ToString(),
+                BankAccountName = bankInfo.ReceiveAccountName,
+                BankAccount = bankInfo.ReceiveBankAccount,
                 BankName = brandPayment.ChannelName
             };
         }

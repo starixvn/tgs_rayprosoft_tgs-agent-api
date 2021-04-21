@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TGS.Apis.FileService.Clients;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
+using TGS.Payment.ManualDeposit;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
@@ -42,10 +43,8 @@ namespace TGS.Services.Operator.BankDeposit
                     command.FormId,
                     1000,
                     _jsonSerializationProvider.SerializeToString(
-                        new
-                        {
-                            ManualReceiptFileId = uploadResult.Id
-                        }))
+                        new ManualDepositPaymentReturn(uploadResult.Id),
+                        JsonSerializationUtility.SerializerOption))
                 .ConfigureAwait(false);
         }
     }
