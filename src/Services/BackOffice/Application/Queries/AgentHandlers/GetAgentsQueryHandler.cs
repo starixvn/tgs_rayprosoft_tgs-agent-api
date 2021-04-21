@@ -39,6 +39,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     AgentStatus = x.AgentStatus,
                     Type = x.Type,
                     LevelType = x.LevelType,
+                    Balance = x.Wallets.FirstOrDefault().Balance,
                     CommissionPercentage = x.CommissionPercentage,
                     DividendPercentage = x.DividendPercentage,
                     LiveDealerRebatePercentage = x.LiveDealerRebatePercentage,

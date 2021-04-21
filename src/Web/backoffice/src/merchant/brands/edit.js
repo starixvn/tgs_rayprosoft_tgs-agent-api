@@ -547,16 +547,35 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
                             />
                         </NormalLabel>
                         <Box alignY="center">
-                            <SettlementIntervalTypeSelect
-                                name="settlementIntervalType"
-                                required
-                                disabled={readonly}
-                            />
+                            {isAdd && (
+                                <SettlementIntervalTypeSelect
+                                    name="settlementIntervalType"
+                                    required
+                                    disabled={readonly}
+                                />
+                            )}
+                            {!isAdd && (
+                                <>
+                                    <SettlementIntervalTypeSelect
+                                        name="settlementIntervalType"
+                                        value={getValues(
+                                            "settlementIntervalType"
+                                        )}
+                                        display="none"
+                                    />
+                                    <SettlementIntervalTypeSelect
+                                        value={getValues(
+                                            "settlementIntervalType"
+                                        )}
+                                        disabled
+                                    />
+                                </>
+                            )}
                         </Box>
                     </>
                 )}
 
-                <LanguageFieldsBox readonly={readonly} isB2B={isB2B} />
+                <LanguageFieldsBox readonly={readonly} />
 
                 <CurrencyBetLimitFieldsBox
                     readonly={readonly}
@@ -569,7 +588,7 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
     )
 }
 
-const LanguageFieldsBox = ({ readonly, isB2B }) => {
+const LanguageFieldsBox = ({ readonly }) => {
     let { watch, control } = useFormContext()
 
     let fieldsName = "languages"
@@ -592,7 +611,7 @@ const LanguageFieldsBox = ({ readonly, isB2B }) => {
             <BrandLanguageCheckboxGroupTable
                 fieldArrayContext={fieldArrayContext}
                 disabled={readonly}
-                showBrandCultureCode={isB2B}
+                showBrandCultureCode
             />
         </>
     )

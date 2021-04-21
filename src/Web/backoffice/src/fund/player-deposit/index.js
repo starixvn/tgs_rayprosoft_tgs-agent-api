@@ -82,7 +82,7 @@ const BodyContent = ({ brandId }) => {
     })
 
     useEffect(() => {
-        setState({ pageIndex: 0, brandId })
+        setState({ pageIndex: 0 })
     }, [brandId])
 
     let {
@@ -103,10 +103,9 @@ const BodyContent = ({ brandId }) => {
         mutate,
         error,
         deleteCache
-    } = usePlayerDepositList({
-        ...toApiParams(state),
-        sortby: "username",
-        brandId
+    } = usePlayerDepositList(brandId, {
+        ...toApiParams(state)
+        // sortby: "CreatedOn" //TODO: rm when bug fixed
     })
 
     let columns = useColumns({ mutate, items: data?.items, brandId })
@@ -285,7 +284,7 @@ const useColumns = ({ brandId, items = [] }) => {
         let columns = [
             sequenceColumn(),
             textColumn({
-                accessor: "username",
+                accessor: "userName",
                 Header: <Trans zh="用户名" en="Username" />,
                 disableSortBy: true
             }),
@@ -327,7 +326,7 @@ const useColumns = ({ brandId, items = [] }) => {
                 accessor: "status",
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <Box>TODO</Box>
+                Cell: ({ value }) => <Box>{value}</Box>
             }),
             textColumn({
                 accessor: "remark",
