@@ -50,6 +50,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     form.BrandPaymentId,
                     form.BrandPayment.ChannelName,
                     form.BrandPayment.PaymentMethodChannel.MethodId,
+                    form.Status,
                     form.BankAccount,
                     form.Amount,
                     form.Remark,
