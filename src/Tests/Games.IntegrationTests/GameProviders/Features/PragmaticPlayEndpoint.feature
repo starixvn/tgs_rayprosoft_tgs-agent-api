@@ -74,7 +74,16 @@ Scenario: 05 - Lose bet
 		And player wallet database record will be for $90
 		And game action will be recorded in the database of type "LoseBet" for $0
 
-Scenario: 06 - Cancel transaction
+Scenario: 06 - Win Prize Drop Event
+	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+		And I place bet of $10 for game "vs50aladdin"
+	When I win prize drop event of $50
+	Then I will receive result response of no error and balance of $140
+		And player wallet database record will be for $140
+		And game action will be recorded in the database of type "FreeBet" for $50
+
+Scenario: 07 - Cancel transaction
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 		And I place bet of $10 for game "vs50aladdin"
@@ -83,7 +92,7 @@ Scenario: 06 - Cancel transaction
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
 
-Scenario: 07 - Win jackpot
+Scenario: 08 - Win jackpot
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	When I win jackpot of $1000 for game "vs50aladdin"
@@ -92,7 +101,7 @@ Scenario: 07 - Win jackpot
 		And game action will be recorded in the database of type "WinJackpot" for $1000
 
 @BonusWin
-Scenario: 08.a -  Win Bonus in Bet and Result
+Scenario: 09.a -  Win Bonus in Bet and Result
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given bonus code is "BigBonus"
@@ -104,7 +113,7 @@ Scenario: 08.a -  Win Bonus in Bet and Result
 		And bonus code in round detail is as set value
 
 @BonusWin
-Scenario: 08.b -  Bonus Win
+Scenario: 09.b -  Bonus Win
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given bonus code is "BigBonus"
@@ -114,7 +123,7 @@ Scenario: 08.b -  Bonus Win
 	Then I will receive bet win response of no error and balance of $200
 
 @PromoWin
-Scenario: 09 -  Promo Win
+Scenario: 10 -  Promo Win
 	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given a campaign id is "C001" and type is "T"

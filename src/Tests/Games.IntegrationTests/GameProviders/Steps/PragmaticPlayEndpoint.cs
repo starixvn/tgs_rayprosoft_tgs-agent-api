@@ -278,6 +278,48 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             await WinBetAsync(amount, bonusCode);
         }
 
+        [When(@"I win prize drop event of \$(.*)")]
+        public async Task WhenIWinPrizeDropEventOf(decimal prizeAmount)
+        {
+            var configuration = await GetConfigurationAsync();
+
+            var playerCode = Get<string>(SR.PlayerCode);
+            var platform = Get<PlatformType>(SR.PlatformType);
+            var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
+
+            var externalGameId = Get<string>(SR.ExternalGameId);
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalTransactionId = Guid.NewGuid().ToString();
+            var promoTransactionId = Guid.NewGuid().ToString();
+
+            var model = new ResultRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode,
+                Amount = 0,
+                GameId = externalGameId,
+                Reference = externalTransactionId,
+                RoundId = externalRoundId,
+                RoundDetails = string.Empty,
+                Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+                PromoCampaignId = "PrizeDropEvent",
+                PromoWinAmount = prizeAmount,
+                PromoWinReference = promoTransactionId,
+                PromoCampaignType = "R"
+            };
+
+            var hash = ComputeHash(model, configuration.SecretKey);
+            var request = model with {Hash = hash};
+
+            var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
+            var response = await client.ResultAsync(request).ConfigureAwait(false);
+
+            Set(SR.ExternalTransactionId, promoTransactionId);
+            Set(SR.Request, request);
+            Set(SR.Response, response);
+        }
+
         [Given(@"I lose bet")]
         [When(@"I lose bet")]
         public async Task WhenILoseBetAsync()
