@@ -53,10 +53,12 @@ namespace TGS.Apis.BackendOffice.Controllers
                 updateOnRange,
                 paging);
 
+            var totalCount = await countDepositFormsService.GetAsync(query).ConfigureAwait(false);
+
             var response = new PagedResponse<DepositFormViewModel>
             {
                 Valid = true,
-                TotalCount = await countDepositFormsService.GetAsync(query).ConfigureAwait(false),
+                TotalCount = totalCount,
                 Items = await queryDepositFormsService.QueryAsync(query)
                     .Select(form => new DepositFormViewModel
                     {

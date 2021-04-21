@@ -34,9 +34,16 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
         {
             var dataQuery = MakeQuery(query);
 
-            if (!query.Paging.ShowAll)
+            var dbPaging = new Paging<DepositForm>();
+
+            if (query.Paging.ShowAll)
             {
-                var dbPaging = new Paging<DepositForm>();
+                dbPaging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
+
+                dataQuery = dataQuery.ApplyOrderBy(dbPaging);
+            }
+            else
+            {
                 dbPaging.Page = query.Paging.Page;
                 dbPaging.RowCount = query.Paging.Rows;
 
@@ -45,7 +52,9 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                 dataQuery = dataQuery.ApplyOrderBy(dbPaging).ApplyPaging(dbPaging);
             }
 
+
             return dataQuery
+                .ToAsyncEnumerable()
                 .Select(form => new DepositFormInfo(
                     form.Id,
                     form.PlayerCode,

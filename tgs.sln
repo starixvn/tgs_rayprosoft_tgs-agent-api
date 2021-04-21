@@ -145,9 +145,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileService.Client", "src\C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BackOffice.Repositories", "src\Repositories\BackOffice.Repositories\BackOffice.Repositories.csproj", "{8A866226-653F-4BE2-A2B3-E2F25A9CD5C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Payment.Core", "src\Services\Payment.Core\Payment.Core.csproj", "{A0967A19-E3AC-4307-B7ED-A096181F63A1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Payment.Core", "src\Services\Payment.Core\Payment.Core.csproj", "{A0967A19-E3AC-4307-B7ED-A096181F63A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaymentRepositories", "src\Repositories\PaymentRepositories\PaymentRepositories.csproj", "{3F84E72F-945C-43AC-9A9D-926C28C1C5E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PaymentRepositories", "src\Repositories\PaymentRepositories\PaymentRepositories.csproj", "{3F84E72F-945C-43AC-9A9D-926C28C1C5E9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PagingUtility", "..\PagingUtility\PagingUtility\PagingUtility.csproj", "{C24047ED-8052-41CF-9C46-1B4DB45C67C0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PagingUtility.AsyncEnumerable", "..\PagingUtility\PagingUtility.AsyncEnumerable\PagingUtility.AsyncEnumerable.csproj", "{2AEC3605-7839-4273-89E5-74D5FE5E58A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -343,6 +347,14 @@ Global
 		{3F84E72F-945C-43AC-9A9D-926C28C1C5E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F84E72F-945C-43AC-9A9D-926C28C1C5E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F84E72F-945C-43AC-9A9D-926C28C1C5E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C24047ED-8052-41CF-9C46-1B4DB45C67C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C24047ED-8052-41CF-9C46-1B4DB45C67C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C24047ED-8052-41CF-9C46-1B4DB45C67C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C24047ED-8052-41CF-9C46-1B4DB45C67C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AEC3605-7839-4273-89E5-74D5FE5E58A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AEC3605-7839-4273-89E5-74D5FE5E58A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AEC3605-7839-4273-89E5-74D5FE5E58A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AEC3605-7839-4273-89E5-74D5FE5E58A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -399,9 +411,11 @@ Global
 		{8A866226-653F-4BE2-A2B3-E2F25A9CD5C7} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 		{A0967A19-E3AC-4307-B7ED-A096181F63A1} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 		{3F84E72F-945C-43AC-9A9D-926C28C1C5E9} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
+		{C24047ED-8052-41CF-9C46-1B4DB45C67C0} = {2D13A664-6549-483A-9659-22362B2C1DE9}
+		{2AEC3605-7839-4273-89E5-74D5FE5E58A1} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 		RESX_TaskErrorCategory = Message
+		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 	EndGlobalSection
 EndGlobal
