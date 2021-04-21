@@ -54,23 +54,98 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now
             };
 
-        private static PromotionType[] GetPromotionTypes() =>
+        private static PromotionTypeGroup[] GetPromotionTypes() =>
             new[]
             {
-                new PromotionType
+                new PromotionTypeGroup
                 {
                     Name = "Deposit",
-                    Types = new[] {"FirstDeposit", "SecondDeposit"}
+                    Trans = new Translation
+                    {
+                        Zh = "充值送",
+                        En = "Deposit Rebate"
+                    },
+                    Types = new[] 
+                    {
+                        new PromotionType
+                        {
+                            Name = "FirstDeposit",
+                            Trans = new Translation
+                            {
+                                Zh = "每日首充",
+                                En = "First Deposit"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "SecondDeposit",
+                            Trans = new Translation
+                            {
+                                Zh = "每日再充",
+                                En = "Second Deposit"
+                            }
+                        }
+                    },
                 },
-                new PromotionType
+                new PromotionTypeGroup
                 {
                     Name = "Turnover",
-                    Types = new[] {"TurnoverRebate"}
+                    Trans = new Translation
+                    {
+                        Zh = "流水",
+                        En = "Turnover"
+                    },
+                    Types = new[] 
+                    {
+                        new PromotionType
+                        {
+                            Name = "TurnoverRebate",
+                            Trans = new Translation
+                            {
+                                Zh = "流水反水",
+                                En = "Turnover Rebate"
+                            }
+                        }
+                    },
                 },
-                new PromotionType
+                new PromotionTypeGroup
                 {
                     Name = "ReliefMoney",
-                    Types = new[] {"ReliefMoneyDaily"}
+                    Trans = new Translation
+                    {
+                        Zh = "救援金",
+                        En = "Relief Money"
+                    },
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyDaily",
+                            Trans = new Translation
+                            {
+                                Zh = "每日救援金",
+                                En = "Daily Relief Money"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyWeekly",
+                            Trans = new Translation
+                            {
+                                Zh = "每周救援金",
+                                En = "Weekly Relief Money"
+                            }
+                        },
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyMonthly",
+                            Trans = new Translation
+                            {
+                                Zh = "每月救援金",
+                                En = "Weekly Relief Money"
+                            }
+                        }
+                    },
                 }
             };
 

@@ -398,22 +398,48 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     <Trans zh="活动类型" en="Promotion Type Group" />
                 </NormalLabel>
                 <Box alignY="center">
-                    <PromotionTypeGroupSelect
-                        name="promotionTypeGroup"
-                        disabled={disabled}
-                    />
+                    {editable && (
+                        <PromotionTypeGroupSelect name="promotionTypeGroup" />
+                    )}
+                    {disabled && (
+                        <>
+                            <PromotionTypeGroupSelect
+                                name="promotionTypeGroup"
+                                value={promotionTypeGroup}
+                                display="none"
+                            />
+                            <PromotionTypeGroupSelect
+                                value={promotionTypeGroup}
+                                disabled="none"
+                            />
+                        </>
+                    )}
                 </Box>
 
                 <NormalLabel>
                     <Trans zh="活动子类型" en="Promotion Type" />
                 </NormalLabel>
                 <Box alignY="center">
-                    <PromotionTypeSelect
-                        name="promotionType"
-                        group={promotionTypeGroup}
-                        required
-                        disabled={disabled}
-                    />
+                    {editable && (
+                        <PromotionTypeSelect
+                            name="promotionType"
+                            group={promotionTypeGroup}
+                            required
+                        />
+                    )}
+                    {disabled && (
+                        <>
+                            <PromotionTypeSelect
+                                name="promotionType"
+                                value={promotionType}
+                                display="none"
+                            />
+                            <PromotionTypeSelect
+                                value={promotionType}
+                                disabled
+                            />
+                        </>
+                    )}
                 </Box>
 
                 <NormalLabel>
@@ -446,7 +472,27 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 <NormalLabel>
                     <Trans zh="活动游戏类型" en="Game Type Group" />
                 </NormalLabel>
-                <GameTypeGroupSelect name="gameTypeGroup" disabled={disabled} />
+                <Box>
+                    {editable && (
+                        <GameTypeGroupSelect
+                            name="gameTypeGroup"
+                            disabled={disabled}
+                        />
+                    )}
+                    {disabled && (
+                        <>
+                            <GameTypeGroupSelect
+                                name="gameTypeGroup"
+                                value={gameTypeGroup}
+                                display="none"
+                            />
+                            <GameTypeGroupSelect
+                                value={gameTypeGroup}
+                                disabled
+                            />
+                        </>
+                    )}
+                </Box>
 
                 <NormalLabel>
                     <Trans zh="活动游戏子类型" en="Game Type" />
@@ -454,8 +500,8 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 <GameTypeSelect
                     name="gameType"
                     group={gameTypeGroup}
-                    required
                     disabled={disabled}
+                    required
                 />
 
                 <NormalLabel>
