@@ -12,7 +12,7 @@ namespace TGS.Services.Operator
         }
 
         public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
-            => player.DepositedAmount > _depositedAmountLimit.From
-                && player.DepositedAmount <= _depositedAmountLimit.To;
+            => player.DepositedAmount >= _depositedAmountLimit.From
+                && player.DepositedAmount < _depositedAmountLimit.To;
     }
 }
