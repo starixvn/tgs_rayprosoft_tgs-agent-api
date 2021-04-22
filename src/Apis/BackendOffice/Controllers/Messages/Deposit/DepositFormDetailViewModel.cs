@@ -29,8 +29,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         public JsonDocument PaymentReturn { get; init; }
 
-        public DateTimeOffset CreateOn { get; init; }
+        public DateTimeOffset CreatedOn { get; init; }
 
-        public DateTimeOffset UpdateOn { get; init; }
+        public DateTimeOffset UpdatedOn { get; init; }
     }
 }

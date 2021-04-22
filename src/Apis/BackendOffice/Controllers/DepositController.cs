@@ -132,8 +132,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     },
                     ApplyInfo = formDetail.ApplyInfo,
                     PaymentReturn = formDetail.PaymentReturn,
-                    CreateOn = formDetail.CreateOn,
-                    UpdateOn = formDetail.UpdateOn
+                    CreatedOn = formDetail.CreateOn,
+                    UpdatedOn = formDetail.UpdateOn
                 }
             };
         }

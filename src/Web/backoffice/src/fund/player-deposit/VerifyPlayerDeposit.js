@@ -1,10 +1,18 @@
-import React from "react"
-import { Spinner, useModalState } from "bumbag"
+import React, { useState, useEffect, useMemo } from "react"
+import { Spinner, useModalState, FieldStack, Box, Text, Button } from "bumbag"
 import { getTrans, Trans, useLocale, useTrans } from "../../i18n"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update } from "./menu"
 import { Disclosure, VerifyDisclosure } from "../../dialog/Disclosure"
 import { FormDialog } from "../../form/FormDialog"
+import { usePlayerDepositForm, useVerifyPlayerDepositForm } from "./client"
+import LoadingBackdrop from "../../dialog/LoadingBackdrop"
+import AlertDialog from "../../dialog/Alert"
+import clone from "clone-deep"
+import { useFormContext } from "react-hook-form"
+import { FieldValues } from "../../layout/Grid"
+import { NormalLabel } from "../../form/Label"
+import { PlayerDepositFormBody } from "./ViewPlayerDeposit"
 
 export const VerifyPlayerDepositDisclosure = ({
     brandId,
@@ -21,24 +29,103 @@ export const VerifyPlayerDepositDisclosure = ({
     return (
         <>
             <VerifyDisclosure {...dialog} />
-            <VerifyPlayerDepositDialog
-                brandId={brandId}
-                formId={formId}
-                dialog={dialog}
-            />
+            {dialog.visible && (
+                <VerifyPlayerDepositDialog
+                    brandId={brandId}
+                    formId={formId}
+                    onSubmitted={onSubmitted}
+                    dialog={dialog}
+                />
+            )}
         </>
     )
 }
 
-const VerifyPlayerDepositDialog = ({ dialog, ...props }) => {
+const VerifyPlayerDepositDialog = ({
+    brandId,
+    formId,
+    onSubmitted,
+    dialog,
+    ...props
+}) => {
     let title = useTrans({
         zh: "充值审核",
-        en: "Verify Deposit"
+        en: "Review Deposit"
     })
 
+    let approveLabel = useTrans({
+        zh: "通过",
+        en: "Approve"
+    })
+
+    let {
+        isLoading: isLoadingPlayerDepositForm,
+        data: playerDepositForm,
+        error: playerDepositFormError
+    } = usePlayerDepositForm(brandId, formId)
+
+    let [statue, setStatus] = useState()
+    let [data, setSubmit] = useState()
+    let {
+        isLoading,
+        result,
+        error,
+        mutate,
+        deleteCache
+    } = useVerifyPlayerDepositForm(brandId, formId, data)
+
+    if (isLoadingPlayerDepositForm) {
+        return <LoadingBackdrop {...dialog} />
+    }
+
+    if (playerDepositFormError) {
+        return <AlertDialog {...playerDepositFormError} {...dialog} />
+    }
+
+    const reset = () => {
+        deleteCache()
+        mutate(undefined, false)
+        setSubmit(undefined)
+    }
+
     return (
-        <FormDialog title={title} dialog={dialog}>
-            TODO
+        <FormDialog
+            defaultValues={clone(playerDepositForm)}
+            actionButtonsProps={{
+                type: "button",
+                submitText: approveLabel,
+                palette: "success"
+            }}
+            onClickSubmit={(event) => {
+                setStatus("Approve")
+
+                //TODO: submit with remark
+                setSubmit("Approve")
+            }}
+            addonButtons={
+                <Button
+                    type="button"
+                    onClick={() => {
+                        setStatus("Reject")
+
+                        //TODO: submit with remark
+                        setSubmit("Reject")
+                    }}
+                    palette="danger"
+                    variant="outlined"
+                >
+                    <Trans zh="拒绝" en="Reject" />
+                </Button>
+            }
+            isLoading={isLoading}
+            result={result}
+            error={error}
+            onCloseErrorAlert={reset}
+            onSubmitted={onSubmitted}
+            title={title}
+            dialog={dialog}
+        >
+            <PlayerDepositFormBody record={playerDepositForm} />
         </FormDialog>
     )
 }
