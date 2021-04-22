@@ -1,0 +1,3 @@
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
+AGIN_DSP_BAC,AGIN_DSP_BAC,,AGIN_DSP_BAC,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+AGIN_DSP_ROU,AGIN_DSP_ROU,,AGIN_DSP_ROU,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
