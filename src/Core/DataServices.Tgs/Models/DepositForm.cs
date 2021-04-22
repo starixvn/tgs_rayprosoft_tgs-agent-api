@@ -10,8 +10,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid BrandId { get; set; }
 
-        public string BankAccount { get; set; }
-
         public decimal Amount { get; set; }
 
         public Guid BrandPaymentId { get; set; }
@@ -20,9 +18,9 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string Remark { get; set; }
 
-        public string ManualReceiptFileId { get; set; }
+        public string ApplyInfo { get; set; }
 
-        public string ManualReceiptExternalUrl { get; set; }
+        public string PaymentReturn { get; set; }
 
         public DateTimeOffset CreatedOn { get; set; }
 

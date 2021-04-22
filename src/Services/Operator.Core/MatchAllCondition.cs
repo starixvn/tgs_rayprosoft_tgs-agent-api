@@ -1,12 +1,13 @@
 ﻿using System.Linq;
+using TGS.Services.Payment;
 
 namespace TGS.Services.Operator
 {
-    internal class AllMatchCondition : IBrandPaymentCondition
+    internal class MatchAllCondition : IBrandPaymentCondition
     {
         private readonly IBrandPaymentCondition[] _brandPaymentConditions;
 
-        public AllMatchCondition(params IBrandPaymentCondition[] brandPaymentConditions)
+        public MatchAllCondition(params IBrandPaymentCondition[] brandPaymentConditions)
         {
             _brandPaymentConditions = brandPaymentConditions;
         }

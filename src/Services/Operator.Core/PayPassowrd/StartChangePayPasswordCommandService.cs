@@ -8,7 +8,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.PayPassowrd
 {
-    class StartChangePayPasswordCommandService : IGetService<StartChangePayPasswordCommand, string>
+    internal class StartChangePayPasswordCommandService : IGetService<StartChangePayPasswordCommand, string>
     {
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidateCodeGenerator _codeGenerator;
@@ -23,6 +23,7 @@ namespace TGS.Services.Operator.PayPassowrd
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
+
         public async ValueTask<string> GetAsync(StartChangePayPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations

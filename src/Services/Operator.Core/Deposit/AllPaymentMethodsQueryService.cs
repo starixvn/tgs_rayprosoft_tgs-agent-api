@@ -4,22 +4,23 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Deposit
 {
     internal class AllPaymentMethodsQueryService : IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>>
     {
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPaymentRepository _paymentRepository;
 
-        public AllPaymentMethodsQueryService(IWalletRepository walletRepository)
+        public AllPaymentMethodsQueryService(IPaymentRepository paymentRepository)
         {
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
         }
 
         public async ValueTask<IDictionary<Guid, PaymentMethodInfo>> GetAsync(AllPaymentMethodsQuery query, CancellationToken cancellationToken = default)
         {
-            var allPaymentMethods = await _walletRepository.GetAllPaymentMethodsAsync()
+            var allPaymentMethods = await _paymentRepository.GetAllPaymentMethodsAsync()
                 .ToDictionaryAsync(method => method.Id)
                 .ConfigureAwait(false);
 

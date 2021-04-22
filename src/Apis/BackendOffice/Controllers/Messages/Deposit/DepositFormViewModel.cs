@@ -18,7 +18,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         public string ChannelName { get; init; }
 
-        public int Status { get; init; }
+        public FlowStatus Status { get; init; }
 
         public decimal Amount { get; init; }
 

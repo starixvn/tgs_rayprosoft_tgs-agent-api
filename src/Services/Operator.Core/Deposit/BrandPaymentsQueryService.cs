@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Deposit
 {
     internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, BrandPaymentInfo>
     {
+        private readonly IPaymentRepository _paymentRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public BrandPaymentsQueryService(IWalletRepository walletRepository)
+        public BrandPaymentsQueryService(IPaymentRepository paymentRepository, IWalletRepository walletRepository)
         {
+            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
@@ -20,11 +23,11 @@ namespace TGS.Services.Operator.Deposit
             BrandPaymentsQuery query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var brandPayments = await _walletRepository
+            var brandPayments = await _paymentRepository
                 .GetBrandPaymentsAsync(query.BrandId)
                 .ToArrayAsync()
                 .ConfigureAwait(false);
-            var acls = await _walletRepository
+            var acls = await _paymentRepository
                 .GetBrandPaymentAclsAsync(brandPayments.Select(bp => bp.Id), query.PlayerCode)
                 .ToArrayAsync()
                 .ConfigureAwait(false);
@@ -41,7 +44,7 @@ namespace TGS.Services.Operator.Deposit
                 .Distinct()
                 .ToArray();
 
-            var brandPaymentVipLevels = await _walletRepository.GetBrandPaymentVipListAsync(brandPayments.Select(bp => bp.Id))
+            var brandPaymentVipLevels = await _paymentRepository.GetBrandPaymentVipListAsync(brandPayments.Select(bp => bp.Id))
                 .ToLookupAsync(bv => bv.BrandPaymentId, bv => bv.VipLevelId)
                 .ConfigureAwait(false);
 
@@ -64,13 +67,13 @@ namespace TGS.Services.Operator.Deposit
                     blockListCondition,
                     whiteListCondition,
                     showOnAllPlayerCondition,
-                    bp.ConditionMatchType == ConditionMatchTypes.AllMatch
-                        ? new AllMatchCondition(
+                    bp.ConditionMatchType == ConditionMatchTypes.MatchAll
+                        ? new MatchAllCondition(
                             depositedAmountCondition,
                             identityCondition,
                             phoneCondition,
                             vipCondition)
-                        : new SomeOneMatchCondition(
+                        : new MatchOneCondition(
                             depositedAmountCondition,
                             identityCondition,
                             phoneCondition,

@@ -3,7 +3,10 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Apis.FileService.Clients;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
+using TGS.Payment.ManualDeposit;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.BankDeposit
@@ -11,14 +14,17 @@ namespace TGS.Services.Operator.BankDeposit
     internal class SubmitBankDepositFormCommandService : ICommandService<SubmitBankDepositFormCommand>
     {
         private readonly IFileServiceClient _fileServiceClient;
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
         public SubmitBankDepositFormCommandService(
             IFileServiceClient fileServiceClient,
-            IWalletRepository walletRepository)
+            IPaymentRepository paymentRepository,
+            IJsonSerializationProvider jsonSerializationProvider)
         {
             _fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command, CancellationToken cancellationToken = default)
@@ -32,8 +38,13 @@ namespace TGS.Services.Operator.BankDeposit
                     command.FileStream)
                 .ConfigureAwait(false);
 
-            await _walletRepository
-                .SubmitRemittanceReceiptToDepositFormAsync(command.FormId, uploadResult.Id)
+            await _paymentRepository
+                .SubmitFormStatusAsync(
+                    command.FormId,
+                    1000,
+                    _jsonSerializationProvider.SerializeToString(
+                        new ManualDepositPaymentReturn(uploadResult.Id),
+                        JsonSerializationUtility.SerializerOption))
                 .ConfigureAwait(false);
         }
     }
