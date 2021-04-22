@@ -15,8 +15,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder
                 .HasOne(e => e.Transaction)
-                .WithMany()
-                .HasForeignKey(e => e.TransactionId)
+                .WithOne()
                 .HasConstraintName("fk_transaction_promotion_transaction_id");
 
             builder.HasIndex(e => e.TransactionId)
@@ -24,8 +23,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder
                 .HasOne(e => e.Promotion)
-                .WithMany()
-                .HasForeignKey(e => e.PromotionId)
+                .WithOne()
                 .HasConstraintName("fk_transaction_promotion_promotion_id");
 
             builder.HasIndex(e => e.PromotionId)

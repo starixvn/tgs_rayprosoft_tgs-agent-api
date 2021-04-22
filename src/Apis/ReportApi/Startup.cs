@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Bonus.Extensions;
+using Bonus.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +9,6 @@ using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -45,7 +46,9 @@ namespace ReportApi
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddReportServices()
-                .AddTransactions();
+                .AddTransactions()
+                .AddBonusServices()
+                .AddBonusRepositoriesServices();
 
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Report", "report-db");

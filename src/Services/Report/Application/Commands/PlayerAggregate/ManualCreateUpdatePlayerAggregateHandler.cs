@@ -14,7 +14,7 @@ using TGS.Services.Report.Infrastructure.DataService;
 namespace TGS.Services.Report.Application.Commands.PlayerAggregate
 {
     public class
-        ManualCreateUpdatePlayerAggregateQueryHandler : Handler<ManualCreateUpdatePlayerAggregateModel,
+        ManualCreateUpdatePlayerAggregateHandler : Handler<ManualCreateUpdatePlayerAggregateModel,
             MessageResponse>
     {
         private readonly IPlayerAggregateService _playerAggregateService;
@@ -22,7 +22,7 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
         private readonly IRoundAggregateService _roundAggregateService;
         private readonly ITransactionManager _transactionManager;
 
-        public ManualCreateUpdatePlayerAggregateQueryHandler(IPlayerAggregateService playerAggregateService,
+        public ManualCreateUpdatePlayerAggregateHandler(IPlayerAggregateService playerAggregateService,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             IRoundAggregateService roundAggregateService,
             ITransactionManager transactionManager,

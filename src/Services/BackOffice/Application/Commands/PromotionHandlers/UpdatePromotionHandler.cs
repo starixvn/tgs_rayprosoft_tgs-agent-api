@@ -43,7 +43,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 
             var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
             var promotionTypes =
-                _jsonSerializationProvider.DeserializeFromString<PromotionType[]>(promotionsJson.Value);
+                _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
 
             if (promotionTypes.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {

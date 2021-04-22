@@ -39,7 +39,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired(false);
 
-            builder.Property(c => c.PromotionAmount)
+            builder.Property(c => c.BonusAmountLimit)
                 .HasPrecision(18, 6)
                 .IsRequired();
 

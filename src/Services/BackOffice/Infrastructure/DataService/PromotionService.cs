@@ -22,7 +22,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         IQueryable<Promotion> GetPromotionQueries(Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery = null,
             bool tracking = false);
 
-        Task CreatePromotionAsync(CreatePromotionRequest request, PromotionTypeModel promotionTypeModel);
+        Task CreatePromotionAsync(CreatePromotionRequest request, PromotionType promotionTypeModel);
 
         Task UpdatePromotionAsync(Promotion promotion, UpdatePromotionRequest request);
 
@@ -76,7 +76,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             promotion.To = request.To;
             promotion.Status = request.Status;
             promotion.PromotionType = request.PromotionType;
-            promotion.PromotionAmount = request.PromotionAmount;
+            promotion.BonusAmountLimit = request.PromotionAmount;
             promotion.Unlimited = request.Unlimited;
             promotion.GameType = request.GameType;
             promotion.Percentage = request.Percentage;
@@ -97,7 +97,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         }
 
         async Task IPromotionService.CreatePromotionAsync(CreatePromotionRequest request,
-            PromotionTypeModel promotionTypeModel)
+            PromotionType promotionTypeModel)
         {
             var promotion = new Promotion
             {
@@ -108,7 +108,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 To = request.To,
                 Status = request.Status,
                 PromotionType = request.PromotionType,
-                PromotionAmount = request.PromotionAmount,
+                BonusAmountLimit = request.PromotionAmount,
                 SettlementIntervalType = promotionTypeModel.SettlementIntervalType,
                 AmountUsed = 0,
                 Unlimited = request.Unlimited,

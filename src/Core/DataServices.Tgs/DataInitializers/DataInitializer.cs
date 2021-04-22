@@ -126,7 +126,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Status = SwitchStatus.Enabled,
                     BrandId = x.Value.Id,
                     PromotionType = "TurnoverRebate",
-                    PromotionAmount = 1000000,
+                    BonusAmountLimit = 1000000,
                     Unlimited = false,
                     PromotionGameProviders =
                         _gameProviders.Select(g =>

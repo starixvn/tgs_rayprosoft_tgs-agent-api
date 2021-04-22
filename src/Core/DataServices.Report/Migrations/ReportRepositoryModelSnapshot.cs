@@ -288,6 +288,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
+
                     b.Property<short>("GameType")
                         .HasColumnType("smallint")
                         .HasColumnName("game_type");
@@ -319,6 +323,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasPrecision(9, 6)
                         .HasColumnType("numeric(9,6)")
                         .HasColumnName("vip_card_game_rebate_percentage");
+
+                    b.Property<int>("VipLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("vip_level");
 
                     b.Property<decimal>("VipLiveDealerRebatePercentage")
                         .HasPrecision(9, 6)
@@ -435,6 +443,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
 
+                    b.Property<DateTimeOffset>("SentOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
+
                     b.Property<decimal>("SlotRebateAmount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -534,6 +546,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
+
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
 
                     b.Property<short>("GameType")
                         .HasColumnType("smallint")

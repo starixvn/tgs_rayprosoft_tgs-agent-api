@@ -15,7 +15,7 @@ using TGS.Services.Report.Infrastructure.DataService;
 namespace TGS.Services.Report.Application.Commands.Agent
 {
     public class
-        CreateAgentDividendsQueryHandler : Handler<CreateAgentDividendsRequest,
+        CreateAgentDividendsHandler : Handler<CreateAgentDividendsRequest,
             MessageResponse>
     {
         private readonly IAgentDividendService _agentDividendService;
@@ -23,7 +23,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
         private readonly ITgsBrandService _brandService;
         private readonly IPlayerAggregateService _playerAggregateService;
 
-        public CreateAgentDividendsQueryHandler(
+        public CreateAgentDividendsHandler(
             IPlayerAggregateService playerAggregateService,
             ITgsAgentService agentService,
             ITgsBrandService brandService,

@@ -8,6 +8,7 @@ namespace TGS.Core.DataServices.Report.Models
         public Guid BrandId { get; set; }
         public Guid? AgentId { get; set; }
         public string PlayerCode { get; set; }
+        public DateTimeOffset SentOn { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset ReportDate { get; set; }
         public decimal SportsTurnover { get; set; }

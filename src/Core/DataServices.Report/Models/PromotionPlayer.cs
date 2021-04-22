@@ -1,0 +1,14 @@
+﻿using System;
+
+namespace TGS.Core.DataServices.Report.Models
+{
+    public class PromotionPlayer
+    {
+        public int Id { get; set; }
+        public string PlayerCode { get; set; }
+        public Guid PromotionBonusId { get; set; }
+        public PromotionBonus PromotionBonus { get; set; }
+        public bool IsSent { get; set; }
+        public decimal BonusAmount { get; set; }
+    }
+}

@@ -28,7 +28,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset BeforeToDateTime { get; set; }
         public DateTimeOffset AfterFromDateTime { get; set; }
         public DateTimeOffset AfterToDateTime { get; set; }
-
+        public bool AutoSentPlayerBonus { get; set; }
+        public bool AutoSentAgentBonus { get; set; }
         public virtual ICollection<Player> Players { get; set; }
 
         public virtual ICollection<BrandGame> Games { get; set; }
