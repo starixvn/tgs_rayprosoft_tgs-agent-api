@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Services.Data;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
@@ -15,8 +16,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
     {
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
 
-        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes);
+        ValueTask<decimal> GetLockAmountAsync(string playerCode, Guid gameProviderId,
+            string externalRoundId);
     }
 
     public sealed class SabaServices : ISabaServices
@@ -56,9 +57,25 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             };
         }
 
-        ValueTask<GameActionExternalIds[]> ISabaServices.GetGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes) =>
-            _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId,
-                gameActionTypes);
+        async ValueTask<decimal> ISabaServices.GetLockAmountAsync(string playerCode, Guid gameProviderId,
+            string externalRoundId)
+        {
+            var game = (await _gameProviderOperations
+                .GetCachedGamesAsync(gameProviderId, SabaConsts.ExternalGameId)
+                .ConfigureAwait(false)).FirstOrDefault();
+
+            var gameActionExternalId =
+                (await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId
+                    , game!.Id, new[] {GameActionType.LockAmount}).ConfigureAwait(false))
+                .FirstOrDefault();
+
+            if (gameActionExternalId == null)
+            {
+                throw new InvalidGameActionException($"No lock transaction is found in round '{externalRoundId}'",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
+            return gameActionExternalId.Amount;
+        }
     }
 }

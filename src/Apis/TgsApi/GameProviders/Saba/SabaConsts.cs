@@ -7,6 +7,7 @@
         public static class RedisKey
         {
             public static readonly string Token = "SabaTsId";
+            public static readonly string LockAmount = "SabaLockAmount";
         }
     }
 }
