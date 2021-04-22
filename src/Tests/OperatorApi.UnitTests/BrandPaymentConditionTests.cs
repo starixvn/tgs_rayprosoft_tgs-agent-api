@@ -14,7 +14,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
-                100M,
+                10M,
                 false,
                 false,
                 null);
