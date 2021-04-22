@@ -46,7 +46,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             {
                 {typeof(GetBalanceRequest), ResolveGetBalanceRequestAsync},
                 {typeof(PlaceBetRequest), ResolvePlaceBetRequestAsync},
-                {typeof(ConfirmBetRequest), ResolveConfirmBetRequestAsync}
+                {typeof(ConfirmBetRequest), ResolveConfirmBetRequestAsync},
+                {typeof(CancelBetRequest), ResolveCancelBetRequestAsync}
             };
         }
 
@@ -121,6 +122,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             var platformType = loginRecord?.PlatformType ?? PlatformType.Desktop;
             return (r.Key, playerCode, platformType);
         }
+
+        private async ValueTask<(string, string, PlatformType)> ResolveCancelBetRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<CancelBetRequest>(value);
+            var playerCode = r.Body.PlayerCode;
+
+            var loginRecord = await _cacheManger.SafeGetAsync<CachedPlayerLoginRecord>(SabaConsts.RedisKey.Token,
+                playerCode, () => null);
+
+            var platformType = loginRecord?.PlatformType ?? PlatformType.Desktop;
+            return (r.Key, playerCode, platformType);
+        }
+
 
         private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string token)
         {

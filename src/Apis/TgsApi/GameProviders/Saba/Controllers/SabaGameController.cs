@@ -103,66 +103,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             return _map.Response(playerCode, request.Body, r);
         }
 
-        [Route("confirmbet")]
-        [ResolveRequest(Type = typeof(ConfirmBetRequest))]
-        public async ValueTask<ConfirmBetResponse> ConfirmBetAsync(ConfirmBetRequest request)
-        {
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var data = await _services.GetGameProviderConfigurationDataAsync()
-                .ConfigureAwait(false);
-
-            decimal unlockAmount;
-            var confirmBet = request.Body.Transactions[0];
-
-            if (confirmBet.IsOddsChanged)
-            {
-                var externalRoundId = confirmBet.ExternalRoundId.ToString();
-                unlockAmount = await GetLockAmountAsync(playerCode, data.GameProviderId, externalRoundId)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                unlockAmount = confirmBet.ActualAmount;
-            }
-
-            var betData = _map.Request(playerCode, data, request, unlockAmount);
-            var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
-
-            await RemoveLockAmountCacheAsync(betData.Transactions).ConfigureAwait(false);
-
-            return _map.Response(playerCode, request.Body, r);
-        }
-
         [Route("cancelbet")]
         [ResolveRequest(Type = typeof(CancelBetRequest))]
-        public async ValueTask<CancelBetResponse> ConfirmBetAsync(CancelBetRequest request)
+        public async ValueTask<CancelBetResponse> CancelBetAsync(CancelBetRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var data = await _services.GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
 
-            decimal unlockAmount;
-            var confirmBet = request.Body.Transactions[0];
-
-            if (confirmBet.IsOddsChanged)
-            {
-                var externalRoundId = confirmBet.ExternalRoundId.ToString();
-                unlockAmount = await GetLockAmountAsync(playerCode, data.GameProviderId, externalRoundId)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                unlockAmount = confirmBet.ActualAmount;
-            }
-
-            var betData = _map.Request(playerCode, data, request, unlockAmount);
-            var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+            var betData = _map.Request(playerCode, data, request);
+            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
 
             await RemoveLockAmountCacheAsync(betData.Transactions).ConfigureAwait(false);
 
             return _map.Response(playerCode, request.Body, r);
         }
-
 
         private async ValueTask CacheLockAmountAsync(TransactionData[] transactions)
         {

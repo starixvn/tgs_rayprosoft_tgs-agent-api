@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -15,11 +16,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         BetData Request(string playerCode, GameProviderConfigurationData data, ConfirmBetRequest request,
             decimal unlockAmount);
 
+        BetData Request(string playerCode, GameProviderConfigurationData data, CancelBetRequest request);
+
         GetBalanceResponse Response(string playerCode, GetBalanceResult result);
 
         PlaceBetResponse Response(string playerCode, PlaceBetRequest.Data body, BetResult r);
 
         ConfirmBetResponse Response(string playerCode, ConfirmBetRequest.Data body, BetResult r);
+
+        CancelBetResponse Response(string playerCode, CancelBetRequest.Data body, BetResult r);
     }
 
     public sealed class SabaActionModelMapper : ISabaActionModelMapper
@@ -89,6 +94,30 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             return GetBetData(playerCode, null, data, transactions);
         }
 
+        BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            CancelBetRequest request)
+        {
+            var body = request.Body;
+            var transactions = body.Transactions.Select(t =>
+            {
+                var externalRoundId = t.ExternalRoundId.ToString();
+
+                return new TransactionData
+                {
+                    ExternalGameId = _externalGameId,
+                    ExternalBetId = string.Empty,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = $"{externalRoundId}_lock_cancel",
+                    ExternalTransactionReferenceId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    TimeStamp = GetTimestamp(body.UpdateTime),
+                    GameActionType = GameActionType.CancelTransaction
+                };
+            }).ToArray();
+
+            return GetBetData(playerCode, null, data, transactions);
+        }
+
         GetBalanceResponse ISabaActionModelMapper.Response(string playerCode, GetBalanceResult result) =>
             new()
             {
@@ -108,6 +137,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 
         ConfirmBetResponse ISabaActionModelMapper.
             Response(string playerCode, ConfirmBetRequest.Data body, BetResult r) =>
+            new()
+            {
+                Status = ((int)GameApiError.Success).ToString(),
+                Balance = r.Balance
+            };
+
+        CancelBetResponse ISabaActionModelMapper.Response(string playerCode, CancelBetRequest.Data body, BetResult r) =>
             new()
             {
                 Status = ((int)GameApiError.Success).ToString(),

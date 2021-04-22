@@ -290,6 +290,8 @@ namespace TGS.Services.GameOperations.Data
             s.ReferencedGameAction = refGameAction;
             s.PreviousActions = actions;
 
+            ThrowIfHaveNoExternalBetIds(s);
+
             if (s.InternalRoundId == null && refData != null)
             {
                 s.InternalRoundId = refData.RoundId;
