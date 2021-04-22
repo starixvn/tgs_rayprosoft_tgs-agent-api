@@ -45,7 +45,10 @@ import {
 import { VerifyPlayerDepositDisclosure } from "./VerifyPlayerDeposit"
 import { ViewPlayerDepositDisclosure } from "./ViewPlayerDeposit"
 import { mutate } from "swr"
-import FundReviewStatus, { FundReviewStatusLabel } from "../FundReviewStatus"
+import FundReviewStatus, {
+    FundReviewStatusLabel,
+    FundReviewStatusSelect
+} from "../FundReviewStatus"
 
 export { Code }
 
@@ -235,6 +238,11 @@ const SearchBar = ({
         zh: "更新时间",
         en: "Update time"
     })
+
+    let paymentMethodPlaceholder = useTrans({
+        zh: "充值类型",
+        en: "Payment Method"
+    })
     return (
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
@@ -250,7 +258,11 @@ const SearchBar = ({
                             showEmptyFieldValueAddonAfter
                             placeholder={channelNameInputPlaceholder}
                         />
-                        <PaymentMethodSelect name="method" />
+                        <PaymentMethodSelect
+                            name="method"
+                            placeholder={paymentMethodPlaceholder}
+                        />
+                        <FundReviewStatusSelect name="status" />
                     </Set>
                     <Set orientation="horizontal">
                         <FieldWrapper label={createdOnLabel}>

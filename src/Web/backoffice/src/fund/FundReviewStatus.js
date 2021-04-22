@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/react"
-import { Trans } from "../i18n"
+import { Trans, useTrans } from "../i18n"
+import Select from "../select/Select"
 
 const Review = "Review"
 const ReviewTrans = {
@@ -31,6 +32,31 @@ export const FundReviewStatusLabel = ({ value }) => {
         default:
             return value ?? ""
     }
+}
+
+export const FundReviewStatusSelect = ({ placeholder, ...props }) => {
+    let defaultPlaceholder = useTrans({
+        zh: "状态",
+        en: "Status"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
+
+    let options = [
+        {
+            label: useTrans(ReviewTrans),
+            value: Review
+        },
+        {
+            label: useTrans(ApprovedTrans),
+            value: Approved
+        },
+        {
+            label: useTrans(RejectedTrans),
+            value: Rejected
+        }
+    ]
+
+    return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export default {
