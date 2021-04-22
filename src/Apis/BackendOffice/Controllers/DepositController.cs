@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Core.Models.Messages;
@@ -50,15 +48,23 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.UserName,
                 request.ChannelName,
                 request.PaymentMethodId,
-                request.Status,
+                request.Status switch
+                {
+                    FlowStatus.Review => new[] { 0, 1000 },
+                    FlowStatus.Approved => new[] { 8000 },
+                    FlowStatus.Rejected => new[] { 7000 },
+                    _ => null
+                },
                 createOnRange,
                 updateOnRange,
                 paging);
 
+            var totalCount = await countDepositFormsService.GetAsync(query).ConfigureAwait(false);
+
             var response = new PagedResponse<DepositFormViewModel>
             {
                 Valid = true,
-                TotalCount = await countDepositFormsService.GetAsync(query).ConfigureAwait(false),
+                TotalCount = totalCount,
                 Items = await queryDepositFormsService.QueryAsync(query)
                     .Select(form => new DepositFormViewModel
                     {
@@ -69,7 +75,12 @@ namespace TGS.Apis.BackendOffice.Controllers
                         BrandPaymentId = form.BrandPaymentId,
                         PaymentMethodId = form.PaymentMethodId,
                         ChannelName = form.ChannelName,
-                        Status = form.Status,
+                        Status = form.Status switch
+                        {
+                            7000 => FlowStatus.Rejected,
+                            8000 => FlowStatus.Approved,
+                            _ => FlowStatus.Review
+                        },
                         Amount = form.Amount,
                         Remark = form.Remark,
                         CreatedOn = form.CreateOn,
@@ -113,10 +124,16 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ChannelName = formDetail.ChannelName,
                     Amount = formDetail.Amount,
                     Remark = formDetail.Remark,
+                    Status = formDetail.Status switch
+                    {
+                        7000 => FlowStatus.Rejected,
+                        8000 => FlowStatus.Approved,
+                        _ => FlowStatus.Review
+                    },
+                    ApplyInfo = formDetail.ApplyInfo,
+                    PaymentReturn = formDetail.PaymentReturn,
                     CreateOn = formDetail.CreateOn,
-                    UpdateOn = formDetail.UpdateOn,
-                    BrandPaymentExtendData = JsonDocument.Parse(formDetail.BrandPaymentExtendData),
-                    ManualReceiptFileId = formDetail.ManualReciptFileId
+                    UpdateOn = formDetail.UpdateOn
                 }
             };
         }

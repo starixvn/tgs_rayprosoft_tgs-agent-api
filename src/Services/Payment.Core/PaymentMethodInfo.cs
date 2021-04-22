@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Payment
 {
     public record PaymentMethodInfo(Guid Id, string Name);
 }

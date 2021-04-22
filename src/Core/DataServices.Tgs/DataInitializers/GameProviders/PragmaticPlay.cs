@@ -81,7 +81,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         internal class PragmaticPlayGameProviderConfiguration : IGameProviderConfiguration
         {
-            private static readonly string _Endpoint = "https: //tgs.prerelease-env.biz/gs2c/playGame.do";
+            private static readonly string _Endpoint = "https://tgs.prerelease-env.biz/gs2c/playGame.do";
 
             Guid IGameProviderConfiguration.Id => new("455B0CA8-64B1-40A9-8C0A-FCFD3FE895FC");
 

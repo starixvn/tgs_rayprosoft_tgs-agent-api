@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
@@ -33,13 +34,17 @@ namespace TGS.BackOffice.Repositories
                             df.BrandPaymentId,
                             df.BrandPayment.ChannelName,
                             df.BrandPayment.PaymentMethodChannel.Id,
-                            df.BankAccount,
                             df.Amount,
                             df.Remark,
+                            df.Status,
+                            string.IsNullOrWhiteSpace(df.ApplyInfo)
+                                ? null
+                                : JsonDocument.Parse(df.ApplyInfo),
+                            string.IsNullOrWhiteSpace(df.PaymentReturn)
+                                ? null
+                                : JsonDocument.Parse(df.PaymentReturn),
                             df.CreatedOn,
-                            df.UpdateOn,
-                            df.BrandPayment.ExtendedData,
-                            df.ManualReceiptFileId);
+                            df.UpdateOn);
 
             return query.SingleAsync();
         }

@@ -38,6 +38,7 @@ import { DateInputRange } from "../../date/DateTimeRangeInput"
 import { today } from "../../date/range"
 import { usePlayerDepositList } from "./client"
 import { Update } from "./menu"
+import { PaymentMethodSelect } from "../../payment/method/PaymentMethod"
 
 export { Code }
 
@@ -242,6 +243,7 @@ const SearchBar = ({
                             showEmptyFieldValueAddonAfter
                             placeholder={channelNameInputPlaceholder}
                         />
+                        <PaymentMethodSelect name="method" />
                     </Set>
                     <Set orientation="horizontal">
                         <FieldWrapper label={createdOnLabel}>
@@ -295,10 +297,11 @@ const useColumns = ({ brandId, items = [] }) => {
                 Cell: ({ value }) => value
             }),
             textColumn({
-                accessor: "paymentChannel",
-                Header: <Trans zh="充值类型" en="Payment Channel" />,
+                id: "paymentMethod",
+                accessor: (row) => row,
+                Header: <Trans zh="充值类型" en="Payment Method" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <Box>{value}</Box>
+                Cell: ({ value }) => <Box>TODO: payment method label</Box>
             }),
             textColumn({
                 accessor: "channelName",

@@ -1,4 +1,6 @@
-﻿namespace TGS.Services.Operator
+﻿using TGS.Services.Payment;
+
+namespace TGS.Services.Operator
 {
     internal class IdentityCondition : IBrandPaymentCondition
     {
