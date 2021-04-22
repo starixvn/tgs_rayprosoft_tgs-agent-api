@@ -11,17 +11,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.BrandPayment
                 .NotEmpty()
                 .WithMessage(Resources.BrandPayment.ChannelNameRequired);
 
-            RuleFor(x => x.PaymentMethodChannelId)
+            RuleFor(x => x.PaymentChannelId)
                 .NotEmpty()
                 .WithMessage(Resources.BrandPayment.PaymentRequired);
 
             RuleFor(x => x.TransferLimitTo)
                 .GreaterThan(0)
                 .WithMessage(Resources.BrandPayment.TransferLimitGreaterZero);
-
-            RuleFor(x => x.DepositedAmountMax)
-                .GreaterThan(0)
-                .WithMessage(Resources.BrandPayment.DepositedGreaterZero);
         }
     }
 }

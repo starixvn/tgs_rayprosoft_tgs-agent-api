@@ -38,7 +38,11 @@ import { DateInputRange } from "../../date/DateTimeRangeInput"
 import { today } from "../../date/range"
 import { usePlayerDepositList } from "./client"
 import { Update } from "./menu"
-import { PaymentMethodSelect } from "../../payment/method/PaymentMethod"
+import {
+    PaymentMethodLabel,
+    PaymentMethodSelect
+} from "../../payment/method/PaymentMethod"
+import { VerifyPlayerDepositDisclosure } from "./VerifyPlayerDeposit"
 
 export { Code }
 
@@ -301,7 +305,9 @@ const useColumns = ({ brandId, items = [] }) => {
                 accessor: (row) => row,
                 Header: <Trans zh="充值类型" en="Payment Method" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <Box>TODO: payment method label</Box>
+                Cell: ({ value }) => {
+                    return <PaymentMethodLabel value={value?.paymentMethodId} />
+                }
             }),
             textColumn({
                 accessor: "channelName",
@@ -347,7 +353,13 @@ const useColumns = ({ brandId, items = [] }) => {
                     disableSortBy: true,
                     Header: <Trans zh="操作" en="Actions" />,
                     Cell: ({ value }) => {
-                        return <Set alignX="center"></Set>
+                        return (
+                            <Set alignX="center">
+                                <VerifyPlayerDepositDisclosure
+                                    formId={value.id}
+                                />
+                            </Set>
+                        )
                     }
                 })
             )

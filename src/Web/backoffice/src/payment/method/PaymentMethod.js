@@ -28,3 +28,17 @@ export const PaymentMethodSelect = ({ placeholder, ...props }) => {
         />
     )
 }
+
+export const PaymentMethodLabel = ({ value }) => {
+    let locale = useLocale()
+    let { isLoading, data, error } = usePaymentMethodList()
+    if (isLoading) {
+        return ""
+    }
+
+    let method = data?.items?.find((item) => {
+        return item.id === value
+    })
+
+    return method?.trans?.[locale] ?? method?.code ?? ""
+}
