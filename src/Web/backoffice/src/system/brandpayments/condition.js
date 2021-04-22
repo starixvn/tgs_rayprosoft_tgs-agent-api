@@ -6,16 +6,16 @@ import { useVipLevelList } from "../../vip-levels/client"
 import { RadioGroup } from "../../radio/RadioGroup"
 import { Switch } from "../../switch/Switch"
 
-export const All = "All"
+const MatchAll = "MatchAll"
 const AllTrans = {
     zh: "满足所有",
-    en: "All"
+    en: "Match All"
 }
 
-export const Someone = "Someone"
-const SomeoneTrans = {
+const MatchOne = "MatchOne"
+const MatchOneTrans = {
     zh: "满足其一",
-    en: "Satisfy one"
+    en: "Satisfy One"
 }
 
 const AllPlayerTrans = {
@@ -62,8 +62,8 @@ export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
     } = record
 
     let condition =
-        playerListCondition === Someone
-            ? useTrans(SomeoneTrans)
+        playerListCondition === MatchOne
+            ? useTrans(MatchOneTrans)
             : useTrans(AllTrans)
 
     let details = [
@@ -91,8 +91,8 @@ export const PlayerListConditionRadioGroup = ({
     ...props
 }) => {
     let options = [
-        { label: useTrans(AllTrans), value: All },
-        { label: useTrans(SomeoneTrans), value: Someone }
+        { label: useTrans(AllTrans), value: MatchAll },
+        { label: useTrans(MatchOneTrans), value: MatchOne }
     ]
 
     return <RadioGroup name={name} options={options} {...props} />
@@ -116,9 +116,9 @@ export const PhoneAuthenticationText = () => (
 
 export const PlayerLabel = ({ value }) => {
     switch (value) {
-        case All:
+        case MatchAll:
             return <AllPlayerText />
-        case Someone:
+        case MatchOne:
             return <Trans zh="特定玩家" en="Specific Players" />
     }
     return ""

@@ -44,6 +44,7 @@ import { DesignatedPlayersLink } from "./DesignatedPlayersLink"
 import { InputField } from "../../input/Input"
 import { formatNumber } from "../../number/format"
 import BrandBar from "../../report/BrandBar"
+import textColumn from "../../table/column/textColumn"
 
 export { Code }
 
@@ -304,17 +305,11 @@ const useColumns = ({
 
     return useMemo(() => {
         let columns = [
-            {
+            textColumn({
                 id: "displayOrder",
                 accessor: (record) => record,
                 Header: <Trans zh="序" en="Order" />,
                 disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                },
                 Cell: ({ value }) => {
                     let { id, number: displayOrder = "" } = value
                     return (
@@ -338,98 +333,46 @@ const useColumns = ({
                         />
                     )
                 }
-            },
-            {
+            }),
+            textColumn({
                 accessor: "paymentName",
                 Header: <Trans zh="支付厂商" en="Payment Vendor" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 accessor: "paymentMethodName",
                 Header: <Trans zh="支付方式" en="Payment Method" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
-                cell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 accessor: "paymentChannelName",
                 Header: <Trans zh="支付通道" en="Payment Channel" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 accessor: "channelName",
                 Header: <Trans zh="通道名称" en="Channel Name" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
-                cell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 id: "target",
                 accessor: (record) => record,
                 Header: <Trans zh="开放对象" en="Target" />,
                 disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                },
-                Cell: ({ value }) => {
-                    return <ConditionDetail record={value} />
-                }
-            },
-            {
+                Cell: ({ value }) => <ConditionDetail record={value} />
+            }),
+            textColumn({
                 id: "designatedUsers",
                 accessor: (record) => record,
                 Header: <Trans zh="特定用户" en="Designated Users" />,
                 disableSortBy: true,
-                headCell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
-                cell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
                 Cell: ({ value }) => <DesignatedPlayersLink record={value} />
-            },
-            {
+            }),
+            textColumn({
                 id: "limit",
                 accessor: (record) => record,
                 Header: <Trans zh="单笔限额" en="Limit" />,
                 disableSortBy: true,
-                headCell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
-                cell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
                 Cell: ({ value }) => {
                     let from = formatNumber(value.transferLimitFrom)
                     let to = formatNumber(value.transferLimitTo)
@@ -439,18 +382,12 @@ const useColumns = ({
                         </Text.Block>
                     )
                 }
-            },
-            {
+            }),
+            textColumn({
                 id: "paymentStatus",
                 accessor: (record) => record,
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                },
                 Cell: ({ value }) => {
                     return (
                         <StatusToggleButton
@@ -460,34 +397,35 @@ const useColumns = ({
                         />
                     )
                 }
-            }
+            })
         ]
 
         if (hasViewAuth || hasEditAuth) {
-            columns.push({
-                id: "actions",
-                accessor: (row) => row,
-                disableSortBy: true,
-                Header: <Trans zh="操作" en="Actions" />,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                },
-                Cell: ({ value }) => {
-                    return (
-                        <Set alignX="center">
-                            <EditButton record={value} onSubmitted={mutate} />
-                            <FeeEditButton
-                                record={value}
-                                onSubmitted={mutate}
-                            />
-                            <LogsButton record={value} />
-                        </Set>
-                    )
-                }
-            })
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Header: <Trans zh="操作" en="Actions" />,
+                    Cell: ({ value }) => {
+                        return (
+                            <Set alignX="center">
+                                <EditButton
+                                    brandId={brandId}
+                                    record={value}
+                                    onSubmitted={mutate}
+                                />
+                                <FeeEditButton
+                                    brandId={brandId}
+                                    record={value}
+                                    onSubmitted={mutate}
+                                />
+                                <LogsButton brandId={brandId} record={value} />
+                            </Set>
+                        )
+                    }
+                })
+            )
         }
         return columns
     }, [transferType, JSON.stringify(items)])

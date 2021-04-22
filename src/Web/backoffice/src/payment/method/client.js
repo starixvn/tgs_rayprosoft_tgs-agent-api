@@ -28,8 +28,9 @@ let CodeTranPairs = [
 export const usePaymentMethodList = () => {
     let { data, ...rest } = useGet(API)
 
-    if (data && data?.data?.length > 0) {
-        data.items = data?.data?.map((item) => {
+    let items = []
+    if (data?.data?.length > 0) {
+        items = data?.data?.map((item) => {
             let [code, trans] =
                 CodeTranPairs.find(([code, trans]) => code === item.code) ?? []
 
@@ -41,7 +42,7 @@ export const usePaymentMethodList = () => {
     }
 
     return {
-        data,
+        data: items,
         ...rest
     }
 }

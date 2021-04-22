@@ -38,18 +38,18 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
         [Test]
         public void Should_have_error_when_payment_vendor_id_is_null()
         {
-            var model = new BrandPaymentRequest { PaymentMethodChannelId = Guid.Empty };
+            var model = new BrandPaymentRequest { PaymentChannelId = Guid.Empty };
             var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.PaymentMethodChannelId)
+            result.ShouldHaveValidationErrorFor(request => request.PaymentChannelId)
                 .WithErrorMessage(BrandPayment.PaymentRequired);
         }
 
         [Test]
         public void Should_not_have_error_when_payment_vendor_id_is_specified()
         {
-            var model = new BrandPaymentRequest { PaymentMethodChannelId = Guid.NewGuid() };
+            var model = new BrandPaymentRequest { PaymentChannelId = Guid.NewGuid() };
             var result = _validator.TestValidate(model);
-            result.ShouldNotHaveValidationErrorFor(request => request.PaymentMethodChannelId);
+            result.ShouldNotHaveValidationErrorFor(request => request.PaymentChannelId);
         }
 
         [Test]
@@ -67,15 +67,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Validators.Payment
             var model = new BrandPaymentRequest { TransferLimitTo = 1 };
             var result = _validator.TestValidate(model);
             result.ShouldNotHaveValidationErrorFor(request => request.TransferLimitTo);
-        }
-
-        [Test]
-        public void Should_have_error_when_deposited_amount_to_is_null()
-        {
-            var model = new BrandPaymentRequest { DepositedAmountMax = 0 };
-            var result = _validator.TestValidate(model);
-            result.ShouldHaveValidationErrorFor(request => request.DepositedAmountMax)
-                .WithErrorMessage(BrandPayment.DepositedGreaterZero);
         }
 
         [Test]
