@@ -177,7 +177,8 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 accessor: "vipLevel",
                 Header: <Trans zh="VIP 等级" en="VIP Level" />,
                 disableSortBy: true,
-                Cell: ({ value }) => `VIP ${value}`
+                Cell: ({ value }) =>
+                    Number.isInteger(value) ? `VIP ${value}` : "-"
             }),
             {
                 disableSortBy: true,
