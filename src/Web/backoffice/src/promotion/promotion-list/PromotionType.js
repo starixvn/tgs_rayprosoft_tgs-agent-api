@@ -1,141 +1,133 @@
 import React from "react"
+import { Spinner } from "bumbag"
 import { getTrans, Trans, useLocale, useTrans } from "../../i18n"
 import Select from "../../select/Select"
+import { usePromotionTypeList } from "./client"
 
 const FirstDeposit = "FirstDeposit"
-const FirstDepositTrans = {
-    zh: "每日首充",
-    en: "First Deposit"
-}
 
 const SecondDeposit = "SecondDeposit"
-const SecondDepositTrans = {
-    zh: "每日再充",
-    en: "Second Deposit"
-}
 
-const DepositGroup = "DepositGroup"
-const DepositGroupItems = [FirstDeposit, SecondDeposit]
-const DepositGroupTrans = {
-    zh: "充值送",
-    en: "Deposit Rebate"
-}
+const Deposit = "Deposit"
 
-const Rebate = "Rebate"
-const RebateTrans = {
-    zh: "流水反水",
-    en: "Turnover Rebate"
-}
+const TurnoverRebate = "TurnoverRebate"
 
-const TurnoverGroup = "TurnoverGroup"
-const TurnoverGroupItems = [Rebate]
-const TurnoverGroupTrans = {
-    zh: "流水",
-    en: "Turnover"
-}
+const Turnover = "Turnover"
+
+const ReliefMoneyDaily = "ReliefMoneyDaily"
 
 const ReliefMoney = "ReliefMoney"
-const ReliefMoneyTrans = {
-    zh: "每日救援金",
-    en: "Daily Relief Money"
-}
 
-const ReliefGroup = "ReliefGroup"
-const ReliefGroupItems = [ReliefMoney]
-const ReliefGroupTrans = {
-    zh: "救援金",
-    en: "Relief Money"
-}
-
-const GroupItems = {
-    DepositGroup: DepositGroupItems,
-    TurnoverGroup: TurnoverGroupItems,
-    ReliefGroup: ReliefGroupItems
-}
-
-const Trans = {
-    FirstDeposit: FirstDepositTrans,
-    SecondDeposit: SecondDepositTrans,
-    Rebate: RebateTrans,
-    ReliefMoney: ReliefMoneyTrans
-}
-
-export const PromotionTypeGroupLabel = ({ value }) => {
-    switch (value) {
-        case DepositGroup:
-            return <Trans {...DepositGroupTrans} />
-        case TurnoverGroup:
-            return <Trans {...TurnoverGroupTrans} />
-        case ReliefGroup:
-            return <Trans {...ReliefGroupTrans} />
-        default:
-            return value
+export const usePromotionGroupLabelOf = (promotionType) => {
+    let locale = useLocale()
+    let { isLoading, data: groups, error } = usePromotionTypeList()
+    if (isLoading) {
+        return ""
     }
+
+    let group = groups?.reduce((result, group) => {
+        if (result) {
+            return result
+        }
+
+        let type = group?.types?.find((type) => type.name === promotionType)
+        return type ? group : undefined
+    }, undefined)
+
+    return group?.trans?.[locale] ?? group?.name ?? ""
 }
 
-export const PromotionGroupSelect = ({ placeholder, ...props }) => {
+export const usePromotionGroupValueOf = (promotionType) => {
+    let { isLoading, data: groups, error } = usePromotionTypeList()
+    if (isLoading) {
+        return ""
+    }
+
+    let group = groups?.reduce((result, group) => {
+        if (result) {
+            return result
+        }
+
+        let type = group?.types?.find((type) => type.name === promotionType)
+        return type ? group : undefined
+    }, undefined)
+
+    return group?.name ?? ""
+}
+
+export const PromotionTypeGroupSelect = ({ placeholder, ...props }) => {
+    let locale = useLocale()
     let defaultPlaceholder = useTrans({
         zh: "活动类型",
-        en: "Promotion Type"
+        en: "Promotion Type Group"
     })
     placeholder = placeholder ?? defaultPlaceholder
 
-    let options = [
-        {
-            label: useTrans(DepositGroupTrans),
-            value: DepositGroup
-        },
-        {
-            label: useTrans(TurnoverGroupTrans),
-            value: TurnoverGroup
-        },
-        {
-            label: useTrans(ReliefGroupTrans),
-            value: ReliefGroup
-        }
-    ]
+    let { isLoading, data: groups, error } = usePromotionTypeList()
+    if (isLoading) {
+        return <Spinner />
+    }
 
+    let options = groups?.map(({ name, trans }) => {
+        return {
+            label: trans?.[locale] ?? name,
+            value: name
+        }
+    })
     return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export const PromotionTypeLabel = ({ value }) => {
     let locale = useLocale()
-    let trans = toTrans(value)
-    if (!trans) {
-        return value
+    let { isLoading, data: groups, error } = usePromotionTypeList()
+    if (isLoading) {
+        return ""
     }
 
-    return trans[locale]
+    let type = groups.reduce((result, group) => {
+        if (result) {
+            return result
+        }
+
+        return group?.types?.find((type) => type.name === value)
+    }, undefined)
+
+    return type?.trans?.[locale] ?? value
 }
 
-export const PromotionTypeSelect = ({ group, props }) => {
+export const PromotionTypeSelect = ({ placeholder, group, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "活动子类型",
-        en: "Promotion Subtype"
+        en: "Promotion Type"
     })
     placeholder = placeholder ?? defaultPlaceholder
 
-    let items = toTypes(group)
     let locale = useLocale()
-    let options = toOptions({ items, locale })
-
-    return <Select options={options} {...props} />
-}
-
-const toTypes = (group = "") => GroupItems[group] ?? []
-
-const toTrans = (type = "") => Trans[type]
-
-const toOptions = ({ items = [], locale }) => {
-    return items
-        .map((item) => {
-            let trans = toTrans(item)
-            if (trans) {
-                return {
-                    label: trans[locale],
-                    value: item
-                }
+    let { isLoading, data: groups, error } = usePromotionTypeList()
+    let options = groups
+        ?.filter(({ name }) => {
+            if (group) {
+                return group === name
             }
+            return true
         })
-        .filter((item) => !!item)
+        .reduce((list, { types = [], ...group }) => {
+            let options = types.map(({ name, trans }) => {
+                return {
+                    label: trans?.[locale] ?? name,
+                    value: name
+                }
+            })
+
+            return [...list, ...options]
+        }, [])
+
+    return (
+        <Select
+            placeholder={placeholder}
+            isLoading={isLoading}
+            options={options}
+            {...props}
+        />
+    )
 }

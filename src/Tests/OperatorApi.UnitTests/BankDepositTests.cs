@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using ExpectedObjects;
@@ -9,6 +8,7 @@ using NUnit.Framework;
 using TGS.Apis.FileService.Clients;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BankDeposit;
+using TGS.Services.Operator.Deposit;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -90,52 +90,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1000M)));
 
             Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
-        }
-
-        [Test]
-        public async Task Get_Payment_Methods_Should_Success()
-        {
-            var moqWalletRepository = new Mock<IWalletRepository>();
-
-            var sut = new AllPaymentMethodsQueryService(moqWalletRepository.Object);
-
-            var query = new AllPaymentMethodsQuery();
-
-            moqWalletRepository
-                .Setup(fake => fake.GetAllPaymentMethodsAsync())
-                .Returns(new[] {
-                    new PaymentMethod(Guid.NewGuid(), "test1"),
-                    new PaymentMethod(Guid.NewGuid(), "test2")
-                }.ToAsyncEnumerable());
-
-            _ = await sut.GetAsync(query);
-
-            moqWalletRepository.Verify(
-                fake => fake.GetAllPaymentMethodsAsync(),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task Get_Payment_Channels_Should_Success()
-        {
-            var moqWalletRepository = new Mock<IWalletRepository>();
-
-            var sut = new AllPaymentChannelsQueryService(moqWalletRepository.Object);
-
-            var query = new AllPaymentChannelsQuery();
-
-            moqWalletRepository
-                .Setup(fake => fake.GetAllPaymentChannelsAsync())
-                .Returns(new[] {
-                    new PaymentChannel(Guid.NewGuid(), "test1"),
-                    new PaymentChannel(Guid.NewGuid(), "test2")
-                }.ToAsyncEnumerable());
-
-            _ = await sut.GetAsync(query);
-
-            moqWalletRepository.Verify(
-                fake => fake.GetAllPaymentChannelsAsync(),
-                Times.Exactly(1));
         }
 
         [Test]

@@ -154,7 +154,7 @@ const SearchBar = ({
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
-                    <DateTimeRangeInput startName="start" endName="end" />
+                    <DateTimeRangeInput />
                     {/* <InputField
                         name="trackingId"
                         showEmptyFieldValueAddonAfter

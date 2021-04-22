@@ -40,12 +40,14 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     Id = brand.Id,
                     LicenseeId = brand.LicenseeId,
                     LicenseeName = brand.Licensee.Name,
+                    BusinessType = brand.Licensee.Reseller.BusinessType,
                     Code = brand.Code,
                     Name = brand.Name,
                     Status = brand.Status,
                     ClientId = brand.ClientId,
                     SecretKey = brand.SecretKey,
                     ApiKey = brand.ApiKey,
+                    SettlementIntervalType = brand.SettlementIntervalType,
                     Currencies = brand.Currencies
                         .Select(x => new BrandCurrencyModel
                         {

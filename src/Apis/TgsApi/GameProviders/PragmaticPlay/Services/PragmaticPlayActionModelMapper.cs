@@ -125,21 +125,50 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
             ResultRequest request, string externalTransactionReferenceId)
         {
-            var transaction = new TransactionData
+            var externalGameId = request.GameId;
+            var externalRoundId = request.RoundId;
+            var hasPromoWin = request.PromoWinReference.IsNotNullOrEmpty();
+
+            var transactions = new List<TransactionData>
             {
-                ExternalBetId = externalTransactionReferenceId,
-                ExternalGameId = request.GameId,
-                ExternalRoundId = request.RoundId,
-                ExternalTransactionId = request.Reference,
-                ExternalTransactionReferenceId = externalTransactionReferenceId,
-                ExternalGameActionGroupId = request.RoundId,
-                GameActionType = GameActionType.WinBet,
-                Amount = request.Amount,
-                RoundClosed = true,
-                TimeStamp = GetTimestamp(request.Timestamp)
+                new()
+                {
+                    ExternalBetId = externalTransactionReferenceId,
+                    ExternalGameId = externalGameId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = request.Reference,
+                    ExternalTransactionReferenceId = externalTransactionReferenceId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    GameActionType = request.Amount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
+                    Amount = request.Amount,
+                    RoundClosed = !hasPromoWin,
+                    TimeStamp = GetTimestamp(request.Timestamp)
+                }
             };
 
-            return GetBetData(playerCode, data, new[] {transaction});
+            if (hasPromoWin)
+            {
+                transactions.Add(new()
+                {
+                    ExternalBetId = externalTransactionReferenceId,
+                    ExternalGameId = externalGameId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = request.PromoWinReference,
+                    ExternalTransactionReferenceId = externalTransactionReferenceId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    GameActionType = GameActionType.FreeBet,
+                    Amount = request.PromoWinAmount!.Value,
+                    RoundClosed = true,
+                    ExtraData = AddCustomDescription(new()
+                    {
+                        {nameof(request.PromoCampaignId), request.PromoCampaignId},
+                        {nameof(request.PromoCampaignType), request.PromoCampaignType}
+                    }),
+                    TimeStamp = GetTimestamp(request.Timestamp)
+                });
+            }
+
+            return GetBetData(playerCode, data, transactions.ToArray());
         }
 
         BetData IPragmaticPlayActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,

@@ -4,7 +4,7 @@ namespace TGS.Shared.Game.Models.PragmaticPlay.Outgoing
 {
     public record OpenHistoryExtendedResponse : ErrorResponse
     {
-        [JsonPropertyName("historyUrl")]
+        [JsonPropertyName("url")]
         public string Url { get; init; }
     }
 }

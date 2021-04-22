@@ -60,7 +60,6 @@ export const GameRoundDialog = ({
         return <AlertDialog {...error} onClickClose={dialog.hide} />
     }
 
-    console.log("round", data)
     return (
         <Dialog.Modal
             title={title}
