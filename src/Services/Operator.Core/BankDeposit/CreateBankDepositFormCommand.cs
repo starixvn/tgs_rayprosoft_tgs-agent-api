@@ -7,8 +7,8 @@ namespace TGS.Services.Operator.BankDeposit
         string PlayerCode,
         Guid BrandId,
         Guid BrandPaymentId,
-        string BankAccount,
-        decimal Amount)
+        decimal Amount,
+        string? ApplyInfo)
     {
         public TaskCompletionSource<Guid> ReturnFormIdSource { get; } = new TaskCompletionSource<Guid>();
     }

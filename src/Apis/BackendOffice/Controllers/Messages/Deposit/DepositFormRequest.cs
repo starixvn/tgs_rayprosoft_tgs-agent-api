@@ -15,7 +15,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
         public Guid? PaymentMethodId { get; init; }
 
         [FromQuery(Name = "status")]
-        public int? Status { get; init; }
+        public FlowStatus? Status { get; init; }
 
         [FromQuery(Name = "bc")]
         public DateTimeOffset? BeginCreateOn { get; init; }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 
 namespace TGS.Services.BackOffice.Domain
 {
@@ -10,10 +11,11 @@ namespace TGS.Services.BackOffice.Domain
         Guid BrandPaymentId,
         string ChannelName,
         Guid PaymentMethodId,
-        int Status,
-        string BankAccount,
         decimal Amount,
         string Remark,
+        int Status,
+        JsonDocument ApplyInfo,
+        JsonDocument PaymentReturn,
         DateTimeOffset CreateOn,
         DateTimeOffset UpdateOn);
 }

@@ -76,7 +76,11 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("EmailSetting").Bind(options);
                 })
-                .UseOperatorRepositories();
+                .UseOperatorRepositories()
+                .ConfigurePayment(config =>
+                {
+                    config.UseTgsPaymentRepository();
+                });
 
             services
                 .AddOptions<ConstValidateCodeOptions>()
