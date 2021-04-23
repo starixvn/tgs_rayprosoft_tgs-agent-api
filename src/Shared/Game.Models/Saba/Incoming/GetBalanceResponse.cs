@@ -2,13 +2,10 @@
 
 namespace TGS.Shared.Game.Models.Saba.Incoming
 {
-    public record GetBalanceResponse : BaseResponse
+    public record GetBalanceResponse : BalanceResponse
     {
         [JsonPropertyName("userId")]
         public string PlayerCode { get; init; }
-
-        [JsonPropertyName("balance")]
-        public decimal Balance { get; init; }
 
         [JsonPropertyName("balanceTs")]
         public string Timestamp { get; init; }

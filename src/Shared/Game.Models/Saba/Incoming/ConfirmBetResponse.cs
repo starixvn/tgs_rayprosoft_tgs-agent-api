@@ -1,10 +1,6 @@
-﻿using System.Text.Json.Serialization;
-
-namespace TGS.Shared.Game.Models.Saba.Incoming
+﻿namespace TGS.Shared.Game.Models.Saba.Incoming
 {
-    public record ConfirmBetResponse : BaseResponse
+    public record ConfirmBetResponse : BalanceResponse
     {
-        [JsonPropertyName("balance")]
-        public decimal Balance { get; init; }
     }
 }
