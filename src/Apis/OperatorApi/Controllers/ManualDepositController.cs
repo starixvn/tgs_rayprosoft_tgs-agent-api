@@ -9,7 +9,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
-using TGS.Services.Operator.BankDeposit;
 using TGS.Services.Operator.Deposit;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
@@ -24,10 +23,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async ValueTask<Guid> SubmitDepositRequestAsync(
-            [FromServices] ICommandService<CreateBankDepositFormCommand> createDepositFormService,
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
-            [FromBody] SubmitDepositRequest request)
+            [FromServices] ManualDepositSerializer serializer,
+            [FromBody] SubmitManualDepositRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
@@ -38,17 +37,16 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
-            var command = new CreateBankDepositFormCommand(
+            var command = new CreateDepositFormCommand(
                 playerTokenData.PlayerCode,
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
-                jsonSerializationProvider.SerializeToString(
+                _ => serializer.Serialize(
                     new ManualDepositApplyInfo(
                             request.BankAccount,
                             brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
-                            brandPaymentBankInfo.RootElement.GetProperty("name").GetString()),
-                    JsonSerializationUtility.SerializerOption));
+                            brandPaymentBankInfo.RootElement.GetProperty("name").GetString())));
 
             await createDepositFormService
                 .ExecuteAsync(command)
@@ -65,7 +63,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>> getAllPaymentChannelService,
             [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IJsonSerializationProvider serializationProvider,
+            [FromServices] ManualDepositSerializer serializer,
             Guid id)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -87,9 +85,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(new GetBrandPaymentQuery(form.BrandPaymentId))
                 .ConfigureAwait(false);
 
-            var bankInfo = serializationProvider.DeserializeFromString<ManualDepositApplyInfo>(
-                form.ApplyInfo,
-                JsonSerializationUtility.SerializerOption);
+            var bankInfo = serializer.Deserialize<ManualDepositApplyInfo>(form.ApplyInfo);
 
             return new DepositFormResponse
             {

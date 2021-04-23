@@ -8,23 +8,24 @@ using TGS.Core.Infrastructures.Utility;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Deposit;
 
-namespace TGS.Services.Operator.BankDeposit
+namespace TGS.Services.Operator.Deposit
 {
     internal class SubmitBankDepositFormCommandService : ICommandService<SubmitBankDepositFormCommand>
     {
         private readonly IFileServiceClient _fileServiceClient;
         private readonly IPaymentRepository _paymentRepository;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ManualDepositSerializer _serializer;
 
         public SubmitBankDepositFormCommandService(
             IFileServiceClient fileServiceClient,
             IPaymentRepository paymentRepository,
-            IJsonSerializationProvider jsonSerializationProvider)
+            ManualDepositSerializer serializer)
         {
             _fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
         public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command, CancellationToken cancellationToken = default)
@@ -42,9 +43,8 @@ namespace TGS.Services.Operator.BankDeposit
                 .SubmitFormStatusAsync(
                     command.FormId,
                     1000,
-                    _jsonSerializationProvider.SerializeToString(
-                        new ManualDepositPaymentReturn(uploadResult.Id),
-                        JsonSerializationUtility.SerializerOption))
+                    _serializer.Serialize(
+                        new ManualDepositPaymentReturn(uploadResult.Id)))
                 .ConfigureAwait(false);
         }
     }
