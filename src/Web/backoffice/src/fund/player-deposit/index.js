@@ -36,13 +36,19 @@ import numberColumn, {
 } from "../../table/column/numberColumn"
 import { DateInputRange } from "../../date/DateTimeRangeInput"
 import { today } from "../../date/range"
-import { usePlayerDepositList } from "./client"
+import { usePlayerDepositFormList } from "./client"
 import { Update } from "./menu"
 import {
     PaymentMethodLabel,
     PaymentMethodSelect
 } from "../../payment/method/PaymentMethod"
 import { VerifyPlayerDepositDisclosure } from "./VerifyPlayerDeposit"
+import { ViewPlayerDepositDisclosure } from "./ViewPlayerDeposit"
+import { mutate } from "swr"
+import FundReviewStatus, {
+    FundReviewStatusLabel,
+    FundReviewStatusSelect
+} from "../FundReviewStatus"
 
 export { Code }
 
@@ -108,7 +114,7 @@ const BodyContent = ({ brandId }) => {
         mutate,
         error,
         deleteCache
-    } = usePlayerDepositList(brandId, {
+    } = usePlayerDepositFormList(brandId, {
         ...toApiParams(state)
         // sortby: "CreatedOn" //TODO: rm when bug fixed
     })
@@ -232,6 +238,11 @@ const SearchBar = ({
         zh: "更新时间",
         en: "Update time"
     })
+
+    let paymentMethodPlaceholder = useTrans({
+        zh: "充值类型",
+        en: "Payment Method"
+    })
     return (
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
@@ -247,7 +258,11 @@ const SearchBar = ({
                             showEmptyFieldValueAddonAfter
                             placeholder={channelNameInputPlaceholder}
                         />
-                        <PaymentMethodSelect name="method" />
+                        <PaymentMethodSelect
+                            name="method"
+                            placeholder={paymentMethodPlaceholder}
+                        />
+                        <FundReviewStatusSelect name="status" />
                     </Set>
                     <Set orientation="horizontal">
                         <FieldWrapper label={createdOnLabel}>
@@ -283,7 +298,7 @@ const SearchBar = ({
     )
 }
 
-const useColumns = ({ brandId, items = [] }) => {
+const useColumns = ({ brandId, items = [], mutate }) => {
     let hasUpdateMenu = useIsDisplayMenuByRoute([Update])
 
     return useMemo(() => {
@@ -306,7 +321,13 @@ const useColumns = ({ brandId, items = [] }) => {
                 Header: <Trans zh="充值类型" en="Payment Method" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
-                    return <PaymentMethodLabel value={value?.paymentMethodId} />
+                    return (
+                        <Box>
+                            <PaymentMethodLabel
+                                value={value?.paymentMethodId}
+                            />
+                        </Box>
+                    )
                 }
             }),
             textColumn({
@@ -335,7 +356,7 @@ const useColumns = ({ brandId, items = [] }) => {
                 accessor: "status",
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <Box>{value}</Box>
+                Cell: ({ value }) => <FundReviewStatusLabel value={value} />
             }),
             textColumn({
                 accessor: "remark",
@@ -353,9 +374,19 @@ const useColumns = ({ brandId, items = [] }) => {
                     disableSortBy: true,
                     Header: <Trans zh="操作" en="Actions" />,
                     Cell: ({ value }) => {
+                        let underReview =
+                            value?.status === FundReviewStatus.Review
                         return (
                             <Set alignX="center">
-                                <VerifyPlayerDepositDisclosure
+                                {underReview && (
+                                    <VerifyPlayerDepositDisclosure
+                                        brandId={brandId}
+                                        formId={value.id}
+                                        onSubmitted={mutate}
+                                    />
+                                )}
+                                <ViewPlayerDepositDisclosure
+                                    brandId={brandId}
                                     formId={value.id}
                                 />
                             </Set>

@@ -50,6 +50,7 @@ import { useForm } from "react-hook-form"
 import { ChangePasswordDialog } from "./ChangePasswordDialog"
 import { EditPlayerInfoDialog, ViewPlayerInfoDialog } from "./InfoDialog"
 import { toValue } from "../../platform"
+import { DepositDialog } from "./DepositDialog"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
     let { path, url } = useRouteMatch()
@@ -136,6 +137,7 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
         }
     }, [playerTokenError])
 
+    const depositDialog = Modal.useState()
     const viewInfoDialog = Modal.useState()
     const editInfoDialog = Modal.useState()
     const changePasswordDialog = Modal.useState()
@@ -145,6 +147,7 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
             <DropdownMenu
                 menu={
                     <PlayerMenu
+                        depositDialog={depositDialog}
                         playerInfoDialog={viewInfoDialog}
                         editPlayerInfoDialog={editInfoDialog}
                         editPasswordDialog={changePasswordDialog}
@@ -156,6 +159,15 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                     {username}
                 </Button>
             </DropdownMenu>
+            {depositDialog.visible && (
+                <DepositDialog
+                    brandCode={brandCode}
+                    currency={currency}
+                    username={username}
+                    platform={platform}
+                    dialog={depositDialog}
+                />
+            )}
             {viewInfoDialog.visible && (
                 <ViewPlayerInfoDialog
                     brandCode={brandCode}
@@ -188,6 +200,7 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
 }
 
 const PlayerMenu = ({
+    depositDialog,
     playerInfoDialog,
     editPlayerInfoDialog,
     editPasswordDialog,
@@ -195,6 +208,9 @@ const PlayerMenu = ({
 }) => {
     return (
         <>
+            <DropdownMenu.Item onClick={depositDialog.show}>
+                Deposit
+            </DropdownMenu.Item>
             <DropdownMenu.Item onClick={playerInfoDialog.show}>
                 View Info
             </DropdownMenu.Item>

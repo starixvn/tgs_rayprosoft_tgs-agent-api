@@ -14,7 +14,7 @@ export const PaymentMethodSelect = ({ placeholder, ...props }) => {
     let locale = useLocale()
     let { isLoading, data, error } = usePaymentMethodList()
 
-    let options = data?.items?.map(({ trans, code }) => ({
+    let options = data?.map(({ trans, code }) => ({
         label: trans?.[locale] ?? code,
         value: code
     }))
@@ -36,7 +36,7 @@ export const PaymentMethodLabel = ({ value }) => {
         return ""
     }
 
-    let method = data?.items?.find((item) => {
+    let method = data?.find((item) => {
         return item.id === value
     })
 
