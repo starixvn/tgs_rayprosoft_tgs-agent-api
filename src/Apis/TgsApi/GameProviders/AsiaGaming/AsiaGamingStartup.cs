@@ -39,6 +39,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming
             services.AddScoped<IAsiaGamingServices, AsiaGamingServices>();
             services.AddSingleton<IAsiaGamingActionModelMapper, AsiaGamingActionModelMapper>();
 
+            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(AsiaGamingGameHistory)}, (provider, _) =>
+                provider.GetRequiredService<AsiaGamingGameHistory>());
+
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(AsiaGamingGameInitializer)}, (provider, _) =>
                 provider.GetRequiredService<AsiaGamingGameInitializer>());
         }

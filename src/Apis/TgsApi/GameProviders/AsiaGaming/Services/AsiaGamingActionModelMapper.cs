@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
+using TGS.Shared.Game.Models.AsiaGaming.Common;
 using TGS.Shared.Game.Models.AsiaGaming.Enums;
 using TGS.Shared.Game.Models.AsiaGaming.Incoming;
 using TransactionType = TGS.Shared.Game.Models.AsiaGaming.Enums.TransactionType;
@@ -28,6 +30,12 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
     public sealed class AsiaGamingActionModelMapper : IAsiaGamingActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.AsiaGaming;
+        private readonly IJsonSerializationProvider _jsonSerialization;
+
+        public AsiaGamingActionModelMapper(IJsonSerializationProvider jsonSerialization)
+        {
+            _jsonSerialization = jsonSerialization;
+        }
         
         BetData IAsiaGamingActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
             PostTransferRequest r, TransactionType transactionType, bool lockGame, OppositeBetSetting[] oppositeBetSettings)
@@ -54,7 +62,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                     GameActionType = gameActionType,
                     TimeStamp = GetTimestamp(timestamp),
                     RoundClosed = roundClosed,
-                    RoundDetail = r.Record.GameResult,
+                    RoundDetail = GetRoundHistory(roundClosed, r.Record.GameResult),
                 }
             };
             
@@ -172,6 +180,14 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var offset = TimeSpan.FromHours(0);
             var dateTime = DateTime.ParseExact(betTime, "MM/dd/yyyy HH:mm:sss", null, System.Globalization.DateTimeStyles.AllowWhiteSpaces);
             return new DateTimeOffset(dateTime, offset);
+        }
+
+        private string GetRoundHistory(bool? roundClosed, string roundResult)
+        {
+            return roundClosed == true ? _jsonSerialization.SerializeToString(new GameHistory
+            {
+                RoundResult = roundResult
+            }) : string.Empty;
         }
         
         private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,

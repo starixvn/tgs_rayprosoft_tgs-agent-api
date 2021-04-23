@@ -349,6 +349,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     GameType = gameType,
                     TableCode = "va21",
                     TransactionType = transactionType,
+                    GameResult = "P;HK;DQ;HJ:B;H5;CK;DA",
                     TransactionCode = "BCB",
                     RoundFinish = finish ?? "true"
                 }
