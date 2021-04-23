@@ -46,6 +46,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             {
                 {typeof(GetBalanceRequest), ResolveGetBalanceRequestAsync},
                 {typeof(PlaceBetRequest), ResolvePlaceBetRequestAsync},
+                {typeof(PlaceBetParlayRequest), ResolvePlaceBetParlayRequestAsync},
                 {typeof(ConfirmBetRequest), ResolveConfirmBetRequestAsync},
                 {typeof(CancelBetRequest), ResolveCancelBetRequestAsync}
             };
@@ -105,8 +106,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             var loginRecord = await DecryptTokenAsync(r.Body.Token);
             var playerCode = loginRecord.PlayerCode;
 
-            var expiresOn = loginRecord.ExpiredOn - DateTimeOffset.Now;
-            await _cacheManger.SafeCacheAsync(SabaConsts.RedisKey.Token, playerCode, expiresOn, loginRecord);
+            await CachedLoginRecordAsync(playerCode, loginRecord);
+
+            return (r.Key, playerCode, loginRecord.PlatformType);
+        }
+
+        private async ValueTask<(string, string, PlatformType)> ResolvePlaceBetParlayRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<PlaceBetParlayRequest>(value);
+            var loginRecord = await DecryptTokenAsync(r.Body.Token);
+            var playerCode = loginRecord.PlayerCode;
+
+            await CachedLoginRecordAsync(playerCode, loginRecord);
 
             return (r.Key, playerCode, loginRecord.PlatformType);
         }
@@ -116,10 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             var r = _json.DeserializeFromString<ConfirmBetRequest>(value);
             var playerCode = r.Body.PlayerCode;
 
-            var loginRecord = await _cacheManger.SafeGetAsync<CachedPlayerLoginRecord>(SabaConsts.RedisKey.Token,
-                playerCode, () => null);
-
-            var platformType = loginRecord?.PlatformType ?? PlatformType.Desktop;
+            var platformType = await GetPlatformTypeFromCachedLoginRecordAsync(playerCode);
             return (r.Key, playerCode, platformType);
         }
 
@@ -128,10 +136,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             var r = _json.DeserializeFromString<CancelBetRequest>(value);
             var playerCode = r.Body.PlayerCode;
 
-            var loginRecord = await _cacheManger.SafeGetAsync<CachedPlayerLoginRecord>(SabaConsts.RedisKey.Token,
-                playerCode, () => null);
-
-            var platformType = loginRecord?.PlatformType ?? PlatformType.Desktop;
+            var platformType = await GetPlatformTypeFromCachedLoginRecordAsync(playerCode);
             return (r.Key, playerCode, platformType);
         }
 
@@ -152,6 +157,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             }
 
             return loginRecord;
+        }
+
+        private async ValueTask<PlatformType> GetPlatformTypeFromCachedLoginRecordAsync(string playerCode)
+        {
+            var loginRecord = await _cacheManger.SafeGetAsync<CachedPlayerLoginRecord>(SabaConsts.RedisKey.Token,
+                playerCode, () => null);
+
+            return loginRecord?.PlatformType ?? PlatformType.Desktop;
+        }
+
+        private async ValueTask CachedLoginRecordAsync(string playerCode, CachedPlayerLoginRecord loginRecord)
+        {
+            var expiresOn = loginRecord.ExpiredOn - DateTimeOffset.Now;
+            await _cacheManger.SafeCacheAsync(SabaConsts.RedisKey.Token, playerCode, expiresOn, loginRecord);
         }
     }
 }

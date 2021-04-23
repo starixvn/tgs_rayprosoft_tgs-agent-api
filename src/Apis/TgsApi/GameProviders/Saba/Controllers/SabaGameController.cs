@@ -73,6 +73,23 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
         }
 
         [HttpPost]
+        [Route("placebetparlay")]
+        [ResolveRequest(Type = typeof(PlaceBetParlayRequest))]
+        public async ValueTask<PlaceBetParlayResponse> PlaceBetParlayAsync(PlaceBetParlayRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var betData = _map.Request(playerCode, data, request);
+            var r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
+
+            await CacheLockAmountAsync(betData.Transactions);
+
+            return _map.Response(playerCode, request.Body, r);
+        }
+
+        [HttpPost]
         [Route("confirmbet")]
         [ResolveRequest(Type = typeof(ConfirmBetRequest))]
         public async ValueTask<ConfirmBetResponse> ConfirmBetAsync(ConfirmBetRequest request)
@@ -138,7 +155,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             var cacheKeys = transactions.Select(t => new CacheKey
             {
                 CacheType = SabaConsts.RedisKey.LockAmount,
-                Key = t.ExternalGameId
+                Key = t.ExternalRoundId
             }).ToArray();
 
             await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true);

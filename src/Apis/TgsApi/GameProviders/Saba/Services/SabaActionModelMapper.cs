@@ -13,6 +13,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
     {
         BetData Request(string playerCode, GameProviderConfigurationData data, PlaceBetRequest request);
 
+        BetData Request(string playerCode, GameProviderConfigurationData data, PlaceBetParlayRequest request);
+
         BetData Request(string playerCode, GameProviderConfigurationData data, ConfirmBetRequest request,
             decimal unlockAmount);
 
@@ -21,6 +23,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         GetBalanceResponse Response(string playerCode, GetBalanceResult result);
 
         PlaceBetResponse Response(string playerCode, PlaceBetRequest.Data body, BetResult r);
+
+        PlaceBetParlayResponse Response(string playerCode, PlaceBetParlayRequest.Data body, BetResult r);
 
         ConfirmBetResponse Response(string playerCode, ConfirmBetRequest.Data body, BetResult r);
 
@@ -53,6 +57,31 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             };
 
             return GetBetData(playerCode, body.CurrencyCode, data, new[] {transaction});
+        }
+
+        BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            PlaceBetParlayRequest request)
+        {
+            var body = request.Body;
+
+            var transactions = body.Transactions.Select(t =>
+            {
+                var externalRoundId = t.ReferenceId.ToString();
+
+                return new TransactionData
+                {
+                    ExternalGameId = _externalGameId,
+                    ExternalBetId = string.Empty,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    Amount = t.BetAmount,
+                    TimeStamp = GetTimestamp(body.BetTime),
+                    GameActionType = GameActionType.LockAmount
+                };
+            }).ToArray();
+
+            return GetBetData(playerCode, body.CurrencyCode, data, transactions);
         }
 
         BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
@@ -133,6 +162,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 Status = ((int)GameApiError.Success).ToString(),
                 ExternalRoundId = body.ReferenceId,
                 ReferenceId = body.ReferenceId
+            };
+
+        PlaceBetParlayResponse ISabaActionModelMapper.Response(string playerCode, PlaceBetParlayRequest.Data body,
+            BetResult r) =>
+            new()
+            {
+                Status = ((int)GameApiError.Success).ToString(),
+                Transactions = body.Transactions.Select(t => new PlaceBetParlayResponse.Transaction
+                {
+                    ExternalRoundId = t.ReferenceId,
+                    ReferenceId = t.ReferenceId
+                }).ToArray()
             };
 
         ConfirmBetResponse ISabaActionModelMapper.
