@@ -15,7 +15,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 {
     public class
         CreatePromotionBonusDailyQueryHandler : Handler<CreatePromotionBonusDailyRequest,
-            PromotionBonusPlayerModel[]>
+            CreatePromotionBonusResponse>
     {
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly IPromotionBonusService _promotionBonusService;
@@ -31,7 +31,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             _promotionService = promotionService;
         }
 
-        public override async Task<PromotionBonusPlayerModel[]> Handle(CreatePromotionBonusDailyRequest request,
+        public override async Task<CreatePromotionBonusResponse> Handle(CreatePromotionBonusDailyRequest request,
             CancellationToken cancellationToken)
         {
             var previousDay = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddDays(-1);
@@ -83,7 +83,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
 
-            return promotionBonus.Where(x => x.AutoSentPlayerBonus).SelectMany(x => x.Players).ToArray();
+            return new() {Valid = true, PromotionBonus = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray()};
         }
 
         private static PromotionBonusPlayerModel[] GetPromotionBonusPlayers(Guid id,

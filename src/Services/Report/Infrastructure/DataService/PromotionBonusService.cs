@@ -46,10 +46,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 CreatedOn = model.CreatedOn,
                 Players = model.Players.Select(x => new PromotionPlayer
                 {
-                    PlayerCode = x.PlayerCode,
-                    PromotionBonusId = model.Id,
-                    IsSent = x.IsSent,
-                    BonusAmount = x.BonusAmount
+                    PlayerCode = x.PlayerCode, PromotionBonusId = model.Id, BonusAmount = x.BonusAmount
                 }).ToHashSet()
             }).ToArray());
 

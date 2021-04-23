@@ -6,7 +6,8 @@ namespace Bonus.Repositories
     {
         public static IServiceCollection AddBonusRepositoriesServices(this IServiceCollection services)
         {
-            services.AddTransient<ISentBonus, SentBonus>();
+            services.AddTransient<IPlayerBonus, PlayerBonus>();
+            services.AddTransient<IAgentDividend, AgentDividend>();
 
             return services;
         }

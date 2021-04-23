@@ -2,7 +2,7 @@
 
 namespace TGS.Services.Report.Application.Models.Promotion
 {
-    public class CreatePromotionBonusMonthlyRequest : IRequest<PromotionBonusPlayerModel[]>
+    public class CreatePromotionBonusMonthlyRequest : IRequest<CreatePromotionBonusResponse>
     {
         public string From { get; set; }
         public string To { get; set; }

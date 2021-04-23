@@ -27,11 +27,17 @@ namespace ReportApi.Controllers
         public async Task<MessageResponse> GetRoundsAsync(
             CreatePromotionBonusDailyRequest request)
         {
-            var promotionBonusPlayers = await _mediator.Send(request);
+            var response = await _mediator.Send(request);
+
             var playerBonus =
-                promotionBonusPlayers.Select(x => new PlayerBonus(x.PlayerCode, x.BonusAmount, x.PromotionType))
-                    .ToArray();
-            var createPlayerBonusRequest = new CreatePlayerBonusRequest(playerBonus, TransactionType.Promotion, true);
+                response.PromotionBonus.Select(x =>
+                {
+                    var players = x.Players.Select(p => new PlayerBonus(p.PlayerCode, p.BonusAmount));
+                    return new PromotionPlayerBonus(players, x.PromotionId, x.Id, x.PromotionType);
+                });
+
+            var createPlayerBonusRequest =
+                new SentPlayerPromotionBonusRequest(playerBonus, TransactionType.Promotion);
 
             await _mediator.Send(createPlayerBonusRequest);
 
@@ -43,15 +49,19 @@ namespace ReportApi.Controllers
         [Description("settleDataWeekly")]
         public async Task<MessageResponse> GetAgentTeamInformationAsync(CreatePromotionBonusWeeklyRequest request)
         {
-            var promotionBonusPlayers = await _mediator.Send(request);
+            var response = await _mediator.Send(request);
+
             var playerBonus =
-                promotionBonusPlayers.Select(x => new PlayerBonus(x.PlayerCode, x.BonusAmount, x.PromotionType))
-                    .ToArray();
-            var createPlayerBonusRequest = new CreatePlayerBonusRequest(playerBonus, TransactionType.Promotion, true);
+                response.PromotionBonus.Select(x =>
+                {
+                    var players = x.Players.Select(p => new PlayerBonus(p.PlayerCode, p.BonusAmount));
+                    return new PromotionPlayerBonus(players, x.PromotionId, x.Id, x.PromotionType);
+                });
 
-            await _mediator.Send(createPlayerBonusRequest);
+            var createPlayerBonusRequest =
+                new SentPlayerPromotionBonusRequest(playerBonus, TransactionType.Promotion);
 
-            return new() {Valid = true};
+            return await _mediator.Send(createPlayerBonusRequest);
         }
 
         [HttpPost("settleDataMonthly")]
@@ -59,15 +69,19 @@ namespace ReportApi.Controllers
         public async Task<MessageResponse>
             GetAgentDividendsAsync(CreatePromotionBonusMonthlyRequest request)
         {
-            var promotionBonusPlayers = await _mediator.Send(request);
+            var response = await _mediator.Send(request);
+
             var playerBonus =
-                promotionBonusPlayers.Select(x => new PlayerBonus(x.PlayerCode, x.BonusAmount, x.PromotionType))
-                    .ToArray();
-            var createPlayerBonusRequest = new CreatePlayerBonusRequest(playerBonus, TransactionType.Promotion, true);
+                response.PromotionBonus.Select(x =>
+                {
+                    var players = x.Players.Select(p => new PlayerBonus(p.PlayerCode, p.BonusAmount));
+                    return new PromotionPlayerBonus(players, x.PromotionId, x.Id, x.PromotionType);
+                });
 
-            await _mediator.Send(createPlayerBonusRequest);
+            var sentPlayerPromotionBonusRequest =
+                new SentPlayerPromotionBonusRequest(playerBonus, TransactionType.Promotion);
 
-            return new() {Valid = true};
+            return await _mediator.Send(sentPlayerPromotionBonusRequest);
         }
     }
 }

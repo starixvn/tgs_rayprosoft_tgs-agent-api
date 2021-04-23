@@ -22,29 +22,29 @@ namespace Report.Client
         {
         }
 
-        Task<MessageResponse> IPromotionSettlementClient.CreatePromotionSettleDataDailyAsync(
+        async Task<MessageResponse> IPromotionSettlementClient.CreatePromotionSettleDataDailyAsync(
             CreatePromotionBonusDailyRequest request)
         {
-            var prefix = "Report.CreatePromotionSettleDataDaily";
-            return ExecuteJsonRequestAsync<CreatePromotionBonusDailyRequest, MessageResponse>(HttpMethod.Post,
+            const string prefix = "Report.CreatePromotionSettleDataDaily";
+            return await ExecuteJsonRequestAsync<CreatePromotionBonusDailyRequest, MessageResponse>(HttpMethod.Post,
                 "/api/promotion/settleDataDaily", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<MessageResponse> IPromotionSettlementClient.CreatePromotionSettleDataWeeklyAsync(
+        async Task<MessageResponse> IPromotionSettlementClient.CreatePromotionSettleDataWeeklyAsync(
             CreatePromotionBonusWeeklyRequest request)
         {
             var prefix = $"Report.{request.From}.{request.To}.CreatePromotionSettleDataWeekly";
-            return ExecuteJsonRequestAsync<CreatePromotionBonusWeeklyRequest, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<CreatePromotionBonusWeeklyRequest, MessageResponse>(HttpMethod.Post,
                 "/api/promotion/settleDataWeekly", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 
-        Task<MessageResponse> IPromotionSettlementClient.CreatePromotionSettleDataMonthlyAsync(
+        async Task<MessageResponse> IPromotionSettlementClient.CreatePromotionSettleDataMonthlyAsync(
             CreatePromotionBonusMonthlyRequest request)
         {
             var prefix = $"Report.{request.From}.{request.To}.CreatePromotionSettleDataMonthly";
-            return ExecuteJsonRequestAsync<CreatePromotionBonusMonthlyRequest, MessageResponse>(HttpMethod.Post,
+            return await ExecuteJsonRequestAsync<CreatePromotionBonusMonthlyRequest, MessageResponse>(HttpMethod.Post,
                 "/api/promotion/settleDataMonthly", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }

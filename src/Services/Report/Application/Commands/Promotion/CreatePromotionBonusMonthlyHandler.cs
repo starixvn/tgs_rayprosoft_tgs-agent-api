@@ -15,7 +15,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 {
     public class
         CreatePromotionBonusMonthlyHandler : Handler<CreatePromotionBonusMonthlyRequest,
-            PromotionBonusPlayerModel[]>
+            CreatePromotionBonusResponse>
     {
         private static readonly DateTimeOffset _Now = new(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
             DateTimeOffset.Now.Day, 0, 0, 0, new(8, 0, 0, 0));
@@ -36,7 +36,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             _promotionService = promotionService;
         }
 
-        public override async Task<PromotionBonusPlayerModel[]> Handle(CreatePromotionBonusMonthlyRequest request,
+        public override async Task<CreatePromotionBonusResponse> Handle(CreatePromotionBonusMonthlyRequest request,
             CancellationToken cancellationToken)
         {
             var promotions = await _promotionService.GetPromotionQueries()
@@ -80,7 +80,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
 
-            return promotionBonus.Where(x => x.AutoSentPlayerBonus).SelectMany(x => x.Players).ToArray();
+            return new() {Valid = true, PromotionBonus = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray()};
         }
 
         private static PromotionBonusPlayerModel[] GetPromotionBonusPlayers(Guid id,

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,34 +6,30 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Commands.Player
 {
     public class
-        CreatePlayerRebatesHandler : Handler<CreatePlayerRebateRequest,
-            MessageResponse>
+        CreatePlayerVipRebatesHandler : Handler<CreatePlayerRebateRequest,
+            CreatePlayerRebateResponse>
     {
+        private readonly ITgsBrandService _brandService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly IPlayerRebateService _playerRebateService;
-        private readonly ITgsPlayerService _playerService;
-        private readonly ITgsTransactionService _transactionService;
 
-        public CreatePlayerRebatesHandler(ITgsTransactionService transaction,
+        public CreatePlayerVipRebatesHandler(ITgsBrandService brandService,
             IPlayerRebateService playerRebateService,
-            ITgsPlayerService player,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             IHttpContextAccessor accessor) : base(accessor)
         {
-            _transactionService = transaction;
-            _playerService = player;
+            _brandService = brandService;
             _playerRebateService = playerRebateService;
             _playerGameTypeAggregateService = playerGameTypeAggregateService;
         }
 
-        public override async Task<MessageResponse> Handle(CreatePlayerRebateRequest request,
+        public override async Task<CreatePlayerRebateResponse> Handle(CreatePlayerRebateRequest request,
             CancellationToken cancellationToken)
         {
             var previousDay = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddDays(-1);
@@ -115,27 +110,18 @@ namespace TGS.Services.Report.Application.Commands.Player
                 return new() {Valid = false, Message = "Has no player rebate data."};
             }
 
-            await using var reportTransaction =
-                await _playerRebateService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            await using var tgsTransaction =
-                await _transactionService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            try
-            {
-                await _playerRebateService.CreatePlayerRebatesAsync(playerRebates);
+            await _playerRebateService.CreatePlayerRebatesAsync(playerRebates);
 
-                await _transactionService.CreateTransactionsAsync(playerRebates);
+            var brandIds = playerRebates.Select(x => x.BrandId);
+            var brands = await _brandService.GetBrandQueries().Where(x => brandIds.Contains(x.Id))
+                .ToArrayAsync(cancellationToken);
 
-                await reportTransaction.CommitAsync(cancellationToken);
-                await tgsTransaction.CommitAsync(cancellationToken);
-            }
-            catch (Exception e)
-            {
-                await reportTransaction.RollbackAsync(cancellationToken);
-                await tgsTransaction.RollbackAsync(cancellationToken);
-                return CreateInvalidResponse<MessageResponse>(e.Message);
-            }
+            var playerBonus = playerRebates
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
+                .Where(x => x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
-            return CreateValidResponse<MessageResponse>();
+
+            return new() {Valid = true, PlayerRebates = playerBonus};
         }
     }
 }

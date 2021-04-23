@@ -1,8 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
+using Bonus.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Core.Models.Bonus;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
 
@@ -51,8 +55,18 @@ namespace ReportApi.Controllers
 
         [HttpPost("dividends")]
         [Description("Create agent dividends")]
-        public Task<MessageResponse> CreateAgentDividendsAsync(
-            [FromQuery] CreateAgentDividendsRequest request) =>
-            _mediator.Send(request);
+        public async Task<MessageResponse> CreateAgentDividendsAsync(
+            [FromQuery] CreateAgentDividendsRequest request)
+        {
+            var response = await _mediator.Send(request);
+            var agentDividends =
+                response.AgentDividends.Select(x =>
+                    new AgentDividend(x.BrandId, x.AgentId, x.AgentDividendAmount, x.From, x.To));
+
+            var sentAgentDividendsRequest =
+                new SentAgentDividendsRequest(agentDividends, TransactionType.Dividend);
+
+            return await _mediator.Send(sentAgentDividendsRequest);
+        }
     }
 }

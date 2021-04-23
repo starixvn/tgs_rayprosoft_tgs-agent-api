@@ -8,7 +8,7 @@ namespace TGS.Core.DataServices.Report.Models
         public string PlayerCode { get; set; }
         public Guid PromotionBonusId { get; set; }
         public PromotionBonus PromotionBonus { get; set; }
-        public bool IsSent { get; set; }
         public decimal BonusAmount { get; set; }
+        public DateTimeOffset SentOn { get; set; }
     }
 }

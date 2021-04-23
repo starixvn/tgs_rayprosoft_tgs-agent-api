@@ -69,34 +69,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             SettlementIntervalType = "Instantly",
                             Trans = new() {Zh = "每日首充", En = "First Deposit"}
                         },
-                    Types = new[] 
-                    {
                         new PromotionType
                         {
-                            Name = "SecondDeposit",
-                            SettlementIntervalType = "Instantly",
-                            Trans = new() {Zh = "每日再充", En = "Second Deposit"}
+                            Name = "SecondDeposit", Trans = new() {Zh = "每日再充", En = "Second Deposit"}
                         }
                     }
-                            }
-                        },
-                        new PromotionType
-                        {
-                            Name = "SecondDeposit",
-                            Trans = new Translation
-                            {
-                                Zh = "每日再充",
-                                En = "Second Deposit"
-                            }
-                        }
-                    },
                 },
-                new PromotionTypeGroup
-                {
-                    {
-                        Zh = "流水",
-                        En = "Turnover"
-                    },
                 new PromotionTypeGroup
                 {
                     Name = "Turnover",
@@ -110,9 +88,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             Trans = new() {Zh = "流水反水", En = "Turnover Rebate"}
                         }
                     }
-                },
-                new PromotionTypeGroup
-                {
                 },
                 new PromotionTypeGroup
                 {
@@ -139,19 +114,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             Trans = new() {Zh = "每日救援金", En = "Daily Relief Money"}
                         }
                     }
-                                En = "Weekly Relief Money"
-                            }
-                        },
-                        new PromotionType
-                        {
-                            Name = "ReliefMoneyMonthly",
-                            Trans = new Translation
-                            {
-                                Zh = "每月救援金",
-                                En = "Weekly Relief Money"
-                            }
-                        }
-                    },
                 }
             };
 
@@ -193,10 +155,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("PromotionList")
-                        {
-                            SubMenus = new[] {new MenuSetting("Update")}
-                        }
+                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("PlayerManagement")
@@ -217,10 +176,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment")
-                        {
-                            SubMenus = new[] {new MenuSetting("Update")}
-                        }
+                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Game")

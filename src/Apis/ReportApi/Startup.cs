@@ -48,6 +48,7 @@ namespace ReportApi
                 .AddReportServices()
                 .AddTransactions()
                 .AddBonusServices()
+                .AddBonusRepositoriesServices()
                 .AddBonusRepositoriesServices();
 
             services.AddHealthChecks()
