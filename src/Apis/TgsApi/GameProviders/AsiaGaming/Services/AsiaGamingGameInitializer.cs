@@ -127,7 +127,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             
             var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, urlRequest.GameId);
 
-            //TODO: check dm url
             var request = new GameUrlRequest
             {
                 cagent = configuration.AgentCode,
@@ -136,8 +135,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 lang = cultureCode,
                 gameType = game.ExternalId,
                 oddtype = player.BetLimitId.ToString(),
-                cur = cur,
-                //dm = platform == PlatformType.Mobile ? 
+                cur = cur
             };
             
             var paras = GetQueryString(request, Separator);
