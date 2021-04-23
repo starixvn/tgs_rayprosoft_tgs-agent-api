@@ -177,7 +177,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         
         private static DateTimeOffset GetTimestamp(string betTime)
         {
-            var offset = TimeSpan.FromHours(0);
+            var offset = TimeSpan.FromHours(-4);
             var dateTime = DateTime.ParseExact(betTime, "MM/dd/yyyy HH:mm:sss", null, System.Globalization.DateTimeStyles.AllowWhiteSpaces);
             return new DateTimeOffset(dateTime, offset);
         }

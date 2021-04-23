@@ -519,7 +519,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         private string GetTimestamp()
         {
-            return DateTimeOffset.UtcNow.AddHours(0).ToString("MM/dd/yyyy HH:mm:sss");
+            return DateTimeOffset.UtcNow.AddHours(-4).ToString("MM/dd/yyyy HH:mm:sss");
         }
 
         private string GetAsiaGamingPlayerCode()
