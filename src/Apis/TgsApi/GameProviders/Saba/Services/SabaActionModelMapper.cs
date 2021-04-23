@@ -38,7 +38,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             PlaceBetRequest request)
         {
             var body = request.Body;
-            var externalRoundId = body.ExternalRoundId.ToString();
+            var externalRoundId = body.ReferenceId.ToString();
 
             var transaction = new TransactionData
             {
@@ -131,8 +131,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             new()
             {
                 Status = ((int)GameApiError.Success).ToString(),
-                ExternalRoundId = body.ExternalRoundId,
-                TransactionId = body.ExternalRoundId
+                ExternalRoundId = body.ReferenceId,
+                ReferenceId = body.ReferenceId
             };
 
         ConfirmBetResponse ISabaActionModelMapper.
