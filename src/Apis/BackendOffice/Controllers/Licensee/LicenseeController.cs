@@ -34,6 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                 {
                     Id = x.Id,
                     ResellerId = x.ResellerId,
+                    BusinessType = x.Reseller.BusinessType,
                     Name = x.Name,
                     Code = x.Code,
                     Status = x.Status,
@@ -67,6 +68,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Licensee
                 {
                     Id = licensee.Id,
                     ResellerId = licensee.ResellerId,
+                    BusinessType = licensee.Reseller.BusinessType,
                     Code = licensee.Code,
                     Name = licensee.Name,
                     Status = licensee.Status,

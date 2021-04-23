@@ -48,6 +48,7 @@
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Libraries\IdentityVerifiers\IdentityVerifiers.csproj" />
     <ProjectReference Include="..\..\Repositories\Operator.Repositories\Operator.Repositories.csproj" />
+    <ProjectReference Include="..\..\Repositories\PaymentRepositories\PaymentRepositories.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />

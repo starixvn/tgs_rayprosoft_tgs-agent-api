@@ -123,11 +123,17 @@
   <data name="ActionsById" xml:space="preserve">
     <value>ActionsById</value>
   </data>
+  <data name="Amount" xml:space="preserve">
+    <value>Amount</value>
+  </data>
   <data name="AutoCloseRound" xml:space="preserve">
     <value>AutoCloseRound</value>
   </data>
   <data name="BetValuesResults" xml:space="preserve">
     <value>BetValuesResults</value>
+  </data>
+  <data name="BonusCode" xml:space="preserve">
+    <value>BonusCode</value>
   </data>
   <data name="Brand" xml:space="preserve">
     <value>Brand</value>
@@ -140,6 +146,12 @@
   </data>
   <data name="BrandTokenExpireTime" xml:space="preserve">
     <value>BrandTokenExpireTime</value>
+  </data>
+  <data name="CampaignId" xml:space="preserve">
+    <value>CampaignId</value>
+  </data>
+  <data name="CampaignType" xml:space="preserve">
+    <value>CampaignType</value>
   </data>
   <data name="ClientRoundStatus" xml:space="preserve">
     <value>ClientRoundStatus</value>
@@ -167,6 +179,9 @@
   </data>
   <data name="HasTurnoverOnTieBet" xml:space="preserve">
     <value>HasTurnoverOnTieBet</value>
+  </data>
+  <data name="JackpotContribution" xml:space="preserve">
+    <value>JackpotContribution</value>
   </data>
   <data name="PlaceBetRequest" xml:space="preserve">
     <value>PlaceBetRequest</value>

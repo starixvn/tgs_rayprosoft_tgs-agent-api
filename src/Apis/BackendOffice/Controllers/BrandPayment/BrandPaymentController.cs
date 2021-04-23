@@ -64,7 +64,9 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     BrandId = x.BrandId,
                     Number = x.DisplayOrder,
                     PaymentName = x.PaymentMethodChannel.Payment.Code,
+                    PaymentMethodId = x.PaymentMethodChannel.Method.Id,
                     PaymentMethodName = x.PaymentMethodChannel.Method.Code,
+                    PaymentChannelId = x.PaymentMethodChannel.Channel.Id,
                     PaymentChannelName = x.PaymentMethodChannel.Channel.Code,
                     TransferType = x.TransferType,
                     ChannelName = x.ChannelName,
@@ -218,7 +220,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NotFound);
             }
 
-            if (await _brandPaymentService.ExistsAsync(p =>
+            if (await _brandPaymentService.ExistsAsync(p => p.BrandId == brandPayment.BrandId &&
                 p.Id != brandPaymentId && p.ChannelName == request.ChannelName))
             {
                 return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NameExists);
@@ -300,7 +302,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             var vipLevelIds = brandPayment.VipLevels.Select(x => x.VipLevelId).ToArray();
             var playerCodes = brandPayment.BrandPaymentPlayers.Where(x => x.ListType == PlayerListType.White)
                 .Select(p => p.PlayerCode).ToArray();
-            var isAll = brandPayment.PlayerListCondition == PlayerListCondition.All;
+            var isAll = brandPayment.PlayerListCondition == PlayerListCondition.MatchAll;
 
             return brandPayment.BrandPaymentPlayers
                 .Where(x => playerCodes.Contains(x.PlayerCode))

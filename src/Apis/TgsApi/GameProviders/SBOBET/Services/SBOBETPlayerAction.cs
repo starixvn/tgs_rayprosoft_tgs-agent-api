@@ -38,18 +38,19 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             _client = client;
         }
 
-        async Task<PlayerKickResponse> IPlayerAction.KickAsync(PlayerKickRequest request)
+        async ValueTask<PlayerKickResponse> IPlayerAction.KickAsync(PlayerKickRequest request)
         {
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts
-                    .GameProviderConfigurations.SBOBET);
+                await _settingOperations
+                    .GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts.GameProviderConfigurations.SBOBET)
+                    .ConfigureAwait(false);
 
             var response = await _client.LogoutAsync(configuration.ApiUrl,
                 new()
                 {
                     CompanyKey = configuration.CompanyKey,
                     PlayerCode = request.PlayerCode
-                });
+                }).ConfigureAwait(false);
 
             if (response.Error.Code != None)
             {
@@ -59,20 +60,24 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return new();
         }
 
-        async Task<PlayerUpdateSportBetLimitsResponse> IPlayerAction.UpdateSportBetLimitsAsync(
+        async ValueTask<PlayerUpdateSportBetLimitsResponse> IPlayerAction.UpdateSportBetLimitsAsync(
             PlayerUpdateSportBetLimitsRequest request)
         {
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts
-                    .GameProviderConfigurations.SBOBET);
+                await _settingOperations
+                    .GetValueFromJsonByKeyAsync<SBOConfiguration>(SettingConsts.GameProviderConfigurations.SBOBET)
+                    .ConfigureAwait(false);
 
             var playerCode = request.PlayerCode;
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode)
+                .ConfigureAwait(false);
+
             var betLimits =
                 await _betLimitQueries.GetPlayerSportBetLimitsAsync(playerCode, gameProviderId,
-                    request.SportMarketTypeIds);
+                    request.SportMarketTypeIds).ConfigureAwait(false);
 
-            var response = await UpdatePlayerBetLimitsAsync(playerCode, betLimits, configuration);
+            var response = await UpdatePlayerBetLimitsAsync(playerCode, betLimits, configuration)
+                .ConfigureAwait(false);
 
             if (response.Error.Code != None)
             {
@@ -82,7 +87,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return new();
         }
 
-        private async Task<BaseResponse> UpdatePlayerBetLimitsAsync(string playerCode, SportBetLimitResult[] betLimits,
+        private async ValueTask<BaseResponse> UpdatePlayerBetLimitsAsync(string playerCode,
+            SportBetLimitResult[] betLimits,
             SBOConfiguration configuration)
         {
             var apiUrl = configuration.ApiUrl;
@@ -102,28 +108,29 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 }).ToArray()
             };
 
-            var response = await _client.UpdatePlayerBetLimitsAsync(apiUrl, updateBetLimitRequest);
+            var response = await _client.UpdatePlayerBetLimitsAsync(apiUrl, updateBetLimitRequest)
+                .ConfigureAwait(false);
 
             if (response.Error.Code == None || response.Error.Code != UserNotExist)
             {
                 return response;
             }
 
-            var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
 
             var registerResponse = await _client.RegisterPlayerAsync(apiUrl,
                 new(player.BrandCode, player.DefaultWalletCurrencyCode)
                 {
                     CompanyKey = companyKey,
                     PlayerCode = playerCode
-                });
+                }).ConfigureAwait(false);
 
             if (registerResponse.Error.Code != None)
             {
                 return registerResponse;
             }
 
-            return await _client.UpdatePlayerBetLimitsAsync(apiUrl, updateBetLimitRequest);
+            return await _client.UpdatePlayerBetLimitsAsync(apiUrl, updateBetLimitRequest).ConfigureAwait(false);
         }
     }
 }

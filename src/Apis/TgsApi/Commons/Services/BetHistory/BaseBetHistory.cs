@@ -28,12 +28,15 @@ namespace TGS.Apis.TgsApi.Commons.Services.BetHistory
             _localizationOperations = localizationOperations;
         }
 
-        async Task<GetRoundHistoryResponse> IGameHistory.GetRoundHistoryAsync(GetRoundHistoryRequest request)
+        async ValueTask<GetRoundHistoryResponse> IGameHistory.GetRoundHistoryAsync(GetRoundHistoryRequest request)
         {
             var playerCode = request.PlayerCode;
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode)
+                .ConfigureAwait(false);
 
-            var round = await _roundQueries.GetRoundByRoundIdAsync(request.RoundId, true, true);
+            var round = await _roundQueries.GetRoundByRoundIdAsync(request.RoundId, true, true)
+                .ConfigureAwait(false);
+
             if (round == null || round.GameProviderId != gameProviderId || round.PlayerCode != playerCode)
             {
                 throw new InvalidGameActionException($"Round with id {request.RoundId} is not found.",
@@ -42,13 +45,17 @@ namespace TGS.Apis.TgsApi.Commons.Services.BetHistory
 
             var language = request.Language;
 
-            var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
-            var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, round.GameId);
+            var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId)
+                .ConfigureAwait(false);
+
+            var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, round.GameId)
+                .ConfigureAwait(false);
 
             var result =
                 await GetGameProviderBetHistoryAsync(playerCode, round, cachedGameProvider, cachedGame, language);
 
-            var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, language);
+            var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, language)
+                .ConfigureAwait(false);
 
             return new()
             {
@@ -67,7 +74,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.BetHistory
             };
         }
 
-        protected abstract Task<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        protected abstract ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language);
     }
 }

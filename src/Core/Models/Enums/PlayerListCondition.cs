@@ -2,7 +2,7 @@
 {
     public enum PlayerListCondition
     {
-        All = 0,
-        Someone = 1
+        MatchAll = 0,
+        MatchOne = 1
     }
 }

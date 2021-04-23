@@ -114,3 +114,11 @@ Scenario: 03.b - If I lose a free bet in a single round, and the round is closed
 			| FreeBet     | 1  |                       | 0      | YES            |
 	When I get the client round status
 	Then the client round status should be "Loss"
+
+Scenario: 04 - If I win a jackpot, and the round is closed, the client round status should be win
+	Given the round is "Closed"
+		And a sequence of game actions
+			| Action Type | ID | Referencing Action ID | Amount | IsClosingRound |
+			| WinJackpot  | 1  |                       | 100    | YES            |
+	When I get the client round status
+	Then the client round status should be "Win"

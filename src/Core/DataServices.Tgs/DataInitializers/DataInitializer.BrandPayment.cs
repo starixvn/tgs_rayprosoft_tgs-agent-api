@@ -12,33 +12,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
     public partial class DataInitializer
     {
-        private const string Help2Pay = "Help2Pay";
-
-        private const string AlipayPayment = "Alipay";
-        private const string WeChatPayPayment = "WeChatPay";
-
-        private const string AlipayScan = "AlipayScan";
-        private const string WeChatPayScan = "WeChatPayScan";
-        private const string BankTransfer = "BankTransfer";
-
         private static readonly Dictionary<string, Guid> Payments = new()
         {
-            { Help2Pay, new("30CB4D17-2506-4D72-8470-65063B80F9C9") }
+            { "Manual", new("30CB4D17-2506-4D72-8470-65063B80F9C9") }
         };
 
-        private static readonly Dictionary<string, (Guid, Guid)> PaymentMethods = new()
+        private static readonly Dictionary<string, Guid> PaymentMethods = new()
         {
-            { AlipayPayment, (new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), Payments[Help2Pay]) },
-            { WeChatPayPayment, (new("083D8754-1FE3-478A-9417-80DA796C3450"), Payments[Help2Pay]) }
+            { "BankTransfer", new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB") },
         };
 
-        private static readonly Dictionary<string, (Guid, (Guid, Guid))> PaymentChannels =
-            new()
-            {
-                { AlipayScan, (new("E761A2D3-5705-417F-8D97-43CB7AEA0142"), PaymentMethods[AlipayPayment]) },
-                { BankTransfer, (new("031FD0E3-A377-48E4-BE11-B52E8B3AD36B"), PaymentMethods[AlipayPayment]) },
-                { WeChatPayScan, (new("450C18AD-214E-4ED1-AAF9-6BAE74BF0BA5"), PaymentMethods[WeChatPayPayment]) }
-            };
+        private static readonly Dictionary<string, Guid> PaymentChannels = new()
+        {
+            { "RichBank", new("E761A2D3-5705-417F-8D97-43CB7AEA0142") }
+        };
 
         private async Task GeneratePaymentAsync()
         {
@@ -72,7 +59,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             var paymentMethods = PaymentMethods.Select(p => new PaymentMethod
             {
-                Id = p.Value.Item1,
+                Id = p.Value,
                 Code = p.Key,
                 Description = "online payment method",
             }).ToArray();
@@ -84,7 +71,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             var paymentVendors = PaymentChannels.Select(p => new PaymentChannel
             {
-                Id = p.Value.Item1,
+                Id = p.Value,
                 Code = p.Key,
                 Description = "online payment channel",
             }).ToArray();
@@ -101,8 +88,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             Id = Guid.NewGuid(),
                             PaymentId = payment.Value,
-                            MethodId = method.Value.Item1,
-                            ChannelId = channel.Value.Item1,
+                            MethodId = method.Value,
+                            ChannelId = channel.Value,
                             CreatedByUsername = AdminUsername,
                             CreatedOn = DateTimeOffset.Now,
                             UpdatedByUsername = AdminUsername,
@@ -129,17 +116,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                     BrandId = brand.Id,
                                     PaymentMethodChannelId = pmc.Id,
                                     TransferType = PaymentTransferType.Deposit,
-                                    ChannelName = "阿里pay",
+                                    ChannelName = "PoorBank",
                                     PaymentStatus = SwitchStatus.Enabled,
                                     TransferLimitFrom = 10,
                                     TransferLimitTo = 100000,
-                                    PlayerListCondition = PlayerListCondition.All,
+                                    PlayerListCondition = PlayerListCondition.MatchAll,
                                     AllPlayers = true,
-                                    IdentityAuthentication = true,
-                                    PhoneAuthentication = true,
+                                    IdentityAuthentication = false,
+                                    PhoneAuthentication = false,
                                     DepositedAmountUnlimited = true,
-                                    DepositedAmountMin = 100,
-                                    DepositedAmountMax = 1000,
+                                    DepositedAmountMin = 0M,
+                                    DepositedAmountMax = 0M,
                                     Reason = "Reason",
                                     FeePercentage = 50,
                                     LowestFee = 50,
@@ -168,7 +155,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                     ExtendedData = JsonSerializer.Serialize(
                                         new
                                         {
-                                            BankAccount = "987654321",
+                                            BankAccount = "9876543210",
                                             Name = "測試者"
                                         },
                                         new JsonSerializerOptions

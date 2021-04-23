@@ -6,19 +6,14 @@ import {
     useDelete
 } from "../../client"
 
-let API = "/api/agent/adjustment"
+let API = "/api/AgentAdjust"
 
 export const useAgentAdjustmentList = (searchParams) => {
     let url = searchParams ? urlWith(searchParams, API) : ""
     return useGet(url)
 }
 
-export const useAgentAddBalance = ({ brandId, username }, formData) => {
-    let url = brandId && username && formData ? `${API}/add` : ""
-    return usePostData(url, formData)
-}
-
-export const useAgentDeductBalance = ({ brandId, username }, formData) => {
-    let url = brandId && username && formData ? `${API}/deduct` : ""
+export const useAgentAdjustBalance = (agentId, formData) => {
+    let url = agentId && formData ? `${API}/${agentId}/adjust` : ""
     return usePostData(url, formData)
 }

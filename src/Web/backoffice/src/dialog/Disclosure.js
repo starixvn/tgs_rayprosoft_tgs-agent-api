@@ -49,6 +49,12 @@ export const DetailDisclosure = forwardRef((props, ref) => (
     </Disclosure>
 ))
 
+export const VerifyDisclosure = forwardRef((props, ref) => (
+    <Disclosure ref={ref} {...props}>
+        <Trans zh="审核" en="Verify" />
+    </Disclosure>
+))
+
 export const ConfigIconDisclosure = forwardRef((props, ref) => (
     <Disclosure ref={ref} {...props}>
         <Icon icon={faCog} type="font-awesome" />

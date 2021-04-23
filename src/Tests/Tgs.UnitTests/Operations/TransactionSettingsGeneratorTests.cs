@@ -27,6 +27,7 @@ namespace TGS.UnitTests.Operations
         [TestCase(GameActionType.FreeBet, 20, 20)]
         [TestCase(GameActionType.TieBet, 20, 20)]
         [TestCase(GameActionType.CancelTransaction, 20, -20)]
+        [TestCase(GameActionType.WinJackpot, 50, 50)]
         public void Can_Get_Expected_Amount_By_GameActionType(GameActionType type, decimal inputAmount,
             decimal expectedAmount)
         {

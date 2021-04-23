@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.FileService.Clients;
+using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BankDeposit;
+using TGS.Services.Operator.Deposit;
+using TGS.Services.Payment;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -18,53 +20,71 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Create_Bank_Deposit_Form_Should_Success()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var jsonSerializationProvider = new JsonSerializationProvider();
 
-            var sut = new CreateBankDepositFormCommandService(moqWalletRepository.Object);
+            var sut = new CreateBankDepositFormCommandService(moqPaymentRepository.Object, jsonSerializationProvider);
 
             var command = new CreateBankDepositFormCommand(
                 "ThisIsPlayerCode",
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                "ThisIsBankAccount",
-                1000M);
-            var expected = new BankDepositForm(
+                1000M,
+                jsonSerializationProvider.SerializeToString(
+                    new
+                    {
+                        SendBankAccount = "ThisIsBankAccount",
+                        ReceiveBankAccount = "ThisIsReceiveBankAccount",
+                        ReceiveAccountName = "ReceiveAccountName"
+                    },
+                    null));
+            var expected = new DepositFormInfo(
                 command.PlayerCode,
                 command.BrandId,
                 command.BrandPaymentId,
-                command.BankAccount,
-                command.Amount).ToExpectedObject();
+                command.Amount,
+                jsonSerializationProvider.SerializeToString(
+                    new
+                    {
+                        SendBankAccount = "ThisIsBankAccount",
+                        ReceiveBankAccount = "ThisIsReceiveBankAccount",
+                        ReceiveAccountName = "ReceiveAccountName"
+                    },
+                    null)).ToExpectedObject();
 
             await sut.ExecuteAsync(command);
 
-            moqWalletRepository.Verify(
-                fake => fake.CreateDepositFormAsync(It.Is<BankDepositForm>(form => expected.Matches(form))),
+            moqPaymentRepository.Verify(
+                fake => fake.CreateDepositFormAsync(
+                    It.IsAny<Guid>(),
+                    It.Is<DepositFormInfo>(form => expected.Matches(form))),
                 Times.Exactly(1));
         }
 
         [Test]
         public async Task Get_Bank_Deposit_Form_By_Id_Should_Success()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var jsonSerializationProvider = new JsonSerializationProvider();
 
-            var sut = new GetBankDepositFromQueryService(moqWalletRepository.Object);
+            var sut = new GetBankDepositFromQueryService(moqPaymentRepository.Object);
 
             var query = new GetBankDepositFormQuery(
                 "ThisIsPlayerCode",
                 Guid.NewGuid());
 
-            moqWalletRepository
+            moqPaymentRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
-                .Returns(ValueTask.FromResult(new BankDepositForm(
+                .Returns(ValueTask.FromResult(new DepositFormInfo(
                     query.PlayerCode,
                     Guid.NewGuid(),
                     Guid.NewGuid(),
-                    "test",
-                    1000M)));
+                    1000M,
+                    string.Empty)));
 
             var actual = await sut.GetAsync(query);
 
-            moqWalletRepository.Verify(
+            moqPaymentRepository.Verify(
                 fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)),
                 Times.Exactly(1));
         }
@@ -72,84 +92,38 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public void Bank_Deposit_Form_If_Not_Player_Own_Will_Throw_Exception()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
 
-            var sut = new GetBankDepositFromQueryService(moqWalletRepository.Object);
+            var sut = new GetBankDepositFromQueryService(moqPaymentRepository.Object);
 
             var query = new GetBankDepositFormQuery(
                 "ThisIsPlayerCode",
                 Guid.NewGuid());
 
-            moqWalletRepository
+            moqPaymentRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
-                .Returns(ValueTask.FromResult(new BankDepositForm(
+                .Returns(ValueTask.FromResult(new DepositFormInfo(
                     "OtherPlayerCode",
                     Guid.NewGuid(),
                     Guid.NewGuid(),
-                    "test",
-                    1000M)));
+                    1000M,
+                    string.Empty)));
 
             Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
         }
 
         [Test]
-        public async Task Get_Payment_Methods_Should_Success()
-        {
-            var moqWalletRepository = new Mock<IWalletRepository>();
-
-            var sut = new AllPaymentMethodsQueryService(moqWalletRepository.Object);
-
-            var query = new AllPaymentMethodsQuery();
-
-            moqWalletRepository
-                .Setup(fake => fake.GetAllPaymentMethodsAsync())
-                .Returns(new[] {
-                    new PaymentMethod(Guid.NewGuid(), "test1"),
-                    new PaymentMethod(Guid.NewGuid(), "test2")
-                }.ToAsyncEnumerable());
-
-            _ = await sut.GetAsync(query);
-
-            moqWalletRepository.Verify(
-                fake => fake.GetAllPaymentMethodsAsync(),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task Get_Payment_Channels_Should_Success()
-        {
-            var moqWalletRepository = new Mock<IWalletRepository>();
-
-            var sut = new AllPaymentChannelsQueryService(moqWalletRepository.Object);
-
-            var query = new AllPaymentChannelsQuery();
-
-            moqWalletRepository
-                .Setup(fake => fake.GetAllPaymentChannelsAsync())
-                .Returns(new[] {
-                    new PaymentChannel(Guid.NewGuid(), "test1"),
-                    new PaymentChannel(Guid.NewGuid(), "test2")
-                }.ToAsyncEnumerable());
-
-            _ = await sut.GetAsync(query);
-
-            moqWalletRepository.Verify(
-                fake => fake.GetAllPaymentChannelsAsync(),
-                Times.Exactly(1));
-        }
-
-        [Test]
         public async Task Get_Brand_Payment_Should_SuccessAsync()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
 
-            var sut = new GetBrandPaymentQueryService(moqWalletRepository.Object);
+            var sut = new GetBrandPaymentQueryService(moqPaymentRepository.Object);
 
             var query = new GetBrandPaymentQuery(Guid.NewGuid());
 
             _ = await sut.GetAsync(query);
 
-            moqWalletRepository.Verify(
+            moqPaymentRepository.Verify(
                 fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == query.Id)),
                 Times.Exactly(1));
         }
@@ -158,11 +132,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Submit_BankDepositForm_Should_Success()
         {
             var moqFileServiceClient = new Mock<IFileServiceClient>();
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var jsonSerializationProvider = new JsonSerializationProvider();
 
             var sut = new SubmitBankDepositFormCommandService(
                 moqFileServiceClient.Object,
-                moqWalletRepository.Object);
+                moqPaymentRepository.Object,
+                jsonSerializationProvider);
 
             var playerCode = "ThisIsPlayerCode";
             var formId = Guid.NewGuid();
@@ -191,8 +167,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqFileServiceClient.Verify(
                 fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
                 Times.Exactly(1));
-            moqWalletRepository.Verify(
-                fake => fake.SubmitRemittanceReceiptToDepositFormAsync(It.IsAny<Guid>(), It.Is<string>(x => x == "testFileId")),
+            moqPaymentRepository.Verify(
+                fake => fake.SubmitFormStatusAsync(It.IsAny<Guid>(), It.Is<int>(x => x == 1000), It.IsAny<string>()),
                 Times.Exactly(1));
         }
     }

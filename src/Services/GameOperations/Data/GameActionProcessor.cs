@@ -22,7 +22,7 @@ namespace TGS.Services.GameOperations.Data
 {
     internal interface IGameActionProcessor
     {
-        Task<BetResult> ExecuteAsync(ProcessorData data);
+        ValueTask<BetResult> ExecuteAsync(ProcessorData data);
     }
 
     internal sealed partial class GameActionProcessor : IGameActionProcessor
@@ -63,7 +63,7 @@ namespace TGS.Services.GameOperations.Data
             _json = json;
         }
 
-        async Task<BetResult> IGameActionProcessor.ExecuteAsync(ProcessorData data)
+        async ValueTask<BetResult> IGameActionProcessor.ExecuteAsync(ProcessorData data)
         {
             var transactionResults = new List<TransactionResult>();
             var betData = data.BetData;
@@ -92,7 +92,8 @@ namespace TGS.Services.GameOperations.Data
                     FreeBetAsSingleRound = betData.FreeBetAsSingleRound,
                     AllowCancelCancelTransaction = betData.AllowCancelCancelTransaction,
                     AllowPlaceBetWithDifferentPlatformToken = betData.AllowPlaceBetWithDifferentPlatformToken,
-                    AutoCloseRound = betData.AutoCloseRound
+                    AutoCloseRound = betData.AutoCloseRound,
+                    OppositeBetRules = betData.OppositeBetRules ?? Array.Empty<OppositeBetRule>()
                 });
 
                 transactionResults.Add(result.TransactionResult);
@@ -143,6 +144,8 @@ namespace TGS.Services.GameOperations.Data
                 {
                     ExternalTransactionId = s.ExternalTransactionId,
                     InternalTransactionId = ga.Id,
+                    RoundId = ga.RoundId,
+                    GameId = s.GameId,
                     IsDuplicate = false
                 },
                 GameAction = ga,
@@ -392,13 +395,15 @@ namespace TGS.Services.GameOperations.Data
             !BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
         private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId,
-            string externalTransactionId) =>
+            string externalTransactionId, Guid roundId, int gameId) =>
             new()
             {
                 TransactionResult = new()
                 {
                     ExternalTransactionId = externalTransactionId,
                     InternalTransactionId = gameActionId,
+                    RoundId = roundId,
+                    GameId = gameId,
                     IsDuplicate = true
                 }
             };
@@ -463,8 +468,12 @@ namespace TGS.Services.GameOperations.Data
                 throw error;
             }
 
+            var oppositePatterns = s.OppositeBetRules
+                .Where(r => r.ExternalGameIds.IgnoreCaseContains(s.Game.ExternalId))
+                .SelectMany(r => r.Patterns).Select(p => new OppositeBetPattern(p.BetType, p.GroupId)).ToArray();
+
             var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
-                s.PreviousActions, s.OppositeBetPatterns);
+                s.PreviousActions, oppositePatterns);
 
             s.BetValueResult = betValues;
 
@@ -666,10 +675,12 @@ namespace TGS.Services.GameOperations.Data
 
         private void FillClosedRoundBetValues(GameActionState s, BetActionData current, Round round)
         {
-            var hasFreeBet = current.Type == FreeBet ||
-                s.PreviousActions.Any(act => act.Type == FreeBet);
+            var gameActionWithSingleRound =
+                s.FreeBetAsSingleRound && current.Type == FreeBet && s.PreviousActions.Count == 0 ||
+                current.Type == WinJackpot;
 
-            var clientStatus = _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, hasFreeBet);
+            var clientStatus =
+                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, gameActionWithSingleRound);
 
             round.Status = s.NewRoundStatus;
             round.ClientStatus = clientStatus;

@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
-using TGS.Services.Operator.PlayerPassword;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

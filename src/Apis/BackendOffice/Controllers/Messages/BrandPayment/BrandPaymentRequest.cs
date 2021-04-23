@@ -6,7 +6,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
     public class BrandPaymentRequest
     {
         public Guid Id { get; set; }
-        public Guid PaymentMethodChannelId { get; set; }
+        public Guid PaymentChannelId { get; set; }
         public SwitchStatus PaymentStatus { get; set; }
         public string ChannelName { get; set; }
         public decimal TransferLimitFrom { get; set; }

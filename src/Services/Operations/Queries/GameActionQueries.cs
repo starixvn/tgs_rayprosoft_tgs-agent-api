@@ -2,28 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.CustomQueryParameters;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Data;
-using TGS.Core.Models.Services.Games;
 
 namespace TGS.Services.Operations.Queries
 {
     public interface IGameActionQueries
     {
-        Task<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId,
+        ValueTask<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId, bool onlyPlacements);
 
-        Task<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode,
             string externalRoundId, int gameId, GameActionType[] gameActionTypes);
 
-        Task<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode,
+        ValueTask<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode,
             string externalRoundId, int gameId);
 
-        Task<bool> ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode,
+        ValueTask<bool> ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode,
             string externalRoundId, string externalTransactionId);
+
+        ValueTask<string[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId, int gameId, string externalGameActionGroupId);
+
+        ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode,
+            string externalTransactionId);
     }
 
     public sealed class GameActionQueries : IGameActionQueries
@@ -35,8 +41,8 @@ namespace TGS.Services.Operations.Queries
             _repository = repository;
         }
 
-        async Task<GameActionExternalIds[]> IGameActionQueries.GetValidGameActionExternalIdsAsync(Guid gameProviderId,
-            string playerCode, string externalRoundId, int gameId, bool onlyPlacements)
+        async ValueTask<GameActionExternalIds[]> IGameActionQueries.GetValidGameActionExternalIdsAsync(
+            Guid gameProviderId, string playerCode, string externalRoundId, int gameId, bool onlyPlacements)
         {
             const string spName = "bet.game_action_get_valid_game_action_external_ids";
             var r = await _repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName,
@@ -52,7 +58,7 @@ namespace TGS.Services.Operations.Queries
             return r.ToArray();
         }
 
-        async Task<GameActionExternalIds[]> IGameActionQueries.GetGameActionExternalIdsAsync(Guid gameProviderId,
+        async ValueTask<GameActionExternalIds[]> IGameActionQueries.GetGameActionExternalIdsAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes)
         {
             const string spName = "bet.game_action_get_game_action_external_ids";
@@ -69,7 +75,7 @@ namespace TGS.Services.Operations.Queries
             return r.ToArray();
         }
 
-        async Task<GameActionData> IGameActionQueries.GetGameActionsByExternalRoundIdAsync(Guid gameProviderId,
+        async ValueTask<GameActionData> IGameActionQueries.GetGameActionsByExternalRoundIdAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId)
         {
             const string spName = "bet.game_action_get_game_actions_by_external_round_id";
@@ -129,16 +135,42 @@ namespace TGS.Services.Operations.Queries
                 }).First();
         }
 
-        Task<bool> IGameActionQueries.ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode,
+        async ValueTask<bool> IGameActionQueries.ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode,
             string externalRoundId, string externalTransactionId)
         {
             const string spName = "bet.game_action_referenced_game_action_exists";
-            return _repository.SqlQuerySingleAsync<bool>(spName, parameters:
+            return await _repository.SqlQuerySingleAsync<bool>(spName, parameters:
                 new Dictionary<string, object>
                 {
                     {":game_provider_id", gameProviderId},
                     {":player_code", playerCode},
                     {":external_round_id", externalRoundId},
+                    {":external_transaction_id", externalTransactionId}
+                });
+        }
+
+        async ValueTask<string[]> IGameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+            Guid gameProviderId, string playerCode, string externalRoundId, int gameId,
+            string externalGameActionGroupId) =>
+            await (from ga in _repository.GameActions
+                   let round = ga.Round
+                   where round.ExternalRoundId == externalRoundId &&
+                       round.GameProviderId == gameProviderId &&
+                       round.PlayerCode == playerCode &&
+                       round.GameId == gameId &&
+                       ga.ExternalGameActionGroupId == externalGameActionGroupId
+                   select ga.ExternalTransactionId).ToArrayAsync()
+                .ConfigureAwait(false);
+
+        async ValueTask<GameActionExternalIds> IGameActionQueries.GetGameActionExternalIdAsync(Guid gameProviderId,
+            string playerCode, string externalTransactionId)
+        {
+            const string spName = "bet.game_action_get_game_actions_by_external_transaction_id";
+            return await _repository.SqlQuerySingleAsync<GameActionExternalIds>(spName, parameters:
+                new Dictionary<string, object>
+                {
+                    {":game_provider_id", gameProviderId},
+                    {":player_code", playerCode},
                     {":external_transaction_id", externalTransactionId}
                 });
         }

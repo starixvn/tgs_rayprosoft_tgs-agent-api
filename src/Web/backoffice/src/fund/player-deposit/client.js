@@ -6,9 +6,12 @@ import {
     useDelete
 } from "../../client"
 
-let API = "/api/fund/deposit"
+let API = "/api/deposit"
 
-export const usePlayerDepositList = (searchParams) => {
-    let url = searchParams ? urlWith(searchParams, API) : ""
+export const usePlayerDepositList = (brandId, searchParams) => {
+    let url =
+        brandId && searchParams
+            ? urlWith(searchParams, `${API}/${brandId}`)
+            : ""
     return useGet(url)
 }

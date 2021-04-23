@@ -38,6 +38,11 @@ import { DateInputRange } from "../../date/DateTimeRangeInput"
 import { today } from "../../date/range"
 import { usePlayerDepositList } from "./client"
 import { Update } from "./menu"
+import {
+    PaymentMethodLabel,
+    PaymentMethodSelect
+} from "../../payment/method/PaymentMethod"
+import { VerifyPlayerDepositDisclosure } from "./VerifyPlayerDeposit"
 
 export { Code }
 
@@ -82,7 +87,7 @@ const BodyContent = ({ brandId }) => {
     })
 
     useEffect(() => {
-        setState({ pageIndex: 0, brandId })
+        setState({ pageIndex: 0 })
     }, [brandId])
 
     let {
@@ -103,10 +108,9 @@ const BodyContent = ({ brandId }) => {
         mutate,
         error,
         deleteCache
-    } = usePlayerDepositList({
-        ...toApiParams(state),
-        sortby: "username",
-        brandId
+    } = usePlayerDepositList(brandId, {
+        ...toApiParams(state)
+        // sortby: "CreatedOn" //TODO: rm when bug fixed
     })
 
     let columns = useColumns({ mutate, items: data?.items, brandId })
@@ -197,7 +201,6 @@ const SearchBar = ({
     isLoading,
     ...props
 }) => {
-    console.log("createdOnStart", createdOnStart, "createdOnEnd", createdOnEnd)
     let formMethods = useForm({
         defaultValues: {
             username,
@@ -244,19 +247,28 @@ const SearchBar = ({
                             showEmptyFieldValueAddonAfter
                             placeholder={channelNameInputPlaceholder}
                         />
+                        <PaymentMethodSelect name="method" />
                     </Set>
                     <Set orientation="horizontal">
                         <FieldWrapper label={createdOnLabel}>
                             <DateInputRange
-                                startName="createdOnStart"
-                                endName="createdOnEnd"
+                                startProps={{
+                                    name: "createdOnStart"
+                                }}
+                                endProps={{
+                                    name: "createdOnEnd"
+                                }}
                             />
                         </FieldWrapper>
 
                         <FieldWrapper label={updatedOnLabel}>
                             <DateInputRange
-                                startName="updatedOnStart"
-                                endName="updatedOnEnd"
+                                startProps={{
+                                    name: "updatedOnStart"
+                                }}
+                                endProps={{
+                                    name: "updatedOnEnd"
+                                }}
                             />
                         </FieldWrapper>
                         <SearchButton
@@ -278,7 +290,7 @@ const useColumns = ({ brandId, items = [] }) => {
         let columns = [
             sequenceColumn(),
             textColumn({
-                accessor: "username",
+                accessor: "userName",
                 Header: <Trans zh="用户名" en="Username" />,
                 disableSortBy: true
             }),
@@ -289,10 +301,13 @@ const useColumns = ({ brandId, items = [] }) => {
                 Cell: ({ value }) => value
             }),
             textColumn({
-                accessor: "paymentChannel",
-                Header: <Trans zh="充值类型" en="Payment Channel" />,
+                id: "paymentMethod",
+                accessor: (row) => row,
+                Header: <Trans zh="充值类型" en="Payment Method" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <Box>{value}</Box>
+                Cell: ({ value }) => {
+                    return <PaymentMethodLabel value={value?.paymentMethodId} />
+                }
             }),
             textColumn({
                 accessor: "channelName",
@@ -320,7 +335,7 @@ const useColumns = ({ brandId, items = [] }) => {
                 accessor: "status",
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <Box>TODO</Box>
+                Cell: ({ value }) => <Box>{value}</Box>
             }),
             textColumn({
                 accessor: "remark",
@@ -338,7 +353,13 @@ const useColumns = ({ brandId, items = [] }) => {
                     disableSortBy: true,
                     Header: <Trans zh="操作" en="Actions" />,
                     Cell: ({ value }) => {
-                        return <Set alignX="center"></Set>
+                        return (
+                            <Set alignX="center">
+                                <VerifyPlayerDepositDisclosure
+                                    formId={value.id}
+                                />
+                            </Set>
+                        )
                     }
                 })
             )

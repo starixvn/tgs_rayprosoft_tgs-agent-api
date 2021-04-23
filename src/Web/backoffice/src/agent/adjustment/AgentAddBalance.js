@@ -24,7 +24,7 @@ import {
     ConfirmCancelFooter
 } from "../../form/ConfirmButtonFooter"
 import { Table, toApiParams, useTable, pageCount } from "../../table"
-import { useAgentAddBalance } from "./client"
+import { useAgentAdjustBalance } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import dateTimeColumn from "../../table/column/dateTime"
 import {
@@ -42,9 +42,11 @@ import FormDialog from "../../form/FormDialog"
 import AddBalanceTypeSelect from "./AgentAddBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
+import AdjustType from "./AdjustType"
 
 export const AgentAddBalanceDisclosure = ({
     brandId,
+    agentId,
     username,
     onSubmitted,
     ...props
@@ -64,6 +66,7 @@ export const AgentAddBalanceDisclosure = ({
             {dialog.visible && (
                 <AddDialog
                     brandId={brandId}
+                    agentId={agentId}
                     username={username}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
@@ -73,19 +76,27 @@ export const AgentAddBalanceDisclosure = ({
     )
 }
 
-const AddDialog = ({ brandId, username, onSubmitted, dialog }) => {
+const AddDialog = ({ brandId, agentId, username, onSubmitted, dialog }) => {
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate, deleteCache } = useAgentAddBalance(
-        { brandId, username },
-        formData
-    )
+    let {
+        result,
+        isLoading,
+        error,
+        mutate,
+        deleteCache
+    } = useAgentAdjustBalance(agentId, formData)
 
     let title = useTrans({
         zh: "余额加分",
         en: "Add Balance"
     })
 
-    const onSubmit = (data) => setSubmit(data)
+    const onSubmit = (data) => {
+        setSubmit({
+            ...data,
+            adjustType: AdjustType.Add
+        })
+    }
 
     const reset = () => {
         deleteCache()

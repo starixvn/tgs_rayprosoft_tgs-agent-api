@@ -93,7 +93,7 @@ const BodyContent = ({ brandId = "" }) => {
 
     return (
         <PageContent
-            title={<Trans zh="代理列表" en="Agents" />}
+            title={<Trans zh="代理调账" en="Agent Balance Adjustment" />}
             actionBar={
                 <Flex justifyContent="space-between">
                     <SearchBar
@@ -220,11 +220,13 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                             <Set alignX="center">
                                 <AgentAddBalanceDisclosure
                                     brandId={brandId}
+                                    agentId={value?.id}
                                     username={username}
                                     onSubmitted={mutate}
                                 />
                                 <AgentDeductBalanceDisclosure
                                     brandId={brandId}
+                                    agentId={value?.id}
                                     username={username}
                                     onSubmitted={mutate}
                                 />

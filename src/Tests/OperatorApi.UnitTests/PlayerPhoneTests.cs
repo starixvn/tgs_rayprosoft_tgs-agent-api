@@ -6,8 +6,8 @@ using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.PlayerPhone;
 using TGS.SmsService.Client;
+using TGS.Services.Operator.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

@@ -10,7 +10,6 @@ using TGS.Core.Models.Messages;
 using TGS.Operator.Repositories;
 using TGS.Paging;
 using TGS.Services.Operator;
-using TGS.Services.Operator.StationLatters;
 using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Tests.OperatorApi.UnitTests

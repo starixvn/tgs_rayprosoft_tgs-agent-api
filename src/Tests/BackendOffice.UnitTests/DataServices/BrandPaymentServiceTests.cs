@@ -34,7 +34,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
                 ChannelName = "ChannelNass888",
                 TransferLimitFrom = 55,
                 TransferLimitTo = 55,
-                PlayerListCondition = PlayerListCondition.All,
+                PlayerListCondition = PlayerListCondition.MatchAll,
                 AllPlayers = true,
                 IdentityAuthentication = true,
                 PhoneAuthentication = true,
@@ -51,11 +51,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 
             var request = new UpdateBrandPaymentRequest
             {
-                PaymentMethodChannelId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
+                PaymentChannelId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
                 ChannelName = "ChannelNass9",
                 TransferLimitFrom = 33,
                 TransferLimitTo = 33,
-                PlayerListCondition = PlayerListCondition.All,
+                PlayerListCondition = PlayerListCondition.MatchAll,
                 AllPlayers = true,
                 IdentityAuthentication = true,
                 PhoneAuthentication = true,

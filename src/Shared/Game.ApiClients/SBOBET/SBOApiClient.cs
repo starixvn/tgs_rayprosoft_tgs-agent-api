@@ -18,23 +18,23 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
     {
         #region Internal Api
 
-        Task<BatchResponse> CancelTransactionsAsync(Uri apiUrl, BatchRequest request);
+        ValueTask<BatchResponse> CancelTransactionsAsync(Uri apiUrl, BatchRequest request);
 
         #endregion
 
         #region Game Provider Client Api
 
-        Task<LoginResponse> LoginAsync(Uri apiUrl, LoginRequest request);
+        ValueTask<LoginResponse> LoginAsync(Uri apiUrl, LoginRequest request);
 
-        Task<LogoutResponse> LogoutAsync(Uri apiUrl, LogoutRequest request);
+        ValueTask<LogoutResponse> LogoutAsync(Uri apiUrl, LogoutRequest request);
 
-        Task<RegisterPlayerResponse> RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request);
+        ValueTask<RegisterPlayerResponse> RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request);
 
-        Task<GetRoundHistoryResponse> GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request);
+        ValueTask<GetRoundHistoryResponse> GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request);
 
-        Task<GetBetHistoryResponse> GetBetHistoryAsync(Uri apiUrl, GetBetHistoryRequest request);
+        ValueTask<GetBetHistoryResponse> GetBetHistoryAsync(Uri apiUrl, GetBetHistoryRequest request);
 
-        Task<UpdatePlayerBetLimitsResponse>
+        ValueTask<UpdatePlayerBetLimitsResponse>
             UpdatePlayerBetLimitsAsync(Uri apiUrl, UpdatePlayerBetLimitsRequest request);
 
         #endregion
@@ -49,7 +49,7 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
 
         #region Internal Api
 
-        Task<BatchResponse> ISBOApiClient.CancelTransactionsAsync(Uri apiUrl, BatchRequest request)
+        ValueTask<BatchResponse> ISBOApiClient.CancelTransactionsAsync(Uri apiUrl, BatchRequest request)
         {
             var prefix = $"{Consts.GameProvider.SBOBET}.BatchCancellation";
             return ExecuteJsonRequestAsync<BatchRequest, BatchResponse>(HttpMethod.Post, apiUrl,
@@ -60,21 +60,21 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
 
         #region Game Provider Client Api
 
-        Task<LoginResponse> ISBOApiClient.LoginAsync(Uri apiUrl, LoginRequest request)
+        ValueTask<LoginResponse> ISBOApiClient.LoginAsync(Uri apiUrl, LoginRequest request)
         {
             var prefix = $"{Consts.GameProvider.SBOBET}.Login";
             return ExecuteJsonRequestAsync<LoginRequest, LoginResponse>(HttpMethod.Post, apiUrl,
                 "/web-root/restricted/player/login.aspx", request, logPrefix: prefix);
         }
 
-        Task<LogoutResponse> ISBOApiClient.LogoutAsync(Uri apiUrl, LogoutRequest request)
+        ValueTask<LogoutResponse> ISBOApiClient.LogoutAsync(Uri apiUrl, LogoutRequest request)
         {
             var prefix = $"{Consts.GameProvider.SBOBET}.Logout";
             return ExecuteJsonRequestAsync<LogoutRequest, LogoutResponse>(HttpMethod.Post, apiUrl,
                 "/web-root/restricted/player/logout.aspx", request, logPrefix: prefix);
         }
 
-        Task<RegisterPlayerResponse> ISBOApiClient.RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request)
+        ValueTask<RegisterPlayerResponse> ISBOApiClient.RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request)
         {
             var prefix = $"{Consts.GameProvider.SBOBET}.RegisterPlayer";
             return ExecuteJsonRequestAsync<RegisterPlayerRequest, RegisterPlayerResponse>(
@@ -83,7 +83,8 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
                 request, logPrefix: prefix);
         }
 
-        Task<GetRoundHistoryResponse> ISBOApiClient.GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request)
+        ValueTask<GetRoundHistoryResponse> ISBOApiClient.GetRoundHistoryAsync(Uri apiUrl,
+            GetRoundHistoryRequest request)
         {
             var options = new JsonSerializerOptions {Converters = {new NumberToStringConverter()}};
 
@@ -93,7 +94,7 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
                 request, logPrefix: prefix, options: options);
         }
 
-        Task<GetBetHistoryResponse> ISBOApiClient.GetBetHistoryAsync(Uri apiUrl, GetBetHistoryRequest request)
+        ValueTask<GetBetHistoryResponse> ISBOApiClient.GetBetHistoryAsync(Uri apiUrl, GetBetHistoryRequest request)
         {
             var options = new JsonSerializerOptions {Converters = {new NumberToStringConverter()}};
 
@@ -103,7 +104,7 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
                 request, logPrefix: prefix, options: options);
         }
 
-        Task<UpdatePlayerBetLimitsResponse> ISBOApiClient.UpdatePlayerBetLimitsAsync(Uri apiUrl,
+        ValueTask<UpdatePlayerBetLimitsResponse> ISBOApiClient.UpdatePlayerBetLimitsAsync(Uri apiUrl,
             UpdatePlayerBetLimitsRequest request)
         {
             var prefix = $"{Consts.GameProvider.SBOBET}.UpdatePlayerBetLimit";
