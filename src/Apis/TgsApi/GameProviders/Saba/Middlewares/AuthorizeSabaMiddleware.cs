@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameProviders.Saba.Attributes;
@@ -49,7 +50,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
                 {typeof(PlaceBetParlayRequest), ResolvePlaceBetParlayRequestAsync},
                 {typeof(ConfirmBetRequest), ResolveConfirmBetRequestAsync},
                 {typeof(ConfirmBetParlayRequest), ResolveConfirmBetParlayRequestAsync},
-                {typeof(CancelBetRequest), ResolveCancelBetRequestAsync}
+                {typeof(CancelBetRequest), ResolveCancelBetRequestAsync},
+                {typeof(SettleBetRequest), ResolveSettleBetRequestAsync}
             };
         }
 
@@ -150,6 +152,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             return (r.Key, playerCode, platformType);
         }
 
+        private ValueTask<(string, string, PlatformType)> ResolveSettleBetRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<SettleBetRequest>(value);
+
+            // as settle bet might have multiple players, get the first for finding the game provider configuration
+            var playerCode = r.Body.Transactions.FirstOrDefault()?.PlayerCode;
+
+            return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));
+        }
 
         private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string token)
         {

@@ -6,6 +6,8 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Extensions;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
@@ -18,6 +20,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 
         ValueTask<decimal> GetLockAmountAsync(string playerCode, Guid gameProviderId,
             string externalRoundId);
+
+        ValueTask<string> GetExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
+
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByRoundIdAsync(Guid gameProviderId,
+            string playerCode, string externalRoundId, int gameId);
     }
 
     public sealed class SabaServices : ISabaServices
@@ -76,6 +83,34 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             }
 
             return gameActionExternalId.Amount;
+        }
+
+        async ValueTask<string> ISabaServices.GetExternalRoundIdAsync(Guid gameProviderId, string playerCode,
+            string externalTransactionId)
+        {
+            var gameActionExternalId =
+                await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode,
+                    externalTransactionId).ConfigureAwait(false);
+
+            if (gameActionExternalId == null)
+            {
+                throw new InvalidGameActionException($"No transaction of id '{externalTransactionId}' is found",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
+            return gameActionExternalId.ExternalRoundId;
+        }
+
+        async ValueTask<GameActionExternalIds[]> ISabaServices.GetGameActionExternalIdsByRoundIdAsync(
+            Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
+        {
+            var gameActions = await _gameActionQueries
+                .GetValidGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, false)
+                .ConfigureAwait(false);
+
+            return gameActions
+                .Where(t => t.GameActionType.IsNotAllOf(GameActionType.LockAmount, GameActionType.UnlockAmount))
+                .ToArray();
         }
     }
 }

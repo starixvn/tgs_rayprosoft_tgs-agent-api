@@ -695,9 +695,13 @@ namespace TGS.Services.GameOperations.Data
         }
 
         private static decimal GetRemainingLockedAmount(IList<BetActionData> validPreviousActions,
-            GameActionType gameActionType, BetActionData referencedGameAction) =>
-            validPreviousActions?.Where(a =>
+            GameActionType gameActionType, BetActionData referencedGameAction)
+        {
+            var actions = validPreviousActions?.Where(a =>
                 a.Type.IsOneOf(LockAmount, UnlockAmount) &&
-                !(gameActionType == CancelTransaction && referencedGameAction.Id == a.Id)).Sum(a => a.Amount) ?? 0;
+                !(gameActionType == CancelTransaction && referencedGameAction.Id == a.Id)).ToArray();
+
+            return actions?.Sum(a => a.Amount) ?? 0;
+        }
     }
 }
