@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
+using Tgs.Payment.LeePay;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
 
@@ -39,7 +41,11 @@ namespace Microsoft.Extensions.DependencyInjection
                     var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
                     httpClient.BaseAddress = options.FileServiceBaseUrl;
-                });
+                })
+                .AddPaymentClient()
+                .AddSingleton<ManualDepositSerializer>()
+                .AddSingleton<LeePaySerializer>()
+                .AddNatsMessageQueue(config => { });
 
             var opConfiguration = new OperatorConfiguration(services);
 

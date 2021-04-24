@@ -38,6 +38,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "ThisIsBankAccount",
                         "ThisIsReceiveBankAccount",
                         "ReceiveAccountName")));
+
+            moqPaymentClient
+                .Setup(fake => fake.DepositAsync(
+                    It.IsAny<string>(),
+                    It.Is<decimal>(x => x == command.Amount),
+                    It.IsAny<string>()))
+                .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
+
             var expected = new DepositFormInfo(
                 command.PlayerCode,
                 command.BrandId,
@@ -205,6 +213,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                                 "CNY",
                                 0.1M,
                                 null))));
+
+            moqPaymentClient
+                .Setup(fake => fake.DepositAsync(
+                    It.IsAny<string>(),
+                    It.Is<decimal>(x => x == command.Amount),
+                    It.IsAny<string>()))
+                .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
+
             var expected = new DepositFormInfo(
                 command.PlayerCode,
                 command.BrandId,
