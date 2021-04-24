@@ -21,7 +21,7 @@ using TGS.Shared.Game.Models.AsiaGaming.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
 {
-    [Route("api/provider")]
+    [Route("api/ag")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Xml)]
     [Produces(MediaTypeNames.Application.Xml)]
@@ -55,7 +55,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
             };
         }
 
-        [HttpPost("rest/integration/postTransfer")]
+        [HttpPost("posttransfer")]
         public async ValueTask<TransferResponse> PostTransferAsync(
             [FromServices] ITgsLog log,
             [FromServices] IJsonSerializationProvider json,
@@ -96,7 +96,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
             return _map.Response(r);
         }
         
-        [HttpPost("rest/integration/betResponse")]
+        [HttpPost("betresponse")]
         public async ValueTask<TransferResponse> BetResponseAsync(
             [FromServices] ITgsLog log,
             [FromServices] IJsonSerializationProvider json,

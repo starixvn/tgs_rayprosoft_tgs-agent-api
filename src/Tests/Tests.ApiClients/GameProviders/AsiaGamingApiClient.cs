@@ -22,7 +22,7 @@ namespace TGS.Tests.ApiClients.GameProviders
     public sealed class AsiaGamingApiClient : BaseApiClient, IAsiaGamingApiClient
     {
         private static readonly XmlMediaTypeFormatter XmlMediaTypeFormatter = new();
-        private static readonly string RoutePrefix = "api/provider";
+        private static readonly string RoutePrefix = "api/ag";
         private HttpClient _client;
 
         public AsiaGamingApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) :
@@ -33,11 +33,11 @@ namespace TGS.Tests.ApiClients.GameProviders
 
         Task<TransferResponse> IAsiaGamingApiClient.PostTransferAsync(PostTransferRequest request) =>
             ExecuteXmlRequestAsync<PostTransferRequest, TransferResponse>(HttpMethod.Post,
-                $"{RoutePrefix}/rest/integration/postTransfer", request);
+                $"{RoutePrefix}/posttransfer", request);
 
         Task<TransferResponse> IAsiaGamingApiClient.BetResponseAsync(BetResponseRequest request) =>
             ExecuteXmlRequestAsync<BetResponseRequest, TransferResponse>(HttpMethod.Post,
-                $"{RoutePrefix}/rest/integration/betResponse", request);
+                $"{RoutePrefix}/betresponse", request);
 
         private async Task<TResponse> ExecuteXmlRequestAsync<TRequest, TResponse>(HttpMethod method, string path, TRequest request)
         {
