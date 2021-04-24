@@ -48,6 +48,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
                 {typeof(PlaceBetRequest), ResolvePlaceBetRequestAsync},
                 {typeof(PlaceBetParlayRequest), ResolvePlaceBetParlayRequestAsync},
                 {typeof(ConfirmBetRequest), ResolveConfirmBetRequestAsync},
+                {typeof(ConfirmBetParlayRequest), ResolveConfirmBetParlayRequestAsync},
                 {typeof(CancelBetRequest), ResolveCancelBetRequestAsync}
             };
         }
@@ -134,6 +135,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
         private async ValueTask<(string, string, PlatformType)> ResolveCancelBetRequestAsync(string value)
         {
             var r = _json.DeserializeFromString<CancelBetRequest>(value);
+            var playerCode = r.Body.PlayerCode;
+
+            var platformType = await GetPlatformTypeFromCachedLoginRecordAsync(playerCode);
+            return (r.Key, playerCode, platformType);
+        }
+
+        private async ValueTask<(string, string, PlatformType)> ResolveConfirmBetParlayRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<ConfirmBetParlayRequest>(value);
             var playerCode = r.Body.PlayerCode;
 
             var platformType = await GetPlatformTypeFromCachedLoginRecordAsync(playerCode);

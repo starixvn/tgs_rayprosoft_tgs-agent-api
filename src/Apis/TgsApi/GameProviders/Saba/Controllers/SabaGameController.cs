@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -98,21 +99,42 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             var data = await _services.GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
 
-            decimal unlockAmount;
             var confirmBet = request.Body.Transactions[0];
-
-            if (confirmBet.IsOddsChanged)
-            {
-                var externalRoundId = confirmBet.ExternalRoundId.ToString();
-                unlockAmount = await GetLockAmountAsync(playerCode, data.GameProviderId, externalRoundId)
-                    .ConfigureAwait(false);
-            }
-            else
-            {
-                unlockAmount = confirmBet.ActualAmount;
-            }
+            var externalRoundId = confirmBet.ExternalRoundId.ToString();
+            var unlockAmount = confirmBet.IsOddsChanged
+                ? await GetLockAmountAsync(playerCode, data.GameProviderId, externalRoundId).ConfigureAwait(false)
+                : confirmBet.ActualAmount;
 
             var betData = _map.Request(playerCode, data, request, unlockAmount);
+            var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+
+            await RemoveLockAmountCacheAsync(betData.Transactions).ConfigureAwait(false);
+
+            return _map.Response(playerCode, request.Body, r);
+        }
+
+        [HttpPost]
+        [Route("confirmbetparlay")]
+        [ResolveRequest(Type = typeof(ConfirmBetParlayRequest))]
+        public async ValueTask<ConfirmBetParlayResponse> ConfirmBetParlayAsync(ConfirmBetParlayRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var unlockAmounts = new Dictionary<string, decimal>();
+
+            foreach (var confirmBet in request.Body.Transactions)
+            {
+                var externalRoundId = confirmBet.ExternalRoundId.ToString();
+                var unlockAmount = confirmBet.IsOddsChanged
+                    ? await GetLockAmountAsync(playerCode, data.GameProviderId, externalRoundId).ConfigureAwait(false)
+                    : confirmBet.ActualAmount;
+
+                unlockAmounts[externalRoundId] = unlockAmount;
+            }
+
+            var betData = _map.Request(playerCode, data, request, unlockAmounts);
             var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
             await RemoveLockAmountCacheAsync(betData.Transactions).ConfigureAwait(false);

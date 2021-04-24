@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
@@ -18,6 +19,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         BetData Request(string playerCode, GameProviderConfigurationData data, ConfirmBetRequest request,
             decimal unlockAmount);
 
+        BetData Request(string playerCode, GameProviderConfigurationData data, ConfirmBetParlayRequest request,
+            IReadOnlyDictionary<string, decimal> unlockAmounts);
+
         BetData Request(string playerCode, GameProviderConfigurationData data, CancelBetRequest request);
 
         GetBalanceResponse Response(string playerCode, GetBalanceResult result);
@@ -27,6 +31,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         PlaceBetParlayResponse Response(string playerCode, PlaceBetParlayRequest.Data body, BetResult r);
 
         ConfirmBetResponse Response(string playerCode, ConfirmBetRequest.Data body, BetResult r);
+
+        ConfirmBetParlayResponse Response(string playerCode, ConfirmBetParlayRequest.Data body, BetResult r);
 
         CancelBetResponse Response(string playerCode, CancelBetRequest.Data body, BetResult r);
     }
@@ -124,6 +130,49 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         }
 
         BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
+            ConfirmBetParlayRequest request, IReadOnlyDictionary<string, decimal> unlockAmounts)
+        {
+            var body = request.Body;
+
+            var transactions = body.Transactions.SelectMany(t =>
+            {
+                var externalTransactionId = t.ExternalTransactionId.ToString();
+                var externalRoundId = t.ExternalRoundId.ToString();
+
+                var unlockAmount = unlockAmounts[externalRoundId];
+
+                return new TransactionData[]
+                {
+                    new()
+                    {
+                        ExternalGameId = _externalGameId,
+                        ExternalBetId = string.Empty,
+                        ExternalRoundId = externalRoundId,
+                        ExternalTransactionId = $"{externalRoundId}_unlock",
+                        ExternalTransactionReferenceId = externalRoundId,
+                        ExternalGameActionGroupId = externalRoundId,
+                        Amount = unlockAmount,
+                        TimeStamp = GetTimestamp(body.UpdateTime),
+                        GameActionType = GameActionType.UnlockAmount
+                    },
+                    new()
+                    {
+                        ExternalGameId = _externalGameId,
+                        ExternalBetId = externalTransactionId,
+                        ExternalRoundId = externalRoundId,
+                        ExternalTransactionId = externalTransactionId,
+                        ExternalGameActionGroupId = externalRoundId,
+                        Amount = t.ActualAmount,
+                        TimeStamp = GetTimestamp(body.UpdateTime),
+                        GameActionType = GameActionType.PlaceBet
+                    }
+                };
+            }).ToArray();
+
+            return GetBetData(playerCode, null, data, transactions);
+        }
+
+        BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
             CancelBetRequest request)
         {
             var body = request.Body;
@@ -178,6 +227,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 
         ConfirmBetResponse ISabaActionModelMapper.
             Response(string playerCode, ConfirmBetRequest.Data body, BetResult r) =>
+            new()
+            {
+                Status = ((int)GameApiError.Success).ToString(),
+                Balance = r.Balance
+            };
+
+        ConfirmBetParlayResponse ISabaActionModelMapper.Response(string playerCode, ConfirmBetParlayRequest.Data body,
+            BetResult r) =>
             new()
             {
                 Status = ((int)GameApiError.Success).ToString(),
