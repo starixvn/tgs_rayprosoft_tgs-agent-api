@@ -137,7 +137,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Operator")));
 
                 services.AddHttpClient<IAsiaGamingApiClient, AsiaGamingApiClient>(
-                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-Habanero")));
+                    c => c.BaseAddress = new(configuration.GetValue<string>("ApiUrls:Tgs-AsiaGaming")));
             }
 
             _serviceProvider = services.BuildServiceProvider();
@@ -542,6 +542,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             => gameId.Split('_');
 
         private string GetBillNo(string transactionId, string playType)
-            => $"{transactionId}-{playType}";
+            => $"{transactionId}_{playType}";
     }
 }

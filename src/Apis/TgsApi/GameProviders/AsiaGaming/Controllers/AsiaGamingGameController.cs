@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Mime;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -73,10 +72,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
                     SettingConsts.GameProviderConfigurations.AsiaGaming);
 
             BetData betData;
-            var lockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
+            var isLockGame = configuration.LockGameTypes?.IgnoreCaseContains(request.Record.GameType) == true;
 
             BetResult r;
-            if (lockGame && transactionType == TransactionType.BET)
+            if (isLockGame && transactionType == TransactionType.BET)
             {
                 betData = _map.LockAmountRequest(playerCode, data, request);
                 r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
@@ -84,14 +83,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
             else
             {
                 betData = _map.Request(playerCode, data, request, transactionType, 
-                    lockGame, configuration.OppositeBets);
+                    isLockGame, configuration.OppositeBets);
                 var execute = _actionMapper[transactionType];
                 r= await execute(betData).ConfigureAwait(false);
             }
-
-            var options = new JsonSerializerOptions {WriteIndented = false};
-            log.LogInfo(
-                $"RoundId: {request.Record.RoundId}, BetData: {json.SerializeToString(betData, options)}, BetResult: {json.SerializeToString(r, options)}");
 
             return _map.Response(r);
         }
@@ -124,10 +119,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
                 lockGameActionExternalIds, configuration.OppositeBets);
             var r = await _actions.PlaceBetAsync(betData);
             
-            var options = new JsonSerializerOptions {WriteIndented = false};
-            log.LogInfo(
-                $"RoundId: {lockGameActionExternalIds.ExternalRoundId}, BetData: {json.SerializeToString(betData, options)}, BetResult: {json.SerializeToString(r, options)}");
-
             return new TransferResponse
             {
                 ResponseCode = GameApiError.OK

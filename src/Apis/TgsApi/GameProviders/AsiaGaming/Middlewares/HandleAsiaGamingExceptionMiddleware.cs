@@ -55,18 +55,18 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
 
         private async Task<object> GetTransferResponseAsync(HttpContext context, GameApiError error)
         {
-            GetBalanceResult result = null;
-
-            if (error is not GameApiError.ERROR and not GameApiError.INVALID_SESSION)
+            if (error is GameApiError.ERROR or GameApiError.INVALID_SESSION)
             {
-                var playerCode = context.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-
-                if (playerCode.IsNotNullOrEmpty())
-                {
-                    result = await _action.GetBalanceAsync(Consts.GameProvider.AsiaGaming, playerCode);
-                }
+                return _map.Response(error);
+            }
+            
+            var playerCode = context.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            if (playerCode.IsNullOrEmpty())
+            {
+                return _map.Response(error);
             }
 
+            var result = await _action.GetBalanceAsync(Consts.GameProvider.AsiaGaming, playerCode);
             return _map.Response(error, result);
         }
 

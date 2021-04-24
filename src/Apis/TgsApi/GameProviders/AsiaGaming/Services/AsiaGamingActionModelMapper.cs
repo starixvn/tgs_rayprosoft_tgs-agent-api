@@ -16,12 +16,14 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 {
     public interface IAsiaGamingActionModelMapper
     {
-        BetData Request(string playerCode, GameProviderConfigurationData data, PostTransferRequest r, TransactionType transactionType, bool lockGame, OppositeBetSetting[] oppositeBetSettings);
+        BetData Request(string playerCode, GameProviderConfigurationData data, PostTransferRequest r, TransactionType transactionType, bool isLockGame, OppositeBetSetting[] oppositeBetSettings);
 
         BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data, PostTransferRequest r);
 
         BetData PlaceBetRequest(string playerCode, GameProviderConfigurationData data, BetResponseRequest r, GameActionExternalIds externalIds, OppositeBetSetting[] oppositeBetSettings);
 
+        TransferResponse Response(GameApiError error);
+        
         TransferResponse Response(GameApiError error, GetBalanceResult result);
         
         TransferResponse Response(BetResult result);
@@ -38,7 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         }
         
         BetData IAsiaGamingActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
-            PostTransferRequest r, TransactionType transactionType, bool lockGame, OppositeBetSetting[] oppositeBetSettings)
+            PostTransferRequest r, TransactionType transactionType, bool isLockGame, OppositeBetSetting[] oppositeBetSettings)
         {
             var isPlaceBet = transactionType == TransactionType.BET;
             var isPlaceBetOrCancel = isPlaceBet || transactionType == TransactionType.REFUND;
@@ -55,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 {
                     Amount = amount,
                     ExternalTransactionId = transactionId,
-                    ExternalTransactionReferenceId = isPlaceBet ? string.Empty : GetTransactionReferenceId(r.Record, lockGame),
+                    ExternalTransactionReferenceId = isPlaceBet ? string.Empty : GetTransactionReferenceId(r.Record, isLockGame),
                     ExternalRoundId = r.Record.RoundId,
                     ExternalBetId = transactionId,
                     ExternalGameId = GetGameId(r),
@@ -106,7 +108,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 new()
                 {
                     Amount = Math.Abs(externalIds.Amount),
-                    ExternalTransactionId = $"{transactionId}-{GameActionType.UnlockAmount}",
+                    ExternalTransactionId = $"{transactionId}_{GameActionType.UnlockAmount}",
                     ExternalRoundId = externalIds.ExternalRoundId,
                     ExternalBetId = transactionId,
                     ExternalGameId = externalIds.ExternalGameId,
@@ -117,9 +119,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             transactions.AddRange(r.Records.Select(re => new TransactionData
             {
                 Amount = re.Amount,
-                ExternalTransactionId = $"{transactionId}-{re.BillNo}",
+                ExternalTransactionId = $"{transactionId}_{re.BillNo}",
                 ExternalRoundId = externalIds.ExternalRoundId,
-                ExternalBetId = $"{transactionId}-{re.BillNo}",
+                ExternalBetId = $"{transactionId}_{re.BillNo}",
                 ExternalGameId = externalIds.ExternalGameId,
                 GameActionType = GameActionType.PlaceBet,
                 TimeStamp = externalIds.RecordedOn
@@ -129,6 +131,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 hasCurrencyFromGameProvider: false, oppositeBetSettings: oppositeBetSettings);
         }
 
+        TransferResponse IAsiaGamingActionModelMapper.Response(GameApiError error)
+        {
+            return new()
+            {
+                ResponseCode = error,
+                Balance = 0
+            };
+        }
+        
         TransferResponse IAsiaGamingActionModelMapper.Response(GameApiError error, GetBalanceResult result)
         {
             return new()
@@ -165,9 +176,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             return transactionType == TransactionType.BET ? transactionId : $"{transactionId}_{transactionType}";
         }
         
-        private static string GetTransactionReferenceId(TransferRecord record, bool lockGame)
+        private static string GetTransactionReferenceId(TransferRecord record, bool isLockGame)
         {
-            return lockGame ? $"{record.TransactionId}-{record.BillNo}" : record.TransactionId;
+            return isLockGame ? $"{record.TransactionId}_{record.BillNo}" : record.TransactionId;
         }
 
         private static string GetGameId(PostTransferRequest r)
