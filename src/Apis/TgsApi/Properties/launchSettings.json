@@ -46,7 +46,7 @@
       "launchBrowser": true,
       "launchUrl": "health",
       "environmentVariables": {
-        "GameProviderCode": "ASGA",
+        "GameProviderCode": "AG",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:62330"
@@ -89,7 +89,7 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
-        "GameProviderCode": "ASGA",
+        "GameProviderCode": "AG",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,
