@@ -7,9 +7,9 @@ namespace TGS.Shared.Game.Models.AsiaGaming.Incoming
     public record TransferResponse
     {
         [XmlElement]
-        public GameApiError ResponseCode { get; set; }
+        public GameApiError ResponseCode { get; init; }
 
         [XmlElement]
-        public decimal Balance { get; set; }
+        public decimal Balance { get; init; }
     }
 }

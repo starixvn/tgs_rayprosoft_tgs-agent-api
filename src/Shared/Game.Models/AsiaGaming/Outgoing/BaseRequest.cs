@@ -1,17 +1,17 @@
 ﻿namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
 {
-    public class BaseRequest
+    public abstract record BaseRequest
     {
-        public string cagent { get; set; }
+        public string cagent { get; init; }
 
-        public string loginname { get; set; }
+        public string loginname { get; init; }
 
         public int actype { get; } = 1;
 
         public string password { get; } = "password";
 
-        public string oddtype { get; set; }
+        public string oddtype { get; init; }
 
-        public string cur { get; set; }
+        public string cur { get; init; }
     }
 }
