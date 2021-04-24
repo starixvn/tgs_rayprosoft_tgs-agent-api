@@ -5,17 +5,15 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Services;
+using TGS.Core.Models.Settings;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
     partial class DataInitializer
     {
-        private Task GenerateSettingsAsync()
+        private async Task GenerateSettingsAsync()
         {
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = false
-            };
+            var options = new JsonSerializerOptions {WriteIndented = false};
 
             var commonSettings = new[]
             {
@@ -24,7 +22,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     "For menus used"),
                 CreateSetting(SettingConsts.SuperLicenseeCodes,
                     _jsonSerializationProvider.SerializeToString(new[] {"TGS"}, options),
-                    "Super Licensee Codes")
+                    "Super Licensee Codes"),
+                CreateSetting(SettingConsts.PromotionType,
+                    _jsonSerializationProvider.SerializeToString(GetPromotionTypes(), options),
+                    "Promotion Types")
             };
 
             var gameProviderSettings = _gameProviders.Select(gp =>
@@ -37,7 +38,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var settings = commonSettings.Concat(gameProviderSettings).ToArray();
 
-            return _repository.BulkInsertAsync(settings);
+            await _repository.Settings.AddRangeAsync(settings);
+            await _repository.SaveChangesAsync();
         }
 
         private static Setting CreateSetting(string key, string value, string description) =>
@@ -52,6 +54,26 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now
             };
 
+        private static PromotionType[] GetPromotionTypes() =>
+            new[]
+            {
+                new PromotionType
+                {
+                    Name = "Deposit",
+                    Types = new[] {"FirstDeposit", "SecondDeposit"}
+                },
+                new PromotionType
+                {
+                    Name = "Turnover",
+                    Types = new[] {"TurnoverRebate"}
+                },
+                new PromotionType
+                {
+                    Name = "ReliefMoney",
+                    Types = new[] {"ReliefMoneyDaily"}
+                }
+            };
+
         private static MenuSetting[] GetMenuSettings()
         {
             var menus = new[]
@@ -64,18 +86,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("View"),
-                                new MenuSetting("Verify")
+                                new MenuSetting("Create"), new MenuSetting("Update"),
+                                new MenuSetting("View"), new MenuSetting("Verify")
                             }
                         },
                         new MenuSetting("StationLetter")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"),
-                                new MenuSetting("View"),
+                                new MenuSetting("Create"), new MenuSetting("View"),
                                 new MenuSetting("Verify")
                             }
                         },
@@ -83,8 +102,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"),
-                                new MenuSetting("View"),
+                                new MenuSetting("Create"), new MenuSetting("View"),
                                 new MenuSetting("Update")
                             }
                         }
@@ -96,11 +114,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         new MenuSetting("PlayerList")
                         {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View"),
-                                new MenuSetting("Update")
-                            }
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         }
                     }
                 },
@@ -110,11 +124,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         new MenuSetting("AgentList")
                         {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View"),
-                                new MenuSetting("Update")
-                            }
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         }
                     }
                 },
@@ -122,102 +132,36 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Providers")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        },
-                        new MenuSetting("BrandProviders")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        },
-                        new MenuSetting("BrandGames")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        }
+                        new MenuSetting("Providers") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("BrandProviders") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("BrandGames") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Report")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("MarketReport")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("OrderReport")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
+                        new MenuSetting("MarketReport") {SubMenus = new[] {new MenuSetting("View")}},
+                        new MenuSetting("OrderReport") {SubMenus = new[] {new MenuSetting("View")}},
                         new MenuSetting("AgentContributionReport")
                         {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
+                            SubMenus = new[] {new MenuSetting("View")}
                         },
                         new MenuSetting("PlayerContributionReport")
                         {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
+                            SubMenus = new[] {new MenuSetting("View")}
                         },
-                        new MenuSetting("AgentBonusReport")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("VipReport")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        }
+                        new MenuSetting("AgentBonusReport") {SubMenus = new[] {new MenuSetting("View")}},
+                        new MenuSetting("VipReport") {SubMenus = new[] {new MenuSetting("View")}}
                     }
                 },
                 new MenuSetting("Merchant")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Resellers")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        },
-                        new MenuSetting("Licensees")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        },
-                        new MenuSetting("Brands")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        }
+                        new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("System")
@@ -226,38 +170,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         new MenuSetting("Admins")
                         {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update")
-                            }
+                            SubMenus = new[] {new MenuSetting("Create"), new MenuSetting("Update")}
                         },
                         new MenuSetting("Roles")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
-                                new MenuSetting("Delete"),
-                                new MenuSetting("Copy")
+                                new MenuSetting("Create"), new MenuSetting("Update"),
+                                new MenuSetting("Delete"), new MenuSetting("Copy")
                             }
                         },
                         new MenuSetting("Departments")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"),
-                                new MenuSetting("Update"),
+                                new MenuSetting("Create"), new MenuSetting("Update"),
                                 new MenuSetting("Delete")
                             }
                         },
                         new MenuSetting("BrandPayments")
                         {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View"),
-                                new MenuSetting("Update")
-                            }
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         }
                     }
                 },
@@ -265,63 +198,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Language")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        },
-                        new MenuSetting("Currency")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        },
-                        new MenuSetting("BetLimit")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        },
-                        new MenuSetting("Settings")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("Update")
-                            }
-                        }
+                        new MenuSetting("Language") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("Currency") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("BetLimit") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("Settings") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Log")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("AdminLog")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("ApiLog")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
-                        new MenuSetting("Log")
-                        {
-                            SubMenus = new[]
-                            {
-                                new MenuSetting("View")
-                            }
-                        },
+                        new MenuSetting("AdminLog") {SubMenus = new[] {new MenuSetting("View")}},
+                        new MenuSetting("ApiLog") {SubMenus = new[] {new MenuSetting("View")}},
+                        new MenuSetting("Log") {SubMenus = new[] {new MenuSetting("View")}}
                     }
-                },
+                }
             };
 
             return menus;

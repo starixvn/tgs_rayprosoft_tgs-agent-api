@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -13,7 +14,7 @@ namespace TGS.Services.ValidateCode
             _validateCodeStore = validateCodeStore ?? throw new ArgumentNullException(nameof(validateCodeStore));
         }
 
-        public async ValueTask ExecuteAsync(SaveValidateDataCommand command)
+        public async ValueTask ExecuteAsync(SaveValidateDataCommand command, CancellationToken cancellationToken = default)
         {
             var result = await _validateCodeStore
                 .SaveDataAsync(command.ValidateCode, command.Token, command.Content)

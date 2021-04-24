@@ -34,17 +34,19 @@ const DetailDialog = ({ record = {}, dialog, ...props }) => {
         <Dialog.Modal
             title={title}
             showActionButtons={false}
+            hideOnClickOutside={false}
             showCloseButton
+            maxWidth="70vw"
             {...dialog}
         >
             <FieldStack orientation="vertical">
                 <Card variant="bordered" title="Request">
                     <FieldStack>
                         <FieldWrapper label="Headers">
-                            <Code>{record.requestHeaders}</Code>
+                            <Code isBlock>{record.requestHeaders}</Code>
                         </FieldWrapper>
                         <FieldWrapper label="Content">
-                            <Code>{record.requestContent}</Code>
+                            <Code isBlock>{record.requestContent}</Code>
                         </FieldWrapper>
                     </FieldStack>
                 </Card>
@@ -52,10 +54,10 @@ const DetailDialog = ({ record = {}, dialog, ...props }) => {
                 <Card variant="bordered" title="Response">
                     <FieldStack>
                         <FieldWrapper label="Headers">
-                            <Code>{record.responseHeaders}</Code>
+                            <Code isBlock>{record.responseHeaders}</Code>
                         </FieldWrapper>
                         <FieldWrapper label="Content">
-                            <Code>{record.responseContent}</Code>
+                            <Code isBlock>{record.responseContent}</Code>
                         </FieldWrapper>
                     </FieldStack>
                 </Card>

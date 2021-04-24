@@ -11,15 +11,18 @@ namespace TGS.Services.Operations.Queries
 {
     public interface IRoundQueries
     {
-        Task<Round> GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions = false,
+        ValueTask<Round> GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions = false,
             bool includeRoundDetail = false);
 
-        Task<RoundWithGameActionExternalIds[]> GetRoundWithGameActionExternalIdsAsync(Guid gameProviderId,
+        ValueTask<RoundWithGameActionExternalIds[]> GetRoundWithGameActionExternalIdsAsync(Guid gameProviderId,
             DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus = RoundStatus.Closed,
             GameType? gameType = null);
 
-        Task<(RoundStatus RoundStatus, int GameId)?> GetRoundStatusAndGameIdAsync(Guid gameProviderId,
+        ValueTask<(RoundStatus RoundStatus, int GameId)?> GetRoundStatusAndGameIdAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, string externalTransactionId);
+
+        ValueTask<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId,
+            int gameId);
     }
 
     public sealed class RoundQueries : IRoundQueries
@@ -31,7 +34,7 @@ namespace TGS.Services.Operations.Queries
             _repository = repository;
         }
 
-        async Task<Round> IRoundQueries.GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions,
+        async ValueTask<Round> IRoundQueries.GetRoundByRoundIdAsync(Guid roundId, bool includeGameActions,
             bool includeRoundDetail)
         {
             IQueryable<Round> query = _repository.Rounds.Include(r => r.RoundDetail);
@@ -49,7 +52,7 @@ namespace TGS.Services.Operations.Queries
             return await query.FirstOrDefaultAsync(c => c.Id == roundId).ConfigureAwait(false);
         }
 
-        async Task<RoundWithGameActionExternalIds[]> IRoundQueries.GetRoundWithGameActionExternalIdsAsync(
+        async ValueTask<RoundWithGameActionExternalIds[]> IRoundQueries.GetRoundWithGameActionExternalIdsAsync(
             Guid gameProviderId, DateTimeOffset start, DateTimeOffset end, RoundStatus? roundStatus, GameType? gameType)
         {
             var query = _repository.Rounds
@@ -94,7 +97,7 @@ namespace TGS.Services.Operations.Queries
             }).ToArrayAsync().ConfigureAwait(false);
         }
 
-        async Task<(RoundStatus RoundStatus, int GameId)?> IRoundQueries.
+        async ValueTask<(RoundStatus RoundStatus, int GameId)?> IRoundQueries.
             GetRoundStatusAndGameIdAsync(Guid gameProviderId, string playerCode,
                 string externalRoundId, string externalTransactionId)
         {
@@ -112,5 +115,15 @@ namespace TGS.Services.Operations.Queries
 
             return data == null ? null : (data.Status, data.GameId);
         }
+
+        async ValueTask<RoundStatus?> IRoundQueries.GetRoundStatusAsync(Guid gameProviderId, string playerCode,
+            string externalRoundId, int gameId) =>
+            await (from round in _repository.Rounds
+                   where round.GameProviderId == gameProviderId &&
+                       round.PlayerCode == playerCode &&
+                       round.ExternalRoundId == externalRoundId &&
+                       round.GameId == gameId
+                   select (RoundStatus?)round.Status)
+                .FirstOrDefaultAsync().ConfigureAwait(false);
     }
 }

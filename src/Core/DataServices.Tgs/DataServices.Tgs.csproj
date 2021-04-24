@@ -7,13 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="DataInitializers\Games\SBO.csv" />
-    <None Remove="SqlScripts\Functions\game_action_referenced_game_action_exists.sql" />
-    <None Remove="SqlScripts\Functions\report_get_round_aggregates.sql" />
-  </ItemGroup>
-
-  
-  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -22,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\PP.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
@@ -33,8 +27,6 @@
     <EmbeddedResource Include="SqlScripts\Functions\report_get_round_aggregates.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\brands.sql" />
-    <EmbeddedResource Include="SqlScripts\Indexes\paymentChannels.sql" />
-    <EmbeddedResource Include="SqlScripts\Indexes\paymentMethods.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\payments.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\licensees.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\games.sql" />

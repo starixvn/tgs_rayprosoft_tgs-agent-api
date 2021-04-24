@@ -65,7 +65,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 response.Items[i].PlayerCode.Should().Be(expectedPlayers[i].PlayerCode);
                 response.Items[i].Username.Should().Be(expectedPlayers[i].Username);
                 response.Items[i].Status.Should().Be(expectedPlayers[i].Status);
-                response.Items[i].HasAgent.Should().Be(expectedPlayers[i].HasAgent);
             }
 
             _mediatorMock.Verify(x => x.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()));
@@ -142,9 +141,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             response.Player.Status.Should().Be(player.Status);
             response.Player.Username.Should().Be(player.Username);
             response.Player.RealName.Should().Be(player.RealName);
-            response.Player.HasAgent.Should().Be(player.HasAgent);
             response.Player.RegisteredOn.Should().Be(player.RegisteredOn);
-            response.Player.ParentUsername.Should().Be(player.ParentUsername);
+            response.Player.AgentUsername.Should().Be(player.AgentUsername);
             response.Player.Balance.Should().Be(player.Balance);
             response.Player.Phone.Should().Be(player.Phone);
             response.Player.Email.Should().Be(player.Email);

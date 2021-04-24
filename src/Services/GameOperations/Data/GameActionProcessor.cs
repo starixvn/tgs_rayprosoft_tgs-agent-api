@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -30,6 +31,7 @@ namespace TGS.Services.GameOperations.Data
         private readonly IActionWithinRoundValidator _actionWithinRoundValidator;
         private readonly IAmountValidator _amountValidator;
         private readonly IBetValuesCalculator _betValuesCalculator;
+        private readonly IJsonSerializationProvider _json;
         private readonly IRoundStatusManager _roundStatusManager;
         private readonly IStatusValidator _statusValidator;
         private readonly ITimeZoneManager _timeZoneManager;
@@ -46,7 +48,8 @@ namespace TGS.Services.GameOperations.Data
             ITimeZoneManager timeZoneManager,
             IRoundStatusManager roundStatusManager,
             IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus)
+            IValidStatus<GameStatus> validGameStatus,
+            IJsonSerializationProvider json)
         {
             _transactionSettingsGenerator = transactionSettingsGenerator;
             _amountValidator = amountValidator;
@@ -57,6 +60,7 @@ namespace TGS.Services.GameOperations.Data
             _roundStatusManager = roundStatusManager;
             _validStatus = validStatus;
             _validGameStatus = validGameStatus;
+            _json = json;
         }
 
         async Task<BetResult> IGameActionProcessor.ExecuteAsync(ProcessorData data)
@@ -127,6 +131,8 @@ namespace TGS.Services.GameOperations.Data
 
             s = GetNewRoundStatus(s);
 
+            VerifyLockedAndUnlockedAmounts(s);
+
             await ThrowIfStatusesIsInvalidAsync(s).ConfigureAwait(false);
 
             var ga = await SaveDatabaseRecordsAsync(s).ConfigureAwait(false);
@@ -137,6 +143,8 @@ namespace TGS.Services.GameOperations.Data
                 {
                     ExternalTransactionId = s.ExternalTransactionId,
                     InternalTransactionId = ga.Id,
+                    RoundId = ga.RoundId,
+                    GameId = s.GameId,
                     IsDuplicate = false
                 },
                 GameAction = ga,
@@ -212,7 +220,7 @@ namespace TGS.Services.GameOperations.Data
             return s;
         }
 
-        private static async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(
+        private async Task<(GameActionState, GameActionResult)> GetAndValidatePreviousActionsAsync(
             GameActionState s)
         {
             var externalRoundId = s.ExternalRoundId;
@@ -269,7 +277,10 @@ namespace TGS.Services.GameOperations.Data
                     GameProviderCode = s.GameProvider.Code,
                     BetType = act.BetType,
                     WalletId = act.WalletId,
-                    IsCancelled = false
+                    IsCancelled = false,
+                    JackpotContribution = act.JackpotContribution == null
+                        ? null
+                        : _json.DeserializeFromString<JackpotContribution>(act.JackpotContribution)
                 })
                 .ToDictionary(e => e.Id);
 
@@ -383,13 +394,15 @@ namespace TGS.Services.GameOperations.Data
             !BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
         private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId,
-            string externalTransactionId) =>
+            string externalTransactionId, Guid roundId, int gameId) =>
             new()
             {
                 TransactionResult = new()
                 {
                     ExternalTransactionId = externalTransactionId,
                     InternalTransactionId = gameActionId,
+                    RoundId = roundId,
+                    GameId = gameId,
                     IsDuplicate = true
                 }
             };
@@ -454,7 +467,8 @@ namespace TGS.Services.GameOperations.Data
                 throw error;
             }
 
-            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current, s.PreviousActions);
+            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
+                s.PreviousActions, s.OppositeBetPatterns);
 
             s.BetValueResult = betValues;
 
@@ -593,7 +607,7 @@ namespace TGS.Services.GameOperations.Data
             return roundId;
         }
 
-        private static GameAction CreateGameAction(GameActionState s, BetActionData current)
+        private GameAction CreateGameAction(GameActionState s, BetActionData current)
         {
             var player = s.PlayerData;
 
@@ -620,11 +634,14 @@ namespace TGS.Services.GameOperations.Data
                 IsClosingRound = current.IsClosingRound,
                 ClosingRoundExplicitRequest =
                     current.IsExplicitlyClosingRound    ? true :
-                    current.IsExplicitlyNotClosingRound ? false : (bool?)null,
+                    current.IsExplicitlyNotClosingRound ? false : null,
                 Amount = s.Amount,
                 Balance = player.Wallet.Balance,
                 BetType = s.BetType,
-                Description = s.Description
+                ExtraData = s.ExtraData,
+                JackpotContribution = s.JackpotContribution != null
+                    ? _json.SerializeToString(s.JackpotContribution)
+                    : null
             };
 
             s.Repository.GameActions.Add(ga);
@@ -653,10 +670,12 @@ namespace TGS.Services.GameOperations.Data
 
         private void FillClosedRoundBetValues(GameActionState s, BetActionData current, Round round)
         {
-            var hasFreeBet = current.Type == FreeBet ||
-                s.PreviousActions.Any(act => act.Type == FreeBet);
+            var gameActionWithSingleRound =
+                s.FreeBetAsSingleRound && current.Type == FreeBet && s.PreviousActions.Count == 0 ||
+                current.Type == WinJackpot;
 
-            var clientStatus = _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, hasFreeBet);
+            var clientStatus =
+                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, gameActionWithSingleRound);
 
             round.Status = s.NewRoundStatus;
             round.ClientStatus = clientStatus;
@@ -667,5 +686,11 @@ namespace TGS.Services.GameOperations.Data
             round.SettleAmount = s.BetValueResult.SettleAmount;
             round.Turnover = s.BetValueResult.Turnover;
         }
+
+        private static decimal GetRemainingLockedAmount(IList<BetActionData> validPreviousActions,
+            GameActionType gameActionType, BetActionData referencedGameAction) =>
+            validPreviousActions?.Where(a =>
+                a.Type.IsOneOf(LockAmount, UnlockAmount) &&
+                !(gameActionType == CancelTransaction && referencedGameAction.Id == a.Id)).Sum(a => a.Amount) ?? 0;
     }
 }

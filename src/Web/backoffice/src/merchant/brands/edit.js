@@ -21,7 +21,7 @@ import {
     ConfirmButtonFooter
 } from "../../form/ConfirmButtonFooter"
 import { Input, InputField } from "../../input/Input"
-import { MerchantIdHookFormSelect, MerchantIdSelect } from "../MerchantSelect"
+import { MerchantIdSelect } from "../MerchantSelect"
 import { RoleTypes } from "../../system/roles/type"
 import { useAddBrand, useBrand, useUpdateBrand } from "./client"
 import { useFormContext, useFieldArray, useForm } from "react-hook-form"

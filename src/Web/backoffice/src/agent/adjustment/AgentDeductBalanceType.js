@@ -43,11 +43,13 @@ const OtherTrans = {
     en: "Other"
 }
 
-export const AddBalanceTypeSelect = ({
-    placeholder,
-    placeholderDisabled = false,
-    ...props
-}) => {
+export const AddBalanceTypeSelect = ({ placeholder, ...props }) => {
+    let defaultPlaceholder = useTrans({
+        zh: "交易类型",
+        en: "Transaction Type"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
+
     let options = [
         {
             label: useTrans(BonusTrans),
@@ -71,24 +73,7 @@ export const AddBalanceTypeSelect = ({
         }
     ]
 
-    let defaultPlaceholder = useTrans({
-        zh: "交易类型",
-        en: "Transaction Type"
-    })
-
-    placeholder = placeholder ?? defaultPlaceholder
-    if (placeholder) {
-        options = [
-            {
-                label: placeholder,
-                value: "",
-                disabled: placeholderDisabled
-            },
-            ...options
-        ]
-    }
-
-    return <Select options={options} {...props} />
+    return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export default {

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
@@ -27,11 +28,16 @@ namespace TGS.Apis.BackendOffice.Middlewares
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
         private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly IStreamToString _streamToString;
+        private readonly ILogger<ExceptionMiddleware> _systemLogger;
         private readonly ITgsLog _tgsLog;
 
-        public ExceptionMiddleware(IRequestAnalyzer requestAnalyzer, ITgsLog logger, IJsonSerializationProvider json,
+        public ExceptionMiddleware(
+            IRequestAnalyzer requestAnalyzer,
+            ITgsLog logger,
+            IJsonSerializationProvider json,
             IWebHostEnvironment env,
-            IStreamToString streamToString)
+            IStreamToString streamToString,
+            ILogger<ExceptionMiddleware> systemLogger)
         {
             _requestAnalyzer = requestAnalyzer;
             _tgsLog = logger;
@@ -39,6 +45,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
             _env = env;
             _streamToString = streamToString;
             _recyclableMemoryStreamManager = new();
+            _systemLogger = systemLogger ?? throw new ArgumentNullException(nameof(systemLogger));
+            _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext httpContext, RequestDelegate next)
@@ -80,6 +88,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
             }
             catch (Exception ex)
             {
+                _systemLogger.LogError(ex, "Error!");
+
                 adminLogEvent.exception = ex.Message.NoLongerThan(4000);
                 adminLogEvent.StackTrace = ex.StackTrace.NoLongerThan(4000);
                 adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
@@ -89,7 +99,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
 
                 var message = new ErrorDetails
                 {
-                    StatusCode = (int)HttpStatusCode.InternalServerError, Message = "Internal Server Error."
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Message = "Internal Server Error."
                 };
 
                 if (_env.IsDevelopment())
@@ -104,8 +115,11 @@ namespace TGS.Apis.BackendOffice.Middlewares
             _tgsLog.LogAdmin(adminLogEvent);
         }
 
+        private static string CutOffResponseContent(string responseContent) =>
+            $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
+
         private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context,
-            RequestDelegate next)
+                    RequestDelegate next)
         {
             var originalBodyStream = context.Response.Body;
             var responseStream = _recyclableMemoryStreamManager.GetStream();
@@ -118,7 +132,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 sw.Stop();
                 var ms = (int)sw.ElapsedMilliseconds;
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
-                var message = await _streamToString.GetString(context.Response.Body);
+                var message = await _streamToString.GetStringAsync(context.Response.Body);
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 await context.Response.Body.CopyToAsync(originalBodyStream);
                 return (message, ms);
@@ -142,8 +156,5 @@ namespace TGS.Apis.BackendOffice.Middlewares
             context.Request.Body.Seek(0, SeekOrigin.Begin);
             return message;
         }
-
-        private static string CutOffResponseContent(string responseContent) =>
-            $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
     }
 }

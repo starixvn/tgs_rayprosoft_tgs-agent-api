@@ -17,10 +17,7 @@ import SearchButton from "../../button/SearchButton"
 import { PageContent } from "../../page/Content"
 import AlertDialog from "../../dialog/Alert"
 import { Trans } from "../../i18n"
-import {
-    AddBetLimitDisclosure as AddBetLimitDisclosure,
-    EditBetLimitDisclosure as EditBetLimitDisclosure
-} from "./edit"
+import { AddBetLimitDisclosure, EditBetLimitDisclosure } from "./edit"
 import equals from "fast-deep-equal"
 import { useBetLimitList } from "../../betlimit/client"
 

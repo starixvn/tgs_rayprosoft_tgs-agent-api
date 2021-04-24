@@ -174,4 +174,7 @@
   <data name="GameProviderBetLimitCountIncorrect" xml:space="preserve">
     <value>游戏提供商的限红笔数不正确</value>
   </data>
+  <data name="SettlementIntervalInvalid" xml:space="preserve">
+    <value>结算周期无效</value>
+  </data>
 </root>

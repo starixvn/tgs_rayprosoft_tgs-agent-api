@@ -30,9 +30,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 
             var source = new BrandPayment
             {
-                PaymentId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
-                PaymentMethodId = Guid.Parse("67252f3a-6826-45ce-8bbc-c53e2ca7cdcb"),
-                PaymentChannelId = Guid.Parse("e761a2d3-5705-417f-8d97-43cb7aea0142"),
+                PaymentMethodChannelId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
                 ChannelName = "ChannelNass888",
                 TransferLimitFrom = 55,
                 TransferLimitTo = 55,
@@ -53,9 +51,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 
             var request = new UpdateBrandPaymentRequest
             {
-                PaymentId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
-                PaymentMethodId = Guid.Parse("67252f3a-6826-45ce-8bbc-c53e2ca7cdcb"),
-                PaymentChannelId = Guid.Parse("e761a2d3-5705-417f-8d97-43cb7aea0142"),
+                PaymentMethodChannelId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
                 ChannelName = "ChannelNass9",
                 TransferLimitFrom = 33,
                 TransferLimitTo = 33,
@@ -104,7 +100,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 
             await sut.UpdatePaymentAsync(source, request, "tester");
 
-            var logs = await repository.PaymentAuditLogs.ToArrayAsync();
+            var logs = await repository.PaymentAuditLogs.AsQueryable().ToArrayAsync();
 
             Assert.AreEqual(1, logs.Length);
 

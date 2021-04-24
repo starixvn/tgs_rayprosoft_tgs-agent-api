@@ -14,14 +14,18 @@ RETURNS TABLE (
 	 "RecordedOn" timestamptz, 
 	 "TrackingId" uuid, 
 	 "Id" uuid, 
-	 "Ip" varchar, 
-	 "Path" varchar, 
-	 "Method" varchar,
-	 "Prefix" varchar,
-	 "ServerName" varchar,
+	 "Ip" character varying, 
+	 "Path" character varying, 
+	 "Method" character varying,
+	 "Prefix" character varying,
+	 "ServerName" character varying,
 	 "ResponseCode" smallint, 
 	 "ExecutionTimeMs" integer, 
-	 "TotalCount" int) 
+	 "RequestHeaders" text, 
+	 "RequestContent" text, 
+	 "ResponseHeaders" text, 
+	 "ResponseContent" text,
+	 "TotalCount" bigint) 
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -38,6 +42,10 @@ BEGIN
 		a.server_name as "ServerName",
 		a.response_code as "ResponseCode",
 		a.execution_time_ms as "ExecutionTimeMs",
+		a.request_headers AS "RequestHeaders",
+		a.request_content AS "RequestContent",
+		a.response_headers AS "ResponseHeaders",
+		a.response_content AS "ResponseContent",
 		count(*) over() as "TotalCount"
     from dbo.api_logs a
     where a.recorded_on >= _from        

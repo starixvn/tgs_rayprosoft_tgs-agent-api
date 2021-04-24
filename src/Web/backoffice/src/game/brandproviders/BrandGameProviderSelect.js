@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import { Heading, Stack, Button, InputField, Set, Text, Box } from "bumbag"
 import { Select } from "../../select/Select"
 import { useBrandGameProviderList } from "./client"
 import { useTrans } from "../../i18n"
@@ -10,7 +8,7 @@ import { useUserBrandId } from "../../user/context"
 export const BrandGameProviderSelect = ({ brandId, placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "厂商",
-        en: "Select Game Provider"
+        en: "Game Provider"
     })
     placeholder = placeholder ?? defaultPlaceholder
 
@@ -21,11 +19,10 @@ export const BrandGameProviderSelect = ({ brandId, placeholder, ...props }) => {
         brandId
     })
 
-    let options =
-        data?.items?.map((gameProvider) => ({
-            label: gameProvider.gameProviderName,
-            value: gameProvider.gameProviderId
-        })) ?? []
+    let options = data?.items?.map((gameProvider) => ({
+        label: gameProvider.gameProviderName,
+        value: gameProvider.gameProviderId
+    }))
 
     return (
         <Select

@@ -21,7 +21,8 @@ namespace TGS.UnitTests.Startups.TgsApi
             _gameProviderCode = gameProviderCode;
         }
 
-        protected void ResolveAllRegistrationsWithAdditionalTypes(Type[] resolveTypes, Type[] ignoreTypes = null, string namespacePrefix = "TGS")
+        protected void ResolveAllRegistrationsWithAdditionalTypes(Type[] resolveTypes, Type[] ignoreTypes = null,
+            string namespacePrefix = "TGS")
         {
             ignoreTypes ??= Array.Empty<Type>();
 
@@ -29,10 +30,11 @@ namespace TGS.UnitTests.Startups.TgsApi
             var types = resolveTypes.Concat(additionalControllerTypes)
                 .Except(ignoreTypes);
 
-            base.ResolveAllRegistrations(types, namespacePrefix);
+            ResolveAllRegistrations(types, namespacePrefix);
         }
 
-        public override void InitialStartupConfigureServices(IServiceCollection services, IConfiguration configuration,
+        protected override void InitialStartupConfigureServices(IServiceCollection services,
+            IConfiguration configuration,
             IWebHostEnvironment env)
         {
             // dynamic create TStartup object and call ConfigureServices method

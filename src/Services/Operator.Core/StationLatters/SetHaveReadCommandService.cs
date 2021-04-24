@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -13,7 +14,7 @@ namespace TGS.Services.Operator.StationLetters
             _stationLetterRepository = stationLetterRepository ?? throw new ArgumentNullException(nameof(stationLetterRepository));
         }
 
-        public ValueTask ExecuteAsync(SetHaveReadCommand command)
+        public ValueTask ExecuteAsync(SetHaveReadCommand command, CancellationToken cancellationToken = default)
         {
             return _stationLetterRepository.SetStationLetterHaveReadAsync(command.PlayerCode, command.LetterId);
         }

@@ -47,11 +47,6 @@ namespace TGS.Services.Report.Application.Commands.Player
                 reportDate = new(result.Year, result.Month, result.Day, 0, 0, 0,
                     result.Offset);
             }
-            else
-            {
-                return CreateInvalidResponse<MessageResponse>("Date is invalid.");
-            }
-
 
             var playerRebates = await _playerGameTypeAggregateService
                 .GetPlayerGameTypeAggregateQueries(q => q.Where(x => x.ReportDate == reportDate))
@@ -117,7 +112,7 @@ namespace TGS.Services.Report.Application.Commands.Player
 
             if (playerRebates.Length <= 0)
             {
-                return new() {Valid = false, Message = "not any player rebate."};
+                return new() {Valid = false, Message = "Has no player rebate data."};
             }
 
             await using var reportTransaction =

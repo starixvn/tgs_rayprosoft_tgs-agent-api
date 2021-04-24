@@ -3,42 +3,25 @@ import { css, Global } from "@emotion/react"
 import Select from "../../select/Select"
 import { useResellerList } from "./client"
 import { useTrans } from "../../i18n"
-import { Controller, useFormContext } from "react-hook-form"
 
-export const ResellerIdSelect = ({ placeholderDisabled = false, ...props }) => {
-    let formMethods = useFormContext()
-    let { data, isLoading } = useResellerList({ showAll: true })
+export const ResellerIdSelect = ({ placeholder, ...props }) => {
+    let defaultPlaceholder = useResellerPlaceholder()
+    placeholder = placeholder ?? defaultPlaceholder
 
-    let placeholder = useResellerPlaceholder()
-    let placeholderOption = {
-        label: placeholder,
-        value: "",
-        disabled: placeholderDisabled
-    }
+    let { isLoading, data, error } = useResellerList({ showAll: true })
+    let options = data?.items.map((reseller) => ({
+        label: reseller.code,
+        value: reseller.id
+    }))
 
-    if (
-        isLoading &&
-        props?.name &&
-        props?.defaultValue &&
-        formMethods?.control
-    ) {
-        return (
-            <Controller
-                name={props?.name}
-                control={formMethods?.control}
-                render={() => <Select isLoading={isLoading} options={[]} />}
-                defaultValue={props?.defaultValue}
-            />
-        )
-    }
-
-    let options =
-        data?.items.map((reseller) => ({
-            label: reseller.code,
-            value: reseller.id
-        })) ?? []
-
-    return <Select options={[placeholderOption, ...options]} {...props} />
+    return (
+        <Select
+            placeholder={placeholder}
+            isLoading={isLoading}
+            options={options}
+            {...props}
+        />
+    )
 }
 
 const useResellerPlaceholder = () =>

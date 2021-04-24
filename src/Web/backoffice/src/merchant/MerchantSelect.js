@@ -14,15 +14,11 @@ import {
 import { Reseller } from "./resellers"
 import { Licensee } from "./licensees"
 import { Brand } from "./brands"
-import { useResellerList } from "./resellers/client"
-import { useLicenseeList } from "./licensees/client"
-import { useBrandList } from "./brands/client"
 import { useTrans } from "../i18n"
 import { useFormContext } from "react-hook-form"
 import { ResellerIdSelect } from "./resellers/ResellerIdSelect"
 import { LicenseeIdSelect } from "./licensees/LicenseeIdSelect"
 import { BrandIdSelect } from "./brands/BrandIdSelect"
-import Input from "../input/Input"
 
 const isActive = (merchant, start, end) => {
     const order = [Reseller, Licensee, Brand]
@@ -35,24 +31,6 @@ const isActive = (merchant, start, end) => {
         merchantIndex <= endIndex
     )
 }
-
-const useResellerPlaceholder = () =>
-    useTrans({
-        zh: "选择总公司",
-        en: "Select Reseller"
-    })
-
-const useLicenseePlaceholder = () =>
-    useTrans({
-        zh: "选择公司",
-        en: "Select Licensee"
-    })
-
-const useBrandPlaceholder = () =>
-    useTrans({
-        zh: "选择品牌",
-        en: "Select Brand"
-    })
 
 const ResellerIdName = "resellerId"
 const DefaultResellerProps = {
@@ -98,6 +76,7 @@ export const MerchantIdSelect = ({
     ...props
 }) => {
     let formMethods = useFormContext()
+    let { unregister } = formMethods
 
     let [resellerId, setResellerId] = useState(
         resellerProps?.value ?? resellerProps?.defaultValue
@@ -110,12 +89,15 @@ export const MerchantIdSelect = ({
         !resellerProps.validate
     ) {
         resellerProps.validate = (value) => {
-            if (
-                formMethods.getValues(brandIdName) ||
-                formMethods.getValues(licenseeIdName)
-            ) {
+            if (isLicenseeActive && formMethods.getValues(licenseeIdName)) {
                 return !!value
             }
+
+            if (isBrandActive && formMethods.getValues(brandIdName)) {
+                return !!value
+            }
+
+            return true
         }
     }
 
@@ -130,13 +112,32 @@ export const MerchantIdSelect = ({
         !licenseeProps.validate
     ) {
         licenseeProps.validate = (value) => {
-            if (formMethods.getValues(brandIdName)) {
+            if (
+                parentRequired &&
+                isBrandActive &&
+                formMethods.getValues(brandIdName)
+            ) {
                 return !!value
             }
         }
     }
 
     let isBrandActive = isActive(Brand, start, end)
+    if (isBrandActive && formMethods && !brandProps.validate) {
+        brandProps.validate = (value) => {
+            if (isBrandActive && required && !disabled && !value) {
+                return false //brandId required
+            }
+        }
+    }
+
+    //TODO: rm when react-hook-form fix bug
+    useEffect(() => {
+        if (!isBrandActive) {
+            unregister(brandIdName)
+        }
+    }, [isBrandActive])
+
     return (
         <>
             <Group {...props}>
@@ -190,7 +191,7 @@ export const MerchantIdSelect = ({
     )
 }
 
-//TODO: rm
+/*
 export const MerchantIdHookFormSelect = ({
     start = Reseller,
     end = Brand,
@@ -329,3 +330,4 @@ export const MerchantIdHookFormSelect = ({
         </Group>
     )
 }
+*/

@@ -73,7 +73,6 @@ const useColumns = ({ items = [] }) =>
             textColumn({
                 accessor: "username",
                 Header: <Trans zh="用户名" en="Username" />,
-
                 disableSortBy: true
             }),
             dateTimeColumn({

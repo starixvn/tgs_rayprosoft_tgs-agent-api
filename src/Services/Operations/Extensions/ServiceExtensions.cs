@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations.CodeMappers;
@@ -32,6 +31,7 @@ namespace TGS.Services.Operations.Extensions
 
             services.AddFactory<IBrandQueries, BrandQueries>();
             services.AddFactory<IGameProviderQueries, GameProviderQueries>();
+            services.AddFactory<IAgentQueries, AgentQueries>();
             services.AddFactory<IPlayerQueries, PlayerQueries>();
             services.AddFactory<IWalletQueries, WalletQueries>();
             services.AddFactory<ISettingQueries, SettingQueries>();

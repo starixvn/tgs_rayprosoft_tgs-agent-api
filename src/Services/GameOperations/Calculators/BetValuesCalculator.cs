@@ -11,13 +11,13 @@ namespace TGS.Services.GameOperations.Calculators
     internal interface IBetValuesCalculator
     {
         BetValuesResult Calculate(bool hasTurnoverOnTieBet, BetActionData current,
-            IList<BetActionData> previousActions);
+            IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns = null);
     }
 
     internal sealed class BetValuesCalculator : IBetValuesCalculator
     {
         BetValuesResult IBetValuesCalculator.Calculate(bool hasTurnoverOnTieBet, BetActionData current,
-            IList<BetActionData> previousActions)
+            IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns)
         {
             if (current.Type.IsOneOf(LockAmount, UnlockAmount))
             {
@@ -29,6 +29,7 @@ namespace TGS.Services.GameOperations.Calculators
             decimal unsettledBets = 0, tieBetAdjustment = 0;
 
             previousActions ??= Array.Empty<BetActionData>();
+            oppositeBetPatterns ??= Array.Empty<OppositeBetPattern>();
             var previouslyClosed = FindPreviouslyClosed(previousActions);
 
             // round has already been closed
@@ -42,7 +43,7 @@ namespace TGS.Services.GameOperations.Calculators
             else if (current.IsClosingRound)
             {
                 (betAmount, validBetAmount, settleAmount, tieBetAdjustment, turnover, winLoss, unsettledBets) =
-                    CalculateClosingActionBetValues(hasTurnoverOnTieBet, current, previousActions);
+                    CalculateClosingActionBetValues(hasTurnoverOnTieBet, current, previousActions, oppositeBetPatterns);
             }
             else
             {
@@ -79,6 +80,7 @@ namespace TGS.Services.GameOperations.Calculators
             }
 
             BetActionData closingAction = null;
+
             foreach (var a in actions)
             {
                 if (a.IsClosingRound)
@@ -106,19 +108,19 @@ namespace TGS.Services.GameOperations.Calculators
 
         private static (decimal BetAmount, decimal ValidBetAmount, decimal SettleAmount, decimal TieBetAdjustment,
             decimal Turnover, decimal WinLoss, decimal UnsettleBets) CalculateClosingActionBetValues(
-                bool hasTurnoverOnTieBet,
-                BetActionData current, IList<BetActionData> previousActions)
+                bool hasTurnoverOnTieBet, BetActionData current,
+                IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns)
         {
             var allActions = GetAllActions(current, previousActions);
 
             var betAmount = CalculateBetAmount(allActions);
-            var validBetAmount = CalculateValidBetAmount(allActions);
             var settleAmount = CalculateSettleAmount(allActions);
-            var tieBetAdjustment = CalculateTieBetAdjustment(hasTurnoverOnTieBet, allActions);
             var winLoss = CalculateWinLoss(allActions);
             var unsettledBets = CalculateUnsettledBets(previousActions);
 
-            var turnover = validBetAmount - tieBetAdjustment;
+            var (turnover, validBetAmount, tieBetAdjustment) =
+                CalculateTurnoverWithValidBetAmountAndTieBetAdjustment(hasTurnoverOnTieBet, allActions,
+                    oppositeBetPatterns);
 
             return (betAmount, validBetAmount, settleAmount, tieBetAdjustment, turnover, winLoss, unsettledBets);
         }
@@ -162,7 +164,7 @@ namespace TGS.Services.GameOperations.Calculators
         private static decimal CalculateSettleAmount(IList<BetActionData> allActions) =>
             // sum all amounts of settle actions without cancelled, include free bets
             allActions
-                .Where(a => a.Type.IsSettleBet() && a.IsCancelled == false)
+                .Where(a => (a.Type.IsSettleBet() || a.Type == WinJackpot) && a.IsCancelled == false)
                 .Sum(a => a.Amount);
 
         private static decimal CalculateTieBetAdjustment(bool hasTurnoverOnTieBet, IList<BetActionData> allActions) =>
@@ -178,6 +180,67 @@ namespace TGS.Services.GameOperations.Calculators
                     .Sum(a => a.Reference.Amount)
                     .Negate();
 
+
+        private static (decimal Turnover, decimal ValidBetAmount, decimal tieBetAdjustment)
+            CalculateTurnoverWithValidBetAmountAndTieBetAdjustment(bool hasTurnoverOnTieBet,
+                IList<BetActionData> allActions, IList<OppositeBetPattern> oppositeBetPatterns)
+        {
+            decimal turnover = 0, tieBetAdjustment = 0;
+            var validBetAmount = CalculateValidBetAmount(allActions);
+            var jackpotContributionAmount = allActions.Where(a => a.JackpotContribution != null)
+                .Sum(a => a.JackpotContribution.TotalAmount);
+
+
+            var allBets = allActions.Where(a => a.Type == PlaceBet && a.IsCancelled == false).ToArray();
+            var matchedPatternGroupIds = (from a in allBets
+                                          from p in oppositeBetPatterns
+                                          where a.BetType == p.BetType
+                                          select p.GroupId).Distinct().ToArray();
+
+            if (matchedPatternGroupIds.Length == 0)
+            {
+                tieBetAdjustment = CalculateTieBetAdjustment(hasTurnoverOnTieBet, allActions);
+
+                turnover = validBetAmount - tieBetAdjustment;
+                turnover = CalculateTurnoverWithJackpotContribution(turnover, jackpotContributionAmount);
+
+                return (turnover, validBetAmount, tieBetAdjustment);
+            }
+
+            // calculate turnover if opposite bets exist
+            decimal rollingTurnover = 0;
+
+            var uncalculatedBets = allBets;
+            foreach (var id in matchedPatternGroupIds)
+            {
+                var betAmountOfBetTypes = oppositeBetPatterns.Where(p => p.GroupId == id)
+                    .Select(p => p.BetType).ToDictionary(p => p, _ => 0m);
+
+                var oppositeBetTypes = betAmountOfBetTypes.Keys;
+                var oppositeBets = allBets.Where(a => oppositeBetTypes.Contains(a.BetType)).ToArray();
+
+                foreach (var bet in oppositeBets)
+                {
+                    var betAmount = bet.Amount.Negate();
+                    var tieBet = allActions.FirstOrDefault(a => a.Reference.Id == bet.Id && a.Type == TieBet);
+                    var adjustment = hasTurnoverOnTieBet || tieBet == null ? 0 : tieBet.Amount;
+                    var actualBetAmount = betAmount - adjustment;
+
+                    betAmountOfBetTypes[bet.BetType] += actualBetAmount;
+                    tieBetAdjustment += adjustment;
+                }
+
+                rollingTurnover += CalculateRollingTurnover(betAmountOfBetTypes);
+
+                uncalculatedBets = uncalculatedBets.Except(oppositeBets).ToArray();
+            }
+
+            turnover = uncalculatedBets.Sum(a => a.Amount).Negate() + rollingTurnover;
+            turnover = CalculateTurnoverWithJackpotContribution(turnover, jackpotContributionAmount);
+
+            return (turnover, validBetAmount, tieBetAdjustment);
+        }
+
         private static decimal CalculateWinLoss(IList<BetActionData> allActions) =>
             // here it means company WinLoss
             // WinLoss = -1 * Sum(Amount from all)
@@ -190,5 +253,19 @@ namespace TGS.Services.GameOperations.Calculators
         private static IList<BetActionData>
             GetAllActions(BetActionData current, IList<BetActionData> previousActions) =>
             previousActions.Concat(new[] {current}).ToArray();
+
+        private static decimal CalculateRollingTurnover(Dictionary<string, decimal> betAmountOfBetTypes)
+        {
+            // substract the bet amount of opposite bets, and return absolute value
+            var rolling = betAmountOfBetTypes.Values.Select((v, i) => i == 0 ? v : v.Negate()).Sum();
+            return Math.Abs(rolling);
+        }
+
+        private static decimal CalculateTurnoverWithJackpotContribution(decimal turnover,
+            decimal jackpotContributionAmount)
+        {
+            var contrib = turnover > 0 ? jackpotContributionAmount : 0;
+            return turnover - contrib;
+        }
     }
 }

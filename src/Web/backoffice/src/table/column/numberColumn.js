@@ -1,6 +1,7 @@
 import React from "react"
 import { css, Global } from "@emotion/react"
-import { FormattedNumber } from "../../i18n"
+import { Text } from "bumbag"
+import { FormattedNumber, FormattedNumberDecimal } from "../../i18n"
 import { sumColumn, sumColumnValue } from "../sumColumn"
 
 const DefaultNumberFormat = "0,0"
@@ -76,7 +77,7 @@ export const coloredNumberDecimalColumn = ({
             let isPositive = value >= 0
             return (
                 <Text color={isPositive ? "success" : "danger"}>
-                    <FormattedNumber
+                    <FormattedNumberDecimal
                         value={value}
                         format={format}
                         postfix={postfix}

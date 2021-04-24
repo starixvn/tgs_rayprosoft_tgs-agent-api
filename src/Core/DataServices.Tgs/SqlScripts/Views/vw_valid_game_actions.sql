@@ -18,7 +18,7 @@ AS SELECT ga.id,
     ga.external_game_action_group_id,
     ga.balance,
     ga.bet_type,
-    ga.description
+    ga.extra_data
 FROM bet.game_actions ga
 WHERE ga.type <> 5 AND NOT (EXISTS 
         ( SELECT 1

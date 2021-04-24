@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
+using TGS.Paging;
 using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories
@@ -19,17 +20,9 @@ namespace TGS.Operator.Repositories
 
         public IAsyncEnumerable<StationLetter> QueryStationLettersAsync(string playerCode, Paging<StationLetter> paging)
         {
-            var query = QueryStationLettersAsync(playerCode);
-
-            if (paging.OrderBy != null)
-                query = paging.IsDesc
-                    ? query.OrderByDescending(paging.OrderBy)
-                    : query.OrderBy(paging.OrderBy);
-
-            var page = paging.Page <= 0 ? 0 : paging.Page - 1;
-
-            var pageSize = paging.RowCount <= 0 ? 10 : paging.RowCount;
-            query = query.Skip(page * pageSize).Take(pageSize);
+            var query = QueryStationLettersAsync(playerCode)
+                .ApplyOrderBy(paging)
+                .ApplyPaging(paging);
 
             return query;
         }

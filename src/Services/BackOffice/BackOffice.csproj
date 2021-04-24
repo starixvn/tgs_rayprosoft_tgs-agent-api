@@ -16,6 +16,12 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="9.5.3" />
     <PackageReference Include="MediatR" Version="9.0.0" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.9.60">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.2" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -94,6 +100,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Player.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\Promotion.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Promotion.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\VipLevel.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -149,6 +160,10 @@
     <EmbeddedResource Update="Application\Resources\Player.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Player.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\Promotion.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Promotion.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\VipLevel.resx">
       <LastGenOutput>VipLevel.Designer.cs</LastGenOutput>

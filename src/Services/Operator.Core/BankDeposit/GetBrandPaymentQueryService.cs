@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -13,7 +14,7 @@ namespace TGS.Services.Operator.BankDeposit
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
-        public ValueTask<BrandPayment> GetAsync(GetBrandPaymentQuery query)
+        public ValueTask<BrandPayment> GetAsync(GetBrandPaymentQuery query, CancellationToken cancellationToken = default)
         {
             return _walletRepository.GetBrandPaymentByIdAsync(query.Id);
         }

@@ -75,7 +75,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.BetType)
                 .HasMaxLength(128);
 
-            builder.Property(c => c.Description);
+            builder.Property(c => c.ExtraData);
+
+            builder.Property(c => c.JackpotContribution)
+                .HasColumnType(ColumnTypes.Jsonb);
 
             builder.HasOne(c => c.Round)
                 .WithMany(c => c.GameActions)

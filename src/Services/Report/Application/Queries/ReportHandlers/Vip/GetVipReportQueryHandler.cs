@@ -42,9 +42,9 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Vip
                 .ToArrayAsync(cancellationToken);
 
             var tgsPlayer = request.Username.IsNotNullOrEmpty()
-                ? null
-                : brandPlayers.FirstOrDefault(x =>
-                    x.BrandId == request.BrandId && x.Username == request.Username);
+                ? brandPlayers.FirstOrDefault(x =>
+                    x.BrandId == request.BrandId && x.Username == request.Username)
+                : null;
 
             var tgsPlayers = request.Level == null
                 ? null
@@ -88,9 +88,9 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Vip
                         pg
                     })
                 .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.ReportDate >= from && x.ReportDate <= to)
+                .Where(x => x.ReportDate >= from && x.ReportDate < to)
                 .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
-                .Where(tgsPlayers, x => tgsPlayers.Contains(x.PlayerCode))
+                .Where(request.Level, x => tgsPlayers.Contains(x.PlayerCode))
                 .GroupBy(x => new
                     {
                         x.BrandId,
@@ -108,27 +108,40 @@ namespace TGS.Services.Report.Application.Queries.ReportHandlers.Vip
                     {
                         BrandId = x.BrandId,
                         PlayerCode = x.PlayerCode,
-                        DepositAmount = players.Sum(m => m.DepositAmount),
-                        WithdrawalAmount = players.Sum(m => m.WithdrawalAmount),
-                        AdjustmentAmount = players.Sum(m => m.AdjustmentAmount),
+                        DepositAmount = x.DepositAmount,
+                        WithdrawalAmount = x.WithdrawalAmount,
+                        AdjustmentAmount = x.AdjustmentAmount,
                         RebateAmount =
                             players.Sum(m =>
                                 m.pg.VipRebateAmount),
-                        BonusAmount = players.Sum(m => m.BonusAmount),
-                        BetAmount = players.Sum(m => m.BetAmount),
-                        Turnover = players.Sum(m => m.Turnover),
-                        WinLossAmount = players.Sum(m => m.WinLossAmount),
-                        NetProfit = players.Sum(m => m.NetProfit)
-                    }).CreatePagedResponseAsync(request);
+                        BonusAmount = x.BonusAmount,
+                        BetAmount = x.BetAmount,
+                        Turnover = x.Turnover,
+                        WinLossAmount = x.WinLossAmount,
+                        NetProfit = x.NetProfit
+                    }).ToArrayAsync(cancellationToken);
 
-            foreach (var model in vips.Items)
+            return vips.Select(x =>
             {
-                var player = brandPlayers.FirstOrDefault(x => x.PlayerCode == model.PlayerCode);
-                model.Username = player?.Username;
-                model.Level = player?.Vip?.Level;
-            }
+                var player = brandPlayers.FirstOrDefault(p => p.PlayerCode == x.PlayerCode);
 
-            return vips;
+                return new VipModel
+                {
+                    Username = player?.Username,
+                    Level = player?.Vip?.Level,
+                    BrandId = x.BrandId,
+                    PlayerCode = x.PlayerCode,
+                    DepositAmount = x.DepositAmount,
+                    WithdrawalAmount = x.WithdrawalAmount,
+                    AdjustmentAmount = x.AdjustmentAmount,
+                    RebateAmount = x.RebateAmount,
+                    BonusAmount = x.BonusAmount,
+                    BetAmount = x.BetAmount,
+                    Turnover = x.Turnover,
+                    WinLossAmount = x.WinLossAmount,
+                    NetProfit = x.NetProfit
+                };
+            }).AsQueryable().CreatePagedResponse(request);
         }
     }
 }

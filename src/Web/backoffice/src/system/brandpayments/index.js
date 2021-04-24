@@ -18,7 +18,8 @@ import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import {
     useIsDisplayMenuByRoute,
-    useHasSubMenuByRoute
+    useHasSubMenuByRoute,
+    useUserBrandId
 } from "../../user/context"
 import { Code } from "./menu"
 import { useTabState, Tabs, TabList, Tab, TabPanel } from "../../tab"
@@ -41,6 +42,8 @@ import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import Alert, { AlertDialog } from "../../dialog/Alert"
 import { DesignatedPlayersLink } from "./DesignatedPlayersLink"
 import { InputField } from "../../input/Input"
+import { formatNumber } from "../../number/format"
+import BrandBar from "../../report/BrandBar"
 
 export { Code }
 
@@ -54,10 +57,32 @@ export const Content = () => {
 }
 
 const Body = () => {
+    let userBrandId = useUserBrandId()
+    let [brandId, setBrandId] = useState(userBrandId)
+
+    return (
+        <Set orientation="vertical" isFilled>
+            <BrandBar
+                onBrandChange={(value) => {
+                    setBrandId(value)
+                }}
+            />
+            {brandId && <BodyContent brandId={brandId} />}
+        </Set>
+    )
+}
+
+const BodyContent = ({ brandId }) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
+        brandId,
         paymentStatus: null,
         keyword: ""
     })
+
+    useEffect(() => {
+        setState({ pageIndex: 0, brandId })
+    }, [brandId])
+
     let [transferType, setTransferType] = useState(TransferType.Deposit)
 
     let { isLoading, data, error, mutate, deleteCache } = useBrandPaymentList({
@@ -102,11 +127,6 @@ const Body = () => {
                         }}
                         isLoading={isLoading}
                     />
-                    {/* <Set alignX="right" alignY="center">
-            <AddVendorButton />
-            <AddMethodButton />
-            <AddChannelButton />
-          </Set> */}
                 </>
             }
         >
@@ -137,6 +157,7 @@ const Body = () => {
                             transferType={transferType}
                             mutate={mutate}
                             isLoading={isLoading}
+                            brandId={brandId}
                         />
                     )}
                 </TabPanel>
@@ -150,6 +171,7 @@ const Body = () => {
                             transferType={transferType}
                             mutate={mutate}
                             isLoading={isLoading}
+                            brandId={brandId}
                         />
                     )}
                 </TabPanel>
@@ -176,7 +198,8 @@ const DataTable = ({
     setSortOrder,
     transferType,
     mutate,
-    isLoading
+    isLoading,
+    brandId
 }) => {
     let { pageSize } = state
     let [displayOrders, setDisplayOrder] = useState({})
@@ -211,7 +234,8 @@ const DataTable = ({
         transferType,
         mutate,
         changeDisplayOrder,
-        items: data?.items ?? []
+        items: data?.items ?? [],
+        brandId
     })
     return (
         <Stack spacing="minor-1">
@@ -245,7 +269,7 @@ const DataTable = ({
 
 const SearchBar = ({ search, isLoading, ...props }) => {
     let formMethods = useForm()
-
+    let keywordPlaceholder = useSearchInputPlaceHolder()
     const onSubmit = (data) => search(data)
 
     return (
@@ -256,16 +280,8 @@ const SearchBar = ({ search, isLoading, ...props }) => {
                     <InputField
                         name="keyword"
                         defaultValue=""
-                        addonAfter={
-                            <Button
-                                onClick={() =>
-                                    formMethods.setValue("keyword", "")
-                                }
-                            >
-                                X
-                            </Button>
-                        }
-                        placeholder={searchInputPlaceHolder()}
+                        showEmptyFieldValueAddonAfter
+                        placeholder={keywordPlaceholder}
                         autocomplete="off"
                     />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
@@ -279,6 +295,7 @@ const useColumns = ({
     transferType,
     changeDisplayOrder,
     mutate,
+    brandId,
     items = []
 }) => {
     let hasUpdateAuth = useIsDisplayMenuByRoute([UpdateMenu])
@@ -414,10 +431,11 @@ const useColumns = ({
                     whiteSpace: "nowrap"
                 },
                 Cell: ({ value }) => {
-                    //TODO: format number?
+                    let from = formatNumber(value.transferLimitFrom)
+                    let to = formatNumber(value.transferLimitTo)
                     return (
                         <Text.Block whiteSpace="nowrap">
-                            {value.transferLimitFrom} - {value.transferLimitTo}
+                            {`${from} - ${to}`}
                         </Text.Block>
                     )
                 }
@@ -475,7 +493,7 @@ const useColumns = ({
     }, [transferType, JSON.stringify(items)])
 }
 
-const searchInputPlaceHolder = () =>
+const useSearchInputPlaceHolder = () =>
     useTrans({
         zh: "关键字搜索",
         en: "Search..."

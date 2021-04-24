@@ -64,6 +64,12 @@ export const GameRoundStatusLabel = ({ value }) => {
 }
 
 export const GameRoundStatusSelect = ({ placeholder, ...props }) => {
+    let defaultPlaceholder = useTrans({
+        zh: "状态",
+        en: "Status"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
+
     let options = [
         {
             value: Win,
@@ -86,14 +92,7 @@ export const GameRoundStatusSelect = ({ placeholder, ...props }) => {
             label: useTrans(OpenTrans)
         }
     ]
-
-    let defaultPlaceholder = useTrans({
-        zh: "状态",
-        en: "Status"
-    })
-    placeholder = placeholder ?? defaultPlaceholder
-
-    return <Select options={options} placeholder={placeholder} {...props} />
+    return <Select placeholder={placeholder} options={options} {...props} />
 }
 
 export default GameRoundStatus

@@ -105,6 +105,7 @@ export const LanguageCheckboxGroupTableRow = ({
     let checkboxFieldName = checkedFieldName(name, field, index)
     let { ref: checkboxRef, ...checkboxFormProps } = register(checkboxFieldName)
 
+    let editable = !disabled
     return useMemo(() => {
         return (
             <Table.Row>
@@ -115,16 +116,29 @@ export const LanguageCheckboxGroupTableRow = ({
                             name={`${name}.${index}.cultureCode`}
                             value={field.cultureCode}
                         />
-                        <Checkbox
-                            checkboxRef={checkboxRef}
-                            defaultChecked={field.checked}
-                            disabled={disabled}
-                            {...checkboxFormProps}
-                            onChange={(event) => {
-                                let checked = event.target.checked
-                                setValue(checkboxFieldName, checked)
-                            }}
-                        />
+                        {disabled && (
+                            <>
+                                <Checkbox
+                                    display="none"
+                                    checked={field.checked}
+                                    disabled
+                                    checkboxRef={checkboxRef}
+                                    {...checkboxFormProps}
+                                />
+                                <Checkbox checked={field.checked} disabled />
+                            </>
+                        )}
+                        {editable && (
+                            <Checkbox
+                                checkboxRef={checkboxRef}
+                                defaultChecked={field.checked}
+                                {...checkboxFormProps}
+                                onChange={(event) => {
+                                    let checked = event.target.checked
+                                    setValue(checkboxFieldName, checked)
+                                }}
+                            />
+                        )}
                     </Box>
                 </Table.Cell>
                 <Table.Cell textAlign="center">{field.cultureCode}</Table.Cell>

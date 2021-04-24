@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
@@ -18,7 +19,7 @@ namespace TGS.Services.Operator.PlayerEmail
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
-        public async ValueTask ExecuteAsync(CommitSetPlayerEmailCommand command)
+        public async ValueTask ExecuteAsync(CommitSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
         {
             var result = await _validateCodeOperator
                 .GetValidateCodeDataAsync<EmailValidateData>(command.ValidateCode, command.SecurityKey)

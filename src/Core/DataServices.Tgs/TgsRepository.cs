@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using Npgsql.Bulk;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.DataInitializers;
 using TGS.Core.DataServices.Tgs.Models;
@@ -105,11 +103,13 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PaymentChannel> PaymentChannels { get; set; }
 
+        DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
+
         DbSet<BrandPayment> BrandPayments { get; set; }
 
-        DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
+        DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
-        DbSet<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
+        DbSet<BrandPaymentVipLevel> BrandPaymentVipLevels { get; set; }
 
         DbSet<BrandPaymentAuditLog> PaymentAuditLogs { get; set; }
 
@@ -136,20 +136,24 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<GameActionBatch> GameActionBatches { get; set; }
 
         DbSet<Transaction> Transactions { get; set; }
+
         DbSet<Agent> Agents { get; set; }
+
         DbSet<AgentBank> AgentBanks { get; set; }
+
         DbSet<AgentWallet> AgentWallets { get; set; }
         DbSet<AgentTransaction> AgentTransactions { get; set; }
+        DbSet<Promotion> Promotions { get; set; }
+        DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+        DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
+
         DbSet<DepositForm> DepositForms { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
     {
-        private readonly NpgsqlBulkUploader _uploader;
-
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
-            _uploader = new(this);
         }
 
         public DbSet<Reseller> Resellers { get; set; }
@@ -236,9 +240,9 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<BrandPayment> BrandPayments { get; set; }
 
-        public DbSet<BrandPaymentPlayer> PaymentPlayerList { get; set; }
+        public DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
-        public DbSet<BrandPaymentVipLevel> PaymentVipLevels { get; set; }
+        public DbSet<BrandPaymentVipLevel> BrandPaymentVipLevels { get; set; }
 
         public DbSet<BrandPaymentAuditLog> PaymentAuditLogs { get; set; }
 
@@ -271,16 +275,24 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<GameActionBatch> GameActionBatches { get; set; }
 
         public DbSet<Transaction> Transactions { get; set; }
+
         public DbSet<Agent> Agents { get; set; }
+
         public DbSet<AgentBank> AgentBanks { get; set; }
+
         public DbSet<AgentWallet> AgentWallets { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
+        public DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+        public DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
+
         public DbSet<AgentTransaction> AgentTransactions { get; set; }
+
+        public DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;
 
         public DbSet<DepositForm> DepositForms { get; set; }
-
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 
         public void SetTimeoutToSeconds(int seconds) => Database.SetCommandTimeout(seconds);
@@ -290,12 +302,6 @@ namespace TGS.Core.DataServices.Tgs
 
         public IDbConnection GetDbConnection() =>
             Database.GetDbConnection();
-
-        public Task BulkInsertAsync<T>(IEnumerable<T> entities) where T : class =>
-            _uploader.InsertAsync(entities);
-
-        public Task BulkUpdateAsync<T>(IEnumerable<T> entities) where T : class =>
-            _uploader.UpdateAsync(entities);
 
         public async Task ExecuteMigrationAndSeedingAsync(IWebHostEnvironment env)
         {

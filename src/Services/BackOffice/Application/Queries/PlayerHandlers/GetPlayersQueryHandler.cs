@@ -28,13 +28,11 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     .Where(BrandId != null, b => b.BrandId == BrandId)
                     .Where(request.BrandId, b => b.BrandId == request.BrandId)
                     .Where(request.Username, x => x.Username == request.Username))
+                .Where(request.Status, x => x.Status == request.Status)
+                .Where(request.VipId, x => x.VipId == request.VipId)
                 .Select(x => new PlayersModel
                 {
-                    PlayerCode = x.PlayerCode,
-                    Username = x.Username,
-                    VipLevel = x.Vip.Level,
-                    Status = x.Status,
-                    HasAgent = x.HasAgent
+                    PlayerCode = x.PlayerCode, Username = x.Username, VipLevel = x.Vip.Level, Status = x.Status
                 }).CreatePagedResponseAsync(request);
     }
 }

@@ -29,7 +29,6 @@ import {
     GameRoundStatusSelect
 } from "../../game/round/GameRoundStatus"
 import GameProviderSelect from "../../game/providers/GameProviderSelect"
-import BrandGameProviderSelect from "../../game/brandproviders/BrandGameProviderSelect"
 import { useGameRoundList } from "../../game/round/client"
 import { GameRoundButton } from "./button"
 import AlertDialog from "../../dialog/Alert"

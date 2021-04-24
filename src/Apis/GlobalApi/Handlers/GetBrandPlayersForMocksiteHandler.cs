@@ -48,7 +48,14 @@ namespace TGS.Apis.GlobalApi.Handlers
                 GetBrandPlayersRequest request, CancellationToken cancellationToken)
         {
             // if ShowAll = true, return the first page with default row counts
-            var newRequest = request.ShowAll ? request with { ShowAll = false, Page = 0, Rows = 10 } : request;
+            var newRequest = request.ShowAll
+                ? request with
+                {
+                    ShowAll = false,
+                    Page = 0,
+                    Rows = 10
+                }
+                : request;
 
             var brandCode = newRequest.BrandCode;
             var currencyCode = newRequest.CurrencyCode;
@@ -63,12 +70,15 @@ namespace TGS.Apis.GlobalApi.Handlers
                 await AddNewPlayersAsync(brandCode, currencyCode, playerType);
             }
 
-            return await query.Select(p => new BrandPlayersResult
-            {
-                Username = p.Username,
-                PlayerCode = p.PlayerCode,
-                Status = p.Status
-            }).CreatePagedResponseAsync<PagedResponse<BrandPlayersResult>, BrandPlayersResult>(newRequest);
+            return await query
+                .Select(p =>
+                    new BrandPlayersResult
+                    {
+                        Username = p.Username,
+                        PlayerCode = p.PlayerCode,
+                        Status = p.Status
+                    })
+                .CreatePagedResponseAsync<PagedResponse<BrandPlayersResult>, BrandPlayersResult>(newRequest);
         }
 
         private async Task AddNewPlayersAsync(string brandCode, string currencyCode, PlayerType playerType)
@@ -84,8 +94,8 @@ namespace TGS.Apis.GlobalApi.Handlers
                 Guid.NewGuid().ToString(),
                 async repo =>
                 {
-                    await repo.BulkInsertAsync(players);
-                    await repo.BulkInsertAsync(players.SelectMany(p => p.Wallets).ToArray());
+                    await repo.Players.AddRangeAsync(players);
+                    await repo.SaveChangesAsync();
 
                     return Task.CompletedTask;
                 });
@@ -114,7 +124,6 @@ namespace TGS.Apis.GlobalApi.Handlers
                 WithdrawSalt = withdrawSalt,
                 WithdrawPassword = withdrawPassword,
                 BetLimitId = betLimit,
-                InvitationCode = InvitationCodeGenerator.NewId(),
                 Status = PlayerStatus.Enabled,
                 DefaultWalletCurrencyCode = currencyCode,
                 DefaultWalletId = walletId,
@@ -122,7 +131,6 @@ namespace TGS.Apis.GlobalApi.Handlers
                 LastActiveOn = now,
                 UpdatedOn = now,
                 UpdatedByUsername = username,
-                HasAgent = false,
                 Wallets = new[]
                 {
                     new Wallet

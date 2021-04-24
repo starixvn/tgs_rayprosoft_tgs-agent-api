@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Core.DataServices.Tgs;
@@ -24,7 +25,7 @@ namespace TGS.Services.Operator.PlayerPassword
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(ForgotPasswordCommand command)
+        public async ValueTask<string> GetAsync(ForgotPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var player = _tgsRepository.Players.AsQueryable()
                 .Where(player => player.PhoneAuthentication == true && player.Phone == command.Phone)

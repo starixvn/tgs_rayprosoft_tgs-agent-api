@@ -29,7 +29,7 @@ namespace TGS.Apis.FileService.Services
                 x =>
                 {
                     var fileObject = _natsManager.Deserialize<ObjectFileEventModel>(x.Data);
-                    _service.AddStationLetterFileAsync(fileObject);
+                    _ = _service.AddStationLetterFileAsync(fileObject);
                 }));
         }
     }

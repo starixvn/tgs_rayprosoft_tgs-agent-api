@@ -137,7 +137,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[] {new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture)};
+                var supportedCultures = new[] { new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture) };
 
                 options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
@@ -145,6 +145,13 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                 options.AddInitialRequestCultureProvider(new CustomRequestCultureProvider(_ =>
                     Task.FromResult(new ProviderCultureResult(zhCNCulture))));
+            });
+
+            services.AddFileServiceClient((sp, httpClient) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                httpClient.BaseAddress = new Uri(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
             return services;

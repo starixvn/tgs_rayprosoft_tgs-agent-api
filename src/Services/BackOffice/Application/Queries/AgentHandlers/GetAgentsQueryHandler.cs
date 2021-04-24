@@ -23,8 +23,10 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
             CancellationToken cancellationToken) =>
             _service.GetAgentQueries(q => q.Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
                     .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
-                    .Where(BrandId, l => l.Id == BrandId)
+                    .Where(BrandId, l => l.Brand.Id == BrandId)
+                    .Where(x => x.BrandId == request.BrandId)
                     .Where(request.Status, x => x.Status == request.Status)
+                    .Where(request.Type, x => x.Type == request.Type)
                     .Where(request.LevelType, x => x.LevelType == request.LevelType)
                     .Where(request.Username, x => EF.Functions.ILike(x.Username, $"%{request.Username}%"))
                 )

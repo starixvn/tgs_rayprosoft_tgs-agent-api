@@ -1,0 +1,51 @@
+﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Models;
+using TGS.Core.Models.Messages;
+using TGS.Core.Models.Settings;
+using TGS.Services.BackOffice.Application.Models.Promotion;
+using TGS.Services.BackOffice.Application.Resources;
+using TGS.Services.BackOffice.Infrastructure.DataService;
+
+namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
+{
+    public class CreatePromotionHandler : Handler<CreatePromotionRequest, MessageResponse>
+    {
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IPromotionService _service;
+        private readonly ISettingsService _settingsService;
+
+        public CreatePromotionHandler(IPromotionService service, ISettingsService settingsService,
+            IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
+        {
+            _service = service;
+            _settingsService = settingsService;
+            _jsonSerializationProvider = jsonSerializationProvider;
+        }
+
+        public override async Task<MessageResponse> Handle(CreatePromotionRequest request,
+            CancellationToken cancellationToken)
+        {
+            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(Promotion.NameExisted);
+            }
+
+            var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
+            var promotionTypes =
+                _jsonSerializationProvider.DeserializeFromString<PromotionType[]>(promotionsJson.Value);
+
+            if (promotionTypes.SelectMany(x => x.Types).All(x => x != request.PromotionType))
+            {
+                return CreateInvalidResponse<MessageResponse>(Promotion.PromotionTypeNotFound);
+            }
+
+            await _service.CreatePromotionAsync(request);
+
+            return CreateValidResponse<MessageResponse>();
+        }
+    }
+}

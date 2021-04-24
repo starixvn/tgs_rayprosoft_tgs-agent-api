@@ -1,50 +1,30 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import AlertDialog from "../../dialog/Alert"
 import { useDepartmentList } from "./client"
 import { Select } from "../../select/Select"
-import { Controller, useFormContext } from "react-hook-form"
 import { useTrans } from "../../i18n"
 
 export const DepartmentSelect = ({
+    placeholder,
     resellerId,
     licenseeId,
     brandId,
-    placeholder,
-    placeholderDisabled,
     ...props
 }) => {
-    let formMethods = useFormContext()
     let defaultPlaceholder = useTrans({
         zh: "选择部门",
         en: "Select Departmen"
     })
     placeholder = placeholder ?? defaultPlaceholder
 
-    let { error, data = {}, isLoading } = useDepartmentList({
+    let { isLoading, data, error } = useDepartmentList({
         showAll: true,
         resellerId,
         licenseeId,
         brandId
     })
 
-    if (
-        isLoading &&
-        props?.name &&
-        props?.defaultValue &&
-        formMethods?.control
-    ) {
-        return (
-            <Controller
-                name={props?.name}
-                control={formMethods?.control}
-                render={() => <Select isLoading={isLoading} options={[]} />}
-                defaultValue={props?.defaultValue}
-            />
-        )
-    }
-
-    let departmentOptions = toOptions(
+    let options = toOptions(
         { resellerId, licenseeId, brandId },
         data?.items
     ).map(({ id, name }) => ({
@@ -52,23 +32,13 @@ export const DepartmentSelect = ({
         value: id
     }))
 
-    let options =
-        typeof placeholder === "string"
-            ? [
-                  {
-                      label: placeholder,
-                      value: "",
-                      disabled: placeholderDisabled
-                  },
-                  ...departmentOptions
-              ]
-            : departmentOptions
-
     return (
-        <>
-            <Select options={options} {...props} />
-            {error && <AlertDialog {...error} />}
-        </>
+        <Select
+            placeholder={placeholder}
+            isLoading={isLoading}
+            options={options}
+            {...props}
+        />
     )
 }
 

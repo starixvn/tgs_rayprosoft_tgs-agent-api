@@ -89,29 +89,46 @@ export const FormattedDateTime = ({
     return <Text>{formatDateTime(format, value)}</Text>
 }
 
-export const FormattedNumber = ({ value, format = "0,0", postfix = "" }) => {
+let MaxDigits = 20
+export const FormattedNumber = ({
+    value,
+    digits,
+    format = "0,0",
+    postfix = ""
+}) => {
+    if (!Number.isFinite(value)) {
+        return null
+    }
+
+    if (Number.isInteger(digits) && digits >= 0 && digits <= MaxDigits) {
+        value = value.toFixed(digits)
+    }
     return (
-        Number.isFinite(value) && (
-            <Text>
-                {numeral(value).format(format)}
-                {postfix}
-            </Text>
-        )
+        <Text>
+            {numeral(value).format(format)}
+            {postfix}
+        </Text>
     )
 }
 
 export const FormattedNumberDecimal = ({
     value,
+    digits = 2,
     format = "0,0.00",
     postfix = ""
 }) => {
+    if (!Number.isFinite(value)) {
+        return null
+    }
+
+    if (Number.isInteger(digits) && digits >= 0 && digits <= MaxDigits) {
+        value = value.toFixed(digits)
+    }
     return (
-        Number.isFinite(value) && (
-            <Text>
-                {numeral(value).format(format)}
-                {postfix}
-            </Text>
-        )
+        <Text>
+            {numeral(value).format(format)}
+            {postfix}
+        </Text>
     )
 }
 

@@ -10,6 +10,6 @@ namespace Microsoft.Extensions.DependencyInjection
             => services
                 .AddHttpClient<FileServiceClient>(configClient)
                 .Services
-                .AddTransient<IFileServiceClient>(sp => sp.GetService<FileServiceClient>());
+                .AddTransient<IFileServiceClient>(sp => sp.GetRequiredService<FileServiceClient>());
     }
 }

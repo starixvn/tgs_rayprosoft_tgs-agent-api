@@ -38,7 +38,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AgentId = model.AgentId,
                 PlayerCode = model.PlayerCode,
                 ReportDate = model.ReportDate,
-                CreatedOn = model.CreatedOn,
+                CreatedOn = DateTimeOffset.Now,
                 VipCardGameRebatePercentage = model.VipCardGameRebatePercentage,
                 VipLiveDealerRebatePercentage = model.VipLiveDealerRebatePercentage,
                 VipLotteryRebatePercentage = model.VipLotteryRebatePercentage,

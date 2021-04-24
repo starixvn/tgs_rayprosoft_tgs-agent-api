@@ -30,11 +30,7 @@ import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel as Label } from "../../form/Label"
 import { BrandPaymentStatusToggleButton } from "./status"
-import {
-    useBrandPayment,
-    useUpdatePayment,
-    useBrandPaymentUpload
-} from "./client"
+import { useUpdatePayment, useBrandPaymentUpload } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import {
     AllPlayerText,
@@ -53,8 +49,9 @@ import Textarea from "../../textarea"
 import Input from "../../input/Input"
 import { Checkbox } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
+import clone from "clone-deep"
 
-export const EditButton = ({ record, onSubmitted, ...props }) => {
+export const EditButton = ({ brandId, record, onSubmitted, ...props }) => {
     let dialog = useModalState()
 
     let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
@@ -67,6 +64,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
             <EditDisclosure {...dialog} />
             {dialog.visible && (
                 <EditDialog
+                    brandId={brandId}
                     record={record}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
@@ -76,25 +74,34 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
     )
 }
 
-const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
+const EditDialog = ({
+    brandId,
+    record = {},
+    onSubmitted,
+    dialog,
+    ...props
+}) => {
     let title = useTrans({
         zh: "编辑",
         en: "Edit"
     })
 
+    /*
     let {
         data: brandPaymentData = {},
         isLoading: isLoadingPayment,
         error: getPaymentDataError,
         deleteCache: deleteGetPaymentCache
     } = useBrandPayment(record?.id)
+    */
 
     let [submitData, setSubmit] = useState()
-    let { result, isLoading, error, mutate } = useUpdatePayment(
+
+    let { result, isLoading, error, mutate, deleteCache } = useUpdatePayment(
         record.id,
         submitData
     )
-
+    /*
     if (isLoadingPayment) {
         return <LoadingBackdrop {...dialog} />
     }
@@ -104,17 +111,21 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
             <AlertDialog {...getPaymentDataError} onClickClose={dialog.hide} />
         )
     }
+    */
 
     return (
         <FormDialog
-            defaultValues={{
-                ...brandPaymentData.payment,
+            defaultValues={clone({
+                ...record,
                 reason: ""
-            }}
+            })}
             onSubmit={(data) => {
                 setSubmit({
+                    brandId,
                     ...record,
+                    /*
                     ...brandPaymentData.payment,
+                    */
                     ...data,
                     depositedAmountMax:
                         data?.depositedAmountMax ?? record?.depositedAmountMax
@@ -124,11 +135,12 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
             isLoading={isLoading}
             error={error}
             onCloseErrorAlert={() => {
-                setSubmit(undefined)
+                deleteCache()
                 mutate(undefined, false)
+                setSubmit(undefined)
             }}
             onSubmitted={() => {
-                deleteGetPaymentCache()
+                // deleteGetPaymentCache()
                 onSubmitted?.()
             }}
             footer={
@@ -163,16 +175,15 @@ const EditDialog = ({ record = {}, onSubmitted, dialog, ...props }) => {
             `}
             dialog={dialog}
         >
-            <EditBody record={brandPaymentData.payment} />
+            <EditBody brandId={brandId} record={record} />
         </FormDialog>
     )
 }
 
-const EditBody = ({ record = {}, dialog, ...props }) => {
-    let { watch, setValue } = useFormContext()
+const EditBody = ({ brandId, record = {}, dialog, ...props }) => {
+    let { watch, setValue, getValues } = useFormContext()
     let transferLimitTo = watch("transferLimitTo")
     let transferLimitFrom = watch("transferLimitFrom")
-
     return (
         <Stack
             orientation="vertical"
@@ -293,8 +304,10 @@ const EditBody = ({ record = {}, dialog, ...props }) => {
                             <VipLevelsText />
                         </Label>
                         <Box alignY="center">
-                            {/* TODO: brandId */}
-                            <VipLevelCheckboxGroup name="vipLevelIds" />
+                            <VipLevelCheckboxGroup
+                                name="vipLevelIds"
+                                brandId={brandId}
+                            />
                         </Box>
                     </FieldValues>
                 </Columns.Column>

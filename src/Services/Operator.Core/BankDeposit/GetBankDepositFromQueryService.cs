@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -13,7 +14,7 @@ namespace TGS.Services.Operator.BankDeposit
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
-        public async ValueTask<BankDepositForm> GetAsync(GetBankDepositFormQuery query)
+        public async ValueTask<BankDepositForm> GetAsync(GetBankDepositFormQuery query, CancellationToken cancellationToken = default)
         {
             var form = await _walletRepository
                 .GetDepositFormByIdAsync(query.FormId)

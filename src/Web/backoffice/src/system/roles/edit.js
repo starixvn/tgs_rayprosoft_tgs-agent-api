@@ -8,13 +8,9 @@ import {
     Card,
     Button,
     Text,
-    Checkbox,
     FieldStack,
     FieldWrapper,
-    SelectField,
     Table,
-    Select,
-    Group,
     Set
 } from "bumbag"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
@@ -64,6 +60,8 @@ import { useLicenseeLabel } from "../../merchant/licensees"
 import LicenseeIdSelect from "../../merchant/licensees/LicenseeIdSelect"
 import { useBrandLabel } from "../../merchant/brands"
 import BrandIdSelect from "../../merchant/brands/BrandIdSelect"
+import Checkbox from "../../checkbox/Checkbox"
+import Select from "../../select/Select"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -257,10 +255,7 @@ const AddDialog = ({ dialog, onSubmitted }) => {
                                     <Trans zh="根管理权限" en="Root Admin" />
                                 </Label>
                                 <Box alignY="center">
-                                    <Checkbox
-                                        name="isRoot"
-                                        checkboxRef={register}
-                                    />
+                                    <Checkbox name="isRoot" />
                                 </Box>
                             </>
                         )}
@@ -372,7 +367,7 @@ const RoleTemplateSelect = ({
     defaultValue,
     ...props
 }) => {
-    let { register, watch, setValue, formState } = useFormContext()
+    let { watch, setValue, formState } = useFormContext()
     let isRoot = watch("isRoot")
 
     let roleType = watch("roleType")
@@ -415,13 +410,11 @@ const RoleTemplateSelect = ({
     */
     }, [options, isRoot, resellerId, licenseeId, brandId])
 
-    let { ref, ...formProps } = register(name, { required: true })
     return (
         <Select
+            name={name}
             required
             defaultValue={defaultValue}
-            selectRef={ref}
-            {...formProps}
             placeholder={placeholder}
             options={options}
         />
