@@ -33,6 +33,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 1000M,
+                "tgs.payment.manual",
                 _ => serializer.Serialize(
                     new ManualDepositApplyInfo(
                         "ThisIsBankAccount",
@@ -192,6 +193,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 1000M,
+                "tgs.payment.leepay",
                 _ => serializer.Serialize(
                     new LeePayApplyInfo(
                             new LeePayDepositSettings(

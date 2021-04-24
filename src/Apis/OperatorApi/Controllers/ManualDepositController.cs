@@ -42,6 +42,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
+                "tgs.payment.manual",
                 _ => serializer.Serialize(
                     new ManualDepositApplyInfo(
                             request.BankAccount,

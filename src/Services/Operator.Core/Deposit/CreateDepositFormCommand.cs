@@ -8,6 +8,7 @@ namespace TGS.Services.Operator.Deposit
         Guid BrandId,
         Guid BrandPaymentId,
         decimal Amount,
+        string Subject,
         Func<Guid, string?> CreatePaymentSettings)
     {
         public TaskCompletionSource<Guid> ReturnFormIdSource { get; } = new TaskCompletionSource<Guid>();

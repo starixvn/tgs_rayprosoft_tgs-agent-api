@@ -42,6 +42,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
+                "tgs.payment.leepay",
                 formId => serializer.Serialize(
                     new LeePayDepositSettings(
                             brandPaymentInfo.RootElement.GetProperty("systemId").GetString(),
