@@ -29,7 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
                 (provider, key) => key switch
                 {
                     GameProvider.JDB => provider.GetRequiredService<JDBErrorMapper>(),
-                    _                     => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 }
             );
 

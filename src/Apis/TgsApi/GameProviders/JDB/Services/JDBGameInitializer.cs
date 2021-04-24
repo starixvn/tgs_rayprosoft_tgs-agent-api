@@ -35,7 +35,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             _brandGameProviderOperations = brandGameProviderOperations;
         }
 
-        async Task<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
+        async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
             var loginTokenId = request.Token.LoginRecordId;
             var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);

@@ -25,7 +25,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
             ITgsLog log,
             IGamePlayActions action,
             IJDBActionModelMapper map)
-            : base(mapper, Consts.GameProvider.Habanero, log, "habanero")
+            : base(mapper, Consts.GameProvider.Habanero, log, "jdb")
         {
             _action = action;
             _map = map;
@@ -49,6 +49,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
             var response = await func(context, error, message);
             context.Response.StatusCode = statusCode;
             await context.Response.WriteAsJsonAsync(response, response.GetType());
+            
         }
     }
 }
