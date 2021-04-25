@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
-using TGS.Shared.Game.Models.Habanero.Enums;
+using TGS.Shared.Game.Models.JDB.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
-using static TGS.Shared.Game.Models.Habanero.Enums.GameApiError;
+using static TGS.Shared.Game.Models.JDB.Enums.GameApiError;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
@@ -15,36 +15,33 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
             new Dictionary<Type, GameApiError>
             {
-                {typeof(InvalidCredentialsException), AuthorizationFailed},
-                {typeof(InvalidStatusException), AuthorizationFailed},
-                {typeof(BrandUnderMaintenanceException), AuthorizationFailed},
-                {typeof(GameProviderUnderMaintenanceException), AuthorizationFailed},
-                {typeof(GameUnderMaintenanceException), AuthorizationFailed},
-                {typeof(MissingTokenException), AuthorizationFailed},
-                {typeof(PlayerDisabledException), AuthorizationFailed},
-                {typeof(PlayerNotFoundException), AuthorizationFailed},
-                {typeof(PlayerLoginExpiredException), AuthorizationFailed},
-                {typeof(PlayerHasInsufficientFundsException), InsufficientFunds}
+                {typeof(BrandUnderMaintenanceException), SystemIsMaintained},
+                {typeof(GameProviderUnderMaintenanceException), SystemIsMaintained},
+                {typeof(GameUnderMaintenanceException), SystemIsMaintained},
+                {typeof(PlayerDisabledException), UserIdCannotBeFound},
+                {typeof(PlayerNotFoundException), UserIdCannotBeFound},
+                {typeof(PlayerLoginExpiredException), UserIdCannotBeFound},
+                {typeof(PlayerHasInsufficientFundsException), BalanceNotEnough}
             };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
             ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
-                    {Cancelled, Success},
-                    {Settled, Success},
-                    {Duplicate, Success},
-                    {TransactionNotFound, TransactionNotExist},
-                    {TransactionBeingCancelledNotFound, TransactionNotExist},
-                    {TransactionBeingReferencedNotFound, TransactionNotExist},
-                    {RoundNotFound, TransactionNotExist}
+                    {Cancelled, Succeed},
+                    {Settled, Succeed},
+                    {Duplicate, DuplicateTransactions},
+                    {TransactionNotFound, DataDoesNotExist},
+                    {TransactionBeingCancelledNotFound, DataDoesNotExist},
+                    {TransactionBeingReferencedNotFound, DataDoesNotExist},
+                    {RoundNotFound, DataDoesNotExist}
                 };
 
         int IErrorMapper.GetApiErrorByException(Exception exception)
         {
             if (exception == null)
             {
-                return (int)Success;
+                return (int)Succeed;
             }
 
             if (exception is InvalidGameActionException e &&
@@ -54,7 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             }
 
             var type = exception.GetType();
-            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)Uncategorized;
+            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)Failed;
         }
 
         int IErrorMapper.GetHttpStatusByException(Exception exception) =>

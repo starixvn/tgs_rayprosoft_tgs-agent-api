@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
                 }
             );
 
-            services.AddScoped<AuthorizeJDBMiddleware>();
+            //services.AddScoped<AuthorizeJDBMiddleware>();
             services.AddScoped<HandleJDBExceptionMiddleware>();
 
             services.AddScoped<IJDBServices, JDBServices>();
@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
                 builder =>
                 {
                     builder.UseMiddleware<HandleJDBExceptionMiddleware>();
-                    builder.UseMiddleware<AuthorizeJDBMiddleware>();
+                    //builder.UseMiddleware<AuthorizeJDBMiddleware>();
                 });
         }
     }
