@@ -78,6 +78,72 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new ("http://game-asiagaming") : new("http://localhost:62330"),
                     AgentCode = "B17",
                     LockGameTypes = new [] { "ROU" },
+                    GameHistoryTypes = new []
+                    {
+                        new AsiaGamingGameHistoryType
+                        {
+                            GameTypes = new []{ "BAC", "LBAC", "CBAC" },
+                            Descriptions = new Dictionary<string, string>
+                            {
+                                { "P", "Player" },
+                                { "B", "Banker" }
+                            }
+                        },
+                        new AsiaGamingGameHistoryType
+                        {
+                            GameTypes = new []{ "DT" },
+                            Descriptions = new Dictionary<string, string>
+                            {
+                                { "D", "Dragon" },
+                                { "T", "Tiger" }
+                            }
+                        },
+                        new AsiaGamingGameHistoryType
+                        {
+                            GameTypes = new []{ "NN" },
+                            Descriptions = new Dictionary<string, string>
+                            {
+                                { "F", "First" },
+                                { "P1", "Player1" },
+                                { "P2", "Player2" },
+                                { "P3", "Player3" },
+                                { "B", "Banker" }
+                            }
+                        },
+                        new AsiaGamingGameHistoryType
+                        {
+                            GameTypes = new []{ "ZJH" },
+                            Descriptions = new Dictionary<string, string>
+                            {
+                                { "D", "Dragon" },
+                                { "P", "Phoenix" }
+                            }
+                        },
+                        new AsiaGamingGameHistoryType
+                        {
+                            GameTypes = new []{ "BF" },
+                            Descriptions = new Dictionary<string, string>
+                            {
+                                { "B", "BlackBull" },
+                                { "R", "RedBull" }
+                            }
+                        },
+                        new AsiaGamingGameHistoryType
+                        {
+                            GameTypes = new []{ "BJ", "SG" },
+                            Descriptions = new Dictionary<string, string>
+                            {
+                                { "B", "Banker" },
+                                { "P1", "Player1" },
+                                { "P2", "Player2" },
+                                { "P3", "Player3" },
+                                { "P4", "Player4" },
+                                { "P5", "Player5" },
+                                { "P6", "Player6" },
+                                { "P7", "Player7" },
+                            }
+                        },
+                    },
                     ApiUrl = new("http://gi.aggdemo.com:81"),
                     LoginApiUrl = new("https://swapi.etwlt.com")
                 };
