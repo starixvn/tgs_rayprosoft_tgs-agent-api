@@ -20,7 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
         BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data, PostTransferRequest r);
 
-        BetData PlaceBetRequest(string playerCode, GameProviderConfigurationData data, BetResponseRequest r, GameActionExternalIds externalIds, OppositeBetSetting[] oppositeBetSettings);
+        BetData PlaceBetRequest(string playerCode, GameProviderConfigurationData data, BetResponseRequest r, GameActionExternalIds lockGameActionExternalIds, OppositeBetSetting[] oppositeBetSettings);
 
         TransferResponse Response(GameApiError error);
         
@@ -99,7 +99,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         }
 
         BetData IAsiaGamingActionModelMapper.PlaceBetRequest(string playerCode, GameProviderConfigurationData data, 
-            BetResponseRequest r, GameActionExternalIds externalIds, OppositeBetSetting[] oppositeBetSettings)
+            BetResponseRequest r, GameActionExternalIds lockGameActionExternalIds, OppositeBetSetting[] oppositeBetSettings)
         {
             var transactionId = r.TransactionId;
 
@@ -107,24 +107,24 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             {
                 new()
                 {
-                    Amount = Math.Abs(externalIds.Amount),
+                    Amount = Math.Abs(lockGameActionExternalIds.Amount),
                     ExternalTransactionId = $"{transactionId}_{GameActionType.UnlockAmount}",
-                    ExternalRoundId = externalIds.ExternalRoundId,
+                    ExternalRoundId = lockGameActionExternalIds.ExternalRoundId,
                     ExternalBetId = transactionId,
-                    ExternalGameId = externalIds.ExternalGameId,
+                    ExternalGameId = lockGameActionExternalIds.ExternalGameId,
                     GameActionType = GameActionType.UnlockAmount,
-                    TimeStamp = externalIds.RecordedOn
+                    TimeStamp = lockGameActionExternalIds.RecordedOn
                 }
             };
             transactions.AddRange(r.Records.Select(re => new TransactionData
             {
                 Amount = re.Amount,
                 ExternalTransactionId = $"{transactionId}_{re.BillNo}",
-                ExternalRoundId = externalIds.ExternalRoundId,
+                ExternalRoundId = lockGameActionExternalIds.ExternalRoundId,
                 ExternalBetId = $"{transactionId}_{re.BillNo}",
-                ExternalGameId = externalIds.ExternalGameId,
+                ExternalGameId = lockGameActionExternalIds.ExternalGameId,
                 GameActionType = GameActionType.PlaceBet,
-                TimeStamp = externalIds.RecordedOn
+                TimeStamp = lockGameActionExternalIds.RecordedOn
             }));
             
             return GetBetData(playerCode, data, transactions.ToArray(), 

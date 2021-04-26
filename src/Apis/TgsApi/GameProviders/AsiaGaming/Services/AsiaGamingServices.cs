@@ -60,8 +60,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var items = _httpContext?.Items ?? throw new InvalidOperationException("Can not get http context items");
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             
-            return await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode,
+            var externalIds = await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode,
                 transactionId).ConfigureAwait(false);
+
+            if (externalIds.GameActionType != GameActionType.LockAmount)
+            {
+                throw new ArgumentException($"Wrong transaction id {transactionId}, game action type can't be {externalIds.GameActionType}");
+            }
+
+            return externalIds;
         }
     }
 }
