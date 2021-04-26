@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210420073847_Initial")]
+    [Migration("20210426044435_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2561,24 +2561,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_audit_logs");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBank", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<string>("BankAccount")
+                    b.Property<string>("BankType")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("bank_account");
+                        .HasColumnType("text")
+                        .HasColumnName("bank_type");
 
-                    b.Property<string>("BankName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("bank_name");
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<string>("CreatedByUsername")
                         .IsRequired()
@@ -2590,17 +2587,19 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<string>("Detail")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("detail");
+
+                    b.Property<Guid>("PaymentChannelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_channel_id");
+
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
-
-                    b.Property<string>("RealName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("real_name");
 
                     b.Property<string>("UpdatedByUsername")
                         .IsRequired()
@@ -2613,12 +2612,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("updated_on");
 
                     b.HasKey("Id")
-                        .HasName("pk_player_banks");
+                        .HasName("pk_player_bank_infos");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_player_bank_infos_brand_id");
+
+                    b.HasIndex("PaymentChannelId")
+                        .HasDatabaseName("ix_player_bank_infos_payment_channel_id");
 
                     b.HasIndex("PlayerCode")
-                        .HasDatabaseName("ix_player_bankers_player_code");
+                        .HasDatabaseName("ix_player_bank_infos_player_code");
 
-                    b.ToTable("player_banks");
+                    b.ToTable("player_bank_infos");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
@@ -4558,14 +4563,32 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Vip");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBank", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", b =>
                 {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_player_bank_infos_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.PaymentChannel", "PaymentChannel")
+                        .WithMany()
+                        .HasForeignKey("PaymentChannelId")
+                        .HasConstraintName("fk_player_bank_infos_payment_channels_payment_channel_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
                         .WithMany("Banks")
                         .HasForeignKey("PlayerCode")
-                        .HasConstraintName("fk_player_banks_players_player_code")
+                        .HasConstraintName("fk_player_bank_infos_players_player_code")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("PaymentChannel");
 
                     b.Navigation("Player");
                 });

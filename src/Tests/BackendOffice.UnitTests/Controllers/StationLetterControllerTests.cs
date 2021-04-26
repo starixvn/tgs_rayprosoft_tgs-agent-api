@@ -277,17 +277,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Level = 1})
                 .With(s => s.Brand, new Brand())
                 .With(s => s.BetLimit, new BetLimit())
-                .With(s => s.Banks,
-                    new[]
-                    {
-                        new PlayerBank
-                        {
-                            Id = Guid.NewGuid(),
-                            RealName = Generator.RandomString(5),
-                            BankName = Generator.RandomString(20),
-                            BankAccount = Generator.RandomIntString(20)
-                        }
-                    })
+                .With(s => s.Banks, Array.Empty<PlayerBankInfo>())
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
                 .With(s => s.Wallets, new[] {new Wallet {Balance = 0}})

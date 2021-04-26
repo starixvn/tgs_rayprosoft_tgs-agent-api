@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +6,8 @@ using MessagePack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Tests.TestsCommon;
 
@@ -17,35 +18,13 @@ namespace TGS.Tests.Nats.IntegrationTests
     public class NatsManagerTests
     {
         private const string Topic = "NatsTopicTest";
-        private ServiceProvider _serviceProvider;
-        [SetUp]
-        public void Init()
-        {
-            var serviceCollection = new ServiceCollection();
-
-#if DEBUG
-            serviceCollection.AddConfiguration();
-            
-#else
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile($"appsettings.IntTest.json", optional: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            serviceCollection.AddSingleton<IConfiguration>(configuration);
-#endif
-
-            _serviceProvider = serviceCollection.BuildServiceProvider();
-            _serviceProvider = serviceCollection.AddNats(_serviceProvider.GetService<IConfiguration>())
-                .BuildServiceProvider();
-        }
 
         [Test, Timeout(10000)]
         public async Task CanPublishAndSubscribeMessages()
         {
             var ev = new AutoResetEvent(false);
-            var natsManager = _serviceProvider.GetService<INatsManager>();
+            var serviceProvider = CreateServiceProvider();
+            var natsManager = serviceProvider.GetService<INatsManager>();
             natsManager?.SubscribeAsync<string>(Topic, message =>
             {
                 message.Subject.Should().Be(Topic);
@@ -54,7 +33,6 @@ namespace TGS.Tests.Nats.IntegrationTests
             });
             await natsManager.PublishAsync(Topic, "Value");
             ev.WaitOne();
-            natsManager.Dispose();
         }
 
         [Test, Timeout(10000)]
@@ -67,7 +45,8 @@ namespace TGS.Tests.Nats.IntegrationTests
                 TestInt = 12345,
                 TestClass = new InternalTestClass { InternalTestString = "internalTestString" }
             };
-            var natsManager = _serviceProvider.GetService<INatsManager>();
+            var serviceProvider = CreateServiceProvider();
+            var natsManager = serviceProvider.GetService<INatsManager>();
             natsManager.SubscribeAsync<TestObject>(Topic, message =>
             {
                 message.Subject.Should().Be(Topic);
@@ -76,14 +55,44 @@ namespace TGS.Tests.Nats.IntegrationTests
             });
             await natsManager.PublishAsync(Topic, testObj);
             ev.WaitOne();
-            natsManager.Dispose();
+        }
+
+        private ServiceProvider CreateServiceProvider()
+        {
+            var serviceCollection = new ServiceCollection();
+
+#if DEBUG
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            serviceCollection.AddScoped<ITgsLog, TgsLog>();
+            serviceCollection.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
+            serviceCollection.AddSingleton<IConfiguration>(configuration);
+#else
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile($"appsettings.IntTest.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            serviceCollection.AddSingleton<IConfiguration>(configuration);
+#endif
+
+            return serviceCollection
+                .AddNats(configuration)
+                .BuildServiceProvider();
         }
 
         [MessagePackObject(true)]
         public class TestObject
         {
             public string TestString { set; get; }
+
             public int TestInt { set; get; }
+
             public InternalTestClass TestClass { set; get; }
         }
 
