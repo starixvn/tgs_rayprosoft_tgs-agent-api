@@ -1,15 +1,20 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
 {
     public record CreateGameSessionRequest
     {
-        public string productid { get; init; }
+        [JsonPropertyName("productid")]
+        public string AgentCode { get; init; }
 
-        public string username { get; init; }
+        [JsonPropertyName("username")]
+        public string PlayerCode { get; init; }
 
-        public Guid session_token { get; init; }
+        [JsonPropertyName("session_token")]
+        public Guid LoginRecordId { get; init; }
 
-        public decimal credit { get; init; }
+        [JsonPropertyName("credit")]
+        public decimal Balance { get; init; }
     }
 }

@@ -1,15 +1,22 @@
-﻿namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
 {
     public record GameUrlRequest : BaseRequest
     {
-        public string dm { get; init; }
+        [JsonPropertyName("dm")]
+        public string ReturnUrl { get; init; }
 
-        public string sid { get; init; }
+        [JsonPropertyName("sid")]
+        public string Sid { get; init; }
 
-        public string mh5 { get; init; }
+        [JsonPropertyName("mh5")]
+        public string Mh5 { get; init; }
 
-        public string lang { get; init; }
+        [JsonPropertyName("lang")]
+        public string Lang { get; init; }
 
-        public string gameType { get; init; }
+        [JsonPropertyName("gameType")]
+        public string GameId { get; init; }
     }
 }

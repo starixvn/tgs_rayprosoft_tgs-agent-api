@@ -1,10 +1,13 @@
 ﻿using System;
-using System.Reflection;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
@@ -31,6 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         private readonly IAsiaGamingApiClient _apiClient;
         private readonly ISymmetricCryptoProvider _cryptoProvider;
         private readonly IHashProvider _hashProvider;
+        private readonly IJsonSerializationProvider _json;
 
         public AsiaGamingGameInitializer(
             ISettingOperations settingOperations,
@@ -41,7 +45,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             IGameProviderCurrencyCodeMapper currencyMapper,
             IAsiaGamingApiClient apiClient,
             ISymmetricCryptoProviderFactory cryptoProviderFactory,
-            IHashProvider hashProvider)
+            IHashProvider hashProvider,
+            IJsonSerializationProvider json)
         {
             _settingOperations = settingOperations;
             _brandOperations = brandOperations;
@@ -52,6 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             _apiClient = apiClient;
             _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.DES);
             _hashProvider = hashProvider;
+            _json = json;
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
@@ -86,10 +92,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         {
             var request = new CheckOrCreateAccountRequest
             {
-                cagent = configuration.AgentCode,
-                loginname = player.PlayerCode,
-                oddtype = player.BetLimitId.ToString(),
-                cur = cur
+                AgentCode = configuration.AgentCode,
+                PlayerCode = player.PlayerCode,
+                BetLimitId = player.BetLimitId.ToString(),
+                Currency = cur
             };
 
             var paras = GetQueryString(request, Separator);
@@ -107,10 +113,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         {
             var request = new CreateGameSessionRequest
             {
-                productid = configuration.AgentCode,
-                username = urlRequest.Token.PlayerCode,
-                session_token = urlRequest.Token.LoginRecordId,
-                credit = balance
+                AgentCode = configuration.AgentCode,
+                PlayerCode = urlRequest.Token.PlayerCode,
+                LoginRecordId = urlRequest.Token.LoginRecordId,
+                Balance = balance
             };
 
             var queryString = GetQueryString(request, "&");
@@ -129,13 +135,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
             var request = new GameUrlRequest
             {
-                cagent = configuration.AgentCode,
-                loginname = urlRequest.Token.PlayerCode,
-                sid = configuration.AgentCode + GenerateSequenceNumber(),
-                lang = cultureCode,
-                gameType = game.ExternalId,
-                oddtype = player.BetLimitId.ToString(),
-                cur = cur
+                AgentCode = configuration.AgentCode,
+                PlayerCode = urlRequest.Token.PlayerCode,
+                Sid = configuration.AgentCode + GenerateSequenceNumber(),
+                Lang = cultureCode,
+                GameId = game.ExternalId,
+                BetLimitId = player.BetLimitId.ToString(),
+                Currency = cur
             };
             
             var paras = GetQueryString(request, Separator);
@@ -160,14 +166,21 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         {
             var index = 0;
             var parameters = string.Empty;
-            var propInfos = data.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);
-
-            foreach (var prop in propInfos)
+            var options = new JsonSerializerOptions
             {
-                parameters += prop.Name + "=" + prop.GetValue(data);
+                WriteIndented = false,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            var value = _json.SerializeToString(data, options);
+            var items = _json.DeserializeFromString<Dictionary<string, object>>(value, options);
+
+            foreach (var item in items)
+            {
+                parameters += item.Key + "=" + item.Value;
                 index++;
 
-                if (index < propInfos.Length)
+                if (index < items.Count)
                 {
                     parameters += separator;
                 }

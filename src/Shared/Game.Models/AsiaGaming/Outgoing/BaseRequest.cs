@@ -1,17 +1,25 @@
-﻿namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
 {
     public abstract record BaseRequest
     {
-        public string cagent { get; init; }
+        [JsonPropertyName("cagent")]
+        public string AgentCode { get; init; }
 
-        public string loginname { get; init; }
+        [JsonPropertyName("loginname")]
+        public string PlayerCode { get; init; }
 
-        public int actype { get; } = 1;
+        [JsonPropertyName("actype")]
+        public int Actype { get; } = 1;
 
-        public string password { get; } = "password";
+        [JsonPropertyName("password")]
+        public string Password { get; } = "password";
 
-        public string oddtype { get; init; }
+        [JsonPropertyName("oddtype")]
+        public string BetLimitId { get; init; }
 
-        public string cur { get; init; }
+        [JsonPropertyName("cur")]
+        public string Currency { get; init; }
     }
 }
