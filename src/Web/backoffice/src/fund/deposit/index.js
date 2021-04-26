@@ -11,7 +11,8 @@ import {
     Flex,
     Level,
     FieldStack,
-    FieldWrapper
+    FieldWrapper,
+    useToasts
 } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
@@ -26,6 +27,7 @@ import { Code } from "./menu"
 import { FormattedNumberDecimal, Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
+import clone from "clone-deep"
 import { InputField } from "../../input/Input"
 import BrandBar from "../../report/BrandBar"
 import AlertDialog from "../../dialog/Alert"
@@ -49,6 +51,14 @@ import FundReviewStatus, {
     FundReviewStatusLabel,
     FundReviewStatusSelect
 } from "../FundReviewStatus"
+import maxTime from "date-fns/max"
+import isEqualTime from "date-fns/isEqual"
+import isSameDay from "date-fns/isSameDay"
+import isAfter from "date-fns/isAfter"
+import parseISO from "date-fns/parseISO"
+import isValidTime from "date-fns/isValid"
+import { SortOrder } from "../../table/order"
+import { startOfNextDay } from "../../date/startOfNextDay"
 
 export { Code }
 
@@ -79,6 +89,8 @@ const Body = () => {
     )
 }
 
+const MinuteInMilliseconds = 6000
+
 const BodyContent = ({ brandId }) => {
     let todayRange = today()
     let { state, setState, setPageIndex, setSortOrder } = useTable({
@@ -86,10 +98,10 @@ const BodyContent = ({ brandId }) => {
         channelName: "",
         paymentChannel: "",
         status: "",
-        createdOnStart: todayRange.start,
-        createdOnEnd: todayRange.end,
-        updatedOnStart: undefined,
-        updatedOnEnd: undefined
+        beginCreateOn: todayRange.start,
+        endCreateOn: todayRange.end,
+        beginUpdateOn: undefined,
+        endUpdateOn: undefined
     })
 
     useEffect(() => {
@@ -103,10 +115,10 @@ const BodyContent = ({ brandId }) => {
         channelName,
         paymentChannel,
         status,
-        createdOnStart,
-        createdOnEnd,
-        updatedOnStart,
-        updatedOnEnd
+        beginCreateOn,
+        endCreateOn,
+        beginUpdateOn,
+        endUpdateOn
     } = state
     let {
         data = {},
@@ -114,83 +126,165 @@ const BodyContent = ({ brandId }) => {
         mutate,
         error,
         deleteCache
-    } = usePlayerDepositFormList(brandId, {
-        ...toApiParams(state)
-        // sortby: "CreatedOn" //TODO: rm when bug fixed
+    } = usePlayerDepositFormList(
+        brandId,
+        {
+            ...toApiParams(state),
+            bc: state.beginCreateOn,
+            ec: startOfNextDay(state.endCreateOn),
+            bu: state.beginUpdateOn,
+            eu: startOfNextDay(state.endUpdateOn),
+            sortby: "CreatedOn",
+            orderby: SortOrder.Descending
+        }
+        /*
+        {
+            refreshInterval: 1000 //5 * MinuteInMilliseconds //100
+        }
+        */
+    )
+
+    let newOrder = useTrans({
+        zh: "新订单",
+        en: "new order"
     })
-
-    let columns = useColumns({ mutate, items: data?.items, brandId })
-
-    return (
-        <PageContent
-            title={<Trans zh="充值列表" en="Deposit List" />}
-            actionBar={
-                <SearchBar
-                    brandId={brandId}
-                    username={username}
-                    channelName={channelName}
-                    paymentChannel={paymentChannel}
-                    status={status}
-                    createdOnStart={createdOnStart}
-                    createdOnEnd={createdOnEnd}
-                    updatedOnStart={updatedOnStart}
-                    updatedOnEnd={updatedOnEnd}
-                    search={(data) => {
-                        let newState = {
-                            pageIndex: 0,
-                            username: data.username,
-                            channelName: data.channelName,
-                            paymentChannel: data.paymentChannel,
-                            status: data.status,
-                            createdOnStart: data.createdOnStart,
-                            createdOnEnd: data.createdOnEnd,
-                            updatedOnStart: data.updatedOnStart,
-                            updatedOnEnd: data.updatedOnEnd
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                username,
-                                channelName,
-                                paymentChannel,
-                                status,
-                                createdOnStart,
-                                createdOnEnd,
-                                updatedOnStart,
-                                updatedOnEnd
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState({
-                            pageIndex: 0,
-                            ...data
+    let multipleOrder = useTrans({
+        zh: "New orders",
+        en: "Multiple new orders"
+    })
+    let toasts = useToasts()
+    let [items, setItems] = useState([])
+    useEffect(() => {
+        if (data?.items && !equals(items, data?.items)) {
+            let newApplications = newApplicationsFromToday(data.items, items)
+            if (newApplications.length) {
+                if (newApplications.length < 3) {
+                    newApplications.map((application) =>
+                        toasts.info({
+                            title: `${newOrder}`,
+                            message: `${application.userName}`
                         })
-                    }}
+                    )
+                } else {
+                    toasts.info({ title: multipleOrder })
+                }
+            }
+            setItems(clone(data.items))
+        }
+    }, [JSON.stringify(data?.items)])
+
+    let columns = useColumns({ mutate, items, brandId })
+    return useMemo(
+        () => (
+            <PageContent
+                title={<Trans zh="充值列表" en="Deposit List" />}
+                actionBar={
+                    <SearchBar
+                        brandId={brandId}
+                        username={username}
+                        channelName={channelName}
+                        paymentChannel={paymentChannel}
+                        status={status}
+                        beginCreateOn={beginCreateOn}
+                        endCreateOn={endCreateOn}
+                        beginUpdateOn={beginUpdateOn}
+                        endUpdateOn={endUpdateOn}
+                        search={(data) => {
+                            let newState = {
+                                pageIndex: 0,
+                                username: data.username,
+                                channelName: data.channelName,
+                                paymentChannel: data.paymentChannel,
+                                status: data.status,
+                                beginCreateOn: data.beginCreateOn,
+                                endCreateOn: data.endCreateOn,
+                                beginUpdateOn: data.beginUpdateOn,
+                                endUpdateOn: data.endUpdateOn
+                            }
+                            if (
+                                equals(newState, {
+                                    pageIndex,
+                                    username,
+                                    channelName,
+                                    paymentChannel,
+                                    status,
+                                    beginCreateOn,
+                                    endCreateOn,
+                                    beginUpdateOn,
+                                    endUpdateOn
+                                })
+                            ) {
+                                mutate()
+                            }
+                            setState({
+                                pageIndex: 0,
+                                ...data
+                            })
+                        }}
+                        isLoading={isLoading}
+                    />
+                }
+            >
+                <Table
+                    controlledState={state}
+                    columns={columns}
+                    data={items}
+                    pageCount={pageCount(pageSize, data?.totalCount)}
+                    setPageIndex={setPageIndex}
+                    setSortOrder={setSortOrder}
                     isLoading={isLoading}
                 />
-            }
-        >
-            <Table
-                controlledState={state}
-                columns={columns}
-                data={data?.items}
-                pageCount={pageCount(pageSize, data?.totalCount)}
-                setPageIndex={setPageIndex}
-                setSortOrder={setSortOrder}
-                isLoading={isLoading}
-            />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
-        </PageContent>
+                {error && (
+                    <AlertDialog
+                        {...error}
+                        onClickClose={() => {
+                            deleteCache()
+                            mutate({ data: undefined }, false)
+                        }}
+                    />
+                )}
+            </PageContent>
+        ),
+        [
+            brandId,
+            JSON.stringify(state),
+            isLoading,
+            JSON.stringify(items),
+            error,
+            mutate
+        ]
     )
+}
+
+const newApplicationsFromToday = (first = [], second = []) => {
+    if (!second || second.length === 0) {
+        return []
+    }
+
+    let today = new Date()
+    let lastMaxApplicationTime = maxTime(
+        second.reduce((times, { createdOn }) => {
+            let value = parseISO(createdOn)
+            if (isValidTime(value)) {
+                times.push(value)
+            }
+
+            return times
+        }, [])
+    )
+
+    const findSameById = (id, list = []) => list.find((item) => item.id === id)
+
+    let result = first.filter(({ createdOn, id }) => {
+        createdOn = parseISO(createdOn)
+        return (
+            isSameDay(today, createdOn) &&
+            isAfter(createdOn, lastMaxApplicationTime) &&
+            !findSameById(id, second)
+        )
+    })
+
+    return result
 }
 
 const SearchBar = ({
@@ -199,10 +293,10 @@ const SearchBar = ({
     channelName,
     paymentChannel,
     status,
-    createdOnStart,
-    createdOnEnd,
-    updatedOnStart,
-    updatedOnEnd,
+    beginCreateOn,
+    endCreateOn,
+    beginUpdateOn,
+    endUpdateOn,
     search,
     isLoading,
     ...props
@@ -213,10 +307,10 @@ const SearchBar = ({
             channelName,
             paymentChannel,
             status,
-            createdOnStart,
-            createdOnEnd,
-            updatedOnStart,
-            updatedOnEnd
+            beginCreateOn,
+            endCreateOn,
+            beginUpdateOn,
+            endUpdateOn
         }
     })
 
@@ -228,15 +322,6 @@ const SearchBar = ({
     let channelNameInputPlaceholder = useTrans({
         zh: "通道名称",
         en: "Channel Name"
-    })
-
-    let createdOnLabel = useTrans({
-        zh: "申请时间",
-        en: "Application Time"
-    })
-    let updatedOnLabel = useTrans({
-        zh: "更新时间",
-        en: "Update time"
     })
 
     let paymentMethodPlaceholder = useTrans({
@@ -265,24 +350,71 @@ const SearchBar = ({
                         <FundReviewStatusSelect name="status" />
                     </Set>
                     <Set orientation="horizontal">
-                        <FieldWrapper label={createdOnLabel}>
+                        <FieldWrapper
+                            label={
+                                <FieldStack
+                                    orientation="horizontal"
+                                    alignY="center"
+                                >
+                                    <Trans
+                                        zh="申请时间"
+                                        en="Application Time"
+                                    />
+                                    <Button.Close
+                                        size="small"
+                                        onClick={() => {
+                                            formMethods.setValue(
+                                                "beginCreateOn",
+                                                ""
+                                            )
+                                            formMethods.setValue(
+                                                "endCreateOn",
+                                                ""
+                                            )
+                                        }}
+                                    />
+                                </FieldStack>
+                            }
+                        >
                             <DateInputRange
                                 startProps={{
-                                    name: "createdOnStart"
+                                    name: "beginCreateOn"
                                 }}
                                 endProps={{
-                                    name: "createdOnEnd"
+                                    name: "endCreateOn"
                                 }}
                             />
                         </FieldWrapper>
 
-                        <FieldWrapper label={updatedOnLabel}>
+                        <FieldWrapper
+                            label={
+                                <FieldStack
+                                    orientation="horizontal"
+                                    alignY="center"
+                                >
+                                    <Trans zh="更新时间" en="Updated time" />
+                                    <Button.Close
+                                        size="small"
+                                        onClick={() => {
+                                            formMethods.setValue(
+                                                "beginUpdateOn",
+                                                ""
+                                            )
+                                            formMethods.setValue(
+                                                "endUpdateOn",
+                                                ""
+                                            )
+                                        }}
+                                    />
+                                </FieldStack>
+                            }
+                        >
                             <DateInputRange
                                 startProps={{
-                                    name: "updatedOnStart"
+                                    name: "beginUpdateOn"
                                 }}
                                 endProps={{
-                                    name: "updatedOnEnd"
+                                    name: "endUpdateOn"
                                 }}
                             />
                         </FieldWrapper>
