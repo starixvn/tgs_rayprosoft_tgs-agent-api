@@ -1,0 +1,2 @@
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
+Texas Hold'em Poker,Texas_Holdem_Poker,,620,CardGame,DesktopAndMobile,FALSE,,Texas Hold'em Poker,FALSE,TRUE,TRUE,
