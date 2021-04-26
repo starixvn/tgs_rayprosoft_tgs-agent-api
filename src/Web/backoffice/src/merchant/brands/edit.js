@@ -542,7 +542,7 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
                     <>
                         <NormalLabel>
                             <Trans
-                                zh="代理红利周期"
+                                zh="代理分红周期"
                                 en="Agent Dividend Interval"
                             />
                         </NormalLabel>
