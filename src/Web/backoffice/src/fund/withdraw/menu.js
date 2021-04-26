@@ -1,7 +1,7 @@
 import React from "react"
 import { Locales, getTrans } from "../../i18n"
 
-export const Code = "playerdeposit"
+export const Code = "withdraw"
 
 export const View = "view"
 

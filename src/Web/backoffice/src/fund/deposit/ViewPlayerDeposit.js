@@ -7,7 +7,8 @@ import {
     Text,
     Dialog,
     Modal,
-    Heading
+    Heading,
+    Link
 } from "bumbag"
 import {
     FormattedDateTime,
@@ -87,6 +88,8 @@ const ViewPlayerDepositDialog = ({ brandId, formId, dialog, ...props }) => {
 }
 
 export const PlayerDepositFormBody = ({ record }) => {
+    let hasAttachment = !!record?.paymentReturn?.manualReceiptFileId
+    let attachmentUrl = `/api/fs/${record?.paymentReturn?.manualReceiptFileId}`
     return (
         <FieldStack>
             <FieldValues marginLeft="1.5rem">
@@ -140,12 +143,33 @@ export const PlayerDepositFormBody = ({ record }) => {
                     <FundReviewStatusLabel value={record?.status} />
                 </Text.Block>
 
-                <NormalLabel>
-                    <Trans zh="附件" en="Attachment" />
-                </NormalLabel>
-                <Text.Block alignY="center"></Text.Block>
+                {hasAttachment && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="附件" en="Attachment" />
+                        </NormalLabel>
+                        <Text.Block alignY="center">
+                            <Link href={attachmentUrl} target="_blank">
+                                <Trans zh="连结" en="Link" />
+                            </Link>
+                        </Text.Block>
+                    </>
+                )}
             </FieldValues>
             <Separator />
+            <BankInfoBox record={record} />
+        </FieldStack>
+    )
+}
+
+const BankInfoBox = ({ record }) => {
+    let hasBankInfo = !!record?.applyInfo?.sendBankAccount
+    if (!hasBankInfo) {
+        return null
+    }
+
+    return (
+        <>
             <Heading use="h6">
                 <Trans zh="银行信息" en="Bank Info" />
             </Heading>
@@ -185,6 +209,6 @@ export const PlayerDepositFormBody = ({ record }) => {
                     {record?.applyInfo?.memo}
                 </Text.Block>
             </FieldValues>
-        </FieldStack>
+        </>
     )
 }

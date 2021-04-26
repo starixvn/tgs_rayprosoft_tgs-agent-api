@@ -510,3 +510,51 @@ export const useApplyDeposit = (
         ...rest
     }
 }
+
+export const useUploadDepositProof = (
+    { brandCode, currency, username, platformtype, depositFormId } = {},
+    formData
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && depositFormId && formData
+            ? [
+                  `/api/deposit/manual/${depositFormId}`,
+                  formData,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            },
+            body: formData
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}

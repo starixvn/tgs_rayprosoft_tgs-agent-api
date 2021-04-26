@@ -43,6 +43,7 @@ export const DepositDialog = ({
     currency,
     username,
     platform,
+    onSubmitted,
     dialog
 }) => {
     let { register, handleSubmit, watch, setError, errors } = useForm()
@@ -68,6 +69,7 @@ export const DepositDialog = ({
 
     useEffect(() => {
         if (result) {
+            onSubmitted?.(result?.data)
             reset()
             dialog.hide()
         }
@@ -109,12 +111,6 @@ export const DepositDialog = ({
                             options={paymentOptions}
                             selectRef={register}
                         />
-                        {/* <InputField
-                            name="paymentid"
-                            inputRef={register}
-                            label="Payment ID"
-                            defaultValue="4f6e04c8-baba-461c-a8aa-08d903d6d2f2"
-                        /> */}
                     </Group>
                     <InputField
                         name="account"
