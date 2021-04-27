@@ -48,6 +48,12 @@ namespace TGS.Services.Report.Application.Commands.Player
                     result.Offset);
             }
 
+            if (await _playerRebateService.ExistsAsync(x => x.ReportDate == reportDate))
+            {
+                return CreateInvalidResponse<MessageResponse>(
+                    $"The rebates of {reportDate} have generated.");
+            }
+
             var playerRebates = await _playerGameTypeAggregateService
                 .GetPlayerGameTypeAggregateQueries(q => q.Where(x => x.ReportDate == reportDate))
                 .GroupBy(

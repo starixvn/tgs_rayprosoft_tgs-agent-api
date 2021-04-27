@@ -517,27 +517,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTimeOffset>("AfterFromDateTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("after_from_date_time");
-
-                    b.Property<DateTimeOffset>("AfterToDateTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("after_to_date_time");
-
                     b.Property<string>("ApiKey")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("api_key");
-
-                    b.Property<DateTimeOffset>("BeforeFromDateTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("before_from_date_time");
-
-                    b.Property<DateTimeOffset>("BeforeToDateTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("before_to_date_time");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
@@ -561,6 +545,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<DateTimeOffset>("CurrentSettlementFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("current_settlement_from");
+
+                    b.Property<DateTimeOffset>("CurrentSettlementTo")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("current_settlement_to");
+
                     b.Property<string>("Description")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
@@ -576,10 +568,26 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
+                    b.Property<DateTimeOffset>("NextSettlementFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_settlement_from");
+
+                    b.Property<DateTimeOffset>("NextSettlementTo")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_settlement_to");
+
                     b.Property<string>("OperationalEmail")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("operational_email");
+
+                    b.Property<DateTimeOffset>("PreviousSettlementFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("previous_settlement_from");
+
+                    b.Property<DateTimeOffset>("PreviousSettlementTo")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("previous_settlement_to");
 
                     b.Property<string>("SecretKey")
                         .IsRequired()
