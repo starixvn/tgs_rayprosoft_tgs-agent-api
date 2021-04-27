@@ -67,7 +67,17 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var brandId = _httpContext.Items.GetBrandId();
             var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, brandId);
 
-            var gameProviderIds = await _brandOperations.GetBrandGameProvidersAsync(brandId);            
+
+            Guid[] gameProviderIds = new Guid[] { };
+            if (!string.IsNullOrEmpty(request.GameProviderCode))
+            {
+                var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
+                gameProviderIds = gameProviderIds.Concat(new Guid[] { gameProviderId }).ToArray();
+            }
+            else
+            {
+                gameProviderIds = (await _brandOperations.GetBrandGameProvidersAsync(brandId)).Select(x=>x.GameProviderId).ToArray();
+            }
 
             var playerTokenData = _httpContext.Items.GetPlayerTokenData();
             var platformType = request.PlatformType;
@@ -93,9 +103,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
             GameModel[] games = new GameModel[] { };
             Dictionary<string, Dictionary<string, string>> store = new Dictionary<string, Dictionary<string, string>>() { };
-            foreach (var item in gameProviderIds)
-            {
-                var gameProviderId = item.GameProviderId;
+            foreach (var gameProviderId in gameProviderIds)
+            {                
                 var game = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, playerType);
                 games = games.Concat(game).ToArray();
 
