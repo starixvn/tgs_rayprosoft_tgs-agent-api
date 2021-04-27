@@ -25,5 +25,7 @@ namespace TGS.Services.Payment
         IAsyncEnumerable<BrandPaymentAcl> GetBrandPaymentAclsAsync(IEnumerable<Guid> brandPaymentIds, string playerCode);
 
         IAsyncEnumerable<BrandPaymentVip> GetBrandPaymentVipListAsync(IEnumerable<Guid> brandPaymentIds);
+
+        IAsyncEnumerable<PaymentMethodChannelInfo> GetPaymentMethodChannelsAsync();
     }
 }
