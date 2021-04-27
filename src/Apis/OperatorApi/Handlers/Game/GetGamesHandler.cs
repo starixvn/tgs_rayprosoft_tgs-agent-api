@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,7 +66,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
         {
             var brandId = _httpContext.Items.GetBrandId();
             var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, brandId);
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
+
+            var gameProviderIds = await _brandOperations.GetBrandGameProvidersAsync(brandId);            
 
             var playerTokenData = _httpContext.Items.GetPlayerTokenData();
             var platformType = request.PlatformType;
@@ -89,11 +91,22 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
             var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
 
-            var games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode,
-                playerType);
+            GameModel[] games = new GameModel[] { };
+            Dictionary<string, Dictionary<string, string>> store = new Dictionary<string, Dictionary<string, string>>() { };
+            foreach (var item in gameProviderIds)
+            {
+                var gameProviderId = item.GameProviderId;
+                var game = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, playerType);
+                games = games.Concat(game).ToArray();
 
-            var types = request.Types ?? Array.Empty<GameType>();
-            var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, cultureCode);
+                var tempStore = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, cultureCode);
+                store = store.Union(tempStore)
+                    .GroupBy(kvp => kvp.Key)
+                    .Select(grp => grp.First())
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            }
+            
+            var types = request.Types ?? Array.Empty<GameType>();                                   
 
             var translatedGames = games
                 .Where(g => types.Length == 0 || types.Contains(g.Type))

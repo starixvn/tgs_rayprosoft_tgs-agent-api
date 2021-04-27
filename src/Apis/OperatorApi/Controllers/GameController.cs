@@ -22,6 +22,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         ///     get game list of specific game provider
         /// </summary>
+        /// <remarks>
+        /// 
+        /// </remarks>
         [HttpGet]
         [Route("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
