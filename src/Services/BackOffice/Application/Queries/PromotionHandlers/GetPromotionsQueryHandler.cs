@@ -32,7 +32,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
                     Status = x.Status,
                     Name = x.Name,
                     PromotionType = x.PromotionType,
-                    PromotionAmount = x.BonusAmountLimit,
+                    BonusAmountLimit = x.BonusAmountLimit,
                     AmountUsed = x.AmountUsed,
                     Unlimited = x.Unlimited,
                     GameType = x.GameType,

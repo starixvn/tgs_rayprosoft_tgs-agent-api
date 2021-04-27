@@ -11,7 +11,7 @@ namespace TGS.Services.BackOffice.Application.Models.Promotion
         public DateTimeOffset To { get; set; }
         public SwitchStatus Status { get; set; }
         public string PromotionType { get; set; }
-        public decimal PromotionAmount { get; set; }
+        public decimal BonusAmountLimit { get; set; }
         public decimal AmountUsed { get; set; }
         public bool Unlimited { get; set; }
         public GameType? GameType { get; set; }
