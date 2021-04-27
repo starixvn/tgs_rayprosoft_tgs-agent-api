@@ -122,6 +122,7 @@ services:
       - traefik.http.routers.backoffice-api.entrypoints=web
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
+      File__FileServiceBaseUrl: "http://fileservice"
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
@@ -219,6 +220,7 @@ services:
       - traefik.http.routers.operator-api.entrypoints=web
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
+      Operator__FileServiceBaseUrl: "http://fileservice"
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
