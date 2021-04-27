@@ -100,7 +100,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
         {
             if (betResponse)
             {
-                return TransactionType.WIN;
+                return TransactionType.BET;
             }
             
             Enum.TryParse<TransactionType>(GetElementValue(elements, "transactionType"), ignoreCase: true, out var transactionType);
