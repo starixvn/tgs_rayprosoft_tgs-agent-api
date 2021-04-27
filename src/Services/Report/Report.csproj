@@ -32,8 +32,4 @@
     </EmbeddedResource>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Application\Queries\ReportHandlers\" />
-  </ItemGroup>
-
 </Project>
