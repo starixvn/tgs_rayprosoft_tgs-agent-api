@@ -76,7 +76,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         null),
                     PaymentReturn = null,
                     CreatedOn = DateTimeOffset.Now,
-                    UpdateOn = DateTimeOffset.Now
+                    UpdatedOn = DateTimeOffset.Now
                 });
 
             await tgsRepository.SaveChangesAsync();
