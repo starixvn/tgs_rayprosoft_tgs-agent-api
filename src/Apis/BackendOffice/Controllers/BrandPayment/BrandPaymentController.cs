@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,7 +19,6 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Queries.BrandPayment;
 using TGS.Services.BackOffice.Application.Queries.PaymentChannel;
 using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
-using TGS.Services.BackOffice.Domain;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
@@ -206,9 +204,9 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
         [HttpGet("pmc")]
         [Description("Get All Brand PaymentMethodChannels")]
         public async Task<GenericResponse<AllPaymentMethodChannelsResponse>> GetAllPaymentMethodChannelsAsync(
-            IQueryService<AllPaymentMethodChannelQuery, PaymentMethodChannelInfo> queryService,
-            IQueryService<PaymentMethodQuery, PaymentMethodInfo> paymentMethodQueryService,
-            IQueryService<PaymentChannelQuery, PaymentChannelInfo> paymentChannelQueryService)
+            [FromServices] IQueryService<AllPaymentMethodChannelQuery, PaymentMethodChannelInfo> queryService,
+            [FromServices] IQueryService<PaymentMethodQuery, PaymentMethodInfo> paymentMethodQueryService,
+            [FromServices] IQueryService<PaymentChannelQuery, PaymentChannelInfo> paymentChannelQueryService)
         {
             var allPaymentMethodChannels = queryService.QueryAsync(new AllPaymentMethodChannelQuery());
             var allPaymentMethods = await paymentMethodQueryService

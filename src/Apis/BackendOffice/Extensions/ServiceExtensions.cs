@@ -154,6 +154,10 @@ namespace TGS.Apis.BackendOffice.Extensions
                 httpClient.BaseAddress = new Uri(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
+            services
+                .AddPayment()
+                .UseTgsPaymentRepository();
+
             return services;
         }
     }
