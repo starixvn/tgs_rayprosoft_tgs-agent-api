@@ -46,58 +46,69 @@ namespace TGS.Tests.Games.IntegrationTests
 
             if (featureContext.FeatureInfo.Tags.Contains("SBOBET"))
             {
-                Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.SBOBET);
-
-                var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-                fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
-                var currentDictionary = Directory.GetCurrentDirectory();
-
-                _OpApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                    .ConfigureAppConfiguration(builder =>
-                    {
-                        builder.SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
-                            "../../../../../Apis/OperatorApi")));
-                    })
-                    .ConfigureWebHostDefaults(builder =>
-                    {
-                        builder
-                            .UseStartup<Startup>()
-                            .UseTestServer()
-                            .ConfigureTestServices(srv =>
-                            {
-                                srv.AddTransient(_ => fakeAnalyzer.Object);
-                            });
-                    })
-                    .Build();
-
-                _OpApiHost.StartAsync();
-                OpApiClient = _OpApiHost.GetTestClient();
-
-                _TgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
-                    .ConfigureAppConfiguration(builder =>
-                    {
-                        builder
-                            .SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
-                                "../../../../../Apis/TgsApi")))
-                            .AddJsonFile("GameProviders/SBOBET/sbobet.json", true);
-                    })
-                    .ConfigureWebHostDefaults(builder =>
-                    {
-                        builder
-                            .UseStartup<SBOBETStartup>()
-                            .UseKestrel(options => options.AddServerHeader = false)
-                            .UseTestServer()
-                            .ConfigureTestServices(srv =>
-                            {
-                                srv.AddTransient(_ => fakeAnalyzer.Object);
-                            });
-                    })
-                    .Build();
-
-                _TgsApiHost.StartAsync();
-                TgsApiClient = _TgsApiHost.GetTestClient();
+                CreateSbobetEnv();
             }
+        }
+
+        [AfterFeature]
+        public static void AfterFeature(FeatureContext featureContext)
+        {
+            Task.WhenAll(_OpApiHost.StopAsync(), _TgsApiHost.StopAsync());
+        }
+
+        private static void CreateSbobetEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.SBOBET);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _OpApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
+                .ConfigureAppConfiguration(builder =>
+                {
+                    builder.SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
+                        "../../../../../Apis/OperatorApi")));
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder
+                        .UseStartup<Startup>()
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _OpApiHost.StartAsync();
+            OpApiClient = _OpApiHost.GetTestClient();
+
+            _TgsApiHost = Host.CreateDefaultBuilder(Array.Empty<string>())
+                .ConfigureAppConfiguration(builder =>
+                {
+                    builder
+                        .SetBasePath(Path.GetFullPath(Path.Combine(currentDictionary,
+                            "../../../../../Apis/TgsApi")))
+                        .AddJsonFile("GameProviders/SBOBET/sbobet.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder
+                        .UseStartup<SBOBETStartup>()
+                        .UseKestrel(options => options.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
         }
 
         private static void CreatePragmaticPlayEnv()
@@ -151,12 +162,6 @@ namespace TGS.Tests.Games.IntegrationTests
 
             _TgsApiHost.StartAsync();
             TgsApiClient = _TgsApiHost.GetTestClient();
-        }
-
-        [AfterFeature]
-        public static void AfterFeature(FeatureContext featureContext)
-        {
-            Task.WhenAll(_OpApiHost.StopAsync(), _TgsApiHost.StopAsync());
         }
 
         private static void CreateHabaneroEnv()
