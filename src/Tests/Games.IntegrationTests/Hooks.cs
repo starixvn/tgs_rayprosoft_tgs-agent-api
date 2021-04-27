@@ -48,6 +48,11 @@ namespace TGS.Tests.Games.IntegrationTests
             {
                 CreateSbobetEnv();
             }
+
+            if (featureContext.FeatureInfo.Tags.Contains("AsiaGaming"))
+            {
+                CreateAsiaGamingEnv();
+            }
         }
 
         [AfterFeature]
@@ -200,6 +205,59 @@ namespace TGS.Tests.Games.IntegrationTests
 
                     builder.SetBasePath(Path.GetFullPath(path))
                         .AddJsonFile("GameProviders/Habanero/habanero.json", true);
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<HabaneroStartup>()
+                        .UseKestrel(o => o.AddServerHeader = false)
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _TgsApiHost.StartAsync();
+            TgsApiClient = _TgsApiHost.GetTestClient();
+        }
+        
+        private static void CreateAsiaGamingEnv()
+        {
+            Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.AsiaGaming);
+
+            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
+            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
+
+            var currentDictionary = Directory.GetCurrentDirectory();
+
+            _OpApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
+                    builder.SetBasePath(Path.GetFullPath(path));
+                })
+                .ConfigureWebHostDefaults(builder =>
+                {
+                    builder.UseStartup<Startup>()
+                        .UseTestServer()
+                        .ConfigureTestServices(srv =>
+                        {
+                            srv.AddTransient(_ => fakeAnalyzer.Object);
+                        });
+                })
+                .Build();
+
+            _OpApiHost.StartAsync();
+            OpApiClient = _OpApiHost.GetTestClient();
+
+            _TgsApiHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
+
+                    builder.SetBasePath(Path.GetFullPath(path))
+                        .AddJsonFile("GameProviders/AsiaGaming/asiagaming.json", true);
                 })
                 .ConfigureWebHostDefaults(builder =>
                 {
