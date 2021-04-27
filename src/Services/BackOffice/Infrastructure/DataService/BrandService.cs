@@ -54,7 +54,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IBrandService.CreateBrandAsync(CreateBrandRequest request)
         {
-            var (beforeFromDate, beforeToDate, afterFromDate, afterToDate) =
+            var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
                 BrandSettlementIntervalGenerator.GetInterval(request.SettlementIntervalType);
             var brand = new Brand
             {
@@ -62,10 +62,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 LicenseeId = request.LicenseeId,
                 Code = request.Code,
                 Name = request.Name,
-                BeforeFromDateTime = beforeFromDate,
-                BeforeToDateTime = beforeToDate,
-                AfterFromDateTime = afterFromDate,
-                AfterToDateTime = afterToDate,
+                CurrentSettlementFrom = currentFromDate,
+                CurrentSettlementTo = currentToDate,
+                NextSettlementFrom = nextFromDate,
+                NextSettlementTo = nextToDate,
                 Status = Status.Active,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,
