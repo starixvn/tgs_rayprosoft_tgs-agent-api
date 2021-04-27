@@ -358,21 +358,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             UpdatedOn = Now
                         }
                     },
-                Banks = new[]
-                {
-                    new PlayerBank
-                    {
-                        Id = GuidExtensions.NewSequentialGuid(),
-                        PlayerCode = playerCode,
-                        RealName = Generator.RandomString(4),
-                        BankName = Generator.RandomString(12),
-                        BankAccount = Generator.RandomIntString(20),
-                        CreatedByUsername = AdminUsername,
-                        UpdatedByUsername = AdminUsername,
-                        CreatedOn = Now,
-                        UpdatedOn = Now
-                    }
-                }
+                //Banks = new[]
+                //{
+                //    new PlayerBankInfo
+                //    {
+                //        Id = GuidExtensions.NewSequentialGuid(),
+                //        PlayerCode = playerCode,
+                //        RealName = Generator.RandomString(4),
+                //        BankName = Generator.RandomString(12),
+                //        BankAccount = Generator.RandomIntString(20),
+                //        CreatedByUsername = AdminUsername,
+                //        UpdatedByUsername = AdminUsername,
+                //        CreatedOn = Now,
+                //        UpdatedOn = Now
+                //    }
+                //}
             };
         }
 

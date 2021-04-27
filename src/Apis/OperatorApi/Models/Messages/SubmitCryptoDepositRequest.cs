@@ -3,11 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record SubmitDepositRequest
+    public record SubmitCryptoDepositRequest
     {
-        [JsonPropertyName("account")]
-        public string BankAccount { get; init; }
-
         [JsonPropertyName("amount")]
         public decimal Amount { get; init; }
 

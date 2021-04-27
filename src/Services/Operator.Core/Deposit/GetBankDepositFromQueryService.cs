@@ -3,8 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Deposit;
 
-namespace TGS.Services.Operator.BankDeposit
+namespace TGS.Services.Operator.Deposit
 {
     internal class GetBankDepositFromQueryService : IGetService<GetBankDepositFormQuery, DepositFormInfo>
     {
