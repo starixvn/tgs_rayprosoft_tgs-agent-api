@@ -5,7 +5,7 @@ namespace Report.Repositories
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddBonusRepositoriesServices(this IServiceCollection services)
+        public static IServiceCollection AddReportRepositoriesServices(this IServiceCollection services)
         {
             services.AddTransient<IReport, UpdateSentOn>();
 

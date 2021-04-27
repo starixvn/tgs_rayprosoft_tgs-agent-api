@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using Report.Repositories;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -49,7 +50,7 @@ namespace ReportApi
                 .AddTransactions()
                 .AddBonusServices()
                 .AddBonusRepositoriesServices()
-                .AddBonusRepositoriesServices();
+                .AddReportRepositoriesServices();
 
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Report", "report-db");

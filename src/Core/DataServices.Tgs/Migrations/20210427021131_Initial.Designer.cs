@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210422071004_Initial")]
+    [Migration("20210427021131_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3590,6 +3590,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("promotion_id");
 
+                    b.Property<Guid>("PromotionBonusId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_bonus_id");
+
                     b.Property<string>("PromotionType")
                         .HasColumnType("text")
                         .HasColumnName("promotion_type");
@@ -3598,7 +3602,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_transaction_promotions");
 
                     b.HasIndex("PromotionId")
-                        .IsUnique()
                         .HasDatabaseName("ix_transaction_Promotion_id");
 
                     b.HasIndex("TransactionId")
@@ -5042,8 +5045,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.TransactionPromotion", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
-                        .WithOne()
-                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.TransactionPromotion", "PromotionId")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
                         .HasConstraintName("fk_transaction_promotion_promotion_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -10,6 +10,10 @@ namespace TGS.Services.Report.Infrastructure.DataService
 {
     public interface ITgsPromotionService
     {
+        ITgsRepository TgsRepository { get; }
+
+        Task UpdatePromotionsAsync(Promotion[] promotions);
+
         Task<Promotion> GetPromotionAsync(Expression<Func<Promotion, bool>> predicate,
             Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery = null);
 
@@ -19,9 +23,14 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
     public class TgsPromotionService : BaseRepositoryOperations<ITgsRepository>, ITgsPromotionService
     {
+        public readonly ITgsRepository _repository;
+
         public TgsPromotionService(ITgsRepository repository) : base(repository)
         {
+            _repository = repository;
         }
+
+        ITgsRepository ITgsPromotionService.TgsRepository => _repository;
 
         Task<Promotion> ITgsPromotionService.GetPromotionAsync(Expression<Func<Promotion, bool>> predicate,
             Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery) =>
@@ -31,5 +40,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
+
+        Task ITgsPromotionService.UpdatePromotionsAsync(Promotion[] promotions) => UpdateEntitiesAsync(promotions);
     }
 }

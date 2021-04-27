@@ -108,6 +108,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
 
+                    b.Property<DateTimeOffset?>("SentOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
+
                     b.Property<decimal>("SlotWinLoss")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -443,7 +447,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("report_date");
 
-                    b.Property<DateTimeOffset>("SentOn")
+                    b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("sent_on");
 
@@ -522,6 +526,106 @@ namespace TGS.Core.DataServices.Report.Migrations
                     b.ToTable("player_rebates");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PromotionBonus", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("BonusAmountLimit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bonus_amount_limit");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<DateTimeOffset>("From")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
+
+                    b.Property<short?>("GameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
+
+                    b.Property<decimal>("Percentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("percentage");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.Property<string>("PromotionType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("promotion_type");
+
+                    b.Property<DateTimeOffset>("To")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
+
+                    b.Property<decimal>("TotalAmountLimit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("total_amount_limit");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_bonus_id");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_promotion_bonus_promotion_id");
+
+                    b.HasIndex("PromotionId", "From", "To")
+                        .HasDatabaseName("ix_promotion_bonus_multiple_keys");
+
+                    b.ToTable("promotion_bonus");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PromotionPlayer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal>("BonusAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bonus_amount");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<Guid>("PromotionBonusId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_bonus_id");
+
+                    b.Property<DateTimeOffset?>("SentOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_player_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_promotion_player_promotion_id");
+
+                    b.HasIndex("PromotionBonusId")
+                        .HasDatabaseName("ix_promotion_player_promotion_bonus_id");
+
+                    b.HasIndex("PlayerCode", "PromotionBonusId")
+                        .HasDatabaseName("ix_promotion_player_multiple_keys");
+
+                    b.ToTable("promotion_player");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Report.Models.RoundAggregate", b =>
                 {
                     b.Property<int>("Id")
@@ -597,6 +701,23 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasDatabaseName("ix_round_aggregate_multiple_keys");
 
                     b.ToTable("round_aggregate");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PromotionPlayer", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Report.Models.PromotionBonus", "PromotionBonus")
+                        .WithMany("Players")
+                        .HasForeignKey("PromotionBonusId")
+                        .HasConstraintName("fk_promotion_bonus_promotion_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PromotionBonus");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PromotionBonus", b =>
+                {
+                    b.Navigation("Players");
                 });
 #pragma warning restore 612, 618
         }

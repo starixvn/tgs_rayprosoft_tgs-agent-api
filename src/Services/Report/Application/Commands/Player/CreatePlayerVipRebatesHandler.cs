@@ -43,6 +43,12 @@ namespace TGS.Services.Report.Application.Commands.Player
                     result.Offset);
             }
 
+            if (await _playerRebateService.GetPlayerRebateQueries()
+                .AnyAsync(x => x.ReportDate == reportDate, cancellationToken))
+            {
+                return new() {Valid = false, Message = $"Player rebates report date {reportDate} is already existed."};
+            }
+
             var playerRebates = await _playerGameTypeAggregateService
                 .GetPlayerGameTypeAggregateQueries(q => q.Where(x => x.ReportDate == reportDate))
                 .GroupBy(

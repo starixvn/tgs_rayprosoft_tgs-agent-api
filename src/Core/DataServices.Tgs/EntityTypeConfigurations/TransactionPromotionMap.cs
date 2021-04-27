@@ -23,7 +23,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder
                 .HasOne(e => e.Promotion)
-                .WithOne()
+                .WithMany()
                 .HasConstraintName("fk_transaction_promotion_promotion_id");
 
             builder.HasIndex(e => e.PromotionId)

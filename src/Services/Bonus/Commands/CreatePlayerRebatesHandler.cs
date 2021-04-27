@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Bonus.Models;
+using Castle.Core.Internal;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
 
@@ -26,6 +27,11 @@ namespace Bonus.Commands
         public override async Task<MessageResponse> Handle(SentPlayerRebatesRequest request,
             CancellationToken cancellationToken)
         {
+            if (request.PlayerRebates.IsNullOrEmpty())
+            {
+                return CreateInvalidResponse<MessageResponse>("Player rebates is null.");
+            }
+
             await using var transaction =
                 await _sentBonus.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             await using var reportTransaction =

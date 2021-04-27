@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Bonus.Models;
+using Castle.Core.Internal;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Bonus;
@@ -59,6 +60,12 @@ namespace ReportApi.Controllers
             [FromQuery] CreateAgentDividendsRequest request)
         {
             var response = await _mediator.Send(request);
+
+            if (response.AgentDividends.IsNullOrEmpty())
+            {
+                return response;
+            }
+
             var agentDividends =
                 response.AgentDividends.Select(x =>
                     new AgentDividend(x.BrandId, x.AgentId, x.AgentDividendAmount, x.From, x.To));

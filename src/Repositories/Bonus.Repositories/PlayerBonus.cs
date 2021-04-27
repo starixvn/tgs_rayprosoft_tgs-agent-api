@@ -26,8 +26,9 @@ namespace Bonus.Repositories
         public async Task SentPromotionBonus(IEnumerable<PromotionPlayerBonus> playerBonus,
             TransactionType transactionType)
         {
+            var playerCodes = playerBonus.SelectMany(p => p.PlayerBonus).Select(p => p.PlayerCode);
             var players = await _repository.Players
-                .Where(x => playerBonus.SelectMany(p => p.PlayerBonus).Select(p => p.PlayerCode).Contains(x.PlayerCode))
+                .Where(x => playerCodes.Contains(x.PlayerCode))
                 .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId}).ToArrayAsync();
 
             var transactions = playerBonus.SelectMany(player =>
@@ -62,9 +63,12 @@ namespace Bonus.Repositories
                     }).ToArray();
             }).ToArray();
 
-            await CreateEntitiesAsync(transactions.Select(x => x.Item1));
+            var trans = transactions.Select(x => x.Item1).ToArray();
+            var transactionPromotions = transactions.Select(x => x.Item2).ToArray();
 
-            await CreateEntitiesAsync(transactions.Select(x => x.Item2));
+            await CreateEntitiesAsync(trans);
+
+            await CreateEntitiesAsync(transactionPromotions);
         }
 
         async Task IPlayerBonus.SentBonus(IEnumerable<PlayerRebates> playerBonus,

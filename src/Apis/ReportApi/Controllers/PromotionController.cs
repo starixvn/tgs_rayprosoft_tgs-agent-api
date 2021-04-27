@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Bonus.Models;
+using Castle.Core.Internal;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Bonus;
@@ -29,6 +30,11 @@ namespace ReportApi.Controllers
         {
             var response = await _mediator.Send(request);
 
+            if (response.PromotionBonus.IsNullOrEmpty())
+            {
+                return response;
+            }
+
             var playerBonus =
                 response.PromotionBonus.Select(x =>
                 {
@@ -51,6 +57,11 @@ namespace ReportApi.Controllers
         {
             var response = await _mediator.Send(request);
 
+            if (response.PromotionBonus.IsNullOrEmpty())
+            {
+                return response;
+            }
+
             var playerBonus =
                 response.PromotionBonus.Select(x =>
                 {
@@ -70,6 +81,11 @@ namespace ReportApi.Controllers
             GetAgentDividendsAsync(CreatePromotionBonusMonthlyRequest request)
         {
             var response = await _mediator.Send(request);
+
+            if (response.PromotionBonus.IsNullOrEmpty())
+            {
+                return response;
+            }
 
             var playerBonus =
                 response.PromotionBonus.Select(x =>

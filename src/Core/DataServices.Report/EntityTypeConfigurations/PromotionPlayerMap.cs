@@ -13,6 +13,9 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
             builder.HasKey(c => c.Id)
                 .HasName("pk_promotion_player_id");
 
+            builder.Property(b => b.Id)
+                .ValueGeneratedOnAdd();
+
             builder.Property(c => c.PlayerCode)
                 .IsRequired();
 
@@ -23,7 +26,7 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
                 .HasPrecision(18, 6);
 
             builder.Property(e => e.SentOn)
-                .IsRequired();
+                .IsRequired(false);
 
             builder.HasIndex(c => new {c.PlayerCode})
                 .HasDatabaseName("ix_promotion_player_promotion_id");

@@ -13,8 +13,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
     {
         IReportRepository Repository { get; }
 
-        IQueryable<PlayerAggregate> GetPlayerAggregateQueries(
-            Func<IQueryable<PlayerAggregate>, IQueryable<PlayerAggregate>> preQuery = null,
+        IQueryable<PlayerRebate> GetPlayerRebateQueries(
+            Func<IQueryable<PlayerRebate>, IQueryable<PlayerRebate>> preQuery = null,
             bool tracking = false);
 
         Task CreatePlayerRebatesAsync(PlayerRebateModel[] request);
@@ -60,8 +60,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 RebateAmount = model.RebateAmount
             }).ToArray());
 
-        IQueryable<PlayerAggregate> IPlayerRebateService.GetPlayerAggregateQueries(
-            Func<IQueryable<PlayerAggregate>, IQueryable<PlayerAggregate>> preQuery,
+        IQueryable<PlayerRebate> IPlayerRebateService.GetPlayerRebateQueries(
+            Func<IQueryable<PlayerRebate>, IQueryable<PlayerRebate>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
     }

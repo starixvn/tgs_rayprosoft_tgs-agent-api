@@ -42,7 +42,7 @@ BEGIN
 	join dbo.games g on r.game_id = g.id
 	join dbo.players p on r.player_code = p.player_code
     where r.closed_on >= _from and r.closed_on < _to
-	group by p.player_code, p.agent_id, p.username,g.type;
+	group by p.brand_id, g.game_provider_id, p.player_code, p.agent_id, p.username,g.type;
 	
 END;
 $$

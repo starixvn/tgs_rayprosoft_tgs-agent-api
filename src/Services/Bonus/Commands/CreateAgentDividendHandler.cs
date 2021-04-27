@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Bonus.Models;
+using Castle.Core.Internal;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
 
@@ -26,6 +27,11 @@ namespace Bonus.Commands
         public override async Task<MessageResponse> Handle(SentAgentDividendsRequest request,
             CancellationToken cancellationToken)
         {
+            if (request.AgentDividends.IsNullOrEmpty())
+            {
+                return CreateInvalidResponse<MessageResponse>("Agent dividends is null.");
+            }
+
             await using var transaction =
                 await _agentDividend.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             await using var reportTransaction =

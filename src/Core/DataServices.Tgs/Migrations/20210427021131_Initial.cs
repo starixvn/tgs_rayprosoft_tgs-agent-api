@@ -2272,6 +2272,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     transaction_id = table.Column<Guid>(type: "uuid", nullable: false),
                     promotion_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    promotion_bonus_id = table.Column<Guid>(type: "uuid", nullable: false),
                     promotion_type = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -2818,8 +2819,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "ix_transaction_Promotion_id",
                 schema: "dbo",
                 table: "transaction_promotions",
-                column: "promotion_id",
-                unique: true);
+                column: "promotion_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_transactions_transaction_id",

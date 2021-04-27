@@ -52,7 +52,7 @@ namespace Bonus.Repositories
                     };
                 }).ToArray();
 
-            await CreateEntitiesAsync(agentDividends);
+            await CreateEntitiesAsync(dividends);
         }
     }
 }

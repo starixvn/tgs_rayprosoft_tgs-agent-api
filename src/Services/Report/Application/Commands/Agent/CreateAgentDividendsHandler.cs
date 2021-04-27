@@ -46,6 +46,14 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
             foreach (var brand in brands)
             {
+                if (await _agentDividendService.GetAgentDividendQueries()
+                    .AnyAsync(
+                        x => x.BrandId == brand.Id && brand.BeforeFromDateTime == x.From &&
+                            brand.BeforeToDateTime == x.To, cancellationToken))
+                {
+                    continue;
+                }
+
                 var agents = await _agentService
                     .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id && x.ParentAgentId != null))
                     .GroupBy(x => new {x.Id, x.ParentAgentId},
@@ -229,7 +237,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
             await _brandService.UpdateBrandsAsync(brands);
 
-            await _brandService.CreateAgentTransactionsAsync(createModels.ToArray());
+            //await _brandService.CreateAgentTransactionsAsync(createModels.ToArray());
 
             await reportTransaction.CommitAsync(cancellationToken);
             await tgsTransaction.CommitAsync(cancellationToken);

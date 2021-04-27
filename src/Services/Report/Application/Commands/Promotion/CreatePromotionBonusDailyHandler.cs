@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,8 +47,21 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             }
 
             var promotions = await _promotionService.GetPromotionQueries()
+                .Include(x => x.PromotionGameProviders)
+                .Include(x => x.PromotionVipLevels)
+                .Include(x => x.PromotionPlayers)
                 .Where(x => x.SettlementIntervalType == "Daily")
-                .Where(x => x.From >= reportDate && x.To <= reportDate).ToArrayAsync(cancellationToken);
+                .Where(x => x.From <= reportDate && x.To >= reportDate).ToArrayAsync(cancellationToken);
+
+            var promotionIds = promotions.Select(x => x.Id);
+
+            if (await _promotionBonusService.GetPromotionBonusQueries()
+                .AnyAsync(
+                    x => promotionIds.Contains(x.PromotionId) && reportDate == x.From &&
+                        reportDate == x.To, cancellationToken))
+            {
+                return new() {Valid = false, Message = $"Promotion bonus report date {reportDate} is already existed."};
+            }
 
             var gameProviderIds = promotions.SelectMany(x => x.PromotionGameProviders).Select(x => x.GameProviderId)
                 .ToArray();
@@ -63,13 +77,15 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             var promotionBonus = promotions.Select(x =>
             {
                 var id = GuidExtensions.NewSequentialGuid();
+                var (players, amountUsed) = GetPromotionBonusPlayers(id, x, playerGameTypeRoundAggregate);
+                x.AmountUsed = amountUsed;
 
                 return new PromotionBonusModel
                 {
                     Id = id,
                     PromotionId = x.Id,
-                    From = x.From,
-                    To = x.To,
+                    From = reportDate,
+                    To = reportDate,
                     AutoSentPlayerBonus = x.AutoSentPlayerBonus,
                     PromotionType = x.PromotionType,
                     TotalAmountLimit = x.TotalAmountLimit,
@@ -77,16 +93,25 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                     Percentage = x.Percentage,
                     BonusAmountLimit = x.BonusAmountLimit,
                     CreatedOn = DateTimeOffset.Now,
-                    Players = GetPromotionBonusPlayers(id, x, playerGameTypeRoundAggregate)
+                    Players = players
                 };
             }).ToArray();
 
+            await using var promotionBonusTransaction =
+                await _promotionBonusService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            await using var promotionTransaction =
+                await _promotionService.TgsRepository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
+            await _promotionService.UpdatePromotionsAsync(promotions);
+
+            await promotionTransaction.CommitAsync(cancellationToken);
+            await promotionBonusTransaction.CommitAsync(cancellationToken);
 
             return new() {Valid = true, PromotionBonus = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray()};
         }
 
-        private static PromotionBonusPlayerModel[] GetPromotionBonusPlayers(Guid id,
+        private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(Guid id,
             Core.DataServices.Tgs.Models.Promotion promotion, IEnumerable<PlayerGameTypeAggregate> aggregates)
         {
             var amount = promotion.AmountUsed;
@@ -95,15 +120,15 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 .Where(promotion.GameType is not null, pa => pa.GameType == promotion.GameType)
                 .Where(pa =>
                     promotion.PromotionGameProviders.Select(pg => pg.GameProviderId)
-                        .Contains(pa.GameProviderId));
+                        .Contains(pa.GameProviderId)).ToArray();
 
             return promotion.PromotionType switch
             {
-                "TurnoverRebate" => promotion.PromotionPlayers.Select(p =>
+                "TurnoverRebate" => (promotion.PromotionPlayers.Select(p =>
                     {
                         var playerRebateAmount =
                             players.Where(pa => pa.PlayerCode == p.PlayerCode).Sum(s => s.Turnover) *
-                            promotion.Percentage;
+                            promotion.Percentage / 100;
 
                         playerRebateAmount = playerRebateAmount > promotion.BonusAmountLimit
                             ? promotion.BonusAmountLimit
@@ -125,11 +150,11 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                             PromotionType = promotion.PromotionType
                         };
                     })
-                    .ToArray(),
-                "ReliefMoneyDaily" => promotion.PromotionPlayers.Select(p =>
+                    .ToArray(), amount),
+                "ReliefMoneyDaily" => (promotion.PromotionPlayers.Select(p =>
                     {
                         var playerRebateAmount = players.Where(pa => pa.PlayerCode == p.PlayerCode)
-                            .Sum(s => s.WinLoss) * promotion.Percentage;
+                            .Sum(s => s.WinLoss) * promotion.Percentage / 100;
 
                         if (playerRebateAmount <= 0)
                         {
@@ -162,8 +187,8 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                             PromotionType = promotion.PromotionType
                         };
                     })
-                    .ToArray(),
-                _ => Array.Empty<PromotionBonusPlayerModel>()
+                    .ToArray(), amount),
+                _ => (Array.Empty<PromotionBonusPlayerModel>(), 0)
             };
         }
     }
