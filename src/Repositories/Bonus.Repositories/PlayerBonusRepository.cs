@@ -9,14 +9,15 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Bonus;
 using TGS.Core.Models.Enums;
+using TGS.Services.Bonus;
 
 namespace Bonus.Repositories
 {
-    public class PlayerBonus : BaseRepositoryOperations<ITgsRepository>, IPlayerBonus
+    public class PlayerBonusRepository : BaseRepositoryOperations<ITgsRepository>, IPlayerBonus
     {
         private readonly ITgsRepository _repository;
 
-        public PlayerBonus(ITgsRepository repository) : base(repository)
+        public PlayerBonusRepository(ITgsRepository repository) : base(repository)
         {
             _repository = repository;
         }

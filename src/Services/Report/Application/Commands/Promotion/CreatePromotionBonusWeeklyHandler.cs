@@ -100,6 +100,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 };
             }).ToArray();
 
+            await _promotionService.UpdatePromotionsAsync(promotions);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
 
             return new() {Valid = true, PromotionBonus = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray()};

@@ -1,7 +1,7 @@
-﻿using Bonus;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Report.Repositories;
+using TGS.Services.Bonus;
 
-namespace Report.Repositories
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceExtensions
     {

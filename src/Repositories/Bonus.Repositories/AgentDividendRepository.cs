@@ -7,22 +7,24 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Bonus;
 using TGS.Core.Models.Enums;
+using TGS.Services.Bonus;
 
 namespace Bonus.Repositories
 {
-    public class AgentDividend : BaseRepositoryOperations<ITgsRepository>, IAgentDividend
+    public class AgentDividendRepository : BaseRepositoryOperations<ITgsRepository>, IAgentDividend
     {
         private readonly ITgsRepository _repository;
 
-        public AgentDividend(ITgsRepository repository) : base(repository)
+        public AgentDividendRepository(ITgsRepository repository) : base(repository)
         {
             _repository = repository;
         }
 
         ITgsRepository IAgentDividend.Repository => _repository;
 
-        public async Task SentAgentDividend(IEnumerable<TGS.Core.Models.Bonus.AgentDividend> agentDividends,
+        public async Task SentAgentDividend(IEnumerable<AgentDividend> agentDividends,
             TransactionType transactionType)
         {
             var agentIds = agentDividends.Select(x => x.AgentId).ToArray();

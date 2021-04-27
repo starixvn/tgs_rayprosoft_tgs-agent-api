@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Report;
 using TGS.Core.Models.Bonus;
 
-namespace Bonus
+namespace TGS.Services.Bonus
 {
     public interface IReport
     {

@@ -1,12 +1,12 @@
 ﻿using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using Bonus.Models;
 using Castle.Core.Internal;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
+using TGS.Services.Bonus.Models;
 
-namespace Bonus.Commands
+namespace TGS.Services.Bonus.Commands
 {
     public class
         CreateAgentDividendHandler : Handler<SentAgentDividendsRequest,

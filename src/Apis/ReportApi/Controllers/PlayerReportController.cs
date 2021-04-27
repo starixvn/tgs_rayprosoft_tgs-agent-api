@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Bonus.Models;
 using Castle.Core.Internal;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Bonus;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.Bonus.Models;
 using TGS.Services.Report.Application.Models.Player;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 

@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>TGS.Services.Bonus</AssemblyName>
+    <RootNamespace>TGS.Services.Bonus</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

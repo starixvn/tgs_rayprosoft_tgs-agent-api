@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Bonus;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Report;
 using TGS.Core.Models.Bonus;
+using TGS.Services.Bonus;
 
 namespace Report.Repositories
 {
