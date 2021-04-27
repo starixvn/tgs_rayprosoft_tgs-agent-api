@@ -54,7 +54,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IBrand.ApiKey => "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV";
 
-            SettlementIntervalType IBrand.Type => SettlementIntervalType.Daily;
+            SettlementIntervalType IBrand.Type => SettlementIntervalType.Weekly;
 
             string[] IBrand.GameProviders => new[]
             {
@@ -81,7 +81,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IBrand.ApiKey => "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ";
 
-            SettlementIntervalType IBrand.Type => SettlementIntervalType.Weekly;
+            SettlementIntervalType IBrand.Type => SettlementIntervalType.Daily;
         }
     }
 }

@@ -18,6 +18,7 @@ import { useBrandGame } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import Input from "../../input/Input"
 import Switch from "../../switch/Switch"
+import { PercentageNumberInputField } from "../../input/NumberInput"
 
 export const EditButton = ({ record, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -193,17 +194,7 @@ const EditBody = ({ record = {} }) => {
                     />
                 </Label>
                 <Box alignY="center">
-                    <Input
-                        name="effectiveBettingPercentage"
-                        type="number"
-                        registerOptions={{
-                            valueAsNumber: true
-                        }}
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <PercentageNumberInputField name="effectiveBettingPercentage" />
                 </Box>
 
                 <Label fontWeight="normal">

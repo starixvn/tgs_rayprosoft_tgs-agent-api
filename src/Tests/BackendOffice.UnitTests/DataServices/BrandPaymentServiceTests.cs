@@ -51,7 +51,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.DataServices
 
             var request = new UpdateBrandPaymentRequest
             {
-                PaymentChannelId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
+                PaymentMethodChannelId = Guid.Parse("30cb4d17-2506-4d72-8470-65063b80f9c9"),
                 ChannelName = "ChannelNass9",
                 TransferLimitFrom = 33,
                 TransferLimitTo = 33,

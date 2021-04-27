@@ -19,7 +19,12 @@ const DisabledTrans = {
     en: Disabled
 }
 
-export const Label = ({ value = "" }) => {
+export default {
+    Enabled,
+    Disabled
+}
+
+export const BrandPaymentStatusLabel = ({ value = "" }) => {
     switch (value) {
         case Disabled:
             return <Trans {...DisabledTrans} />
@@ -53,7 +58,7 @@ export const BrandPaymentStatusSelect = ({ placeholder, ...props }) => {
     return <Select placeholder={placeholder} options={options} {...props} />
 }
 
-export const BrandPaymentStatusToggleButton = ({ name = "paymentStatus" }) => {
+export const BrandPaymentStatusButton = ({ name = "paymentStatus" }) => {
     let { watch, setValue, control } = useFormContext()
     let paymentStatus = watch(name)
 
@@ -74,7 +79,7 @@ export const BrandPaymentStatusToggleButton = ({ name = "paymentStatus" }) => {
                         setValue(name, newStatus)
                     }}
                 >
-                    <Label value={paymentStatus} />
+                    <BrandPaymentStatusLabel value={paymentStatus} />
                 </Button>
             )}
         />
@@ -104,7 +109,12 @@ const toPalette = (status) => {
 }
 
 // Enabled <-> Disabled toggle
-export const ToggleButton = ({ record, onSubmitted, disabled, ...props }) => {
+export const BrandPaymentStatusToggleButton = ({
+    record,
+    onSubmitted,
+    disabled,
+    ...props
+}) => {
     let { id, paymentStatus } = record
     let [newStatus, setSubmit] = useState()
     let {
@@ -139,7 +149,7 @@ export const ToggleButton = ({ record, onSubmitted, disabled, ...props }) => {
             }}
             whiteSpace="nowrap"
         >
-            <Label value={record.paymentStatus} />
+            <BrandPaymentStatusLabel value={record.paymentStatus} />
             {error && <AlertDialog {...error} onClickClose={reset} />}
         </Button>
     )

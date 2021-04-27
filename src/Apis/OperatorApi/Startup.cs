@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
+using Tgs.Payment;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Middlewares;
@@ -28,6 +29,7 @@ using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.PluggableServices.Extensions;
@@ -80,7 +82,9 @@ namespace TGS.Apis.OperatorApi
                 .ConfigurePayment(config =>
                 {
                     config.UseTgsPaymentRepository();
-                });
+                })
+                .Services
+                .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()

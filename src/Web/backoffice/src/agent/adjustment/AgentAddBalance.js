@@ -43,6 +43,7 @@ import AddBalanceTypeSelect from "./AgentAddBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
 import AdjustType from "./AdjustType"
+import { NumberInput } from "../../input/NumberInput"
 
 export const AgentAddBalanceDisclosure = ({
     brandId,
@@ -137,7 +138,7 @@ const AddDialog = ({ brandId, agentId, username, onSubmitted, dialog }) => {
                 <Text.Block alignY="center">
                     <Trans zh="交易金额" en="Amount" />
                 </Text.Block>
-                <Input type="number" name="amount" min="0" required />
+                <NumberInput name="amount" min="0" required />
 
                 <Text.Block alignY="center">
                     <Trans zh="备注" en="Remark" />

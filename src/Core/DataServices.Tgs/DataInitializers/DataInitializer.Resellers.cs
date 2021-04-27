@@ -16,16 +16,26 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] Currencies => new ICurrency[]
             {
-                new CNYCurrency(), new IDRCurrency(), new IDR1000Currency(),
-                new INRCurrency(), new VNDCurrency(), new VND1000Currency(),
-                new THBCurrency(), new EURCurrency(), new GBPCurrency(),
-                new KRWCurrency(), new JPYCurrency()
+                new CNYCurrency(),
+                new IDRCurrency(),
+                new IDR1000Currency(),
+                new INRCurrency(),
+                new VNDCurrency(),
+                new VND1000Currency(),
+                new THBCurrency(),
+                new EURCurrency(),
+                new GBPCurrency(),
+                new KRWCurrency(),
+                new JPYCurrency()
             };
 
             ILanguage[] Languages => new ILanguage[]
             {
-                new CNLanguage(), new USLanguage(), new IDLanguage(),
-                new VNLanguage(), new THLanguage()
+                new CNLanguage(), 
+                new USLanguage(), 
+                new IDLanguage(),
+                new VNLanguage(), 
+                new THLanguage()
             };
 
             string[] GameProviders => Array.Empty<string>();

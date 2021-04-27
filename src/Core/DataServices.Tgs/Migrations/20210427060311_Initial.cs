@@ -844,10 +844,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     secret_key = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     api_key = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     settlement_interval_type = table.Column<int>(type: "integer", nullable: false),
-                    before_from_date_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    before_to_date_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    after_from_date_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    after_to_date_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    previous_settlement_from = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    previous_settlement_to = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    current_settlement_from = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    current_settlement_to = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    next_settlement_from = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    next_settlement_to = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     code = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
                     name = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -1938,15 +1940,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "player_banks",
+                name: "player_bank_infos",
                 schema: "dbo",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     player_code = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
-                    real_name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    bank_name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    bank_account = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    brand_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    payment_channel_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    bank_type = table.Column<string>(type: "text", nullable: false),
+                    detail = table.Column<string>(type: "jsonb", nullable: true),
                     created_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     updated_on = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     created_by_username = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -1954,9 +1957,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_player_banks", x => x.id);
+                    table.PrimaryKey("pk_player_bank_infos", x => x.id);
                     table.ForeignKey(
-                        name: "fk_player_banks_players_player_code",
+                        name: "fk_player_bank_infos_brands_brand_id",
+                        column: x => x.brand_id,
+                        principalSchema: "dbo",
+                        principalTable: "brands",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_player_bank_infos_payment_channels_payment_channel_id",
+                        column: x => x.payment_channel_id,
+                        principalSchema: "dbo",
+                        principalTable: "payment_channels",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_player_bank_infos_players_player_code",
                         column: x => x.player_code,
                         principalSchema: "dbo",
                         principalTable: "players",
@@ -2512,9 +2529,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 column: "payment_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_player_bankers_player_code",
+                name: "ix_player_bank_infos_brand_id",
                 schema: "dbo",
-                table: "player_banks",
+                table: "player_bank_infos",
+                column: "brand_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_player_bank_infos_payment_channel_id",
+                schema: "dbo",
+                table: "player_bank_infos",
+                column: "payment_channel_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_player_bank_infos_player_code",
+                schema: "dbo",
+                table: "player_bank_infos",
                 column: "player_code");
 
             migrationBuilder.CreateIndex(
@@ -2834,7 +2863,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "player_banks",
+                name: "player_bank_infos",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
