@@ -20,6 +20,7 @@ import {
 } from "../../betlimit/trans"
 import { useUpdateBetLimit } from "../../betlimit/client"
 import { CurrencySelectField } from "../../currency/CurrencySelect"
+import { NumberInputField } from "../../input/NumberInput"
 
 export const AddButton = ({ onSubmitted }) => {
     let dialog = useModalState()
@@ -124,23 +125,22 @@ const EditBody = ({}) => {
     return (
         <FieldStack>
             <CurrencySelectField name="currencyCode" required />
-            <InputField
+            <NumberInputField
                 name="minBet"
-                type="number"
                 min="0"
                 required
-                minlabel={<BetLimitMinBetTrans />}
+                label={<BetLimitMinBetTrans />}
             />
-            <InputField
+
+            <NumberInputField
                 name="maxBet"
-                type="number"
                 min="0"
                 required
                 label={<BetLimitMaxBetTrans />}
             />
-            <InputField
+
+            <NumberInputField
                 name="maxBetPerMatch"
-                type="number"
                 min="0"
                 label={<BetLimitMaxBetPerMatchTrans />}
             />

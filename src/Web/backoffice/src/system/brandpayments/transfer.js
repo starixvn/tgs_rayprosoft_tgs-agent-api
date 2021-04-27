@@ -8,6 +8,6 @@ export const Deposit = "Deposit"
 export const Withdrawal = "Withdrawal"
 
 export const Type = {
-  Deposit: Deposit,
-  Withdrawal: Withdrawal
+    Deposit: Deposit,
+    Withdrawal: Withdrawal
 }

@@ -11,7 +11,8 @@ import {
     Link,
     Dialog,
     Card,
-    List
+    List,
+    Level
 } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
@@ -29,13 +30,13 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import {
     BrandPaymentStatusSelect,
-    ToggleButton as StatusToggleButton
-} from "./status"
+    BrandPaymentStatusToggleButton
+} from "./BrandPaymentStatus"
 import { Type as TransferType } from "./transfer"
 import { useChangeBrandPaymentOrders, useBrandPaymentList } from "./client"
 import { View as ViewMenu, Update as UpdateMenu } from "./menu"
 import { Detail as ConditionDetail } from "./condition"
-import { EditButton } from "./edit"
+import { AddBrandPaymentButton, EditButton } from "./edit"
 import { EditButton as FeeEditButton } from "./handlingfee"
 import { ViewButton as LogsButton } from "./logs"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
@@ -45,6 +46,8 @@ import { InputField } from "../../input/Input"
 import { formatNumber } from "../../number/format"
 import BrandBar from "../../report/BrandBar"
 import textColumn from "../../table/column/textColumn"
+import { PaymentLabel } from "../../payment/payment"
+import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
 
 export { Code }
 
@@ -113,7 +116,7 @@ const BodyContent = ({ brandId }) => {
         <PageContent
             title={<Trans zh="金流管理" en="Payment Management" />}
             actionBar={
-                <>
+                <Level>
                     <SearchBar
                         search={(newState) => {
                             if (
@@ -128,7 +131,8 @@ const BodyContent = ({ brandId }) => {
                         }}
                         isLoading={isLoading}
                     />
-                </>
+                    <AddBrandPaymentButton brandId={brandId} />
+                </Level>
             }
         >
             <Tabs>
@@ -335,14 +339,16 @@ const useColumns = ({
                 }
             }),
             textColumn({
-                accessor: "paymentName",
-                Header: <Trans zh="支付厂商" en="Payment Vendor" />,
-                disableSortBy: true
+                accessor: "paymentId",
+                Header: <Trans zh="支付厂商" en="Payment Name" />,
+                disableSortBy: true,
+                Cell: ({ value }) => <PaymentLabel value={value} />
             }),
             textColumn({
-                accessor: "paymentMethodName",
+                accessor: "paymentMethodId",
                 Header: <Trans zh="支付方式" en="Payment Method" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => <PaymentMethodLabel value={value} />
             }),
             textColumn({
                 accessor: "paymentChannelName",
@@ -359,7 +365,9 @@ const useColumns = ({
                 accessor: (record) => record,
                 Header: <Trans zh="开放对象" en="Target" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <ConditionDetail record={value} />
+                Cell: ({ value }) => (
+                    <ConditionDetail brandId={brandId} record={value} />
+                )
             }),
             textColumn({
                 id: "designatedUsers",
@@ -390,7 +398,7 @@ const useColumns = ({
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     return (
-                        <StatusToggleButton
+                        <BrandPaymentStatusToggleButton
                             record={value}
                             disabled={!hasUpdateAuth}
                             onSubmitted={mutate}
