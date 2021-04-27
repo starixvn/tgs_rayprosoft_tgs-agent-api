@@ -203,7 +203,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
         }
 
-        [HttpGet]
+        [HttpGet("pmc")]
         [Description("Get All Brand PaymentMethodChannels")]
         public async Task<GenericResponse<AllPaymentMethodChannelsResponse>> GetAllPaymentMethodChannelsAsync(
             IQueryService<AllPaymentMethodChannelQuery, PaymentMethodChannelInfo> queryService,
