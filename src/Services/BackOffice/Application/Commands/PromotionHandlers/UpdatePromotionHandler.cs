@@ -50,6 +50,11 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
                 return CreateInvalidResponse<MessageResponse>(Promotion.PromotionTypeNotFound);
             }
 
+            var promotionType = promotionTypeGroups.SelectMany(x => x.Types)
+                .First(x => x.Name == request.PromotionType);
+
+            promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
+
             await _service.UpdatePromotionAsync(promotion, request);
 
             return CreateValidResponse<MessageResponse>();

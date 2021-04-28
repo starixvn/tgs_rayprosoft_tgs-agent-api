@@ -7,7 +7,7 @@ import { RadioGroup } from "../../radio/RadioGroup"
 import { Switch } from "../../switch/Switch"
 
 const MatchAll = "MatchAll"
-const AllTrans = {
+const MatchAllTrans = {
     zh: "满足所有",
     en: "Match All"
 }
@@ -64,7 +64,7 @@ export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
     let condition =
         playerListCondition === MatchOne
             ? useTrans(MatchOneTrans)
-            : useTrans(AllTrans)
+            : useTrans(MatchAllTrans)
 
     let details = [
         allPlayers ? useTrans(AllPlayerTrans) : "",
@@ -91,7 +91,7 @@ export const PlayerListConditionRadioGroup = ({
     ...props
 }) => {
     let options = [
-        { label: useTrans(AllTrans), value: MatchAll },
+        { label: useTrans(MatchAllTrans), value: MatchAll },
         { label: useTrans(MatchOneTrans), value: MatchOne }
     ]
 

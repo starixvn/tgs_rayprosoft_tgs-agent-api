@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
@@ -26,7 +25,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
 
         public bool DesignatedUsers { get; set; }
 
-        public JsonDocument ExtendedData { get; set; }
+        public string ExtendedData { get; set; }
 
         public Guid Id { get; set; }
 
@@ -41,6 +40,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
         public PaymentFeeModel PaymentFee { get; set; }
 
         public Guid? PaymentId { get; set; }
+
+        public Guid? PaymentMethodChannelId { get; set; }
 
         public Guid? PaymentMethodId { get; set; }
 

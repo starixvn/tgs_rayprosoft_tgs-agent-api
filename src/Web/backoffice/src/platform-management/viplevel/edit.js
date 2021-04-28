@@ -47,6 +47,11 @@ import {
     CloseButtonFooter,
     ConfirmCancelFooter
 } from "../../form/ConfirmButtonFooter"
+import {
+    NumberInput,
+    NumberInputField,
+    PercentageNumberInputField
+} from "../../input/NumberInput"
 
 export const AddButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -211,8 +216,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
-                                        type="number"
+                                    <NumberInput
                                         name="levelUpAccumulateBetAmount"
                                         min="0"
                                     />
@@ -236,8 +240,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
-                                        type="number"
+                                    <NumberInput
                                         name="levelUpAccumulateDeposit"
                                         min="0"
                                     />
@@ -275,8 +278,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
-                                        type="number"
+                                    <NumberInput
                                         name="levelKeepAccumulateBetAmount"
                                         min="0"
                                     />
@@ -300,8 +302,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
-                                        type="number"
+                                    <NumberInput
                                         name="levelKeepAccumulateDeposit"
                                         min="0"
                                     />
@@ -371,11 +372,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
-                                        type="number"
-                                        name="birthBenefit"
-                                        min="0"
-                                    />
+                                    <NumberInput name="birthBenefit" min="0" />
                                 </Box>
                             )}
                             {readonly && (
@@ -394,8 +391,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
-                                        type="number"
+                                    <NumberInput
                                         name="promotionBenefit"
                                         min="0"
                                     />
@@ -417,8 +413,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <Input
-                                        type="number"
+                                    <NumberInput
                                         name="quarterlyBenefit"
                                         min="0"
                                     />
@@ -453,14 +448,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <InputField
-                                        type="number"
-                                        name="liveDealerRebate"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        addonAfter={<Button isStatic>%</Button>}
-                                    />
+                                    <PercentageNumberInputField name="liveDealerRebate" />
                                 </Box>
                             )}
                             {readonly && (
@@ -475,19 +463,12 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             <NormalLabel>
                                 <Trans
                                     zh="电子反水比例（%）："
-                                    en="Slot Game rebate （%）："
+                                    en="EGame Rebate（%）："
                                 />
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <InputField
-                                        type="number"
-                                        name="slotRebate"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        addonAfter={<Button isStatic>%</Button>}
-                                    />
+                                    <PercentageNumberInputField name="slotRebate" />
                                 </Box>
                             )}
                             {readonly && (
@@ -507,14 +488,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <InputField
-                                        type="number"
-                                        name="cardGameRebate"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        addonAfter={<Button isStatic>%</Button>}
-                                    />
+                                    <PercentageNumberInputField name="cardGameRebate" />
                                 </Box>
                             )}
                             {readonly && (
@@ -534,14 +508,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <InputField
-                                        type="number"
-                                        name="sportsRebate"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        addonAfter={<Button isStatic>%</Button>}
-                                    />
+                                    <PercentageNumberInputField name="sportsRebate" />
                                 </Box>
                             )}
                             {readonly && (
@@ -561,14 +528,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <InputField
-                                        type="number"
-                                        name="virtualSportsRebate"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        addonAfter={<Button isStatic>%</Button>}
-                                    />
+                                    <PercentageNumberInputField name="virtualSportsRebate" />
                                 </Box>
                             )}
                             {readonly && (
@@ -588,14 +548,7 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                             </NormalLabel>
                             {editable && (
                                 <Box>
-                                    <InputField
-                                        type="number"
-                                        name="lotteryRebate"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        addonAfter={<Button isStatic>%</Button>}
-                                    />
+                                    <PercentageNumberInputField name="lotteryRebate" />
                                 </Box>
                             )}
                             {readonly && (

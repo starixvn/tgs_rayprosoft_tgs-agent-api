@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -70,13 +71,16 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     Id = x.Id,
                     BrandId = x.BrandId,
                     Number = x.DisplayOrder,
+                    PaymentId = x.PaymentMethodChannel.Payment.Id,
                     PaymentName = x.PaymentMethodChannel.Payment.Code,
                     PaymentMethodId = x.PaymentMethodChannel.Method.Id,
                     PaymentMethodName = x.PaymentMethodChannel.Method.Code,
                     PaymentChannelId = x.PaymentMethodChannel.Channel.Id,
                     PaymentChannelName = x.PaymentMethodChannel.Channel.Code,
+                    PaymentMethodChannelId = x.PaymentMethodChannel.Id,
                     TransferType = x.TransferType,
                     ChannelName = x.ChannelName,
+                    ExtendedData = x.ExtendedData,
                     PlayerListCondition = x.PlayerListCondition,
                     AllPlayers = x.AllPlayers,
                     DepositedAmountMin = x.DepositedAmountMin,

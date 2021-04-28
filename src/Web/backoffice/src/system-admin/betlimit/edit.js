@@ -22,6 +22,7 @@ import { InputField, Input } from "../../input/Input"
 import clone from "clone-deep"
 import { useAddBetLimit, useUpdateBetLimit } from "../../betlimit/client"
 import { CurrencySelectField } from "../../currency/CurrencySelect"
+import { NumberInputField } from "../../input/NumberInput"
 
 export const EditBetLimitDisclosure = ({ record, onSubmitted }) => {
     let dialog = useModalState()
@@ -163,23 +164,20 @@ const FormBody = ({ isAdd = false }) => {
             {isEdit && <Input type="hidden" name="id" />}
             <FieldStack>
                 <CurrencySelectField name="currencyCode" required />
-                <InputField
+                <NumberInputField
                     name="minBet"
-                    type="number"
                     min="0"
                     label={minBetLabel}
                     required
                 />
-                <InputField
+                <NumberInputField
                     name="maxBet"
-                    type="number"
                     min={minBet}
                     label={maxBetLabel}
                     required
                 />
-                <InputField
+                <NumberInputField
                     name="maxBetPerMatch"
-                    type="number"
                     min="0"
                     label={maxBetPerMatchLabel}
                 />

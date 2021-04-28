@@ -11,15 +11,17 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
         public SwitchStatus Status { get; set; }
+        public bool AutoSentPlayerBonus { get; set; }
         public Guid BrandId { get; set; }
         public virtual Brand Brand { get; set; }
         public string PromotionType { get; set; }
-        public decimal PromotionAmount { get; set; }
+        public string SettlementIntervalType { get; set; }
+        public decimal TotalAmountLimit { get; set; }
         public decimal AmountUsed { get; set; }
         public bool Unlimited { get; set; }
         public GameType? GameType { get; set; }
         public decimal Percentage { get; set; }
-        public decimal TotalAmountLimit { get; set; }
+        public decimal BonusAmountLimit { get; set; }
         public decimal TurnoverMultiple { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
@@ -27,5 +29,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string UpdatedByUsername { get; set; }
         public virtual ICollection<PromotionGameProvider> PromotionGameProviders { get; set; }
         public virtual ICollection<PromotionVipLevel> PromotionVipLevels { get; set; }
+        public virtual ICollection<PromotionParticipant> PromotionParticipants { get; set; }
     }
 }

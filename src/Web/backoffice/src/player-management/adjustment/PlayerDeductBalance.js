@@ -42,6 +42,7 @@ import FormDialog from "../../form/FormDialog"
 import PlayerAddBalanceTypeSelect from "./PlayerAddBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
+import { NumberInputField } from "../../input/NumberInput"
 
 export const PlayerDeductBalanceDisclosure = ({
     brandId,
@@ -145,8 +146,7 @@ const FormBody = ({ brandId, username }) => {
                 <Text.Block alignY="center">
                     <Trans zh="交易金额" en="Amount" />
                 </Text.Block>
-
-                <Input type="number" name="amount" min="0" required />
+                <NumberInputField name="amount" min="0" required />
 
                 <Text.Block alignY="center">
                     <Trans zh="备注" en="Remark" />

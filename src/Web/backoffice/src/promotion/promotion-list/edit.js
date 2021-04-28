@@ -50,6 +50,13 @@ import parseISO from "date-fns/parseISO"
 import { today } from "../../date/range"
 import { useBrandGameProviderList } from "../../game/brandproviders/client"
 import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
+import {
+    NumberInput,
+    NumberInputField,
+    PercentageNumberInputField
+} from "../../input/NumberInput"
+import { PromotionTypeGroup } from "./PromotionType"
+import { Switch } from "../../switch/Switch"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -101,7 +108,9 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
 
     return (
         <FormDialog
-            defaultValues={{}}
+            defaultValues={{
+                autoSentPlayerBonus: true
+            }}
             onSubmit={onSubmit}
             isLoading={isLoading}
             result={result}
@@ -344,9 +353,22 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
     })
 
     let promotionTypeGroup = watch("promotionTypeGroup")
+    let isPromotionTypeTurnoverRelated =
+        promotionTypeGroup === PromotionTypeGroup.Turnover ||
+        promotionTypeGroup === PromotionTypeGroup.ReliefMoney
     let gameTypeGroup = watch("gameTypeGroup")
 
     let promotionType = watch("promotionType")
+
+    let autoSentPlayerBonus = watch("autoSentPlayerBonus")
+    let autoPayoutLabel = useTrans({
+        zh: "自動",
+        en: "Auto"
+    })
+    let manualPayoutLabel = useTrans({
+        zh: "手动",
+        en: "Manual"
+    })
 
     let disabled = readonly
     let editable = !readonly
@@ -443,6 +465,21 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
+                    <Trans zh="活动派发" en="Auto Bonus Payout" />
+                </NormalLabel>
+                <Box>
+                    <Switch
+                        name="autoSentPlayerBonus"
+                        label={
+                            autoSentPlayerBonus
+                                ? autoPayoutLabel
+                                : manualPayoutLabel
+                        }
+                        disabled={disabled}
+                    />
+                </Box>
+
+                <NormalLabel>
                     <Trans zh="活动费用" en="Total Amount Limit" />
                 </NormalLabel>
                 <Set orientation="horizontal" alignY="center">
@@ -454,8 +491,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     )}
                     {limitedTotalAmount && (
                         <>
-                            <Input
-                                type="number"
+                            <NumberInput
                                 name="totalAmountLimit"
                                 required
                                 disabled={disabled}
@@ -469,50 +505,62 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     />
                 </Set>
 
-                <NormalLabel>
-                    <Trans zh="活动游戏类型" en="Game Type Group" />
-                </NormalLabel>
-                <Box>
-                    {editable && (
-                        <GameTypeGroupSelect
-                            name="gameTypeGroup"
+                {isPromotionTypeTurnoverRelated && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="活动游戏类型" en="Game Type Group" />
+                        </NormalLabel>
+                        <Box>
+                            {editable && (
+                                <GameTypeGroupSelect
+                                    name="gameTypeGroup"
+                                    disabled={disabled}
+                                />
+                            )}
+                            {disabled && (
+                                <>
+                                    <GameTypeGroupSelect
+                                        name="gameTypeGroup"
+                                        value={gameTypeGroup}
+                                        display="none"
+                                    />
+                                    <GameTypeGroupSelect
+                                        value={gameTypeGroup}
+                                        disabled
+                                    />
+                                </>
+                            )}
+                        </Box>
+                    </>
+                )}
+
+                {isPromotionTypeTurnoverRelated && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="活动游戏子类型" en="Game Type" />
+                        </NormalLabel>
+                        <GameTypeSelect
+                            name="gameType"
+                            group={gameTypeGroup}
                             disabled={disabled}
+                            required
                         />
-                    )}
-                    {disabled && (
-                        <>
-                            <GameTypeGroupSelect
-                                name="gameTypeGroup"
-                                value={gameTypeGroup}
-                                display="none"
-                            />
-                            <GameTypeGroupSelect
-                                value={gameTypeGroup}
-                                disabled
-                            />
-                        </>
-                    )}
-                </Box>
+                    </>
+                )}
 
-                <NormalLabel>
-                    <Trans zh="活动游戏子类型" en="Game Type" />
-                </NormalLabel>
-                <GameTypeSelect
-                    name="gameType"
-                    group={gameTypeGroup}
-                    disabled={disabled}
-                    required
-                />
-
-                <NormalLabel>
-                    <Trans zh="活动厂商" en="Game Providers" />
-                </NormalLabel>
-                <Box>
-                    <BrandGameProviderCheckboxGroupTable
-                        brandId={brandId}
-                        disabled={disabled}
-                    />
-                </Box>
+                {isPromotionTypeTurnoverRelated && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="活动厂商" en="Game Providers" />
+                        </NormalLabel>
+                        <Box>
+                            <BrandGameProviderCheckboxGroupTable
+                                brandId={brandId}
+                                disabled={disabled}
+                            />
+                        </Box>
+                    </>
+                )}
             </FieldValues>
 
             <Separator />
@@ -525,27 +573,17 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 <NormalLabel>
                     <Trans zh="彩金百分比" en="Percentage" />
                 </NormalLabel>
-                <InputField
-                    type="number"
-                    step="0.01"
+                <PercentageNumberInputField
                     name="percentage"
-                    min="0"
-                    max="100"
                     required
                     disabled={disabled}
-                    addonAfter={
-                        <Button isStatic tabIndex="-1">
-                            %
-                        </Button>
-                    }
                 />
 
                 <NormalLabel>
                     <Trans zh="彩金上限" en="Max Amount" />
                 </NormalLabel>
-                <InputField
-                    type="number"
-                    name="promotionAmount"
+                <NumberInput
+                    name="bonusAmountLimit"
                     min="0"
                     required
                     disabled={disabled}
@@ -554,8 +592,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 <NormalLabel>
                     <Trans zh="流水倍数" en="Turnover Multiple" />
                 </NormalLabel>
-                <InputField
-                    type="number"
+                <NumberInputField
                     name="turnoverMultiple"
                     min="0"
                     required

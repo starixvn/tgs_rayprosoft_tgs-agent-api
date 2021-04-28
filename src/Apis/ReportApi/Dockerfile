@@ -21,6 +21,9 @@ COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructur
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
 COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
 COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataServices.Report/"]
+COPY ["src/Repositories/Bonus.Repositories/Bonus.Repositories.csproj", "src/Repositories/Bonus.Repositories/"]
+COPY ["src/Services/Bonus/Bonus.csproj", "src/Services/Bonus/"]
+COPY ["src/Repositories/Report.Repositories/Report.Repositories.csproj", "src/Repositories/Report.Repositories/"]
 RUN dotnet restore "src/Apis/ReportApi/ReportApi.csproj"
 COPY . .
 WORKDIR "/dest/src/Apis/ReportApi"

@@ -3,24 +3,20 @@ import { css, Global } from "@emotion/react"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 import { RadioGroup as _RadioGroup } from "bumbag"
 
-export const RadioGroup = ({ name, ...props }) => {
+export const RadioGroup = ({ name, defaultValue, ...props }) => {
     let { control } = useFormContext() ?? {}
 
     return (
         <Controller
             control={control}
             name={name}
+            defaultValue={defaultValue}
             render={({
-                field: { onChange, onBlur, value, name, ref },
+                field: { ref, ...formProps },
                 fieldState: { invalid, isTouched, isDirty }
-            }) => (
-                <_RadioGroup
-                    onBlur={onBlur}
-                    onChange={(e) => onChange(e.target.value)}
-                    value={value}
-                    {...props}
-                />
-            )}
+            }) => {
+                return <_RadioGroup {...formProps} {...props} />
+            }}
         />
     )
 }
