@@ -40,10 +40,11 @@ import {
 } from "../../game/GameType"
 import Separator from "../../layout/Separator"
 import {
+    PromotionTypeGroup,
     PromotionTypeGroupSelect,
     PromotionTypeSelect,
     usePromotionGroupValueOf
-} from "./PromotionType"
+} from "../PromotionType"
 import { toCheckedGameProviderIds } from "../../game/providers/GameProviderCheckboxGroup"
 import { BrandGameProviderCheckboxGroupTable } from "../../game/brandproviders/BrandGameProviderCheckboxGroup"
 import parseISO from "date-fns/parseISO"
@@ -55,7 +56,6 @@ import {
     NumberInputField,
     PercentageNumberInputField
 } from "../../input/NumberInput"
-import { PromotionTypeGroup } from "./PromotionType"
 import { Switch } from "../../switch/Switch"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {

@@ -38,6 +38,3 @@ export const useChangePromotionStatus = (id, status) => {
 
     return usePut(url)
 }
-
-export const usePromotionTypeList = () =>
-    useSystemSettingValue("PromotionTypes")
