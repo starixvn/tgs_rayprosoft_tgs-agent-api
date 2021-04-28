@@ -29,7 +29,6 @@ using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -137,7 +136,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[] { new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture) };
+                var supportedCultures = new[] {new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture)};
 
                 options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
@@ -151,7 +150,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             {
                 var config = sp.GetRequiredService<IConfiguration>();
 
-                httpClient.BaseAddress = new Uri(config.GetValue<string>("File:FileServiceBaseUrl"));
+                httpClient.BaseAddress = new(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
             return services;

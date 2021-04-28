@@ -14,6 +14,9 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
             builder.HasKey(c => c.Id)
                 .HasName("pk_promotion_bonus_id");
 
+            builder.Property(c => c.BrandId)
+                .IsRequired();
+
             builder.Property(c => c.PromotionId)
                 .IsRequired();
 
@@ -49,11 +52,17 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
                 .HasForeignKey(x => x.PromotionBonusId)
                 .HasConstraintName("fk_promotion_bonus_promotion_brand_id");
 
+            builder.HasIndex(c => new {c.BrandId})
+                .HasDatabaseName("ix_promotion_bonus_brand_id");
+
             builder.HasIndex(c => new {c.PromotionId})
                 .HasDatabaseName("ix_promotion_bonus_promotion_id");
 
             builder.HasIndex(c => new {c.PromotionId, c.From, c.To})
-                .HasDatabaseName("ix_promotion_bonus_multiple_keys");
+                .HasDatabaseName("ix_promotion_bonus_promotion_id_from_to");
+
+            builder.HasIndex(c => new {c.BrandId, c.From, c.To})
+                .HasDatabaseName("ix_promotion_bonus_brand_id_from_to");
         }
     }
 }

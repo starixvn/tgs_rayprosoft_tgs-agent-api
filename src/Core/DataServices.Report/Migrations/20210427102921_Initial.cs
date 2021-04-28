@@ -157,6 +157,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
+                    brand_id = table.Column<Guid>(type: "uuid", nullable: false),
                     promotion_id = table.Column<Guid>(type: "uuid", nullable: false),
                     from = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     to = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -295,16 +296,28 @@ namespace TGS.Core.DataServices.Report.Migrations
                 columns: new[] { "brand_id", "report_date", "player_code" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_promotion_bonus_multiple_keys",
+                name: "ix_promotion_bonus_brand_id",
                 schema: "dbo",
                 table: "promotion_bonus",
-                columns: new[] { "promotion_id", "from", "to" });
+                column: "brand_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_promotion_bonus_brand_id_from_to",
+                schema: "dbo",
+                table: "promotion_bonus",
+                columns: new[] { "brand_id", "from", "to" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_promotion_bonus_promotion_id",
                 schema: "dbo",
                 table: "promotion_bonus",
                 column: "promotion_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_promotion_bonus_promotion_id_from_to",
+                schema: "dbo",
+                table: "promotion_bonus",
+                columns: new[] { "promotion_id", "from", "to" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_promotion_player_multiple_keys",

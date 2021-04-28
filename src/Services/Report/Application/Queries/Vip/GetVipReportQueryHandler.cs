@@ -10,7 +10,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Vip;
 using TGS.Services.Report.Infrastructure.DataService;
 
-namespace TGS.Services.Report.Application.Queries.ReportHandlers.Vip
+namespace TGS.Services.Report.Application.Queries.Vip
 {
     internal class GetVipReportQueryHandler : Handler<GetVipReportRequest, PagedResponse<VipModel>>
     {

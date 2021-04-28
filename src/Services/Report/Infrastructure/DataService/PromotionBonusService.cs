@@ -17,6 +17,10 @@ namespace TGS.Services.Report.Infrastructure.DataService
             Func<IQueryable<PromotionBonus>, IQueryable<PromotionBonus>> preQuery = null,
             bool tracking = false);
 
+        IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
+            Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>> preQuery = null,
+            bool tracking = false);
+
         Task CreatePromotionBonusAsync(PromotionBonusModel[] model);
     }
 
@@ -35,6 +39,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             CreateEntitiesAsync(models.Select(model => new PromotionBonus
             {
                 Id = model.Id,
+                BrandId = model.BrandId,
                 PromotionId = model.PromotionId,
                 From = model.From,
                 To = model.To,
@@ -49,6 +54,11 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     PlayerCode = x.PlayerCode, PromotionBonusId = model.Id, BonusAmount = x.BonusAmount
                 }).ToHashSet()
             }).ToArray());
+
+        IQueryable<PromotionPlayer> IPromotionBonusService.GetPromotionBonusPlayersQueries(
+            Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>> preQuery, bool tracking)
+            =>
+                GetQueriesAsync(preQuery, tracking);
 
         IQueryable<PromotionBonus> IPromotionBonusService.GetPromotionBonusQueries(
             Func<IQueryable<PromotionBonus>, IQueryable<PromotionBonus>> preQuery,

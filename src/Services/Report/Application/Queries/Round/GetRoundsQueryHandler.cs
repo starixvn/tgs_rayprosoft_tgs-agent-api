@@ -7,7 +7,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Round;
 using TGS.Services.Report.Infrastructure.DataService;
 
-namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
+namespace TGS.Services.Report.Application.Queries.Round
 {
     internal class GetRoundsQueryHandler : Handler<GetRoundsRequest, PagedResponse<RoundModel>>
     {

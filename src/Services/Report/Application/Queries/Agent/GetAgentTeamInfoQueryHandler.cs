@@ -8,7 +8,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
 using TGS.Services.Report.Infrastructure.DataService;
 
-namespace TGS.Services.Report.Application.Queries.ReportHandlers.Agent
+namespace TGS.Services.Report.Application.Queries.Agent
 {
     public class GetAgentTeamInfoQueryHandler : Handler<GetAgentTeamInfoRequest, PagedResponse<TeamInfoModel>>
     {

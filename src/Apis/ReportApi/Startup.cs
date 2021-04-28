@@ -1,10 +1,8 @@
-﻿using Bonus.Repositories;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using Report.Repositories;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -49,6 +47,7 @@ namespace ReportApi
                 .AddReportServices()
                 .AddTransactions()
                 .AddBonusServices()
+                .AddBackendOfficeRepositories()
                 .AddBonusRepositoriesServices()
                 .AddReportRepositoriesServices();
 

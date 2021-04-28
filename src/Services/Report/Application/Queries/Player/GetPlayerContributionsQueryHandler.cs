@@ -11,7 +11,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Player;
 using TGS.Services.Report.Infrastructure.DataService;
 
-namespace TGS.Services.Report.Application.Queries.ReportHandlers.Player
+namespace TGS.Services.Report.Application.Queries.Player
 {
     public class
         GetPlayerContributionsQueryHandler : Handler<GetPlayerContributionsRequest,

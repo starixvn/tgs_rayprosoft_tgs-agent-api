@@ -87,6 +87,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 return new PromotionBonusModel
                 {
                     Id = id,
+                    BrandId = x.BrandId,
                     PromotionId = x.Id,
                     From = from,
                     To = to,

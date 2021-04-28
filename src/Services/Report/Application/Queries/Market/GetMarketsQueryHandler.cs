@@ -8,7 +8,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Market;
 using TGS.Services.Report.Infrastructure.DataService;
 
-namespace TGS.Services.Report.Application.Queries.ReportHandlers.Market
+namespace TGS.Services.Report.Application.Queries.Market
 {
     internal class GetMarketsQueryHandler : Handler<GetMarketsRequest, PagedResponse<MarketModel>>
     {

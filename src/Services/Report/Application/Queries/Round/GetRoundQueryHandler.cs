@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using TGS.Services.PluggableServices;
 using TGS.Services.PluggableServices.Models;
 
-namespace TGS.Services.Report.Application.Queries.ReportHandlers.Round
+namespace TGS.Services.Report.Application.Queries.Round
 {
     internal class GetRoundQueryHandler : Handler<GetRoundHistoryRequest, GetRoundHistoryResponse>
     {

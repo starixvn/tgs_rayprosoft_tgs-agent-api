@@ -1,12 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using MediatR;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Report.Application.Models.PromotionDispatch
 {
-    class GetPromotionDispatchRequest
+    public class GetPromotionDispatchesRequest : PageableRequest, IRequest<PagedResponse<PromotionDispatchModel>>
     {
+        public Guid BrandId { get; set; }
+        public string PromotionGroup { get; set; }
+        public string PromotionName { get; set; }
+        public string Username { get; set; }
+        public DateTimeOffset? From { get; set; }
+        public DateTimeOffset? To { get; set; }
     }
 }

@@ -7,6 +7,7 @@ namespace TGS.Core.DataServices.Report.Models
     public class PromotionBonus
     {
         public Guid Id { get; set; }
+        public Guid BrandId { get; set; }
         public Guid PromotionId { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }

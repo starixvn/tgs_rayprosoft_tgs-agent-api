@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Report;
 namespace TGS.Core.DataServices.Report.Migrations
 {
     [DbContext(typeof(ReportRepository))]
-    [Migration("20210426071059_Initial")]
+    [Migration("20210427102921_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -540,6 +540,10 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bonus_amount_limit");
 
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
@@ -578,11 +582,17 @@ namespace TGS.Core.DataServices.Report.Migrations
                     b.HasKey("Id")
                         .HasName("pk_promotion_bonus_id");
 
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_promotion_bonus_brand_id");
+
                     b.HasIndex("PromotionId")
                         .HasDatabaseName("ix_promotion_bonus_promotion_id");
 
+                    b.HasIndex("BrandId", "From", "To")
+                        .HasDatabaseName("ix_promotion_bonus_brand_id_from_to");
+
                     b.HasIndex("PromotionId", "From", "To")
-                        .HasDatabaseName("ix_promotion_bonus_multiple_keys");
+                        .HasDatabaseName("ix_promotion_bonus_promotion_id_from_to");
 
                     b.ToTable("promotion_bonus");
                 });

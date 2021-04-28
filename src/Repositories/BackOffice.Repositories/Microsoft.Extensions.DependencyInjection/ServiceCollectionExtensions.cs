@@ -1,12 +1,17 @@
 ﻿using TGS.BackOffice.Repositories;
 using TGS.Services.BackOffice.Domain;
+using TGS.Services.Report.Domain;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddBackendOfficeRepositories(this IServiceCollection services)
-            => services
-                .AddTransient<IDepositRepository, DepositRepository>();
+        {
+            services.AddTransient<IDepositRepository, DepositRepository>();
+            services.AddTransient<ISettingRepository, SettingRepository>();
+
+            return services;
+        }
     }
 }
