@@ -75,6 +75,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             promotion.From = request.From;
             promotion.To = request.To;
             promotion.Status = request.Status;
+            promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
             promotion.PromotionType = request.PromotionType;
             promotion.BonusAmountLimit = request.PromotionAmount;
             promotion.Unlimited = request.Unlimited;
@@ -107,6 +108,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 From = request.From,
                 To = request.To,
                 Status = request.Status,
+                AutoSentPlayerBonus = request.AutoSentPlayerBonus,
                 PromotionType = request.PromotionType,
                 BonusAmountLimit = request.PromotionAmount,
                 SettlementIntervalType = promotionTypeModel.SettlementIntervalType,
