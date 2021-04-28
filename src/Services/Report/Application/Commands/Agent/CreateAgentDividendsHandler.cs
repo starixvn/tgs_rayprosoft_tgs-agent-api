@@ -8,22 +8,21 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
 using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Commands.Agent
 {
     public class
-        CreateAgentDividendsQueryHandler : Handler<CreateAgentDividendsRequest,
-            MessageResponse>
+        CreateAgentDividendsHandler : Handler<CreateAgentDividendsRequest,
+            CreateAgentDividendsResponse>
     {
         private readonly IAgentDividendService _agentDividendService;
         private readonly ITgsAgentService _agentService;
         private readonly ITgsBrandService _brandService;
         private readonly IPlayerAggregateService _playerAggregateService;
 
-        public CreateAgentDividendsQueryHandler(
+        public CreateAgentDividendsHandler(
             IPlayerAggregateService playerAggregateService,
             ITgsAgentService agentService,
             ITgsBrandService brandService,
@@ -36,7 +35,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
             _agentDividendService = agentDividendService;
         }
 
-        public override async Task<MessageResponse> Handle(CreateAgentDividendsRequest request,
+        public override async Task<CreateAgentDividendsResponse> Handle(CreateAgentDividendsRequest request,
             CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
@@ -46,6 +45,14 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
             foreach (var brand in brands)
             {
+                if (await _agentDividendService.GetAgentDividendQueries()
+                    .AnyAsync(
+                        x => x.BrandId == brand.Id && brand.CurrentSettlementFrom == x.From &&
+                            brand.CurrentSettlementTo == x.To, cancellationToken))
+                {
+                    continue;
+                }
+
                 var agents = await _agentService
                     .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id && x.ParentAgentId != null))
                     .GroupBy(x => new {x.Id, x.ParentAgentId},
@@ -212,41 +219,32 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
                 createModels.AddRange(agentDividends);
 
-                var (beforeFromDate, beforeToDate, afterFromDate, afterToDate) =
+                var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
                     BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType);
 
                 brand.PreviousSettlementFrom = brand.CurrentSettlementFrom;
                 brand.PreviousSettlementTo = brand.CurrentSettlementTo;
-                brand.CurrentSettlementFrom = beforeFromDate;
-                brand.CurrentSettlementTo = beforeToDate;
-                brand.NextSettlementFrom = afterFromDate;
-                brand.NextSettlementTo = afterToDate;
+                brand.CurrentSettlementFrom = currentFromDate;
+                brand.CurrentSettlementTo = currentToDate;
+                brand.NextSettlementFrom = nextFromDate;
+                brand.NextSettlementTo = nextToDate;
             }
 
             await using var reportTransaction =
                 await _agentDividendService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             await using var tgsTransaction =
                 await _brandService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            try
-            {
-                await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray());
 
-                await _brandService.UpdateBrandsAsync(brands);
+            await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray());
 
-                await _brandService.CreateAgentTransactionsAsync(createModels.ToArray());
+            await _brandService.UpdateBrandsAsync(brands);
 
-                await reportTransaction.CommitAsync(cancellationToken);
-                await tgsTransaction.CommitAsync(cancellationToken);
-            }
-            catch (Exception e)
-            {
-                await reportTransaction.RollbackAsync(cancellationToken);
-                await tgsTransaction.RollbackAsync(cancellationToken);
-                return CreateInvalidResponse<MessageResponse>(e.Message);
-            }
+            //await _brandService.CreateAgentTransactionsAsync(createModels.ToArray());
 
+            await reportTransaction.CommitAsync(cancellationToken);
+            await tgsTransaction.CommitAsync(cancellationToken);
 
-            return CreateValidResponse<MessageResponse>();
+            return new() {Valid = true, AgentDividends = createModels.ToArray()};
         }
     }
 }

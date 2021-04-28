@@ -11,13 +11,13 @@ using TGS.Services.Report.Infrastructure.DataService;
 namespace TGS.Services.Report.Application.Commands.RoundAggregate
 {
     public class
-        CreateUpdateRoundAggregateQueryHandler : Handler<CreateUpdateRoundAggregateModel,
+        CreateUpdateRoundAggregateHandler : Handler<CreateUpdateRoundAggregateModel,
             MessageResponse>
     {
         private readonly IRoundAggregateService _roundAggregateService;
         private readonly ITgsRoundService _roundService;
 
-        public CreateUpdateRoundAggregateQueryHandler(ITgsRoundService roundService,
+        public CreateUpdateRoundAggregateHandler(ITgsRoundService roundService,
             IRoundAggregateService roundAggregateService,
             IHttpContextAccessor accessor) : base(accessor)
         {
