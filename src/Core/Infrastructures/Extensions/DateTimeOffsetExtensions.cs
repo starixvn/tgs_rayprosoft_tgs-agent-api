@@ -4,20 +4,29 @@ namespace TGS.Core.Infrastructures.Extensions
 {
     public static class DateTimeOffsetExtensions
     {
-        public static string ToIso8601String(this DateTimeOffset dateTimeOffset)
-        {
+        public static string ToIso8601String(this DateTimeOffset dateTimeOffset) =>
             // Returns string format like 2020-09-25T07:07:31+00:00
-            return dateTimeOffset.ToString(@"yyyy-MM-dd\THH:mm:ssK");
-        }
+            dateTimeOffset.ToString(@"yyyy-MM-dd\THH:mm:ssK");
 
-        public static string ToDateTimeFormat(this DateTimeOffset dateTimeOffset)
-        {
-            return dateTimeOffset.ToString(@"yyyy-MM-dd HH:mm:ss");
-        }
+        public static string ToDateTimeFormat(this DateTimeOffset dateTimeOffset) =>
+            dateTimeOffset.ToString(@"yyyy-MM-dd HH:mm:ss");
 
-        public static string ToUtcDateTimeFormat(this DateTimeOffset dateTimeOffset)
-        {
-            return dateTimeOffset.ToString(@"yyyy-MM-dd HH:mmK");
-        }
+        public static string ToUtcDateTimeFormat(this DateTimeOffset dateTimeOffset) =>
+            dateTimeOffset.ToString(@"yyyy-MM-dd HH:mmK");
+
+        public static DateTimeOffset GetMonday(this DateTimeOffset dateTimeOffset) =>
+            dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - 1, 0, 0, 0));
+
+        public static DateTimeOffset GetSunday(this DateTimeOffset dateTimeOffset) =>
+            dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - 7, 0, 0, 0));
+
+        public static DateTimeOffset GetDayOfWeek(this DateTimeOffset dateTimeOffset, int day) =>
+            dateTimeOffset.Subtract(new TimeSpan((int)dateTimeOffset.DayOfWeek - day, 0, 0, 0));
+
+        public static DateTimeOffset GetFirstDayOfMonth(this DateTimeOffset dateTimeOffset) =>
+            dateTimeOffset.AddDays(1 - dateTimeOffset.Day);
+
+        public static DateTimeOffset GetLastDayOfMonth(this DateTimeOffset dateTimeOffset) =>
+            dateTimeOffset.GetFirstDayOfMonth().AddMonths(1).AddDays(-1);
     }
 }

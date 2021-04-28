@@ -11,14 +11,14 @@ using TGS.Services.Report.Infrastructure.DataService;
 namespace TGS.Services.Report.Application.Commands.PlayerAggregate
 {
     public class
-        CreateUpdatePlayerAggregateQueryHandler : Handler<CreateUpdatePlayerAggregateModel,
+        CreateUpdatePlayerAggregateHandler : Handler<CreateUpdatePlayerAggregateModel,
             MessageResponse>
     {
         private readonly IPlayerAggregateService _playerAggregateService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly IRoundAggregateService _roundAggregateService;
 
-        public CreateUpdatePlayerAggregateQueryHandler(IPlayerAggregateService playerAggregateService,
+        public CreateUpdatePlayerAggregateHandler(IPlayerAggregateService playerAggregateService,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             IRoundAggregateService roundAggregateService,
             IHttpContextAccessor accessor) : base(accessor)

@@ -16,12 +16,14 @@ namespace TGS.Services.Report.Application.Extensions
             services.AddTransient<ITgsAgentService, TgsAgentService>();
             services.AddTransient<ITgsBrandService, TgsBrandService>();
             services.AddTransient<ITgsTransactionService, TgsTransactionService>();
+            services.AddTransient<ITgsPromotionService, TgsPromotionService>();
             services.AddTransient<IAgentDividendService, AgentDividendService>();
             services.AddTransient<IPlayerAggregateService, PlayerAggregateService>();
             services.AddTransient<IPlayerGameTypeAggregateService, PlayerGameTypeAggregateService>();
             services.AddTransient<IRoundAggregateService, RoundAggregateService>();
             services.AddTransient<IPlayerRebateService, PlayerRebateService>();
             services.AddTransient<ITransactionManager, TransactionManager>();
+            services.AddTransient<IPromotionBonusService, PromotionBonusService>();
 
             return services;
         }

@@ -14,14 +14,14 @@ using TGS.Services.Report.Infrastructure.DataService;
 namespace TGS.Services.Report.Application.Commands.RoundAggregate
 {
     public class
-        ManualCreateUpdateRoundAggregateQueryHandler : Handler<ManualCreateUpdateRoundAggregateModel,
+        ManualCreateUpdateRoundAggregateHandler : Handler<ManualCreateUpdateRoundAggregateModel,
             MessageResponse>
     {
         private readonly IRoundAggregateService _roundAggregateService;
         private readonly ITgsRoundService _roundService;
         private readonly ITransactionManager _transactionManager;
 
-        public ManualCreateUpdateRoundAggregateQueryHandler(ITgsRoundService roundService,
+        public ManualCreateUpdateRoundAggregateHandler(ITgsRoundService roundService,
             IRoundAggregateService roundAggregateService,
             ITransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)

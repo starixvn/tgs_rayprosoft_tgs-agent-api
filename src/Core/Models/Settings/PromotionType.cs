@@ -8,10 +8,11 @@ namespace TGS.Core.Models.Settings
         public PromotionType[] Types { get; set; }
         public Translation Trans { get; set; }
     }
-    
+
     public record PromotionType
     {
         public string Name { get; set; }
+        public string SettlementIntervalType { get; set; }
         public Translation Trans { get; set; }
     }
 

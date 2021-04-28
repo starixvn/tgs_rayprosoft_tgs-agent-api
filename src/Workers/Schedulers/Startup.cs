@@ -12,7 +12,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Filters;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -24,6 +23,7 @@ using TGS.Shared.Game.ApiClients.Extensions;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
 using TGS.Workers.Schedulers.Jobs.Players;
+using TGS.Workers.Schedulers.Jobs.Promotion;
 using TGS.Workers.Schedulers.Jobs.Reports;
 using TGS.Workers.Schedulers.Jobs.Rounds;
 using TGS.Workers.Schedulers.Services;
@@ -75,6 +75,9 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IRoundAggregateWorkerService, RoundAggregateWorkerService>();
             services.AddTransient<IPlayerRebateWorkerService, PlayerRebateWorkerService>();
             services.AddTransient<IAgentDividendWorkerService, AgentDividendWorkerService>();
+            services.AddTransient<IPromotionSettlementDailyWorkerService, PromotionSettlementDailyWorkerService>();
+            services.AddTransient<IPromotionSettlementWeeklyWorkerService, PromotionSettlementWeeklyWorkerService>();
+            services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
         }
 
         public void Configure(IApplicationBuilder app)
