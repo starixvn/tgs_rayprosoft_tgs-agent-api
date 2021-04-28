@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Apis.OperatorApi.Handlers.Game;
@@ -15,9 +11,6 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operator;
-using TGS.Services.Operator.Deposit;
-using TGS.Services.Payment;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -27,7 +20,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Game_List_By_Specific_GPCode()
         {
-            // arrange                        
+            // arrange
             var fakeHttpContextAccessor = Substitute.For<IHttpContextAccessor>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
@@ -52,8 +45,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeJsonSerializationProvider,
                 fakeValidStatus,
                 fakeValidGameStatus);
-            
-            // act            
+
+            // act
             GetGamesRequest request = new GetGamesRequest()
             {
                 GameProviderCode = "SBO",
@@ -66,13 +59,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
             await sut.Handle(request, default);
 
             // assert
+            // 驗證有傳gpcode時 會執行一次 _gameProviderOperations.GetGameProviderIdByCodeAsync 取得gameProviderId
             _ = fakeGameProviderOperations.Received(1).GetGameProviderIdByCodeAsync(Arg.Is(request.GameProviderCode));
         }
 
         [Test]
         public async Task Get_Game_List_By_No_GPCode()
         {
-            // arrange                        
+            // arrange
             var fakeHttpContextAccessor = Substitute.For<IHttpContextAccessor>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
@@ -107,18 +101,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // act
             GetGamesRequest request = new GetGamesRequest()
-            {                
+            {
                 PlatformType = PlatformType.Desktop,
                 CurrencyCode = "CNY",
                 LanguageCode = "zh-TW",
                 Types = Array.Empty<GameType>()
-            };            
+            };
 
             await sut.Handle(request, default);
 
-            // assert            
+            // assert
+            // 驗證沒傳gpcode時 會執行一次 _brandOperations.GetBrandGameProvidersAsync 取得全部gameProviderId
             _ = fakeBrandOperations.Received(1).GetBrandGameProvidersAsync(Arg.Is(brandId));
         }
-
     }
 }

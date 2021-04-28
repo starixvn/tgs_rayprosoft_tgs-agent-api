@@ -67,7 +67,6 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var brandId = _httpContext.Items.GetBrandId();
             var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, brandId);
 
-
             Guid[] gameProviderIds = new Guid[] { };
             if (!string.IsNullOrEmpty(request.GameProviderCode))
             {
@@ -102,19 +101,12 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var types = request.Types ?? Array.Empty<GameType>();
             var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
 
-            //var games = new List<GameModel>();
-            //var store = new Dictionary<string, Dictionary<string, string>>();
             var translatedGames = new List<GameModel>();
             foreach (var gameProviderId in gameProviderIds)
             {
                 var games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, playerType);
-                //games.AddRange(game);
-
                 var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, cultureCode);
-                //store = store.Union(tempStore)
-                //    .GroupBy(kvp => kvp.Key)
-                //    .Select(grp => grp.First())
-                //    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
                 var translatedGame = games
                 .Where(g => types.Length == 0 || types.Contains(g.Type))
                 .Select(g =>
@@ -132,9 +124,6 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
                 translatedGames.AddRange(translatedGame);
             }
-
-
-            
 
             return new() { Games = translatedGames.ToArray() };
         }
