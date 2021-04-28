@@ -41,6 +41,16 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
+    "TgsApi-KY": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "KY",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,

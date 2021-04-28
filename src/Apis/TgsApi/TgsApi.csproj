@@ -52,5 +52,9 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="GameProviders\KY\Controllers\" />
+  </ItemGroup>
+
 
 </Project>

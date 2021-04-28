@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
@@ -12,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record KYGameProvider : IGameProvider
         {
-            private static readonly string EndpointPath = "?agent={agent}&timestamp={timestamp}&param={param}";
+            private static readonly string EndpointPath = "?agent={AGENT}&timestamp={TIMESTAMP}&param={PARAM}";
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -64,14 +65,23 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
+            Dictionary<string, string> MerchantCodes => new Dictionary<string, string>()
+            {
+                ["CNY"] = "72412"
+            };
+
+
             PluggableConfigurationBase IGameProvider.GetConfiguration() =>
                 new KYConfiguration
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-habanero") : new("http://localhost:62330"),
-                    ApiKey = "349F896E-DBC8-4A9D-963D-EFC921AD19FC",
-                    ApiUrl = new("https://api.ky34.com/"),
 
+                    ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
+                    ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
+                    Deskey = "E2F3A416006F84F8",
+                    Md5key = "B563DF2A3DE58DFB",
+                    MerchantCodes = MerchantCodes
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

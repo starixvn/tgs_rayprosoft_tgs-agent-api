@@ -6,4 +6,8 @@
     <RootNamespace>TGS.Shared.Game.Models</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="KY\Incoming\" />
+  </ItemGroup>
+
 </Project>
