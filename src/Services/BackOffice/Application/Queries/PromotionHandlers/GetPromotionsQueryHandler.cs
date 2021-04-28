@@ -31,6 +31,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
                     To = x.To,
                     Status = x.Status,
                     Name = x.Name,
+                    AutoSentPlayerBonus = x.AutoSentPlayerBonus,
                     PromotionType = x.PromotionType,
                     PromotionAmount = x.BonusAmountLimit,
                     AmountUsed = x.AmountUsed,
