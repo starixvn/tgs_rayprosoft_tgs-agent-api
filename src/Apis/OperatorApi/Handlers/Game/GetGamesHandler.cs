@@ -61,7 +61,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             _validGameStatus = validGameStatus;
         }
 
-        async Task<GetGamesResponse> IRequestHandler<GetGamesRequest, GetGamesResponse>.Handle(GetGamesRequest request,
+        public async Task<GetGamesResponse> Handle(GetGamesRequest request,
             CancellationToken cancellationToken)
         {
             var brandId = _httpContext.Items.GetBrandId();
@@ -76,7 +76,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             }
             else
             {
-                gameProviderIds = (await _brandOperations.GetBrandGameProvidersAsync(brandId)).Select(x=>x.GameProviderId).ToArray();
+                gameProviderIds = (await _brandOperations.GetBrandGameProvidersAsync(brandId)).Select(x => x.GameProviderId).ToArray();
             }
 
             var playerTokenData = _httpContext.Items.GetPlayerTokenData();
@@ -99,25 +99,23 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
+            var types = request.Types ?? Array.Empty<GameType>();
             var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
 
-            GameModel[] games = new GameModel[] { };
-            Dictionary<string, Dictionary<string, string>> store = new Dictionary<string, Dictionary<string, string>>() { };
+            //var games = new List<GameModel>();
+            //var store = new Dictionary<string, Dictionary<string, string>>();
+            var translatedGames = new List<GameModel>();
             foreach (var gameProviderId in gameProviderIds)
-            {                
-                var game = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, playerType);
-                games = games.Concat(game).ToArray();
+            {
+                var games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, playerType);
+                //games.AddRange(game);
 
-                var tempStore = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, cultureCode);
-                store = store.Union(tempStore)
-                    .GroupBy(kvp => kvp.Key)
-                    .Select(grp => grp.First())
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            }
-            
-            var types = request.Types ?? Array.Empty<GameType>();                                   
-
-            var translatedGames = games
+                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, cultureCode);
+                //store = store.Union(tempStore)
+                //    .GroupBy(kvp => kvp.Key)
+                //    .Select(grp => grp.First())
+                //    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                var translatedGame = games
                 .Where(g => types.Length == 0 || types.Contains(g.Type))
                 .Select(g =>
                 {
@@ -132,7 +130,13 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                     };
                 }).ToArray();
 
-            return new() {Games = translatedGames};
+                translatedGames.AddRange(translatedGame);
+            }
+
+
+            
+
+            return new() { Games = translatedGames.ToArray() };
         }
 
         private async Task<GameModel[]> GetGameModelsAsync(Guid brandId, Guid gameProviderId,
