@@ -73,10 +73,10 @@ const dropEmptyValues = (record) => {
     }, {})
 }
 
-export const useGet = (url) => {
+export const useGet = (url, options) => {
     let fetchData = !!url
     let key = fetchData ? url : null
-    const { data, error, isValidating, mutate } = useSWR(key, get)
+    const { data, error, isValidating, mutate } = useSWR(key, get, options)
 
     return {
         data,

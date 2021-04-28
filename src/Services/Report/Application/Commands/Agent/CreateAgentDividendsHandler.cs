@@ -39,17 +39,16 @@ namespace TGS.Services.Report.Application.Commands.Agent
             CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
-            var brands = await _brandService.GetBrandQueries(q => q.Where(x => now.Date > x.BeforeToDateTime))
+            var brands = await _brandService.GetBrandQueries(q => q.Where(x => now.Date > x.CurrentSettlementTo))
                 .ToArrayAsync(cancellationToken);
-
             var createModels = new List<CreateAgentDividendModel>();
 
             foreach (var brand in brands)
             {
                 if (await _agentDividendService.GetAgentDividendQueries()
                     .AnyAsync(
-                        x => x.BrandId == brand.Id && brand.BeforeFromDateTime == x.From &&
-                            brand.BeforeToDateTime == x.To, cancellationToken))
+                        x => x.BrandId == brand.Id && brand.CurrentSettlementFrom == x.From &&
+                            brand.CurrentSettlementTo == x.To, cancellationToken))
                 {
                     continue;
                 }
@@ -63,7 +62,8 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 var agentBonus = await _playerAggregateService.GetPlayerAggregateQueries()
                     .Where(x => x.AgentId != null)
                     .Where(x => x.BrandId == brand.Id)
-                    .Where(x => x.ReportDate >= brand.BeforeFromDateTime && x.ReportDate <= brand.BeforeToDateTime)
+                    .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
+                        x.ReportDate <= brand.CurrentSettlementTo)
                     .GroupBy(x => new {x.BrandId, x.AgentId},
                         (x, pa) => new
                         {
@@ -80,8 +80,8 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         }).GroupJoin(_playerAggregateService.Repository.PlayerGameTypeAggregates
                             .Where(x => x.AgentId != null)
                             .Where(x => x.BrandId == brand.Id)
-                            .Where(x => x.ReportDate >= brand.BeforeFromDateTime &&
-                                x.ReportDate <= brand.BeforeToDateTime),
+                            .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
+                                x.ReportDate <= brand.CurrentSettlementTo),
                         p => new {p.BrandId, p.AgentId},
                         pg => new {pg.BrandId, pg.AgentId},
                         (p, pg) => new {p, pg})
@@ -164,8 +164,8 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         {
                             AgentId = x.AgentId.Value,
                             BrandId = x.BrandId,
-                            From = brand.BeforeFromDateTime,
-                            To = brand.BeforeToDateTime,
+                            From = brand.CurrentSettlementFrom,
+                            To = brand.CurrentSettlementTo,
                             AgentDividendPercentage = x.AgentDividendPercentage,
                             DepositAmount = models.Sum(m => m.DepositAmount),
                             WithdrawalAmount = models.Sum(m => m.WithdrawalAmount),
@@ -219,13 +219,15 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
                 createModels.AddRange(agentDividends);
 
-                var (beforeFromDate, beforeToDate, afterFromDate, afterToDate) =
+                var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
                     BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType);
 
-                brand.BeforeFromDateTime = beforeFromDate;
-                brand.BeforeToDateTime = beforeToDate;
-                brand.AfterFromDateTime = afterFromDate;
-                brand.AfterToDateTime = afterToDate;
+                brand.PreviousSettlementFrom = brand.CurrentSettlementFrom;
+                brand.PreviousSettlementTo = brand.CurrentSettlementTo;
+                brand.CurrentSettlementFrom = currentFromDate;
+                brand.CurrentSettlementTo = currentToDate;
+                brand.NextSettlementFrom = nextFromDate;
+                brand.NextSettlementTo = nextToDate;
             }
 
             await using var reportTransaction =
@@ -241,7 +243,6 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
             await reportTransaction.CommitAsync(cancellationToken);
             await tgsTransaction.CommitAsync(cancellationToken);
-
             return new() {Valid = true, AgentDividends = createModels.ToArray()};
         }
     }

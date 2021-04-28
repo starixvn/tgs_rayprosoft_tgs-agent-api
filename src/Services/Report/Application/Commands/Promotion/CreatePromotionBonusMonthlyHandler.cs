@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,7 +44,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             var promotions = await _promotionService.GetPromotionQueries()
                 .Include(x => x.PromotionGameProviders)
                 .Include(x => x.PromotionVipLevels)
-                .Include(x => x.PromotionPlayers)
+                .Include(x => x.PromotionParticipants)
                 .Where(x => x.SettlementIntervalType == "Monthly")
                 .Where(x => x.From >= _PreviousFirstDayOfMonth && x.From <= _CurrentFirstDayOfMonth ||
                     x.To >= _PreviousFirstDayOfMonth && x.To <= _CurrentFirstDayOfMonth ||
@@ -102,8 +103,16 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 };
             }).ToArray();
 
+            await using var promotionBonusTransaction =
+                await _promotionBonusService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            await using var promotionTransaction =
+                await _promotionService.TgsRepository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+
             await _promotionService.UpdatePromotionsAsync(promotions);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
+
+            await promotionTransaction.CommitAsync(cancellationToken);
+            await promotionBonusTransaction.CommitAsync(cancellationToken);
 
             return new() {Valid = true, PromotionBonus = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray()};
         }
@@ -124,7 +133,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             return promotion.PromotionType switch
             {
-                "ReliefMoneyMonthly" => (promotion.PromotionPlayers.Select(p =>
+                "ReliefMoneyMonthly" => (promotion.PromotionParticipants.Select(p =>
                     {
                         var playerRebateAmount =
                             players.Where(pa => pa.PlayerCode == p.PlayerCode).Sum(s => s.WinLoss) *

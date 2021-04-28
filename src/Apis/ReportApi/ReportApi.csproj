@@ -27,6 +27,7 @@
     <ProjectReference Include="..\..\Repositories\BackOffice.Repositories\BackOffice.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Bonus.Repositories\Bonus.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Report.Repositories\Report.Repositories.csproj" />
+    <ProjectReference Include="..\..\Repositories\Report.Repositories\Report.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\Report\Report.csproj" />
   </ItemGroup>

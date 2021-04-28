@@ -72,7 +72,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .WithOne(p => p.Promotion)
                 .HasForeignKey(p => p.PromotionId);
 
-            builder.HasMany(p => p.PromotionPlayers)
+            builder.HasMany(p => p.PromotionParticipants)
                 .WithOne(p => p.Promotion)
                 .HasForeignKey(p => p.PromotionId);
 

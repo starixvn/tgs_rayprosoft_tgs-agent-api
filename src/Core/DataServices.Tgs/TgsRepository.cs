@@ -85,7 +85,7 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        DbSet<PlayerBank> PlayerBanks { get; set; }
+        DbSet<PlayerBankInfo> PlayerBanks { get; set; }
 
         DbSet<VipLevel> VipLevels { get; set; }
 
@@ -154,6 +154,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<DepositForm> DepositForms { get; set; }
 
         DbSet<TransactionPromotion> TransactionPromotions { get; set; }
+        DbSet<PlayerBucket> PlayerBuckets { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
@@ -226,7 +227,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        public DbSet<PlayerBank> PlayerBanks { get; set; }
+        public DbSet<PlayerBankInfo> PlayerBanks { get; set; }
 
         public DbSet<VipLevel> VipLevels { get; set; }
 
@@ -299,6 +300,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
 
         public DbSet<TransactionPromotion> TransactionPromotions { get; set; }
+
+        public DbSet<PlayerBucket> PlayerBuckets { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;

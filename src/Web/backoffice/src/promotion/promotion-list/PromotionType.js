@@ -16,7 +16,17 @@ const Turnover = "Turnover"
 
 const ReliefMoneyDaily = "ReliefMoneyDaily"
 
+const ReliefMoneyWeekly = "ReliefMoneyWeekly"
+
+const ReliefMoneyMonthly = "ReliefMoneyMonthly"
+
 const ReliefMoney = "ReliefMoney"
+
+export const PromotionTypeGroup = {
+    Deposit,
+    Turnover,
+    ReliefMoney
+}
 
 export const usePromotionGroupLabelOf = (promotionType) => {
     let locale = useLocale()

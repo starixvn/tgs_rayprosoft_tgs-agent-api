@@ -8,7 +8,7 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<PromotionPlayer>.Configure(EntityTypeBuilder<PromotionPlayer> builder)
         {
-            builder.ToTable("promotion_player");
+            builder.ToTable("promotion_players");
 
             builder.HasKey(c => c.Id)
                 .HasName("pk_promotion_player_id");

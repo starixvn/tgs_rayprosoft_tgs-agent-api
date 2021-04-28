@@ -155,6 +155,12 @@ namespace TGS.Payment.Repositories
                 payment.Code);
         }
 
+        public IAsyncEnumerable<PaymentMethodChannelInfo> GetPaymentMethodChannelsAsync()
+        {
+            return _tgsRepository.PaymentMethodChannels.ToAsyncEnumerable()
+                .Select(pmc => new PaymentMethodChannelInfo(pmc.Id, pmc.PaymentId, pmc.MethodId, pmc.ChannelId));
+        }
+
         public async ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn)
         {
             var formData = await _tgsRepository.DepositForms.FindAsync(formId).ConfigureAwait(false);

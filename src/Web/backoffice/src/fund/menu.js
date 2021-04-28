@@ -4,11 +4,11 @@ import { Menu as _Menu, findlLabel } from "../menu"
 import {
     Code as DepositListCode,
     codeLabelPair as depositListPair
-} from "./player-deposit/menu"
+} from "./deposit/menu"
 import {
     Code as WithdrawCode,
     codeLabelPair as withdrawListPair
-} from "./player-withdraw/menu"
+} from "./withdraw/menu"
 import { getTrans, useTrans } from "../i18n"
 
 export const Name = ({}) => useTrans(nameMessages)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,7 +49,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             var promotions = await _promotionService.GetPromotionQueries()
                 .Include(x => x.PromotionGameProviders)
                 .Include(x => x.PromotionVipLevels)
-                .Include(x => x.PromotionPlayers)
+                .Include(x => x.PromotionParticipants)
                 .Where(x => x.SettlementIntervalType == "Daily")
                 .Where(x => x.From <= reportDate && x.To >= reportDate).ToArrayAsync(cancellationToken);
 
@@ -97,8 +98,16 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 };
             }).ToArray();
 
+            await using var promotionBonusTransaction =
+                await _promotionBonusService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            await using var promotionTransaction =
+                await _promotionService.TgsRepository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+
             await _promotionService.UpdatePromotionsAsync(promotions);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
+
+            await promotionTransaction.CommitAsync(cancellationToken);
+            await promotionBonusTransaction.CommitAsync(cancellationToken);
 
             return new() {Valid = true, PromotionBonus = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray()};
         }
@@ -116,7 +125,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             return promotion.PromotionType switch
             {
-                "TurnoverRebate" => (promotion.PromotionPlayers.Select(p =>
+                "TurnoverRebate" => (promotion.PromotionParticipants.Select(p =>
                     {
                         var playerRebateAmount =
                             players.Where(pa => pa.PlayerCode == p.PlayerCode).Sum(s => s.Turnover) *
@@ -143,7 +152,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                         };
                     })
                     .ToArray(), amount),
-                "ReliefMoneyDaily" => (promotion.PromotionPlayers.Select(p =>
+                "ReliefMoneyDaily" => (promotion.PromotionParticipants.Select(p =>
                     {
                         var playerRebateAmount = players.Where(pa => pa.PlayerCode == p.PlayerCode)
                             .Sum(s => s.WinLoss) * promotion.Percentage / 100;

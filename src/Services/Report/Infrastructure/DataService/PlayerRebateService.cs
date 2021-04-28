@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Report;
@@ -18,6 +19,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             bool tracking = false);
 
         Task CreatePlayerRebatesAsync(PlayerRebateModel[] request);
+        Task<bool> ExistsAsync(Expression<Func<PlayerRebate, bool>> predicate);
     }
 
     public class PlayerRebateService : BaseRepositoryOperations<IReportRepository>, IPlayerRebateService
@@ -60,9 +62,12 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 RebateAmount = model.RebateAmount
             }).ToArray());
 
+        Task<bool> IPlayerRebateService.ExistsAsync(Expression<Func<PlayerRebate, bool>> predicate) =>
+            ExistsAsync(predicate);
+
         IQueryable<PlayerRebate> IPlayerRebateService.GetPlayerRebateQueries(
             Func<IQueryable<PlayerRebate>, IQueryable<PlayerRebate>> preQuery,
-            bool tracking) =>
+            bool tracking = false) =>
             GetQueriesAsync(preQuery, tracking);
     }
 }

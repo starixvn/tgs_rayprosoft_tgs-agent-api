@@ -16,6 +16,6 @@ namespace TGS.Services.BackOffice.Domain
         int Status,
         JsonDocument ApplyInfo,
         JsonDocument PaymentReturn,
-        DateTimeOffset CreateOn,
-        DateTimeOffset UpdateOn);
+        DateTimeOffset CreatedOn,
+        DateTimeOffset UpdatedOn);
 }

@@ -139,7 +139,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         x.Value.VipLevels.Select(v =>
                                 new PromotionVipLevel {PromotionId = promotionId, VipLevelId = v.Id})
                             .ToHashSet(),
-                    PromotionPlayers = x.Value.Players.Select(p => new PromotionPlayer
+                    PromotionParticipants = x.Value.Players.Select(p => new PromotionParticipant
                     {
                         PlayerCode = p.PlayerCode, PromotionId = promotionId
                     }).ToHashSet()
@@ -396,21 +396,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             UpdatedOn = Now
                         }
                     },
-                Banks = new[]
-                {
-                    new PlayerBank
-                    {
-                        Id = GuidExtensions.NewSequentialGuid(),
-                        PlayerCode = playerCode,
-                        RealName = Generator.RandomString(4),
-                        BankName = Generator.RandomString(12),
-                        BankAccount = Generator.RandomIntString(20),
-                        CreatedByUsername = AdminUsername,
-                        UpdatedByUsername = AdminUsername,
-                        CreatedOn = Now,
-                        UpdatedOn = Now
-                    }
-                }
+                //Banks = new[]
+                //{
+                //    new PlayerBankInfo
+                //    {
+                //        Id = GuidExtensions.NewSequentialGuid(),
+                //        PlayerCode = playerCode,
+                //        RealName = Generator.RandomString(4),
+                //        BankName = Generator.RandomString(12),
+                //        BankAccount = Generator.RandomIntString(20),
+                //        CreatedByUsername = AdminUsername,
+                //        UpdatedByUsername = AdminUsername,
+                //        CreatedOn = Now,
+                //        UpdatedOn = Now
+                //    }
+                //}
             };
         }
 
@@ -734,7 +734,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
-            var (beforeFromDate, beforeToDate, afterFromDate, afterToDate) =
+            var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
                 BrandSettlementIntervalGenerator.GetInterval(brand.Type);
 
             return new()
@@ -755,10 +755,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 SecretKey = brand.SecretKey,
                 ApiKey = brand.ApiKey,
                 SettlementIntervalType = brand.Type,
-                BeforeFromDateTime = beforeFromDate,
-                BeforeToDateTime = beforeToDate,
-                AfterFromDateTime = afterFromDate,
-                AfterToDateTime = afterToDate,
+                CurrentSettlementFrom = currentFromDate,
+                CurrentSettlementTo = currentToDate,
+                NextSettlementFrom = nextFromDate,
+                NextSettlementTo = nextToDate,
                 Currencies =
                     brand.Currencies.Select(curr => new BrandCurrency
                     {

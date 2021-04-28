@@ -45,6 +45,7 @@ import Input from "../../input/Input"
 import DeductBalanceType from "./AgentDeductBalanceType"
 import { DeductBalanceTargetSelect } from "./AgentDeductBalanceTarget"
 import AdjustType from "./AdjustType"
+import { NumberInput } from "../../input/NumberInput"
 
 export const AgentDeductBalanceDisclosure = ({
     brandId,
@@ -169,8 +170,7 @@ const FormBody = ({ brandId, username }) => {
                 <Text.Block alignY="center">
                     <Trans zh="交易金额" en="Amount" />
                 </Text.Block>
-
-                <Input type="number" name="amount" min="0" required />
+                <NumberInput name="amount" min="0" required />
 
                 <Text.Block alignY="center">
                     <Trans zh="备注" en="Remark" />

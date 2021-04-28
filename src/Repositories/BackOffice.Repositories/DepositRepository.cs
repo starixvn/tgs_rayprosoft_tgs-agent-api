@@ -44,7 +44,7 @@ namespace TGS.BackOffice.Repositories
                                 ? null
                                 : JsonDocument.Parse(df.PaymentReturn),
                             df.CreatedOn,
-                            df.UpdateOn);
+                            df.UpdatedOn);
 
             return query.SingleAsync();
         }
@@ -61,7 +61,7 @@ namespace TGS.BackOffice.Repositories
                 ReviewStatus.Reject => 7000,
                 _ => formData.Status
             };
-            formData.UpdateOn = DateTimeOffset.UtcNow;
+            formData.UpdatedOn = DateTimeOffset.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

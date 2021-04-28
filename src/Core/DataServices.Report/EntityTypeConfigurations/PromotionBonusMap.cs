@@ -9,7 +9,7 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<PromotionBonus>.Configure(EntityTypeBuilder<PromotionBonus> builder)
         {
-            builder.ToTable("promotion_bonus");
+            builder.ToTable("promotion_bonuses");
 
             builder.HasKey(c => c.Id)
                 .HasName("pk_promotion_bonus_id");
