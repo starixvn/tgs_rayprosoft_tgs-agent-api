@@ -33,6 +33,7 @@ import { useGameTypeGroupList } from "../../game/client"
 import { GameProviderListDialogDisclosure } from "../../game/providers/GameProviderList"
 import { VipLevelListDialogDisclosure } from "../../vip-levels/VipLevelList"
 import { formatNumber } from "../../number/format"
+import { PromotionStatusSelect, PromotionStatusSwitch } from "./PromotionStatus"
 
 export { Code }
 
@@ -65,6 +66,7 @@ const Body = () => {
 
 const BodyContent = ({ brandId }) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
+        status: "",
         name: "",
         brandId
     })
@@ -84,16 +86,18 @@ const BodyContent = ({ brandId }) => {
             actionBar={
                 <Flex justifyContent="space-between">
                     <SearchBar
-                        code={state?.code}
+                        status={state?.status}
                         name={state?.name}
                         search={(data) => {
                             let newState = {
                                 pageIndex: 0,
+                                status: data?.status,
                                 name: data?.name
                             }
                             if (
                                 equals(newState, {
                                     pageIndex: state?.pageIndex,
+                                    status: state?.status,
                                     name: state?.name
                                 })
                             ) {
@@ -132,19 +136,20 @@ const BodyContent = ({ brandId }) => {
     )
 }
 
-const SearchBar = ({ name = "", search, isLoading }) => {
+const SearchBar = ({ status = "", name = "", search, isLoading }) => {
     let namePlaceholder = useTrans({
         zh: "名称",
         en: "Name"
     })
     let formMethods = useForm({
-        defaultValues: { name }
+        defaultValues: { status, name }
     })
 
     return (
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
                 <Set>
+                    <PromotionStatusSelect name="status" />
                     <InputField
                         name="name"
                         showEmptyFieldValueAddonAfter
@@ -259,6 +264,18 @@ const useColumns = ({ brandId, items = [], mutate }) => {
         ]
 
         if (hasAnyMenu) {
+            columns.push(
+                textColumn({
+                    id: "status",
+                    Header: <Trans zh="状态" en="Status" />,
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Cell: ({ value: record }) => {
+                        return <PromotionStatusSwitch value={record?.status} />
+                    }
+                })
+            )
+
             columns.push(
                 textColumn({
                     id: "actions",

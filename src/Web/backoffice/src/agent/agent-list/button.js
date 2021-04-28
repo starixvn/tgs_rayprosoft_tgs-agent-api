@@ -56,6 +56,14 @@ import AgentLevel, {
 import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
 import Textarea from "../../textarea"
 import AgentUpdateType from "./AgentUpdateType"
+import { PercentageNumberInputField } from "../../input/NumberInput"
+import { AgentCommissionPercentageInputField } from "../AgentCommissionPercentage"
+import { AgentLiveDealerRebatePercentageInputField } from "../AgentLiveDealerRebatePercentage"
+import { AgentEgameRebatePercentageInputField } from "../AgentEgameRebatePercentage"
+import { AgentCardGameRebatePercentageInputField } from "../AgentCardGameRebatePercentage"
+import { AgentLotteryRebatePercentageInputField } from "../AgentLotteryRebatePercentage"
+import { AgentSportsRebatePercentageInputField } from "../AgentSportsRebatePercentage"
+import { AgentVirtualSportsRebatePercentageInputField } from "../AgentVirtualSportsRebatePercentage"
 
 export const AddAgentButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -208,28 +216,14 @@ const FormBody = ({}) => {
                     <NormalLabel required>
                         <Trans zh="代理分红" en="Bonus" />
                     </NormalLabel>
-                    <InputField
-                        type="number"
-                        name="bonusPercentage"
-                        min="0"
-                        step="0.1"
-                        required
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <AgentCommissionPercentageInputField />
 
                     <NormalLabel required>
                         <Trans zh="真人返佣" en="Live Dealer Rebate" />
                     </NormalLabel>
                     <TwoColumns columns={["0.7fr"]}>
                         <Flex flex="1 50%">
-                            <InputField
-                                type="number"
-                                name="liveDealerRebatePercentage"
-                                min="0"
-                                step="0.1"
-                                required
-                                addonAfter={<Button isStatic>%</Button>}
-                            />
+                            <AgentLiveDealerRebatePercentageInputField />
                         </Flex>
 
                         <FieldValues flex="1 50%">
@@ -237,31 +231,16 @@ const FormBody = ({}) => {
                                 <Trans zh="彩票返佣" en="Lottery Rebate" />
                             </NormalLabel>
 
-                            <InputField
-                                type="number"
-                                name="lotteryRebatePercentage"
-                                max="100"
-                                min="0"
-                                step="0.1"
-                                required
-                                addonAfter={<Button isStatic>%</Button>}
-                            />
+                            <AgentLotteryRebatePercentageInputField />
                         </FieldValues>
                     </TwoColumns>
 
                     <NormalLabel required>
-                        <Trans zh="电子返佣" en="Slot Rebate" />
+                        <Trans zh="电子返佣" en="EGame Rebate" />
                     </NormalLabel>
                     <TwoColumns columns={["0.7fr"]}>
                         <Flex flex="1 50%">
-                            <InputField
-                                type="number"
-                                name="slotRebatePercentage"
-                                min="0"
-                                step="0.1"
-                                required
-                                addonAfter={<Button isStatic>%</Button>}
-                            />
+                            <AgentEgameRebatePercentageInputField />
                         </Flex>
 
                         <FieldValues>
@@ -269,14 +248,7 @@ const FormBody = ({}) => {
                                 <Trans zh="体育返佣" en="Sports Rebate" />
                             </NormalLabel>
 
-                            <InputField
-                                type="number"
-                                name="sportsRebatePercentage"
-                                min="0"
-                                step="0.1"
-                                required
-                                addonAfter={<Button isStatic>%</Button>}
-                            />
+                            <AgentSportsRebatePercentageInputField />
                         </FieldValues>
                     </TwoColumns>
 
@@ -285,14 +257,7 @@ const FormBody = ({}) => {
                     </NormalLabel>
                     <TwoColumns columns={["0.7fr"]}>
                         <Flex flex="1 50%">
-                            <InputField
-                                type="number"
-                                name="cardGameRebatePercentage"
-                                min="0"
-                                step="0.1"
-                                required
-                                addonAfter={<Button isStatic>%</Button>}
-                            />
+                            <AgentCardGameRebatePercentageInputField />
                         </Flex>
 
                         <FieldValues>
@@ -303,14 +268,7 @@ const FormBody = ({}) => {
                                 />
                             </NormalLabel>
 
-                            <InputField
-                                type="number"
-                                name="virtualSportsRebatePercentage"
-                                min="0"
-                                step="0.1"
-                                required
-                                addonAfter={<Button isStatic>%</Button>}
-                            />
+                            <AgentVirtualSportsRebatePercentageInputField />
                         </FieldValues>
                     </TwoColumns>
 
@@ -382,89 +340,37 @@ const ConfigFormBody = ({ record }) => {
                     <NormalLabel required>
                         <Trans zh="分红比例" en="Bonus" />
                     </NormalLabel>
-                    <InputField
-                        type="number"
-                        name="bonusPercentage"
-                        min="0"
-                        step="0.1"
-                        required
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <AgentCommissionPercentageInputField />
 
                     <NormalLabel required>
                         <Trans zh="真人返佣" en="Live Dealer Rebate" />
                     </NormalLabel>
-                    <InputField
-                        type="number"
-                        name="liveDealerRebatePercentage"
-                        min="0"
-                        step="0.1"
-                        required
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <AgentLiveDealerRebatePercentageInputField />
 
                     <NormalLabel required>
-                        <Trans zh="电子返佣" en="Slot Rebate" />
+                        <Trans zh="电子返佣" en="EGame Rebate" />
                     </NormalLabel>
-                    <InputField
-                        type="number"
-                        name="slotRebatePercentage"
-                        min="0"
-                        step="0.1"
-                        required
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <AgentEgameRebatePercentageInputField />
 
                     <NormalLabel required>
                         <Trans zh="棋牌返佣" en="Card Game Rebate" />
                     </NormalLabel>
-                    <InputField
-                        type="number"
-                        name="cardGameRebatePercentage"
-                        min="0"
-                        step="0.1"
-                        required
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <AgentCardGameRebatePercentageInputField />
 
                     <NormalLabel required>
                         <Trans zh="彩票返佣" en="Lottery Rebate" />
                     </NormalLabel>
-                    <InputField
-                        type="number"
-                        name="lotteryRebatePercentage"
-                        max="100"
-                        min="0"
-                        step="0.1"
-                        required
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <AgentLotteryRebatePercentageInputField />
 
                     <NormalLabel required>
                         <Trans zh="体育返佣" en="Sportsbook Rebate" />
                     </NormalLabel>
-
-                    <InputField
-                        type="number"
-                        name="sportsbookRebatePercentage"
-                        min="0"
-                        step="0.1"
-                        required
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <AgentSportsRebatePercentageInputField />
 
                     <NormalLabel required>
                         <Trans zh="虚拟体育返佣" en="Virtual Sports Rebate" />
                     </NormalLabel>
-
-                    <InputField
-                        type="number"
-                        name="virtualSportsRebatePercentage"
-                        min="0"
-                        step="0.1"
-                        required
-                        addonAfter={<Button isStatic>%</Button>}
-                    />
+                    <AgentVirtualSportsRebatePercentageInputField />
                 </FieldValues>
             </Set>
         </Set>

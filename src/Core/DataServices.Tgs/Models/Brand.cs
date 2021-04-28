@@ -30,7 +30,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset CurrentSettlementTo { get; set; }
         public DateTimeOffset NextSettlementFrom { get; set; }
         public DateTimeOffset NextSettlementTo { get; set; }
-
+        public bool AutoSentPlayerBonus { get; set; }
+        public bool AutoSentAgentBonus { get; set; }
         public virtual ICollection<Player> Players { get; set; }
 
         public virtual ICollection<BrandGame> Games { get; set; }

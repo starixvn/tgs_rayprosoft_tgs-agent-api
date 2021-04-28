@@ -14,17 +14,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         private static readonly Dictionary<string, Guid> Payments = new()
         {
-            { "Manual", new("30CB4D17-2506-4D72-8470-65063B80F9C9") }
+            ["Manual"] = new("30CB4D17-2506-4D72-8470-65063B80F9C9"),
+            ["LeePay"] = new Guid("EC6EBD49-E002-4DB9-B7DE-1750FADC0C8E")
         };
 
         private static readonly Dictionary<string, Guid> PaymentMethods = new()
         {
-            { "BankTransfer", new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB") },
+            ["BankTransfer"] = new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"),
+            ["Crypto"] = new Guid("798D21C6-9CF5-4FC0-BD09-8D67D2C9E7E1")
+
         };
 
         private static readonly Dictionary<string, Guid> PaymentChannels = new()
         {
-            { "RichBank", new("E761A2D3-5705-417F-8D97-43CB7AEA0142") }
+            ["RichBank"] = new("E761A2D3-5705-417F-8D97-43CB7AEA0142"),
+            ["USDT"] = new("B90029F9-F0C6-4E77-9031-0C554028F9BA")
         };
 
         private async Task GeneratePaymentAsync()

@@ -5,7 +5,7 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.BrandPayment;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
+using PaymentData = TGS.Core.DataServices.Tgs.Models.Payment;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -16,8 +16,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public void Can_Get_All_Payments()
         {
-            var moqQueries = new Mock<ITgsQueries<Payment>>();
-            var moqCommands = new Mock<ITgsCommands<Payment>>();
+            var moqQueries = new Mock<ITgsQueries<PaymentData>>();
+            var moqCommands = new Mock<ITgsCommands<PaymentData>>();
 
             var sut = new PaymentController(
                 moqQueries.Object,
@@ -25,7 +25,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             moqQueries.Setup(x => x.GetQueries())
                 .Returns(new[] {
-                    new Payment{
+                    new PaymentData{
                         Id = Guid.NewGuid(),
                         Code = "code1",
                         Name = "name1",

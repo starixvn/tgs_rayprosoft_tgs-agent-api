@@ -10,7 +10,6 @@ using TGS.Core.DataServices.Report.Models;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.Report.Application.Models.Market;
 using TGS.Services.Report.Application.Models.Player;
 using TGS.Services.Report.Application.Models.Round;
 
@@ -27,8 +26,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
         Task CreateRoundAggregateAsync(RoundAggregateModel[] models);
         Task DeleteRoundAggregatesAsync(RoundAggregate[] roundAggregates);
         Task<bool> ExistsAsync(Expression<Func<RoundAggregate, bool>> predicate);
-        Task<MarketDataModel[]> GetMarketsAsync(DateTimeOffset start, DateTimeOffset end);
-        Task<PlayerDataModel[]> GetPlayersAsync(DateTimeOffset start, DateTimeOffset end);
 
         Task<(PlayerAggregateModel[] playerAggregates, PlayerGameTypeAggregateModel[] playerAggregateByGameType)>
             GetPlayerAggregatesAsync(DateTimeOffset start,
@@ -54,9 +51,11 @@ namespace TGS.Services.Report.Infrastructure.DataService
             {
                 BrandId = model.BrandId,
                 AgentId = model.AgentId,
+                GameProviderId = model.GameProviderId,
                 PlayerCode = model.PlayerCode,
                 GameType = model.GameType,
                 Hour = model.Hour,
+                Minute = model.Minute,
                 BetAmount = model.BetAmount,
                 ValidBetAmount = model.ValidBetAmount,
                 Turnover = model.Turnover,
@@ -75,94 +74,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
             Func<IQueryable<RoundAggregate>, IQueryable<RoundAggregate>> preQuery, bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        async Task<MarketDataModel[]> IRoundAggregateService.
-            GetMarketsAsync(DateTimeOffset start, DateTimeOffset end)
-        {
-            var reportDate = new DateTimeOffset(start.Year, start.Month, start.Day, 0,
-                0, 0,
-                start.Offset);
-
-            var roundAggregates =
-                await GetQueriesAsync<RoundAggregate>(
-                    q => q.Where(x => x.ReportDate == reportDate && x.Hour == start.Hour && x.Minute == start.Minute),
-                    false).ToArrayAsync();
-
-            var markets = await _tgsRepository.Brands
-                .Select(x =>
-                    new MarketDataModel
-                    {
-                        BrandId = x.Id,
-                        Hour = start.Hour,
-                        ReportDate = reportDate,
-                        RegisteredCount =
-                            _tgsRepository.Players.Count(p =>
-                                p.BrandId == x.Id && p.RegisteredOn >= start && p.RegisteredOn < end),
-                        FirstFundInCount =
-                            _tgsRepository.Players.Count(p =>
-                                p.BrandId == x.Id && p.FirstDepositOn >= start && p.FirstDepositOn < end),
-                        DepositAmount =
-                            _tgsRepository.Transactions.Where(t =>
-                                t.BrandId == x.Id && t.Type == TransactionType.Deposit && t.ConfirmedOn >= start &&
-                                t.ConfirmedOn < end).Sum(t => t.Amount),
-                        WithdrawalAmount =
-                            _tgsRepository.Transactions.Where(t =>
-                                t.BrandId == x.Id && t.Type == TransactionType.Withdrawal && t.ConfirmedOn >= start &&
-                                t.ConfirmedOn < end).Sum(t => t.Amount),
-                        AdjustmentAmount = _tgsRepository.Transactions.Where(t =>
-                            t.BrandId == x.Id && t.Type == TransactionType.Adjust && t.ConfirmedOn >= start &&
-                            t.ConfirmedOn < end).Sum(t => t.Amount),
-                        CreatedOn = DateTimeOffset.Now
-                    }).ToArrayAsync();
-
-            foreach (var market in markets)
-            {
-                market.BetAmount =
-                    roundAggregates.Where(r => r.BrandId == market.BrandId)
-                        .Sum(r => r.BetAmount);
-                market.Turnover =
-                    roundAggregates.Where(r => r.BrandId == market.BrandId)
-                        .Sum(r => r.Turnover);
-                market.WinLossAmount = roundAggregates
-                    .Where(r => r.BrandId == market.BrandId)
-                    .Sum(r => r.WinLoss);
-                market.NetProfit = market.WinLossAmount - market.AdjustmentAmount - market.BonusAmount;
-            }
-
-            return markets;
-        }
-
-        async Task<PlayerDataModel[]> IRoundAggregateService.GetPlayersAsync(DateTimeOffset start, DateTimeOffset end)
-        {
-            var reportDate = new DateTimeOffset(start.Year, start.Month, start.Day, 0,
-                0, 0,
-                start.Offset);
-
-            var brandIds = await _tgsRepository.Brands.Select(x => x.Id).ToArrayAsync();
-
-            return brandIds.Join(GetQueriesAsync<RoundAggregate>(
-                    q => q.Where(x => x.ReportDate == reportDate && x.Hour == start.Hour && x.Minute == start.Minute),
-                    false), brandId => brandId, ra => ra.BrandId, (brandId, ra) => new {brandId, ra})
-                .GroupBy(x => new
-                    {
-                        x.brandId,
-                        x.ra.AgentId,
-                        x.ra.PlayerCode,
-                        x.ra.ReportDate,
-                        x.ra.Hour,
-                        x.ra.Minute
-                    },
-                    (x, ra) => new PlayerDataModel
-                    {
-                        BrandId = x.brandId,
-                        AgentId = x.AgentId,
-                        PlayerCode = x.PlayerCode,
-                        Hour = x.Hour,
-                        Contribution = ra.Sum(r => r.ra.WinLoss),
-                        ReportDate = x.ReportDate,
-                        CreatedOn = DateTimeOffset.Now
-                    }).ToArray();
-        }
-
         async Task<(PlayerAggregateModel[] playerAggregates, PlayerGameTypeAggregateModel[] playerAggregateByGameType)
             > IRoundAggregateService.
             GetPlayerAggregatesAsync(DateTimeOffset start, DateTimeOffset end)
@@ -175,8 +86,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 await GetQueriesAsync<RoundAggregate>(
                     q => q.Where(x => x.ReportDate == reportDate && x.Hour == start.Hour && x.Minute == start.Minute),
                     false).ToArrayAsync();
-            var playerCodes = roundAggregates.Select(x => x.PlayerCode).Distinct().ToArray();
-            var players = _tgsRepository.Players.Where(x => playerCodes.Contains(x.PlayerCode)).ToArray();
 
             var playerAggregates = await _tgsRepository.Players.Include(x => x.Agent)
                 .GroupJoin(_tgsRepository.Transactions, p => p.PlayerCode, t => t.Wallet.PlayerCode,
@@ -215,17 +124,22 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             BonusAmount = players.Where(p =>
                                 p.transaction.Type == TransactionType.Bonus && p.transaction.ConfirmedOn >= start &&
                                 p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                            RebateAmount = players.Where(p =>
+                                p.transaction.Type == TransactionType.Rebate && p.transaction.ConfirmedOn >= start &&
+                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                            DividendAmount = players.Where(p =>
+                                p.transaction.Type == TransactionType.Dividend && p.transaction.ConfirmedOn >= start &&
+                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                            PromotionAmount = players.Where(p =>
+                                p.transaction.Type == TransactionType.Promotion && p.transaction.ConfirmedOn >= start &&
+                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
                             CreatedOn = DateTimeOffset.Now
                         }).ToArrayAsync();
 
             foreach (var playerAggregate in playerAggregates)
             {
-                var player = players.FirstOrDefault(x => x.PlayerCode == playerAggregate.PlayerCode);
                 var playerRoundAggregates =
                     roundAggregates.Where(r => r.PlayerCode == playerAggregate.PlayerCode).ToArray();
-                var rebate = player?.Vip == null ? 0 : GetPlayerRebateAmount(player.Vip, playerRoundAggregates);
-                var agentDividend = (playerAggregate.WinLossAmount - playerAggregate.AdjustmentAmount -
-                    playerAggregate.BonusAmount - rebate) * (player?.Agent?.DividendPercentage ?? 0) / 100;
 
                 playerAggregate.BetAmount =
                     playerRoundAggregates
@@ -236,7 +150,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 playerAggregate.WinLossAmount = playerRoundAggregates
                     .Sum(r => r.WinLoss);
                 playerAggregate.NetProfit = playerAggregate.WinLossAmount - playerAggregate.AdjustmentAmount -
-                    playerAggregate.BonusAmount - rebate - agentDividend;
+                    playerAggregate.BonusAmount - playerAggregate.RebateAmount - playerAggregate.DividendAmount -
+                    playerAggregate.PromotionAmount;
             }
 
             playerAggregates = playerAggregates.Where(x =>
@@ -254,6 +169,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                         x.r.BrandId,
                         x.r.AgentId,
                         x.r.PlayerCode,
+                        x.r.GameProviderId,
                         x.r.GameType,
                         x.Vip,
                         x.Agent
@@ -265,6 +181,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             BrandId = x.BrandId,
                             AgentId = x.AgentId,
                             PlayerCode = x.PlayerCode,
+                            VipLevel = x.Vip.Level,
+                            GameProviderId = x.GameProviderId,
                             GameType = x.GameType,
                             Hour = start.Hour,
                             VipSportsRebatePercentage = x.Vip.SportsRebatePercentage,
@@ -324,24 +242,5 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     return 0;
             }
         }
-
-        private static decimal GetPlayerRebateAmount(VipLevel vip, IEnumerable<RoundAggregate> roundAggregates) =>
-            vip.SportsRebatePercentage * roundAggregates.Where(a =>
-                    a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
-                .Sum(a => a.Turnover) / 100 +
-            vip.VirtualSportsRebatePercentage * roundAggregates
-                .Where(a => a.GameType == GameType.VirtualSports)
-                .Sum(a => a.Turnover) / 100 +
-            vip.LiveDealerRebatePercentage * roundAggregates
-                .Where(a => a.GameType == GameType.LiveDealer)
-                .Sum(a => a.Turnover) / 100 +
-            vip.CardGameRebatePercentage * roundAggregates.Where(a => a.GameType == GameType.CardGame)
-                .Sum(a => a.Turnover) / 100 +
-            vip.SlotRebatePercentage * roundAggregates.Where(a =>
-                    a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
-                    a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
-                .Sum(a => a.Turnover) / 100 +
-            vip.LotteryRebatePercentage * roundAggregates.Where(a => a.GameType == GameType.Lottery)
-                .Sum(a => a.Turnover) / 100;
     }
 }

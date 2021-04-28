@@ -105,11 +105,49 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await LogSeedingTimeAsync(GenerateSportTypesAndMarketTypesAsync, logBuilder);
             await LogSeedingTimeAsync(GeneratePlayerSportsBetLimitsAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateBetDataAsync, logBuilder);
+            await LogSeedingTimeAsync(GeneratePromotionsAsync, logBuilder);
 
             timer.Stop();
 
             logBuilder.AppendLine($"Total Time was {timer.ElapsedMilliseconds} ms");
             Console.WriteLine(logBuilder.ToString());
+        }
+
+        private async Task GeneratePromotionsAsync()
+        {
+            var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month, DateTimeOffset.Now.Day, 0,
+                0, 0, new(8, 0, 0));
+            var promotions = _brandCreated.Select(x =>
+            {
+                var promotionId = Guid.NewGuid();
+                return new Promotion
+                {
+                    Id = promotionId,
+                    Name = $"{x.Value.Name}_發發發流流流長江流水向東流",
+                    From = now,
+                    To = now.AddDays(7),
+                    Status = SwitchStatus.Enabled,
+                    BrandId = x.Value.Id,
+                    PromotionType = "TurnoverRebate",
+                    BonusAmountLimit = 1000000,
+                    Unlimited = false,
+                    PromotionGameProviders =
+                        _gameProviders.Select(g =>
+                                new PromotionGameProvider {PromotionId = promotionId, GameProviderId = g.Id})
+                            .ToHashSet(),
+                    PromotionVipLevels =
+                        x.Value.VipLevels.Select(v =>
+                                new PromotionVipLevel {PromotionId = promotionId, VipLevelId = v.Id})
+                            .ToHashSet(),
+                    PromotionParticipants = x.Value.Players.Select(p => new PromotionParticipant
+                    {
+                        PlayerCode = p.PlayerCode, PromotionId = promotionId
+                    }).ToHashSet()
+                };
+            });
+
+            await _repository.Promotions.AddRangeAsync(promotions);
+            await _repository.SaveChangesAsync();
         }
 
         private async Task GenerateCurrenciesAsync()
@@ -358,21 +396,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             UpdatedOn = Now
                         }
                     },
-                Banks = new[]
-                {
-                    new PlayerBank
-                    {
-                        Id = GuidExtensions.NewSequentialGuid(),
-                        PlayerCode = playerCode,
-                        RealName = Generator.RandomString(4),
-                        BankName = Generator.RandomString(12),
-                        BankAccount = Generator.RandomIntString(20),
-                        CreatedByUsername = AdminUsername,
-                        UpdatedByUsername = AdminUsername,
-                        CreatedOn = Now,
-                        UpdatedOn = Now
-                    }
-                }
+                //Banks = new[]
+                //{
+                //    new PlayerBankInfo
+                //    {
+                //        Id = GuidExtensions.NewSequentialGuid(),
+                //        PlayerCode = playerCode,
+                //        RealName = Generator.RandomString(4),
+                //        BankName = Generator.RandomString(12),
+                //        BankAccount = Generator.RandomIntString(20),
+                //        CreatedByUsername = AdminUsername,
+                //        UpdatedByUsername = AdminUsername,
+                //        CreatedOn = Now,
+                //        UpdatedOn = Now
+                //    }
+                //}
             };
         }
 

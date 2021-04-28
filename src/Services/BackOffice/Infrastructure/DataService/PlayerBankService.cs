@@ -11,13 +11,13 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IPlayerBankService
     {
-        Task<PlayerBank> GetPlayerBankAsync(Expression<Func<PlayerBank, bool>> predicate,
-            Func<IQueryable<PlayerBank>, IQueryable<PlayerBank>> preQuery = null);
+        Task<PlayerBankInfo> GetPlayerBankAsync(Expression<Func<PlayerBankInfo, bool>> predicate,
+            Func<IQueryable<PlayerBankInfo>, IQueryable<PlayerBankInfo>> preQuery = null);
 
         Task CreatePlayerBankAsync(CreatePlayerBankRequest request);
-        Task UpdatePlayerBankAsync(PlayerBank playerBank, UpdatePlayerBankRequest request);
-        Task DeletePlayerBankAsync(PlayerBank playerBank);
-        Task<bool> ExistsAsync(Expression<Func<PlayerBank, bool>> predicate);
+        Task UpdatePlayerBankAsync(PlayerBankInfo playerBank, UpdatePlayerBankRequest request);
+        Task DeletePlayerBankAsync(PlayerBankInfo playerBank);
+        Task<bool> ExistsAsync(Expression<Func<PlayerBankInfo, bool>> predicate);
     }
 
     public class PlayerBankService : BaseRepositoryOperations<ITgsRepository>, IPlayerBankService
@@ -27,16 +27,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
         }
 
-        Task<PlayerBank> IPlayerBankService.GetPlayerBankAsync(Expression<Func<PlayerBank, bool>> predicate,
-            Func<IQueryable<PlayerBank>, IQueryable<PlayerBank>> preQuery) =>
+        Task<PlayerBankInfo> IPlayerBankService.GetPlayerBankAsync(Expression<Func<PlayerBankInfo, bool>> predicate,
+            Func<IQueryable<PlayerBankInfo>, IQueryable<PlayerBankInfo>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         Task IPlayerBankService.UpdatePlayerBankAsync(
-            PlayerBank playerBank, UpdatePlayerBankRequest request)
+            PlayerBankInfo playerBank, UpdatePlayerBankRequest request)
         {
-            playerBank.RealName = request.RealName;
-            playerBank.BankName = request.BankName;
-            playerBank.BankAccount = request.BankAccount;
+            //playerBank.RealName = request.RealName;
+            //playerBank.BankName = request.BankName;
+            //playerBank.BankAccount = request.BankAccount;
             playerBank.UpdatedByUsername = request.EditorUsername;
             playerBank.UpdatedOn = DateTimeOffset.Now;
 
@@ -45,12 +45,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         Task IPlayerBankService.CreatePlayerBankAsync(CreatePlayerBankRequest request)
         {
-            var bank = new PlayerBank
+            var bank = new PlayerBankInfo
             {
                 PlayerCode = request.PlayerCode,
-                RealName = request.RealName,
-                BankAccount = request.BankAccount,
-                BankName = request.BankName,
+                //RealName = request.RealName,
+                //BankAccount = request.BankAccount,
+                //BankName = request.BankName,
                 CreatedByUsername = request.EditorUsername,
                 UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
@@ -60,9 +60,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return CreateEntityAsync(bank);
         }
 
-        Task IPlayerBankService.DeletePlayerBankAsync(PlayerBank playerBank) => DeleteEntityAsync(playerBank);
+        Task IPlayerBankService.DeletePlayerBankAsync(PlayerBankInfo playerBank) => DeleteEntityAsync(playerBank);
 
-        Task<bool> IPlayerBankService.ExistsAsync(Expression<Func<PlayerBank, bool>> predicate) =>
+        Task<bool> IPlayerBankService.ExistsAsync(Expression<Func<PlayerBankInfo, bool>> predicate) =>
             ExistsAsync(predicate);
     }
 }
