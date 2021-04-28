@@ -94,10 +94,14 @@ export const EditButton = ({ brandId, record, onSubmitted, ...props }) => {
 }
 
 const parseJsonString = (value = "") => {
-    let result = undefined
+    let result = value
     try {
-        result = JSON.parse(value)
-    } catch {}
+        if (typeof value === "string") {
+            result = JSON.parse(value)
+        }
+    } catch {
+        //ignore
+    }
     return result
 }
 

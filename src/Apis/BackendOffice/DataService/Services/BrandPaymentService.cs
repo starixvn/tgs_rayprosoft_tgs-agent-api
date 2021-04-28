@@ -114,6 +114,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 DepositedAmountMax = payment.DepositedAmountMax
             };
 
+            payment.PaymentMethodChannelId = request.PaymentMethodChannelId;
             payment.ChannelName = request.ChannelName;
             payment.PaymentStatus = request.PaymentStatus;
             payment.TransferLimitFrom = request.TransferLimitFrom;
