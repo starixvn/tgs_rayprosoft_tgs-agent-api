@@ -111,6 +111,7 @@ const BodyContent = ({ brandId }) => {
             keyword: ""
         })
     }
+    let isDepositTab = transferType === TransferType.Deposit
 
     return (
         <PageContent
@@ -131,7 +132,12 @@ const BodyContent = ({ brandId }) => {
                         }}
                         isLoading={isLoading}
                     />
-                    <AddBrandPaymentButton brandId={brandId} />
+                    {isDepositTab && (
+                        <AddBrandPaymentButton
+                            brandId={brandId}
+                            onSubmitted={mutate}
+                        />
+                    )}
                 </Level>
             }
         >

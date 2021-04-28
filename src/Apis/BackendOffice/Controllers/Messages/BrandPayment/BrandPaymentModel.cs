@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
@@ -10,11 +11,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
         public Guid? PaymentId { get; set; }
         public Guid? PaymentMethodId { get; set; }
         public Guid? PaymentChannelId { get; set; }
+        public Guid? PaymentMethodChannelId { get; set; }
         public int Number { get; set; }
         public string PaymentName { get; set; }
         public string PaymentMethodName { get; set; }
         public string PaymentChannelName { get; set; }
         public string ChannelName { get; set; }
+        public string ExtendedData { get; set; }
         public decimal TransferLimitFrom { get; set; }
         public decimal TransferLimitTo { get; set; }
         public PaymentTransferType TransferType { get; set; }
