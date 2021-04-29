@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210428022855_Initial")]
+    [Migration("20210428100111_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2631,9 +2631,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_player_bank_infos");
 
                     b.HasIndex("BrandId")
+                        .IsUnique()
                         .HasDatabaseName("ix_player_bank_infos_brand_id");
 
                     b.HasIndex("PaymentChannelId")
+                        .IsUnique()
                         .HasDatabaseName("ix_player_bank_infos_payment_channel_id");
 
                     b.HasIndex("PlayerCode")
@@ -4673,15 +4675,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
-                        .WithMany()
-                        .HasForeignKey("BrandId")
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", "BrandId")
                         .HasConstraintName("fk_player_bank_infos_brands_brand_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.PaymentChannel", "PaymentChannel")
-                        .WithMany()
-                        .HasForeignKey("PaymentChannelId")
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", "PaymentChannelId")
                         .HasConstraintName("fk_player_bank_infos_payment_channels_payment_channel_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
