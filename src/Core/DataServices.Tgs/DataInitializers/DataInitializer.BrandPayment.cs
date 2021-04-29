@@ -22,7 +22,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             ["BankTransfer"] = new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"),
             ["Crypto"] = new Guid("798D21C6-9CF5-4FC0-BD09-8D67D2C9E7E1")
-
         };
 
         private static readonly Dictionary<string, Guid> PaymentChannels = new()
@@ -85,6 +84,30 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private Task GeneratePaymentMethodChannelsAsync()
         {
+            var paymentMethodChannels = new[] {
+                new PaymentMethodChannel
+                {
+                    Id = Guid.NewGuid(),
+                    PaymentId = Payments["Manual"],
+                    MethodId = PaymentMethods["BankTransfer"],
+                    ChannelId = PaymentChannels["RichBank"],
+                    CreatedByUsername = AdminUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedByUsername = AdminUsername,
+                    UpdatedOn = DateTimeOffset.Now
+                },
+                new PaymentMethodChannel
+                {
+                    Id = Guid.NewGuid(),
+                    PaymentId = Payments["LeePay"],
+                    MethodId = PaymentMethods["Crypto"],
+                    ChannelId = PaymentChannels["USDT"],
+                    CreatedByUsername = AdminUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedByUsername = AdminUsername,
+                    UpdatedOn = DateTimeOffset.Now
+                }
+            };
             var query = from payment in Payments
                         from method in PaymentMethods
                         from channel in PaymentChannels
@@ -120,7 +143,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                     BrandId = brand.Id,
                                     PaymentMethodChannelId = pmc.Id,
                                     TransferType = PaymentTransferType.Deposit,
-                                    ChannelName = "PoorBank",
+                                    ChannelName = $"{Payments.Where(p => p.Value == pmc.PaymentId).First().Key}_" +
+                                        $"{PaymentMethods.Where(p => p.Value == pmc.MethodId).First().Key}_" +
+                                        $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
                                     PaymentStatus = SwitchStatus.Enabled,
                                     TransferLimitFrom = 10,
                                     TransferLimitTo = 100000,

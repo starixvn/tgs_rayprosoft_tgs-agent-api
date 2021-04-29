@@ -8,6 +8,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
     {
         public Guid Id { get; set; }
 
+        public Guid BrandId { get; set; }
+
         public Guid PaymentMethodChannelId { get; set; }
 
         public SwitchStatus PaymentStatus { get; set; }

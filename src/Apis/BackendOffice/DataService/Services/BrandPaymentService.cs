@@ -50,9 +50,11 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             var payment = new BrandPayment
             {
                 Id = paymentId,
+                BrandId = request.BrandId,
                 DisplayOrder = 99,
                 PaymentMethodChannelId = request.PaymentMethodChannelId,
                 ChannelName = request.ChannelName,
+                ExtendedData = JsonSerializer.Serialize(request.ExtendedData),
                 TransferLimitFrom = request.TransferLimitFrom,
                 TransferLimitTo = request.TransferLimitTo,
                 PlayerListCondition = request.PlayerListCondition,
@@ -112,6 +114,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 DepositedAmountMax = payment.DepositedAmountMax
             };
 
+            payment.PaymentMethodChannelId = request.PaymentMethodChannelId;
             payment.ChannelName = request.ChannelName;
             payment.PaymentStatus = request.PaymentStatus;
             payment.TransferLimitFrom = request.TransferLimitFrom;

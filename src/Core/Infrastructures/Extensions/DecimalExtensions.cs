@@ -1,10 +1,15 @@
-﻿namespace TGS.Core.Infrastructures.Extensions
+﻿using System;
+
+namespace TGS.Core.Infrastructures.Extensions
 {
     public static class DecimalExtensions
     {
-        public static decimal Negate(this decimal d)
+        public static decimal Negate(this decimal d) => decimal.Negate(d);
+
+        public static decimal Truncate(this decimal d, int digits)
         {
-            return decimal.Negate(d);
+            var step = (decimal)Math.Pow(10, digits);
+            return decimal.Truncate(d * step) / step;
         }
     }
 }

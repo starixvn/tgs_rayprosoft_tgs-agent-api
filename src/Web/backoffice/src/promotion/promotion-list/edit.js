@@ -40,10 +40,11 @@ import {
 } from "../../game/GameType"
 import Separator from "../../layout/Separator"
 import {
+    PromotionTypeGroup,
     PromotionTypeGroupSelect,
     PromotionTypeSelect,
     usePromotionGroupValueOf
-} from "./PromotionType"
+} from "../PromotionType"
 import { toCheckedGameProviderIds } from "../../game/providers/GameProviderCheckboxGroup"
 import { BrandGameProviderCheckboxGroupTable } from "../../game/brandproviders/BrandGameProviderCheckboxGroup"
 import parseISO from "date-fns/parseISO"
@@ -55,7 +56,7 @@ import {
     NumberInputField,
     PercentageNumberInputField
 } from "../../input/NumberInput"
-import { PromotionTypeGroup } from "./PromotionType"
+import { Switch } from "../../switch/Switch"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -107,7 +108,9 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
 
     return (
         <FormDialog
-            defaultValues={{}}
+            defaultValues={{
+                autoSentPlayerBonus: true
+            }}
             onSubmit={onSubmit}
             isLoading={isLoading}
             result={result}
@@ -357,6 +360,16 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
 
     let promotionType = watch("promotionType")
 
+    let autoSentPlayerBonus = watch("autoSentPlayerBonus")
+    let autoPayoutLabel = useTrans({
+        zh: "自動",
+        en: "Auto"
+    })
+    let manualPayoutLabel = useTrans({
+        zh: "手动",
+        en: "Manual"
+    })
+
     let disabled = readonly
     let editable = !readonly
 
@@ -449,6 +462,21 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                             />
                         </>
                     )}
+                </Box>
+
+                <NormalLabel>
+                    <Trans zh="活动派发" en="Auto Bonus Payout" />
+                </NormalLabel>
+                <Box>
+                    <Switch
+                        name="autoSentPlayerBonus"
+                        label={
+                            autoSentPlayerBonus
+                                ? autoPayoutLabel
+                                : manualPayoutLabel
+                        }
+                        disabled={disabled}
+                    />
                 </Box>
 
                 <NormalLabel>
@@ -555,7 +583,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     <Trans zh="彩金上限" en="Max Amount" />
                 </NormalLabel>
                 <NumberInput
-                    name="promotionAmount"
+                    name="bonusAmountLimit"
                     min="0"
                     required
                     disabled={disabled}

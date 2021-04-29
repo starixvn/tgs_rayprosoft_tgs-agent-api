@@ -9,7 +9,7 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
     {
         void IEntityTypeConfiguration<RoundAggregate>.Configure(EntityTypeBuilder<RoundAggregate> builder)
         {
-            builder.ToTable("round_aggregate");
+            builder.ToTable("round_aggregates");
 
             builder.HasKey(c => c.Id)
                 .HasName("pk_round_aggregate_id");

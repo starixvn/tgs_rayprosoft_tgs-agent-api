@@ -101,6 +101,9 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
             builder.Property(b => b.CreatedOn)
                 .IsRequired();
 
+            builder.Property(e => e.SentOn)
+                .IsRequired(false);
+
             builder.HasIndex(b => b.BrandId)
                 .HasDatabaseName("ix_agent_dividends_brand_id");
 
