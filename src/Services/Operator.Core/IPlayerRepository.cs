@@ -2,10 +2,8 @@
 
 namespace TGS.Services.Operator
 {
-    public interface IWalletRepository
+    public interface IPlayerRepository
     {
-        ValueTask<BalanceInfo> GetBalanceInfoAsync(string playerCode);
-
         ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode);
     }
 }

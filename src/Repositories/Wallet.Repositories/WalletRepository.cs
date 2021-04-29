@@ -24,13 +24,18 @@ namespace TGS.Wallet.Repositories
             _transcationManager = transcationManager ?? throw new ArgumentNullException(nameof(transcationManager));
         }
 
-        public async ValueTask<Guid> ExchangeAsync(Guid brandId, Guid walletId, string playerCode, TransactionTypes transactionType, decimal amount)
+        public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(
+            Guid brandId,
+            Guid walletId,
+            string playerCode,
+            TransactionTypes transactionType,
+            decimal amount)
         {
             const string sql = "dbo.wallet_update_wallet_balance";
             var updatedOn = DateTimeOffset.UtcNow;
             var transactionId = GuidExtensions.NewSequentialGuid();
 
-            return await _transcationManager
+            var postBalance = await _transcationManager
                 .ExecuteTransactionAsync(
                     () => _tgsRepository,
                     IsolationLevel.ReadCommitted,
@@ -72,9 +77,11 @@ namespace TGS.Wallet.Repositories
 
                         await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
 
-                        return transactionId;
+                        return postBalance;
                     })
                 .ConfigureAwait(false);
+
+            return (transactionId, postBalance);
         }
 
         public async ValueTask<decimal> GetBalanceAsync(Guid walletId, string playerCode)

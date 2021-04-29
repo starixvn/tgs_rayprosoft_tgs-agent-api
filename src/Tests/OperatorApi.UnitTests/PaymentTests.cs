@@ -82,7 +82,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task User_Can_List_Available_BrandPayments()
         {
             var fakePaymentRepository = Substitute.For<IPaymentRepository>();
-            var fakeWalletRepository = Substitute.For<IWalletRepository>();
+            var fakeWalletRepository = Substitute.For<IPlayerRepository>();
 
             var sut = new BrandPaymentsQueryService(fakePaymentRepository, fakeWalletRepository);
 

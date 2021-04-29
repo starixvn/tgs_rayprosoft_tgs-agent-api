@@ -32,10 +32,10 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration UseWalletRepository<TWalletRepository>() where TWalletRepository : class, IWalletRepository
+        public OperatorConfiguration UseWalletRepository<TWalletRepository>() where TWalletRepository : class, IPlayerRepository
         {
             Services
-                .AddTransient<IWalletRepository, TWalletRepository>();
+                .AddTransient<IPlayerRepository, TWalletRepository>();
 
             return this;
         }

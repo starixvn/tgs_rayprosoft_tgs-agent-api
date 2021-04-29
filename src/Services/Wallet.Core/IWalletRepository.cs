@@ -5,7 +5,7 @@ namespace TGS.Services.Wallet
 {
     public interface IWalletRepository
     {
-        ValueTask<Guid> ExchangeAsync(
+        ValueTask<(Guid TranscationId, decimal PostBalance)> ExchangeAsync(
             Guid brandId,
             Guid walletId,
             string playerCode,
