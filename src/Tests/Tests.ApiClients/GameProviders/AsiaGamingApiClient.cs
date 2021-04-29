@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,9 +20,8 @@ namespace TGS.Tests.ApiClients.GameProviders
 
     public sealed class AsiaGamingApiClient : BaseApiClient, IAsiaGamingApiClient
     {
-        private static readonly XmlMediaTypeFormatter XmlMediaTypeFormatter = new();
         private static readonly string RoutePrefix = "api/ag";
-        private HttpClient _client;
+        private readonly HttpClient _client;
 
         public AsiaGamingApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) :
             base(client, logger, json)
@@ -39,49 +37,47 @@ namespace TGS.Tests.ApiClients.GameProviders
             ExecuteXmlRequestAsync<BetResponseRequest, TransferResponse>(HttpMethod.Post,
                 $"{RoutePrefix}/betresponse", request);
 
-        private async Task<TResponse> ExecuteXmlRequestAsync<TRequest, TResponse>(HttpMethod method, string path, TRequest request)
+        private async Task<TResponse> ExecuteXmlRequestAsync<TRequest, TResponse>(HttpMethod method, string path,
+            TRequest request)
         {
             var requestMessage = CreateHttpRequestMessage(path, method);
             var httpContent = new StringContent(ObjectToXml(request), Encoding.UTF8, MediaTypeNames.Application.Xml);
             requestMessage.Content = httpContent;
-            
+
             var response = await SendAsync(requestMessage, string.Empty);
-            
+
             var responseString = await response.Content.ReadAsStringAsync();
-            return DeserializeWithXmlSerializer<TResponse>(responseString);
+            return DeserializeXml<TResponse>(responseString);
         }
-        
+
         private HttpRequestMessage CreateHttpRequestMessage(string path, HttpMethod method)
         {
-            var reqUrl = _client.BaseAddress.AbsoluteUri.TrimEndSlash();
+            var reqUrl = _client.BaseAddress!.AbsoluteUri.TrimEndSlash();
             reqUrl = $"{reqUrl}/{path}";
-            return new HttpRequestMessage(method, reqUrl);
+            return new(method, reqUrl);
         }
-        
-        private string ObjectToXml<TRequest>(TRequest request)
+
+        private static string ObjectToXml<TRequest>(TRequest request)
         {
             var emptyNamespaces = new XmlSerializerNamespaces();
             emptyNamespaces.Add("", "");
             using var sw = new Utf8StringWriter();
             using var writer = XmlWriter.Create(sw);
-            var _xml = new XmlSerializer(typeof(TRequest));
-            _xml.Serialize(writer, request, emptyNamespaces);
+            var serializer = new XmlSerializer(typeof(TRequest));
+            serializer.Serialize(writer, request, emptyNamespaces);
             return sw.ToString();
         }
-        
-        private static T DeserializeWithXmlSerializer<T>(string msg)
+
+        private static T DeserializeXml<T>(string msg)
         {
             using var sr = new StringReader(msg);
-            var serializer = XmlMediaTypeFormatter.CreateXmlSerializer(typeof(T));
+            var serializer = new XmlSerializer(typeof(T));
             return (T)serializer.Deserialize(sr);
         }
 
         private class Utf8StringWriter : StringWriter
         {
-            public override Encoding Encoding
-            {
-                get { return new UTF8Encoding(false); }
-            }
+            public override Encoding Encoding => new UTF8Encoding(false);
         }
     }
 }
