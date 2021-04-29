@@ -152,7 +152,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "promotion_bonus",
+                name: "promotion_bonuses",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -173,7 +173,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "round_aggregate",
+                name: "round_aggregates",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -199,7 +199,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "promotion_player",
+                name: "promotion_players",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -217,7 +217,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                         name: "fk_promotion_bonus_promotion_brand_id",
                         column: x => x.promotion_bonus_id,
                         principalSchema: "dbo",
-                        principalTable: "promotion_bonus",
+                        principalTable: "promotion_bonuses",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -297,43 +297,43 @@ namespace TGS.Core.DataServices.Report.Migrations
             migrationBuilder.CreateIndex(
                 name: "ix_promotion_bonus_multiple_keys",
                 schema: "dbo",
-                table: "promotion_bonus",
+                table: "promotion_bonuses",
                 columns: new[] { "promotion_id", "from", "to" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_promotion_bonus_promotion_id",
                 schema: "dbo",
-                table: "promotion_bonus",
+                table: "promotion_bonuses",
                 column: "promotion_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_promotion_player_multiple_keys",
                 schema: "dbo",
-                table: "promotion_player",
+                table: "promotion_players",
                 columns: new[] { "player_code", "promotion_bonus_id" });
-
-            migrationBuilder.CreateIndex(
-                name: "ix_promotion_player_promotion_bonus_id",
-                schema: "dbo",
-                table: "promotion_player",
-                column: "promotion_bonus_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_promotion_player_promotion_id",
                 schema: "dbo",
-                table: "promotion_player",
+                table: "promotion_players",
                 column: "player_code");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_promotion_players_promotion_bonus_id",
+                schema: "dbo",
+                table: "promotion_players",
+                column: "promotion_bonus_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_round_aggregate_multiple_keys",
                 schema: "dbo",
-                table: "round_aggregate",
+                table: "round_aggregates",
                 columns: new[] { "report_date", "hour", "minute" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_round_aggregate_player_code",
                 schema: "dbo",
-                table: "round_aggregate",
+                table: "round_aggregates",
                 column: "player_code");
         }
 
@@ -356,15 +356,15 @@ namespace TGS.Core.DataServices.Report.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "promotion_player",
+                name: "promotion_players",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "round_aggregate",
+                name: "round_aggregates",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "promotion_bonus",
+                name: "promotion_bonuses",
                 schema: "dbo");
         }
     }
