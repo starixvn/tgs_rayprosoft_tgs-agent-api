@@ -29,6 +29,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY
             services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(KYGameInitializer) }, (provider, _) =>
                   provider.GetRequiredService<KYGameInitializer>());
+            services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(KYGameProviderWalletAction) }, (provider, _) =>
+                 provider.GetRequiredService<KYGameProviderWalletAction>());
 
 
         }

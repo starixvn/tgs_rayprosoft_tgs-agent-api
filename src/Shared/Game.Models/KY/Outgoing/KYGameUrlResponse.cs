@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using TGS.Shared.Game.Models.KY.Outgoing;
 
-namespace TGS.Shared.Game.Models.KY.Incoming
+namespace TGS.Shared.Game.Models.KY.Outgoing
 {
-    public record KYGameUrlResponse
+    public record KYGameUrlResponse : KYBaseDataResponse
     {
-        [JsonPropertyName("code")]
-        public int Code { get; init; }
+
 
         [JsonPropertyName("url")]
         public string Url { get; init; }

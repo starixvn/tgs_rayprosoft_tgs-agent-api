@@ -33,6 +33,14 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
                 .ConfigureAwait(false);
 
         [HttpPost]
+        [Route("player/blaance")]
+        public async ValueTask<GameProviderWalletGetBalanceResponse> GetBalance(
+    [FromServices] Func<string, IGameProviderWalletAction> walletActionFactory,
+    GameProviderWalletGetBalanceRequest request) =>
+    await walletActionFactory(request.GameProviderCode).GetBalanceAsync(request)
+        .ConfigureAwait(false);
+
+        [HttpPost]
         [Route("player/kick")]
         public async ValueTask<PlayerKickResponse> KickPlayerAsync(
             [FromServices] IGameProviderOperations gameProviderOperations,

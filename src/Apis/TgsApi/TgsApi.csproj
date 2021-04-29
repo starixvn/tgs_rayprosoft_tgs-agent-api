@@ -54,6 +54,7 @@
 
   <ItemGroup>
     <Folder Include="GameProviders\KY\Controllers\" />
+    <Folder Include="Models\GameProviderWalletAction\" />
   </ItemGroup>
 
 

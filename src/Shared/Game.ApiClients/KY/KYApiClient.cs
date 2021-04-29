@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
-using TGS.Shared.Game.Models.KY.Incoming;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.KY
