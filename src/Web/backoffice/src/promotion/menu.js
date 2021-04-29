@@ -5,6 +5,10 @@ import {
     Code as PromotionListCode,
     codeLabelPair as promotionListPair
 } from "./promotion-list/menu"
+import {
+    Code as PayoutListCode,
+    codeLabelPair as payoutListPair
+} from "./payout-list/menu"
 import { getTrans, useTrans } from "../i18n"
 
 export const Code = "promotion"
@@ -46,6 +50,14 @@ const labelOf = ({ locale, code }) => {
                 },
                 locale
             )
+        case PayoutListCode:
+            return getTrans(
+                {
+                    zh: "活动派发列表",
+                    en: "Promotion Payouts"
+                },
+                locale
+            )
         default:
             return ""
     }
@@ -58,6 +70,6 @@ export const codeLabelPair = [
             locale,
             codes,
             label: labelOf,
-            subLabelPairs: [promotionListPair]
+            subLabelPairs: [promotionListPair, payoutListPair]
         })
 ]

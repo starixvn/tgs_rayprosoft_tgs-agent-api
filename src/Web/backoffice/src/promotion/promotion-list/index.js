@@ -27,13 +27,15 @@ import equals from "fast-deep-equal"
 import { usePromotionList } from "./client"
 import BrandBar from "../../report/BrandBar"
 import { formatDateTime, formatDayMonthYear } from "../../date/format"
-import { PromotionTypeLabel, usePromotionGroupLabelOf } from "./PromotionType"
+import { PromotionTypeLabel, usePromotionGroupLabelOf } from "../PromotionType"
 import { GameTypeLabel, useGameTypeGroupLabelOf } from "../../game/GameType"
-import { useGameTypeGroupList } from "../../game/client"
 import { GameProviderListDialogDisclosure } from "../../game/providers/GameProviderList"
 import { VipLevelListDialogDisclosure } from "../../vip-levels/VipLevelList"
 import { formatNumber } from "../../number/format"
-import { PromotionStatusSelect, PromotionStatusSwitch } from "./PromotionStatus"
+import {
+    PromotionStatusSelect,
+    PromotionStatusSwitch
+} from "../PromotionStatus"
 
 export { Code }
 

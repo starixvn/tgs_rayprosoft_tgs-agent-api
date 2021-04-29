@@ -46,7 +46,7 @@ import { InputField } from "../../input/Input"
 import { formatNumber } from "../../number/format"
 import BrandBar from "../../report/BrandBar"
 import textColumn from "../../table/column/textColumn"
-import { PaymentLabel } from "../../payment/payment"
+import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
 
 export { Code }
@@ -348,7 +348,7 @@ const useColumns = ({
                 accessor: "paymentId",
                 Header: <Trans zh="支付厂商" en="Payment Name" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <PaymentLabel value={value} />
+                Cell: ({ value }) => <PaymentProviderLabel value={value} />
             }),
             textColumn({
                 accessor: "paymentMethodId",

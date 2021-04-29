@@ -1,9 +1,9 @@
 import React from "react"
 import { css } from "@emotion/react"
 import { Spinner } from "bumbag"
-import { getTrans, Trans, useLocale, useTrans } from "../../i18n"
-import { Switch } from "../../switch/Switch"
-import { Select } from "../../select/Select"
+import { getTrans, Trans, useLocale, useTrans } from "../i18n"
+import { Switch } from "../switch/Switch"
+import { Select } from "../select/Select"
 
 const Enabled = "Enabled"
 const EnabledTrans = {
@@ -37,6 +37,7 @@ export const PromotionStatusSelect = ({ placeholder, ...props }) => {
     return <Select placeholder={placeholder} options={options} {...props} />
 }
 
+//TODO: update menu auth
 //TODO: remove disabled when bo-api ready
 export const PromotionStatusSwitch = ({ value, disabled = true, ...props }) => {
     let checked = value === Enabled
