@@ -97,6 +97,7 @@ namespace TGS.Apis.OperatorApi
 
             services.AddIdentityVerifiers();
 
+            services.AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>

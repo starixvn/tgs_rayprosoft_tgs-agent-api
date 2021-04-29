@@ -85,7 +85,7 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        DbSet<PlayerBankInfo> PlayerBanks { get; set; }
+        DbSet<PlayerBankInfo> PlayerBankInfos { get; set; }
 
         DbSet<VipLevel> VipLevels { get; set; }
 
@@ -227,7 +227,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        public DbSet<PlayerBankInfo> PlayerBanks { get; set; }
+        public DbSet<PlayerBankInfo> PlayerBankInfos { get; set; }
 
         public DbSet<VipLevel> VipLevels { get; set; }
 

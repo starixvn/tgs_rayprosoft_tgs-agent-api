@@ -2615,13 +2615,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "ix_player_bank_infos_brand_id",
                 schema: "dbo",
                 table: "player_bank_infos",
-                column: "brand_id");
+                column: "brand_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_player_bank_infos_payment_channel_id",
                 schema: "dbo",
                 table: "player_bank_infos",
-                column: "payment_channel_id");
+                column: "payment_channel_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_player_bank_infos_player_code",
