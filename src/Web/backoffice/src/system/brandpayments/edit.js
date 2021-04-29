@@ -35,7 +35,8 @@ import BrandPaymentStatus, {
 import {
     useUpdatePayment,
     useBrandPaymentUpload,
-    useAddBrandPayment
+    useAddBrandPayment,
+    useBrandPaymentMethodChannelList
 } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import {
@@ -56,10 +57,8 @@ import Input from "../../input/Input"
 import { Checkbox } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
 import clone from "clone-deep"
-import { usePaymentMethodList } from "../../payment/method/client"
-import { usePaymentChannelList } from "../../payment/channel/client"
 import { usePaymentList } from "../../payment/client"
-import { PaymentLabel } from "../../payment/payment"
+import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import {
     PaymentMethodLabel,
     PaymentMethodSelect
@@ -92,9 +91,21 @@ export const EditButton = ({ brandId, record, onSubmitted, ...props }) => {
     )
 }
 
+const parseJsonString = (value = "") => {
+    let result = value
+    try {
+        if (typeof value === "string") {
+            result = JSON.parse(value)
+        }
+    } catch {
+        //ignore
+    }
+    return result
+}
+
 const EditDialog = ({
     brandId,
-    record = {},
+    record: { extendedData, ...record } = {},
     onSubmitted,
     dialog,
     ...props
@@ -104,14 +115,13 @@ const EditDialog = ({
         en: "Edit"
     })
 
-    /*
     let {
-        data: brandPaymentData = {},
         isLoading: isLoadingPayment,
-        error: getPaymentDataError,
-        deleteCache: deleteGetPaymentCache
-    } = useBrandPayment(record?.id)
-    */
+        manualPayment,
+        bankTransferPaymentMethod,
+        bankTransferPaymentMethodChannels,
+        error: loadingPaymentError
+    } = useManualBankTransferPayment()
 
     let [submitData, setSubmit] = useState()
 
@@ -119,22 +129,23 @@ const EditDialog = ({
         record.id,
         submitData
     )
-    /*
+
     if (isLoadingPayment) {
         return <LoadingBackdrop {...dialog} />
     }
 
-    if (getPaymentDataError) {
+    if (loadingPaymentError) {
         return (
-            <AlertDialog {...getPaymentDataError} onClickClose={dialog.hide} />
+            <AlertDialog {...loadingPaymentError} onClickClose={dialog.hide} />
         )
     }
-    */
 
+    extendedData = parseJsonString(extendedData)
     return (
         <FormDialog
             defaultValues={clone({
                 ...record,
+                extendedData,
                 reason: ""
             })}
             onSubmit={(data) => {
@@ -193,7 +204,15 @@ const EditDialog = ({
             `}
             dialog={dialog}
         >
-            <EditBody brandId={brandId} record={record} />
+            <EditBody
+                brandId={brandId}
+                record={record}
+                manualPayment={manualPayment}
+                bankTransferPaymentMethod={bankTransferPaymentMethod}
+                bankTransferPaymentMethodChannels={
+                    bankTransferPaymentMethodChannels
+                }
+            />
         </FormDialog>
     )
 }
@@ -225,46 +244,45 @@ const useManualBankTransferPayment = () => {
         isLoading: isLoadingPaymentList,
         data: paymentListData,
         error: paymentListError,
-        deleteCache: deletePaymentListCache,
-        ...paymentList
+        mutate: mutatePaymentList,
+        deleteCache: deletePaymentListCache
     } = usePaymentList()
+
     let {
-        isLoading: isLoadingPaymentMethodList,
-        data: paymentMethodData,
-        error: paymentMethodError,
-        deleteCache: deletePaymentMethodCache,
-        ...paymentMethodList
-    } = usePaymentMethodList()
-    let {
-        isLoading: isLoadingPaymentChannelList,
-        data: paymentChannelData,
-        error: paymentChannelError,
-        deleteCache: deletePaymentChannelCache,
-        ...paymentChannelList
-    } = usePaymentChannelList()
+        isLoading: isLoadingBrandPaymentMethodChannelList,
+        data: paymentMethodChannelList,
+        error: paymentMethodChannelListError,
+        mutate: mutatePaymentMethodChannelList,
+        deleteCache: deletePaymentMethodChannelListCache
+    } = useBrandPaymentMethodChannelList()
 
     let manualPayment = paymentListData?.find(({ code }) => code === "Manual")
 
-    let bankTransferPaymentMethod = paymentMethodData?.find(
+    let bankTransferPaymentMethod = paymentMethodChannelList?.methods?.find(
         ({ code }) => code === "BankTransfer"
     )
 
-    //TODO: filter payment channel based on payment id and method id?
-    let paymentChannels = paymentChannelData?.data
+    let bankTransferPaymentMethodChannels = paymentMethodChannelList?.allData?.filter(
+        (item) => {
+            return (
+                item.methodId === bankTransferPaymentMethod.id &&
+                item.paymentId === manualPayment.id
+            )
+        }
+    )
 
     return {
         isLoading:
-            isLoadingPaymentList ||
-            isLoadingPaymentMethodList ||
-            isLoadingPaymentChannelList,
+            isLoadingPaymentList || isLoadingBrandPaymentMethodChannelList,
         manualPayment,
         bankTransferPaymentMethod,
-        paymentChannels,
-        error: paymentListError || paymentMethodError || paymentChannelError,
+        bankTransferPaymentMethodChannels,
+        error: paymentListError || paymentMethodChannelListError,
+        mutatePaymentList,
+        mutatePaymentMethodChannelList,
         deleteCache: () => {
             deletePaymentListCache()
-            deletePaymentMethodCache()
-            deletePaymentChannelCache()
+            deletePaymentMethodChannelListCache()
         }
     }
 }
@@ -274,7 +292,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
         isLoading: isLoadingPayment,
         manualPayment,
         bankTransferPaymentMethod,
-        paymentChannels,
+        bankTransferPaymentMethodChannels,
         error: loadingPaymentError
     } = useManualBankTransferPayment()
 
@@ -309,7 +327,8 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     return (
         <FormDialog
             defaultValues={{
-                paymentStatus: BrandPaymentStatus.Enabled
+                paymentStatus: BrandPaymentStatus.Enabled,
+                extendedData: {}
             }}
             onSubmit={onSubmit}
             result={result}
@@ -354,7 +373,9 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
                 isAdd={true}
                 manualPayment={manualPayment}
                 bankTransferPaymentMethod={bankTransferPaymentMethod}
-                paymentChannels={paymentChannels}
+                bankTransferPaymentMethodChannels={
+                    bankTransferPaymentMethodChannels
+                }
             />
         </FormDialog>
     )
@@ -366,7 +387,7 @@ const EditBody = ({
     record = {},
     manualPayment,
     bankTransferPaymentMethod,
-    paymentChannels = [],
+    bankTransferPaymentMethodChannels = [],
     dialog,
     ...props
 }) => {
@@ -374,10 +395,30 @@ const EditBody = ({
     let transferLimitTo = watch("transferLimitTo")
     let transferLimitFrom = watch("transferLimitFrom")
 
+    const PaymentChannelIdFieldName = "paymentChannelId"
+    let paymentChannelId = watch("paymentChannelId")
+
+    let paymentMethodId = watch("paymentMethodId")
+    const PaymentMethodChannelIdFieldName = "paymentMethodChannelId"
+    let paymentMethodChannelId = watch(PaymentMethodChannelIdFieldName)
     let isEdit = !isAdd
     let paymentId = isAdd ? manualPayment?.id : record?.paymentId
-    let isBankTransferMethodRecord =
-        record?.paymentMethodId === bankTransferPaymentMethod?.id
+    let isBankTransferMethod = paymentMethodId === bankTransferPaymentMethod?.id
+
+    useEffect(() => {
+        if (isBankTransferMethod) {
+            let paymentMethodChannel = bankTransferPaymentMethodChannels.find(
+                (item) =>
+                    item.methodId === paymentMethodId &&
+                    item.channelId === paymentChannelId
+            )
+
+            setValue(
+                PaymentMethodChannelIdFieldName,
+                paymentMethodChannel?.id ?? ""
+            )
+        }
+    }, [paymentChannelId, paymentMethodId])
     return (
         <Stack
             orientation="vertical"
@@ -406,7 +447,7 @@ const EditBody = ({
                                     name="paymentId"
                                     value={paymentId}
                                 />
-                                <PaymentLabel value={paymentId} />
+                                <PaymentProviderLabel value={paymentId} />
                             </Box>
 
                             <Label>
@@ -417,20 +458,34 @@ const EditBody = ({
                                     <PaymentMethodSelect
                                         name="paymentMethodId"
                                         placeholder={false}
+                                        range={[bankTransferPaymentMethod.id]}
                                         value={bankTransferPaymentMethod?.id}
+                                        onChange={(event) => {
+                                            console.log(
+                                                "paymentMethodId onChange",
+                                                event.target.value
+                                            )
+                                        }}
                                     />
                                 )}
-                                {isEdit && isBankTransferMethodRecord && (
+                                {isEdit && isBankTransferMethod && (
                                     <PaymentMethodSelect
                                         name="paymentMethodId"
+                                        range={[bankTransferPaymentMethod.id]}
                                         required
                                     />
                                 )}
-                                {isEdit && !isBankTransferMethodRecord && (
+                                {isEdit && !isBankTransferMethod && (
                                     <PaymentMethodLabel
+                                        range={[bankTransferPaymentMethod.id]}
                                         value={record?.paymentMethodId}
                                     />
                                 )}
+                                <Input
+                                    type="hidden"
+                                    name={PaymentMethodChannelIdFieldName}
+                                    value={paymentMethodChannelId}
+                                />
                             </Box>
 
                             <Label>
@@ -439,17 +494,17 @@ const EditBody = ({
                             <Box alignY="center">
                                 {isAdd && (
                                     <PaymentChannelSelect
-                                        name="paymentChannelId"
+                                        name={PaymentChannelIdFieldName}
                                         required
                                     />
                                 )}
-                                {isEdit && isBankTransferMethodRecord && (
+                                {isEdit && isBankTransferMethod && (
                                     <PaymentChannelSelect
-                                        name="paymentChannelId"
+                                        name={PaymentChannelIdFieldName}
                                         required
                                     />
                                 )}
-                                {isEdit && !isBankTransferMethodRecord && (
+                                {isEdit && !isBankTransferMethod && (
                                     <PaymentChannelLabel
                                         value={record?.paymentChannelId}
                                     />
@@ -460,6 +515,29 @@ const EditBody = ({
                                 <Trans zh="通道名称" en="Channel Name" />
                             </Label>
                             <Input name="channelName" size="small" required />
+
+                            {isBankTransferMethod && (
+                                <>
+                                    <Label required>
+                                        <Trans
+                                            zh="帐号名称"
+                                            en="Account Name"
+                                        />
+                                    </Label>
+                                    <Input name="extendedData.name" required />
+
+                                    <Label required>
+                                        <Trans
+                                            zh="银行帐号"
+                                            en="Bank Account"
+                                        />
+                                    </Label>
+                                    <Input
+                                        name="extendedData.bankAccount"
+                                        required
+                                    />
+                                </>
+                            )}
 
                             <Label>
                                 <Trans zh="状态" en="Status" />
@@ -558,6 +636,7 @@ const EditBody = ({
 
                 <Textarea name="reason" />
             </Stack>
+            <Input type="hidden" name="brandId" value={brandId} />
         </Stack>
     )
 }

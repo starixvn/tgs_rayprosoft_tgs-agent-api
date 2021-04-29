@@ -19,6 +19,29 @@ namespace TGS.Payment.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
+        public async ValueTask CreateBankInfoAsync(BankInfo bankInfo, string modifyUser)
+        {
+            var createTime = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.PlayerBankInfos
+                .AddAsync(new PlayerBankInfo
+                {
+                    Id = bankInfo.Id,
+                    PlayerCode = bankInfo.PlayerCode,
+                    BrandId = bankInfo.BrandId,
+                    PaymentChannelId = bankInfo.PaymentChannelId,
+                    BankType = bankInfo.BankType,
+                    Detail = bankInfo.Detail,
+                    CreatedByUsername = modifyUser,
+                    CreatedOn = createTime,
+                    UpdatedByUsername = modifyUser,
+                    UpdatedOn = createTime
+                })
+                .ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
         public async ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormInfo form)
         {
             _tgsRepository.DepositForms.Add(new DepositForm
@@ -35,6 +58,20 @@ namespace TGS.Payment.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public async ValueTask DeleteBankInfoAsync(string playerCode, Guid bankInfoId)
+        {
+            var bankInfo = await _tgsRepository.PlayerBankInfos
+                .FindAsync(bankInfoId)
+                .ConfigureAwait(false);
+
+            if (bankInfo.PlayerCode == playerCode)
+            {
+                _tgsRepository.PlayerBankInfos.Remove(bankInfo);
+
+                await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
+
         public IAsyncEnumerable<PaymentChannelInfo> GetAllPaymentChannelsAsync()
             => _tgsRepository.PaymentChannels.AsAsyncEnumerable()
                 .Select(row => new PaymentChannelInfo(row.Id, row.Code));
@@ -42,6 +79,17 @@ namespace TGS.Payment.Repositories
         public IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync()
             => _tgsRepository.PaymentMethods.AsAsyncEnumerable()
                 .Select(row => new PaymentMethodInfo(row.Id, row.Code));
+
+        public IAsyncEnumerable<BankInfo> GetBankInfosByPlayerCodeAsync(string playerCode)
+            => _tgsRepository.PlayerBankInfos.AsAsyncEnumerable()
+                .Where(info => info.PlayerCode == playerCode)
+                .Select(info => new BankInfo(
+                    info.Id,
+                    info.PlayerCode,
+                    info.BrandId,
+                    info.PaymentChannelId,
+                    info.BankType,
+                    info.Detail));
 
         public IAsyncEnumerable<BrandPaymentAcl> GetBrandPaymentAclsAsync(IEnumerable<Guid> brandPaymentIds, string playerCode)
         {

@@ -28,7 +28,7 @@ namespace TGS.Services.Operator.Deposit
 
             var settings = command.CreatePaymentSettings(createFormId);
             var applyInfo = await _paymentClient
-                .DepositAsync("", command.Amount, settings)
+                .DepositAsync(command.Subject, command.Amount, settings)
                 .ConfigureAwait(false);
 
             var form = new DepositFormInfo(

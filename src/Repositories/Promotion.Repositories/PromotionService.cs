@@ -62,6 +62,7 @@ namespace Promotion.Repositories
             promotion.From = request.From;
             promotion.To = request.To;
             promotion.Status = request.Status;
+            promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
             promotion.PromotionType = request.PromotionType;
             promotion.BonusAmountLimit = request.BonusAmountLimit;
             promotion.Unlimited = request.Unlimited;
@@ -94,6 +95,7 @@ namespace Promotion.Repositories
                 From = request.From,
                 To = request.To,
                 Status = request.Status,
+                AutoSentPlayerBonus = request.AutoSentPlayerBonus,
                 PromotionType = request.PromotionType,
                 BonusAmountLimit = request.BonusAmountLimit,
                 SettlementIntervalType = promotionTypeModel.SettlementIntervalType,

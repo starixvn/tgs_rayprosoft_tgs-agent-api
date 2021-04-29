@@ -105,13 +105,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             Name = "ReliefMoneyWeekly",
                             SettlementIntervalType = "Weekly",
-                            Trans = new() {Zh = "每日救援金", En = "Daily Relief Money"}
+                            Trans = new() {Zh = "每周救援金", En = "Weekly Relief Money"}
                         },
                         new PromotionType
                         {
                             Name = "ReliefMoneyMonthly",
                             SettlementIntervalType = "Monthly",
-                            Trans = new() {Zh = "每日救援金", En = "Daily Relief Money"}
+                            Trans = new() {Zh = "每月救援金", En = "Monthly Relief Money"}
                         }
                     }
                 }
@@ -213,6 +213,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("Update")}}
+                    }
+                },
+                new MenuSetting("FundManagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("Update")}},
                     }
                 },
                 new MenuSetting("System")

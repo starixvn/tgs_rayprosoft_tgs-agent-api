@@ -24,13 +24,18 @@ namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
             GetPromotionsRequest request,
             CancellationToken cancellationToken) =>
             _service.GetPromotionQueries()
+                .Where(x => x.BrandId == request.BrandId)
+                .Where(request.Status, x => x.Status == request.Status)
+                .Where(request.Name, x => x.Name == request.Name)
                 .Select(x => new PromotionModel
                 {
                     Id = x.Id,
+                    BrandId = x.BrandId,
                     From = x.From,
                     To = x.To,
                     Status = x.Status,
                     Name = x.Name,
+                    AutoSentPlayerBonus = x.AutoSentPlayerBonus,
                     PromotionType = x.PromotionType,
                     BonusAmountLimit = x.BonusAmountLimit,
                     AmountUsed = x.AmountUsed,

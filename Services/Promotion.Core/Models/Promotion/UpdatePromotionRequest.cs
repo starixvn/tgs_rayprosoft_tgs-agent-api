@@ -12,6 +12,7 @@ namespace TGS.Services.PromotionCore.Models.Promotions
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
         public SwitchStatus Status { get; set; }
+        public bool AutoSentPlayerBonus { get; set; }
         public string PromotionType { get; set; }
         public decimal BonusAmountLimit { get; set; }
         public bool Unlimited { get; set; }

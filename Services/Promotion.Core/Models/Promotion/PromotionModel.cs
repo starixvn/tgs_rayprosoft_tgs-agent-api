@@ -6,10 +6,12 @@ namespace TGS.Services.PromotionCore.Models.Promotions
     public class PromotionModel
     {
         public Guid Id { get; set; }
+        public Guid BrandId { get; set; }
         public string Name { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
         public SwitchStatus Status { get; set; }
+        public bool AutoSentPlayerBonus { get; set; }
         public string PromotionType { get; set; }
         public decimal BonusAmountLimit { get; set; }
         public decimal AmountUsed { get; set; }
