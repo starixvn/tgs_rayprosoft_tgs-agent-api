@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.KY.Outgoing
+namespace TGS.Shared.Game.Models.KY.Commons
 {
     /// <summary>
     /// 基地 - 請求

@@ -8,8 +8,8 @@ namespace TGS.Apis.TgsApi.Models.Interfaces
 {
     public interface IGameProviderWalletAction
     {
-        ValueTask<GameProviderWalletFnudOutResponse> FnudOutAsync(GameProviderWalletFnudOutRequest request);
-        ValueTask<GameProviderWalletFundInResponse> FundInAsync(GameProviderWalletFundInRequest request);
+        ValueTask<GameProviderWalletFnudResponse> FnudOutAsync(GameProviderWalletFnudRequest request);
+        ValueTask<GameProviderWalletFnudResponse> FundInAsync(GameProviderWalletFnudRequest request);
         ValueTask<GameProviderWalletGetBalanceResponse> GetBalanceAsync(GameProviderWalletGetBalanceRequest request);
     }
 }

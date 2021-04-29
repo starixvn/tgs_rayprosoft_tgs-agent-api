@@ -12,52 +12,50 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 {
     public abstract record BaseGameProviderWalletAction : IGameProviderWalletAction
     {
-        private readonly IHashProvider _hashProvider;
         private readonly ITokenProvider _tokenProvider;
-        private readonly ISettingOperations _settingOperations;
+
         private readonly IPlayerOperations _playerOperations;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
 
         public BaseGameProviderWalletAction(
-            IHashProvider hashProvider,
             ITokenProvider tokenProvider,
-            ISettingOperations settingOperations,
-            IPlayerOperations playerOperations,
-            IBrandOperations brandOperations,
-            IGameProviderOperations gameProviderOperations
+            IPlayerOperations playerOperations
             )
         {
-            _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
-        public async ValueTask<GameProviderWalletFnudOutResponse> FnudOutAsync(GameProviderWalletFnudOutRequest request)
+        public async ValueTask<GameProviderWalletFnudResponse> FnudOutAsync(GameProviderWalletFnudRequest request)
         {
+            var token = request.Token;
+            var loginTokenId = token.LoginRecordId;
+            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
+
+            var player = await _playerOperations.GetCachedPlayerAsync(token.PlayerCode);
 
             /*
              * 扣錢
              */
 
-            await GameProviderFundAsync();
+            var response = await FnudInAsync(player, Math.Abs(request.Amount));
             /*
              * 建立Game交易單
              */
 
 
-            return new() { };
+            return new() { GameProviderOrderId = response.orderId, TransactionsId = DateTime.UtcNow.ToString("yyyyMMddHHmmss") };
         }
 
-        public async ValueTask<GameProviderWalletFundInResponse> FundInAsync(GameProviderWalletFundInRequest request)
+        public async ValueTask<GameProviderWalletFnudResponse> FundInAsync(GameProviderWalletFnudRequest request)
         {
+            var token = request.Token;
+            var loginTokenId = token.LoginRecordId;
+            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
+
+            var player = await _playerOperations.GetCachedPlayerAsync(token.PlayerCode);
 
 
-            await GameProviderFundAsync();
-
+            var response = await FnudOutAsync(player, Math.Abs(request.Amount));
             /*
              * 加錢
              */
@@ -65,7 +63,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
              * 建立Game交易單
              */
 
-            return new() { };
+            return new() { GameProviderOrderId = response.orderId, TransactionsId = DateTime.UtcNow.ToString("yyyyMMddHHmmss") };
         }
 
         public async ValueTask<GameProviderWalletGetBalanceResponse> GetBalanceAsync(GameProviderWalletGetBalanceRequest request)
@@ -79,7 +77,10 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             return new() { Balance = balance ?? 0 };
         }
 
-        public abstract ValueTask GameProviderFundAsync();
+        public abstract ValueTask<(string orderId, decimal balance)> FnudInAsync(CachedPlayer player, decimal amount);
+
+        public abstract ValueTask<(string orderId, decimal balance)> FnudOutAsync(CachedPlayer player, decimal amount);
+
         public abstract ValueTask<decimal?> GameProviderGetBalanceAsync(CachedPlayer player);
     }
 }

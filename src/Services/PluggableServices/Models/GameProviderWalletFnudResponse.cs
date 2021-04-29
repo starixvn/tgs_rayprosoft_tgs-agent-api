@@ -1,0 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using TGS.Core.Models.Messages;
+
+namespace TGS.Services.PluggableServices.Models
+{
+    public record GameProviderWalletFnudResponse : TgsResponse
+    {
+        public string TransactionsId { get; init; }
+        public string GameProviderOrderId { get; init; }
+    }
+}

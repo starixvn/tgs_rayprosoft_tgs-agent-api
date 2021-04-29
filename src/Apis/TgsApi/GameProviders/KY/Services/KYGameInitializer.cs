@@ -16,6 +16,8 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.KY;
+using TGS.Shared.Game.Models.KY.Commons;
+using TGS.Shared.Game.Models.KY.Defines;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY.Services
@@ -77,9 +79,9 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYGameUrlRequest()
             {
-                Action = 0,
+                Action = (int)KYAction.GetGameUrl,
                 PlayerCode = token.PlayerCode,
-                Orderid = orderId,
+                OrderId = orderId,
                 Amount = 0m,
                 IP = ip,
                 ExternalID = 0,

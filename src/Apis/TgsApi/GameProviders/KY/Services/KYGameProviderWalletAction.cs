@@ -11,6 +11,8 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.KY;
+using TGS.Shared.Game.Models.KY.Commons;
+using TGS.Shared.Game.Models.KY.Defines;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY.Services
@@ -18,11 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
     public record KYGameProviderWalletAction : BaseGameProviderWalletAction
     {
         private readonly IKYApiClient _client;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
-        private readonly ITokenProvider _tokenProvider;
         private readonly IHashProvider _hashProvider;
 
         public KYGameProviderWalletAction(
@@ -30,23 +28,102 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             IHashProvider hashProvider,
             ITokenProvider tokenProvider,
             ISettingOperations settingOperations,
-            IPlayerOperations playerOperations,
-            IBrandOperations brandOperations,
-            IGameProviderOperations gameProviderOperations
-            ) : base(hashProvider, tokenProvider, settingOperations, playerOperations, brandOperations, gameProviderOperations)
+            IPlayerOperations playerOperations
+            ) : base(tokenProvider, playerOperations)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
-            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
-        public override ValueTask GameProviderFundAsync()
+        public override async ValueTask<(string orderId, decimal balance)> FnudInAsync(CachedPlayer player, decimal amount)
         {
-            throw new NotImplementedException();
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
+                    .GameProviderConfigurations.KY);
+
+            configuration.MerchantCodes.TryGetValue(player.DefaultWalletCurrencyCode, out string agentId);
+
+            var date = DateTimeOffset.UtcNow.AddHours(+8);
+            var timestamp = date.ToUnixTimeMilliseconds();
+            var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
+
+
+            var data = new KYFnudInRequest()
+            {
+                Action = (int)KYAction.FnudIn,
+                PlayerCode = player.PlayerCode,
+                Amount = amount,
+                OrderId = orderId
+            };
+            var dataPath = KYUtility.GetPath(data);
+            var param = KYUtility.AesEncrypt(dataPath, configuration.Deskey, true);
+            var plainText = $"{agentId}{timestamp}{configuration.Md5key}";
+            var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
+
+            var apiKYRequest = new KYApiRequest()
+            {
+                Agent = agentId,
+                Timestamp = timestamp,
+                Param = param,
+                Key = key
+            };
+
+            var response = await _client.GetAPIAsync<KYFnudInResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
+
+            var balance = default(decimal);
+            if (response.Data.Code == 0)
+            {
+                Decimal.TryParse(response.Data.Balance, out balance);
+            }
+
+
+            return new() { balance = balance, orderId = orderId };
+        }
+
+        public override async ValueTask<(string orderId, decimal balance)> FnudOutAsync(CachedPlayer player, decimal amount)
+        {
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
+                    .GameProviderConfigurations.KY);
+
+            configuration.MerchantCodes.TryGetValue(player.DefaultWalletCurrencyCode, out string agentId);
+
+            var date = DateTimeOffset.UtcNow.AddHours(+8);
+            var timestamp = date.ToUnixTimeMilliseconds();
+            var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
+
+
+            var data = new KYFnudOutRequest()
+            {
+                Action = (int)KYAction.FnudOut,
+                PlayerCode = player.PlayerCode,
+                Amount = amount,
+                OrderId = orderId
+            };
+            var dataPath = KYUtility.GetPath(data);
+            var param = KYUtility.AesEncrypt(dataPath, configuration.Deskey, true);
+            var plainText = $"{agentId}{timestamp}{configuration.Md5key}";
+            var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
+
+            var apiKYRequest = new KYApiRequest()
+            {
+                Agent = agentId,
+                Timestamp = timestamp,
+                Param = param,
+                Key = key
+            };
+
+            var response = await _client.GetAPIAsync<KYFnudOutResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
+
+            var balance = default(decimal);
+            if (response.Data.Code == 0)
+            {
+                Decimal.TryParse(response.Data.Balance, out balance);
+            }
+
+
+            return new() { balance = balance, orderId = orderId };
         }
 
         public override async ValueTask<decimal?> GameProviderGetBalanceAsync(CachedPlayer player)
@@ -64,7 +141,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYGetBlaanceRequest()
             {
-                Action = 1,
+                Action = (int)KYAction.GetBalance,
                 PlayerCode = player.PlayerCode
             };
             var dataPath = KYUtility.GetPath(data);
