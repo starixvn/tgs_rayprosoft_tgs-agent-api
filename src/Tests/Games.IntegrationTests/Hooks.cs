@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 using Moq;
 using TechTalk.SpecFlow;
 using TGS.Apis.OperatorApi;
+using TGS.Apis.TgsApi.GameProviders.AsiaGaming;
 using TGS.Apis.TgsApi.GameProviders.Habanero;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
@@ -56,10 +57,8 @@ namespace TGS.Tests.Games.IntegrationTests
         }
 
         [AfterFeature]
-        public static void AfterFeature(FeatureContext featureContext)
-        {
+        public static void AfterFeature(FeatureContext featureContext) =>
             Task.WhenAll(_OpApiHost.StopAsync(), _TgsApiHost.StopAsync());
-        }
 
         private static void CreateSbobetEnv()
         {
@@ -221,7 +220,7 @@ namespace TGS.Tests.Games.IntegrationTests
             _TgsApiHost.StartAsync();
             TgsApiClient = _TgsApiHost.GetTestClient();
         }
-        
+
         private static void CreateAsiaGamingEnv()
         {
             Environment.SetEnvironmentVariable("GameProviderCode", Consts.GameProvider.AsiaGaming);
@@ -261,7 +260,7 @@ namespace TGS.Tests.Games.IntegrationTests
                 })
                 .ConfigureWebHostDefaults(builder =>
                 {
-                    builder.UseStartup<HabaneroStartup>()
+                    builder.UseStartup<AsiaGamingStartup>()
                         .UseKestrel(o => o.AddServerHeader = false)
                         .UseTestServer()
                         .ConfigureTestServices(srv =>

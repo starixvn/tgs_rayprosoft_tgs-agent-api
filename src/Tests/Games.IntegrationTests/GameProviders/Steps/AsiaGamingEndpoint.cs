@@ -3,17 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Moq;
 using TechTalk.SpecFlow;
-using TGS.Apis.OperatorApi;
-using TGS.Apis.TgsApi.GameProviders.AsiaGaming;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.DataServices.Tgs.Models;
@@ -23,7 +16,6 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
@@ -41,62 +33,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     [Scope(Tag = "AsiaGaming")]
     public sealed class AsiaGamingEndpoint : BaseGameEndpoint
     {
+        private const string AgentCode = "B17";
         private static readonly string GameProviderCode = Consts.GameProvider.AsiaGaming;
-        private readonly ServiceProvider _serviceProvider;
         private readonly IAsiaGamingApiClient _client;
-        const string AgentCode = "B17";
+        private readonly ServiceProvider _serviceProvider;
 
         public AsiaGamingEndpoint(ScenarioContext context) : base(context)
         {
-            Environment.SetEnvironmentVariable("GameProviderCode", GameProviderCode);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
             var currentDictionary = Directory.GetCurrentDirectory();
-
-            var opApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            opApiHost.StartAsync();
-            var opApiClient = opApiHost.GetTestClient();
-
-            var tgsApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
-
-                    builder.SetBasePath(Path.GetFullPath(path))
-                        .AddJsonFile("GameProviders/AsiaGaming/asiagaming.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<AsiaGamingStartup>()
-                        .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            tgsApiHost.StartAsync();
-            var tgsApiClient = tgsApiHost.GetTestClient();
 
             var services = (IServiceCollection)new ServiceCollection();
 
@@ -126,10 +70,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             if (isDev)
             {
                 services.AddTransient<IPlayerApiClient>(sp =>
-                    ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+                    ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, Hooks.OpApiClient));
 
                 services.AddTransient<IAsiaGamingApiClient>(sp =>
-                    ActivatorUtilities.CreateInstance<AsiaGamingApiClient>(sp, tgsApiClient));
+                    ActivatorUtilities.CreateInstance<AsiaGamingApiClient>(sp, Hooks.TgsApiClient));
             }
             else
             {
@@ -212,7 +156,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var betResponseRequest = Get<BetResponseRequest>(SR.Request);
             var transactionId = betResponseRequest.TransactionId;
 
-            for (int i = 0; i < records.Count(); i++)
+            for (var i = 0; i < records.Count(); i++)
             {
                 var record = records.ElementAt(i);
                 await SettleBetAsync(record.WinAmount, betResponseRequest.Records.ElementAt(i).Amount,
@@ -227,7 +171,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [When(@"I cancel non-existent transaction for game ""(.*)""")]
         public Task WhenICancelNonExistentTransactionForGame(string externalGameId) =>
-            CancelTransactionAsync(externalGameId, newRound: true);
+            CancelTransactionAsync(externalGameId, true);
 
         [When(@"I resend the same bet")]
         [When(@"I resend the same settle bet")]
@@ -255,7 +199,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var request = new PostTransferRequest
             {
-                Record = new TransferRecord
+                Record = new()
                 {
                     DeviceType = platform.ToString().ToUpper(),
                     Currency = gameProviderCurrencyCode,
@@ -285,6 +229,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
+
         private async Task SendBetResponse(BetRecord[] records)
         {
             var lockRequest = Get<PostTransferRequest>(SR.Request);
@@ -314,7 +259,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        private async Task SettleBetAsync(decimal winAmount, decimal? betAmount = null, bool isRetry = false, TransactionType? type = null, string billNo = null, string finish = null)
+        private async Task SettleBetAsync(decimal winAmount, decimal? betAmount = null, bool isRetry = false,
+            TransactionType? type = null, string billNo = null, string finish = null)
         {
             var transactionType = type ?? (winAmount > 0 ? TransactionType.WIN : TransactionType.LOSE);
 
@@ -330,7 +276,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var settleRequest = new PostTransferRequest
             {
-                Record = new TransferRecord
+                Record = new()
                 {
                     DeviceType = platform.ToString().ToUpper(),
                     Currency = gameProviderCurrencyCode,
@@ -387,7 +333,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 gameRound = betRequest.Record.GameRound;
                 gameType = betRequest.Record.GameType;
             }
-            
+
             if (gameId.IsNotNullOrEmpty())
             {
                 var splitGameId = GetGameId(gameId);
@@ -398,7 +344,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var cancelRequest = new PostTransferRequest
             {
-                Record = new TransferRecord
+                Record = new()
                 {
                     DeviceType = platform.ToString().ToUpper(),
                     Currency = gameProviderCurrencyCode,
@@ -450,7 +396,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Then(@"game action id contains (.*) will be recorded in the database of type ""(.*)"" for \$(.*)")]
-        public async Task ThenGameActionIdContainsWillBeRecordedInTheDatabaseOfTypeFor(string playType, GameActionType type, decimal amount)
+        public async Task ThenGameActionIdContainsWillBeRecordedInTheDatabaseOfTypeFor(string playType,
+            GameActionType type, decimal amount)
         {
             var gas = await GetGameActionsByRoundId();
             var placeGa = gas.First(ga => ga.ExternalTransactionId.IgnoreCaseContains(playType));
@@ -517,10 +464,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         private static string NewRoundId() => Guid.NewGuid().ToString();
 
-        private string GetTimestamp()
-        {
-            return DateTimeOffset.UtcNow.AddHours(-4).ToString("MM/dd/yyyy HH:mm:sss");
-        }
+        private string GetTimestamp() => DateTimeOffset.UtcNow.AddHours(-4).ToString("MM/dd/yyyy HH:mm:sss");
 
         private string GetAsiaGamingPlayerCode()
         {
