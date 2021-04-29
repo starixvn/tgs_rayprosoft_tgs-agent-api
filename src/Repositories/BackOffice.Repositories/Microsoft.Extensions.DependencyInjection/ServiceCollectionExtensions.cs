@@ -1,6 +1,5 @@
 ﻿using TGS.BackOffice.Repositories;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.Report.Domain;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

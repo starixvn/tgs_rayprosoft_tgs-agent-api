@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using Promotion.Client.Extensions;
 using Report.Client.Extensions;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
@@ -39,7 +40,6 @@ using TGS.Core.Models;
 using TGS.Services.BackOffice.Application.Extensions;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
-using TGS.Services.Report.Application.Extensions;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -64,7 +64,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient<IBrandPaymentService, BrandPaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
             services.AddBackOfficeApplicationServices();
-            services.AddReportServices();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
@@ -79,7 +78,9 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddTransactions()
-                .AddReportClientServices(configuration);
+                .AddReportClientServices(configuration)
+                .AddPromotionClientServices(configuration)
+                .AddPromotionRepositoriesServices();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 

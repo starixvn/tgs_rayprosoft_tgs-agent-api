@@ -50,6 +50,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
             var agents = await _tgsAgentService.GetAgentQueries(q => q.Where(x => agentIds.Contains(x.Id)))
                 .ToArrayAsync(cancellationToken);
 
+
             var models = agentDividends.Join(agents, ad => ad.AgentId, a => a.Id,
                 (ad, a) => new AgentDividendModel
                 {

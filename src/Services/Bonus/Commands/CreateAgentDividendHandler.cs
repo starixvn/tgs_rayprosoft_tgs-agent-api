@@ -13,15 +13,12 @@ namespace TGS.Services.Bonus.Commands
             MessageResponse>
     {
         private readonly IAgentDividend _agentDividend;
-        private readonly IReport _report;
 
         public CreateAgentDividendHandler(
             IAgentDividend agentDividend,
-            IReport report,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentDividend = agentDividend;
-            _report = report;
         }
 
         public override async Task<MessageResponse> Handle(SentAgentDividendsRequest request,
@@ -34,14 +31,11 @@ namespace TGS.Services.Bonus.Commands
 
             await using var transaction =
                 await _agentDividend.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            await using var reportTransaction =
-                await _report.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             await _agentDividend.SentAgentDividend(request.AgentDividends, request.TransactionType);
-            await _report.UpdateAgentDividendSentOn(request.AgentDividends);
+            await _agentDividend.UpdateAgentDividendSentOn(request.AgentDividends);
 
             await transaction.CommitAsync(cancellationToken);
-            await reportTransaction.CommitAsync(cancellationToken);
 
             return CreateValidResponse<MessageResponse>();
         }

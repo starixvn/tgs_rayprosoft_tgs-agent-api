@@ -155,6 +155,10 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<TransactionPromotion> TransactionPromotions { get; set; }
         DbSet<PlayerBucket> PlayerBuckets { get; set; }
+        DbSet<PromotionBonus> PromotionBonus { get; set; }
+        DbSet<PromotionPlayer> PromotionPlayers { get; set; }
+        DbSet<AgentDividend> AgentDividends { get; set; }
+        DbSet<PlayerRebate> PlayerRebates { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
@@ -302,6 +306,10 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<TransactionPromotion> TransactionPromotions { get; set; }
 
         public DbSet<PlayerBucket> PlayerBuckets { get; set; }
+        public DbSet<PromotionBonus> PromotionBonus { get; set; }
+        public DbSet<PromotionPlayer> PromotionPlayers { get; set; }
+        public DbSet<AgentDividend> AgentDividends { get; set; }
+        public DbSet<PlayerRebate> PlayerRebates { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;

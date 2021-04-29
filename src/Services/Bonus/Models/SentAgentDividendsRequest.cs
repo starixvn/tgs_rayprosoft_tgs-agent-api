@@ -6,6 +6,6 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Bonus.Models
 {
-    public record SentAgentDividendsRequest(IEnumerable<AgentDividend> AgentDividends,
+    public record SentAgentDividendsRequest(IEnumerable<AgentDividendBonus> AgentDividends,
         TransactionType TransactionType) : IRequest<MessageResponse>;
 }

@@ -24,7 +24,7 @@ namespace Bonus.Repositories
 
         ITgsRepository IAgentDividend.Repository => _repository;
 
-        public async Task SentAgentDividend(IEnumerable<AgentDividend> agentDividends,
+        public async Task SentAgentDividend(IEnumerable<AgentDividendBonus> agentDividends,
             TransactionType transactionType)
         {
             var agentIds = agentDividends.Select(x => x.AgentId).ToArray();
@@ -55,6 +55,32 @@ namespace Bonus.Repositories
                 }).ToArray();
 
             await CreateEntitiesAsync(dividends);
+        }
+
+        async Task IAgentDividend.UpdateAgentDividendSentOn(IEnumerable<AgentDividendBonus> agentDividends)
+        {
+            var agentMinDate =
+                agentDividends.Min(x => x.From);
+            var agentMaxDate =
+                agentDividends.Min(x => x.To);
+            var brandIds = agentDividends.Select(x => x.BrandId);
+            var agentIds = agentDividends.Select(x => x.AgentId);
+
+            var dividends = await _repository.AgentDividends.Where(x =>
+                    brandIds.Contains(x.BrandId))
+                .Where(x => agentIds.Contains(x.AgentId))
+                .Where(x => x.From >= agentMinDate && x.To <= agentMaxDate)
+                .ToArrayAsync();
+
+            var updateAgentDividends = dividends.Where(x => agentDividends.Any(a =>
+                a.BrandId == x.BrandId && a.AgentId == x.AgentId && a.From == x.From && a.To == x.To));
+
+            foreach (var updateAgentDividend in updateAgentDividends)
+            {
+                updateAgentDividend.SentOn = DateTimeOffset.Now;
+            }
+
+            await UpdateEntitiesAsync(updateAgentDividends);
         }
     }
 }

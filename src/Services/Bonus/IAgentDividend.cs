@@ -9,6 +9,7 @@ namespace TGS.Services.Bonus
     public interface IAgentDividend
     {
         ITgsRepository Repository { get; }
-        Task SentAgentDividend(IEnumerable<AgentDividend> agentDividends, TransactionType transactionType);
+        Task SentAgentDividend(IEnumerable<AgentDividendBonus> agentDividends, TransactionType transactionType);
+        Task UpdateAgentDividendSentOn(IEnumerable<AgentDividendBonus> agentDividends);
     }
 }

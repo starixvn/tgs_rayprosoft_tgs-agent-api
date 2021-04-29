@@ -66,6 +66,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 CurrentSettlementTo = currentToDate,
                 NextSettlementFrom = nextFromDate,
                 NextSettlementTo = nextToDate,
+                AutoSentAgentBonus = true,
+                AutoSentPlayerBonus = true,
                 Status = Status.Active,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,

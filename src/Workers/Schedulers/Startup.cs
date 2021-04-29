@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using Promotion.Client.Extensions;
 using Report.Client.Extensions;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -56,6 +57,7 @@ namespace TGS.Workers.Schedulers
                 .AddGameApiClients()
                 .AddOperations()
                 .AddReportClientServices(_configuration)
+                .AddPromotionClientServices(_configuration)
                 .AddHangfireScheduler(_configuration, jobProvider: new JobProvider(),
                     typesToUseManagementPage: GetModuleTypes());
 

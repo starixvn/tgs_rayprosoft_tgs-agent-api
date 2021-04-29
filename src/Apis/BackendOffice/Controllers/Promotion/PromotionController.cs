@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Promotion.Client;
+using Promotion.Client.Models.Promotion;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.Models.Promotion;
 
 namespace TGS.Apis.BackendOffice.Controllers.Promotion
 {
@@ -12,28 +12,29 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
     [ApiController]
     public class PromotionController : BaseContextController
     {
-        private readonly IMediator _mediator;
+        private readonly IPromotionClient _client;
 
-        public PromotionController(IMediator mediator)
+        public PromotionController(IPromotionClient client)
         {
-            _mediator = mediator;
+            _client = client;
         }
 
         [HttpGet]
         [Description("Get promotions")]
         public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request) =>
-            _mediator.Send(request);
+            _client.GetPromotionsAsync(request);
 
         [HttpPost]
         [Description("Create a promotion")]
-        public Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request) => _mediator.Send(request);
+        public Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request) =>
+            _client.CreatePromotionAsync(request);
 
         [HttpPut("{id}")]
         [Description("Update a promotion")]
         public Task<MessageResponse> UpdatePromotionAsync(Guid id, UpdatePromotionRequest request)
         {
             request.Id = id;
-            return _mediator.Send(request);
+            return _client.UpdatePromotionAsync(request);
         }
     }
 }

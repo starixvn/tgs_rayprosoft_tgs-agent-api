@@ -2,16 +2,15 @@
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
-using TGS.Core.DataServices.Report;
-using TGS.Core.DataServices.Report.Models;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Report.Application.Models.Agent;
 
 namespace TGS.Services.Report.Infrastructure.DataService
 {
     public interface IAgentDividendService
     {
-        IReportRepository Repository { get; }
+        ITgsRepository Repository { get; }
 
         IQueryable<AgentDividend> GetAgentDividendQueries(
             Func<IQueryable<AgentDividend>, IQueryable<AgentDividend>> preQuery = null,
@@ -20,16 +19,16 @@ namespace TGS.Services.Report.Infrastructure.DataService
         Task CreateAgentDividendsAsync(CreateAgentDividendModel[] request);
     }
 
-    public class AgentDividendService : BaseRepositoryOperations<IReportRepository>, IAgentDividendService
+    public class AgentDividendService : BaseRepositoryOperations<ITgsRepository>, IAgentDividendService
     {
-        private readonly IReportRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public AgentDividendService(IReportRepository repository, ITgsRepository tgsRepository) : base(repository)
+        public AgentDividendService(ITgsRepository repository) : base(repository)
         {
             _repository = repository;
         }
 
-        IReportRepository IAgentDividendService.Repository => _repository;
+        ITgsRepository IAgentDividendService.Repository => _repository;
 
         Task IAgentDividendService.CreateAgentDividendsAsync(CreateAgentDividendModel[] models) =>
             CreateEntitiesAsync(models.Select(model => new AgentDividend

@@ -3,26 +3,29 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Report.Client;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operations.Queries;
-using TGS.Services.Report.Application.Models.Round;
 
 namespace TGS.Apis.OperatorApi.Handlers.PlayerReport
 {
-    public sealed class GetPlayerReportHandler : IRequestHandler<GetPlayerRoundReportRequest, PagedResponse<PlayerRoundReportModel>>
+    public sealed class
+        GetPlayerReportHandler : IRequestHandler<GetPlayerRoundReportRequest, PagedResponse<PlayerRoundReportModel>>
     {
+        private readonly IReportClient _client;
         private readonly HttpContext _httpContext;
         private readonly IMediator _mediator;
         private readonly IPlayerQueries _queries;
 
         public GetPlayerReportHandler(IHttpContextAccessor httpContextAccessor,
-            IMediator mediator, IPlayerQueries queries)
+            IMediator mediator, IPlayerQueries queries, IReportClient client)
         {
             _httpContext = httpContextAccessor.HttpContext;
             _mediator = mediator;
             _queries = queries;
+            _client = client;
         }
 
         async Task<PagedResponse<PlayerRoundReportModel>>
@@ -34,18 +37,17 @@ namespace TGS.Apis.OperatorApi.Handlers.PlayerReport
             var brandId = _httpContext.Items.GetBrandId();
             var player = await _queries.GetCachedPlayerAsync(data.PlayerCode);
 
-            var roundModelResponse = await _mediator.Send(
-                new GetRoundsRequest
-                {
-                    BrandId = brandId,
-                    Username = player.Username,
-                    From = request.From,
-                    To = request.To,
-                    OrderBy = request.OrderBy,
-                    Page = request.Page,
-                    ShowAll = request.ShowAll,
-                    SortBy = request.SortBy
-                }, cancellationToken);
+            var roundModelResponse = await _client.GetRoundsAsync(new()
+            {
+                BrandId = brandId,
+                Username = player.Username,
+                From = request.From,
+                To = request.To,
+                OrderBy = request.OrderBy,
+                Page = request.Page,
+                ShowAll = request.ShowAll,
+                SortBy = request.SortBy
+            });
 
             return new()
             {

@@ -103,5 +103,50 @@ namespace Bonus.Repositories
 
             await CreateEntitiesAsync(transactions);
         }
+
+        async Task IPlayerBonus.UpdatePlayerRebateSentOn(IEnumerable<PlayerRebates> playerRebates)
+        {
+            var playerReportDates =
+                playerRebates.Select(x => x.ReportDate);
+
+            var promotionPlayers = await _repository.PlayerRebates
+                .Where(x => playerReportDates.Contains(x.ReportDate))
+                .ToArrayAsync();
+
+            var players = promotionPlayers.Where(x =>
+                playerRebates.Any(p => p.PlayerCode == x.PlayerCode && p.ReportDate == x.ReportDate));
+
+            foreach (var player in players)
+            {
+                player.SentOn = DateTimeOffset.Now;
+            }
+
+            await UpdateEntitiesAsync(players);
+        }
+
+        async Task IPlayerBonus.UpdatePromotionBonusSentOn(IEnumerable<PromotionPlayerBonus> promotionPlayerBonus)
+        {
+            var players =
+                promotionPlayerBonus.Select(x => x.PromotionBonusId);
+
+            var promotionPlayers = await _repository.PromotionPlayers.Where(x =>
+                    players.Contains(x.PromotionBonusId))
+                .ToArrayAsync();
+
+            var playerBonus =
+                promotionPlayerBonus.SelectMany(x => x.PlayerBonus.Select(p => new {x.PromotionBonusId, p.PlayerCode}))
+                    .ToArray();
+
+            var updatePlayers = promotionPlayers.Where(x =>
+                    playerBonus.Any(p => p.PlayerCode == x.PlayerCode && p.PromotionBonusId == x.PromotionBonusId))
+                .ToArray();
+
+            foreach (var updatePlayer in updatePlayers)
+            {
+                updatePlayer.SentOn = DateTimeOffset.Now;
+            }
+
+            await UpdateEntitiesAsync(updatePlayers);
+        }
     }
 }

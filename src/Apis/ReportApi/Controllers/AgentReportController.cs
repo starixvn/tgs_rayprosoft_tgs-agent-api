@@ -68,7 +68,7 @@ namespace ReportApi.Controllers
 
             var agentDividends =
                 response.AgentDividends.Select(x =>
-                    new AgentDividend(x.BrandId, x.AgentId, x.AgentDividendAmount, x.From, x.To));
+                    new AgentDividendBonus(x.BrandId, x.AgentId, x.AgentDividendAmount, x.From, x.To));
 
             var sentAgentDividendsRequest =
                 new SentAgentDividendsRequest(agentDividends, TransactionType.Dividend);

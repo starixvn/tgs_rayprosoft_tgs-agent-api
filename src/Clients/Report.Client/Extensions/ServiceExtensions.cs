@@ -26,11 +26,6 @@ namespace Report.Client.Extensions
                 var settings = sp.GetRequiredService<ReportSettings>();
                 c.BaseAddress = new(settings.Url);
             });
-            services.AddHttpClient<IPromotionSettlementClient, PromotionSettlementClient>((sp, c) =>
-            {
-                var settings = sp.GetRequiredService<ReportSettings>();
-                c.BaseAddress = new(settings.Url);
-            });
 
             return services;
         }

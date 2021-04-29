@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Services\Promotion.Core\PromotionCore.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
+    <ProjectReference Include="..\..\Services\BackOffice\BackOffice.csproj" />
+  </ItemGroup>
+
+</Project>

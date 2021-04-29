@@ -230,8 +230,6 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 brand.NextSettlementTo = nextToDate;
             }
 
-            await using var reportTransaction =
-                await _agentDividendService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             await using var tgsTransaction =
                 await _brandService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
@@ -239,9 +237,6 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
             await _brandService.UpdateBrandsAsync(brands);
 
-            //await _brandService.CreateAgentTransactionsAsync(createModels.ToArray());
-
-            await reportTransaction.CommitAsync(cancellationToken);
             await tgsTransaction.CommitAsync(cancellationToken);
             return new() {Valid = true, AgentDividends = createModels.ToArray()};
         }

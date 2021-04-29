@@ -3,7 +3,7 @@
     "ReportApi": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "health",
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

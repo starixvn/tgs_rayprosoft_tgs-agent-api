@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Services\Promotion.Core\PromotionCore.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
     <ProjectReference Include="..\..\Repositories\PaymentRepositories\PaymentRepositories.csproj" />

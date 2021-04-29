@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Services.Report.Domain;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.BackOffice.Repositories
 {

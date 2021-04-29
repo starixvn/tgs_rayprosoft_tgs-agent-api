@@ -9,7 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Report.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Services.Report.Application.Models.Promotion;
+using TGS.Services.PromotionCore;
+using TGS.Services.PromotionCore.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Commands.Promotion
@@ -103,8 +104,6 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 };
             }).ToArray();
 
-            await using var promotionBonusTransaction =
-                await _promotionBonusService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             await using var promotionTransaction =
                 await _promotionService.TgsRepository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
@@ -112,7 +111,6 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
 
             await promotionTransaction.CommitAsync(cancellationToken);
-            await promotionBonusTransaction.CommitAsync(cancellationToken);
 
             return new() {Valid = true, PromotionBonus = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray()};
         }

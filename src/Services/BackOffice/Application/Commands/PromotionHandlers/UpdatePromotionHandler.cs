@@ -6,9 +6,10 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Settings;
-using TGS.Services.BackOffice.Application.Models.Promotion;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Services.PromotionCore;
+using TGS.Services.PromotionCore.Models.Promotions;
 
 namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 {

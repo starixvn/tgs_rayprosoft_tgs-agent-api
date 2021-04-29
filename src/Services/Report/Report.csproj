@@ -7,10 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\Queries\ReportHandlers\**" />
+    <EmbeddedResource Remove="Application\Queries\ReportHandlers\**" />
+    <None Remove="Application\Queries\ReportHandlers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Services\Promotion.Core\PromotionCore.csproj" />
     <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Report\DataServices.Report.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
@@ -33,7 +40,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Application\Queries\ReportHandlers\" />
+    <Folder Include="Application\Queries\Promotion\" />
+    <Folder Include="Domain\" />
   </ItemGroup>
 
 </Project>
