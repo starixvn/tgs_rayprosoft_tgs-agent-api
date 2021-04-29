@@ -8,7 +8,7 @@ using TGS.Shared.Game.Models.KY.Commons;
 
 namespace TGS.Shared.Game.Models.KY.Outgoing
 {
-    public record KYFnudInResponse : KYBaseDataResponse
+    public record KYFnudResponse : KYBaseDataResponse
     {
         [JsonPropertyName("money")]
         public string Balance { get; init; }

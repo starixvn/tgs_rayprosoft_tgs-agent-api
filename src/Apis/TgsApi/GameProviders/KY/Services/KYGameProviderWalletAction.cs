@@ -26,17 +26,16 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
         public KYGameProviderWalletAction(
             IKYApiClient client,
             IHashProvider hashProvider,
-            ITokenProvider tokenProvider,
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations
-            ) : base(tokenProvider, playerOperations)
+            ) : base(playerOperations)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
         }
 
-        public override async ValueTask<(string orderId, decimal balance)> FnudInAsync(CachedPlayer player, decimal amount)
+        public override async ValueTask<(string orderId, decimal balance)> FundInAsync(CachedPlayer player, decimal amount)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
@@ -49,7 +48,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
 
 
-            var data = new KYFnudInRequest()
+            var data = new KYFnudRequest()
             {
                 Action = (int)KYAction.FnudIn,
                 PlayerCode = player.PlayerCode,
@@ -69,7 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYFnudInResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<KYFnudResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             var balance = default(decimal);
             if (response.Data.Code == 0)
@@ -81,7 +80,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             return new() { balance = balance, orderId = orderId };
         }
 
-        public override async ValueTask<(string orderId, decimal balance)> FnudOutAsync(CachedPlayer player, decimal amount)
+        public override async ValueTask<(string orderId, decimal balance)> FundOutAsync(CachedPlayer player, decimal amount)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
@@ -94,7 +93,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
 
 
-            var data = new KYFnudOutRequest()
+            var data = new KYFnudRequest()
             {
                 Action = (int)KYAction.FnudOut,
                 PlayerCode = player.PlayerCode,
@@ -114,7 +113,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYFnudOutResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<KYFnudResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             var balance = default(decimal);
             if (response.Data.Code == 0)

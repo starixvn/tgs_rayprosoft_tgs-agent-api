@@ -12,7 +12,7 @@ namespace TGS.Services.PluggableServices.Models
     {
         [JsonPropertyName("gpcode")]
         public string GameProviderCode { get; init; }
-        [JsonPropertyName("token")]
-        public PlayerTokenData Token { get; init; }
+        [JsonPropertyName("playercode")]
+        public string PlayerCode { get; init; }
     }
 }

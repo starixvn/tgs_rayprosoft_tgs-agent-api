@@ -7,7 +7,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.PluggableServices.Models
 {
-    public record GameProviderWalletFnudResponse : TgsResponse
+    public record GameProviderWalletFundResponse : TgsResponse
     {
         public string TransactionsId { get; init; }
         public string GameProviderOrderId { get; init; }

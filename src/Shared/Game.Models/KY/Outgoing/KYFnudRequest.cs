@@ -9,7 +9,7 @@ using TGS.Shared.Game.Models.KY.Commons;
 
 namespace TGS.Shared.Game.Models.KY.Outgoing
 {
-    public record KYFnudInRequest : KYBaseRequest
+    public record KYFnudRequest : KYBaseRequest
     {
         [JsonPropertyName("account")]
         public string PlayerCode { get; init; }

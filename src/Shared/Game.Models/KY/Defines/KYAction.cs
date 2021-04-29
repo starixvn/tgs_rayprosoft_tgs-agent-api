@@ -20,11 +20,11 @@ namespace TGS.Shared.Game.Models.KY.Defines
         /// </summary>
         GetBalance = 1,
         /// <summary>
-        /// The fnud out(主錢包->GP)
+        /// The fnud out(Tgs -> Gp)
         /// </summary>
         FnudOut = 2,
         /// <summary>
-        /// The fnud in(GP->主錢包)
+        /// The fnud in(GP -> Tgs)
         /// </summary>
         FnudIn = 3,
         /// <summary>
