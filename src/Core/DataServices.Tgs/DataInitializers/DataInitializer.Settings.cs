@@ -215,6 +215,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
+                new MenuSetting("FundManagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("Update")}},
+                    }
+                },
                 new MenuSetting("System")
                 {
                     SubMenus = new[]

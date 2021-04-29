@@ -57,10 +57,8 @@ import Input from "../../input/Input"
 import { Checkbox } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
 import clone from "clone-deep"
-import { usePaymentMethodList } from "../../payment/method/client"
-import { usePaymentChannelList } from "../../payment/channel/client"
 import { usePaymentList } from "../../payment/client"
-import { PaymentLabel } from "../../payment/payment"
+import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import {
     PaymentMethodLabel,
     PaymentMethodSelect
@@ -449,7 +447,7 @@ const EditBody = ({
                                     name="paymentId"
                                     value={paymentId}
                                 />
-                                <PaymentLabel value={paymentId} />
+                                <PaymentProviderLabel value={paymentId} />
                             </Box>
 
                             <Label>
