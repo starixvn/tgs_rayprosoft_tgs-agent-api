@@ -9,17 +9,18 @@ using TGS.Core.Models.Settings;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PromotionCore;
+using TGS.Services.PromotionCore.Models.PromotionDispatch;
 using TGS.Services.PromotionCore.Models.Promotions;
 
 namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 {
-    public class CreatePromotionHandler : Handler<CreatePromotionRequest, MessageResponse>
+    public class DispatchPromotionBonusHandler : Handler<DispatchPromotionBonusRequest, MessageResponse>
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPromotionService _service;
         private readonly ISettingsService _settingsService;
 
-        public CreatePromotionHandler(IPromotionService service, ISettingsService settingsService,
+        public DispatchPromotionBonusHandler(IPromotionService service, ISettingsService settingsService,
             IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
@@ -27,7 +28,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
             _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        public override async Task<MessageResponse> Handle(CreatePromotionRequest request,
+        public override async Task<MessageResponse> Handle(DispatchPromotionBonusRequest request,
             CancellationToken cancellationToken)
         {
             if (await _service.ExistsAsync(x => x.Name == request.Name))
