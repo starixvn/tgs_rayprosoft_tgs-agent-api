@@ -650,6 +650,53 @@ export const useAddBankInfo = (
     }
 }
 
+export const useDeleteBankInfo = (
+    { brandCode, currency, username, platformtype },
+    bankInfoId
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && bankInfoId
+            ? [
+                  `/api/bankinfo/${bankInfoId}`,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url) => {
+        return fetch(url, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            }
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
 export const useApplyWithdraw = (
     { brandCode, currency, username, platformtype } = {},
     formData

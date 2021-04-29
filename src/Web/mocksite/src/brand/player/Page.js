@@ -53,6 +53,7 @@ import { toValue } from "../../platform"
 import { DepositDialog } from "./DepositDialog"
 import { UploadDepositProofDialog } from "./UploadDepositProofDialog"
 import { BankInfoDialog } from "./BankInfoDialog"
+import { WithdrawDialog } from "./WithdrawDialog"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
     let { path, url } = useRouteMatch()
@@ -145,6 +146,8 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
     const uploadDepositProofDialog = Modal.useState()
     let showUploadDepositProofMenu = !!depositFormId
 
+    const withdrawDialog = Modal.useState()
+
     const bankInfoDialog = Modal.useState()
 
     const viewInfoDialog = Modal.useState()
@@ -159,6 +162,7 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                         depositDialog={depositDialog}
                         showUploadDepositProofMenu={showUploadDepositProofMenu}
                         uploadDepositProofDialog={uploadDepositProofDialog}
+                        withdrawDialog={withdrawDialog}
                         bankInfoDialog={bankInfoDialog}
                         playerInfoDialog={viewInfoDialog}
                         editPlayerInfoDialog={editInfoDialog}
@@ -178,14 +182,9 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                     username={username}
                     platform={platform}
                     onSubmitted={(value) => {
-                        console.log("onSubmitted", value)
                         setDepositFormId(value)
 
                         if (value) {
-                            console.log(
-                                "uploadDepositProofDialog.sho",
-                                depositFormId
-                            )
                             uploadDepositProofDialog.show()
                         }
                     }}
@@ -200,6 +199,15 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                     platform={platform}
                     depositFormId={depositFormId}
                     dialog={uploadDepositProofDialog}
+                />
+            )}
+            {withdrawDialog.visible && (
+                <WithdrawDialog
+                    brandCode={brandCode}
+                    currency={currency}
+                    username={username}
+                    platform={platform}
+                    dialog={withdrawDialog}
                 />
             )}
             {bankInfoDialog.visible && (
@@ -246,6 +254,7 @@ const PlayerMenu = ({
     depositDialog,
     showUploadDepositProofMenu,
     uploadDepositProofDialog,
+    withdrawDialog,
     bankInfoDialog,
     playerInfoDialog,
     editPlayerInfoDialog,
@@ -262,6 +271,9 @@ const PlayerMenu = ({
                     Upload Deposit Proof
                 </DropdownMenu.Item>
             )}
+            <DropdownMenu.Item onClick={withdrawDialog.show}>
+                Withdraw
+            </DropdownMenu.Item>
             <DropdownMenu.Item onClick={bankInfoDialog.show}>
                 Bank List
             </DropdownMenu.Item>

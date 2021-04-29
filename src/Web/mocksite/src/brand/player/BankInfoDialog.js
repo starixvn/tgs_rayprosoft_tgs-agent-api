@@ -38,10 +38,12 @@ import {
     useAddBankInfo,
     useApplyDeposit,
     useBankInfoList,
+    useDeleteBankInfo,
     usePaymentList
 } from "../../client/brand/player"
 import { useForm, useFormContext, FormProvider } from "react-hook-form"
 import { toValue } from "../../platform"
+import clone from "clone-deep"
 
 export const BankInfoDialog = ({
     brandCode,
@@ -52,7 +54,6 @@ export const BankInfoDialog = ({
     dialog
 }) => {
     const addBankInfoDialog = Modal.useState()
-    const editBankInfoDialog = Modal.useState()
     const errorDialog = Modal.useState()
 
     let platformtype = toValue(platform)
@@ -65,8 +66,6 @@ export const BankInfoDialog = ({
             platformtype
         }
     )
-
-    let [record, setRecord] = useState()
 
     useEffect(() => {
         if (error) {
@@ -88,9 +87,19 @@ export const BankInfoDialog = ({
                 {...dialog}
             >
                 {bankInfoList.map((bankInfo, index) => (
-                    <Card title={`${index + 1}`}>
-                        TODO: {JSON.stringify(bankInfo)}
-                    </Card>
+                    <CardForm
+                        key={index}
+                        title={`${index + 1}`}
+                        record={bankInfo}
+                        brandCode={brandCode}
+                        currency={currency}
+                        username={username}
+                        platform={platform}
+                        onSubmitted={() => {
+                            mutate()
+                            onSubmitted?.()
+                        }}
+                    />
                 ))}
             </Dialog.Modal>
             {addBankInfoDialog.visible && (
@@ -104,20 +113,6 @@ export const BankInfoDialog = ({
                         onSubmitted?.()
                     }}
                     dialog={addBankInfoDialog}
-                />
-            )}
-            {editBankInfoDialog.visible && (
-                <EditBankInfoDialog
-                    brandCode={brandCode}
-                    currency={currency}
-                    username={username}
-                    platform={platform}
-                    record={record}
-                    onSubmitted={() => {
-                        mutate()
-                        onSubmitted?.()
-                    }}
-                    dialog={editBankInfoDialog}
                 />
             )}
             {error && (
@@ -154,7 +149,6 @@ const AddBankInfoDialog = ({
             detail: {}
         }
     })
-    let { register } = formMethods
 
     let [formData, setSubmit] = useState()
     let platformtype = toValue(platform)
@@ -206,38 +200,55 @@ const AddBankInfoDialog = ({
     )
 }
 
-const EditBankInfoDialog = ({ record, onSubmitted, dialog, ...props }) => {
-    let formMethods = useForm()
+const CardForm = ({
+    brandCode,
+    currency,
+    username,
+    platform,
+    record,
+    onSubmitted,
+    ...props
+}) => {
+    let platformtype = toValue(platform)
 
-    const onSubmit = (data) => {
-        console.log("onSubmit", data)
-    }
+    let formMethods = useForm({ defaultValues: clone(record) })
+    let { handleSubmit } = formMethods
+
+    let [deleteBankInfoId, setDeleteBankInfoId] = useState()
+    let { result: deleteBankInfoResult } = useDeleteBankInfo(
+        { brandCode, currency, username, platformtype },
+        deleteBankInfoId
+    )
+
+    useEffect(() => {
+        if (deleteBankInfoResult) {
+            onSubmitted?.()
+        }
+    }, [deleteBankInfoResult])
 
     return (
-        <>
-            <Modal.Backdrop zIndex="19900410" {...dialog}>
-                <Dialog.Modal
-                    wrap={(children) => (
-                        <FormProvider {...formMethods}>
-                            <form onSubmit={formMethods.handleSubmit(onSubmit)}>
-                                {children}
-                            </form>
-                        </FormProvider>
-                    )}
-                    title="Edit Bank Info"
-                    hideBackdrop={true}
-                    showCloseButton
-                    hideOnClickOutside={false}
-                    {...dialog}
-                >
-                    {JSON.stringify(record)}
-                </Dialog.Modal>
-            </Modal.Backdrop>
-        </>
+        <FormProvider>
+            <Card
+                {...props}
+                headerAddon={
+                    <Set>
+                        <Button
+                            palette="danger"
+                            variant="link"
+                            onClick={() => {
+                                setDeleteBankInfoId(record.id)
+                            }}
+                        >
+                            Delete
+                        </Button>
+                    </Set>
+                }
+            >
+                <FormBody />
+            </Card>
+        </FormProvider>
     )
 }
-
-const CardForm = ({ record, onSubmitted }) => {}
 
 const FormBody = ({}) => {
     let { register } = useFormContext()
@@ -270,5 +281,5 @@ const BankTypeSelect = ({ ...props }) => {
         }
     ]
 
-    return <Select options={options} {...props} />
+    return <SelectField options={options} label="Type" {...props} />
 }
