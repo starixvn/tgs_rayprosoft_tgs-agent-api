@@ -34,9 +34,8 @@ namespace TGS.Shared.Game.ApiClients.KY
 
         public async ValueTask<KYApiResponse<TData>> GetAPIAsync<TData>(Uri apiUrl, KYApiRequest request)
         {
-            var companies = JObject.Parse(JsonSerializer.Serialize(request)).Properties();
-            var keyValuePairs = companies.ToDictionary(k => k.Name, v => v.Value.ToString());
-            var paths = string.Join("&", keyValuePairs.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)));
+
+            var paths = KYUtility.GetPath(request);
 
             var url = $"{apiUrl?.ToString()}?{paths}";
 

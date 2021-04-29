@@ -19,11 +19,11 @@ namespace TGS.Shared.Game.ApiClients.KY
         /// <typeparam name="TRequest">The type of the request.</typeparam>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        public static string GetPath<TRequest>(TRequest request)
+        public static string GetPath<TRequest>(TRequest request, JsonSerializerOptions options = null)
         {
-            var companies = JObject.Parse(JsonSerializer.Serialize(request)).Properties();
-            var keyValuePairs = companies.ToDictionary(k => k.Name, v => v.Value.ToString());
-            return string.Join("&", keyValuePairs.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)));
+            var value = JsonSerializer.Serialize(request, options);
+            var items = JsonSerializer.Deserialize<Dictionary<string, object>>(value, options);
+            return string.Join("&", items.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)));
         }
 
         /// <summary>
