@@ -52,6 +52,7 @@ import { EditPlayerInfoDialog, ViewPlayerInfoDialog } from "./InfoDialog"
 import { toValue } from "../../platform"
 import { DepositDialog } from "./DepositDialog"
 import { UploadDepositProofDialog } from "./UploadDepositProofDialog"
+import { BankInfoDialog } from "./BankInfoDialog"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
     let { path, url } = useRouteMatch()
@@ -144,6 +145,8 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
     const uploadDepositProofDialog = Modal.useState()
     let showUploadDepositProofMenu = !!depositFormId
 
+    const bankInfoDialog = Modal.useState()
+
     const viewInfoDialog = Modal.useState()
     const editInfoDialog = Modal.useState()
     const changePasswordDialog = Modal.useState()
@@ -156,6 +159,7 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                         depositDialog={depositDialog}
                         showUploadDepositProofMenu={showUploadDepositProofMenu}
                         uploadDepositProofDialog={uploadDepositProofDialog}
+                        bankInfoDialog={bankInfoDialog}
                         playerInfoDialog={viewInfoDialog}
                         editPlayerInfoDialog={editInfoDialog}
                         editPasswordDialog={changePasswordDialog}
@@ -198,6 +202,15 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                     dialog={uploadDepositProofDialog}
                 />
             )}
+            {bankInfoDialog.visible && (
+                <BankInfoDialog
+                    brandCode={brandCode}
+                    currency={currency}
+                    username={username}
+                    platform={platform}
+                    dialog={bankInfoDialog}
+                />
+            )}
             {viewInfoDialog.visible && (
                 <ViewPlayerInfoDialog
                     brandCode={brandCode}
@@ -233,6 +246,7 @@ const PlayerMenu = ({
     depositDialog,
     showUploadDepositProofMenu,
     uploadDepositProofDialog,
+    bankInfoDialog,
     playerInfoDialog,
     editPlayerInfoDialog,
     editPasswordDialog,
@@ -248,6 +262,9 @@ const PlayerMenu = ({
                     Upload Deposit Proof
                 </DropdownMenu.Item>
             )}
+            <DropdownMenu.Item onClick={bankInfoDialog.show}>
+                Bank List
+            </DropdownMenu.Item>
             <DropdownMenu.Item onClick={playerInfoDialog.show}>
                 View Info
             </DropdownMenu.Item>
