@@ -54,7 +54,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IBrandService.CreateBrandAsync(CreateBrandRequest request)
         {
-            var (beforeFromDate, beforeToDate, afterFromDate, afterToDate) =
+            var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
                 BrandSettlementIntervalGenerator.GetInterval(request.SettlementIntervalType);
             var brand = new Brand
             {
@@ -62,13 +62,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 LicenseeId = request.LicenseeId,
                 Code = request.Code,
                 Name = request.Name,
-                BeforeFromDateTime = beforeFromDate,
-                BeforeToDateTime = beforeToDate,
-                AfterFromDateTime = afterFromDate,
-                AfterToDateTime = afterToDate,
+                CurrentSettlementFrom = currentFromDate,
+                CurrentSettlementTo = currentToDate,
+                NextSettlementFrom = nextFromDate,
+                NextSettlementTo = nextToDate,
                 Status = Status.Active,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,
+                SettlementIntervalType = request.SettlementIntervalType,
                 ApiKey = _credentialGenerator.GetApiKey(),
                 ClientId = request.Code,
                 SecretKey = _credentialGenerator.GetSecretKey(),
@@ -199,6 +200,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var gameProviderIds = brand.GameProviders.Select(x => x.GameProviderId).ToArray();
 
             var brandGames = await _repository.Games.AsQueryable()
+                .Where(x => x.AvailableToBrand == true)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
             var games = brandGames.Select((x, count) =>
@@ -246,6 +248,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId);
             var games = await _repository.Games.AsQueryable()
+                .Where(x => x.AvailableToBrand == true)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
             var brandGames = games.Select(x =>

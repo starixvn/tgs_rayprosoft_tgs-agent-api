@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
@@ -12,28 +14,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             var configBuilder = new ConfigurationBuilder();
             configBuilder
                 .AddJsonFile("appsettings.json");
-
             var config = configBuilder.Build();
+
+            var services = new ServiceCollection();
+
+            services.AddRepository<TgsRepository, TgsRepository>(config, "Tgs");
 
             var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
             });
+            services.AddSingleton<ILoggerFactory>(loggerFactory);
 
-            var optionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            optionsBuilder
-                .UseNpgsql(config.GetConnectionString("Tgs"), serverOption =>
-                {
-                    serverOption.SetPostgresVersion(12, 5);
-                    serverOption.CommandTimeout(180);
-                    serverOption.MigrationsHistoryTable(Core.Models.Consts.Db.MigrationsHistoryTable,
-                        Core.Models.Consts.Db.Schema);
-                    serverOption.UseTrigrams();
-                })
-                .UseSnakeCaseNamingConvention()
-                .UseLoggerFactory(loggerFactory);
+            var serviceProvider = services.BuildServiceProvider();
 
-            return new(optionsBuilder.Options);
+            var dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<TgsRepository>>();
+
+            return dbContextFactory.CreateDbContext();
         }
     }
 }

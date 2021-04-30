@@ -44,6 +44,13 @@ import {
     isAgentConfigRequired,
     isAgentConfigDone
 } from "../AgentConfigStatus"
+import AgentCommissionPercentage from "../AgentCommissionPercentage"
+import AgentLiveDealerRebatePercentage from "../AgentLiveDealerRebatePercentage"
+import AgentEgameRebatePercentage from "../AgentEgameRebatePercentage"
+import AgentCardGameRebatePercentage from "../AgentCardGameRebatePercentage"
+import AgentLotteryRebatePercentage from "../AgentLotteryRebatePercentage"
+import AgentSportsRebatePercentage from "../AgentSportsRebatePercentage"
+import AgentVirtualSportsRebatePercentage from "../AgentVirtualSportsRebatePercentage"
 
 export { Code }
 
@@ -216,9 +223,9 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Cell: ({ value }) => <AgentStatusLabel value={value} />
             }),
             textColumn({
-                id: "dividendPercentage",
+                id: AgentCommissionPercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="分红比例" en="Dividend Percentage" />,
+                Header: <Trans zh="分红比例" en="Commission Percentage" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -230,14 +237,14 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
 
                     return (
                         <FormattedNumberDecimal
-                            value={value?.dividendPercentage}
+                            value={value?.commissionPercentage}
                             postfix="%"
                         />
                     )
                 }
             }),
             textColumn({
-                id: "liveDealerRebatePercentage",
+                id: AgentLiveDealerRebatePercentage.Name,
                 accessor: (row) => row,
                 Header: <Trans zh="真人返佣%" en="Live Dealer Rebate %" />,
                 disableSortBy: true,
@@ -258,9 +265,9 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 }
             }),
             textColumn({
-                id: "slotRebatePercentage",
+                id: AgentEgameRebatePercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="电子返佣%" en="Slot Rebate %" />,
+                Header: <Trans zh="电子返佣%" en="EGame Rebate %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -279,7 +286,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 }
             }),
             textColumn({
-                id: "cardGameRebatePercentage",
+                id: AgentCardGameRebatePercentage.Name,
                 accessor: (row) => row,
                 Header: <Trans zh="棋牌返佣%" en="Card Game Rebate %" />,
                 disableSortBy: true,
@@ -300,7 +307,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 }
             }),
             textColumn({
-                id: "lotteryRebatePercentage",
+                id: AgentLotteryRebatePercentage.Name,
                 accessor: (row) => row,
                 Header: <Trans zh="彩票返佣%" en="Lottery Rebate %" />,
                 disableSortBy: true,
@@ -321,7 +328,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 }
             }),
             textColumn({
-                id: "sportsRebatePercentage",
+                id: AgentSportsRebatePercentage.Name,
                 accessor: (row) => row,
                 Header: <Trans zh="体育返佣%" en="Sports Rebate %" />,
                 disableSortBy: true,
@@ -342,7 +349,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 }
             }),
             textColumn({
-                id: "virtualSportsRebatePercentage",
+                id: AgentVirtualSportsRebatePercentage.Name,
                 accessor: (row) => row,
                 Header: (
                     <Trans zh="虚拟体育返佣%" en="Virtual Sports Rebate %" />
@@ -413,11 +420,6 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                                         brandId={brandId}
                                     />
                                     <EditButton
-                                        brandId={brandId}
-                                        record={value}
-                                        onSubmitted={mutate}
-                                    />
-                                    <ConfigButton
                                         brandId={brandId}
                                         record={value}
                                         onSubmitted={mutate}

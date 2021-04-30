@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/react"
-import { CodeContentPair as DepositListPair } from "./player-deposit"
-import { CodeContentPair as WithdrawListPair } from "./player-withdraw"
+import { CodeContentPair as DepositListPair } from "./deposit"
+import { CodeContentPair as WithdrawListPair } from "./withdraw"
 import { Switch } from "../content"
 import { Code, DefaultCodePath, Menu } from "./menu"
 

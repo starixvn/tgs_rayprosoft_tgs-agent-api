@@ -4,7 +4,7 @@ using Moq;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
-using TGS.Services.Operator.PlayerInfo;
+using TGS.Services.Operator.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

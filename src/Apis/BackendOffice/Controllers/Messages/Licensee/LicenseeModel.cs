@@ -7,6 +7,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Licensee
     {
         public Guid Id { get; set; }
         public Guid ResellerId { get; set; }
+        public BusinessType BusinessType { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
         public Status Status { get; set; }

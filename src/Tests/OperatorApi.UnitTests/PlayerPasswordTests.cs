@@ -17,7 +17,7 @@ using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
-using TGS.Services.Operator.PlayerPassword;
+using TGS.Services.Operator.Player;
 
 namespace OperatorApi.UnitTests
 {

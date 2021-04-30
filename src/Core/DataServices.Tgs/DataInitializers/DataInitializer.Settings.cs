@@ -54,23 +54,66 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now
             };
 
-        private static PromotionType[] GetPromotionTypes() =>
+        private static PromotionTypeGroup[] GetPromotionTypes() =>
             new[]
             {
-                new PromotionType
+                new PromotionTypeGroup
                 {
                     Name = "Deposit",
-                    Types = new[] {"FirstDeposit", "SecondDeposit"}
+                    Trans = new() {Zh = "充值送", En = "Deposit Rebate"},
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "FirstDeposit",
+                            SettlementIntervalType = "Instantly",
+                            Trans = new() {Zh = "每日首充", En = "First Deposit"}
+                        },
+                        new PromotionType
+                        {
+                            Name = "SecondDeposit", Trans = new() {Zh = "每日再充", En = "Second Deposit"}
+                        }
+                    }
                 },
-                new PromotionType
+                new PromotionTypeGroup
                 {
                     Name = "Turnover",
-                    Types = new[] {"TurnoverRebate"}
+                    Trans = new() {Zh = "流水", En = "Turnover"},
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "TurnoverRebate",
+                            SettlementIntervalType = "Daily",
+                            Trans = new() {Zh = "流水反水", En = "Turnover Rebate"}
+                        }
+                    }
                 },
-                new PromotionType
+                new PromotionTypeGroup
                 {
                     Name = "ReliefMoney",
-                    Types = new[] {"ReliefMoneyDaily"}
+                    Trans = new() {Zh = "救援金", En = "Relief Money"},
+                    Types = new[]
+                    {
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyDaily",
+                            SettlementIntervalType = "Daily",
+                            Trans = new() {Zh = "每日救援金", En = "Daily Relief Money"}
+                        },
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyWeekly",
+                            SettlementIntervalType = "Weekly",
+                            Trans = new() {Zh = "每周救援金", En = "Weekly Relief Money"}
+                        },
+                        new PromotionType
+                        {
+                            Name = "ReliefMoneyMonthly",
+                            SettlementIntervalType = "Monthly",
+                            Trans = new() {Zh = "每月救援金", En = "Monthly Relief Money"}
+                        }
+                    }
                 }
             };
 
@@ -108,6 +151,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     }
                 },
+                new MenuSetting("Promotion")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}}
+                    }
+                },
                 new MenuSetting("PlayerManagement")
                 {
                     SubMenus = new[]
@@ -125,7 +175,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new MenuSetting("AgentList")
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
-                        }
+                        },
+                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Game")
@@ -162,6 +213,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("Update")}}
+                    }
+                },
+                new MenuSetting("FundManagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("Update")}},
                     }
                 },
                 new MenuSetting("System")

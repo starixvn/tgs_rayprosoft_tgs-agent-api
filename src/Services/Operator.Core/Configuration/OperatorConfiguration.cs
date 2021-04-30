@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Services.Payment.Configuration;
 
 namespace TGS.Services.Operator.Configuration
 {
@@ -43,6 +44,13 @@ namespace TGS.Services.Operator.Configuration
             where TStationLetterRepository : class, IStationLetterRepository
         {
             Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration ConfigurePayment(Action<PaymentConfiguration> configure)
+        {
+            configure(Services.AddPayment());
 
             return this;
         }

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
+using TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;
+using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
@@ -14,6 +17,11 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Queries.BrandPayment;
+using TGS.Services.BackOffice.Application.Queries.PaymentChannel;
+using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
+using TGS.Services.Payment;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -63,11 +71,16 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     Id = x.Id,
                     BrandId = x.BrandId,
                     Number = x.DisplayOrder,
+                    PaymentId = x.PaymentMethodChannel.Payment.Id,
                     PaymentName = x.PaymentMethodChannel.Payment.Code,
+                    PaymentMethodId = x.PaymentMethodChannel.Method.Id,
                     PaymentMethodName = x.PaymentMethodChannel.Method.Code,
+                    PaymentChannelId = x.PaymentMethodChannel.Channel.Id,
                     PaymentChannelName = x.PaymentMethodChannel.Channel.Code,
+                    PaymentMethodChannelId = x.PaymentMethodChannel.Id,
                     TransferType = x.TransferType,
                     ChannelName = x.ChannelName,
+                    ExtendedData = x.ExtendedData,
                     PlayerListCondition = x.PlayerListCondition,
                     AllPlayers = x.AllPlayers,
                     DepositedAmountMin = x.DepositedAmountMin,
@@ -192,6 +205,59 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
         }
 
+        [HttpGet("pmc")]
+        [Description("Get All Brand PaymentMethodChannels")]
+        public async Task<GenericResponse<AllPaymentMethodChannelsResponse>> GetAllPaymentMethodChannelsAsync(
+            [FromServices] IQueryService<AllPaymentMethodChannelQuery, PaymentMethodChannelInfo> queryService,
+            [FromServices] IQueryService<PaymentMethodQuery, PaymentMethodInfo> paymentMethodQueryService,
+            [FromServices] IQueryService<PaymentChannelQuery, PaymentChannelInfo> paymentChannelQueryService)
+        {
+            var allPaymentMethodChannels = queryService.QueryAsync(new AllPaymentMethodChannelQuery());
+            var allPaymentMethods = await paymentMethodQueryService
+                .QueryAsync(new PaymentMethodQuery())
+                .ToDictionaryAsync(pm => pm.Id)
+                .ConfigureAwait(false);
+            var allPaymentChannels = await paymentChannelQueryService
+                .QueryAsync(new PaymentChannelQuery())
+                .ToDictionaryAsync(pc => pc.Id)
+                .ConfigureAwait(false);
+
+            return new GenericResponse<AllPaymentMethodChannelsResponse>
+            {
+                Valid = true,
+                Data = new AllPaymentMethodChannelsResponse
+                {
+                    AllData = allPaymentMethodChannels
+                        .Select(pmc => new PaymentMethodChannelResponse
+                        {
+                            Id = pmc.Id,
+                            PaymentId = pmc.PaymentId,
+                            MethodId = pmc.MethodId,
+                            ChannelId = pmc.ChannelId
+                        })
+                        .ToEnumerable(),
+                    Methods = allPaymentMethodChannels
+                        .GroupBy(pmc => pmc.MethodId)
+                        .SelectAwait(async g => await g.FirstAsync().ConfigureAwait(false))
+                        .Select(pmc => new PaymentMethodModel
+                        {
+                            Id = pmc.MethodId,
+                            Code = allPaymentMethods[pmc.MethodId].Name
+                        })
+                        .ToEnumerable(),
+                    Channels = allPaymentMethodChannels
+                        .GroupBy(pmc => pmc.ChannelId)
+                        .SelectAwait(async g => await g.FirstAsync().ConfigureAwait(false))
+                        .Select(pmc => new PaymentChannelModel
+                        {
+                            Id = pmc.ChannelId,
+                            Code = allPaymentChannels[pmc.ChannelId].Name
+                        })
+                        .ToEnumerable(),
+                }
+            };
+        }
+
         [HttpPut("{brandPaymentId:guid}")]
         [Description("Update a Payment")]
         public async Task<CreateUpdateBrandPaymentResponse> UpdateBrandPaymentAsync(Guid brandPaymentId,
@@ -218,7 +284,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NotFound);
             }
 
-            if (await _brandPaymentService.ExistsAsync(p =>
+            if (await _brandPaymentService.ExistsAsync(p => p.BrandId == brandPayment.BrandId &&
                 p.Id != brandPaymentId && p.ChannelName == request.ChannelName))
             {
                 return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NameExists);
@@ -245,7 +311,6 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
             return CreateValidResponse<MessageResponse>();
         }
-
 
         [HttpPost("upload")]
         [Description("Upload player file")]
@@ -300,7 +365,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             var vipLevelIds = brandPayment.VipLevels.Select(x => x.VipLevelId).ToArray();
             var playerCodes = brandPayment.BrandPaymentPlayers.Where(x => x.ListType == PlayerListType.White)
                 .Select(p => p.PlayerCode).ToArray();
-            var isAll = brandPayment.PlayerListCondition == PlayerListCondition.All;
+            var isAll = brandPayment.PlayerListCondition == PlayerListCondition.MatchAll;
 
             return brandPayment.BrandPaymentPlayers
                 .Where(x => playerCodes.Contains(x.PlayerCode))

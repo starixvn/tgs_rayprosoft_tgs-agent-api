@@ -8,7 +8,7 @@ using NUnit.Framework;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.PlayerEmail;
+using TGS.Services.Operator.Player;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

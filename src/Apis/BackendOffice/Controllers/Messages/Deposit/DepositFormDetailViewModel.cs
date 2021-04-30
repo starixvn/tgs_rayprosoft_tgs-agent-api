@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 {
-    public class DepositFormDetailViewModel
+    public record DepositFormDetailViewModel
     {
         public Guid Id { get; init; }
 
@@ -23,12 +23,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         public string Remark { get; init; }
 
-        public DateTimeOffset CreateOn { get; init; }
+        public FlowStatus Status { get; init; }
 
-        public DateTimeOffset UpdateOn { get; init; }
+        public JsonDocument ApplyInfo { get; init; }
 
-        public JsonDocument BrandPaymentExtendData { get; init; }
+        public JsonDocument PaymentReturn { get; init; }
 
-        public string ManualReceiptFileId { get; init; }
+        public DateTimeOffset CreatedOn { get; init; }
+
+        public DateTimeOffset UpdatedOn { get; init; }
     }
 }

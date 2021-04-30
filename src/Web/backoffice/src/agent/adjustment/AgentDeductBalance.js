@@ -24,7 +24,7 @@ import {
     ConfirmCancelFooter
 } from "../../form/ConfirmButtonFooter"
 import { Table, toApiParams, useTable, pageCount } from "../../table"
-import { useAgentDeductBalance } from "./client"
+import { useAgentAdjustBalance } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import dateTimeColumn from "../../table/column/dateTime"
 import {
@@ -44,9 +44,12 @@ import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
 import DeductBalanceType from "./AgentDeductBalanceType"
 import { DeductBalanceTargetSelect } from "./AgentDeductBalanceTarget"
+import AdjustType from "./AdjustType"
+import { NumberInput } from "../../input/NumberInput"
 
 export const AgentDeductBalanceDisclosure = ({
     brandId,
+    agentId,
     username,
     onSubmitted,
     ...props
@@ -66,6 +69,7 @@ export const AgentDeductBalanceDisclosure = ({
             {dialog.visible && (
                 <DeductDialog
                     brandId={brandId}
+                    agentId={agentId}
                     username={username}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
@@ -75,7 +79,7 @@ export const AgentDeductBalanceDisclosure = ({
     )
 }
 
-const DeductDialog = ({ brandId, username, onSubmitted, dialog }) => {
+const DeductDialog = ({ brandId, agentId, username, onSubmitted, dialog }) => {
     let [formData, setSubmit] = useState()
     let {
         result,
@@ -83,14 +87,19 @@ const DeductDialog = ({ brandId, username, onSubmitted, dialog }) => {
         error,
         mutate,
         deleteCache
-    } = useAgentDeductBalance({ brandId, username }, formData)
+    } = useAgentAdjustBalance(agentId, formData)
 
     let title = useTrans({
         zh: "余额扣分",
         en: "Deduct Balance"
     })
 
-    const onSubmit = (data) => setSubmit(data)
+    const onSubmit = (data) => {
+        setSubmit({
+            ...data,
+            adjustType: AdjustType.Subtract
+        })
+    }
 
     const reset = () => {
         deleteCache()
@@ -161,8 +170,7 @@ const FormBody = ({ brandId, username }) => {
                 <Text.Block alignY="center">
                     <Trans zh="交易金额" en="Amount" />
                 </Text.Block>
-
-                <Input type="number" name="amount" min="0" required />
+                <NumberInput name="amount" min="0" required />
 
                 <Text.Block alignY="center">
                     <Trans zh="备注" en="Remark" />

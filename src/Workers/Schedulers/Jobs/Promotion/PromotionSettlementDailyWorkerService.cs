@@ -1,0 +1,35 @@
+﻿using System.Threading.Tasks;
+using Report.Client;
+using TGS.Core.Models.Messages;
+
+namespace TGS.Workers.Schedulers.Jobs.Promotion
+{
+    public interface IPromotionSettlementDailyWorkerService
+    {
+        Task<TgsResponse> ExecutionAsync();
+        Task<TgsResponse> ManualExecutionAsync(string date);
+    }
+
+    public class PromotionSettlementDailyWorkerService : IPromotionSettlementDailyWorkerService
+    {
+        private readonly IPromotionSettlementClient _client;
+
+        public PromotionSettlementDailyWorkerService(
+            IPromotionSettlementClient client)
+        {
+            _client = client;
+        }
+
+        async Task<TgsResponse> IPromotionSettlementDailyWorkerService.ExecutionAsync()
+        {
+            var response = await _client.CreatePromotionSettleDataDailyAsync(new());
+            return new() {ErrorMessage = response.Message};
+        }
+
+        async Task<TgsResponse> IPromotionSettlementDailyWorkerService.ManualExecutionAsync(string date)
+        {
+            var response = await _client.CreatePromotionSettleDataDailyAsync(new(date));
+            return new() {ErrorMessage = response.Message};
+        }
+    }
+}

@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Moq;
 using NUnit.Framework;
-using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.DataServices.Tgs;
-using TGS.Services.BackOffice.Application.Queries.Deposit;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
+using TGS.Services.Payment;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -18,31 +9,19 @@ namespace TGS.Tests.BackendOffice.UnitTests
     public class PaymentMethodTests
     {
         [Test]
-        public async Task User_Can_Get_All_PaymentMethods()
+        public void User_Can_Get_All_PaymentMethods()
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
 
-            var tgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
-
-            await tgsRepository.PaymentMethods.AddAsync(
-                new PaymentMethod
-                {
-                    Id = Guid.NewGuid(),
-                    Code = "Test"
-                });
-
-            await tgsRepository.SaveChangesAsync();
-
-            var sut = new PaymentMethodQueryService(tgsRepository);
+            var sut = new PaymentMethodQueryService(moqPaymentRepository.Object);
 
             var query = new PaymentMethodQuery();
 
-            var actual = await sut.QueryAsync(query).ToArrayAsync();
+            sut.QueryAsync(query);
 
-            Assert.IsTrue(actual.Length == 1);
+            moqPaymentRepository.Verify(
+                fake => fake.GetAllPaymentMethodsAsync(),
+                Times.Exactly(1));
         }
     }
 }

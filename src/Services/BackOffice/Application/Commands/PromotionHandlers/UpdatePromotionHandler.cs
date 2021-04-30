@@ -42,13 +42,18 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
             }
 
             var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
-            var promotionTypes =
-                _jsonSerializationProvider.DeserializeFromString<PromotionType[]>(promotionsJson.Value);
+            var promotionTypeGroups =
+                _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
 
-            if (promotionTypes.SelectMany(x => x.Types).All(x => x != request.PromotionType))
+            if (promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {
                 return CreateInvalidResponse<MessageResponse>(Promotion.PromotionTypeNotFound);
             }
+
+            var promotionType = promotionTypeGroups.SelectMany(x => x.Types)
+                .First(x => x.Name == request.PromotionType);
+
+            promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
 
             await _service.UpdatePromotionAsync(promotion, request);
 

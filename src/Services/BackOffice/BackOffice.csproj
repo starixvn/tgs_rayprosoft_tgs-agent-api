@@ -20,13 +20,15 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.2" />
+    <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+    <ProjectReference Include="..\..\Repositories\PaymentRepositories\PaymentRepositories.csproj" />
+    <ProjectReference Include="..\Payment.Core\Payment.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

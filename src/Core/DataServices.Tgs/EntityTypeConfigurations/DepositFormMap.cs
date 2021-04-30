@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -20,9 +21,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.BrandId)
                 .IsRequired();
 
-            builder.Property(c => c.BankAccount)
-                .IsRequired();
-
             builder.Property(c => c.Amount)
                 .HasPrecision(18, 6)
                 .IsRequired();
@@ -36,15 +34,17 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.Remark);
 
-            builder.Property(c => c.ManualReceiptFileId);
+            builder.Property(c => c.ApplyInfo)
+                .HasColumnType(ColumnTypes.Jsonb);
 
-            builder.Property(c => c.ManualReceiptExternalUrl);
+            builder.Property(c => c.PaymentReturn)
+                .HasColumnType(ColumnTypes.Jsonb);
 
             builder.Property(c => c.CreatedOn)
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
 
-            builder.Property(c => c.UpdateOn)
+            builder.Property(c => c.UpdatedOn)
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
 

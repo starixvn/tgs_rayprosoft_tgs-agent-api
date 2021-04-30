@@ -7,25 +7,24 @@ import { CheckboxGroup } from "../checkbox/CheckboxGroup"
 
 export const VipLevelCheckboxGroup = ({
     orientation = "horizontal",
+    valueFieldName = "id",
     brandId,
     ...props
 }) => {
-    let { data, isLoading, error } = useVipLevelList({ brandId, showAll: true })
+    let { isLoading, data, error } = useVipLevelList({ brandId, showAll: true })
 
     let options =
-        data?.items?.map(({ id, ...item }) => ({
+        data?.items?.map((item) => ({
             label: item.name,
-            value: id
+            value: `${Reflect.get(item, valueFieldName)}`
         })) ?? []
 
     return (
-        <>
-            <CheckboxGroup
-                orientation={orientation}
-                options={options}
-                {...props}
-            />
-            {error && <AlertDialog {...error} />}
-        </>
+        <CheckboxGroup
+            isLoading={isLoading}
+            options={options}
+            orientation={orientation}
+            {...props}
+        />
     )
 }
