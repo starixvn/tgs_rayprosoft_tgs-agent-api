@@ -84,18 +84,27 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             {
                 new()
                 {
-                    ExternalTransactionId = $"{request.TransferId}_cancel",
-                    ExternalTransactionReferenceId = $"{request.TransferId}_place",
+                    ExternalTransactionId = $"{request.TransferId}_settle_cancel",
+                    ExternalTransactionReferenceId = $"{request.TransferId}_settle",
                     ExternalRoundId = clientRoundId,
                     ExternalBetId = clientRoundId,
                     ExternalGameActionGroupId = clientRoundId,
-                    ExternalGameId = string.Empty, //TODO
+                    GameActionType = CancelTransaction,
+                    TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(request.SystemTime)
+                },
+                new()
+                {
+                    ExternalTransactionId = $"{request.TransferId}_cancel",
+                    ExternalTransactionReferenceId = request.TransferId.ToString(),
+                    ExternalRoundId = clientRoundId,
+                    ExternalBetId = clientRoundId,
+                    ExternalGameActionGroupId = clientRoundId,
                     GameActionType = CancelTransaction,
                     TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(request.SystemTime)
                 }
             };
 
-            return GetBetData(request.UserId, currencyCode, data, transactions);
+            return GetBetData(request.UserId, currencyCode, data, transactions, hasCurrencyFromGameProvider: false);
         }
         
         BaseResponse IJDBActionModelMapper.Response(BetResult result) =>
@@ -110,7 +119,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         #region Private Methods
 
         private static BetData GetBetData(string playerCode, string currencyCode, GameProviderConfigurationData data,
-            TransactionData[] transactions) => new()
+            TransactionData[] transactions, bool hasCurrencyFromGameProvider = true) => new()
         {
             GameProviderId = data.GameProviderId,
             GameProviderConfigurationId = data.GameProviderConfigurationId,
@@ -118,7 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             AutoCloseRound = data.AutoCloseRound,
             PlayerCode = playerCode,
             PlatformType = data.PlatformType,
-            HasCurrencyFromGameProvider = true,
+            HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
             CurrencyCode = currencyCode,
             Transactions = transactions
         };
