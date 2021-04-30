@@ -43,7 +43,7 @@
     },
     "TgsApi-JDB": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "health",
       "environmentVariables": {
         "GameProviderCode": "JDB",

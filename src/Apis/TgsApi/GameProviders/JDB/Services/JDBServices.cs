@@ -38,7 +38,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
                 .ConfigureAwait(false);
@@ -48,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 GameProviderId = gameProviderId,
                 GameProviderConfigurationId = gameProviderConfigurationId,
                 AutoCloseRound = autoCloseRound,
-                PlatformType = platformType
+                PlatformType = PlatformType.Desktop
             };
         }
     }

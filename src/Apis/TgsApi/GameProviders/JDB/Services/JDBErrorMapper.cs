@@ -21,7 +21,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 {typeof(PlayerDisabledException), UserIdCannotBeFound},
                 {typeof(PlayerNotFoundException), UserIdCannotBeFound},
                 {typeof(PlayerLoginExpiredException), UserIdCannotBeFound},
-                {typeof(PlayerHasInsufficientFundsException), BalanceNotEnough}
+                {typeof(PlayerHasInsufficientFundsException), BalanceNotEnough},
+                {typeof(ArgumentException), InvalidParameters}
             };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>

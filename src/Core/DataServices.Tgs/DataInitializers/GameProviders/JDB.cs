@@ -16,7 +16,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record JDBGameProvider : IGameProvider
         {
-            private const int UniqueId = 3;
+            private const int UniqueId = 4;
 
             private static readonly string EndpointPath = "?brandId={BRANDID}&token={TOKEN}&locale={CULTURE}&mode=real";
             private readonly IWebHostEnvironment _env;

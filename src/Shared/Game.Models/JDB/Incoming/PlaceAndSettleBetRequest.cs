@@ -1,14 +1,17 @@
 ﻿// unset
 
-using System;
+using System.Text.Json.Serialization;
+using JDBGameType = TGS.Shared.Game.Models.JDB.Enums.GameType;
 
 namespace TGS.Shared.Game.Models.JDB.Incoming
 {
     public record PlaceAndSettleBetRequest : BaseActionRequest
     {
         public long TransferId { get; set; }
-        public long GameNo { get; set; }
-        public int GameType { get; set; }
+        public long GameSeqNo { get; set; }
+        [JsonPropertyName("gType")]
+        public JDBGameType GameType { get; set; }
+        [JsonPropertyName("mType")]
         public int MachineType { get; set; }
         public string ReportDate { get; set; }
         public string GameDate { get; set; }

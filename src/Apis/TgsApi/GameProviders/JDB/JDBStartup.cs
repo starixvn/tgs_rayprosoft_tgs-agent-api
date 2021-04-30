@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
                 }
             );
 
-            //services.AddScoped<AuthorizeJDBMiddleware>();
+            services.AddScoped<AuthorizeJDBMiddleware>();
             services.AddScoped<HandleJDBExceptionMiddleware>();
 
             services.AddScoped<IJDBServices, JDBServices>();
@@ -48,13 +48,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            const string Route = "/api/provider";
+            const string Route = "/api/jdb";
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
                 {
                     builder.UseMiddleware<HandleJDBExceptionMiddleware>();
-                    //builder.UseMiddleware<AuthorizeJDBMiddleware>();
+                    builder.UseMiddleware<AuthorizeJDBMiddleware>();
                 });
         }
     }
