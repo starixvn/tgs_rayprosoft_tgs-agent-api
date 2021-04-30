@@ -12,11 +12,13 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public decimal Amount { get; set; }
 
-        public Guid BrandPaymentId { get; set; }
+        public Guid? BrandPaymentId { get; set; }
 
         public int Status { get; set; }
 
         public string Remark { get; set; }
+
+        public string BankInfo { get; set; }
 
         public string ApplyInfo { get; set; }
 

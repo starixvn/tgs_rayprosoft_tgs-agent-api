@@ -24,7 +24,7 @@ namespace TGS.Wallet.Repositories
             _transcationManager = transcationManager ?? throw new ArgumentNullException(nameof(transcationManager));
         }
 
-        public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(
+        public async ValueTask<(Guid TranscationId, decimal PostBalance)> ExchangeAsync(
             Guid brandId,
             Guid walletId,
             string playerCode,

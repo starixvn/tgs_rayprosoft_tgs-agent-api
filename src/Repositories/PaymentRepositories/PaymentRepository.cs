@@ -44,16 +44,45 @@ namespace TGS.Payment.Repositories
 
         public async ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormInfo form)
         {
-            _tgsRepository.DepositForms.Add(new DepositForm
-            {
-                Id = createFormId,
-                PlayerCode = form.PlayerCode,
-                BrandId = form.BrandId,
-                BrandPaymentId = form.BrandPaymentId,
-                Amount = form.Amount,
-                ApplyInfo = form.ApplyInfo,
-                PaymentReturn = form.PaymentReturn
-            });
+            var currentDate = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.DepositForms
+                .AddAsync(new DepositForm
+                {
+                    Id = createFormId,
+                    PlayerCode = form.PlayerCode,
+                    BrandId = form.BrandId,
+                    BrandPaymentId = form.BrandPaymentId,
+                    Amount = form.Amount,
+                    ApplyInfo = form.ApplyInfo,
+                    PaymentReturn = form.PaymentReturn,
+                    CreatedOn = currentDate,
+                    UpdatedOn = currentDate
+                })
+                .ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask CreateWithdrawFormAsync(Guid createFormId, WithdrawFormInfo form)
+        {
+            var currentDate = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.WithdrawForms
+                .AddAsync(new WithdrawForm
+                {
+                    Id = createFormId,
+                    BrandId = form.BrandId,
+                    PlayerCode = form.PlayerCode,
+                    BrandPaymentId = form.BrandPaymentId,
+                    Amount = form.Amount,
+                    BankInfo = form.BankInfo,
+                    ApplyInfo = form.ApplyInfo,
+                    PaymentReturn = form.PaymentReturn,
+                    CreatedOn = currentDate,
+                    UpdatedOn = currentDate
+                })
+                .ConfigureAwait(false);
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -79,6 +108,21 @@ namespace TGS.Payment.Repositories
         public IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync()
             => _tgsRepository.PaymentMethods.AsAsyncEnumerable()
                 .Select(row => new PaymentMethodInfo(row.Id, row.Code));
+
+        public async ValueTask<BankInfo> GetBankInfoByIdAsync(Guid id)
+        {
+            var bankInfo = await _tgsRepository.PlayerBankInfos
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            return new BankInfo(
+                bankInfo.Id,
+                bankInfo.PlayerCode,
+                bankInfo.BrandId,
+                bankInfo.PaymentChannelId,
+                bankInfo.BankType,
+                bankInfo.Detail);
+        }
 
         public IAsyncEnumerable<BankInfo> GetBankInfosByPlayerCodeAsync(string playerCode)
             => _tgsRepository.PlayerBankInfos.AsAsyncEnumerable()
