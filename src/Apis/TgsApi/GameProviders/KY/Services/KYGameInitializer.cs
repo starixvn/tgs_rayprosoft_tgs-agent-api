@@ -84,6 +84,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 OrderId = orderId,
                 Amount = 0m,
                 IP = ip,
+                BrandsCode = player.BrandCode,
                 ExternalID = 0,
 
             };

@@ -34,6 +34,10 @@ namespace TGS.Shared.Game.Models.KY.Defines
         /// <summary>
         /// The kick
         /// </summary>
-        Kick = 8
+        Kick = 8,
+        /// <summary>
+        /// The game record
+        /// </summary>
+        GameRecord = 6
     }
 }
