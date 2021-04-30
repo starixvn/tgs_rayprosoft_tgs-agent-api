@@ -96,63 +96,63 @@ export const PlayerDepositFormBody = ({ record }) => {
                 <NormalLabel>
                     <Trans zh="用户名" en="Username" />
                 </NormalLabel>
-                <Text.Block alignY="center">{record?.userName}</Text.Block>
+                <Box alignY="center">{record?.userName}</Box>
 
                 <NormalLabel>
                     <Trans zh="订单号" en="Order Id" />
                 </NormalLabel>
-                <Text.Block alignY="center">{record?.id}</Text.Block>
+                <Box alignY="center">{record?.id}</Box>
 
                 <NormalLabel>
                     <Trans zh="充值类型 " en="Payment Method" />
                 </NormalLabel>
-                <Text.Block alignY="center">
+                <Box alignY="center">
                     <PaymentMethodLabel value={record?.paymentMethodId} />
-                </Text.Block>
+                </Box>
 
                 <NormalLabel>
                     <Trans zh="通道名称" en="Channel Name" />
                 </NormalLabel>
-                <Text.Block alignY="center">{record?.channelName}</Text.Block>
+                <Box alignY="center">{record?.channelName}</Box>
 
                 <NormalLabel>
                     <Trans zh="充值金额" en="Deposit Amount" />
                 </NormalLabel>
-                <Text.Block alignY="center">
+                <Box alignY="center">
                     <FormattedNumberDecimal value={record?.amount} />
-                </Text.Block>
+                </Box>
 
                 <NormalLabel>
                     <Trans zh="申请时间" en="Application Time" />
                 </NormalLabel>
-                <Text.Block alignY="center">
+                <Box alignY="center">
                     <FormattedDateTime value={record?.createdOn} />
-                </Text.Block>
+                </Box>
 
                 <NormalLabel>
                     <Trans zh="更新时间" en="Updated Time" />
                 </NormalLabel>
-                <Text.Block alignY="center">
+                <Box alignY="center">
                     <FormattedDateTime value={record?.updatedOn} />
-                </Text.Block>
+                </Box>
 
                 <NormalLabel>
                     <Trans zh="状态" en="Status" />
                 </NormalLabel>
-                <Text.Block alignY="center">
+                <Box alignY="center">
                     <FundReviewStatusLabel value={record?.status} />
-                </Text.Block>
+                </Box>
 
                 {hasAttachment && (
                     <>
                         <NormalLabel>
                             <Trans zh="附件" en="Attachment" />
                         </NormalLabel>
-                        <Text.Block alignY="center">
+                        <Box alignY="center">
                             <Link href={attachmentUrl} target="_blank">
                                 <Trans zh="连结" en="Link" />
                             </Link>
-                        </Text.Block>
+                        </Box>
                     </>
                 )}
             </FieldValues>
@@ -177,37 +177,33 @@ const BankInfoBox = ({ record }) => {
                 <NormalLabel>
                     <Trans zh="充值银行" en="Bank" />
                 </NormalLabel>
-                <Text.Block alignY="center">
-                    {record?.applyInfo?.sendBankAccount}
-                </Text.Block>
+                <Box alignY="center">{record?.applyInfo?.sendBankAccount}</Box>
 
                 <NormalLabel>
                     <Trans zh="收款账户名" en="Account Name" />
                 </NormalLabel>
-                <Text.Block alignY="center">
+                <Box alignY="center">
                     {record?.applyInfo?.receiveAccountName}
-                </Text.Block>
+                </Box>
 
                 <NormalLabel>
                     <Trans zh="银行卡帐号" en="Account" />
                 </NormalLabel>
-                <Text.Block alignY="center">
+                <Box alignY="center">
                     {record?.applyInfo?.receiveBankAccount}
-                </Text.Block>
+                </Box>
 
                 <NormalLabel>
                     <Trans zh="开户地址" en="Account Address" />
                 </NormalLabel>
-                <Text.Block alignY="center">
+                <Box alignY="center">
                     {record?.applyInfo?.receiveBankAccountAddress}
-                </Text.Block>
+                </Box>
 
                 <NormalLabel>
                     <Trans zh="附言" en="Memo" />
                 </NormalLabel>
-                <Text.Block alignY="center">
-                    {record?.applyInfo?.memo}
-                </Text.Block>
+                <Box alignY="center">{record?.applyInfo?.memo}</Box>
             </FieldValues>
         </>
     )

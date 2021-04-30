@@ -200,6 +200,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var gameProviderIds = brand.GameProviders.Select(x => x.GameProviderId).ToArray();
 
             var brandGames = await _repository.Games.AsQueryable()
+                .Where(x => x.AvailableToBrand == true)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
             var games = brandGames.Select((x, count) =>
@@ -247,6 +248,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId);
             var games = await _repository.Games.AsQueryable()
+                .Where(x => x.AvailableToBrand == true)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
             var brandGames = games.Select(x =>
