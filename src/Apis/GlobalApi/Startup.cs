@@ -1,14 +1,17 @@
+using System;
+using System.IO;
+using System.Reflection;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Prometheus;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -23,10 +26,12 @@ namespace TGS.Apis.GlobalApi
     public sealed class Startup
     {
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             _configuration = configuration;
+            _env = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -55,10 +60,30 @@ namespace TGS.Apis.GlobalApi
                 });
 
             services.AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", name: "tgs-db")
-
+                .AddPostgres(_configuration, "Tgs", "tgs-db")
                 .AddRedis(_configuration)
-                .ForwardToPrometheus(); ;
+                .ForwardToPrometheus();
+
+            services.AddRouting(options => options.LowercaseUrls = true);
+
+            if (!_env.IsProduction())
+            {
+                services.AddSwaggerGen(c =>
+                {
+                    c.SwaggerDoc("v1", new()
+                    {
+                        Title = "TGS Global API",
+                        Version = "v1"
+                    });
+
+                    var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                    var path = Path.Combine(AppContext.BaseDirectory, xml);
+                    if (File.Exists(path))
+                    {
+                        c.IncludeXmlComments(path);
+                    }
+                });
+            }
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -81,6 +106,14 @@ namespace TGS.Apis.GlobalApi
 
                 endpoints.MapMetrics();
             });
+
+            if (_env.IsProduction())
+            {
+                return;
+            }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Global API"));
         }
     }
 }
