@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -13,7 +14,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 {
-    internal class WithdrawFormQueryService : IQueryService<WithdrawFormQuery, WithdrawFormInfo>
+    internal class WithdrawFormQueryService : IQueryService<WithdrawFormQuery, WithdrawFormInfo>, IGetService<WithdrawFormQuery, int>
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _tgsRepository;
@@ -23,6 +24,9 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
+
+        public async ValueTask<int> GetAsync(WithdrawFormQuery query, CancellationToken cancellationToken = default)
+            => await MakeQuery(query).CountAsync().ConfigureAwait(false);
 
         public IAsyncEnumerable<WithdrawFormInfo> QueryAsync(WithdrawFormQuery query, CancellationToken cancellationToken = default)
         {
