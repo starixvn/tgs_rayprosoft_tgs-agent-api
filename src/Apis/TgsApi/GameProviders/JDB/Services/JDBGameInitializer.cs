@@ -1,71 +1,74 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
+using TGS.Shared.Game.ApiClients.JDB;
+using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
     public sealed class JDBGameInitializer : IGameInitializer
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
-        private readonly ITokenProvider _tokenProvider;
+        private readonly IJDBApiClient _jdbApiClient;
+        private readonly JDBGameTypeMapper _jdbGameTypeMapper;
 
         public JDBGameInitializer(
-            ITokenProvider tokenProvider,
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
-            IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
-            IBrandGameProviderOperations brandGameProviderOperations)
+            IBrandGameProviderOperations brandGameProviderOperations,
+            IJDBApiClient jdbApiClient,
+            JDBGameTypeMapper jdbGameTypeMapper)
         {
-            _tokenProvider = tokenProvider;
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
-            _brandOperations = brandOperations;
             _gameProviderOperations = gameProviderOperations;
             _brandGameProviderOperations = brandGameProviderOperations;
+            _jdbApiClient = jdbApiClient;
+            _jdbGameTypeMapper = jdbGameTypeMapper;
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
-            var loginTokenId = request.Token.LoginRecordId;
-            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
-
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
 
             var brandId = player.BrandId;
-            var platform = request.Token.PlatformType;
-            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId,
                 request.Language);
-
-            var gpc = await _gameProviderOperations.GetCachedGameProviderConfigurationAsync(gameProviderId,
-                bgpc.GameProviderConfigurationId);
-
+            
             var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId);
 
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<HabaneroConfiguration>(SettingConsts
-                    .GameProviderConfigurations.Habanero);
+                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB);
 
-            var domain = platform == PlatformType.Mobile ? gpc.MobileEndpoint : gpc.DesktopEndpoint;
-            var url = domain.AppendQueryString(game.EndpointPath)
-                .Replace("{BRANDID}", configuration.BrandId)
-                .Replace("{TOKEN}", encryptedToken)
-                .Replace("{CULTURE}", cultureCode)
-                .AppendQueryString($"keyname={game.ExternalId}");
+            var getTokenRequest = new GetTokenRequest
+            {
+                Timestamp = DateTime.Now.Ticks,
+                Parent = configuration.Parent,
+                UserId = player.PlayerCode,
+                Language = cultureCode,
+                GameType = ((int)_jdbGameTypeMapper.Get(game.Type)).ToString(),
+                MachineType = game.ExternalId
+            };
 
-            return new() {Url = url};
+            var response = await
+                _jdbApiClient.GetTokenAsync(configuration.ApiUrl, configuration.ClientDomain, getTokenRequest);
+
+            if (response.Status == "0000")
+            {
+                return new() {Url = response.Path};
+            }
+
+            //TODO log error message from jdb
+            return new() {Url = string.Empty};
         }
     }
 }

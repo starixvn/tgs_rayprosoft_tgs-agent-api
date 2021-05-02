@@ -21,7 +21,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
         protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
             Exception exception)
         {
-            var response = new BaseResponse
+            var response = new BaseActionResponse
             {
                 Status = errorCode.ToString().PadLeft(4, '0'),
                 ErrorMessage = ErrorMapper.GetMessageByException(exception)

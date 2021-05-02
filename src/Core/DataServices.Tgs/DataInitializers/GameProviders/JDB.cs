@@ -72,15 +72,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() =>
-                new HabaneroConfiguration
+                new JDBConfiguration
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-jdb") : new("http://localhost:62330"),
-                    BrandId = "a5df0ada-7b6a-eb11-9889-00155db5435a",
-                    ApiKey = "349F896E-DBC8-4A9D-963D-EFC921AD19FC",
                     ApiUrl = new("https://ws-test.insvr.com/jsonapi"),
-                    BetHistoryUrl = new("https://app-test.insvr.com"),
-                    DelaySecondsForPlaceBet = 0
+                    ClientDomain = "tgs",
+                    Parent = "tgs"
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

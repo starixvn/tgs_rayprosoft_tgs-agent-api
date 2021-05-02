@@ -4,6 +4,8 @@
     {
         CancelTransaction = 4,
         GetBalance = 6,
-        PlaceAndSettleBet = 8
+        PlaceAndSettleBet = 8,
+        GetToken = 21,
+        BetHistory = 54
     }
 }

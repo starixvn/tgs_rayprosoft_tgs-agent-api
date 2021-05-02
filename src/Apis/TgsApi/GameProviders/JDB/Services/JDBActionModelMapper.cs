@@ -15,8 +15,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         PlayerValidationData Request(string playerCode, PlatformType platformType);
         BetData Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request);
         BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request);
-        BaseResponse Response(GetBalanceResult result);
-        BaseResponse Response(BetResult result);
+        BaseActionResponse Response(GetBalanceResult result);
+        BaseActionResponse Response(BetResult result);
     }
 
     public sealed class JDBActionModelMapper : IJDBActionModelMapper
@@ -31,8 +31,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 PlatformType = platformType
             };
 
-        BaseResponse IJDBActionModelMapper.Response(GetBalanceResult result) =>
-            new BaseResponse
+        BaseActionResponse IJDBActionModelMapper.Response(GetBalanceResult result) =>
+            new BaseActionResponse
             {
                 Status = "0000",
                 Balance = result.Balance
@@ -70,14 +70,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 TimeStamp = DateTimeOffset.Parse(request.LastModifyTime),
                 RoundClosed = true
             });
-            
 
-            return GetBetData(request.UserId, request.Currency, data, transactions.ToArray());
+            var platformType = GetPlatformType(request.ClientType);
+            return GetBetData(request.UserId, request.Currency, data, transactions.ToArray(), platformType);
         }
         
         BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, CancelTransactionRequest request)
         {
-            var currencyCode = string.Empty;
             var clientRoundId = request.TransferId.ToString();
             
             var transactions = new TransactionData[]
@@ -104,34 +103,41 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 }
             };
 
-            return GetBetData(request.UserId, currencyCode, data, transactions, hasCurrencyFromGameProvider: false);
+            return GetBetData(request.UserId, null, data, transactions, null, hasCurrencyFromGameProvider: false);
         }
         
-        BaseResponse IJDBActionModelMapper.Response(BetResult result) =>
-            new BaseResponse
+        BaseActionResponse IJDBActionModelMapper.Response(BetResult result) =>
+            new BaseActionResponse
             {
                 Status = SuccessCode,
                 Balance = result.Balance
             };
 
-        private string SuccessCode => ((int)GameApiError.Success).ToString().PadLeft(4, '0');
-
         #region Private Methods
 
         private static BetData GetBetData(string playerCode, string currencyCode, GameProviderConfigurationData data,
-            TransactionData[] transactions, bool hasCurrencyFromGameProvider = true) => new()
+            TransactionData[] transactions, PlatformType? platform, bool hasCurrencyFromGameProvider = true) => new()
         {
             GameProviderId = data.GameProviderId,
             GameProviderConfigurationId = data.GameProviderConfigurationId,
             GameProviderCode = GameProviderCode,
             AutoCloseRound = data.AutoCloseRound,
             PlayerCode = playerCode,
-            PlatformType = data.PlatformType,
+            PlatformType = platform,
             HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
             CurrencyCode = currencyCode,
             Transactions = transactions
         };
         
+        private static string SuccessCode => ((int)GameApiError.Success).ToString().PadLeft(4, '0');
+
+        private static PlatformType GetPlatformType(string platform)
+        {
+            return "WEB".Equals(platform, StringComparison.OrdinalIgnoreCase)
+                ? PlatformType.Desktop
+                : PlatformType.Mobile;
+        }
+
         #endregion
     }
 }

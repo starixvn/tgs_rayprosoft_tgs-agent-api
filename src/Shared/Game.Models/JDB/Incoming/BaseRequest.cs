@@ -3,11 +3,6 @@ using TGS.Shared.Game.Models.JDB.Enums;
 
 namespace TGS.Shared.Game.Models.JDB.Incoming
 {
-    public record BaseRequest
-    {
-        public string x { get; set; }
-    }
-
     public record BaseActionRequest
     {
         [JsonPropertyName("action")]

@@ -38,12 +38,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
 
             services.AddScoped<IJDBServices, JDBServices>();
             services.AddSingleton<IJDBActionModelMapper, JDBActionModelMapper>();
+            services.AddSingleton<JDBGameTypeMapper>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(JDBGameInitializer)}, (provider, _) =>
                 provider.GetRequiredService<JDBGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(JDBGameHistory)}, (provider, _) =>
-                provider.GetRequiredService<JDBGameHistory>());
+            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(JDBBetHistory)}, (provider, _) =>
+                provider.GetRequiredService<JDBBetHistory>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

@@ -39,7 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         }
 
         [HttpPost]
-        public Task<BaseResponse> TransferFundsAsync([FromForm] string x)
+        public Task<BaseActionResponse> TransferFundsAsync([FromForm] string x)
         {
             var baseRequest = _jsonSerializationProvider.DeserializeFromString<BaseActionRequest>(x);
 
@@ -54,11 +54,11 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
                     return CancelTransactionAsync(
                         _jsonSerializationProvider.DeserializeFromString<CancelTransactionRequest>(x));
                 default:
-                    return Task.FromResult(new BaseResponse {Status = "0000", ErrorMessage = "Invalid action"});
+                    return Task.FromResult(new BaseActionResponse {Status = "0000", ErrorMessage = "Invalid action"});
             }
         }
 
-        private async Task<BaseResponse> GetBalanceAsync(GetBalanceRequest request)
+        private async Task<BaseActionResponse> GetBalanceAsync(GetBalanceRequest request)
         {
             var result = await _actions.GetBalanceAsync(Consts.GameProvider.JDB, request.UserId)
                 .ConfigureAwait(false);
@@ -66,7 +66,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
             return _map.Response(result);
         }
 
-        private async Task<BaseResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request)
+        private async Task<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync()
                 .ConfigureAwait(false);
@@ -76,7 +76,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
             return _map.Response(betResult);
         }
 
-        private async Task<BaseResponse> CancelTransactionAsync(CancelTransactionRequest request)
+        private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync();
 
