@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Controllers.Messages.Withdraw;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
 using TGS.Services.BackOffice.Domain;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -15,9 +18,54 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class WithdrawController : ControllerBase
     {
+        [HttpGet("{brandId}/{formId}")]
+        public async Task<GenericResponse<WithdrawFormDetailViewModel>> GetWithdrawFormDetailAsync(
+            [FromServices] IGetService<GetWithdrawFormDetailQuery, WithdrawFormInfo> getDepositFormService,
+            Guid brandId,
+            Guid formId)
+        {
+            var formDetail = await getDepositFormService
+                .GetAsync(new GetWithdrawFormDetailQuery(formId, brandId))
+                .ConfigureAwait(false);
+
+            return new GenericResponse<WithdrawFormDetailViewModel>
+            {
+                Valid = true,
+                Data = new WithdrawFormDetailViewModel
+                {
+                    Id = formDetail.Id,
+                    PlayerCode = formDetail.PlayerCode,
+                    UserName = formDetail.UserName,
+                    BrandId = formDetail.BrandId,
+                    BrandPaymentId = formDetail.BrandPaymentId,
+                    PaymentMethodId = formDetail.PaymentMethodId,
+                    ChannelName = formDetail.ChannelName,
+                    Amount = formDetail.Amount,
+                    Remark = formDetail.Remark,
+                    Status = formDetail.Status switch
+                    {
+                        7000 => FlowStatus.Rejected,
+                        8000 => FlowStatus.Approved,
+                        _ => FlowStatus.Review
+                    },
+                    BankInfo = string.IsNullOrWhiteSpace(formDetail.BankInfo)
+                        ? null
+                        : JsonDocument.Parse(formDetail.BankInfo),
+                    ApplyInfo = string.IsNullOrWhiteSpace(formDetail.ApplyInfo)
+                        ? null
+                        : JsonDocument.Parse(formDetail.ApplyInfo),
+                    PaymentReturn = string.IsNullOrWhiteSpace(formDetail.PaymentReturn)
+                        ? null
+                        : JsonDocument.Parse(formDetail.PaymentReturn),
+                    CreatedOn = formDetail.CreatedOn,
+                    UpdatedOn = formDetail.UpdatedOn
+                }
+            };
+        }
+
         [HttpGet("{brandId}")]
         public async Task<PagedResponse<WithdrawFormViewModel>> QueryDepositFormsAsync(
-            [FromServices] IQueryService<WithdrawFormQuery, WithdrawFormInfo> queryDepositFormsService,
+            [FromServices] IQueryService<WithdrawFormQuery, WithdrawFormModel> queryDepositFormsService,
             [FromServices] IGetService<WithdrawFormQuery, int> countDepositFormsService,
             Guid brandId,
             [FromQuery] WithdrawFormRequest request,

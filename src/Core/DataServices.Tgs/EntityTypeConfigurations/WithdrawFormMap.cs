@@ -31,6 +31,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(w => w.Remark);
 
+            builder.Property(w => w.BankInfoId)
+                .IsRequired();
+
             builder.Property(w => w.BankInfo)
                 .HasColumnType(ColumnTypes.Jsonb)
                 .IsRequired();

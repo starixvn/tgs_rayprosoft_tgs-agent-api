@@ -18,6 +18,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string Remark { get; set; }
 
+        public Guid BankInfoId { get; set; }
+
         public string BankInfo { get; set; }
 
         public string ApplyInfo { get; set; }

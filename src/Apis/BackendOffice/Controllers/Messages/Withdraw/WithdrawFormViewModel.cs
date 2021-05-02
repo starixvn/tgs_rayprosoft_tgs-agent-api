@@ -1,24 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 {
-    public class WithdrawFormViewModel
+    public record WithdrawFormViewModel
     {
-        public Guid Id { get; internal set; }
-        public string PlayerCode { get; internal set; }
-        public string UserName { get; internal set; }
-        public Guid BrandId { get; internal set; }
-        public Guid? BrandPaymentId { get; internal set; }
-        public Guid? PaymentMethodId { get; internal set; }
-        public string ChannelName { get; internal set; }
-        public FlowStatus Status { get; internal set; }
-        public decimal Amount { get; internal set; }
-        public string Remark { get; internal set; }
-        public DateTimeOffset CreatedOn { get; internal set; }
-        public DateTimeOffset UpdatedOn { get; internal set; }
+        public decimal Amount { get; init; }
+
+        public Guid BrandId { get; init; }
+
+        public Guid? BrandPaymentId { get; init; }
+
+        public string ChannelName { get; init; }
+
+        public DateTimeOffset CreatedOn { get; init; }
+
+        public Guid Id { get; init; }
+
+        public Guid? PaymentMethodId { get; init; }
+
+        public string PlayerCode { get; init; }
+
+        public string Remark { get; init; }
+
+        public FlowStatus Status { get; init; }
+
+        public DateTimeOffset UpdatedOn { get; init; }
+
+        public string UserName { get; init; }
     }
 }

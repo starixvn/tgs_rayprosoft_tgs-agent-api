@@ -14,7 +14,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 {
-    internal class WithdrawFormQueryService : IQueryService<WithdrawFormQuery, WithdrawFormInfo>, IGetService<WithdrawFormQuery, int>
+    internal class WithdrawFormQueryService : IQueryService<WithdrawFormQuery, WithdrawFormModel>, IGetService<WithdrawFormQuery, int>
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _tgsRepository;
@@ -28,7 +28,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
         public async ValueTask<int> GetAsync(WithdrawFormQuery query, CancellationToken cancellationToken = default)
             => await MakeQuery(query).CountAsync().ConfigureAwait(false);
 
-        public IAsyncEnumerable<WithdrawFormInfo> QueryAsync(WithdrawFormQuery query, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<WithdrawFormModel> QueryAsync(WithdrawFormQuery query, CancellationToken cancellationToken = default)
         {
             var dataQuery = MakeQuery(query);
 
@@ -52,7 +52,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 
             return dataQuery
                 .ToAsyncEnumerable()
-                .Select(form => new WithdrawFormInfo(
+                .Select(form => new WithdrawFormModel(
                     form.Id,
                     form.PlayerCode,
                     form.Player.Username,
@@ -63,12 +63,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                     form.Amount,
                     form.Remark,
                     form.Status,
-                    string.IsNullOrWhiteSpace(form.ApplyInfo)
-                        ? null
-                        : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.ApplyInfo, null),
-                    string.IsNullOrWhiteSpace(form.PaymentReturn)
-                        ? null
-                        : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.PaymentReturn, null),
                     form.CreatedOn,
                     form.UpdatedOn))
                 .AsAsyncEnumerable();

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Services.BackOffice.Domain
 {
-    public record WithdrawFormInfo(
+    public record WithdrawFormModel(
         Guid Id,
         string PlayerCode,
         string UserName,
@@ -18,8 +18,6 @@ namespace TGS.Services.BackOffice.Domain
         decimal Amount,
         string Remark,
         int Status,
-        JsonDocument ApplyInfo,
-        JsonDocument PaymentReturn,
         DateTimeOffset CreatedOn,
         DateTimeOffset UpdatedOn);
 }

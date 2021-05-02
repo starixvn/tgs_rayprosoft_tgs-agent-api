@@ -3,12 +3,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Moq;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
+using TGS.Services.BackOffice.Domain;
+using TGS.Services.Payment;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -84,6 +88,25 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var actual = await sut.QueryAsync(query).ToArrayAsync();
 
             Assert.IsTrue(actual.Length == 1);
+        }
+
+        [Test]
+        public async Task Manager_Can_Get_The_WithdrawForm_Detail()
+        {
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+
+            var sut = new GetWithdrawFormDetailQueryService(moqPaymentRepository.Object);
+
+            var formId = Guid.NewGuid();
+            var brandId = Guid.NewGuid();
+
+            var query = new GetWithdrawFormDetailQuery(formId, brandId);
+
+            await sut.GetAsync(query);
+
+            moqPaymentRepository.Verify(
+                fake => fake.GetWithdrawFormByIdAsync(It.Is<Guid>(x => x == formId)),
+                Times.Exactly(1));
         }
     }
 }

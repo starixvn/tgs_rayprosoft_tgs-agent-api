@@ -68,11 +68,12 @@ namespace TGS.Services.Operator.Withdraw
 
                 await _paymentRepository.CreateWithdrawFormAsync(
                     createFormId,
-                    new WithdrawFormInfo(
+                    new WithdrawFormCreateInfo(
                         command.PlayerCode,
                         command.BrandId,
                         command.Amount,
                         7000,
+                        null,
                         command.BankInfoId)).ConfigureAwait(false);
 
                 command.ReturnFormIdSource.SetResult(createFormId);
@@ -87,11 +88,12 @@ namespace TGS.Services.Operator.Withdraw
             await _paymentRepository
                 .CreateWithdrawFormAsync(
                     createFormId,
-                new WithdrawFormInfo(
+                new WithdrawFormCreateInfo(
                         command.PlayerCode,
                         command.BrandId,
                         command.Amount,
                         1000,
+                        null,
                         command.BankInfoId,
                         BankInfo: _jsonSerializationProvider.SerializeToString(bankInfo, _jsonSerializerOptions)))
                 .ConfigureAwait(false);

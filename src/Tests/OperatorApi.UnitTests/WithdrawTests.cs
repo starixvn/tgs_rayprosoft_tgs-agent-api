@@ -63,11 +63,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "Bank",
                 "detail");
 
-            var expected = new WithdrawFormInfo(
+            var expected = new WithdrawFormCreateInfo(
                 command.PlayerCode,
                 command.BrandId,
                 command.Amount,
                 1000,
+                null,
                 command.BankInfoId,
                 BankInfo: jsonSerializationProvider.SerializeToString(
                     fakeBankInfo,
@@ -78,10 +79,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(fakeBankInfo);
 
             fakePaymentRepository
-                .When(fake => fake.CreateWithdrawFormAsync(Arg.Any<Guid>(), Arg.Any<WithdrawFormInfo>()))
+                .When(fake => fake.CreateWithdrawFormAsync(Arg.Any<Guid>(), Arg.Any<WithdrawFormCreateInfo>()))
                 .Do(callInfo =>
                 {
-                    var info = callInfo.Arg<WithdrawFormInfo>();
+                    var info = callInfo.Arg<WithdrawFormCreateInfo>();
 
                     expected.ShouldMatch(info);
                 });
@@ -92,7 +93,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Received(1)
                 .CreateWithdrawFormAsync(
                     Arg.Any<Guid>(),
-                    Arg.Any<WithdrawFormInfo>());
+                    Arg.Any<WithdrawFormCreateInfo>());
         }
 
         [Test]

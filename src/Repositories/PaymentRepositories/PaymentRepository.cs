@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
@@ -64,7 +65,7 @@ namespace TGS.Payment.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask CreateWithdrawFormAsync(Guid createFormId, WithdrawFormInfo form)
+        public async ValueTask CreateWithdrawFormAsync(Guid createFormId, WithdrawFormCreateInfo form)
         {
             var currentDate = DateTimeOffset.UtcNow;
 
@@ -251,6 +252,35 @@ namespace TGS.Payment.Repositories
         {
             return _tgsRepository.PaymentMethodChannels.ToAsyncEnumerable()
                 .Select(pmc => new PaymentMethodChannelInfo(pmc.Id, pmc.PaymentId, pmc.MethodId, pmc.ChannelId));
+        }
+
+        public ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid formId)
+        {
+            var query = from df in _tgsRepository.WithdrawForms
+                            .Include(f => f.Player)
+                            .Include(f => f.BrandPayment)
+                            .ThenInclude(bp => bp.PaymentMethodChannel)
+                            .AsAsyncEnumerable()
+                        where df.Id == formId
+                        select new WithdrawFormInfo(
+                            df.Id,
+                            df.PlayerCode,
+                            df.Player.Username,
+                            df.BrandId,
+                            df.Amount,
+                            df.Status,
+                            df.Remark,
+                            df.BankInfoId,
+                            df.CreatedOn,
+                            df.UpdatedOn,
+                            df.BrandPaymentId,
+                            df.BrandPayment?.ChannelName,
+                            df.BrandPayment?.PaymentMethodChannel?.MethodId,
+                            df.BankInfo,
+                            df.ApplyInfo,
+                            df.PaymentReturn);
+
+            return query.SingleAsync();
         }
 
         public async ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn)
