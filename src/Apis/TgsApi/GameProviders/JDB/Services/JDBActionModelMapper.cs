@@ -46,7 +46,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             //place bet
             transactions.Add(new TransactionData
             {
-                Amount = request.Bet,
+                Amount = Math.Abs(request.Bet),
                 ExternalTransactionId = externalTransactionId,
                 ExternalGameActionGroupId = externalTransactionId,
                 ExternalBetId = externalTransactionId,
@@ -60,12 +60,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             //settle bet
             transactions.Add(new TransactionData
             {
-                Amount = request.Bet,
+                Amount = request.Win,
                 ExternalTransactionId = $"{externalTransactionId}_settle",
+                ExternalTransactionReferenceId = externalTransactionId,
                 ExternalGameActionGroupId = externalTransactionId,
                 ExternalBetId = externalTransactionId,
                 ExternalRoundId = externalTransactionId,
-                ExternalGameId = request.GameSeqNo.ToString(),
+                ExternalGameId = request.GameSequenceNo.ToString(),
                 GameActionType = request.Win > 0 ? WinBet : LoseBet,
                 TimeStamp = DateTimeOffset.Parse(request.LastModifyTime),
                 RoundClosed = true
@@ -89,7 +90,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                     ExternalBetId = clientRoundId,
                     ExternalGameActionGroupId = clientRoundId,
                     GameActionType = CancelTransaction,
-                    TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(request.SystemTime)
+                    TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(request.SystemTime),
+                    RoundClosed = false
                 },
                 new()
                 {
@@ -99,7 +101,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                     ExternalBetId = clientRoundId,
                     ExternalGameActionGroupId = clientRoundId,
                     GameActionType = CancelTransaction,
-                    TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(request.SystemTime)
+                    TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(request.SystemTime),
+                    RoundClosed = true
                 }
             };
 
