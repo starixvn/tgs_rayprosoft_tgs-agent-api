@@ -221,31 +221,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 
                 var settleTransactions = kvp.Value.Except(cancelTransactions).ToArray();
 
-                var betResults = new List<BatchBetResult>();
+                var betResults = await ExecuteSettleAndVoidRoundAsync(cancelTransactions, data, playerCode,
+                    externalRoundIds, settleTransactions).ConfigureAwait(false);
 
-                if (cancelTransactions.Length > 0)
-                {
-                    var r = await VoidRoundAsync(data, playerCode, externalRoundIds, cancelTransactions)
-                        .ConfigureAwait(false);
-
-                    if (r != null)
-                    {
-                        betResults.Add(r);
-                    }
-                }
-
-                if (settleTransactions.Length > 0)
-                {
-                    var r = await SettleBatchAsync(data, playerCode, externalRoundIds, settleTransactions)
-                        .ConfigureAwait(false);
-
-                    if (r != null)
-                    {
-                        betResults.Add(r);
-                    }
-                }
-
-                return new {Response = betResults.ToArray()};
+                return new {Response = betResults};
             }).WhenAll();
 
             await RemoveExternalRoundIdMapCacheAsync(transactions).ConfigureAwait(false);
@@ -254,6 +233,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 
             return _map.Response(request, results);
         }
+
+        #region Private Methods
 
         private async ValueTask CacheLockAmountAsync(TransactionData[] transactions)
         {
@@ -276,7 +257,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
         private async ValueTask<decimal> GetLockAmountAsync(string playerCode, Guid gameProviderId,
             string externalRoundId) =>
             await _cacheManager.SafeGetAsync(SabaConsts.RedisKey.LockAmount, externalRoundId,
-                async () => await _services.GetLockAmountAsync(playerCode, gameProviderId, externalRoundId));
+                async () => await _services.GetLockAmountAsync(playerCode, gameProviderId, externalRoundId)
+                    .ConfigureAwait(false));
 
         private async ValueTask RemoveLockAmountCacheAsync(TransactionData[] transactions)
         {
@@ -286,7 +268,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
                 Key = t.ExternalRoundId
             }).ToArray();
 
-            await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true);
+            await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true).ConfigureAwait(false);
         }
 
         private async ValueTask<Dictionary<string, string>> GetExternalRoundIdMapCacheAsync(Guid gameProviderId,
@@ -299,8 +281,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
                 var externalTransactionId = t.ExternalTransactionId.ToString();
                 var externalRoundId =
                     await _cacheManager.SafeGetAsync(SabaConsts.RedisKey.SabaTxIdMap, externalTransactionId,
-                        async () => await _services.GetExternalRoundIdAsync(gameProviderId, t.PlayerCode,
-                            externalTransactionId));
+                        async () => await _services
+                            .GetExternalRoundIdAsync(gameProviderId, t.PlayerCode, externalTransactionId)
+                            .ConfigureAwait(false));
 
                 map[externalTransactionId] = externalRoundId;
             }
@@ -316,7 +299,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
                 Key = t.ExternalTransactionId.ToString()
             }).ToArray();
 
-            await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true);
+            await _cacheManager.ClearCacheByBatchAsync(cacheKeys, true).ConfigureAwait(false);
         }
 
         private async ValueTask<Dictionary<string, Guid>> GetPlayerGameProviderConfigurationIdsAsync(
@@ -344,6 +327,40 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             return map;
         }
 
+        private async ValueTask<BatchBetResult[]> ExecuteSettleAndVoidRoundAsync(
+            SettleBetRequest.Transaction[] cancelTransactions, GameProviderConfigurationData data,
+            string playerCode, Dictionary<string, string> externalRoundIds,
+            SettleBetRequest.Transaction[] settleTransactions)
+        {
+            var betResults = new List<BatchBetResult>();
+
+            if (cancelTransactions.Length > 0)
+            {
+                var cancelResult = await VoidRoundAsync(data, playerCode, externalRoundIds, cancelTransactions)
+                    .ConfigureAwait(false);
+
+                if (cancelResult != null)
+                {
+                    betResults.Add(cancelResult);
+                }
+            }
+
+            if (settleTransactions.Length == 0)
+            {
+                return betResults.ToArray();
+            }
+
+            var settleResult = await SettleBatchAsync(data, playerCode, externalRoundIds, settleTransactions)
+                .ConfigureAwait(false);
+
+            if (settleResult != null)
+            {
+                betResults.Add(settleResult);
+            }
+
+            return betResults.ToArray();
+        }
+
         private ValueTask<BatchBetResult> SettleBatchAsync(GameProviderConfigurationData data,
             string playerCode, Dictionary<string, string> externalRoundIds, SettleBetRequest.Transaction[] transactions)
         {
@@ -357,7 +374,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             string playerCode, Dictionary<string, string> externalRoundIds, SettleBetRequest.Transaction[] transactions)
         {
             var gameProviderId = data.GameProviderId;
-            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, SabaConsts.ExternalGameId);
+            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, SabaConsts.ExternalGameId)
+                    .ConfigureAwait(false)
+                ;
             if (games == null || games.Length == 0)
             {
                 throw new InvalidGameActionException("No game is found", InvalidGameActionErrorCode.GameNotFound);
@@ -372,8 +391,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
                 var externalRoundId = externalRoundIds[externalTransactionId];
 
                 var externalIds =
-                    await _services.GetGameActionExternalIdsByRoundIdAsync(gameProviderId, playerCode, externalRoundId,
-                        gameId);
+                    await _services
+                        .GetGameActionExternalIdsByRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId)
+                        .ConfigureAwait(false);
 
                 gameActionExternalIds.AddRange(externalIds);
             }
@@ -386,7 +406,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             var batchBetData =
                 _map.CancelBatchRequest(data, playerCode, gameActionExternalIds);
 
-            return await _actions.CancelBatchAsync(batchBetData);
+            return await _actions.CancelBatchAsync(batchBetData).ConfigureAwait(false);
         }
+
+        #endregion
     }
 }
