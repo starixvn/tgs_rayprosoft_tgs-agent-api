@@ -2298,6 +2298,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("BankType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_type");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
