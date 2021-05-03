@@ -6,9 +6,9 @@ import {
     codeLabelPair as agentListPair
 } from "./agent-list/menu"
 import {
-    Code as AdjustmentCode,
-    codeLabelPair as adjustmentListPair
-} from "./adjustment/menu"
+    Code as BalanceAdjustmentCode,
+    codeLabelPair as balanceAdjustmentListPair
+} from "./balance-adjustment/menu"
 import { getTrans, useTrans } from "../i18n"
 
 export const Name = ({}) => useTrans(nameMessages)
@@ -51,11 +51,11 @@ const label = ({ locale, code }) => {
                 locale
             )
 
-        case AdjustmentCode:
+        case BalanceAdjustmentCode:
             return getTrans(
                 {
                     zh: "代理调账",
-                    en: "Adjustment"
+                    en: "Balance Adjustment"
                 },
                 locale
             )
@@ -71,6 +71,6 @@ export const codeLabelPair = [
             locale,
             codes,
             label,
-            subLabelPairs: [agentListPair, adjustmentListPair]
+            subLabelPairs: [agentListPair, balanceAdjustmentListPair]
         })
 ]

@@ -15,15 +15,12 @@ import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
-import { AgentStatusLabel } from "../AgentStatus"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
     useUserBrandId
 } from "../../user/context"
 import { Code, Update } from "./menu"
-import { AgentStatusSelect } from "../AgentStatus"
-import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import { FormattedNumberDecimal, Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
@@ -70,9 +67,6 @@ const Body = () => {
 
 const BodyContent = ({ brandId = "" }) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
-        status: "",
-        levelType: "",
-        type: "",
         username: ""
     })
 
@@ -80,12 +74,16 @@ const BodyContent = ({ brandId = "" }) => {
         setState({ pageIndex: 0, brandId })
     }, [brandId])
 
-    let { pageIndex, pageSize, status, levelType, type, username } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = usePlayerList({
-        ...toApiParams(state),
-        sortby: "username",
+    let { pageIndex, pageSize, username } = state
+    let { data = {}, isLoading, mutate, error, deleteCache } = usePlayerList(
         brandId
-    })
+            ? {
+                  ...toApiParams(state),
+                  sortby: "username",
+                  brandId
+              }
+            : undefined
+    )
 
     let columns = useColumns({ mutate, items: data?.items, brandId })
 
@@ -99,17 +97,11 @@ const BodyContent = ({ brandId = "" }) => {
                         search={(data) => {
                             let newState = {
                                 pageIndex: 0,
-                                status: data.status,
-                                levelType: data.levelType,
-                                type: data.type,
                                 username: data.username
                             }
                             if (
                                 equals(newState, {
                                     pageIndex,
-                                    status,
-                                    levelType,
-                                    type,
                                     username
                                 })
                             ) {
@@ -150,8 +142,8 @@ const BodyContent = ({ brandId = "" }) => {
 
 const SearchBar = ({ brandId, search, isLoading, ...props }) => {
     let usernameInputPlaceholder = useTrans({
-        zh: "用户名输入框",
-        en: "Input username"
+        zh: "用户名",
+        en: "Username"
     })
     let formMethods = useForm()
 
@@ -161,9 +153,6 @@ const SearchBar = ({ brandId, search, isLoading, ...props }) => {
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
-                    <AgentStatusSelect name="status" />
-                    <AgentLevelSelect name="levelType" />
-                    <AgentTypeSelect name="type" />
                     <InputField
                         name="username"
                         showEmptyFieldValueAddonAfter
@@ -183,7 +172,7 @@ const useColumns = ({ brandId, items = [], mutate }) => {
             sequenceColumn(),
             textColumn({
                 accessor: "username",
-                Header: <Trans zh="代里用户名" en="Agent Username" />,
+                Header: <Trans zh="用户名" en="Username" />,
                 disableSortBy: true
             }),
             numberDecimalColumn({
