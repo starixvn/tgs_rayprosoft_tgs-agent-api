@@ -154,8 +154,9 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
             return (from bg in brandGames.Where(g => g.GameProviderId == gameProviderId)
                     join g in cachedGames on bg.GameId equals g.Id
-                    where g.AvailableToBrand && (g.AvailableCurrencies.Length == 0 ||
-                        g.AvailableCurrencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase))
+                    where g.AvailableToBrand 
+                    && (g.AvailableCurrencies.Length == 0 
+                            || g.AvailableCurrencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase))
                     select new GameModel
                     {
                         Id = bg.GameId,
