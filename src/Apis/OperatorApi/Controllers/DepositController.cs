@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator;
 using TGS.Services.Operator.Deposit;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
@@ -59,6 +58,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 yield return new BrandPaymentResponse
                 {
                     Id = bp.Id,
+                    ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
                     TransferLimit = new Models.ValueRange<decimal>
                     {

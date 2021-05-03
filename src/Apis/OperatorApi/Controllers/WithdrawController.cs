@@ -92,6 +92,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 yield return new BrandPaymentResponse
                 {
                     Id = bp.Id,
+                    ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
                     TransferLimit = new Models.ValueRange<decimal>
                     {
