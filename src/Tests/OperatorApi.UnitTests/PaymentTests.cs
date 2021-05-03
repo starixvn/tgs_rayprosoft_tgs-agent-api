@@ -29,8 +29,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentRepository
                 .Setup(fake => fake.GetAllPaymentMethodsAsync())
                 .Returns(new[] {
-                    new PaymentMethodInfo(Guid.NewGuid(), "test1"),
-                    new PaymentMethodInfo(Guid.NewGuid(), "test2")
+                    new PaymentMethodInfo(Guid.NewGuid(), "test1", "Bank"),
+                    new PaymentMethodInfo(Guid.NewGuid(), "test2", "Crypto")
                 }.ToAsyncEnumerable());
 
             _ = await sut.GetAsync(query);

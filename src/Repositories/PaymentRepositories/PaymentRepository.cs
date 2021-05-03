@@ -108,7 +108,7 @@ namespace TGS.Payment.Repositories
 
         public IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync()
             => _tgsRepository.PaymentMethods.AsAsyncEnumerable()
-                .Select(row => new PaymentMethodInfo(row.Id, row.Code));
+                .Select(row => new PaymentMethodInfo(row.Id, row.Code, row.BankType));
 
         public async ValueTask<BankInfo> GetBankInfoByIdAsync(Guid id)
         {

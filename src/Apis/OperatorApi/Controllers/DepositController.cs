@@ -55,6 +55,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .GetAsync(getPaymentQuery)
                     .ConfigureAwait(false);
 
+                var paymentMethod = paymentMethods[bp.MethodId];
+
                 yield return new BrandPaymentResponse
                 {
                     Id = bp.Id,
@@ -69,7 +71,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     PaymentId = bp.PaymentId,
                     PaymentCode = paymentInfo.Code,
                     MethodId = bp.MethodId,
-                    MethodCode = paymentMethods[bp.MethodId].Name
+                    MethodCode = paymentMethod.Name,
+                    BankType = paymentMethod.BankType
                 };
             }
         }

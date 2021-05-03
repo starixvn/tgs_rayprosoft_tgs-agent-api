@@ -6,6 +6,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record BrandPaymentResponse
     {
+        [JsonPropertyName("banktype")]
+        public string BankType { get; init; }
+
         [JsonPropertyName("channelid")]
         public Guid ChannelId { get; init; }
 
