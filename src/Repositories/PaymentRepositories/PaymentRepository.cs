@@ -76,6 +76,7 @@ namespace TGS.Payment.Repositories
                     PlayerCode = form.PlayerCode,
                     BrandPaymentId = form.BrandPaymentId,
                     Amount = form.Amount,
+                    BankInfoId = form.BankInfoId,
                     BankInfo = form.BankInfo,
                     ApplyInfo = form.ApplyInfo,
                     PaymentReturn = form.PaymentReturn,
