@@ -85,7 +85,7 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        DbSet<PlayerBank> PlayerBanks { get; set; }
+        DbSet<PlayerBankInfo> PlayerBankInfos { get; set; }
 
         DbSet<VipLevel> VipLevels { get; set; }
 
@@ -142,12 +142,19 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<AgentBank> AgentBanks { get; set; }
 
         DbSet<AgentWallet> AgentWallets { get; set; }
+
         DbSet<AgentTransaction> AgentTransactions { get; set; }
+
         DbSet<Promotion> Promotions { get; set; }
+
         DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+
         DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
 
         DbSet<DepositForm> DepositForms { get; set; }
+
+        DbSet<TransactionPromotion> TransactionPromotions { get; set; }
+        DbSet<PlayerBucket> PlayerBuckets { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
@@ -220,7 +227,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        public DbSet<PlayerBank> PlayerBanks { get; set; }
+        public DbSet<PlayerBankInfo> PlayerBankInfos { get; set; }
 
         public DbSet<VipLevel> VipLevels { get; set; }
 
@@ -281,13 +288,20 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<AgentBank> AgentBanks { get; set; }
 
         public DbSet<AgentWallet> AgentWallets { get; set; }
+
         public DbSet<Promotion> Promotions { get; set; }
+
         public DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+
         public DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
 
         public DbSet<AgentTransaction> AgentTransactions { get; set; }
 
         public DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
+
+        public DbSet<TransactionPromotion> TransactionPromotions { get; set; }
+
+        public DbSet<PlayerBucket> PlayerBuckets { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;

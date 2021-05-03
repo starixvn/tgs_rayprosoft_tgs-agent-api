@@ -44,7 +44,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
 
-            builder.Property(c => c.UpdateOn)
+            builder.Property(c => c.UpdatedOn)
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
 

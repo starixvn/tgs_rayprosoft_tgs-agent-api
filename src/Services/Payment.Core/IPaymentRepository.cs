@@ -6,24 +6,32 @@ namespace TGS.Services.Payment
 {
     public interface IPaymentRepository
     {
+        ValueTask CreateBankInfoAsync(BankInfo bankInfo, string modifyUser);
+
         ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormInfo form);
 
-        ValueTask<DepositFormInfo> GetDepositFormByIdAsync(Guid id);
-
-        IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync();
+        ValueTask DeleteBankInfoAsync(string playerCode, Guid bankInfoId);
 
         IAsyncEnumerable<PaymentChannelInfo> GetAllPaymentChannelsAsync();
 
-        ValueTask<BrandPaymentInfo> GetBrandPaymentByIdAsync(Guid id);
+        IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync();
 
-        ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn);
-
-        ValueTask<PaymentInfo> GetPaymentAsync(Guid id);
-
-        IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId);
+        IAsyncEnumerable<BankInfo> GetBankInfosByPlayerCodeAsync(string playerCode);
 
         IAsyncEnumerable<BrandPaymentAcl> GetBrandPaymentAclsAsync(IEnumerable<Guid> brandPaymentIds, string playerCode);
 
+        ValueTask<BrandPaymentInfo> GetBrandPaymentByIdAsync(Guid id);
+
+        IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId);
+
         IAsyncEnumerable<BrandPaymentVip> GetBrandPaymentVipListAsync(IEnumerable<Guid> brandPaymentIds);
+
+        ValueTask<DepositFormInfo> GetDepositFormByIdAsync(Guid id);
+
+        ValueTask<PaymentInfo> GetPaymentAsync(Guid id);
+
+        IAsyncEnumerable<PaymentMethodChannelInfo> GetPaymentMethodChannelsAsync();
+
+        ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn);
     }
 }

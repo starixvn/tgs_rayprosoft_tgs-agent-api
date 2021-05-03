@@ -70,7 +70,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<Wallet> Wallets { get; set; }
 
-        public virtual ICollection<PlayerBank> Banks { get; set; }
+        public virtual ICollection<PlayerBankInfo> Banks { get; set; }
 
         public virtual ICollection<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
@@ -79,5 +79,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
         public virtual ICollection<PlayerSportsBetLimit> SportsBetLimits { get; set; }
+
+        public virtual ICollection<PlayerBucket> PlayerBuckets { get; set; }
     }
 }

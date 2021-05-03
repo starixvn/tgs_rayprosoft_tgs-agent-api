@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Settings;
 using TGS.Services.BackOffice.Application.Models.Promotion;
 using TGS.Services.BackOffice.Infrastructure.Services;
 
@@ -21,7 +22,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         IQueryable<Promotion> GetPromotionQueries(Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery = null,
             bool tracking = false);
 
-        Task CreatePromotionAsync(CreatePromotionRequest request);
+        Task CreatePromotionAsync(CreatePromotionRequest request, PromotionType promotionTypeModel);
 
         Task UpdatePromotionAsync(Promotion promotion, UpdatePromotionRequest request);
 
@@ -74,8 +75,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             promotion.From = request.From;
             promotion.To = request.To;
             promotion.Status = request.Status;
+            promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
             promotion.PromotionType = request.PromotionType;
-            promotion.PromotionAmount = request.PromotionAmount;
+            promotion.BonusAmountLimit = request.BonusAmountLimit;
             promotion.Unlimited = request.Unlimited;
             promotion.GameType = request.GameType;
             promotion.Percentage = request.Percentage;
@@ -95,7 +97,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await tran.CommitAsync();
         }
 
-        async Task IPromotionService.CreatePromotionAsync(CreatePromotionRequest request)
+        async Task IPromotionService.CreatePromotionAsync(CreatePromotionRequest request,
+            PromotionType promotionTypeModel)
         {
             var promotion = new Promotion
             {
@@ -105,8 +108,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 From = request.From,
                 To = request.To,
                 Status = request.Status,
+                AutoSentPlayerBonus = request.AutoSentPlayerBonus,
                 PromotionType = request.PromotionType,
-                PromotionAmount = request.PromotionAmount,
+                BonusAmountLimit = request.BonusAmountLimit,
+                SettlementIntervalType = promotionTypeModel.SettlementIntervalType,
                 AmountUsed = 0,
                 Unlimited = request.Unlimited,
                 GameType = request.GameType,

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Payment;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Tgs.Models;
+using PaymentData = TGS.Core.DataServices.Tgs.Models.Payment;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -14,12 +14,12 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
     [ApiController]
     public class PaymentController : BaseContextController
     {
-        private readonly ITgsCommands<Payment> _commands;
-        private readonly ITgsQueries<Payment> _queries;
+        private readonly ITgsCommands<PaymentData> _commands;
+        private readonly ITgsQueries<PaymentData> _queries;
 
         public PaymentController(
-            ITgsQueries<Payment> queries,
-            ITgsCommands<Payment> commands)
+            ITgsQueries<PaymentData> queries,
+            ITgsCommands<PaymentData> commands)
         {
             _queries = queries;
             _commands = commands;

@@ -44,53 +44,59 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository = repository;
         }
 
-        Task IBrandPaymentService.CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
+        public async Task CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
         {
-            throw new NotImplementedException();
+            var paymentId = Guid.NewGuid();
+            var payment = new BrandPayment
+            {
+                Id = paymentId,
+                BrandId = request.BrandId,
+                DisplayOrder = 99,
+                PaymentMethodChannelId = request.PaymentMethodChannelId,
+                ChannelName = request.ChannelName,
+                ExtendedData = JsonSerializer.Serialize(request.ExtendedData),
+                TransferLimitFrom = request.TransferLimitFrom,
+                TransferLimitTo = request.TransferLimitTo,
+                PlayerListCondition = request.PlayerListCondition,
+                AllPlayers = request.AllPlayers,
+                IdentityAuthentication = request.IdentityAuthentication,
+                PhoneAuthentication = request.PhoneAuthentication,
+                DepositedAmountUnlimited = request.DepositedAmountUnlimited,
+                DepositedAmountMin = request.DepositedAmountMin,
+                DepositedAmountMax = request.DepositedAmountMax,
+                Reason = request.Reason,
+                CreatedByUsername = username,
+                UpdatedByUsername = username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
 
-            //var paymentId = Guid.NewGuid();
-            //var payment = new BrandPayment
-            //{
-            //    Id = paymentId,
-            //    DisplayOrder = 99,
-            //    PaymentId = request.PaymentId,
-            //    PaymentMethodId = request.PaymentMethodId,
-            //    PaymentChannelId = request.PaymentChannelId,
-            //    ChannelName = request.ChannelName,
-            //    TransferLimitFrom = request.TransferLimitFrom,
-            //    TransferLimitTo = request.TransferLimitTo,
-            //    PlayerListCondition = request.PlayerListCondition,
-            //    AllPlayers = request.AllPlayers,
-            //    IdentityAuthentication = request.IdentityAuthentication,
-            //    PhoneAuthentication = request.PhoneAuthentication,
-            //    DepositedAmountUnlimited = request.DepositedAmountUnlimited,
-            //    DepositedAmountMin = request.DepositedAmountMin,
-            //    DepositedAmountMax = request.DepositedAmountMax,
-            //    Reason = request.Reason,
-            //    CreatedByUsername = username,
-            //    UpdatedByUsername = username,
-            //    CreatedOn = DateTimeOffset.Now,
-            //    UpdatedOn = DateTimeOffset.Now
-            //};
-            //var whitelist = await GeneratePaymentPlayerListAsync(paymentId, request.Whitelist, PlayerListType.White);
-            //var blacklist = await GeneratePaymentPlayerListAsync(paymentId, request.Blacklist, PlayerListType.Black);
-            //var playerList = whitelist.Union(blacklist);
-            //payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
-            //var vips = await _repository.VipLevels.AsQueryable()
-            //    .Where(x => request.VipLevelIds.Contains(x.Id))
-            //    .ToArrayAsync();
-            //var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
-            //{
-            //    BrandPaymentId = paymentId,
-            //    VipLevelId = vip.Id,
-            //    VipLevel = vip
-            //}).ToArray();
-            //payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
-            //await _repository.BrandPayments.AddAsync(payment);
-            //await _repository.SaveChangesAsync();
+            var whitelist = await GeneratePaymentPlayerListAsync(
+                paymentId,
+                request.Whitelist,
+                PlayerListType.White).ConfigureAwait(false);
+            var blacklist = await GeneratePaymentPlayerListAsync(
+                paymentId,
+                request.Blacklist,
+                PlayerListType.Black).ConfigureAwait(false);
+
+            var playerList = whitelist.Union(blacklist);
+            payment.BrandPaymentPlayers = new HashSet<BrandPaymentPlayer>(playerList);
+            var vips = await _repository.VipLevels.AsQueryable()
+                .Where(x => request.VipLevelIds.Contains(x.Id))
+                .ToArrayAsync();
+            var vipLevels = vips.Select(vip => new BrandPaymentVipLevel
+            {
+                BrandPaymentId = paymentId,
+                VipLevelId = vip.Id,
+                VipLevel = vip
+            }).ToArray();
+            payment.VipLevels = new HashSet<BrandPaymentVipLevel>(vipLevels);
+            await _repository.BrandPayments.AddAsync(payment);
+            await _repository.SaveChangesAsync();
         }
 
-        async Task IBrandPaymentService.UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request,
+        public async Task UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request,
             string username)
         {
             var beforePayment = new BrandPayment
@@ -108,6 +114,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 DepositedAmountMax = payment.DepositedAmountMax
             };
 
+            payment.PaymentMethodChannelId = request.PaymentMethodChannelId;
             payment.ChannelName = request.ChannelName;
             payment.PaymentStatus = request.PaymentStatus;
             payment.TransferLimitFrom = request.TransferLimitFrom;
@@ -156,7 +163,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await tran.CommitAsync();
         }
 
-        Task<BrandPayment> IBrandPaymentService.GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
+        public Task<BrandPayment> GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
             Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery, bool tracking)
         {
             var payment = tracking
@@ -167,15 +174,15 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return preQuery(payment).FirstOrDefaultAsync(predicate);
         }
 
-        IQueryable<BrandPayment> IBrandPaymentService.GetPaymentQueries(bool tracking) =>
+        public IQueryable<BrandPayment> GetPaymentQueries(bool tracking) =>
             tracking
                 ? _repository.BrandPayments
                 : _repository.BrandPayments.AsNoTracking();
 
-        Task<bool> IBrandPaymentService.ExistsAsync(Expression<Func<BrandPayment, bool>> predicate) =>
+        public Task<bool> ExistsAsync(Expression<Func<BrandPayment, bool>> predicate) =>
             _repository.BrandPayments.AnyAsync(predicate);
 
-        Task IBrandPaymentService.UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request,
+        public Task UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request,
             string username)
         {
             payment.FeePercentage = request.FeePercentage;
@@ -185,7 +192,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return _repository.SaveChangesAsync();
         }
 
-        async Task IBrandPaymentService.ChangeOrderAsync(ChangeOrderRequest request)
+        public async Task ChangeOrderAsync(ChangeOrderRequest request)
         {
             var ids = request.Orders.Select(q => q.Id);
             var payments = await _repository.BrandPayments.AsQueryable()
@@ -205,7 +212,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await _repository.SaveChangesAsync();
         }
 
-        Task IBrandPaymentService.ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
+        public Task ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
         {
             var beforePayment = new BrandPayment
             {

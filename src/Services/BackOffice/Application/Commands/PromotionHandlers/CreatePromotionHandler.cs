@@ -43,7 +43,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
                 return CreateInvalidResponse<MessageResponse>(Promotion.PromotionTypeNotFound);
             }
 
-            await _service.CreatePromotionAsync(request);
+            var promotionType = promotionTypeGroups.SelectMany(x => x.Types)
+                .First(x => x.Name == request.PromotionType);
+
+            await _service.CreatePromotionAsync(request, promotionType);
 
             return CreateValidResponse<MessageResponse>();
         }

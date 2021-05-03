@@ -1,0 +1,14 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using TGS.Core.DataServices.Tgs;
+using TGS.Core.Models.Bonus;
+using TGS.Core.Models.Enums;
+
+namespace Bonus
+{
+    public interface IAgentDividend
+    {
+        ITgsRepository Repository { get; }
+        Task SentAgentDividend(IEnumerable<AgentDividend> agentDividends, TransactionType transactionType);
+    }
+}

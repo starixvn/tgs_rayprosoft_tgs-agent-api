@@ -24,7 +24,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public DateTimeOffset CreatedOn { get; set; }
 
-        public DateTimeOffset UpdateOn { get; set; }
+        public DateTimeOffset UpdatedOn { get; set; }
 
         public virtual Player Player { get; set; }
 

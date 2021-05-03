@@ -72,7 +72,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                         ? null
                         : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.PaymentReturn, null),
                     form.CreatedOn,
-                    form.UpdateOn))
+                    form.UpdatedOn))
                 .AsAsyncEnumerable();
         }
 
@@ -106,8 +106,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     && form.CreatedOn < query.CreateOnRange.Value.End);
 
             if (query.UpdateOnRange != null)
-                dataQuery = dataQuery.Where(form => form.UpdateOn >= query.UpdateOnRange.Value.Begin
-                    && form.UpdateOn < query.UpdateOnRange.Value.End);
+                dataQuery = dataQuery.Where(form => form.UpdatedOn >= query.UpdateOnRange.Value.Begin
+                    && form.UpdatedOn < query.UpdateOnRange.Value.End);
 
             return dataQuery;
         }

@@ -14,17 +14,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         private static readonly Dictionary<string, Guid> Payments = new()
         {
-            { "Manual", new("30CB4D17-2506-4D72-8470-65063B80F9C9") }
+            ["Manual"] = new("30CB4D17-2506-4D72-8470-65063B80F9C9"),
+            ["LeePay"] = new Guid("EC6EBD49-E002-4DB9-B7DE-1750FADC0C8E")
         };
 
         private static readonly Dictionary<string, Guid> PaymentMethods = new()
         {
-            { "BankTransfer", new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB") },
+            ["BankTransfer"] = new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"),
+            ["Crypto"] = new Guid("798D21C6-9CF5-4FC0-BD09-8D67D2C9E7E1")
         };
 
         private static readonly Dictionary<string, Guid> PaymentChannels = new()
         {
-            { "RichBank", new("E761A2D3-5705-417F-8D97-43CB7AEA0142") }
+            ["RichBank"] = new("E761A2D3-5705-417F-8D97-43CB7AEA0142"),
+            ["USDT"] = new("B90029F9-F0C6-4E77-9031-0C554028F9BA")
         };
 
         private async Task GeneratePaymentAsync()
@@ -81,6 +84,30 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private Task GeneratePaymentMethodChannelsAsync()
         {
+            var paymentMethodChannels = new[] {
+                new PaymentMethodChannel
+                {
+                    Id = Guid.NewGuid(),
+                    PaymentId = Payments["Manual"],
+                    MethodId = PaymentMethods["BankTransfer"],
+                    ChannelId = PaymentChannels["RichBank"],
+                    CreatedByUsername = AdminUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedByUsername = AdminUsername,
+                    UpdatedOn = DateTimeOffset.Now
+                },
+                new PaymentMethodChannel
+                {
+                    Id = Guid.NewGuid(),
+                    PaymentId = Payments["LeePay"],
+                    MethodId = PaymentMethods["Crypto"],
+                    ChannelId = PaymentChannels["USDT"],
+                    CreatedByUsername = AdminUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedByUsername = AdminUsername,
+                    UpdatedOn = DateTimeOffset.Now
+                }
+            };
             var query = from payment in Payments
                         from method in PaymentMethods
                         from channel in PaymentChannels
@@ -116,7 +143,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                     BrandId = brand.Id,
                                     PaymentMethodChannelId = pmc.Id,
                                     TransferType = PaymentTransferType.Deposit,
-                                    ChannelName = "PoorBank",
+                                    ChannelName = $"{Payments.Where(p => p.Value == pmc.PaymentId).First().Key}_" +
+                                        $"{PaymentMethods.Where(p => p.Value == pmc.MethodId).First().Key}_" +
+                                        $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
                                     PaymentStatus = SwitchStatus.Enabled,
                                     TransferLimitFrom = 10,
                                     TransferLimitTo = 100000,
