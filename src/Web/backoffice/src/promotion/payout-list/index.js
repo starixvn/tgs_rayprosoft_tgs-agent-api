@@ -31,7 +31,11 @@ import { useGameTypeGroupList } from "../../game/client"
 import { formatNumber } from "../../number/format"
 import { usePromotionPayoutList, useSendPromotionPayout } from "./client"
 import { PromotionStatusSelect } from "../PromotionStatus"
-import { PromotionTypeLabel, usePromotionGroupLabelOf } from "../PromotionType"
+import {
+    PromotionTypeGroupSelect,
+    PromotionTypeLabel,
+    usePromotionGroupLabelOf
+} from "../PromotionType"
 import { Checkbox } from "../../checkbox/Checkbox"
 import {
     PromotionManualPayoutDisclosure,
@@ -39,6 +43,9 @@ import {
 } from "./ManualPayout"
 import { PayoutStatusLabel } from "./PayoutStatus"
 import clone from "clone-deep"
+import { DateInputRangeField } from "../../date/DateTimeRangeInput"
+import { today } from "../../date/range"
+import { startOfNextDay } from "../../date/startOfNextDay"
 
 export { Code }
 
@@ -70,6 +77,7 @@ const Body = () => {
 }
 
 const BodyContent = ({ brandId }) => {
+    let todayRange = today()
     let [batchPayouts, setBatchPayouts] = useState([])
 
     const appendBatchPayout = (id) => {
@@ -88,9 +96,11 @@ const BodyContent = ({ brandId }) => {
     const resetBatchPayout = () => setBatchPayouts([])
 
     let { state, setState, setPageIndex, setSortOrder } = useTable({
-        status: "",
+        promotionGroup: "",
         username: "",
         name: "",
+        start: undefined,
+        end: undefined,
         brandId
     })
 
@@ -104,7 +114,10 @@ const BodyContent = ({ brandId }) => {
         error: promotionListError,
         mutate,
         deleteCache
-    } = usePromotionPayoutList(toApiParams(state))
+    } = usePromotionPayoutList({
+        ...toApiParams(state),
+        end: startOfNextDay(state.end)
+    })
 
     let [formData, setSubmit] = useState()
     let {
@@ -141,22 +154,28 @@ const BodyContent = ({ brandId }) => {
             actionBar={
                 <Flex justifyContent="space-between">
                     <SearchBar
-                        status={state?.status}
+                        promotionGroup={state?.promotionGroup}
                         username={state?.username}
                         name={state?.name}
+                        start={state?.start}
+                        end={state?.end}
                         search={(data) => {
                             let newState = {
                                 pageIndex: 0,
-                                status: data?.status,
+                                promotionGroup: data?.promotionGroup,
                                 username: data?.username,
-                                name: data?.name
+                                name: data?.name,
+                                start: data?.start,
+                                end: data?.end
                             }
                             if (
                                 equals(newState, {
                                     pageIndex: state?.pageIndex,
-                                    status: state?.status,
+                                    promotionGroup: state?.promotionGroup,
                                     username: state?.username,
-                                    name: state?.name
+                                    name: state?.name,
+                                    start: state?.start,
+                                    end: state?.end
                                 })
                             ) {
                                 mutate()
@@ -207,9 +226,11 @@ const BodyContent = ({ brandId }) => {
 }
 
 const SearchBar = ({
-    status = "",
+    promotionGroup = "",
     username = "",
     name = "",
+    start,
+    end,
     search,
     isLoading
 }) => {
@@ -218,27 +239,36 @@ const SearchBar = ({
         en: "Player Username"
     })
     let namePlaceholder = useTrans({
-        zh: "活动名称",
+        zh: "活动名",
         en: "Promotion Name"
     })
     let formMethods = useForm({
-        defaultValues: { status, name, username }
+        defaultValues: { promotionGroup, name, username, start, end }
     })
 
     return (
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
-                <Set>
-                    <PromotionStatusSelect name="status" />
+                <Set alignY="bottom">
+                    <PromotionTypeGroupSelect name="promotionGroup" />
+                    <InputField
+                        name="name"
+                        showEmptyFieldValueAddonAfter
+                        placeholder={namePlaceholder}
+                    />
                     <InputField
                         name="username"
                         showEmptyFieldValueAddonAfter
                         placeholder={usernamePlaceholder}
                     />
-                    <InputField
-                        name="name"
-                        showEmptyFieldValueAddonAfter
-                        placeholder={namePlaceholder}
+                    <DateInputRangeField
+                        label={<Trans zh="派发时间" en="Sent On" />}
+                        startProps={{
+                            name: "start"
+                        }}
+                        endProps={{
+                            name: "end"
+                        }}
                     />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
@@ -290,8 +320,8 @@ const useColumns = ({
                 Cell: ({ value }) => {
                     // let promotionId = value?.promotionId
                     let promotionId = value?.id
-                    let checked = batchPayouts.find(
-                        (id) => value.id === promotionId
+                    let checked = !!batchPayouts.find(
+                        (id) => id === promotionId
                     )
                     return (
                         <Checkbox

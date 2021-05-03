@@ -8,7 +8,9 @@ import {
     Button,
     useToasts,
     useModalState,
-    Dialog
+    Dialog,
+    FieldWrapper,
+    FieldStack
 } from "bumbag"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 import "react-datepicker/dist/react-datepicker.css"
@@ -29,6 +31,41 @@ export const DateInputRange = ({ dateFormat = "yyyy/MM/dd", ...props }) => (
         {...props}
     />
 )
+
+export const DateInputRangeField = ({
+    label,
+    startProps,
+    endProps,
+    ...props
+}) => {
+    let startFieldName = startProps?.name
+    let endFieldName = endProps?.name
+    let formMethods = useFormContext()
+    return (
+        <FieldWrapper
+            label={
+                <FieldStack orientation="horizontal" alignY="center">
+                    {label}
+                    {formMethods && (startFieldName || endFieldName) && (
+                        <Button.Close
+                            size="small"
+                            onClick={() => {
+                                formMethods.setValue(startFieldName, "")
+                                formMethods.setValue(endFieldName, "")
+                            }}
+                        />
+                    )}
+                </FieldStack>
+            }
+        >
+            <DateInputRange
+                startProps={startProps}
+                endProps={endProps}
+                {...props}
+            />
+        </FieldWrapper>
+    )
+}
 
 export const DateTimeRangeInput = ({
     startProps,
