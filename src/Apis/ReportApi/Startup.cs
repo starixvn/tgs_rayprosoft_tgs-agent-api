@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
+using Promotion.Client.Extensions;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -49,7 +50,11 @@ namespace ReportApi
                 .AddReportServices()
                 .AddTransactions()
                 .AddBackendOfficeRepositories()
-                .AddPromotionRepositoriesServices();
+                .AddPromotionClientServices(_configuration)
+                .AddPromotionRepositoriesServices()
+                .AddPlayerBucketRepositoriesServices();
+
+            services.AddWallet().AddTgsWalletRepositories().AddTgsAgentWalletRepositories();
 
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Report", "report-db");

@@ -62,9 +62,6 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             }
 
             var promotions = await _promotionService.GetPromotionQueries()
-                .Include(x => x.PromotionGameProviders)
-                .Include(x => x.PromotionVipLevels)
-                .Include(x => x.PromotionParticipants)
                 .Where(x => x.SettlementIntervalType == "Daily")
                 .Where(x => x.From <= reportDate && x.To >= reportDate).ToArrayAsync(cancellationToken);
 

@@ -80,7 +80,10 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddTransactions()
                 .AddReportClientServices(configuration)
                 .AddPromotionClientServices(configuration)
-                .AddPromotionRepositoriesServices();
+                .AddPromotionRepositoriesServices()
+                .AddPlayerBucketRepositoriesServices();
+
+            services.AddWallet().AddTgsWalletRepositories().AddTgsAgentWalletRepositories();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 

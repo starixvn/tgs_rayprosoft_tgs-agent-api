@@ -28,7 +28,11 @@ export const ConfirmButtonFooter = ({
                 isLoading={isLoading}
                 disabled={disabled}
             >
-                <ConfirmText />
+                {typeof ConfirmText === "function" ? (
+                    <ConfirmText />
+                ) : (
+                    ConfirmText
+                )}
             </Button>
         </Box>
     )
@@ -53,7 +57,11 @@ export const ConfirmCancelFooter = ({
                 isLoading={isLoading}
                 disabled={disabled}
             >
-                <ConfirmText />
+                {typeof ConfirmText === "function" ? (
+                    <ConfirmText />
+                ) : (
+                    ConfirmText
+                )}
             </Button>
             <Button
                 type="button"
@@ -62,7 +70,11 @@ export const ConfirmCancelFooter = ({
                     onClickClose?.()
                 }}
             >
-                <CancelTextLabel />
+                {typeof CancelTextLabel === "function" ? (
+                    <CancelTextLabel />
+                ) : (
+                    CancelTextLabel
+                )}
             </Button>
         </Set>
     )

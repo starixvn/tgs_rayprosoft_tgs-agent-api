@@ -22,6 +22,11 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         ///     get game list of specific game provider
         /// </summary>
+        /// <remarks>
+        /// language填 languages表的culture_code ex:zh-TW
+        /// 
+        /// currency填 currencies表的code ex:CNY
+        /// </remarks>
         [HttpGet]
         [Route("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]

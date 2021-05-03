@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Settings;
 using TGS.Services.PromotionCore;
-using TGS.Services.PromotionCore.Models.Promotions;
+using TGS.Services.PromotionCore.Models.Promotion;
 
 namespace Promotion.Repositories
 {

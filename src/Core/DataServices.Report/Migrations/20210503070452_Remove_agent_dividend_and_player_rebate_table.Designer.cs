@@ -10,8 +10,8 @@ using TGS.Core.DataServices.Report;
 namespace TGS.Core.DataServices.Report.Migrations
 {
     [DbContext(typeof(ReportRepository))]
-    [Migration("20210429095717_Initial")]
-    partial class Initial
+    [Migration("20210503070452_Remove_agent_dividend_and_player_rebate_table")]
+    partial class Remove_agent_dividend_and_player_rebate_table
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

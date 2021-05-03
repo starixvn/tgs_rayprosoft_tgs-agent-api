@@ -24,13 +24,25 @@ namespace TGS.Apis.GlobalApi.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("apikeys")]
-        public Task<PagedResponse<BrandApiKeyResult>> GetBrandApiKeysAsync([FromQuery] GetBrandApiKeysRequest request)
-            => _mediator.Send(request);
+        public async ValueTask<PagedResponse<BrandApiKeyResult>> GetBrandApiKeysAsync(
+            [FromQuery] GetBrandApiKeysRequest request)
+            => await _mediator.Send(request).ConfigureAwait(false);
 
         [HttpGet]
         [AllowAnonymous]
         [Route("players/mocksite")]
-        public Task<PagedResponse<BrandPlayersResult>> GetBrandPlayersForMockSiteAsync([FromQuery] GetBrandPlayersRequest request)
-            => _mediator.Send(request);
+        public async ValueTask<PagedResponse<BrandPlayersResult>> GetBrandPlayersForMockSiteAsync(
+            [FromQuery] GetBrandPlayersRequest request)
+            => await _mediator.Send(request).ConfigureAwait(false);
+
+        /// <summary>
+        ///     This api will create a new player when the player is not exist, and login with desktop
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("player/createandlogin")]
+        public async ValueTask<CreatePlayerAndLoginResponse> CreatePlayerAndLoginAsync(
+            CreatePlayerAndLoginRequest request)
+            => await _mediator.Send(request).ConfigureAwait(false);
     }
 }

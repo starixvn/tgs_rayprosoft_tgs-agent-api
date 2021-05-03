@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.PromotionCore;
-using TGS.Services.PromotionCore.Models.Promotions;
+using TGS.Services.PromotionCore.Models.Promotion;
 
 namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
 {

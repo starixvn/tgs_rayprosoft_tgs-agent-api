@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
-using TGS.Services.PromotionCore.Models.Promotions;
+using TGS.Services.PromotionCore.Models.Promotion;
 
 namespace PromotionApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PromotionController
+    public class PromotionController : ControllerBase
     {
         private readonly IMediator _mediator;
 

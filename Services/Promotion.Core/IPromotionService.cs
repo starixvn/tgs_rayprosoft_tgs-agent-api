@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Settings;
-using TGS.Services.PromotionCore.Models.Promotions;
+using TGS.Services.PromotionCore.Models.Promotion;
 
 namespace TGS.Services.PromotionCore
 {

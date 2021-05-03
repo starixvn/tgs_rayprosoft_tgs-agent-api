@@ -3,7 +3,7 @@ using MediatR;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.PromotionCore.Models.Promotions
+namespace TGS.Services.PromotionCore.Models.Promotion
 {
     public class UpdatePromotionRequest : IRequest<MessageResponse>
     {

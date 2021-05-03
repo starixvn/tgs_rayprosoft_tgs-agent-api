@@ -2808,6 +2808,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<bool>("IsFull")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_full");
+
                     b.Property<string>("PlayerCode")
                         .HasColumnType("text")
                         .HasColumnName("player_code");
@@ -3206,6 +3210,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("total_amount_limit");
+
+                    b.Property<decimal>("TurnoverMultiple")
+                        .HasColumnType("numeric")
+                        .HasColumnName("turnover_multiple");
 
                     b.HasKey("Id")
                         .HasName("pk_promotion_bonus_id");

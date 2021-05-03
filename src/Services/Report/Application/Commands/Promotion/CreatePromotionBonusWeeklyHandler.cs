@@ -56,9 +56,6 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             CancellationToken cancellationToken)
         {
             var promotions = await _promotionService.GetPromotionQueries()
-                .Include(x => x.PromotionGameProviders)
-                .Include(x => x.PromotionVipLevels)
-                .Include(x => x.PromotionParticipants)
                 .Where(x => x.SettlementIntervalType == "Weekly")
                 .Where(x => x.From >= _PreviousMonday && x.From <= _PreviousSunday ||
                     x.To >= _PreviousMonday && x.To <= _PreviousSunday ||

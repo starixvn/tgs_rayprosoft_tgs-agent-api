@@ -34,7 +34,7 @@ namespace Promotion.Client
         async Task<PagedResponse<PromotionModel>> IPromotionClient.GetPromotionsAsync(GetPromotionsRequest request)
         {
             var prefix = $"Promotion.{request.BrandId}.GetPromotions";
-            var path = ClientPath.AppendWithProperties("/api/roundReport?", request);
+            var path = ClientPath.AppendWithProperties("/api/promotion?", request);
 
             return await ExecuteJsonRequestAsync<GetPromotionsRequest, PagedResponse<PromotionModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,

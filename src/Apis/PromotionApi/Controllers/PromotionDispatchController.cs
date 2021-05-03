@@ -9,7 +9,7 @@ namespace PromotionApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PromotionDispatchController
+    public class PromotionDispatchController : ControllerBase
     {
         private readonly IMediator _mediator;
 
