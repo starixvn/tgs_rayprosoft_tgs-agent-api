@@ -5,11 +5,14 @@ using ExpectedObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson.Serialization;
+using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Withdraw;
 using TGS.Services.Payment;
@@ -193,6 +196,29 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "detail");
 
             Assert.ThrowsAsync<InsufficientFundsException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
+        public async Task Player_Withdraw_Should_Input_Pay_Password()
+        {
+            var fakePlayerQueries = Substitute.For<IPlayerQueries>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+
+            var sut = new CheckWithdrawPayPasswordCommandService(
+                fakePlayerQueries,
+                fakePasswordHandler);
+
+            var command = new CheckWithdrawPayPasswordCommand("ThisIsPlayerCode", "1qaz2wsx");
+
+            fakePasswordHandler
+                .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(command.PayPassword))
+                .Returns(true);
+
+            await sut.ExecuteAsync(command);
+
+            var actual = await command.ReturnSource.Task.ConfigureTimeout(TimeSpan.FromMilliseconds(500));
+
+            Assert.IsTrue(actual);
         }
     }
 }

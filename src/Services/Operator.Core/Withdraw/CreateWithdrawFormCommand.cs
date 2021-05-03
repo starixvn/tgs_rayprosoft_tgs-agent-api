@@ -9,6 +9,6 @@ namespace TGS.Services.Operator.Withdraw
         Guid BankInfoId,
         decimal Amount)
     {
-        public TaskCompletionSource<Guid> ReturnFormIdSource => new TaskCompletionSource<Guid>();
+        public TaskCompletionSource<Guid> ReturnFormIdSource { get; } = new TaskCompletionSource<Guid>();
     }
 }

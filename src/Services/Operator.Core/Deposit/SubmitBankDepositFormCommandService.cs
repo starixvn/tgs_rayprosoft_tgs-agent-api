@@ -3,12 +3,10 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Apis.FileService.Clients;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Deposit;
 
 namespace TGS.Services.Operator.Deposit
 {
