@@ -56,6 +56,7 @@ namespace TGS.Core.Models
             public const string SBOBET = "SBO";
             public const string Habanero = "HABA";
             public const string PragmaticPlay = "PP";
+            public const string VR = "VR";
         }
 
         public static class EnvironmentVariable
