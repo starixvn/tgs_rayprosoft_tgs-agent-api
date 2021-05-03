@@ -194,7 +194,7 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             // textColumn({
             //     accessor: "trackingId",
@@ -206,37 +206,37 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "path",
                 Header: <Trans zh="Path" en="Path" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "method",
                 Header: <Trans zh="Method" en="Method" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "prefix",
                 Header: <Trans zh="Prefix" en="Prefix" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "serverName",
                 Header: <Trans zh="Server Name" en="Server Name" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "responseCode",
                 Header: <Trans zh="Response Code" en="Response Code" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "executionTimeMs",

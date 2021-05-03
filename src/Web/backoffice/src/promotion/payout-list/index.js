@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Box, Button, Set, Text, Flex } from "bumbag"
+import { Box, Button, Set, Text, Flex, Dialog, Stack } from "bumbag"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
@@ -17,18 +17,28 @@ import { InputField } from "../../input/Input"
 import SearchButton from "../../button/SearchButton"
 import { PageContent } from "../../page/Content"
 import AlertDialog from "../../dialog/Alert"
-import { FormattedNumberDecimal, Trans, useTrans } from "../../i18n"
+import {
+    FormatHourMinuteSecondDayMonthYear,
+    FormattedNumberDecimal,
+    Trans,
+    useTrans
+} from "../../i18n"
 import equals from "fast-deep-equal"
 import BrandBar from "../../report/BrandBar"
 import { formatDateTime, formatDayMonthYear } from "../../date/format"
 import { GameTypeLabel } from "../../game/GameType"
 import { useGameTypeGroupList } from "../../game/client"
 import { formatNumber } from "../../number/format"
-import { usePromotionPayoutList } from "./client"
+import { usePromotionPayoutList, useSendPromotionPayout } from "./client"
 import { PromotionStatusSelect } from "../PromotionStatus"
 import { PromotionTypeLabel, usePromotionGroupLabelOf } from "../PromotionType"
 import { Checkbox } from "../../checkbox/Checkbox"
-import { PromotionManualPayoutDisclosure } from "./ManualPayout"
+import {
+    PromotionManualPayoutDisclosure,
+    ViewPromotionManualPayoutDisclosure
+} from "./ManualPayout"
+import { PayoutStatusLabel } from "./PayoutStatus"
+import clone from "clone-deep"
 
 export { Code }
 
@@ -60,7 +70,23 @@ const Body = () => {
 }
 
 const BodyContent = ({ brandId }) => {
-    // let [payouts, setPayouts] = useState()
+    let [batchPayouts, setBatchPayouts] = useState([])
+
+    const appendBatchPayout = (id) => {
+        if (!batchPayouts.includes(id)) {
+            setBatchPayouts((batchPayouts = []) => [...batchPayouts, id])
+        }
+    }
+
+    const dropBatchPayout = (id) => {
+        let payouts = batchPayouts.filter(
+            (batchPayoutId) => batchPayoutId != id
+        )
+        setBatchPayouts(payouts)
+    }
+
+    const resetBatchPayout = () => setBatchPayouts([])
+
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         status: "",
         username: "",
@@ -73,14 +99,42 @@ const BodyContent = ({ brandId }) => {
     }, [brandId])
 
     let {
-        isLoading,
+        isLoading: isLoadingPromotionList,
         data,
-        error,
+        error: promotionListError,
         mutate,
         deleteCache
     } = usePromotionPayoutList(toApiParams(state))
 
-    let columns = useColumns({ mutate, brandId, items: data?.items })
+    let [formData, setSubmit] = useState()
+    let {
+        isLoading: isLoadingSendPromotionPayout,
+        result,
+        error: sendPromotionPayoutError,
+        mutate: mutateSendPromotionPayout,
+        deleteCache: deleteSendPromotionPayoutCache
+    } = useSendPromotionPayout(formData)
+
+    let isLoading = isLoadingPromotionList || isLoadingSendPromotionPayout
+    let error = promotionListError || sendPromotionPayoutError
+
+    useEffect(() => {
+        if (result && !sendPromotionPayoutError) {
+            resetBatchPayout()
+            mutate()
+        }
+    }, [result])
+
+    let columns = useColumns({
+        mutate,
+        brandId,
+        items: data?.items,
+        batchPayouts,
+        setBatchPayouts,
+        appendBatchPayout,
+        dropBatchPayout,
+        resetBatchPayout
+    })
     return (
         <PageContent
             title={<Trans zh="活动派发列表" en="Promotion Payouts" />}
@@ -114,15 +168,31 @@ const BodyContent = ({ brandId }) => {
                 </Flex>
             }
         >
-            <Table
-                controlledState={state}
-                columns={columns}
-                data={data?.items}
-                pageCount={pageCount(state?.pageSize, data?.totalCount)}
-                setPageIndex={setPageIndex}
-                setSortOrder={setSortOrder}
-                isLoading={isLoading}
-            />
+            <Stack>
+                <Table
+                    controlledState={state}
+                    columns={columns}
+                    data={data?.items}
+                    pageCount={pageCount(state?.pageSize, data?.totalCount)}
+                    setPageIndex={setPageIndex}
+                    setSortOrder={setSortOrder}
+                    isLoading={isLoading}
+                />
+                <Dialog.Footer position="sticky" bottom="0">
+                    <Button
+                        isLoading={isLoadingSendPromotionPayout}
+                        onClick={() => {
+                            let data = batchPayouts.map((record) =>
+                                clone(record)
+                            )
+                            setSubmit(data)
+                        }}
+                    >
+                        <Trans zh="批量派发" en="Batch Payout" />
+                    </Button>
+                </Dialog.Footer>
+            </Stack>
+
             {error && (
                 <AlertDialog
                     {...error}
@@ -177,18 +247,75 @@ const SearchBar = ({
     )
 }
 
-const useColumns = ({ brandId, items = [], mutate }) => {
+const useColumns = ({
+    brandId,
+    items = [],
+    mutate,
+    batchPayouts = [],
+    setBatchPayouts,
+    appendBatchPayout,
+    dropBatchPayout,
+    resetBatchPayout
+}) => {
     let hasAnyMenu = useHasSubMenuByRoute()
     return useMemo(() => {
         let columns = [
             textColumn({
+                id: "batchPayout",
+                accessor: (row) => row,
+                Header: () => {
+                    let isAllChecked =
+                        items.length > 0 && items.length === batchPayouts.length
+                    return (
+                        <Checkbox
+                            checked={isAllChecked}
+                            onChange={(event) => {
+                                let checked = event.target.checked
+                                if (checked) {
+                                    let ids = items.map(({ id }) => id)
+                                    /*
+                                    let ids = items.map(
+                                        ({ promotionId }) => promotionId
+                                    )
+                                    */
+                                    setBatchPayouts(ids)
+                                } else {
+                                    resetBatchPayout()
+                                }
+                            }}
+                        />
+                    )
+                },
+                disableSortBy: true,
+                Cell: ({ value }) => {
+                    // let promotionId = value?.promotionId
+                    let promotionId = value?.id
+                    let checked = batchPayouts.find(
+                        (id) => value.id === promotionId
+                    )
+                    return (
+                        <Checkbox
+                            checked={checked}
+                            onChange={(event) => {
+                                let checked = event.target.checked
+                                if (checked) {
+                                    appendBatchPayout(promotionId)
+                                } else {
+                                    dropBatchPayout(promotionId)
+                                }
+                            }}
+                        />
+                    )
+                }
+            }),
+            textColumn({
                 accessor: "username",
-                Header: <Trans zh="用户名" en="Player Username" />,
+                Header: <Trans zh="用户名" en="Username" />,
                 disableSortBy: true
             }),
             textColumn({
                 accessor: "name",
-                Header: <Trans zh="活动名称" en="Name" />,
+                Header: <Trans zh="活动名称" en="promotionName " />,
                 disableSortBy: true
             }),
             textColumn({
@@ -213,22 +340,24 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                 accessor: (row) => row,
                 Header: <Trans zh="生成时间" en="Created Time" />,
                 disableSortBy: true,
-                Cell: ({ value }) => {
-                    let from = formatDayMonthYear(value?.from)
-                    let to = formatDayMonthYear(value?.to)
-                    return `${from} - ${to}`
-                }
+                Cell: ({ value }) => (
+                    <FormatHourMinuteSecondDayMonthYear
+                        value={value?.from}
+                        placeholder="-"
+                    />
+                )
             }),
             textColumn({
                 id: "sentTime",
                 accessor: (row) => row,
-                Header: <Trans zh="派发时间" en="Sent Time" />,
+                Header: <Trans zh="派发时间" en="Sent On" />,
                 disableSortBy: true,
-                Cell: ({ value }) => {
-                    let from = formatDayMonthYear(value?.from)
-                    let to = formatDayMonthYear(value?.to)
-                    return `${from} - ${to}`
-                }
+                Cell: ({ value }) => (
+                    <FormatHourMinuteSecondDayMonthYear
+                        value={value?.from}
+                        placeholder="-"
+                    />
+                )
             }),
             textColumn({
                 accessor: "amount",
@@ -238,11 +367,12 @@ const useColumns = ({ brandId, items = [], mutate }) => {
             }),
             textColumn({
                 id: "status",
+                accessor: (row) => row,
                 Header: <Trans zh="状态" en="Status" />,
                 accessor: (row) => row,
                 disableSortBy: true,
                 Cell: ({ value: record }) => {
-                    return "TODO"
+                    return <PayoutStatusLabel value={record?.sentOn} />
                 }
             })
         ]
@@ -262,6 +392,10 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                                     record={record}
                                     onSubmitted={mutate}
                                 />
+                                <ViewPromotionManualPayoutDisclosure
+                                    brandId={brandId}
+                                    record={record}
+                                />
                             </Set>
                         )
                     }
@@ -270,5 +404,5 @@ const useColumns = ({ brandId, items = [], mutate }) => {
         }
 
         return columns
-    }, [JSON.stringify(items)])
+    }, [JSON.stringify(items), JSON.stringify(batchPayouts)])
 }

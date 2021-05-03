@@ -11,11 +11,7 @@ namespace TGS.Apis.OperatorApi.Validators
     public sealed class GetGamesRequestValidator : BaseFluentValidator<GetGamesRequest>
     {
         public GetGamesRequestValidator()
-        {
-            RuleFor(x => x.GameProviderCode)
-                .NotEmpty()
-                .WithName(x => GetBindPropertyName(x, nameof(x.GameProviderCode)));
-
+        {            
             RuleFor(x => x.LanguageCode)
                 .NotEmpty()
                 .WithName(x => GetBindPropertyName(x, nameof(x.LanguageCode)));
