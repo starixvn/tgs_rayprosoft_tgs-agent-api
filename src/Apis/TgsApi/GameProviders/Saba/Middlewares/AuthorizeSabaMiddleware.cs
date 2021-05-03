@@ -51,7 +51,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
                 {typeof(ConfirmBetRequest), ResolveConfirmBetRequestAsync},
                 {typeof(ConfirmBetParlayRequest), ResolveConfirmBetParlayRequestAsync},
                 {typeof(CancelBetRequest), ResolveCancelBetRequestAsync},
-                {typeof(SettleBetRequest), ResolveSettleBetRequestAsync}
+                {typeof(SettleBetRequest), ResolveSettleBetRequestAsync},
+                {typeof(UnsettleBetRequest), ResolveUnsettleBetRequestAsync},
+                {typeof(ResettleBetRequest), ResolveResettleBetRequestAsync}
             };
         }
 
@@ -157,6 +159,26 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
             var r = _json.DeserializeFromString<SettleBetRequest>(value);
 
             // as settle bet might have multiple players, get the first for finding the game provider configuration
+            var playerCode = r.Body.Transactions.FirstOrDefault()?.PlayerCode;
+
+            return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));
+        }
+
+        private ValueTask<(string, string, PlatformType)> ResolveUnsettleBetRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<UnsettleBetRequest>(value);
+
+            // as unsettle bet might have multiple players, get the first for finding the game provider configuration
+            var playerCode = r.Body.Transactions.FirstOrDefault()?.PlayerCode;
+
+            return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));
+        }
+
+        private ValueTask<(string, string, PlatformType)> ResolveResettleBetRequestAsync(string value)
+        {
+            var r = _json.DeserializeFromString<ResettleBetRequest>(value);
+
+            // as resettle bet might have multiple players, get the first for finding the game provider configuration
             var playerCode = r.Body.Transactions.FirstOrDefault()?.PlayerCode;
 
             return ValueTask.FromResult((r.Key, playerCode, PlatformType.Desktop));

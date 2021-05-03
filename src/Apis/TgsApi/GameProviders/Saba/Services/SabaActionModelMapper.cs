@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TGS.Apis.TgsApi.GameProviders.Saba.Data;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -25,11 +26,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 
         BetData Request(string playerCode, GameProviderConfigurationData data, CancelBetRequest request);
 
-        BatchBetData SettleBatchRequest(GameProviderConfigurationData data, string playerCode,
-            Dictionary<string, string> externalRoundIds, SettleBetRequest.Transaction[] transactions);
+        BatchBetData SettleBatchRequest(Guid gameProviderId, bool autoCloseRound,
+            Dictionary<string, Guid> playerConfigurationIds, Dictionary<string, string> externalRoundIds,
+            SettleTransaction[] transactions);
 
-        BatchBetData CancelBatchRequest(GameProviderConfigurationData data, string playerCode,
-            IList<GameActionExternalIds> gameActionExternalIds);
+        BatchBetData VoidRoundRequest(Guid gameProviderId, bool autoCloseRound,
+            Dictionary<string, Guid> playerConfigurationIds,
+            Dictionary<string, List<GameActionExternalIds>> playerGameActionExternalIds);
+
+        BatchBetData UnsettleBatchRequest(Guid gameProviderId,
+            bool autoCloseRound, Dictionary<string, Guid> playerConfigurationIds,
+            Dictionary<string, string> externalRoundIds, TransactionInfo[] transactions);
+
+        BatchBetData ResettleBatchRequest(Guid gameProviderId, bool autoCloseRound,
+            Dictionary<string, Guid> playerConfigurationIds, Dictionary<string, string> externalRoundIds,
+            SettleTransaction[] transactions);
 
         GetBalanceResponse Response(string playerCode, GetBalanceResult result);
 
@@ -44,6 +55,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         CancelBetResponse Response(string playerCode, CancelBetRequest.Data body, BetResult result);
 
         SettleBetResponse Response(SettleBetRequest request, BatchBetResult[] results);
+
+        UnsettleBetResponse Response(UnsettleBetRequest request, BatchBetResult result);
+
+        ResettleBetResponse Response(ResettleBetRequest request, BatchBetResult[] results);
     }
 
     public sealed class SabaActionModelMapper : ISabaActionModelMapper
@@ -205,41 +220,47 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             return GetBetData(playerCode, null, data, transactions);
         }
 
-        BatchBetData ISabaActionModelMapper.SettleBatchRequest(GameProviderConfigurationData data, string playerCode,
-            Dictionary<string, string> externalRoundIds, SettleBetRequest.Transaction[] transactions)
+        BatchBetData ISabaActionModelMapper.SettleBatchRequest(Guid gameProviderId, bool autoCloseRound,
+            Dictionary<string, Guid> playerConfigurationIds, Dictionary<string, string> externalRoundIds,
+            SettleTransaction[] transactions)
         {
             var batchTransactions = transactions.Select(t =>
             {
-                var externalTransactionId = t.ExternalTransactionId.ToString();
+                var playerCode = t.PlayerCode;
+                var externalTransactionId = t.ExternalTransactionId;
                 var externalRoundId = externalRoundIds[externalTransactionId];
-                var gameActionType = SabaConsts.GameActionTypeMap[t.Status];
 
                 return new BatchTransactionData
                 {
                     PlayerCode = playerCode,
-                    GameProviderConfigurationId = data.GameProviderConfigurationId,
-                    Amount = t.Payout,
+                    GameProviderConfigurationId = playerConfigurationIds[playerCode],
+                    Amount = t.Amount,
                     ExternalBetId = externalTransactionId,
                     ExternalRoundId = externalRoundId,
                     ExternalTransactionId = $"{externalTransactionId}_settle",
                     ExternalTransactionReferenceId = externalTransactionId,
                     ExternalGameId = _externalGameId,
-                    GameActionType = gameActionType,
+                    GameActionType = t.GameActionType,
                     Timestamp = GetTimestamp(t.UpdateTime)
                 };
             }).ToArray();
 
-            return GetBatchBetData(data.GameProviderId, data.AutoCloseRound, batchTransactions);
+            return GetBatchBetData(gameProviderId, autoCloseRound, batchTransactions);
         }
 
-        BatchBetData ISabaActionModelMapper.CancelBatchRequest(GameProviderConfigurationData data, string playerCode,
-            IList<GameActionExternalIds> gameActionExternalIds)
+        BatchBetData ISabaActionModelMapper.VoidRoundRequest(Guid gameProviderId, bool autoCloseRound,
+            Dictionary<string, Guid> playerConfigurationIds,
+            Dictionary<string, List<GameActionExternalIds>> playerGameActionExternalIds)
         {
-            var transactions = gameActionExternalIds.OrderBy(a => a.ExternalRoundId).ThenByDescending(a => a.RecordedOn)
-                .Select(a => new BatchTransactionData
+            var transactions = playerGameActionExternalIds.SelectMany(kvp =>
+            {
+                var playerCode = kvp.Key;
+                var gameActionExternalIds = kvp.Value;
+
+                return gameActionExternalIds.Select(a => new BatchTransactionData
                 {
                     PlayerCode = playerCode,
-                    GameProviderConfigurationId = data.GameProviderConfigurationId,
+                    GameProviderConfigurationId = playerConfigurationIds[playerCode],
                     ExternalBetId = a.ExternalBetId,
                     ExternalRoundId = a.ExternalRoundId,
                     ExternalTransactionId = $"{a.ExternalTransactionId}_cancel",
@@ -247,9 +268,68 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                     ExternalGameId = _externalGameId,
                     GameActionType = GameActionType.CancelTransaction,
                     Timestamp = DateTimeOffset.Now
-                }).ToArray();
+                });
+            }).ToArray();
 
-            return GetBatchBetData(data.GameProviderId, data.AutoCloseRound, transactions);
+            return GetBatchBetData(gameProviderId, autoCloseRound, transactions);
+        }
+
+        BatchBetData ISabaActionModelMapper.UnsettleBatchRequest(Guid gameProviderId,
+            bool autoCloseRound,
+            Dictionary<string, Guid> playerConfigurationIds, Dictionary<string, string> externalRoundIds,
+            TransactionInfo[] transactions)
+        {
+            var batchTransactions = transactions.Select(t =>
+            {
+                var playerCode = t.PlayerCode;
+                var gameProviderConfigurationId = playerConfigurationIds[playerCode];
+                var externalTransactionId = t.ExternalTransactionId.ToString();
+                var externalRoundId = externalRoundIds[externalTransactionId];
+
+                return new BatchTransactionData
+                {
+                    PlayerCode = playerCode,
+                    GameProviderConfigurationId = gameProviderConfigurationId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = $"{externalTransactionId}_settle_canel",
+                    ExternalTransactionReferenceId = $"{externalTransactionId}_settle",
+                    ExternalGameId = _externalGameId,
+                    GameActionType = GameActionType.CancelTransaction,
+                    Timestamp = GetTimestamp(t.UpdateTime),
+                    RoundClosed = false
+                };
+            }).ToArray();
+
+            return GetBatchBetData(gameProviderId, autoCloseRound, batchTransactions);
+        }
+
+        BatchBetData ISabaActionModelMapper.ResettleBatchRequest(Guid gameProviderId, bool autoCloseRound,
+            Dictionary<string, Guid> playerConfigurationIds, Dictionary<string, string> externalRoundIds,
+            SettleTransaction[] transactions)
+        {
+            var batchTransactions = transactions.Select(t =>
+            {
+                var playerCode = t.PlayerCode;
+                var externalTransactionId = t.ExternalTransactionId;
+                var externalRoundId = externalRoundIds[externalTransactionId];
+
+                return new BatchTransactionData
+                {
+                    PlayerCode = playerCode,
+                    GameProviderConfigurationId = playerConfigurationIds[playerCode],
+                    Amount = t.Amount,
+                    ExternalBetId = externalTransactionId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = $"{externalTransactionId}_resettle",
+                    ExternalTransactionReferenceId = externalTransactionId,
+                    ExternalGameId = _externalGameId,
+                    GameActionType = t.GameActionType,
+                    Timestamp = GetTimestamp(t.UpdateTime)
+                };
+            }).ToArray();
+
+            return GetBatchBetData(gameProviderId, autoCloseRound, batchTransactions);
         }
 
         GetBalanceResponse ISabaActionModelMapper.Response(string playerCode, GetBalanceResult result) =>
@@ -329,6 +409,56 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             return errors.Count == 0
                 ? new() {Status = ((int)GameApiError.Success).ToString()}
                 : new SettleBetResponse
+                {
+                    Status = ((int)GameApiError.UnableProcessed).ToString(),
+                    Message = errors.JoinAsString(";")
+                };
+        }
+
+        UnsettleBetResponse ISabaActionModelMapper.Response(UnsettleBetRequest request, BatchBetResult result)
+        {
+            var errors = new List<string>();
+
+            if (result.Error != TgsApiError.None)
+            {
+                errors.Add(result.ErrorMessage);
+            }
+
+            var messages = result.Errors.Select(e => e.ErrorMessage).ToArray();
+            errors.AddRange(messages);
+
+            return errors.Count == 0
+                ? new() {Status = ((int)GameApiError.Success).ToString()}
+                : new UnsettleBetResponse
+                {
+                    Status = ((int)GameApiError.UnableProcessed).ToString(),
+                    Message = errors.JoinAsString(";")
+                };
+        }
+
+        ResettleBetResponse ISabaActionModelMapper.Response(ResettleBetRequest request, BatchBetResult[] results)
+        {
+            var errors = new List<string>();
+
+            foreach (var r in results)
+            {
+                if (r.Error != TgsApiError.None)
+                {
+                    errors.Add(r.ErrorMessage);
+                }
+
+                if (r.Errors.Length <= 0)
+                {
+                    continue;
+                }
+
+                var messages = r.Errors.Select(e => e.ErrorMessage).ToArray();
+                errors.AddRange(messages);
+            }
+
+            return errors.Count == 0
+                ? new() {Status = ((int)GameApiError.Success).ToString()}
+                : new ResettleBetResponse
                 {
                     Status = ((int)GameApiError.UnableProcessed).ToString(),
                     Message = errors.JoinAsString(";")
