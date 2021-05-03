@@ -18,7 +18,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class GameTests
     {
         [Test]
-        public async Task Get_Game_List_By_Specific_GPCode()
+        public async Task Get_Game_List_Of_Specific_GameProvider()
         {
             // arrange
             var fakeHttpContextAccessor = Substitute.For<IHttpContextAccessor>();
@@ -64,7 +64,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Get_Game_List_By_No_GPCode()
+        public async Task Get_Game_List_Of_All_GameProviders()
         {
             // arrange
             var fakeHttpContextAccessor = Substitute.For<IHttpContextAccessor>();

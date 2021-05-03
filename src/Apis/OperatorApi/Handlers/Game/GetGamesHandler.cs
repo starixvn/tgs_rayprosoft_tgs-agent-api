@@ -67,11 +67,11 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var brandId = _httpContext.Items.GetBrandId();
             var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, brandId);
 
-            Guid[] gameProviderIds = new Guid[] { };
+            Guid[] gameProviderIds;
             if (!string.IsNullOrEmpty(request.GameProviderCode))
             {
                 var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
-                gameProviderIds = gameProviderIds.Concat(new Guid[] { gameProviderId }).ToArray();
+                gameProviderIds = new [] { gameProviderId };
             }
             else
             {
