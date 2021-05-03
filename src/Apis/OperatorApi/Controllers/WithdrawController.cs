@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
@@ -6,7 +9,9 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operator;
+using TGS.Services.Operator.Deposit;
 using TGS.Services.Operator.Withdraw;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -49,6 +54,56 @@ namespace TGS.Apis.OperatorApi.Controllers
             catch (InsufficientFundsException)
             {
                 throw new PlayerHasInsufficientFundsException();
+            }
+        }
+
+        [HttpGet]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
+            [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
+            [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+            [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var paymentMethods = await getAllPaymentMethodService
+                .GetAsync(new AllPaymentMethodsQuery())
+                .ConfigureAwait(false);
+
+            var query = new BrandPaymentsQuery(brandId, playerTokenData.PlayerCode);
+
+            var brandPayments = await brandPaymentsQueryService.QueryAsync(query)
+                .ToArrayAsync()
+                .ConfigureAwait(false);
+
+            foreach (var bp in brandPayments)
+            {
+                if (bp.TransferType != TransferTypes.Withdraw)
+                    continue;
+
+                var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
+
+                var paymentInfo = await getPaymentService
+                    .GetAsync(getPaymentQuery)
+                    .ConfigureAwait(false);
+
+                yield return new BrandPaymentResponse
+                {
+                    Id = bp.Id,
+                    ChannelName = bp.ChannelName,
+                    TransferLimit = new Models.ValueRange<decimal>
+                    {
+                        From = bp.TransferLimit.From,
+                        To = bp.TransferLimit.To
+                    },
+                    ExtendedData = JsonDocument.Parse(bp.ExtendedData),
+                    PaymentId = bp.PaymentId,
+                    PaymentCode = paymentInfo.Code,
+                    MethodId = bp.MethodId,
+                    MethodCode = paymentMethods[bp.MethodId].Name
+                };
             }
         }
     }

@@ -47,6 +47,9 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             foreach (var bp in brandPayments)
             {
+                if (bp.TransferType != TransferTypes.Deposit)
+                    continue;
+
                 var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
 
                 var paymentInfo = await getPaymentService

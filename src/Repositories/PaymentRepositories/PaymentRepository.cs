@@ -180,7 +180,12 @@ namespace TGS.Payment.Repositories
                     From = row.DepositedAmountMin,
                     To = row.DepositedAmountUnlimited ? decimal.MaxValue : row.DepositedAmountMax
                 },
-                row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll);
+                row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
+                row.TransferType switch
+                {
+                    PaymentTransferType.Withdrawal => TransferTypes.Withdraw,
+                    _ => TransferTypes.Deposit,
+                });
         }
 
         public IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId)
@@ -212,7 +217,12 @@ namespace TGS.Payment.Repositories
                     From = bp.DepositedAmountMin,
                     To = bp.DepositedAmountUnlimited ? decimal.MaxValue : bp.DepositedAmountMax
                 },
-                bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll));
+                bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
+                bp.TransferType switch
+                {
+                    PaymentTransferType.Withdrawal => TransferTypes.Withdraw,
+                    _ => TransferTypes.Deposit
+                }));
         }
 
         public IAsyncEnumerable<BrandPaymentVip> GetBrandPaymentVipListAsync(IEnumerable<Guid> brandPaymentIds)
