@@ -41,9 +41,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations =>
                 new IGameProviderConfiguration[] { new VRGameProviderConfiguration() };
 
-            ICurrency[] IGameProvider.Currencies => new ICurrency[] { };
+            ICurrency[] IGameProvider.Currencies => new ICurrency[] { new CNYCurrency("CNY") };
 
-            ILanguage[] IGameProvider.Languages => new ILanguage[] { };
+            ILanguage[] IGameProvider.Languages => new ILanguage[] { new CNLanguage("zh") };
 
             IGame[] IGameProvider.Games => _games;
 
