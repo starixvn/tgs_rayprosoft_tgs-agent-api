@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
-    <ProjectReference Include="..\..\Services\Bonus\Bonus.csproj" />
   </ItemGroup>
 
 </Project>

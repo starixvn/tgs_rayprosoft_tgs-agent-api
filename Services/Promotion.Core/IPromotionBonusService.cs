@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.PromotionCore.Models.PromotionBonus;
-using TGS.Services.PromotionCore.Models.PromotionDispatch;
 
 namespace TGS.Services.PromotionCore
 {
@@ -21,7 +20,5 @@ namespace TGS.Services.PromotionCore
             bool tracking = false);
 
         Task CreatePromotionBonusAsync(PromotionBonusModel[] model);
-
-        Task DispatchPromotionBonus(DispatchPromotionBonusRequest[] model);
     }
 }

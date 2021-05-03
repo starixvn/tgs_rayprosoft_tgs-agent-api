@@ -17,7 +17,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             Func<IQueryable<PlayerRebate>, IQueryable<PlayerRebate>> preQuery = null,
             bool tracking = false);
 
-        Task CreatePlayerRebatesAsync(PlayerRebateModel[] request);
+        Task CreatePlayerRebatesAsync(PlayerRebateModel[] request, DateTimeOffset? sentOn);
         Task<bool> ExistsAsync(Expression<Func<PlayerRebate, bool>> predicate);
     }
 
@@ -32,7 +32,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
         ITgsRepository IPlayerRebateService.Repository => _repository;
 
-        Task IPlayerRebateService.CreatePlayerRebatesAsync(PlayerRebateModel[] models) =>
+        Task IPlayerRebateService.CreatePlayerRebatesAsync(PlayerRebateModel[] models, DateTimeOffset? sentOn) =>
             CreateEntitiesAsync(models.Select(model => new PlayerRebate
             {
                 BrandId = model.BrandId,
@@ -40,6 +40,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 PlayerCode = model.PlayerCode,
                 ReportDate = model.ReportDate,
                 CreatedOn = DateTimeOffset.Now,
+                SentOn = sentOn,
                 VipCardGameRebatePercentage = model.VipCardGameRebatePercentage,
                 VipLiveDealerRebatePercentage = model.VipLiveDealerRebatePercentage,
                 VipLotteryRebatePercentage = model.VipLotteryRebatePercentage,

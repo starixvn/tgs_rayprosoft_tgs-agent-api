@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
-    <ProjectReference Include="..\..\Services\Bonus\Bonus.csproj" />
     <ProjectReference Include="..\..\Services\Report\Report.csproj" />
   </ItemGroup>
 

@@ -17,6 +17,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public GameType? GameType { get; set; }
         public decimal Percentage { get; set; }
         public decimal BonusAmountLimit { get; set; }
+        public decimal TurnoverMultiple { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public virtual ICollection<PromotionPlayer> PromotionPlayers { get; set; }
     }

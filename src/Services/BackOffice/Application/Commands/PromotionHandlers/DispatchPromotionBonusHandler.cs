@@ -2,53 +2,63 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Core.Infrastructures.Json;
-using TGS.Core.Models;
+using Microsoft.EntityFrameworkCore;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Core.Models.Settings;
-using TGS.Services.BackOffice.Application.Resources;
-using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Services.PlayerBucket.Core;
+using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.PromotionCore;
 using TGS.Services.PromotionCore.Models.PromotionDispatch;
-using TGS.Services.PromotionCore.Models.Promotions;
+using TGS.Services.Wallet;
 
 namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 {
     public class DispatchPromotionBonusHandler : Handler<DispatchPromotionBonusRequest, MessageResponse>
     {
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPromotionService _service;
-        private readonly ISettingsService _settingsService;
+        private readonly IPromotionBonusService _promotionBonusService;
+        private readonly IPlayerBucketService _service;
+        private readonly IWalletRepository _walletRepository;
 
-        public DispatchPromotionBonusHandler(IPromotionService service, ISettingsService settingsService,
-            IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
+        public DispatchPromotionBonusHandler(IPlayerBucketService service, IPromotionBonusService promotionBonusService,
+            IWalletRepository walletRepository, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
-            _settingsService = settingsService;
-            _jsonSerializationProvider = jsonSerializationProvider;
+            _walletRepository = walletRepository;
+            _promotionBonusService = promotionBonusService;
         }
 
         public override async Task<MessageResponse> Handle(DispatchPromotionBonusRequest request,
             CancellationToken cancellationToken)
         {
-            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            var playerCodes = request.Players.Select(x => x.PlayerCode).ToArray();
+            var promotionBonusIds = request.Players.Select(x => x.PromotionBonusId).ToArray();
+
+            var playerBonus = await _promotionBonusService.GetPromotionBonusPlayersQueries()
+                .Include(x => x.Player)
+                .Where(x => promotionBonusIds.Contains(x.PromotionBonusId))
+                .Where(x => playerCodes.Contains(x.PlayerCode)).ToArrayAsync(cancellationToken);
+
+            var playerBuckets = playerBonus.Where(x =>
+                    request.Players.Any(p => p.PlayerCode == x.PlayerCode && p.PromotionBonusId == x.PromotionBonusId))
+                .Select(x => new CreatePlayerBucketRequest
+                {
+                    BrandId = x.Player.BrandId,
+                    PlayerCode = x.PlayerCode,
+                    DefaultWalletId = x.Player.DefaultWalletId,
+                    BucketAmount = x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
+                    BonusAmount = x.BonusAmount,
+                    BucketType = BucketType.Promotion
+                })
+                .ToArray();
+
+            await _service.CreatePlayerBuckets(playerBuckets).ConfigureAwait(false);
+
+            foreach (var promotionPlayer in playerBuckets)
             {
-                return CreateInvalidResponse<MessageResponse>(Promotion.NameExisted);
+                await _walletRepository.ExchangeAsync(promotionPlayer.BrandId,
+                    promotionPlayer.DefaultWalletId, promotionPlayer.PlayerCode, TransactionTypes.Promotion,
+                    promotionPlayer.BonusAmount).ConfigureAwait(false);
             }
-
-            var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
-            var promotionTypeGroups =
-                _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
-
-            if (promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
-            {
-                return CreateInvalidResponse<MessageResponse>(Promotion.PromotionTypeNotFound);
-            }
-
-            var promotionType = promotionTypeGroups.SelectMany(x => x.Types)
-                .First(x => x.Name == request.PromotionType);
-
-            await _service.CreatePromotionAsync(request, promotionType);
 
             return CreateValidResponse<MessageResponse>();
         }

@@ -33,10 +33,14 @@ namespace Promotion.Repositories
                 GameType = model.GameType,
                 Percentage = model.Percentage,
                 BonusAmountLimit = model.BonusAmountLimit,
+                TurnoverMultiple = model.TurnoverMultiple,
                 CreatedOn = model.CreatedOn,
                 PromotionPlayers = model.Players.Select(x => new PromotionPlayer
                 {
-                    PlayerCode = x.PlayerCode, PromotionBonusId = model.Id, BonusAmount = x.BonusAmount
+                    PlayerCode = x.PlayerCode,
+                    PromotionBonusId = model.Id,
+                    BonusAmount = x.BonusAmount,
+                    SentOn = model.SentOn
                 }).ToHashSet()
             }).ToArray());
 

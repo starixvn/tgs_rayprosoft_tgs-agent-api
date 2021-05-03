@@ -1,13 +1,8 @@
 ﻿using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
-using Castle.Core.Internal;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Core.Models.Bonus;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.Bonus.Models;
 using TGS.Services.Report.Application.Models.Player;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 
@@ -32,22 +27,6 @@ namespace ReportApi.Controllers
 
         [HttpPost("rebates")]
         [Description("Create player rebates")]
-        public async Task<MessageResponse> GetRoundsAsync(CreatePlayerRebateRequest request)
-        {
-            var response = await _mediator.Send(request);
-
-            if (response.PlayerRebates.IsNullOrEmpty())
-            {
-                return response;
-            }
-
-            var playerBonus =
-                response.PlayerRebates.Select(x => new PlayerRebates(x.PlayerCode, x.RebateAmount, x.ReportDate));
-
-            var sentPlayerRebatesRequest =
-                new SentPlayerRebatesRequest(playerBonus, TransactionType.Rebate);
-
-            return await _mediator.Send(sentPlayerRebatesRequest);
-        }
+        public Task<MessageResponse> GetRoundsAsync(CreatePlayerRebateRequest request) => _mediator.Send(request);
     }
 }

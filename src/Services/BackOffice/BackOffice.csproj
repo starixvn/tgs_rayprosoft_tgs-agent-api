@@ -29,7 +29,9 @@
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
     <ProjectReference Include="..\..\Repositories\PaymentRepositories\PaymentRepositories.csproj" />
+    <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
     <ProjectReference Include="..\Payment.Core\Payment.Core.csproj" />
+    <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

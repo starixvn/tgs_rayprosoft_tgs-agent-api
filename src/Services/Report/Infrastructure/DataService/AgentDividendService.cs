@@ -16,7 +16,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             Func<IQueryable<AgentDividend>, IQueryable<AgentDividend>> preQuery = null,
             bool tracking = false);
 
-        Task CreateAgentDividendsAsync(CreateAgentDividendModel[] request);
+        Task CreateAgentDividendsAsync(CreateAgentDividendModel[] request, DateTimeOffset? sentOn);
     }
 
     public class AgentDividendService : BaseRepositoryOperations<ITgsRepository>, IAgentDividendService
@@ -30,7 +30,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
         ITgsRepository IAgentDividendService.Repository => _repository;
 
-        Task IAgentDividendService.CreateAgentDividendsAsync(CreateAgentDividendModel[] models) =>
+        Task IAgentDividendService.
+            CreateAgentDividendsAsync(CreateAgentDividendModel[] models, DateTimeOffset? sentOn) =>
             CreateEntitiesAsync(models.Select(model => new AgentDividend
             {
                 BrandId = model.BrandId,
@@ -57,7 +58,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 ESportsWinLoss = model.ESportsWinLoss,
                 VirtualSportsWinLoss = model.VirtualSportsWinLoss,
                 AgentDividendAmount = model.AgentDividendAmount,
-                CreatedOn = model.CreatedOn
+                CreatedOn = model.CreatedOn,
+                SentOn = sentOn
             }).ToArray());
 
         IQueryable<AgentDividend> IAgentDividendService.GetAgentDividendQueries(

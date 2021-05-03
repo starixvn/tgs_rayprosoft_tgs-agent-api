@@ -17,7 +17,6 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
-using TGS.Services.Bonus.Extensions;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 using TGS.Services.Report.Application.Extensions;
@@ -49,9 +48,7 @@ namespace ReportApi
                 .AddPluggableServices()
                 .AddReportServices()
                 .AddTransactions()
-                .AddBonusServices()
                 .AddBackendOfficeRepositories()
-                .AddBonusRepositoriesServices()
                 .AddPromotionRepositoriesServices();
 
             services.AddHealthChecks()

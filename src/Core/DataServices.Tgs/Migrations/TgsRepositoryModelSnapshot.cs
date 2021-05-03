@@ -2809,14 +2809,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on");
 
                     b.Property<string>("PlayerCode")
-                        .HasColumnType("character varying(16)")
+                        .HasColumnType("text")
                         .HasColumnName("player_code");
+
+                    b.Property<string>("PlayerCode1")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code1");
 
                     b.HasKey("Id")
                         .HasName("pk_player_buckets");
 
-                    b.HasIndex("PlayerCode")
-                        .HasDatabaseName("ix_player_buckets_player_code");
+                    b.HasIndex("PlayerCode1")
+                        .HasDatabaseName("ix_player_buckets_player_code1");
 
                     b.ToTable("player_buckets");
                 });
@@ -3274,7 +3278,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("PlayerCode")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
                     b.Property<Guid>("PromotionBonusId")
@@ -5104,8 +5108,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
                         .WithMany("PlayerBuckets")
-                        .HasForeignKey("PlayerCode")
-                        .HasConstraintName("fk_player_buckets_players_player_code");
+                        .HasForeignKey("PlayerCode1")
+                        .HasConstraintName("fk_player_buckets_players_player_code1");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
@@ -5167,6 +5171,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Brand");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionBonus", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .HasConstraintName("fk_promotion_bonus_promotion_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionGameProvider", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProvider", "GameProvider")
@@ -5211,12 +5227,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionPlayer", b =>
                 {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_promotion_bonus_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.PromotionBonus", "PromotionBonus")
-                        .WithMany("Players")
+                        .WithMany("PromotionPlayers")
                         .HasForeignKey("PromotionBonusId")
                         .HasConstraintName("fk_promotion_bonus_promotion_brand_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Player");
 
                     b.Navigation("PromotionBonus");
                 });
@@ -5737,7 +5762,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionBonus", b =>
                 {
-                    b.Navigation("Players");
+                    b.Navigation("PromotionPlayers");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Reseller", b =>

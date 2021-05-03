@@ -9,36 +9,50 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Report.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
+using TGS.Services.PlayerBucket.Core;
+using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.PromotionCore;
 using TGS.Services.PromotionCore.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
+using TGS.Services.Wallet;
 
 namespace TGS.Services.Report.Application.Commands.Promotion
 {
     public class
         CreatePromotionBonusWeeklyHandler : Handler<CreatePromotionBonusWeeklyRequest,
-            CreatePromotionBonusResponse>
+            MessageResponse>
     {
         private static readonly DateTimeOffset _Now = new(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
             DateTimeOffset.Now.Day, 0, 0, 0, new(8, 0, 0));
 
         private static readonly DateTimeOffset _PreviousMonday = _Now.AddDays(-7).GetMonday();
         private static readonly DateTimeOffset _PreviousSunday = _Now.AddDays(-7).GetSunday();
+        private readonly IPlayerBucketService _playerBucketService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
+        private readonly ITgsPlayerService _playerService;
         private readonly IPromotionBonusService _promotionBonusService;
         private readonly ITgsPromotionService _promotionService;
+        private readonly IWalletRepository _walletRepository;
 
         public CreatePromotionBonusWeeklyHandler(IPromotionBonusService promotionBonusService,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             ITgsPromotionService promotionService,
+            ITgsPlayerService playerService,
+            IPlayerBucketService playerBucketService,
+            IWalletRepository walletRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _promotionBonusService = promotionBonusService;
             _playerGameTypeAggregateService = playerGameTypeAggregateService;
             _promotionService = promotionService;
+            _playerBucketService = playerBucketService;
+            _walletRepository = walletRepository;
+            _playerService = playerService;
         }
 
-        public override async Task<CreatePromotionBonusResponse> Handle(CreatePromotionBonusWeeklyRequest request,
+        public override async Task<MessageResponse> Handle(CreatePromotionBonusWeeklyRequest request,
             CancellationToken cancellationToken)
         {
             var promotions = await _promotionService.GetPromotionQueries()
@@ -98,21 +112,53 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                     GameType = x.GameType,
                     Percentage = x.Percentage,
                     BonusAmountLimit = x.BonusAmountLimit,
+                    TurnoverMultiple = x.TurnoverMultiple,
                     CreatedOn = DateTimeOffset.Now,
+                    SentOn = x.AutoSentPlayerBonus ? DateTimeOffset.Now : null,
                     Players = players
                 };
             }).ToArray();
+
+            var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
+            var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
+
+            var players = await _playerService.GetPlayerQueries()
+                .Where(x => playerCodes.Contains(x.PlayerCode))
+                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
+                .ToArrayAsync(cancellationToken);
+
+            var playerBuckets = autoSentPlayerBonuses
+                .SelectMany(x =>
+                {
+                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new {pb, p})
+                        .Select(p => new CreatePlayerBucketRequest
+                        {
+                            BrandId = x.BrandId,
+                            PlayerCode = p.p.PlayerCode,
+                            DefaultWalletId = p.p.DefaultWalletId,
+                            BucketAmount = p.pb.BonusAmount * x.TurnoverMultiple,
+                            BonusAmount = p.pb.BonusAmount,
+                            BucketType = BucketType.Promotion
+                        });
+                }).ToArray();
 
             await using var promotionTransaction =
                 await _promotionService.TgsRepository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             await _promotionService.UpdatePromotionsAsync(promotions);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus);
+            await _playerBucketService.CreatePlayerBuckets(playerBuckets).ConfigureAwait(false);
 
             await promotionTransaction.CommitAsync(cancellationToken);
 
+            foreach (var createPlayerBucketRequest in playerBuckets)
+            {
+                await _walletRepository.ExchangeAsync(createPlayerBucketRequest.BrandId,
+                    createPlayerBucketRequest.DefaultWalletId, createPlayerBucketRequest.PlayerCode,
+                    TransactionTypes.Promotion, createPlayerBucketRequest.BonusAmount);
+            }
 
-            return new() {Valid = true, PromotionBonus = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray()};
+            return CreateValidResponse<MessageResponse>();
         }
 
         private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(Guid id,

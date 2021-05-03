@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Report;
 namespace TGS.Core.DataServices.Report.Migrations
 {
     [DbContext(typeof(ReportRepository))]
-    [Migration("20210428093553_Initial")]
+    [Migration("20210429095717_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
