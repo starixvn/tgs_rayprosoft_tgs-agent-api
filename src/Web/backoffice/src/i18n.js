@@ -4,7 +4,11 @@ import numeral from "numeral"
 import { registerLocale, setDefaultLocale } from "react-datepicker"
 import en from "date-fns/locale/en-US"
 import zh from "date-fns/locale/zh-CN"
-import { formatDateTime } from "./date/format"
+import {
+    formatDateTime,
+    formatHourMinuteSecondDayMonthYear,
+    HourMinuteSecondDayMonthYear
+} from "./date/format"
 registerLocale("en", en)
 registerLocale("zh", zh)
 
@@ -83,10 +87,20 @@ export const Trans = ({ en, zh }) => {
 export const FormattedDateTime = ({
     dateFormat = DefaultDateFormat,
     timeFormat = DefaultTimeFormat,
-    value
+    value,
+    placeholder = ""
 }) => {
     let format = `${dateFormat} ${timeFormat}`
-    return <Text>{formatDateTime(format, value)}</Text>
+    let formatted = formatDateTime(format, value)
+    return <Text>{formatted ?? placeholder}</Text>
+}
+
+export const FormatHourMinuteSecondDayMonthYear = ({
+    value,
+    placeholder = ""
+}) => {
+    let formatted = formatHourMinuteSecondDayMonthYear(value)
+    return formatted ? formatted : placeholder
 }
 
 let MaxDigits = 20
