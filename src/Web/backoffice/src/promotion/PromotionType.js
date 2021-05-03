@@ -1,7 +1,7 @@
 import React from "react"
 import { Spinner } from "bumbag"
-import { getTrans, Trans, useLocale, useTrans } from "../../i18n"
-import Select from "../../select/Select"
+import { getTrans, Trans, useLocale, useTrans } from "../i18n"
+import Select from "../select/Select"
 import { usePromotionTypeList } from "./client"
 
 const FirstDeposit = "FirstDeposit"

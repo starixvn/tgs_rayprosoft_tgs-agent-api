@@ -24,7 +24,7 @@ import {
     ConfirmCancelFooter
 } from "../../form/ConfirmButtonFooter"
 import { Table, toApiParams, useTable, pageCount } from "../../table"
-import { usePlayerDeductBalance } from "./client"
+import { usePlayerAdjustBalance } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import dateTimeColumn from "../../table/column/dateTime"
 import {
@@ -43,6 +43,7 @@ import PlayerAddBalanceTypeSelect from "./PlayerAddBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
 import { NumberInputField } from "../../input/NumberInput"
+import AdjustType from "./AdjustType"
 
 export const PlayerDeductBalanceDisclosure = ({
     brandId,
@@ -82,14 +83,19 @@ const DeductDialog = ({ brandId, username, onSubmitted, dialog }) => {
         error,
         mutate,
         deleteCache
-    } = usePlayerDeductBalance({ brandId, username }, formData)
+    } = usePlayerAdjustBalance(username, formData)
 
     let title = useTrans({
         zh: "余额扣分",
         en: "Deduct Balance"
     })
 
-    const onSubmit = (data) => setSubmit(data)
+    const onSubmit = (data) => {
+        setSubmit({
+            ...data,
+            adjustType: AdjustType.Subtract
+        })
+    }
 
     const reset = () => {
         deleteCache()

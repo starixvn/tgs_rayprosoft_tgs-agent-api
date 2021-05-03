@@ -1,10 +1,14 @@
 import React, { createContext, useContext, useState } from "react"
-import { Text } from "bumbag"
+import { Text, DropdownMenu, Button } from "bumbag"
 import numeral from "numeral"
 import { registerLocale, setDefaultLocale } from "react-datepicker"
 import en from "date-fns/locale/en-US"
 import zh from "date-fns/locale/zh-CN"
-import { formatDateTime } from "./date/format"
+import {
+    formatDateTime,
+    formatHourMinuteSecondDayMonthYear,
+    HourMinuteSecondDayMonthYear
+} from "./date/format"
 registerLocale("en", en)
 registerLocale("zh", zh)
 
@@ -20,14 +24,45 @@ const defaultLocale = Locales.zh
 
 const Store = createContext()
 
-//TODO: default locale from cookie?
-export const Provider = ({ value = Locales.zh, children }) => {
+const Key = "lang"
+//1. lang from localStorage
+//2. lang from navigator.language
+export const getAcceptLang = () => {
+    let lang
+    try {
+        lang = localStorage.getItem(Key)
+        if (lang) {
+            return lang
+        }
+    } catch (error) {
+        //ignore
+    }
+
+    lang = Object.values(Locales).reduce((result, lang) => {
+        if (result) {
+            return result
+        }
+
+        if (navigator.language.startsWith(lang)) {
+            return lang
+        }
+    }, lang)
+
+    return lang ?? Locales.en
+}
+
+export const Provider = ({ value = getAcceptLang(), children }) => {
     let [locale, set] = useState(value)
     setDefaultLocale(locale)
 
     const setLocale = (locale) => {
         set(locale)
         setDefaultLocale(locale)
+        try {
+            localStorage.setItem(Key, locale)
+        } catch (error) {
+            //ignore
+        }
     }
 
     return (
@@ -83,10 +118,20 @@ export const Trans = ({ en, zh }) => {
 export const FormattedDateTime = ({
     dateFormat = DefaultDateFormat,
     timeFormat = DefaultTimeFormat,
-    value
+    value,
+    placeholder = ""
 }) => {
     let format = `${dateFormat} ${timeFormat}`
-    return <Text>{formatDateTime(format, value)}</Text>
+    let formatted = formatDateTime(format, value)
+    return <Text>{formatted ?? placeholder}</Text>
+}
+
+export const FormatHourMinuteSecondDayMonthYear = ({
+    value,
+    placeholder = ""
+}) => {
+    let formatted = formatHourMinuteSecondDayMonthYear(value)
+    return formatted ? formatted : placeholder
 }
 
 let MaxDigits = 20
@@ -134,3 +179,32 @@ export const FormattedNumberDecimal = ({
 
 export const getTrans = (messages = {}, locale = Locales.zh) =>
     Reflect.get(messages, locale) ?? ""
+
+export const LangDropdownMenu = ({ ...props }) => {
+    let locale = useLocale()
+    let chinese = "中文"
+    let english = "English"
+
+    let useEn = useEnglish()
+    let useZh = useChinese()
+
+    return (
+        <DropdownMenu
+            menu={
+                <>
+                    <DropdownMenu.Item onClick={useZh}>
+                        {chinese}
+                    </DropdownMenu.Item>
+                    <DropdownMenu.Item onClick={useEn}>
+                        {english}
+                    </DropdownMenu.Item>
+                </>
+            }
+        >
+            <Button variant="ghost" iconAfter="chevron-down">
+                {locale === Locales.zh && chinese}
+                {locale === Locales.en && english}
+            </Button>
+        </DropdownMenu>
+    )
+}

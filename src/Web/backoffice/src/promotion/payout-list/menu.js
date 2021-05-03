@@ -1,27 +1,15 @@
 import React from "react"
-import { Locales, getTrans } from "../../i18n"
+import { getTrans } from "../../i18n"
 
-export const Code = "adjustment"
-
-export const View = "view"
+export const Code = "payoutlist"
 
 export const Update = "update"
-
-export const codeLabelPair = [Code, ({ codes, locale }) => label(codes, locale)]
 
 export const label = (codes = [], locale = Locales.zh) => {
     let [code = ""] = codes
     code = code.toLowerCase()
 
     switch (code) {
-        case View:
-            return getTrans(
-                {
-                    zh: "查看",
-                    en: "View"
-                },
-                locale
-            )
         case Update:
             return getTrans(
                 {
@@ -34,3 +22,5 @@ export const label = (codes = [], locale = Locales.zh) => {
             return ""
     }
 }
+
+export const codeLabelPair = [Code, ({ codes, locale }) => label(codes, locale)]

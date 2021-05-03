@@ -36,11 +36,11 @@ namespace TGS.Core.DataServices.Log
         {
         }
 
-        private DbSet<ApiLog> ApiLogs { get; }
+        public DbSet<ApiLog> ApiLogs { get; set; }
 
-        private DbSet<LogRecord> LogRecords { get; }
+        public DbSet<LogRecord> LogRecords { get; set; }
 
-        private DbSet<AdminLog> AdminLogs { get; }
+        public DbSet<AdminLog> AdminLogs { get; set; }
 
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;

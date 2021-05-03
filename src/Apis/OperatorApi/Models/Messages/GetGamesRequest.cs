@@ -7,8 +7,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 {
     [BindProperties(SupportsGet = true)]
     public record GetGamesRequest : IRequest<GetGamesResponse>
-    {
-        [Required]
+    {        
         [BindProperty(Name = "gpcode")]
         public string GameProviderCode { get; init; }
 

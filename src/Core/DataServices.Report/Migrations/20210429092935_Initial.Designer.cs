@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Report;
 namespace TGS.Core.DataServices.Report.Migrations
 {
     [DbContext(typeof(ReportRepository))]
-    [Migration("20210426071059_Initial")]
+    [Migration("20210429092935_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -584,7 +584,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                     b.HasIndex("PromotionId", "From", "To")
                         .HasDatabaseName("ix_promotion_bonus_multiple_keys");
 
-                    b.ToTable("promotion_bonus");
+                    b.ToTable("promotion_bonuses");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PromotionPlayer", b =>
@@ -620,12 +620,12 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasDatabaseName("ix_promotion_player_promotion_id");
 
                     b.HasIndex("PromotionBonusId")
-                        .HasDatabaseName("ix_promotion_player_promotion_bonus_id");
+                        .HasDatabaseName("ix_promotion_players_promotion_bonus_id");
 
                     b.HasIndex("PlayerCode", "PromotionBonusId")
                         .HasDatabaseName("ix_promotion_player_multiple_keys");
 
-                    b.ToTable("promotion_player");
+                    b.ToTable("promotion_players");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Report.Models.RoundAggregate", b =>
@@ -702,7 +702,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                     b.HasIndex("ReportDate", "Hour", "Minute")
                         .HasDatabaseName("ix_round_aggregate_multiple_keys");
 
-                    b.ToTable("round_aggregate");
+                    b.ToTable("round_aggregates");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Report.Models.PromotionPlayer", b =>

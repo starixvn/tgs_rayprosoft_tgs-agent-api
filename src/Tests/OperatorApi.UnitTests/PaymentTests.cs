@@ -17,6 +17,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Payment_Methods_Should_Success()
         {
+            // arrange
+            // act
+            // assert
             var moqPaymentRepository = new Mock<IPaymentRepository>();
 
             var sut = new AllPaymentMethodsQueryService(moqPaymentRepository.Object);

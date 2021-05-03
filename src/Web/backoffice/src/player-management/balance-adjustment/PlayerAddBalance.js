@@ -24,7 +24,7 @@ import {
     ConfirmCancelFooter
 } from "../../form/ConfirmButtonFooter"
 import { Table, toApiParams, useTable, pageCount } from "../../table"
-import { usePlayerAddBalance } from "./client"
+import { usePlayerAdjustBalance } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import dateTimeColumn from "../../table/column/dateTime"
 import {
@@ -43,6 +43,7 @@ import PlayerAddBalanceTypeSelect from "./PlayerAddBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
 import { NumberInputField } from "../../input/NumberInput"
+import AdjustType from "./AdjustType"
 
 export const PlayerAddBalanceDisclosure = ({
     brandId,
@@ -76,17 +77,25 @@ export const PlayerAddBalanceDisclosure = ({
 
 const AddDialog = ({ brandId, username, onSubmitted, dialog }) => {
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate, deleteCache } = usePlayerAddBalance(
-        { brandId, username },
-        formData
-    )
+    let {
+        result,
+        isLoading,
+        error,
+        mutate,
+        deleteCache
+    } = usePlayerAdjustBalance(username, formData)
 
     let title = useTrans({
         zh: "余额加分",
         en: "Add Balance"
     })
 
-    const onSubmit = (data) => setSubmit(data)
+    const onSubmit = (data) => {
+        setSubmit({
+            ...data,
+            adjustType: AdjustType.Add
+        })
+    }
 
     const reset = () => {
         deleteCache()
