@@ -23,7 +23,6 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -47,6 +46,46 @@ namespace TGS.Apis.OperatorApi
         {
             _configuration = configuration;
             _env = env;
+        }
+
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseGlobalExceptionHandler();
+            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
+
+            app.UseRequestLocalization(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture("en-US");
+                options.ApplyCurrentCultureToResponseHeaders = true;
+            });
+
+            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
+
+            app.UseRouting();
+
+            app.UseHttpMetrics();
+
+            app.UseCors();
+
+            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health", new()
+                {
+                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) =>
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                });
+                endpoints.MapMetrics();
+            });
+
+            if (!_env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
+            }
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -82,6 +121,10 @@ namespace TGS.Apis.OperatorApi
                 .ConfigurePayment(config =>
                 {
                     config.UseTgsPaymentRepository();
+                })
+                .ConfigureWallet(config =>
+                {
+                    config.AddTgsWalletRepositories();
                 })
                 .Services
                 .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>();
@@ -165,46 +208,6 @@ namespace TGS.Apis.OperatorApi
             });
 
             services.AddSingleton<OperatorApiErrorMapper>();
-        }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseGlobalExceptionHandler();
-            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
-
-            app.UseRequestLocalization(options =>
-            {
-                options.DefaultRequestCulture = new RequestCulture("en-US");
-                options.ApplyCurrentCultureToResponseHeaders = true;
-            });
-
-            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
-
-            app.UseRouting();
-
-            app.UseHttpMetrics();
-
-            app.UseCors();
-
-            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                });
-                endpoints.MapMetrics();
-            });
-
-            if (!_env.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
-            }
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
@@ -281,6 +280,24 @@ namespace TGS.Payment.Repositories
                             df.PaymentReturn);
 
             return query.SingleAsync();
+        }
+
+        public async ValueTask SignOffWithdrawFormAsync(Guid formId, ReviewStatus reviewStatus, string? remark)
+        {
+            var formData = await _tgsRepository.WithdrawForms
+                .FindAsync(formId)
+                .ConfigureAwait(false);
+
+            formData.Status = reviewStatus switch
+            {
+                ReviewStatus.Approve => 8000,
+                ReviewStatus.Reject => 7000,
+                _ => formData.Status
+            };
+            formData.Remark = remark;
+            formData.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn)

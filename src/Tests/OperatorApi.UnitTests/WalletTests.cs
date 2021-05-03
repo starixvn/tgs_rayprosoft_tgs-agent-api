@@ -5,10 +5,10 @@ using ExpectedObjects;
 using Moq;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
-using TGS.Services.Wallet;
 using TGS.Core.Models.Services.Caches;
 using System;
 using TGS.Core.Models.Enums;
+using TGS.Services.WalletService;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

@@ -13,7 +13,7 @@ using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Withdraw;
 using TGS.Services.Payment;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

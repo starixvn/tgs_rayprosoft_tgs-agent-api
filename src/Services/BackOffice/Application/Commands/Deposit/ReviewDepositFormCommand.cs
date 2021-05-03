@@ -1,9 +1,10 @@
 ﻿using System;
-using TGS.Services.BackOffice.Domain.Enums;
+using TGS.Services.Payment;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {
     public record ReviewDepositFormCommand(
         Guid FormId,
-        ReviewStatus Status);
+        ReviewStatus Status,
+        string remark);
 }

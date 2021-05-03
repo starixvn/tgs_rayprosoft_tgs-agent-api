@@ -9,7 +9,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Wallet.Repositories
 {

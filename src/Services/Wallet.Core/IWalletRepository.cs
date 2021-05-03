@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace TGS.Services.Wallet
+namespace TGS.Services.WalletService
 {
     public interface IWalletRepository
     {

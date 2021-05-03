@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operations;
 using TGS.Services.Payment;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Withdraw

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Payment.Configuration;
+using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Operator.Configuration
 {
@@ -14,15 +15,6 @@ namespace TGS.Services.Operator.Configuration
             Services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
-        public OperatorConfiguration ConfigureOperatorOptions<TDep>(Action<OperatorOptions, TDep> configure) where TDep : class
-        {
-            Services
-                .AddOptions<OperatorOptions>()
-                .Configure(configure);
-
-            return this;
-        }
-
         public OperatorConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure) where TDep : class
         {
             Services
@@ -32,10 +24,25 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration UseWalletRepository<TWalletRepository>() where TWalletRepository : class, IPlayerRepository
+        public OperatorConfiguration ConfigureOperatorOptions<TDep>(Action<OperatorOptions, TDep> configure) where TDep : class
         {
             Services
-                .AddTransient<IPlayerRepository, TWalletRepository>();
+                .AddOptions<OperatorOptions>()
+                .Configure(configure);
+
+            return this;
+        }
+
+        public OperatorConfiguration ConfigurePayment(Action<PaymentConfiguration> configure)
+        {
+            configure(Services.AddPayment());
+
+            return this;
+        }
+
+        public OperatorConfiguration ConfigureWallet(Action<WalletConfiguration> configure)
+        {
+            configure(Services.AddWallet());
 
             return this;
         }
@@ -48,9 +55,10 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration ConfigurePayment(Action<PaymentConfiguration> configure)
+        public OperatorConfiguration UseWalletRepository<TWalletRepository>() where TWalletRepository : class, IPlayerRepository
         {
-            configure(Services.AddPayment());
+            Services
+                .AddTransient<IPlayerRepository, TWalletRepository>();
 
             return this;
         }

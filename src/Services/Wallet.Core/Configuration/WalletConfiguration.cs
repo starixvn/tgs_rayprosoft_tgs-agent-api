@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace TGS.Services.Wallet.Configuration
+namespace TGS.Services.WalletService.Configuration
 {
     public class WalletConfiguration
     {

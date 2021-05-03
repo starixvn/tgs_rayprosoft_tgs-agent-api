@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Wallet

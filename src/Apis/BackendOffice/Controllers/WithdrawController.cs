@@ -7,6 +7,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Controllers.Messages.Withdraw;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.Payment;
@@ -16,7 +17,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class WithdrawController : ControllerBase
+    public class WithdrawController : BaseContextController
     {
         [HttpGet("{brandId}/{formId}")]
         public async Task<GenericResponse<WithdrawFormDetailViewModel>> GetWithdrawFormDetailAsync(
@@ -128,6 +129,24 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
             return response;
+        }
+
+        [HttpPost("{formId}")]
+        public async Task<MessageResponse> ReviewWithdrawFormAsync(
+            [FromServices] ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
+            Guid formId,
+            [FromBody] ReviewRequest reviewResponse)
+        {
+            var command = new ReviewWithdrawFormCommand(
+                formId,
+                reviewResponse.ReviewResponse,
+                reviewResponse.Remark);
+
+            await reviewCommandService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            return CreateValidResponse<MessageResponse>();
         }
     }
 }

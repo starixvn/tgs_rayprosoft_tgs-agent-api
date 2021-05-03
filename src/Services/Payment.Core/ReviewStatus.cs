@@ -1,4 +1,4 @@
-﻿namespace TGS.Services.BackOffice.Domain.Enums
+﻿namespace TGS.Services.Payment
 {
     public enum ReviewStatus
     {
