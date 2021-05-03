@@ -114,8 +114,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                     {
                         ExternalTransactionId = response.Data.List.GameID[i],
                         Type = GameActionType.LoseBet,
-                        Amount = Convert.ToDecimal(response.Data.List.AllBet[i]),
-                        Turnover = Convert.ToDecimal(response.Data.List.CellScore[i]),
+                        Amount = Convert.ToDecimal(response.Data.List.AllBet[i]) * -1,
+                        Turnover = Convert.ToDecimal(response.Data.List.CellScore[i]) * -1,
                         WinLoss = Convert.ToDecimal(response.Data.List.Profit[i]),
                         UnsettledBets = 0,
                         Balance = 0,
