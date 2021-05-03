@@ -32,7 +32,11 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 .Where(request.VipId, x => x.VipId == request.VipId)
                 .Select(x => new PlayersModel
                 {
-                    PlayerCode = x.PlayerCode, Username = x.Username, VipLevel = x.Vip.Level, Status = x.Status
+                    PlayerCode = x.PlayerCode, 
+                    Username = x.Username, 
+                    Balance = x.Wallets.FirstOrDefault().Balance,
+                    VipLevel = x.Vip.Level, 
+                    Status = x.Status
                 }).CreatePagedResponseAsync(request);
     }
 }
