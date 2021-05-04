@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.Models.Promotion;
-using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Services.Promotion.Core;
+using TGS.Services.Promotion.Core.Models.Promotion;
 
 namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
 {

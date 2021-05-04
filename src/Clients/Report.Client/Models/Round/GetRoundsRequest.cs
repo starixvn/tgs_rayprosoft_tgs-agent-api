@@ -2,7 +2,7 @@
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client.Models.Round
+namespace TGS.Clients.Report.Client.Models.Round
 {
     public class GetRoundsRequest : PageableRequest
     {

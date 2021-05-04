@@ -1,6 +1,6 @@
 ﻿using TGS.Core.Models.Services.BetHistories;
 
-namespace Report.Client.Models.Round
+namespace TGS.Clients.Report.Client.Models.Round
 {
     public record GetRoundHistoryResponse
     {

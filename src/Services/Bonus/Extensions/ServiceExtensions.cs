@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bonus.Extensions
+namespace TGS.Services.Bonus.Extensions
 {
     public static class ServiceExtensions
     {
