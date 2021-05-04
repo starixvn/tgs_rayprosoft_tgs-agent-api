@@ -8,11 +8,12 @@ import { FormDialog } from "../../form/FormDialog"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
-import { useFormContext } from "react-hook-form"
+import { useForm, useFormContext } from "react-hook-form"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import { FormBody } from "./ViewFundWithdraw"
 import { useFundWithdrawForm, useVerifyFundWithdrawForm } from "./client"
+import ReviewFund from "../ReviewFund"
 
 export const VerifyFundWithdrawDisclosure = ({
     brandId,
@@ -58,6 +59,9 @@ const VerifyFundWithdrawDialog = ({
         en: "Approve"
     })
 
+    let formMethods = useForm()
+    let { setValue } = formMethods
+
     let {
         isLoading: isLoadingFundWithdrawForm,
         data: fundWithdrawForm,
@@ -81,6 +85,13 @@ const VerifyFundWithdrawDialog = ({
         return <AlertDialog {...fundWithdrawFormError} {...dialog} />
     }
 
+    const onSubmit = ({ remark, reviewResponse }) => {
+        setSubmit({
+            remark,
+            reviewResponse
+        })
+    }
+
     const reset = () => {
         deleteCache()
         mutate(undefined, false)
@@ -89,7 +100,28 @@ const VerifyFundWithdrawDialog = ({
 
     return (
         <FormDialog
+            formMethods={formMethods}
             defaultValues={clone(fundWithdrawForm)}
+            actionButtonsProps={{
+                submitText: approveLabel,
+                palette: "success"
+            }}
+            onClickSubmit={(event) => {
+                setValue("reviewResponse", ReviewFund.Approve)
+            }}
+            addonButtons={
+                <Button
+                    type="button"
+                    onClick={() => {
+                        setValue("reviewResponse", ReviewFund.Reject)
+                    }}
+                    palette="danger"
+                    variant="outlined"
+                >
+                    <Trans zh="拒绝" en="Reject" />
+                </Button>
+            }
+            onSubmit={onSubmit}
             isLoading={isLoading}
             result={result}
             error={error}

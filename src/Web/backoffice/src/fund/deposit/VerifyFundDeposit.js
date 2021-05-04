@@ -13,6 +13,7 @@ import { useForm, useFormContext } from "react-hook-form"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import { FormBody } from "./ViewFundDeposit"
+import ReviewFund from "../ReviewFund"
 
 export const VerifyFundDepositDisclosure = ({
     brandId,
@@ -106,13 +107,13 @@ const VerifyFundDepositDialog = ({
                 palette: "success"
             }}
             onClickSubmit={(event) => {
-                setValue("reviewResponse", "Approve")
+                setValue("reviewResponse", ReviewFund.Approve)
             }}
             addonButtons={
                 <Button
                     type="button"
                     onClick={() => {
-                        setValue("reviewResponse", "Reject")
+                        setValue("reviewResponse", ReviewFund.Reject)
                     }}
                     palette="danger"
                     variant="outlined"

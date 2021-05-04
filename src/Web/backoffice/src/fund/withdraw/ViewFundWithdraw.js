@@ -39,6 +39,7 @@ import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
 import { FundReviewStatusLabel } from "../FundReviewStatus"
 import { WithdrawMethodSelect } from "./WithdrawMethod"
 import { PaymentChannelSelect } from "../../payment/channel/PaymentChannel"
+import { TextareaField } from "../../textarea"
 
 export const ViewFundWithdrawDisclosure = ({ brandId, formId, ...props }) => {
     let dialog = useModalState()
@@ -87,12 +88,13 @@ const ViewFundWithdrawDialog = ({ brandId, formId, dialog, ...props }) => {
             hideOnClickOutside={false}
             {...dialog}
         >
-            <FormBody record={data} />
+            <FormBody record={data} readonly />
         </Dialog.Modal>
     )
 }
 
-export const FormBody = ({ record }) => {
+export const FormBody = ({ record, readonly }) => {
+    let disabled = readonly
     return (
         <FieldStack>
             <FieldValues marginLeft="1.5rem">
@@ -112,11 +114,6 @@ export const FormBody = ({ record }) => {
                 <Box alignY="center">
                     <PaymentMethodLabel value={record?.paymentMethodId} />
                 </Box>
-
-                <NormalLabel>
-                    <Trans zh="通道名称" en="Channel Name" />
-                </NormalLabel>
-                <Box alignY="center">{record?.channelName}</Box>
 
                 <NormalLabel>
                     <Trans zh="提款金额" en="Withdraw Amount" />
@@ -159,18 +156,25 @@ export const FormBody = ({ record }) => {
                         <NormalLabel>
                             <Trans zh="出款方式" en="Status" />
                         </NormalLabel>
-                        <WithdrawMethodSelect />
+                        <WithdrawMethodSelect disabled={disabled} />
 
                         <NormalLabel>
                             <Trans zh="出款渠道" en="Channel" />
                         </NormalLabel>
-                        <PaymentChannelSelect />
+                        <PaymentChannelSelect disabled={disabled} />
                     </FieldValues>
                 </Columns.Column>
                 <Columns.Column>
                     <PayeeInfo record={record} />
                 </Columns.Column>
             </Columns>
+
+            <Separator />
+
+            <TextareaField
+                name="remark"
+                label={<Trans zh="备注" en="Remark" />}
+            />
         </FieldStack>
     )
 }

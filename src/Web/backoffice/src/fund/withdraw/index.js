@@ -44,6 +44,8 @@ import { startOfNextDay } from "../../date/startOfNextDay"
 import { SortOrder } from "../../table/order"
 import { Update } from "./menu"
 import { ViewFundWithdrawDisclosure } from "./ViewFundWithdraw"
+import { VerifyFundWithdrawDisclosure } from "./VerifyFundWithdraw"
+import { PaymentMethodSelect } from "../../payment/method/PaymentMethod"
 
 export { Code }
 
@@ -181,6 +183,11 @@ const SearchBar = ({
         en: "Channel Name"
     })
 
+    let paymentMethodPlaceholder = useTrans({
+        zh: "提款类型",
+        en: "Withdraw Method"
+    })
+
     return (
         <FormProvider {...formMethods}>
             <form onSubmit={formMethods.handleSubmit(search)}>
@@ -195,6 +202,10 @@ const SearchBar = ({
                             name="channelName"
                             showEmptyFieldValueAddonAfter
                             placeholder={channelNameInputPlaceholder}
+                        />
+                        <PaymentMethodSelect
+                            name="method"
+                            placeholder={paymentMethodPlaceholder}
                         />
                         <FundReviewStatusSelect name="status" />
                     </Set>
@@ -267,6 +278,12 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
                 Cell: ({ value }) => <FundReviewStatusLabel value={value} />
+            }),
+            textColumn({
+                accessor: "remark",
+                Header: <Trans zh="备注" en="Remark" />,
+                disableSortBy: true,
+                Cell: ({ value }) => <Box>{value}</Box>
             })
         ]
 
@@ -281,6 +298,13 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                         let underReview = isFundUnderReview(value?.status)
                         return (
                             <Set alignX="center">
+                                {underReview && (
+                                    <VerifyFundWithdrawDisclosure
+                                        brandId={brandId}
+                                        formId={value.id}
+                                        onSubmitted={mutate}
+                                    />
+                                )}
                                 <ViewFundWithdrawDisclosure
                                     brandId={brandId}
                                     formId={value.id}

@@ -95,7 +95,7 @@ const BodyContent = ({ brandId }) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         username: "",
         channelName: "",
-        paymentChannel: "",
+        method: "",
         status: "",
         beginCreateOn: todayRange.start,
         endCreateOn: todayRange.end,
@@ -112,7 +112,7 @@ const BodyContent = ({ brandId }) => {
         pageSize,
         username,
         channelName,
-        paymentChannel,
+        method,
         status,
         beginCreateOn,
         endCreateOn,
@@ -182,7 +182,7 @@ const BodyContent = ({ brandId }) => {
                         brandId={brandId}
                         username={username}
                         channelName={channelName}
-                        paymentChannel={paymentChannel}
+                        method={method}
                         status={status}
                         beginCreateOn={beginCreateOn}
                         endCreateOn={endCreateOn}
@@ -193,7 +193,7 @@ const BodyContent = ({ brandId }) => {
                                 pageIndex: 0,
                                 username: data.username,
                                 channelName: data.channelName,
-                                paymentChannel: data.paymentChannel,
+                                method: data.method,
                                 status: data.status,
                                 beginCreateOn: data.beginCreateOn,
                                 endCreateOn: data.endCreateOn,
@@ -205,7 +205,7 @@ const BodyContent = ({ brandId }) => {
                                     pageIndex,
                                     username,
                                     channelName,
-                                    paymentChannel,
+                                    method,
                                     status,
                                     beginCreateOn,
                                     endCreateOn,
@@ -290,7 +290,7 @@ const SearchBar = ({
     brandId,
     username,
     channelName,
-    paymentChannel,
+    method,
     status,
     beginCreateOn,
     endCreateOn,
@@ -304,7 +304,7 @@ const SearchBar = ({
         defaultValues: {
             username,
             channelName,
-            paymentChannel,
+            method,
             status,
             beginCreateOn,
             endCreateOn,
@@ -325,7 +325,7 @@ const SearchBar = ({
 
     let paymentMethodPlaceholder = useTrans({
         zh: "充值类型",
-        en: "Payment Method"
+        en: "Deposit Method"
     })
     return (
         <FormProvider {...formMethods}>
