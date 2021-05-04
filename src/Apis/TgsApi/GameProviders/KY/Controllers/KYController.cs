@@ -8,17 +8,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Shared.Game.ApiClients.KY;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.KY.Commons;
 using TGS.Shared.Game.Models.KY.Outgoing;
+using static TGS.Core.Models.SettingConsts;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
 {
@@ -34,16 +37,25 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
         private readonly IKYApiClient _client;
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IBrandOperations _brandOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
 
         public KYController(
             IKYApiClient client,
             ISettingOperations settingOperations,
-            IHashProvider hashProvider
+            IHashProvider hashProvider,
+            IPlayerOperations playerOperations,
+            IBrandOperations brandOperations,
+            IGameProviderOperations gameProviderOperations
           )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
         [HttpPost("GameRecord")]
@@ -80,83 +92,101 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
 
             var response = await _client.GetAPIAsync<KYGameRecordResponses>(configuration.ApiRecordUrl, apiKYRequest);
 
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.KY);
+            var players = new Dictionary<string, Player>();
+            var gameIds = new Dictionary<int, CachedGame>();
             var list = default(List<RoundResult>);
             if (response.Data.Code == 0)
             {
+                var sysDateTimeOffset = DateTimeOffset.UtcNow;
                 list = new List<RoundResult>();
                 for (int i = 0; i < response.Data.Count; i++)
                 {
-                    var roundGameActions = new List<RoundGameActions>();
-                    roundGameActions.Add(new RoundGameActions()
+                    var gameId = default(int?);
+                    var game = default(CachedGame);
+                    var player = default(Player);
+                    var gameProviderConfigurationId = default(Guid?);
+                    var success = true;
+                    var PlayerCode = response.Data.List.Accounts[i].Split('_')[1];
+                    player = players.Where(x => x.Key == PlayerCode).FirstOrDefault().Value;
+                    if (player == null)
                     {
-                        ExternalTransactionId = response.Data.List.GameID[i],
-                        Type = GameActionType.PlaceBet,
-                        Amount = Convert.ToDecimal(response.Data.List.AllBet[i]) * -1,
-                        Turnover = 0,
-                        WinLoss = 0,
-                        UnsettledBets = Convert.ToDecimal(response.Data.List.AllBet[i]) * -1,
-                        Balance = 0,
-                        BetType = default(string),
-                        ExternalBetId = response.Data.List.GameID[i],
-                        ExternalGameActionGroupId = response.Data.List.GameID[i],
-                        ReferencedGameActionId = default(Guid),
-                        GameActionBatchId = default(Guid),
-                        RecordedOn = DateTimeOffset.UtcNow,
-                        SentOn = DateTimeOffset.UtcNow,
-                        IsClosingRound = false,
-                        ClosingRoundExplicitRequest = null,
-                        PlayerIp = string.Empty,
-                        ExtraData = string.Empty,
-                        JackpotContribution = string.Empty,
-                    });
+                        player = await _playerOperations.GetPlayerByCodeAsync(PlayerCode);
+                        if (player != null)
+                        {
+                            players.Add(PlayerCode, player);
+                        }
+                    }
+                    if (player != null)
+                    {
+                        gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
+                    }
 
-                    roundGameActions.Add(new RoundGameActions()
+
+                    game = gameIds.Where(x => x.Key == response.Data.List.KindID[i]).FirstOrDefault().Value;
+                    if (game == null)
                     {
-                        ExternalTransactionId = response.Data.List.GameID[i],
-                        Type = GameActionType.LoseBet,
-                        Amount = Convert.ToDecimal(response.Data.List.AllBet[i]) * -1,
-                        Turnover = Convert.ToDecimal(response.Data.List.CellScore[i]) * -1,
-                        WinLoss = Convert.ToDecimal(response.Data.List.Profit[i]),
-                        UnsettledBets = 0,
-                        Balance = 0,
-                        BetType = default(string),
-                        ExternalBetId = response.Data.List.GameID[i],
-                        ExternalGameActionGroupId = response.Data.List.GameID[i],
-                        ReferencedGameActionId = default(Guid),
-                        GameActionBatchId = default(Guid),
-                        RecordedOn = DateTimeOffset.UtcNow,
-                        SentOn = DateTimeOffset.UtcNow,
-                        IsClosingRound = false,
-                        ClosingRoundExplicitRequest = null,
-                        PlayerIp = string.Empty,
-                        ExtraData = string.Empty,
-                        JackpotContribution = string.Empty,
-                    });
+                        var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, response.Data.List.KindID[i].ToString()).ConfigureAwait(false);
+
+                        if (games != null && games.Length > 0)
+                        {
+                            game = games.FirstOrDefault();
+                            gameIds.Add(response.Data.List.KindID[i], game);
+                        }
+                    }
+
+
+                    if (game != null)
+                    {
+                        gameId = game.Id;
+                    }
+
+                    if (player == null || !gameId.HasValue || !gameProviderConfigurationId.HasValue)
+                    {
+                        success = false;
+                    }
 
                     list.Add(new RoundResult()
                     {
                         ExternalRoundId = response.Data.List.GameID[i],
-                        PlayerCode = response.Data.List.Accounts[i].Split('_')[1],
-                        GameId = Convert.ToInt32(response.Data.List.KindID[i]),
+                        GameProviderId = gameProviderId,
+                        PlayerCode = player.PlayerCode,
+                        GameId = gameId.GetValueOrDefault(-1),
                         CurrencyCode = request.CurrencyCode,
-                        CreatedOn = DateTimeOffset.UtcNow,
-                        ClosedOn = DateTimeOffset.UtcNow,
-                        UpdatedOn = DateTimeOffset.UtcNow,
+                        Status = RoundStatus.Closed,
+                        GameProviderConfigurationId = gameProviderConfigurationId.GetValueOrDefault(),
+                        WalletId = player.DefaultWalletId,
+                        CreatedOn = sysDateTimeOffset,
+                        ClosedOn = sysDateTimeOffset,
+                        UpdatedOn = sysDateTimeOffset,
+                        BrandId = player.BrandId,
                         ExternalCreatedOn = DateTimeOffset.Parse(response.Data.List.GameStartTime[i]),
                         ExternalClosedOn = DateTimeOffset.Parse(response.Data.List.GameEndTime[i]),
                         BetAmount = Convert.ToDecimal(response.Data.List.AllBet[i]),
-                        ValidBetAmount = Convert.ToDecimal(response.Data.List.CellScore[i]),
-                        WinLoss = Convert.ToDecimal(response.Data.List.Profit[i]),
+                        ValidBetAmount = Convert.ToDecimal(response.Data.List.AllBet[i]),
+                        WinLoss = Convert.ToDecimal(response.Data.List.Profit[i]).Negate(),
                         Commission = Convert.ToDecimal(response.Data.List.Revenue[i]),
                         Turnover = Convert.ToDecimal(response.Data.List.CellScore[i]),
                         SettleAmount = Convert.ToDecimal(response.Data.List.AllBet[i]) + Convert.ToDecimal(response.Data.List.Profit[i]),
                         TieBetAdjustment = null,
-                        RoundGameActions = roundGameActions,
+                        ClientStatus = GetClientRound(Convert.ToDecimal(response.Data.List.Profit[i])),
+                        RoundDetail = new RoundDetailResult() { AdditionalData = response.Data.List.CardValue[i] },
+                        Success = success
                     });
                 }
             }
 
             return list;
+        }
+
+        private ClientRoundStatus GetClientRound(decimal playerWinLoss)
+        {
+            return playerWinLoss switch
+            {
+                > 0 => ClientRoundStatus.Win,
+                < 0 => ClientRoundStatus.Loss,
+                0 => ClientRoundStatus.Draw
+            };
         }
     }
 
@@ -167,52 +197,35 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
         public long EndTime { get; init; }
     }
 
-    public record RoundGameActions
-    {
-        public string ExternalTransactionId { get; set; }
-        public GameActionType Type { get; set; }
-        public decimal Amount { get; set; }
-        public decimal Turnover { get; set; }
-        public decimal WinLoss { get; set; }
-        public decimal UnsettledBets { get; set; }
-        public decimal Balance { get; set; }
-        public string BetType { get; set; }
-        public string ExternalBetId { get; set; }
-        public string ExternalGameActionGroupId { get; set; }
-        public Guid? ReferencedGameActionId { get; set; }
-        public Guid? GameActionBatchId { get; set; }
-        public DateTimeOffset RecordedOn { get; set; }
-        public DateTimeOffset? SentOn { get; set; }
-        public bool IsClosingRound { get; set; }
-        public bool? ClosingRoundExplicitRequest { get; set; }
-        public string PlayerIp { get; set; }
-        public string ExtraData { get; set; }
-        public string JackpotContribution { get; init; }
 
-    }
 
     public record RoundResult
     {
-        public Guid RoundId { get; set; }
-        public string ExternalRoundId { get; set; }
-        public string PlayerCode { get; set; }
-        public int GameId { get; set; }
-        public string CurrencyCode { get; set; }
-        public RoundStatus Status { get; set; }
-        public DateTimeOffset CreatedOn { get; set; }
-        public DateTimeOffset? ClosedOn { get; set; }
-        public DateTimeOffset UpdatedOn { get; set; }
-        public DateTimeOffset? ExternalCreatedOn { get; set; }
-        public DateTimeOffset? ExternalClosedOn { get; set; }
-        public decimal? BetAmount { get; set; }
-        public decimal? ValidBetAmount { get; set; }
-        public decimal? SettleAmount { get; set; }
-        public decimal? Commission { get; set; }
-        public decimal? Turnover { get; set; }
-        public decimal? WinLoss { get; set; }
-        public decimal? TieBetAdjustment { get; set; }
-        public virtual RoundDetailResult RoundDetail { get; set; }
-        public virtual List<RoundGameActions> RoundGameActions { get; set; }
+        //public Guid RoundId { get; set; }
+        public string ExternalRoundId { get; init; }
+        public Guid GameProviderId { get; init; }
+        public string PlayerCode { get; init; }
+        public int GameId { get; init; }
+        public string CurrencyCode { get; init; }
+        public RoundStatus Status { get; init; }
+        public Guid GameProviderConfigurationId { get; init; }
+        public Guid WalletId { get; init; }
+        public DateTimeOffset CreatedOn { get; init; }
+        public DateTimeOffset? ClosedOn { get; init; }
+        public DateTimeOffset UpdatedOn { get; init; }
+        public DateTimeOffset? ExternalCreatedOn { get; init; }
+        public DateTimeOffset? ExternalClosedOn { get; init; }
+        public Guid BrandId { get; init; }
+        public decimal? BetAmount { get; init; }
+        public decimal? ValidBetAmount { get; init; }
+        public decimal? SettleAmount { get; init; }
+        public decimal? Commission { get; init; }
+        public decimal? Turnover { get; init; }
+        public decimal? WinLoss { get; init; }
+        public decimal? TieBetAdjustment { get; init; }
+        public virtual RoundDetailResult RoundDetail { get; init; }
+        public ClientRoundStatus ClientStatus { get; init; }
+        public bool Success { get; init; }
     }
 
     public record RoundDetailResult

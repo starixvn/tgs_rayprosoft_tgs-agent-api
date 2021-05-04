@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record KYGameProvider : IGameProvider
         {
-            private static readonly string EndpointPath = "?agent={AGENT}&timestamp={TIMESTAMP}&param={PARAM}";
+            //private static readonly string EndpointPath = "?agent={AGENT}&timestamp={TIMESTAMP}&param={PARAM}";
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -27,7 +27,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with { EndpointPath = EndpointPath };
+                        return (Game)g with { EndpointPath = string.Empty };
                     })
                     .ToArray();
 

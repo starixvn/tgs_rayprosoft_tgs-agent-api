@@ -1,3 +1,4 @@
 Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
 Card Game Lobby,,,CardGameLobby,CardGameLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,FALSE,
 Texas Hold'em Poker,Texas_Holdem_Poker,,620,CardGame,DesktopAndMobile,FALSE,,Texas Hold'em Poker,FALSE,TRUE,TRUE,
+Baccarat,Baccarat,,910,CardGame,DesktopAndMobile,FALSE,,Baccarat,FALSE,TRUE,TRUE,
