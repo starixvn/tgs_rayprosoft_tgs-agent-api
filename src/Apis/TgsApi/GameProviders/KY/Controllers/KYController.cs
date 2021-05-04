@@ -16,6 +16,8 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
+using TGS.Services.GameOperations.Data;
+using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.Operations;
 using TGS.Shared.Game.ApiClients.KY;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
@@ -40,6 +42,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
         private readonly IPlayerOperations _playerOperations;
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IGameRoundsProcessor _gameRoundsProcessor;
 
         public KYController(
             IKYApiClient client,
@@ -47,7 +50,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             IHashProvider hashProvider,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
-            IGameProviderOperations gameProviderOperations
+            IGameProviderOperations gameProviderOperations,
+            IGameRoundsProcessor gameRoundsProcessor
           )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
@@ -56,10 +60,11 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _gameRoundsProcessor = gameRoundsProcessor ?? throw new ArgumentNullException(nameof(gameRoundsProcessor));
         }
 
         [HttpPost("GameRecord")]
-        public async ValueTask<List<RoundResult>> GameRecordAsync(KYGameRecord request)
+        public async ValueTask<bool> GameRecordAsync(KYGameRecord request)
         {
 
             var configuration =
@@ -92,14 +97,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
 
             var response = await _client.GetAPIAsync<KYGameRecordResponses>(configuration.ApiRecordUrl, apiKYRequest);
 
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.KY);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode);
             var players = new Dictionary<string, Player>();
             var gameIds = new Dictionary<int, CachedGame>();
-            var list = default(List<RoundResult>);
+
             if (response.Data.Code == 0)
             {
                 var sysDateTimeOffset = DateTimeOffset.UtcNow;
-                list = new List<RoundResult>();
+
                 for (int i = 0; i < response.Data.Count; i++)
                 {
                     var gameId = default(int?);
@@ -146,7 +151,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                         success = false;
                     }
 
-                    list.Add(new RoundResult()
+                    var ex = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                     {
                         ExternalRoundId = response.Data.List.GameID[i],
                         GameProviderId = gameProviderId,
@@ -170,13 +175,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                         SettleAmount = Convert.ToDecimal(response.Data.List.AllBet[i]) + Convert.ToDecimal(response.Data.List.Profit[i]),
                         TieBetAdjustment = null,
                         ClientStatus = GetClientRound(Convert.ToDecimal(response.Data.List.Profit[i])),
-                        RoundDetail = new RoundDetailResult() { AdditionalData = response.Data.List.CardValue[i] },
+                        AdditionalData = response.Data.List.CardValue[i],
                         Success = success
                     });
                 }
-            }
 
-            return list;
+
+            }
+            return true;
         }
 
         private ClientRoundStatus GetClientRound(decimal playerWinLoss)
@@ -223,12 +229,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
         public decimal? Turnover { get; init; }
         public decimal? WinLoss { get; init; }
         public decimal? TieBetAdjustment { get; init; }
-        public virtual RoundDetailResult RoundDetail { get; init; }
+        public virtual GameRoundsDetailData RoundDetail { get; init; }
         public ClientRoundStatus ClientStatus { get; init; }
         public bool Success { get; init; }
     }
 
-    public record RoundDetailResult
+    public record GameRoundsDetailData
     {
         public string AdditionalData { get; set; }
     }

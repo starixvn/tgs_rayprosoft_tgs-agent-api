@@ -9,6 +9,7 @@ using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Services.GameOperations.Extensions;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY
@@ -31,7 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY
                   provider.GetRequiredService<KYGameInitializer>());
             services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(KYGameProviderWalletAction) }, (provider, _) =>
                  provider.GetRequiredService<KYGameProviderWalletAction>());
-
+            
 
         }
 
