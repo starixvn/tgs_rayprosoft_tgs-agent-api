@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             private const int UniqueId = 6;
 
-            private static readonly string EndpointPath = "?brandId={BRANDID}&token={TOKEN}&locale={CULTURE}&mode=real";
+            private static readonly string EndpointPath = "?token={GPTOKEN}&tsId={TOKENID}";
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -76,7 +76,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-saba") : new("http://localhost:62330"),
-                    SecretKey = "XXX"
+                    VendorId = "PG",
+                    SecretKey = "XXX",
+                    ApiUrl = new("http://game-saba")
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();
@@ -86,13 +88,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         internal record SabaGameProviderConfiguration : IGameProviderConfiguration
         {
-            private static readonly string _endpoint = "https://app-test.insvr.com/go.ashx";
+            private static readonly string _endpoint = "http://sbtest.l0093.owsb66.com/deposit_processlogin.aspx";
 
             Guid IGameProviderConfiguration.Id => new("E3F6CD9F-20BA-4824-86A6-562B135440E1");
 
             string IGameProviderConfiguration.Name => "Configuration Saba";
 
-            string IGameProviderConfiguration.ClientId => "Saba-WG";
+            string IGameProviderConfiguration.ClientId => "Saba-PG";
 
             string IGameProviderConfiguration.SecretKey => "k6JgvabfqlneVTfM9pxmOK14WnmkxQBf";
 

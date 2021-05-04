@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.Saba.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Saba
@@ -35,6 +37,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
             services.AddScoped<ISabaServices, SabaServices>();
             services.AddScoped<ISabaActionModelMapper, SabaActionModelMapper>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(SabaGameInitializer)},
+                (provider, _) => provider.GetRequiredService<SabaGameInitializer>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
