@@ -5,16 +5,16 @@ import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Update } from "./menu"
 import { Disclosure, VerifyDisclosure } from "../../dialog/Disclosure"
 import { FormDialog } from "../../form/FormDialog"
-import { usePlayerDepositForm, useVerifyPlayerDepositForm } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
 import { useFormContext } from "react-hook-form"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
-import { PlayerDepositFormBody } from "./ViewPlayerDeposit"
+import { FormBody } from "./ViewFundWithdraw"
+import { useFundWithdrawForm, useVerifyFundWithdrawForm } from "./client"
 
-export const VerifyPlayerDepositDisclosure = ({
+export const VerifyFundWithdrawDisclosure = ({
     brandId,
     formId,
     onSubmitted
@@ -30,7 +30,7 @@ export const VerifyPlayerDepositDisclosure = ({
         <>
             <VerifyDisclosure {...dialog} />
             {dialog.visible && (
-                <VerifyPlayerDepositDialog
+                <VerifyFundWithdrawDialog
                     brandId={brandId}
                     formId={formId}
                     onSubmitted={onSubmitted}
@@ -41,7 +41,7 @@ export const VerifyPlayerDepositDisclosure = ({
     )
 }
 
-const VerifyPlayerDepositDialog = ({
+const VerifyFundWithdrawDialog = ({
     brandId,
     formId,
     onSubmitted,
@@ -49,8 +49,8 @@ const VerifyPlayerDepositDialog = ({
     ...props
 }) => {
     let title = useTrans({
-        zh: "充值审核",
-        en: "Review Deposit"
+        zh: "提款审核",
+        en: "Review Withdraw"
     })
 
     let approveLabel = useTrans({
@@ -59,27 +59,26 @@ const VerifyPlayerDepositDialog = ({
     })
 
     let {
-        isLoading: isLoadingPlayerDepositForm,
-        data: playerDepositForm,
-        error: playerDepositFormError
-    } = usePlayerDepositForm(brandId, formId)
+        isLoading: isLoadingFundWithdrawForm,
+        data: fundWithdrawForm,
+        error: fundWithdrawFormError
+    } = useFundWithdrawForm(brandId, formId)
 
-    let [statue, setStatus] = useState()
-    let [data, setSubmit] = useState()
+    let [formData, setSubmit] = useState()
     let {
         isLoading,
         result,
         error,
         mutate,
         deleteCache
-    } = useVerifyPlayerDepositForm(brandId, formId, data)
+    } = useVerifyFundWithdrawForm(brandId, formId, formData)
 
-    if (isLoadingPlayerDepositForm) {
+    if (isLoadingFundWithdrawForm) {
         return <LoadingBackdrop {...dialog} />
     }
 
-    if (playerDepositFormError) {
-        return <AlertDialog {...playerDepositFormError} {...dialog} />
+    if (fundWithdrawFormError) {
+        return <AlertDialog {...fundWithdrawFormError} {...dialog} />
     }
 
     const reset = () => {
@@ -90,33 +89,7 @@ const VerifyPlayerDepositDialog = ({
 
     return (
         <FormDialog
-            defaultValues={clone(playerDepositForm)}
-            actionButtonsProps={{
-                type: "button",
-                submitText: approveLabel,
-                palette: "success"
-            }}
-            onClickSubmit={(event) => {
-                setStatus("Approve")
-
-                //TODO: submit with remark
-                setSubmit("Approve")
-            }}
-            addonButtons={
-                <Button
-                    type="button"
-                    onClick={() => {
-                        setStatus("Reject")
-
-                        //TODO: submit with remark
-                        setSubmit("Reject")
-                    }}
-                    palette="danger"
-                    variant="outlined"
-                >
-                    <Trans zh="拒绝" en="Reject" />
-                </Button>
-            }
+            defaultValues={clone(fundWithdrawForm)}
             isLoading={isLoading}
             result={result}
             error={error}
@@ -125,7 +98,7 @@ const VerifyPlayerDepositDialog = ({
             title={title}
             dialog={dialog}
         >
-            <PlayerDepositFormBody record={playerDepositForm} />
+            <FormBody record={fundWithdrawForm} />
         </FormDialog>
     )
 }

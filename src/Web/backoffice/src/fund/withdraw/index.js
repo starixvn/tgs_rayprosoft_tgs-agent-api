@@ -7,9 +7,9 @@ import {
     Box,
     Button,
     Set,
-    useModalState,
     Flex,
-    Level
+    Level,
+    FieldStack
 } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
@@ -32,6 +32,18 @@ import numberColumn, {
     numberDecimalColumn,
     numberDecimalPercentageColumn
 } from "../../table/column/numberColumn"
+import { today } from "../../date/range"
+import FundReviewStatus, {
+    FundReviewStatusLabel,
+    FundReviewStatusSelect,
+    isFundUnderReview
+} from "../FundReviewStatus"
+import { DateInputRangeField } from "../../date/DateTimeRangeInput"
+import { useFundWithdrawFormList } from "./client"
+import { startOfNextDay } from "../../date/startOfNextDay"
+import { SortOrder } from "../../table/order"
+import { Update } from "./menu"
+import { ViewFundWithdrawDisclosure } from "./ViewFundWithdraw"
 
 export { Code }
 
@@ -63,9 +75,223 @@ const Body = () => {
 }
 
 const BodyContent = ({ brandId }) => {
+    let todayRange = today()
+    let { state, setState, setPageIndex, setSortOrder } = useTable({
+        username: "",
+        channelName: "",
+        status: "",
+        beginCreateOn: todayRange.start,
+        endCreateOn: todayRange.end,
+        beginUpdateOn: undefined,
+        endUpdateOn: undefined
+    })
+
+    let {
+        data: { items, ...data } = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = useFundWithdrawFormList(brandId, {
+        ...toApiParams(state),
+        bc: state.beginCreateOn,
+        ec: startOfNextDay(state.endCreateOn),
+        bu: state.beginUpdateOn,
+        eu: startOfNextDay(state.endUpdateOn),
+        sortby: "CreatedOn",
+        orderby: SortOrder.Descending
+    })
+
+    useEffect(() => {
+        setState({ pageIndex: 0 })
+    }, [brandId])
+
+    let columns = useColumns({ mutate, items, brandId })
     return (
         <PageContent
             title={<Trans zh="提款列表" en="Withdraw List" />}
-        ></PageContent>
+            actionBar={
+                <SearchBar
+                    brandId={brandId}
+                    username={state?.username}
+                    channelName={state?.channelName}
+                    status={state?.status}
+                    beginCreateOn={state?.beginCreateOn}
+                    endCreateOn={state?.endCreateOn}
+                    beginUpdateOn={state?.beginUpdateOn}
+                    endUpdateOn={state?.endUpdateOn}
+                    isLoading={isLoading}
+                />
+            }
+        >
+            <Table
+                controlledState={state}
+                columns={columns}
+                data={items}
+                pageCount={pageCount(state.pageSize, data?.totalCount)}
+                setPageIndex={setPageIndex}
+                setSortOrder={setSortOrder}
+                isLoading={isLoading}
+            />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
+        </PageContent>
     )
+}
+
+const SearchBar = ({
+    brandId,
+    username,
+    channelName,
+    status,
+    beginCreateOn,
+    endCreateOn,
+    beginUpdateOn,
+    endUpdateOn,
+    search,
+    isLoading,
+    ...props
+}) => {
+    let formMethods = useForm({
+        defaultValues: {
+            username,
+            channelName,
+            status,
+            beginCreateOn,
+            endCreateOn,
+            beginUpdateOn,
+            endUpdateOn
+        }
+    })
+
+    let usernameInputPlaceholder = useTrans({
+        zh: "用户名",
+        en: "Username"
+    })
+
+    let channelNameInputPlaceholder = useTrans({
+        zh: "通道名称",
+        en: "Channel Name"
+    })
+
+    return (
+        <FormProvider {...formMethods}>
+            <form onSubmit={formMethods.handleSubmit(search)}>
+                <FieldStack orientation="vertical">
+                    <Set orientation="horizontal">
+                        <InputField
+                            name="username"
+                            showEmptyFieldValueAddonAfter
+                            placeholder={usernameInputPlaceholder}
+                        />
+                        <InputField
+                            name="channelName"
+                            showEmptyFieldValueAddonAfter
+                            placeholder={channelNameInputPlaceholder}
+                        />
+                        <FundReviewStatusSelect name="status" />
+                    </Set>
+                    <Set orientation="horizontal">
+                        <DateInputRangeField
+                            label={
+                                <Trans zh="申请时间" en="Application Time" />
+                            }
+                            startProps={{
+                                name: "beginCreateOn"
+                            }}
+                            endProps={{
+                                name: "endCreateOn"
+                            }}
+                        />
+                        <DateInputRangeField
+                            label={<Trans zh="更新时间" en="Updated Time" />}
+                            startProps={{
+                                name: "beginUpdateOn"
+                            }}
+                            endProps={{
+                                name: "endUpdateOn"
+                            }}
+                        />
+                        <SearchButton
+                            isLoading={isLoading}
+                            disabled={isLoading}
+                            alignSelf="flex-end"
+                        />
+                    </Set>
+                </FieldStack>
+            </form>
+        </FormProvider>
+    )
+}
+
+const useColumns = ({ brandId, items = [], mutate }) => {
+    let hasUpdateMenu = useIsDisplayMenuByRoute([Update])
+    return useMemo(() => {
+        let columns = [
+            sequenceColumn(),
+            textColumn({
+                accessor: "userName",
+                Header: <Trans zh="用户名" en="Username" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "id",
+                Header: <Trans zh="订单号" en="Id" />,
+                disableSortBy: true,
+                Cell: ({ value }) => value
+            }),
+            numberDecimalColumn({
+                accessor: "amount",
+                Header: <Trans zh="提款金额" en="Amount" />,
+                disableSortBy: true
+            }),
+            dateTimeColumn({
+                accessor: "createdOn",
+                Header: <Trans zh="申请时间" en="Application Time" />,
+                disableSortBy: true
+            }),
+            dateTimeColumn({
+                accessor: "updatedOn",
+                Header: <Trans zh="更新时间" en="Update Time" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "status",
+                Header: <Trans zh="状态" en="Status" />,
+                disableSortBy: true,
+                Cell: ({ value }) => <FundReviewStatusLabel value={value} />
+            })
+        ]
+
+        if (hasUpdateMenu) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Header: <Trans zh="操作" en="Actions" />,
+                    Cell: ({ value }) => {
+                        let underReview = isFundUnderReview(value?.status)
+                        return (
+                            <Set alignX="center">
+                                <ViewFundWithdrawDisclosure
+                                    brandId={brandId}
+                                    formId={value.id}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
 }

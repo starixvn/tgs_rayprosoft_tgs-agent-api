@@ -19,14 +19,14 @@ import {
     useTrans
 } from "../../i18n"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Update } from "./menu"
+import { Update, View } from "./menu"
 import {
     Disclosure,
     VerifyDisclosure,
     ViewDisclosure
 } from "../../dialog/Disclosure"
 import { FormDialog } from "../../form/FormDialog"
-import { usePlayerDepositForm } from "./client"
+import { useFundDepositForm } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
@@ -36,20 +36,23 @@ import { NormalLabel } from "../../form/Label"
 import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
 import Separator from "../../layout/Separator"
 import { FundReviewStatusLabel } from "../FundReviewStatus"
+import Textarea, { TextareaField } from "../../textarea"
 
-export const ViewPlayerDepositDisclosure = ({ brandId, formId, ...props }) => {
+export const ViewFundDepositDisclosure = ({ brandId, formId, ...props }) => {
     let dialog = useModalState()
 
-    let isDisplay = useIsDisplayMenuByRoute([Update])
+    /*
+    let isDisplay = useIsDisplayMenuByRoute([View])
     if (!isDisplay) {
         return null
     }
+    */
 
     return (
         <>
             <ViewDisclosure {...dialog} />
             {dialog.visible && (
-                <ViewPlayerDepositDialog
+                <ViewFundDepositDialog
                     brandId={brandId}
                     formId={formId}
                     dialog={dialog}
@@ -59,13 +62,13 @@ export const ViewPlayerDepositDisclosure = ({ brandId, formId, ...props }) => {
     )
 }
 
-const ViewPlayerDepositDialog = ({ brandId, formId, dialog, ...props }) => {
+const ViewFundDepositDialog = ({ brandId, formId, dialog, ...props }) => {
     let title = useTrans({
-        zh: "查看审核",
+        zh: "查看充值",
         en: "View Deposit"
     })
 
-    let { isLoading, data, error } = usePlayerDepositForm(brandId, formId)
+    let { isLoading, data, error } = useFundDepositForm(brandId, formId)
 
     if (isLoading) {
         return <LoadingBackdrop {...dialog} />
@@ -82,14 +85,15 @@ const ViewPlayerDepositDialog = ({ brandId, formId, dialog, ...props }) => {
             hideOnClickOutside={false}
             {...dialog}
         >
-            <PlayerDepositFormBody record={data} />
+            <FormBody record={data} />
         </Dialog.Modal>
     )
 }
 
-export const PlayerDepositFormBody = ({ record }) => {
+export const FormBody = ({ record }) => {
     let hasAttachment = !!record?.paymentReturn?.manualReceiptFileId
     let attachmentUrl = `/api/fs/${record?.paymentReturn?.manualReceiptFileId}`
+
     return (
         <FieldStack>
             <FieldValues marginLeft="1.5rem">
@@ -133,7 +137,10 @@ export const PlayerDepositFormBody = ({ record }) => {
                     <Trans zh="更新时间" en="Updated Time" />
                 </NormalLabel>
                 <Box alignY="center">
-                    <FormattedDateTime value={record?.updatedOn} />
+                    <FormattedDateTime
+                        value={record?.updatedOn}
+                        placeholder="-"
+                    />
                 </Box>
 
                 <NormalLabel>
@@ -158,6 +165,11 @@ export const PlayerDepositFormBody = ({ record }) => {
             </FieldValues>
             <Separator />
             <BankInfoBox record={record} />
+            <Separator />
+            <TextareaField
+                name="remark"
+                label={<Trans zh="备注" en="Remark" />}
+            />
         </FieldStack>
     )
 }
