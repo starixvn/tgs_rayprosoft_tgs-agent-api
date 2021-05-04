@@ -19,9 +19,19 @@ COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataService
 COPY ["src/Core/Models/Models.csproj", "src/Core/Models/"]
 COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructures/"]
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
+COPY ["src/Services/Bucket/PlayerBucket.Core.csproj", "src/Services/Bucket/"]
+COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
+COPY ["Services/Promotion.Core/Promotion.Core.csproj", "Services/Promotion.Core/"]
+COPY ["src/Services/Wallet.Core/Wallet.Core.csproj", "src/Services/Wallet.Core/"]
 COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataServices.Report/"]
-COPY ["src/Libraries/IdentityVerifiers/IdentityVerifiers.csproj", "src/Libraries/IdentityVerifiers/"]
+COPY ["src/Repositories/Operator.Repositories/Operator.Repositories.csproj", "src/Repositories/Operator.Repositories/"]
 COPY ["src/Services/Operator.Core/Operator.Core.csproj", "src/Services/Operator.Core/"]
+COPY ["src/Services/Payment.Core/Payment.Core.csproj", "src/Services/Payment.Core/"]
+COPY ["src/Clients/FileService.Client/FileService.Client.csproj", "src/Clients/FileService.Client/"]
+COPY ["src/Repositories/PaymentRepositories/PaymentRepositories.csproj", "src/Repositories/PaymentRepositories/"]
+COPY ["src/Repositories/Wallet.Repositories/Wallet.Repositories.csproj", "src/Repositories/Wallet.Repositories/"]
+COPY ["src/Libraries/IdentityVerifiers/IdentityVerifiers.csproj", "src/Libraries/IdentityVerifiers/"]
+COPY ["src/Clients/Promotion.Client/Promotion.Client.csproj", "src/Clients/Promotion.Client/"]
 RUN dotnet restore "src/Apis/OperatorApi/OperatorApi.csproj"
 COPY . .
 WORKDIR "/src/src/Apis/OperatorApi"
