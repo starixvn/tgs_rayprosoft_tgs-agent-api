@@ -23,7 +23,6 @@ namespace TGS.Services.Report.Application.Extensions
             services.AddTransient<IRoundAggregateService, RoundAggregateService>();
             services.AddTransient<IPlayerRebateService, PlayerRebateService>();
             services.AddTransient<ITransactionManager, TransactionManager>();
-            services.AddTransient<IPromotionBonusService, PromotionBonusService>();
 
             return services;
         }

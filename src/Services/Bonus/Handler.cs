@@ -9,7 +9,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 
-namespace Bonus
+namespace TGS.Services.Bonus
 {
     public abstract class Handler<T, TOut> : IRequestHandler<T, TOut> where T : IRequest<TOut>
     {

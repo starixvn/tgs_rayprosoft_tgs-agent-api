@@ -1,4 +1,4 @@
-﻿namespace Report.Client.Models.Agent
+﻿namespace TGS.Clients.Report.Client.Models.Agent
 {
     public class AgentPlayerWinLossModel
     {

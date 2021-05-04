@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Report.Client;
+using TGS.Clients.Report.Client;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Workers.Schedulers.Jobs.Reports
