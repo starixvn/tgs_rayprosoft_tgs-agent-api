@@ -7,6 +7,7 @@ using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.Saba.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Saba.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Saba
 {
@@ -21,9 +22,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
-            services.AddErrorMappers();
+            services.AddErrorMappers(
+                new[] {typeof(SabaErrorMapper)},
+                (provider, key) => key switch
+                {
+                    GameProvider.Saba => provider.GetRequiredService<SabaErrorMapper>(),
+                    _                 => provider.GetRequiredService<TgsErrorMapper>()
+                });
 
             services.AddScoped<AuthorizeSabaMiddleware>();
+            services.AddScoped<HandleSabaExceptionMiddleware>();
 
             services.AddScoped<ISabaServices, SabaServices>();
             services.AddScoped<ISabaActionModelMapper, SabaActionModelMapper>();
@@ -36,7 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
                 {
-                    //builder.UseMiddleware<HandlePragmaticPlayExceptionMiddleware>();
+                    builder.UseMiddleware<HandleSabaExceptionMiddleware>();
                     builder.UseMiddleware<AuthorizeSabaMiddleware>();
                 });
         }

@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.Saba.Incoming
 {
-    public record PlaceBetParlayResponse : BaseResponse
+    public record PlaceBetParlayResponse : ErrorResponse
     {
         [JsonPropertyName("txns")]
         public Transaction[] Transactions { get; init; }

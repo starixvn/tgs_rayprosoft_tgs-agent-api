@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.Saba.Incoming
 {
-    public abstract record BalanceResponse : BaseResponse
+    public abstract record BalanceResponse : ErrorResponse
     {
         [JsonPropertyName("balance")]
         public decimal Balance { get; init; }

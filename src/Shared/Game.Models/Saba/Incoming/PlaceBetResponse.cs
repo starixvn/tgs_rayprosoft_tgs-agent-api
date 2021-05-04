@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.Saba.Incoming
 {
-    public record PlaceBetResponse : BaseResponse
+    public record PlaceBetResponse : ErrorResponse
     {
         [JsonPropertyName("refId")]
         public long ReferenceId { get; init; }

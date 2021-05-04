@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.Saba.Incoming
 {
-    public abstract record BaseResponse
+    public record ErrorResponse
     {
         [JsonPropertyName("status")]
         public string Status { get; init; }

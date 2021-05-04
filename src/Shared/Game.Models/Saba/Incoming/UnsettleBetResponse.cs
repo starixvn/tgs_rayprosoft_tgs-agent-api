@@ -1,6 +1,6 @@
 ﻿namespace TGS.Shared.Game.Models.Saba.Incoming
 {
-    public record UnsettleBetResponse : BaseResponse
+    public record UnsettleBetResponse : ErrorResponse
     {
     }
 }
