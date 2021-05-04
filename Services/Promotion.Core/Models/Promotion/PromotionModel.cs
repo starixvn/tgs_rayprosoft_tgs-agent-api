@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.PromotionCore.Models.Promotion
+namespace TGS.Services.Promotion.Core.Models.Promotion
 {
     public class PromotionModel
     {

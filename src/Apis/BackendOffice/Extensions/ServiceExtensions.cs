@@ -16,13 +16,13 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using Promotion.Client.Extensions;
-using Report.Client.Extensions;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
+using TGS.Clients.Promotion.Client.Extensions;
+using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Log;
@@ -83,7 +83,9 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddPromotionRepositoriesServices()
                 .AddPlayerBucketRepositoriesServices();
 
-            services.AddWallet().AddTgsWalletRepositories().AddTgsAgentWalletRepositories();
+            services.AddWallet()
+                .AddTgsWalletRepositories()
+                .AddTgsAgentWalletRepositories();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 

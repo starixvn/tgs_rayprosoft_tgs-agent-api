@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.PromotionCore.Models.PromotionDispatch
+namespace TGS.Services.Promotion.Core.Models.PromotionDispatch
 {
     public class PromotionDispatchModel
     {

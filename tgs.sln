@@ -157,7 +157,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PromotionApi", "src\Apis\Pr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wallet.Core", "src\Services\Wallet.Core\Wallet.Core.csproj", "{51F81A47-4A39-4386-BE32-9744FBAFC644}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PromotionCore", "Services\Promotion.Core\PromotionCore.csproj", "{D1E9ADC7-6408-43D0-AF59-883FF9BA0D77}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promotion.Core", "Services\Promotion.Core\Promotion.Core.csproj", "{D1E9ADC7-6408-43D0-AF59-883FF9BA0D77}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wallet.Repositories", "src\Repositories\Wallet.Repositories\Wallet.Repositories.csproj", "{C5B5A52D-F788-49BC-988D-3A105C45B840}"
 EndProject
@@ -464,7 +464,7 @@ Global
 		{9C2B8455-403C-4156-9541-380AB5C12FAA} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 		RESX_TaskErrorCategory = Message
+		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 	EndGlobalSection
 EndGlobal

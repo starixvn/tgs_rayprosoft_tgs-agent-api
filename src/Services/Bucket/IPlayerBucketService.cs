@@ -5,8 +5,8 @@ namespace TGS.Services.PlayerBucket.Core
 {
     public interface IPlayerBucketService
     {
-        Task CreatePlayerBucket(CreatePlayerBucketRequest request);
-        Task CreatePlayerBuckets(CreatePlayerBucketRequest[] request);
-        Task IsBucketFull(string playerCode);
+        ValueTask<decimal> CreateDepositAsync(CreatePlayerBucketWithDepositRequest request);
+        Task CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] request);
+        ValueTask<bool> IsBucketFull(string playerCode);
     }
 }

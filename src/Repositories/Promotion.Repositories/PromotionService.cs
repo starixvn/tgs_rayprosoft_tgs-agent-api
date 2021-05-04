@@ -9,8 +9,8 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Settings;
-using TGS.Services.PromotionCore;
-using TGS.Services.PromotionCore.Models.Promotion;
+using TGS.Services.Promotion.Core;
+using TGS.Services.Promotion.Core.Models.Promotion;
 
 namespace Promotion.Repositories
 {
@@ -23,15 +23,6 @@ namespace Promotion.Repositories
         {
             _repository = tgsRepository;
         }
-
-        //Task IPromotionService.ChangeStatusAsync(Promotion promotion, UpdatePromotionStatusRequest request)
-        //{
-        //    promotion.Status = request.Status;
-        //    promotion.UpdatedOn = DateTimeOffset.Now;
-        //    promotion.UpdatedByUsername = request.EditorUsername;
-
-        //    return UpdateEntityAsync(promotion);
-        //}
 
         Task<TGS.Core.DataServices.Tgs.Models.Promotion> IPromotionService.GetPromotionAsync(
             Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate,

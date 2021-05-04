@@ -13,8 +13,8 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.PlayerBucket.Core;
 using TGS.Services.PlayerBucket.Core.Models;
-using TGS.Services.PromotionCore;
-using TGS.Services.PromotionCore.Models.PromotionBonus;
+using TGS.Services.Promotion.Core;
+using TGS.Services.Promotion.Core.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
 using TGS.Services.Wallet;
 
@@ -124,13 +124,13 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 .SelectMany(x =>
                 {
                     return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new {pb, p})
-                        .Select(p => new CreatePlayerBucketRequest
+                        .Select(p => new
                         {
-                            BrandId = x.BrandId,
-                            PlayerCode = p.p.PlayerCode,
-                            DefaultWalletId = p.p.DefaultWalletId,
+                            x.BrandId,
+                            p.p.PlayerCode,
+                            p.p.DefaultWalletId,
                             BucketAmount = p.pb.BonusAmount * x.TurnoverMultiple,
-                            BonusAmount = p.pb.BonusAmount,
+                            p.pb.BonusAmount,
                             BucketType = BucketType.Promotion
                         });
                 }).ToArray();
@@ -141,7 +141,9 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             await _promotionService.UpdatePromotionsAsync(promotions).ConfigureAwait(false);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus).ConfigureAwait(false);
-            await _playerBucketService.CreatePlayerBuckets(playerBuckets).ConfigureAwait(false);
+            await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
+                new CreatePlayerBucketRequest(x.BrandId, x.PlayerCode, x.DefaultWalletId, x.BucketType,
+                    x.BucketAmount)).ToArray()).ConfigureAwait(false);
 
             await promotionTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 

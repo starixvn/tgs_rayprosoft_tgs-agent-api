@@ -1,4 +1,4 @@
-﻿namespace Promotion.Client
+﻿namespace TGS.Clients.Promotion.Client
 {
     public record PromotionSettings
     {

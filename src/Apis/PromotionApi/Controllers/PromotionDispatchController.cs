@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
-using TGS.Services.PromotionCore.Models.PromotionDispatch;
+using TGS.Services.Promotion.Core.Models.PromotionDispatch;
 
 namespace PromotionApi.Controllers
 {
@@ -22,6 +22,12 @@ namespace PromotionApi.Controllers
         [Description("Get promotion dispatches")]
         public Task<PagedResponse<PromotionDispatchModel>> GetPromotionsAsync(
             [FromQuery] GetPromotionDispatchesRequest request) =>
+            _mediator.Send(request);
+
+        [HttpPost]
+        [Description("Dispatch promotion")]
+        public Task<MessageResponse> DispatchPromotionsAsync(
+            [FromQuery] DispatchPromotionBonusRequest request) =>
             _mediator.Send(request);
     }
 }

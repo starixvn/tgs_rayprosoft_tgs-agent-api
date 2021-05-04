@@ -1,11 +1,11 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
-using Promotion.Client.Models.PromotionBonus;
+using TGS.Clients.Promotion.Client.Models.PromotionBonus;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
 
-namespace Promotion.Client
+namespace TGS.Clients.Promotion.Client
 {
     public interface IPromotionBonusClient
     {

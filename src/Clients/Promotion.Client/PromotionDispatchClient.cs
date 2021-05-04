@@ -1,16 +1,17 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
-using Promotion.Client.Models.PromotionDispatch;
+using TGS.Clients.Promotion.Client.Models.PromotionDispatch;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
 
-namespace Promotion.Client
+namespace TGS.Clients.Promotion.Client
 {
     public interface IPromotionDispatchClient
     {
         Task<PagedResponse<PromotionDispatchModel>> GetPromotionDispatchesAsync(GetPromotionDispatchesRequest request);
+        Task<MessageResponse> DispatchPromotionAsync(DispatchPromotionBonusRequest request);
     }
 
     public class PromotionDispatchClient : BaseApiClient, IPromotionDispatchClient
@@ -19,6 +20,15 @@ namespace Promotion.Client
             IJsonSerializationProvider json)
             : base(client, logger, json)
         {
+        }
+
+        async Task<MessageResponse> IPromotionDispatchClient.DispatchPromotionAsync(
+            DispatchPromotionBonusRequest request)
+        {
+            const string prefix = "Promotion.DispatchPromotionBonus";
+            return await ExecuteJsonRequestAsync<DispatchPromotionBonusRequest, MessageResponse>(HttpMethod.Post,
+                "/api/promotionDispatch", request, logPrefix: prefix,
+                options: new() {PropertyNameCaseInsensitive = true});
         }
 
         async Task<PagedResponse<PromotionDispatchModel>> IPromotionDispatchClient.GetPromotionDispatchesAsync(

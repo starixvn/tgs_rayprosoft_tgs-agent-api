@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Services.PromotionCore;
-using TGS.Services.PromotionCore.Models.PromotionBonus;
+using TGS.Services.Promotion.Core;
+using TGS.Services.Promotion.Core.Models.PromotionBonus;
 
 namespace Promotion.Repositories
 {

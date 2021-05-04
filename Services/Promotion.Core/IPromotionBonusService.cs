@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Services.PromotionCore.Models.PromotionBonus;
+using TGS.Services.Promotion.Core.Models.PromotionBonus;
 
-namespace TGS.Services.PromotionCore
+namespace TGS.Services.Promotion.Core
 {
     public interface IPromotionBonusService
     {

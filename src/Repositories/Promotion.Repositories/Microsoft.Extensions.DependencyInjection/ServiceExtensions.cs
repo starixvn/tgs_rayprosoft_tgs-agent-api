@@ -1,5 +1,5 @@
 ﻿using Promotion.Repositories;
-using TGS.Services.PromotionCore;
+using TGS.Services.Promotion.Core;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

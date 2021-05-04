@@ -10,8 +10,8 @@ using TGS.Core.Models.Messages;
 using TGS.Core.Models.Settings;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.PromotionCore;
-using TGS.Services.PromotionCore.Models.PromotionDispatch;
+using TGS.Services.Promotion.Core;
+using TGS.Services.Promotion.Core.Models.PromotionDispatch;
 
 namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
 {

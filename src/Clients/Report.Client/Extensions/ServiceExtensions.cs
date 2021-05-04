@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Report.Client.Extensions
+namespace TGS.Clients.Report.Client.Extensions
 {
     public static class ServiceExtensions
     {

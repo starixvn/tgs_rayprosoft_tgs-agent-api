@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Messages;
 
-namespace Promotion.Client.Models.PromotionDispatch
+namespace TGS.Clients.Promotion.Client.Models.PromotionDispatch
 {
     public class GetPromotionDispatchesRequest : PageableRequest
     {

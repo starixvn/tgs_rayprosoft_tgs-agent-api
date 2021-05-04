@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Promotion.Client.Extensions
+namespace TGS.Clients.Promotion.Client.Extensions
 {
     public static class ServiceExtensions
     {

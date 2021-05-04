@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.Report.Infrastructure.DataService
 {
@@ -12,12 +11,16 @@ namespace TGS.Services.Report.Infrastructure.DataService
     {
         ITgsRepository TgsRepository { get; }
 
-        Task UpdatePromotionsAsync(Promotion[] promotions);
+        Task UpdatePromotionsAsync(Core.DataServices.Tgs.Models.Promotion[] promotions);
 
-        Task<Promotion> GetPromotionAsync(Expression<Func<Promotion, bool>> predicate,
-            Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery = null);
+        Task<Core.DataServices.Tgs.Models.Promotion> GetPromotionAsync(
+            Expression<Func<Core.DataServices.Tgs.Models.Promotion, bool>> predicate,
+            Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>, IQueryable<Core.DataServices.Tgs.Models.Promotion>>
+                preQuery = null);
 
-        IQueryable<Promotion> GetPromotionQueries(Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery = null,
+        IQueryable<Core.DataServices.Tgs.Models.Promotion> GetPromotionQueries(
+            Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>, IQueryable<Core.DataServices.Tgs.Models.Promotion>>
+                preQuery = null,
             bool tracking = false);
     }
 
@@ -32,15 +35,19 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
         ITgsRepository ITgsPromotionService.TgsRepository => _repository;
 
-        Task<Promotion> ITgsPromotionService.GetPromotionAsync(Expression<Func<Promotion, bool>> predicate,
-            Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery) =>
+        Task<Core.DataServices.Tgs.Models.Promotion> ITgsPromotionService.GetPromotionAsync(
+            Expression<Func<Core.DataServices.Tgs.Models.Promotion, bool>> predicate,
+            Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>, IQueryable<Core.DataServices.Tgs.Models.Promotion>>
+                preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<Promotion> ITgsPromotionService.GetPromotionQueries(
-            Func<IQueryable<Promotion>, IQueryable<Promotion>> preQuery,
+        IQueryable<Core.DataServices.Tgs.Models.Promotion> ITgsPromotionService.GetPromotionQueries(
+            Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>, IQueryable<Core.DataServices.Tgs.Models.Promotion>>
+                preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        Task ITgsPromotionService.UpdatePromotionsAsync(Promotion[] promotions) => UpdateEntitiesAsync(promotions);
+        Task ITgsPromotionService.UpdatePromotionsAsync(Core.DataServices.Tgs.Models.Promotion[] promotions) =>
+            UpdateEntitiesAsync(promotions);
     }
 }

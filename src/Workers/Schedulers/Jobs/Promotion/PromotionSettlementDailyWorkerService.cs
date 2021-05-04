@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Promotion.Client;
+using TGS.Clients.Promotion.Client;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Workers.Schedulers.Jobs.Promotion

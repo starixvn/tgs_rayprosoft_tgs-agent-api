@@ -2,7 +2,7 @@
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client.Models.Agent
+namespace TGS.Clients.Report.Client.Models.Agent
 {
     public class GetAgentDividendsRequest : PageableRequest
     {

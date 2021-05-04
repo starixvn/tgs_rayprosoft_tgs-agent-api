@@ -1,4 +1,4 @@
-﻿namespace Report.Client.Models.Promotion
+﻿namespace TGS.Clients.Report.Client.Models.Promotion
 {
     public record CreatePromotionBonusDailyRequest(string Date = null);
 }

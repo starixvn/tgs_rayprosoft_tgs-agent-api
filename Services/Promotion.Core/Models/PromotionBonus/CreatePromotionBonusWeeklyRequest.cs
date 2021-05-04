@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.PromotionCore.Models.PromotionBonus
+namespace TGS.Services.Promotion.Core.Models.PromotionBonus
 {
     public class CreatePromotionBonusWeeklyRequest : IRequest<MessageResponse>
     {

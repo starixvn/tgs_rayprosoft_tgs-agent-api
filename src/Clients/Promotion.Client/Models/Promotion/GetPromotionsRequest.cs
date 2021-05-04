@@ -2,7 +2,7 @@
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace Promotion.Client.Models.Promotion
+namespace TGS.Clients.Promotion.Client.Models.Promotion
 {
     public class GetPromotionsRequest : PageableRequest
     {

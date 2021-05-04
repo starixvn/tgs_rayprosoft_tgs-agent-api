@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
-using TGS.Services.PromotionCore.Models.Promotion;
+using TGS.Services.Promotion.Core.Models.Promotion;
 
 namespace PromotionApi.Controllers
 {
@@ -36,5 +36,10 @@ namespace PromotionApi.Controllers
             request.Id = id;
             return _mediator.Send(request);
         }
+
+        [HttpPost("{id}/addPlayer")]
+        [Description("Add player to promotion")]
+        public Task<MessageResponse> AddPlayerToPromotionAsync(string playerCode) =>
+            _mediator.Send(new CreatePromotionParticipantRequest(playerCode));
     }
 }

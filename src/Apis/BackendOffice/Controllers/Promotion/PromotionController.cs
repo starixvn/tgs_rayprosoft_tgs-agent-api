@@ -2,8 +2,9 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Promotion.Client;
-using Promotion.Client.Models.Promotion;
+using TGS.Clients.Promotion.Client;
+using TGS.Clients.Promotion.Client.Models.Promotion;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Promotion
@@ -36,5 +37,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
             request.Id = id;
             return _client.UpdatePromotionAsync(request);
         }
+
+        [HttpPut("{promotionId:guid}/{status}")]
+        [Description("change a Promotion's status")]
+        public Task<MessageResponse> UpdatePromotionStatusAsync(Guid promotionId, SwitchStatus status) =>
+            _client.ChangePromotionStatusAsync(new(promotionId, status));
     }
 }

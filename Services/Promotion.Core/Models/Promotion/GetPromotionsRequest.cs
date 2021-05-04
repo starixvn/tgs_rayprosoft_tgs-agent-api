@@ -3,7 +3,7 @@ using MediatR;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.PromotionCore.Models.Promotion
+namespace TGS.Services.Promotion.Core.Models.Promotion
 {
     public class GetPromotionsRequest : PageableRequest, IRequest<PagedResponse<PromotionModel>>
     {

@@ -1,18 +1,19 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
-using Promotion.Client.Models.Promotion;
+using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
 
-namespace Promotion.Client
+namespace TGS.Clients.Promotion.Client
 {
     public interface IPromotionClient
     {
         Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request);
         Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request);
         Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);
+        Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request);
     }
 
     public class PromotionClient : BaseApiClient, IPromotionClient
@@ -46,6 +47,14 @@ namespace Promotion.Client
             var prefix = $"Promotion.Id.{request.Id}.UpdatePromotion";
             return await ExecuteJsonRequestAsync<UpdatePromotionRequest, MessageResponse>(HttpMethod.Post,
                 "/api/promotion", request, logPrefix: prefix,
+                options: new() {PropertyNameCaseInsensitive = true});
+        }
+
+        async Task<MessageResponse> IPromotionClient.ChangePromotionStatusAsync(UpdatePromotionStatusRequest request)
+        {
+            var prefix = $"Promotion.PromotionId.{request.PromotionId}.UpdatePromotion";
+            return await ExecuteJsonRequestAsync<UpdatePromotionStatusRequest, MessageResponse>(HttpMethod.Put,
+                $"/api/promotion/{request.PromotionId}/{request.Status}", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
     }

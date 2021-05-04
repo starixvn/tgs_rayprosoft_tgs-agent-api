@@ -2,7 +2,7 @@
 using MediatR;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.PromotionCore.Models.PromotionDispatch
+namespace TGS.Services.Promotion.Core.Models.PromotionDispatch
 {
     public class DispatchPromotionBonusRequest : IRequest<MessageResponse>
     {

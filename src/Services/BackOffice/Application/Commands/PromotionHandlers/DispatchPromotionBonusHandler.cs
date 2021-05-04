@@ -7,8 +7,8 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.PlayerBucket.Core;
 using TGS.Services.PlayerBucket.Core.Models;
-using TGS.Services.PromotionCore;
-using TGS.Services.PromotionCore.Models.PromotionDispatch;
+using TGS.Services.Promotion.Core;
+using TGS.Services.Promotion.Core.Models.PromotionDispatch;
 using TGS.Services.Wallet;
 
 namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
@@ -40,18 +40,21 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 
             var playerBuckets = playerBonus.Where(x =>
                     request.Players.Any(p => p.PlayerCode == x.PlayerCode && p.PromotionBonusId == x.PromotionBonusId))
-                .Select(x => new CreatePlayerBucketRequest
+                .Select(x => new
                 {
-                    BrandId = x.Player.BrandId,
-                    PlayerCode = x.PlayerCode,
-                    DefaultWalletId = x.Player.DefaultWalletId,
+                    x.Player.BrandId,
+                    x.PlayerCode,
+                    x.Player.DefaultWalletId,
                     BucketAmount = x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
-                    BonusAmount = x.BonusAmount,
+                    x.BonusAmount,
                     BucketType = BucketType.Promotion
                 })
                 .ToArray();
 
-            await _service.CreatePlayerBuckets(playerBuckets).ConfigureAwait(false);
+            await _service.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
+                    new CreatePlayerBucketRequest(x.BrandId, x.PlayerCode, x.DefaultWalletId, x.BucketType,
+                        x.BucketAmount))
+                .ToArray()).ConfigureAwait(false);
 
             foreach (var promotionPlayer in playerBuckets)
             {

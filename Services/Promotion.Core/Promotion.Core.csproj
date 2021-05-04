@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>TGS.Services.PromotionCore</AssemblyName>
-    <RootNamespace>TGS.Services.PromotionCore</RootNamespace>
+    <AssemblyName>Promotion.Core</AssemblyName>
+    <RootNamespace>TGS.Services.Promotion.Core</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
