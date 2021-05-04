@@ -52,7 +52,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasOne(c => c.Player)
                 .WithMany()
                 .HasForeignKey(c => c.PlayerCode)
-                .HasConstraintName("fk_deposit_forms_players_playerCode");
+                .HasConstraintName("fk_deposit_forms_players_player_code");
 
             builder.HasIndex(c => c.PlayerCode)
                 .HasDatabaseName("ix_deposit_forms_playerCode");
@@ -73,7 +73,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasConstraintName("fk_deposit_forms_brand_payments_id");
 
             builder.HasIndex(c => c.BrandPaymentId)
-                .HasDatabaseName("ix_deposit_forms_brandPaymentId");
+                .HasDatabaseName("ix_deposit_forms_brand_payment_id");
         }
     }
 }

@@ -1539,7 +1539,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_deposit_forms_brandId");
 
                     b.HasIndex("BrandPaymentId")
-                        .HasDatabaseName("ix_deposit_forms_brandPaymentId");
+                        .HasDatabaseName("ix_deposit_forms_brand_payment_id");
 
                     b.HasIndex("PlayerCode")
                         .HasDatabaseName("ix_deposit_forms_playerCode");
@@ -2444,6 +2444,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("BankType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_type");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -2775,11 +2780,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_player_bank_infos");
 
                     b.HasIndex("BrandId")
-                        .IsUnique()
                         .HasDatabaseName("ix_player_bank_infos_brand_id");
 
                     b.HasIndex("PaymentChannelId")
-                        .IsUnique()
                         .HasDatabaseName("ix_player_bank_infos_payment_channel_id");
 
                     b.HasIndex("PlayerCode")
@@ -4323,6 +4326,84 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("whitelists");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.WithdrawForm", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric")
+                        .HasColumnName("amount");
+
+                    b.Property<string>("ApplyInfo")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("apply_info");
+
+                    b.Property<string>("BankInfo")
+                        .IsRequired()
+                        .HasColumnType("jsonb")
+                        .HasColumnName("bank_info");
+
+                    b.Property<Guid>("BankInfoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("bank_info_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<Guid?>("BrandPaymentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_payment_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.Property<string>("PaymentReturn")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("payment_return");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("status");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_withdraw_forms");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_withdraw_forms_brand_id");
+
+                    b.HasIndex("BrandPaymentId")
+                        .HasDatabaseName("ix_withdraw_froms_brand_payment_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_withdraw_forms_player_code");
+
+                    b.ToTable("withdraw_forms");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
@@ -4763,7 +4844,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
                         .WithMany()
                         .HasForeignKey("PlayerCode")
-                        .HasConstraintName("fk_deposit_forms_players_playerCode")
+                        .HasConstraintName("fk_deposit_forms_players_player_code")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -5085,15 +5166,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
-                        .WithOne()
-                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", "BrandId")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
                         .HasConstraintName("fk_player_bank_infos_brands_brand_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.PaymentChannel", "PaymentChannel")
-                        .WithOne()
-                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerBankInfo", "PaymentChannelId")
+                        .WithMany()
+                        .HasForeignKey("PaymentChannelId")
                         .HasConstraintName("fk_player_bank_infos_payment_channels_payment_channel_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -5555,6 +5636,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Licensee");
 
                     b.Navigation("Reseller");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.WithdrawForm", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_withdraw_forms_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.BrandPayment", "BrandPayment")
+                        .WithMany()
+                        .HasForeignKey("BrandPaymentId")
+                        .HasConstraintName("fk_withdraw_forms_brand_payments_brand_payment_id");
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_withdraw_forms_players_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("BrandPayment");
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>

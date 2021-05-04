@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace TGS.Services.BackOffice.Domain
 {
-    public record DepositFormInfo(
+    public record DepositFormModel(
         Guid Id,
         string PlayerCode,
         string UserName,

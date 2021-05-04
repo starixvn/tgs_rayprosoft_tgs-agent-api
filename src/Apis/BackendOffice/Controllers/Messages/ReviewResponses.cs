@@ -1,4 +1,4 @@
-﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
+﻿namespace TGS.Apis.BackendOffice.Controllers.Messages
 {
     public enum ReviewResponses
     {

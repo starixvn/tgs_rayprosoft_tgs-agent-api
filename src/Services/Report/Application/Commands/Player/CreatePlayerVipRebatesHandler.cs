@@ -9,7 +9,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 using TGS.Services.Report.Infrastructure.DataService;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Services.Report.Application.Commands.Player
 {
@@ -121,7 +121,7 @@ namespace TGS.Services.Report.Application.Commands.Player
 
             if (playerRebates.Length <= 0)
             {
-                return new() {Valid = false, Message = "Has no player rebate data."};
+                return new() { Valid = false, Message = "Has no player rebate data." };
             }
 
             var brandIds = playerRebates.Select(x => x.BrandId);
@@ -129,16 +129,16 @@ namespace TGS.Services.Report.Application.Commands.Player
                 .ToArrayAsync(cancellationToken);
 
             var playerBonuses = playerRebates
-                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new { player, brand })
                 .Where(x => x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
             var playerBonusesNotSend = playerRebates
-                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new { player, brand })
                 .Where(x => !x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
             var players = await _playerService.GetPlayerQueries()
                 .Where(x => playerBonuses.Select(p => p.PlayerCode).Contains(x.PlayerCode))
-                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
+                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
                 .ToArrayAsync(cancellationToken);
 
             await _playerRebateService.CreatePlayerRebatesAsync(playerBonuses, DateTimeOffset.Now);
@@ -146,7 +146,7 @@ namespace TGS.Services.Report.Application.Commands.Player
             await _playerRebateService.CreatePlayerRebatesAsync(playerBonusesNotSend, null);
 
             foreach (var playerBonus in playerBonuses.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
-                (pb, p) => new {pb, p}))
+                (pb, p) => new { pb, p }))
             {
                 await _walletRepository.ExchangeAsync(playerBonus.pb.BrandId, playerBonus.p.DefaultWalletId,
                     playerBonus.pb.PlayerCode, TransactionTypes.Rebate,

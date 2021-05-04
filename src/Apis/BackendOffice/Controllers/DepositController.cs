@@ -8,7 +8,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.BackOffice.Domain.Enums;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -28,7 +28,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// <returns></returns>
         [HttpGet("{brandId}")]
         public async Task<PagedResponse<DepositFormViewModel>> QueryDepositFormsAsync(
-            [FromServices] IQueryService<DepositFormQuery, DepositFormInfo> queryDepositFormsService,
+            [FromServices] IQueryService<DepositFormQuery, DepositFormModel> queryDepositFormsService,
             [FromServices] IGetService<DepositFormQuery, int> countDepositFormsService,
             Guid brandId,
             [FromQuery] DepositFormRequest request,
@@ -143,16 +143,17 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// </summary>
         /// <param name="reviewCommandService">The review command service.</param>
         /// <param name="formId">The form identifier.</param>
-        /// <param name="reviewResponses">The review responses.</param>
+        /// <param name="reviewResponse">The review responses.</param>
         [HttpPost("{formId}")]
         public async Task<MessageResponse> ReviewDepositFormAsync(
             [FromServices] ICommandService<ReviewDepositFormCommand> reviewCommandService,
             Guid formId,
-            [FromBody] ReviewStatus reviewResponses)
+            [FromBody] ReviewRequest reviewResponse)
         {
             var command = new ReviewDepositFormCommand(
                 formId,
-                reviewResponses);
+                reviewResponse.ReviewResponse,
+                reviewResponse.Remark);
 
             await reviewCommandService
                 .ExecuteAsync(command)

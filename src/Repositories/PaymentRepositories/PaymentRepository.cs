@@ -44,16 +44,46 @@ namespace TGS.Payment.Repositories
 
         public async ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormInfo form)
         {
-            _tgsRepository.DepositForms.Add(new DepositForm
-            {
-                Id = createFormId,
-                PlayerCode = form.PlayerCode,
-                BrandId = form.BrandId,
-                BrandPaymentId = form.BrandPaymentId,
-                Amount = form.Amount,
-                ApplyInfo = form.ApplyInfo,
-                PaymentReturn = form.PaymentReturn
-            });
+            var currentDate = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.DepositForms
+                .AddAsync(new DepositForm
+                {
+                    Id = createFormId,
+                    PlayerCode = form.PlayerCode,
+                    BrandId = form.BrandId,
+                    BrandPaymentId = form.BrandPaymentId,
+                    Amount = form.Amount,
+                    ApplyInfo = form.ApplyInfo,
+                    PaymentReturn = form.PaymentReturn,
+                    CreatedOn = currentDate,
+                    UpdatedOn = currentDate
+                })
+                .ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask CreateWithdrawFormAsync(Guid createFormId, WithdrawFormCreateInfo form)
+        {
+            var currentDate = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.WithdrawForms
+                .AddAsync(new WithdrawForm
+                {
+                    Id = createFormId,
+                    BrandId = form.BrandId,
+                    PlayerCode = form.PlayerCode,
+                    BrandPaymentId = form.BrandPaymentId,
+                    Amount = form.Amount,
+                    BankInfoId = form.BankInfoId,
+                    BankInfo = form.BankInfo,
+                    ApplyInfo = form.ApplyInfo,
+                    PaymentReturn = form.PaymentReturn,
+                    CreatedOn = currentDate,
+                    UpdatedOn = currentDate
+                })
+                .ConfigureAwait(false);
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -78,7 +108,22 @@ namespace TGS.Payment.Repositories
 
         public IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync()
             => _tgsRepository.PaymentMethods.AsAsyncEnumerable()
-                .Select(row => new PaymentMethodInfo(row.Id, row.Code));
+                .Select(row => new PaymentMethodInfo(row.Id, row.Code, row.BankType));
+
+        public async ValueTask<BankInfo> GetBankInfoByIdAsync(Guid id)
+        {
+            var bankInfo = await _tgsRepository.PlayerBankInfos
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            return new BankInfo(
+                bankInfo.Id,
+                bankInfo.PlayerCode,
+                bankInfo.BrandId,
+                bankInfo.PaymentChannelId,
+                bankInfo.BankType,
+                bankInfo.Detail);
+        }
 
         public IAsyncEnumerable<BankInfo> GetBankInfosByPlayerCodeAsync(string playerCode)
             => _tgsRepository.PlayerBankInfos.AsAsyncEnumerable()
@@ -135,7 +180,12 @@ namespace TGS.Payment.Repositories
                     From = row.DepositedAmountMin,
                     To = row.DepositedAmountUnlimited ? decimal.MaxValue : row.DepositedAmountMax
                 },
-                row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll);
+                row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
+                row.TransferType switch
+                {
+                    PaymentTransferType.Withdrawal => TransferTypes.Withdraw,
+                    _ => TransferTypes.Deposit,
+                });
         }
 
         public IAsyncEnumerable<BrandPaymentInfo> GetBrandPaymentsAsync(Guid brandId)
@@ -167,7 +217,12 @@ namespace TGS.Payment.Repositories
                     From = bp.DepositedAmountMin,
                     To = bp.DepositedAmountUnlimited ? decimal.MaxValue : bp.DepositedAmountMax
                 },
-                bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll));
+                bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
+                bp.TransferType switch
+                {
+                    PaymentTransferType.Withdrawal => TransferTypes.Withdraw,
+                    _ => TransferTypes.Deposit
+                }));
         }
 
         public IAsyncEnumerable<BrandPaymentVip> GetBrandPaymentVipListAsync(IEnumerable<Guid> brandPaymentIds)
@@ -207,6 +262,53 @@ namespace TGS.Payment.Repositories
         {
             return _tgsRepository.PaymentMethodChannels.ToAsyncEnumerable()
                 .Select(pmc => new PaymentMethodChannelInfo(pmc.Id, pmc.PaymentId, pmc.MethodId, pmc.ChannelId));
+        }
+
+        public ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid formId)
+        {
+            var query = from df in _tgsRepository.WithdrawForms
+                            .Include(f => f.Player)
+                            .Include(f => f.BrandPayment)
+                            .ThenInclude(bp => bp.PaymentMethodChannel)
+                            .AsAsyncEnumerable()
+                        where df.Id == formId
+                        select new WithdrawFormInfo(
+                            df.Id,
+                            df.PlayerCode,
+                            df.Player.Username,
+                            df.BrandId,
+                            df.Amount,
+                            df.Status,
+                            df.Remark,
+                            df.BankInfoId,
+                            df.CreatedOn,
+                            df.UpdatedOn,
+                            df.BrandPaymentId,
+                            df.BrandPayment?.ChannelName,
+                            df.BrandPayment?.PaymentMethodChannel?.MethodId,
+                            df.BankInfo,
+                            df.ApplyInfo,
+                            df.PaymentReturn);
+
+            return query.SingleAsync();
+        }
+
+        public async ValueTask SignOffWithdrawFormAsync(Guid formId, ReviewStatus reviewStatus, string? remark)
+        {
+            var formData = await _tgsRepository.WithdrawForms
+                .FindAsync(formId)
+                .ConfigureAwait(false);
+
+            formData.Status = reviewStatus switch
+            {
+                ReviewStatus.Approve => 8000,
+                ReviewStatus.Reject => 7000,
+                _ => formData.Status
+            };
+            formData.Remark = remark;
+            formData.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn)

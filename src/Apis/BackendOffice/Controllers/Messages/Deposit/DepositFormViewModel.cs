@@ -12,9 +12,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         public Guid BrandId { get; init; }
 
-        public Guid BrandPaymentId { get; init; }
+        public Guid? BrandPaymentId { get; init; }
 
-        public Guid PaymentMethodId { get; init; }
+        public Guid? PaymentMethodId { get; init; }
 
         public string ChannelName { get; init; }
 

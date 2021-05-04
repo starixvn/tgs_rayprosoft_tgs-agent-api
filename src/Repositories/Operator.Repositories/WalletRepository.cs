@@ -10,7 +10,7 @@ using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories
 {
-    internal class WalletRepository : IWalletRepository
+    internal class WalletRepository : IPlayerRepository
     {
         private readonly ITgsRepository _tgsRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;

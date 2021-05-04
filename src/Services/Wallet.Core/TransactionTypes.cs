@@ -1,4 +1,4 @@
-﻿namespace TGS.Services.Wallet
+﻿namespace TGS.Services.WalletService
 {
     public enum TransactionTypes
     {
