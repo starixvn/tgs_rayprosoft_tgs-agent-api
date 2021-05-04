@@ -5,7 +5,7 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build AS publish
+FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 ARG BuildConfiguration=Release
 RUN --mount=type=secret,id=nuget,dst=/pat cp /pat ~/.nuget/NuGet/NuGet.Config
 RUN dotnet nuget remove source 'Microsoft Visual Studio Offline Packages' || true
@@ -19,9 +19,9 @@ COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataService
 COPY ["src/Core/Models/Models.csproj", "src/Core/Models/"]
 COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructures/"]
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
-COPY ["Services/Promotion.Core/PromotionCore.csproj", "Services/Promotion.Core/"]
 COPY ["src/Services/Bucket/PlayerBucket.Core.csproj", "src/Services/Bucket/"]
 COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
+COPY ["Services/Promotion.Core/Promotion.Core.csproj", "Services/Promotion.Core/"]
 COPY ["src/Services/Wallet.Core/Wallet.Core.csproj", "src/Services/Wallet.Core/"]
 COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataServices.Report/"]
 COPY ["src/Repositories/BackOffice.Repositories/BackOffice.Repositories.csproj", "src/Repositories/BackOffice.Repositories/"]
@@ -35,7 +35,11 @@ COPY ["src/Repositories/PlayerBucket.Repositories/PlayerBucket.Repositories.cspr
 RUN dotnet restore "src/Apis/PromotionApi/PromotionApi.csproj"
 COPY . .
 WORKDIR "/src/src/Apis/PromotionApi"
-RUN dotnet build "PromotionApi.csproj" -c ${BuildConfiguration} -o /app/publish --no-restore
+RUN dotnet build "PromotionApi.csproj" -c ${BuildConfiguration} -o /app/build
+
+FROM build AS publish
+ARG BuildConfiguration
+RUN dotnet publish "PromotionApi.csproj" -c ${BuildConfiguration} -o /app/publish
 
 FROM base AS final
 WORKDIR /app
