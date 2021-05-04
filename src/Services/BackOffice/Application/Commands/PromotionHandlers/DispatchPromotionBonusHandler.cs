@@ -9,7 +9,7 @@ using TGS.Services.PlayerBucket.Core;
 using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.Promotion.Core;
 using TGS.Services.Promotion.Core.Models.PromotionDispatch;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 {

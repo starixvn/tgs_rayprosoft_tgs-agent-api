@@ -16,7 +16,7 @@ using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.Promotion.Core;
 using TGS.Services.Promotion.Core.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Services.Report.Application.Commands.Promotion
 {
@@ -24,12 +24,13 @@ namespace TGS.Services.Report.Application.Commands.Promotion
         CreatePromotionBonusMonthlyHandler : Handler<CreatePromotionBonusMonthlyRequest,
             MessageResponse>
     {
+        private static readonly DateTimeOffset _CurrentFirstDayOfMonth = _Now.GetFirstDayOfMonth();
+
         private static readonly DateTimeOffset _Now = new(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
-            DateTimeOffset.Now.Day, 0, 0, 0, new(8, 0, 0));
+                    DateTimeOffset.Now.Day, 0, 0, 0, new(8, 0, 0));
 
         private static readonly DateTimeOffset _PreviousFirstDayOfMonth = _Now.AddMonths(-1).GetFirstDayOfMonth();
         private static readonly DateTimeOffset _PreviousLastDayOfMonth = _Now.AddMonths(-1).GetLastDayOfMonth();
-        private static readonly DateTimeOffset _CurrentFirstDayOfMonth = _Now.GetFirstDayOfMonth();
         private readonly IPlayerBucketService _playerBucketService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly ITgsPlayerService _playerService;
@@ -122,13 +123,13 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             var players = await _playerService.GetPlayerQueries()
                 .Where(x => playerCodes.Contains(x.PlayerCode))
-                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
+                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
                 .ToArrayAsync(cancellationToken);
 
             var playerBuckets = autoSentPlayerBonuses
                 .SelectMany(x =>
                 {
-                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new {pb, p})
+                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new { pb, p })
                         .Select(p => new
                         {
                             x.BrandId,

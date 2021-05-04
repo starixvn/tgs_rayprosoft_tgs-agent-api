@@ -9,6 +9,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Wallet.Repositories
 {
@@ -57,14 +58,14 @@ namespace TGS.Wallet.Repositories
                                 Balance = postBalance,
                                 Type = transactionType switch
                                 {
-                                    TransactionTypes.Deposit    => TransactionType.Deposit,
+                                    TransactionTypes.Deposit => TransactionType.Deposit,
                                     TransactionTypes.Withdrawal => TransactionType.Withdrawal,
-                                    TransactionTypes.Adjust     => TransactionType.Adjust,
-                                    TransactionTypes.Bonus      => TransactionType.Bonus,
-                                    TransactionTypes.Rebate     => TransactionType.Rebate,
-                                    TransactionTypes.Dividend   => TransactionType.Dividend,
-                                    TransactionTypes.Promotion  => TransactionType.Promotion,
-                                    _                           => TransactionType.Other
+                                    TransactionTypes.Adjust => TransactionType.Adjust,
+                                    TransactionTypes.Bonus => TransactionType.Bonus,
+                                    TransactionTypes.Rebate => TransactionType.Rebate,
+                                    TransactionTypes.Dividend => TransactionType.Dividend,
+                                    TransactionTypes.Promotion => TransactionType.Promotion,
+                                    _ => TransactionType.Other
                                 },
                                 RecordedOn = DateTimeOffset.Now
                             })

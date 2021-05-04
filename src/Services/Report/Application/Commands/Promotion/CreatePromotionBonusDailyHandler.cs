@@ -16,7 +16,7 @@ using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.Promotion.Core;
 using TGS.Services.Promotion.Core.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Services.Report.Application.Commands.Promotion
 {
@@ -72,7 +72,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                     x => promotionIds.Contains(x.PromotionId) && reportDate == x.From &&
                         reportDate == x.To, cancellationToken))
             {
-                return new() {Valid = false, Message = $"Promotion bonus report date {reportDate} is already existed."};
+                return new() { Valid = false, Message = $"Promotion bonus report date {reportDate} is already existed." };
             }
 
             var gameProviderIds = promotions.SelectMany(x => x.PromotionGameProviders).Select(x => x.GameProviderId)
@@ -117,13 +117,13 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             var players = await _playerService.GetPlayerQueries()
                 .Where(x => playerCodes.Contains(x.PlayerCode))
-                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
+                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
                 .ToArrayAsync(cancellationToken);
 
             var playerBuckets = autoSentPlayerBonuses
                 .SelectMany(x =>
                 {
-                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new {pb, p})
+                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new { pb, p })
                         .Select(p => new
                         {
                             x.BrandId,

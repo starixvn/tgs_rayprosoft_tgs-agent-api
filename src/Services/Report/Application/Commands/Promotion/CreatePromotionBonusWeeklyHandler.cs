@@ -16,7 +16,7 @@ using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.Promotion.Core;
 using TGS.Services.Promotion.Core.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
-using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Services.Report.Application.Commands.Promotion
 {
@@ -61,7 +61,6 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                     x.To >= _PreviousMonday && x.To <= _PreviousSunday ||
                     x.From < _PreviousMonday && x.To > _PreviousSunday
                 ).ToArrayAsync(cancellationToken);
-
 
             var promotionIds = promotions.Select(x => x.Id);
 
@@ -121,13 +120,13 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             var players = await _playerService.GetPlayerQueries()
                 .Where(x => playerCodes.Contains(x.PlayerCode))
-                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
+                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
                 .ToArrayAsync(cancellationToken);
 
             var playerBuckets = autoSentPlayerBonuses
                 .SelectMany(x =>
                 {
-                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new {pb, p})
+                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new { pb, p })
                         .Select(p => new
                         {
                             x.BrandId,
