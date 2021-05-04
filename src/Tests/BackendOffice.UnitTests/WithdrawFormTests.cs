@@ -41,17 +41,51 @@ namespace TGS.Tests.BackendOffice.UnitTests
         public async Task Manager_Can_Review_WithdrawForm()
         {
             var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqWithdrawProcessorFactory = new Mock<IWithdrawProcessorFactory>();
 
-            var sut = new ReviewWithdrawFormCommandService(moqPaymentRepository.Object);
+            var sut = new ReviewWithdrawFormCommandService(moqPaymentRepository.Object, moqWithdrawProcessorFactory.Object);
 
             var formId = Guid.NewGuid();
-            var command = new ReviewWithdrawFormCommand(formId, ReviewStatus.Approve, null);
+            var brandPaymentId = Guid.NewGuid();
+            var command = new ReviewWithdrawFormCommand(
+                formId,
+                brandPaymentId,
+                ReviewStatus.Approve,
+                null);
+
+            moqPaymentRepository
+                .Setup(fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == brandPaymentId)))
+                .Returns(ValueTask.FromResult(new BrandPaymentInfo(
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "TestChannel",
+                    "{}",
+                    new ValueRange<decimal>
+                    {
+                        From = 0M,
+                        To = 1000M
+                    },
+                    true,
+                    false,
+                    false,
+                    new ValueRange<decimal>
+                    {
+                        From = 0M,
+                        To = decimal.MaxValue
+                    },
+                    ConditionMatchTypes.MatchOne,
+                    TransferTypes.Withdraw)));
 
             await sut.ExecuteAsync(command);
 
             moqPaymentRepository.Verify(
                 fake => fake.SignOffWithdrawFormAsync(
                     It.Is<Guid>(x => x == formId),
+                    It.Is<Guid>(x => x == brandPaymentId),
+                    It.IsAny<string>(),
                     It.Is<ReviewStatus>(x => x == ReviewStatus.Approve),
                     It.IsAny<string>()),
                 Times.Exactly(1));

@@ -7,6 +7,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment
     {
         public bool AllPlayers { get; set; }
 
+        public string BankType { get; set; }
+
         public string[] Blacklist { get; set; }
 
         public Guid BrandId { get; set; }
