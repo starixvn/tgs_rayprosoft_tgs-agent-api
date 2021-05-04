@@ -42,7 +42,7 @@ export const get = (
     return fetch(url, { headers, ...options }).then(toDataOrError)
 }
 
-export const put = (url, {}) => fetchApi("PUT", url, options)
+export const put = (url, options) => fetchApi("PUT", url, options)
 
 export const post = (url, options) => fetchApi("POST", url, options)
 

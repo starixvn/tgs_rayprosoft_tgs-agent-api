@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="DataInitializers\Games\KY.csv" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -31,6 +27,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_action_external_ids.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_valid_game_action_external_ids.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_round_aggregates.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\agent_wallet_update_wallet_balance.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\brands.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\payments.sql" />

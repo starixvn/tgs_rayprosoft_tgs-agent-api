@@ -1,4 +1,4 @@
-﻿namespace Report.Client
+﻿namespace TGS.Clients.Report.Client
 {
     public record ReportSettings
     {

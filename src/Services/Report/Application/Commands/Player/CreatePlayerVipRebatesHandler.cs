@@ -6,30 +6,38 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 using TGS.Services.Report.Infrastructure.DataService;
+using TGS.Services.WalletService;
 
 namespace TGS.Services.Report.Application.Commands.Player
 {
     public class
         CreatePlayerVipRebatesHandler : Handler<CreatePlayerRebateRequest,
-            CreatePlayerRebateResponse>
+            MessageResponse>
     {
         private readonly ITgsBrandService _brandService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly IPlayerRebateService _playerRebateService;
+        private readonly ITgsPlayerService _playerService;
+        private readonly IWalletRepository _walletRepository;
 
         public CreatePlayerVipRebatesHandler(ITgsBrandService brandService,
             IPlayerRebateService playerRebateService,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
+            IWalletRepository walletRepository,
+            ITgsPlayerService playerService,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _brandService = brandService;
             _playerRebateService = playerRebateService;
             _playerGameTypeAggregateService = playerGameTypeAggregateService;
+            _walletRepository = walletRepository;
+            _playerService = playerService;
         }
 
-        public override async Task<CreatePlayerRebateResponse> Handle(CreatePlayerRebateRequest request,
+        public override async Task<MessageResponse> Handle(CreatePlayerRebateRequest request,
             CancellationToken cancellationToken)
         {
             var previousDay = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddDays(-1);
@@ -113,21 +121,39 @@ namespace TGS.Services.Report.Application.Commands.Player
 
             if (playerRebates.Length <= 0)
             {
-                return new() {Valid = false, Message = "Has no player rebate data."};
+                return new() { Valid = false, Message = "Has no player rebate data." };
             }
-
-            await _playerRebateService.CreatePlayerRebatesAsync(playerRebates);
 
             var brandIds = playerRebates.Select(x => x.BrandId);
             var brands = await _brandService.GetBrandQueries().Where(x => brandIds.Contains(x.Id))
                 .ToArrayAsync(cancellationToken);
 
-            var playerBonus = playerRebates
-                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
+            var playerBonuses = playerRebates
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new { player, brand })
                 .Where(x => x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
+            var playerBonusesNotSend = playerRebates
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new { player, brand })
+                .Where(x => !x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
-            return new() {Valid = true, PlayerRebates = playerBonus};
+            var players = await _playerService.GetPlayerQueries()
+                .Where(x => playerBonuses.Select(p => p.PlayerCode).Contains(x.PlayerCode))
+                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
+                .ToArrayAsync(cancellationToken);
+
+            await _playerRebateService.CreatePlayerRebatesAsync(playerBonuses, DateTimeOffset.Now);
+
+            await _playerRebateService.CreatePlayerRebatesAsync(playerBonusesNotSend, null);
+
+            foreach (var playerBonus in playerBonuses.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
+                (pb, p) => new { pb, p }))
+            {
+                await _walletRepository.ExchangeAsync(playerBonus.pb.BrandId, playerBonus.p.DefaultWalletId,
+                    playerBonus.pb.PlayerCode, TransactionTypes.Rebate,
+                    playerBonus.pb.RebateAmount);
+            }
+
+            return CreateValidResponse<MessageResponse>();
         }
     }
 }

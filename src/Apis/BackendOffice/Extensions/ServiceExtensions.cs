@@ -16,12 +16,13 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using Report.Client.Extensions;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
+using TGS.Clients.Promotion.Client.Extensions;
+using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Log;
@@ -29,7 +30,6 @@ using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -40,7 +40,6 @@ using TGS.Core.Models;
 using TGS.Services.BackOffice.Application.Extensions;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
-using TGS.Services.Report.Application.Extensions;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -65,7 +64,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient<IBrandPaymentService, BrandPaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
             services.AddBackOfficeApplicationServices();
-            services.AddReportServices();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
@@ -80,7 +78,14 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddTransactions()
-                .AddReportClientServices(configuration);
+                .AddReportClientServices(configuration)
+                .AddPromotionClientServices(configuration)
+                .AddPromotionRepositoriesServices()
+                .AddPlayerBucketRepositoriesServices();
+
+            services.AddWallet()
+                .AddTgsWalletRepositories()
+                .AddTgsAgentWalletRepositories();
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
@@ -137,7 +142,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[] { new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture) };
+                var supportedCultures = new[] {new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture)};
 
                 options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
@@ -151,7 +156,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             {
                 var config = sp.GetRequiredService<IConfiguration>();
 
-                httpClient.BaseAddress = new Uri(config.GetValue<string>("File:FileServiceBaseUrl"));
+                httpClient.BaseAddress = new(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
             services

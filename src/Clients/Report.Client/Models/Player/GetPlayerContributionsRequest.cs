@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client.Models.Player
+namespace TGS.Clients.Report.Client.Models.Player
 {
     public class GetPlayerContributionsRequest : PageableRequest
     {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace TGS.Services.Wallet
+namespace TGS.Services.WalletService
 {
     public interface IWalletRepository
     {
-        ValueTask<Guid> ExchangeAsync(
+        ValueTask<(Guid TranscationId, decimal PostBalance)> ExchangeAsync(
             Guid brandId,
             Guid walletId,
             string playerCode,

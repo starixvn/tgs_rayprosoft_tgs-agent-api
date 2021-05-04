@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>TGS.Services.PlayerBucket.Core</AssemblyName>
+    <RootNamespace>TGS.Services.PlayerBucket.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+  </ItemGroup>
+
+</Project>

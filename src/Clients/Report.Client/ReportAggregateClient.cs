@@ -1,13 +1,13 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
-using Report.Client.Models.Agent;
-using Report.Client.Models.Aggregate;
-using Report.Client.Models.Player;
+using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Clients.Report.Client.Models.Aggregate;
+using TGS.Clients.Report.Client.Models.Player;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client
+namespace TGS.Clients.Report.Client
 {
     public interface IReportAggregateClient
     {

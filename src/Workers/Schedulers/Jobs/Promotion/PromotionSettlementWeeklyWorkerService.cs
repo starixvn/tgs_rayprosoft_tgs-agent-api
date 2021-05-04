@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Report.Client;
+using TGS.Clients.Promotion.Client;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Workers.Schedulers.Jobs.Promotion
@@ -12,10 +12,10 @@ namespace TGS.Workers.Schedulers.Jobs.Promotion
 
     public class PromotionSettlementWeeklyWorkerService : IPromotionSettlementWeeklyWorkerService
     {
-        private readonly IPromotionSettlementClient _client;
+        private readonly IPromotionBonusClient _client;
 
         public PromotionSettlementWeeklyWorkerService(
-            IPromotionSettlementClient client)
+            IPromotionBonusClient client)
         {
             _client = client;
         }

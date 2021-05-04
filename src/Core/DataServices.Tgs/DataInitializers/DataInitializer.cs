@@ -395,7 +395,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             CreatedOn = Now,
                             UpdatedOn = Now
                         }
-                    },
+                    }
                 //Banks = new[]
                 //{
                 //    new PlayerBankInfo
@@ -759,6 +759,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 CurrentSettlementTo = currentToDate,
                 NextSettlementFrom = nextFromDate,
                 NextSettlementTo = nextToDate,
+                AutoSentAgentBonus = true,
+                AutoSentPlayerBonus = true,
                 Currencies =
                     brand.Currencies.Select(curr => new BrandCurrency
                     {

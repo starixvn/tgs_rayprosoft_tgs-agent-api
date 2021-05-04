@@ -8,40 +8,47 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
 using TGS.Services.Report.Infrastructure.DataService;
+using TGS.Services.Wallet;
+using TGS.Services.WalletService;
 
 namespace TGS.Services.Report.Application.Commands.Agent
 {
     public class
         CreateAgentDividendsHandler : Handler<CreateAgentDividendsRequest,
-            CreateAgentDividendsResponse>
+            MessageResponse>
     {
         private readonly IAgentDividendService _agentDividendService;
         private readonly ITgsAgentService _agentService;
         private readonly ITgsBrandService _brandService;
         private readonly IPlayerAggregateService _playerAggregateService;
+        private readonly IAgentWalletRepository _walletRepository;
 
         public CreateAgentDividendsHandler(
             IPlayerAggregateService playerAggregateService,
             ITgsAgentService agentService,
             ITgsBrandService brandService,
             IAgentDividendService agentDividendService,
+            IAgentWalletRepository walletRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
             _brandService = brandService;
             _playerAggregateService = playerAggregateService;
             _agentDividendService = agentDividendService;
+            _walletRepository = walletRepository;
         }
 
-        public override async Task<CreateAgentDividendsResponse> Handle(CreateAgentDividendsRequest request,
+        public override async Task<MessageResponse> Handle(CreateAgentDividendsRequest request,
             CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
             var brands = await _brandService.GetBrandQueries(q => q.Where(x => now.Date > x.CurrentSettlementTo))
                 .ToArrayAsync(cancellationToken);
             var createModels = new List<CreateAgentDividendModel>();
+            var createAutoSendModels = new List<CreateAgentDividendModel>();
 
             foreach (var brand in brands)
             {
@@ -217,7 +224,14 @@ namespace TGS.Services.Report.Application.Commands.Agent
                             CreatedOn = DateTimeOffset.Now
                         }).ToList();
 
-                createModels.AddRange(agentDividends);
+                if (brand.AutoSentAgentBonus)
+                {
+                    createAutoSendModels.AddRange(agentDividends);
+                }
+                else
+                {
+                    createModels.AddRange(agentDividends);
+                }
 
                 var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
                     BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType);
@@ -230,21 +244,29 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 brand.NextSettlementTo = nextToDate;
             }
 
-            await using var reportTransaction =
-                await _agentDividendService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             await using var tgsTransaction =
                 await _brandService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
-            await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray());
+            await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray(), null);
+
+            await _agentDividendService.CreateAgentDividendsAsync(createAutoSendModels.ToArray(), DateTimeOffset.Now);
 
             await _brandService.UpdateBrandsAsync(brands);
 
-            //await _brandService.CreateAgentTransactionsAsync(createModels.ToArray());
-
-            await reportTransaction.CommitAsync(cancellationToken);
             await tgsTransaction.CommitAsync(cancellationToken);
 
-            return new() {Valid = true, AgentDividends = createModels.ToArray()};
+
+            var createdAgentIds = createAutoSendModels.Select(x => x.AgentId).ToArray();
+            var createdAgents = await _agentService.GetAgentQueries().Where(x => createdAgentIds.Contains(x.Id))
+                .ToArrayAsync(cancellationToken);
+
+            createAutoSendModels.ForEach(async x =>
+            {
+                var agent = createdAgents.Single(a => a.Id == x.AgentId);
+                await _walletRepository.ExchangeAsync(x.BrandId, agent.DefaultWalletId, agent.Id,
+                    TransactionTypes.Dividend, x.AgentDividendAmount);
+            });
+            return CreateValidResponse<MessageResponse>();
         }
     }
 }
