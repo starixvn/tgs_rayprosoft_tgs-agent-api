@@ -16,8 +16,8 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Shared.Game.ApiClients.KY;
+using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.KY.Commons;
-using TGS.Shared.Game.Models.KY.Defines;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
@@ -60,7 +60,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
 
             var data = new KYGameRecordRequest()
             {
-                Action = (int)KYAction.GameRecord,
+                Action = KYUtility.GetAction(GPAction.GameRecord) ?? -1,
                 StartTime = request.StartTime,
                 EndTime = request.EndTime,
             };

@@ -11,8 +11,8 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.KY;
+using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.KY.Commons;
-using TGS.Shared.Game.Models.KY.Defines;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY.Services
@@ -50,7 +50,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYFnudRequest()
             {
-                Action = (int)KYAction.FnudIn,
+                Action = KYUtility.GetAction(GPAction.FnudIn) ?? -1,
                 PlayerCode = player.PlayerCode,
                 Amount = amount,
                 OrderId = orderId
@@ -95,7 +95,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYFnudRequest()
             {
-                Action = (int)KYAction.FnudOut,
+                Action = KYUtility.GetAction(GPAction.FnudOut) ?? -1,
                 PlayerCode = player.PlayerCode,
                 Amount = amount,
                 OrderId = orderId
@@ -140,7 +140,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYGetBlaanceRequest()
             {
-                Action = (int)KYAction.GetBalance,
+                Action = KYUtility.GetAction(GPAction.GetBalance) ?? -1,
                 PlayerCode = player.PlayerCode
             };
             var dataPath = KYUtility.GetPath(data);

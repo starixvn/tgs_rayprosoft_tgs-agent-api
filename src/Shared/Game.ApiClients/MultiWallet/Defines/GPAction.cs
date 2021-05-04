@@ -4,40 +4,41 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.KY.Defines
+namespace TGS.Shared.Game.ApiClients.MultiWallet.Defines
 {
-    /// <summary>
-    /// KY Action
-    /// </summary>
-    public enum KYAction
+    public enum GPAction
     {
         /// <summary>
         /// The get game URL
         /// </summary>
-        GetGameUrl = 0,
+        GetGameUrl,
         /// <summary>
         /// The get balance
         /// </summary>
-        GetBalance = 1,
+        GetBalance,
         /// <summary>
         /// The fnud out(Tgs -> Gp)
         /// </summary>
-        FnudOut = 2,
+        FnudOut,
         /// <summary>
         /// The fnud in(GP -> Tgs)
         /// </summary>
-        FnudIn = 3,
+        FnudIn,
         /// <summary>
         /// The fund checking
         /// </summary>
-        FundChecking = 4,
+        FundChecking,
         /// <summary>
         /// The kick
         /// </summary>
-        Kick = 8,
+        Kick,
         /// <summary>
         /// The game record
         /// </summary>
-        GameRecord = 6
+        GameRecord,
+        /// <summary>
+        /// The create player
+        /// </summary>
+        CreatePlayer,
     }
 }

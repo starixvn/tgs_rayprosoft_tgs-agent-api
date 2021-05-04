@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 
 namespace TGS.Shared.Game.ApiClients.KY
 {
@@ -11,6 +12,33 @@ namespace TGS.Shared.Game.ApiClients.KY
     /// </summary>
     public static class KYUtility
     {
+        private static readonly Dictionary<GPAction, int> _MapAction;
+
+        /// <summary>
+        /// Initializes the <see cref="KYUtility"/> class.
+        /// </summary>
+        static KYUtility()
+        {
+            _MapAction = new Dictionary<GPAction, int>();
+            _MapAction.Add(GPAction.GetGameUrl, 0);
+            _MapAction.Add(GPAction.GetBalance, 1);
+            _MapAction.Add(GPAction.FnudOut, 2);
+            _MapAction.Add(GPAction.FnudIn, 3);
+            _MapAction.Add(GPAction.FundChecking, 4);
+            _MapAction.Add(GPAction.Kick, 8);
+            _MapAction.Add(GPAction.GameRecord, 6);
+        }
+
+        /// <summary>
+        /// Gets the action.
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <returns></returns>
+        public static int? GetAction(GPAction action)
+        {
+            return _MapAction.Where(x => x.Key == action).FirstOrDefault().Value;
+        }
+
         /// <summary>
         /// Gets the path.
         /// </summary>

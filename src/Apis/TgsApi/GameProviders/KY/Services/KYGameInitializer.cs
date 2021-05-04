@@ -16,8 +16,8 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.KY;
+using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.KY.Commons;
-using TGS.Shared.Game.Models.KY.Defines;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY.Services
@@ -26,11 +26,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IKYApiClient _client;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
-        private readonly ITokenProvider _tokenProvider;
         private readonly IHashProvider _hashProvider;
         private readonly IRequestAnalyzer _requestAnalyzer;
 
@@ -38,33 +35,23 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             IHttpContextAccessor httpContextAccessor,
             IKYApiClient client,
             IHashProvider hashProvider,
-            ITokenProvider tokenProvider,
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
-            IBrandOperations brandOperations,
-            IGameProviderOperations gameProviderOperations,
             IRequestAnalyzer requestAnalyzer
             )
         {
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
-            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _requestAnalyzer = requestAnalyzer ?? throw new ArgumentNullException(nameof(requestAnalyzer));
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
-            var token = request.Token;
-            var loginTokenId = token.LoginRecordId;
-            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
 
-            var player = await _playerOperations.GetCachedPlayerAsync(token.PlayerCode);
-
+            var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
 
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
@@ -74,13 +61,13 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var date = DateTimeOffset.UtcNow.AddHours(+8);
             var timestamp = date.ToUnixTimeMilliseconds();
-            var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{token.PlayerCode}";
+            var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
             var ip = _requestAnalyzer.GetIp(_httpContextAccessor.HttpContext);
 
             var data = new KYGameUrlRequest()
             {
-                Action = (int)KYAction.GetGameUrl,
-                PlayerCode = token.PlayerCode,
+                Action = KYUtility.GetAction(GPAction.GetGameUrl) ?? -1,
+                PlayerCode = player.PlayerCode,
                 OrderId = orderId,
                 Amount = 0m,
                 IP = ip,
