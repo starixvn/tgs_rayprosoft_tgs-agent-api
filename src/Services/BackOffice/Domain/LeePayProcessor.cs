@@ -9,7 +9,7 @@ namespace TGS.Services.BackOffice.Domain
 
         public string MakeApplyInfo(Guid formId, decimal amount, BrandPaymentInfo brandPayment)
         {
-            return "";
+            return "{}";
         }
     }
 }
