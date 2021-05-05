@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Json.JsonConverters;
+using TGS.Core.Models;
 using TGS.Shared.Game.Models.Saba.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.Saba
@@ -32,8 +33,9 @@ namespace TGS.Shared.Game.ApiClients.Saba
             var value = Json.SerializeToString(request, options);
             var parameters = Json.DeserializeFromString<Dictionary<string, string>>(value, options);
 
+            var prefix = $"{Consts.GameProvider.Saba}.CreateMember";
             return ExecuteFormRequestAsync<CreateMemberResponse>(apiUrl,
-                "api/CreateMember", parameters);
+                "api/CreateMember", parameters, logPrefix: prefix);
         }
 
         ValueTask<LoginResponse> ISabaApiClient.LoginAsync(Uri apiUrl, LoginRequest request)
@@ -41,8 +43,9 @@ namespace TGS.Shared.Game.ApiClients.Saba
             var value = Json.SerializeToString(request);
             var parameters = Json.DeserializeFromString<Dictionary<string, string>>(value);
 
+            var prefix = $"{Consts.GameProvider.Saba}.Login";
             return ExecuteFormRequestAsync<LoginResponse>(apiUrl,
-                "api/LogIn", parameters);
+                "api/LogIn", parameters, logPrefix: prefix);
         }
     }
 }

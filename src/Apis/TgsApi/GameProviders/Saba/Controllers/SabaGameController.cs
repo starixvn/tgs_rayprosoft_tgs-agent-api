@@ -314,7 +314,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 
         private async ValueTask CacheExternalRoundIdMapAsync(TransactionData[] transactions)
         {
-            foreach (var t in transactions)
+            foreach (var t in transactions.Where(t => t.GameActionType == GameActionType.PlaceBet))
             {
                 await _cacheManager.SafeCacheForeverAsync(SabaConsts.RedisKey.SabaTxIdMap, t.ExternalTransactionId,
                     t.ExternalRoundId);

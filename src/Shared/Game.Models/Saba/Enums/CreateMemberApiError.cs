@@ -11,7 +11,7 @@
         DuplicatedVendorMemberId = 6,
         MinTransferGreaterThanMaxTransfer = 7,
         InvalidArgument = 8,
-        InvalidCredential = 9,
+        InvalidVendorId = 9,
         SystemUnderMaintenance = 10,
         MinTransferLessThanOne = 11,
         IdExceedLengthLimit = 12
