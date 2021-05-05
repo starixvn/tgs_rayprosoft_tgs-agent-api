@@ -7,9 +7,12 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static PaymentConfiguration AddPayment(this IServiceCollection services)
         {
-            services.AddSingleton<IWithdrawProcessorFactory, WithdrawProcessorFactory>();
+            var configuration = new PaymentConfiguration(services);
 
-            return new PaymentConfiguration(services);
+            services.AddSingleton<IWithdrawProcessorFactory>(
+                sp => ActivatorUtilities.CreateInstance<WithdrawProcessorFactory>(sp, configuration.GetAllRegisterWithdrawProcessorTypes()));
+
+            return configuration;
         }
     }
 }
