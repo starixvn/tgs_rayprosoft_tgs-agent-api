@@ -64,7 +64,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 command.BrandId,
                 Guid.NewGuid(),
                 "Bank",
-                "detail");
+                "{}");
 
             var expected = new WithdrawFormCreateInfo(
                 command.PlayerCode,
@@ -74,7 +74,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 command.BankInfoId,
                 BankInfo: jsonSerializationProvider.SerializeToString(
-                    fakeBankInfo,
+                    new
+                    {
+                        fakeBankInfo.Id,
+                        fakeBankInfo.PaymentChannelId,
+                        fakeBankInfo.BankType,
+                        Detail = jsonSerializationProvider.DeserializeFromString<JsonDocument>(fakeBankInfo.Detail, null)
+                    },
                     optionsAccessor.Value.JsonSerializerOptions)).ToExpectedObject();
 
             fakePaymentRepository

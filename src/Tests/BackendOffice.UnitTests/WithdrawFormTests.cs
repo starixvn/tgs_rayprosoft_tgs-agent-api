@@ -41,17 +41,74 @@ namespace TGS.Tests.BackendOffice.UnitTests
         public async Task Manager_Can_Review_WithdrawForm()
         {
             var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqWithdrawProcessorFactory = new Mock<IWithdrawProcessorFactory>();
 
-            var sut = new ReviewWithdrawFormCommandService(moqPaymentRepository.Object);
+            var sut = new ReviewWithdrawFormCommandService(moqPaymentRepository.Object, moqWithdrawProcessorFactory.Object);
 
             var formId = Guid.NewGuid();
-            var command = new ReviewWithdrawFormCommand(formId, ReviewStatus.Approve, null);
+            var brandPaymentId = Guid.NewGuid();
+            var command = new ReviewWithdrawFormCommand(
+                formId,
+                brandPaymentId,
+                ReviewStatus.Approve,
+                null);
+
+            moqPaymentRepository
+                .Setup(fake => fake.GetWithdrawFormByIdAsync(It.Is<Guid>(x => x == formId)))
+                .Returns(ValueTask.FromResult(new WithdrawFormInfo(
+                    formId,
+                    "ThisIsPlayerCode",
+                    "UserName",
+                    Guid.NewGuid(),
+                    1000M,
+                    1000,
+                    null,
+                    Guid.NewGuid(),
+                    DateTimeOffset.UtcNow,
+                    DateTimeOffset.UtcNow)));
+
+            moqPaymentRepository
+                .Setup(fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == brandPaymentId)))
+                .Returns(ValueTask.FromResult(new BrandPaymentInfo(
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "TestChannel",
+                    "{}",
+                    new ValueRange<decimal>
+                    {
+                        From = 0M,
+                        To = 1000M
+                    },
+                    true,
+                    false,
+                    false,
+                    new ValueRange<decimal>
+                    {
+                        From = 0M,
+                        To = decimal.MaxValue
+                    },
+                    ConditionMatchTypes.MatchOne,
+                    TransferTypes.Withdraw)));
+
+            moqPaymentRepository
+                .Setup(fake => fake.GetPaymentAsync(It.IsAny<Guid>()))
+                .Returns(ValueTask.FromResult(new PaymentInfo(Guid.NewGuid(), "LeePay")));
+
+            var moqProcessor = new Mock<IWithdrawProcessor>();
+            moqWithdrawProcessorFactory
+                .Setup(fake => fake.GetWithdrawProcessor(It.Is<string>(x => x == "LeePay")))
+                .Returns(moqProcessor.Object);
 
             await sut.ExecuteAsync(command);
 
             moqPaymentRepository.Verify(
                 fake => fake.SignOffWithdrawFormAsync(
                     It.Is<Guid>(x => x == formId),
+                    It.Is<Guid>(x => x == brandPaymentId),
+                    It.IsAny<string>(),
                     It.Is<ReviewStatus>(x => x == ReviewStatus.Approve),
                     It.IsAny<string>()),
                 Times.Exactly(1));

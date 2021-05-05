@@ -38,7 +38,12 @@ namespace TGS.Services.Payment
 
         ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid formId);
 
-        ValueTask SignOffWithdrawFormAsync(Guid formId, ReviewStatus reviewStatus, string? remark = null);
+        ValueTask SignOffWithdrawFormAsync(
+            Guid formId,
+            Guid brandPaymentId,
+            string? applyInfo,
+            ReviewStatus reviewStatus,
+            string? remark = null);
 
         ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn);
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -46,136 +45,13 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             _auditLogQueries = auditLogQueries;
         }
 
-        [HttpGet]
-        [Description("Get brand payments")]
-        public Task<PagedResponse<BrandPaymentModel>>
-            GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request) =>
-            _brandPaymentService.GetPaymentQueries()
-                .Include(p => p.BrandPaymentPlayers)
-                .ThenInclude(pp => pp.Player)
-                .Include(p => p.VipLevels)
-                .Include(p => p.PaymentMethodChannel)
-                .ThenInclude(pmc => pmc.Payment)
-                .Include(p => p.PaymentMethodChannel)
-                .ThenInclude(pmc => pmc.Method)
-                .Include(p => p.PaymentMethodChannel)
-                .ThenInclude(pmc => pmc.Channel)
-                .Where(ResellerId, x => x.Brand.Licensee.ResellerId == ResellerId)
-                .Where(LicenseeId, x => x.Brand.LicenseeId == LicenseeId)
-                .Where(BrandId, x => x.BrandId == BrandId)
-                .Where(request.BrandId, x => x.BrandId == request.BrandId)
-                .Where(request.TransferType, x => x.TransferType == request.TransferType)
-                .Where(request.PaymentStatus, x => x.PaymentStatus == request.PaymentStatus)
-                .Select(x => new BrandPaymentModel
-                {
-                    Id = x.Id,
-                    BrandId = x.BrandId,
-                    Number = x.DisplayOrder,
-                    PaymentId = x.PaymentMethodChannel.Payment.Id,
-                    PaymentName = x.PaymentMethodChannel.Payment.Code,
-                    PaymentMethodId = x.PaymentMethodChannel.Method.Id,
-                    PaymentMethodName = x.PaymentMethodChannel.Method.Code,
-                    PaymentChannelId = x.PaymentMethodChannel.Channel.Id,
-                    PaymentChannelName = x.PaymentMethodChannel.Channel.Code,
-                    PaymentMethodChannelId = x.PaymentMethodChannel.Id,
-                    TransferType = x.TransferType,
-                    ChannelName = x.ChannelName,
-                    ExtendedData = x.ExtendedData,
-                    PlayerListCondition = x.PlayerListCondition,
-                    AllPlayers = x.AllPlayers,
-                    DepositedAmountMin = x.DepositedAmountMin,
-                    DepositedAmountMax = x.DepositedAmountMax,
-                    DepositedAmountUnlimited = x.DepositedAmountUnlimited,
-                    IdentityAuthentication = x.IdentityAuthentication,
-                    PhoneAuthentication = x.PhoneAuthentication,
-                    TransferLimitFrom = x.TransferLimitFrom,
-                    TransferLimitTo = x.TransferLimitTo,
-                    PaymentStatus = x.PaymentStatus,
-                    DesignatedUsers = GetDesignatedUsers(x).Any(),
-                    PaymentFee =
-                        new() { FeePercentage = x.FeePercentage, HighestFee = x.HighestFee, LowestFee = x.LowestFee },
-                    VipLevelIds = x.VipLevels.Select(p => p.VipLevelId).ToArray(),
-                    CreatedByUsername = x.CreatedByUsername,
-                    UpdatedByUsername = x.UpdatedByUsername,
-                    CreatedOn = x.CreatedOn,
-                    UpdatedOn = x.UpdatedOn
-                })
-                .CreatePagedResponseAsync(request);
-
-        //[HttpGet("{id}")]
-        //[Description("Get a Payment")]
-        //public async Task<GetBrandPaymentResponse> GetBrandPaymentMethodAsync(Guid id)
-        //{
-        //    var brandPayment = await _brandPaymentService.GetPaymentAsync(q => q.Id == id,
-        //        p => p
-        //            .Include(pm => pm.Payment)
-        //            .Include(pm => pm.PaymentMethod)
-        //            .Include(pm => pm.PaymentChannel)
-        //            .Include(pm => pm.BrandPaymentPlayers)
-        //            .ThenInclude(pp => pp.Player)
-        //            .Include(pm => pm.VipLevels)
-        //            .ThenInclude(pp => pp.VipLevel)
-        //            .AsNoTracking());
-        //    if (brandPayment == null)
-        //    {
-        //        return CreateInvalidResponse<GetBrandPaymentResponse>(Resources.BrandPayment.PaymentNotFound);
-        //    }
-
-        //    return new()
-        //    {
-        //        Valid = true,
-        //        Payment = new()
-        //        {
-        //            Id = brandPayment.Id,
-        //            BrandId = brandPayment.BrandId,
-        //            PaymentId = brandPayment.Payment.Id,
-        //            PaymentName = brandPayment.Payment.Name,
-        //            PaymentMethodId = brandPayment.Payment.Id,
-        //            PaymentMethodName = brandPayment.PaymentMethod.Name,
-        //            PaymentChannelId = brandPayment.PaymentMethod.Id,
-        //            PaymentChannelName = brandPayment.PaymentChannel.Name,
-        //            ChannelName = brandPayment.ChannelName,
-        //            TransferLimitFrom = brandPayment.TransferLimitFrom,
-        //            TransferLimitTo = brandPayment.TransferLimitTo,
-        //            PlayerListCondition = brandPayment.PlayerListCondition,
-        //            AllPlayers = brandPayment.AllPlayers,
-        //            IdentityAuthentication = brandPayment.IdentityAuthentication,
-        //            PhoneAuthentication = brandPayment.PhoneAuthentication,
-        //            DepositedAmountUnlimited = brandPayment.DepositedAmountUnlimited,
-        //            DepositedAmountMin = brandPayment.DepositedAmountMin,
-        //            DepositedAmountMax = brandPayment.DepositedAmountMax,
-        //            DesignatedUsers = brandPayment.BrandPaymentPlayers.Count > 0,
-        //            PaymentStatus = brandPayment.PaymentStatus,
-        //            Reason = brandPayment.Reason,
-        //            Whitelist = brandPayment.BrandPaymentPlayers.Where(p => p.ListType == PlayerListType.White)
-        //                .Select(p => p.Player.Username).ToArray(),
-        //            Blacklist = brandPayment.BrandPaymentPlayers.Where(p => p.ListType == PlayerListType.Black)
-        //                .Select(p => p.Player.Username).ToArray(),
-        //            VipLevelIds = brandPayment.VipLevels.Select(p => p.VipLevelId).ToArray(),
-        //            CreatedByUsername = brandPayment.CreatedByUsername,
-        //            UpdatedByUsername = brandPayment.UpdatedByUsername,
-        //            CreatedOn = brandPayment.CreatedOn,
-        //            UpdatedOn = brandPayment.UpdatedOn
-        //        }
-        //    };
-        //}
-
-        [HttpGet("{id}/handingFee")]
-        [Description("Get a Payment handing Fee")]
-        public async Task<GetPaymentFeeResponse> GetBrandPaymentHandingFeeAsync(Guid id)
+        [HttpPut("ChangeOrders")]
+        [Description("Change Payment Order")]
+        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
         {
-            var brandPayment = await _brandPaymentService.GetPaymentAsync(q => q.Id == id, p => p.AsNoTracking());
+            await _brandPaymentService.ChangeOrderAsync(request);
 
-            return new()
-            {
-                Valid = true,
-                PaymentFee = new()
-                {
-                    FeePercentage = brandPayment.FeePercentage,
-                    HighestFee = brandPayment.HighestFee,
-                    LowestFee = brandPayment.LowestFee
-                }
-            };
+            return CreateValidResponse<MessageResponse>();
         }
 
         [HttpPost]
@@ -258,6 +134,157 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             };
         }
 
+        [HttpGet("{id}/handingFee")]
+        [Description("Get a Payment handing Fee")]
+        public async Task<GetPaymentFeeResponse> GetBrandPaymentHandingFeeAsync(Guid id)
+        {
+            var brandPayment = await _brandPaymentService.GetPaymentAsync(q => q.Id == id, p => p.AsNoTracking());
+
+            return new()
+            {
+                Valid = true,
+                PaymentFee = new()
+                {
+                    FeePercentage = brandPayment.FeePercentage,
+                    HighestFee = brandPayment.HighestFee,
+                    LowestFee = brandPayment.LowestFee
+                }
+            };
+        }
+
+        [HttpGet]
+        [Description("Get brand payments")]
+        public Task<PagedResponse<BrandPaymentModel>>
+            GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request) =>
+            _brandPaymentService.GetPaymentQueries()
+                .Include(p => p.BrandPaymentPlayers)
+                .ThenInclude(pp => pp.Player)
+                .Include(p => p.VipLevels)
+                .Include(p => p.PaymentMethodChannel)
+                .ThenInclude(pmc => pmc.Payment)
+                .Include(p => p.PaymentMethodChannel)
+                .ThenInclude(pmc => pmc.Method)
+                .Include(p => p.PaymentMethodChannel)
+                .ThenInclude(pmc => pmc.Channel)
+                .Where(ResellerId, x => x.Brand.Licensee.ResellerId == ResellerId)
+                .Where(LicenseeId, x => x.Brand.LicenseeId == LicenseeId)
+                .Where(BrandId, x => x.BrandId == BrandId)
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
+                .Where(request.TransferType, x => x.TransferType == request.TransferType)
+                .Where(request.PaymentStatus, x => x.PaymentStatus == request.PaymentStatus)
+                .Select(x => new BrandPaymentModel
+                {
+                    Id = x.Id,
+                    BrandId = x.BrandId,
+                    Number = x.DisplayOrder,
+                    PaymentId = x.PaymentMethodChannel.Payment.Id,
+                    PaymentName = x.PaymentMethodChannel.Payment.Code,
+                    PaymentMethodId = x.PaymentMethodChannel.Method.Id,
+                    PaymentMethodName = x.PaymentMethodChannel.Method.Code,
+                    PaymentChannelId = x.PaymentMethodChannel.Channel.Id,
+                    PaymentChannelName = x.PaymentMethodChannel.Channel.Code,
+                    PaymentMethodChannelId = x.PaymentMethodChannel.Id,
+                    TransferType = x.TransferType,
+                    ChannelName = x.ChannelName,
+                    ExtendedData = x.ExtendedData,
+                    PlayerListCondition = x.PlayerListCondition,
+                    AllPlayers = x.AllPlayers,
+                    DepositedAmountMin = x.DepositedAmountMin,
+                    DepositedAmountMax = x.DepositedAmountMax,
+                    DepositedAmountUnlimited = x.DepositedAmountUnlimited,
+                    IdentityAuthentication = x.IdentityAuthentication,
+                    PhoneAuthentication = x.PhoneAuthentication,
+                    TransferLimitFrom = x.TransferLimitFrom,
+                    TransferLimitTo = x.TransferLimitTo,
+                    PaymentStatus = x.PaymentStatus,
+                    DesignatedUsers = GetDesignatedUsers(x).Any(),
+                    PaymentFee =
+                        new() { FeePercentage = x.FeePercentage, HighestFee = x.HighestFee, LowestFee = x.LowestFee },
+                    VipLevelIds = x.VipLevels.Select(p => p.VipLevelId).ToArray(),
+                    CreatedByUsername = x.CreatedByUsername,
+                    UpdatedByUsername = x.UpdatedByUsername,
+                    CreatedOn = x.CreatedOn,
+                    UpdatedOn = x.UpdatedOn,
+                    BankType = x.PaymentMethodChannel.Method.BankType
+                })
+                .CreatePagedResponseAsync(request);
+
+        //[HttpGet("{id}")]
+        //[Description("Get a Payment")]
+        //public async Task<GetBrandPaymentResponse> GetBrandPaymentMethodAsync(Guid id)
+        //{
+        //    var brandPayment = await _brandPaymentService.GetPaymentAsync(q => q.Id == id,
+        //        p => p
+        //            .Include(pm => pm.Payment)
+        //            .Include(pm => pm.PaymentMethod)
+        //            .Include(pm => pm.PaymentChannel)
+        //            .Include(pm => pm.BrandPaymentPlayers)
+        //            .ThenInclude(pp => pp.Player)
+        //            .Include(pm => pm.VipLevels)
+        //            .ThenInclude(pp => pp.VipLevel)
+        //            .AsNoTracking());
+        //    if (brandPayment == null)
+        //    {
+        //        return CreateInvalidResponse<GetBrandPaymentResponse>(Resources.BrandPayment.PaymentNotFound);
+        //    }
+
+        [HttpGet("{id}/DesignatedUsers")]
+        [Description("Get Designated Users")]
+        public async Task<GetDesignatedUsersResponse> GetDesignatedUsersAsync(Guid id)
+        {
+            var brandPayment = await _brandPaymentService.GetPaymentAsync(x => x.Id == id,
+                x => x.Include(p => p.BrandPaymentPlayers)
+                    .ThenInclude(p => p.Player)
+                    .Include(p => p.VipLevels).AsNoTracking());
+
+            if (brandPayment == null)
+            {
+                return CreateInvalidResponse<GetDesignatedUsersResponse>(Resources.BrandPayment.NotFound);
+            }
+
+            var players = GetDesignatedUsers(brandPayment);
+
+            return new() { Valid = true, Players = players };
+        }
+
+        //    return new()
+        //    {
+        //        Valid = true,
+        //        Payment = new()
+        //        {
+        //            Id = brandPayment.Id,
+        //            BrandId = brandPayment.BrandId,
+        //            PaymentId = brandPayment.Payment.Id,
+        //            PaymentName = brandPayment.Payment.Name,
+        //            PaymentMethodId = brandPayment.Payment.Id,
+        //            PaymentMethodName = brandPayment.PaymentMethod.Name,
+        //            PaymentChannelId = brandPayment.PaymentMethod.Id,
+        //            PaymentChannelName = brandPayment.PaymentChannel.Name,
+        //            ChannelName = brandPayment.ChannelName,
+        //            TransferLimitFrom = brandPayment.TransferLimitFrom,
+        //            TransferLimitTo = brandPayment.TransferLimitTo,
+        //            PlayerListCondition = brandPayment.PlayerListCondition,
+        //            AllPlayers = brandPayment.AllPlayers,
+        //            IdentityAuthentication = brandPayment.IdentityAuthentication,
+        //            PhoneAuthentication = brandPayment.PhoneAuthentication,
+        //            DepositedAmountUnlimited = brandPayment.DepositedAmountUnlimited,
+        //            DepositedAmountMin = brandPayment.DepositedAmountMin,
+        //            DepositedAmountMax = brandPayment.DepositedAmountMax,
+        //            DesignatedUsers = brandPayment.BrandPaymentPlayers.Count > 0,
+        //            PaymentStatus = brandPayment.PaymentStatus,
+        //            Reason = brandPayment.Reason,
+        //            Whitelist = brandPayment.BrandPaymentPlayers.Where(p => p.ListType == PlayerListType.White)
+        //                .Select(p => p.Player.Username).ToArray(),
+        //            Blacklist = brandPayment.BrandPaymentPlayers.Where(p => p.ListType == PlayerListType.Black)
+        //                .Select(p => p.Player.Username).ToArray(),
+        //            VipLevelIds = brandPayment.VipLevels.Select(p => p.VipLevelId).ToArray(),
+        //            CreatedByUsername = brandPayment.CreatedByUsername,
+        //            UpdatedByUsername = brandPayment.UpdatedByUsername,
+        //            CreatedOn = brandPayment.CreatedOn,
+        //            UpdatedOn = brandPayment.UpdatedOn
+        //        }
+        //    };
+        //}
         [HttpPut("{brandPaymentId:guid}")]
         [Description("Update a Payment")]
         public async Task<CreateUpdateBrandPaymentResponse> UpdateBrandPaymentAsync(Guid brandPaymentId,
@@ -330,34 +357,6 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             return diffUsers.Any()
                 ? new() { Valid = false, Message = Resources.BrandPayment.PlayersNotFound, NotExistsPlayers = diffUsers }
                 : new UploadFileResponse { Valid = true, Players = allPlayers };
-        }
-
-        [HttpPut("ChangeOrders")]
-        [Description("Change Payment Order")]
-        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
-        {
-            await _brandPaymentService.ChangeOrderAsync(request);
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpGet("{id}/DesignatedUsers")]
-        [Description("Get Designated Users")]
-        public async Task<GetDesignatedUsersResponse> GetDesignatedUsersAsync(Guid id)
-        {
-            var brandPayment = await _brandPaymentService.GetPaymentAsync(x => x.Id == id,
-                x => x.Include(p => p.BrandPaymentPlayers)
-                    .ThenInclude(p => p.Player)
-                    .Include(p => p.VipLevels).AsNoTracking());
-
-            if (brandPayment == null)
-            {
-                return CreateInvalidResponse<GetDesignatedUsersResponse>(Resources.BrandPayment.NotFound);
-            }
-
-            var players = GetDesignatedUsers(brandPayment);
-
-            return new() { Valid = true, Players = players };
         }
 
         private static string[] GetDesignatedUsers(Core.DataServices.Tgs.Models.BrandPayment brandPayment)

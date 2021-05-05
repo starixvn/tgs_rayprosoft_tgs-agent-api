@@ -135,11 +135,16 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> ReviewWithdrawFormAsync(
             [FromServices] ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
             Guid formId,
-            [FromBody] ReviewRequest reviewResponse)
+            [FromBody] WithdrawReviewRequest reviewResponse)
         {
             var command = new ReviewWithdrawFormCommand(
                 formId,
-                reviewResponse.ReviewResponse,
+                reviewResponse.BrandPaymentId,
+                reviewResponse.ReviewResponse switch
+                {
+                    ReviewResponses.Approve => ReviewStatus.Approve,
+                    _ => ReviewStatus.Reject
+                },
                 reviewResponse.Remark);
 
             await reviewCommandService
