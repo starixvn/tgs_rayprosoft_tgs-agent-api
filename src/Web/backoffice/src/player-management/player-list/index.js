@@ -163,7 +163,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
         let columns = [
             sequenceColumn(),
             {
-                Header: <Trans zh="用户名" en="User name" />,
+                Header: <Trans zh="用户名" en="Username" />,
                 accessor: "username",
                 disableSortBy: true,
                 headCell: {
