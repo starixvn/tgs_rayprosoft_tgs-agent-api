@@ -5,9 +5,8 @@ using TGS.Apis.OperatorApi.Validators;
 
 namespace OperatorApi.UnitTests
 {
-    
     public class PlayerCreateTests
-    {                
+    {
         [Test]
         public void Verify_Player_Account_Input_Min_Length()
         {
@@ -18,7 +17,7 @@ namespace OperatorApi.UnitTests
                 Password = "123456",
                 ConfirmPassword = "123456",
                 Username = "user",
-                AgentInvitationCode = "",
+                AgentInvitationCode = string.Empty,
                 CurrencyCode = "CNY",
                 IsTestPlayer = false
             };
@@ -26,7 +25,7 @@ namespace OperatorApi.UnitTests
             // act
             var actual = sut.TestValidate(request);
 
-            // assert            
+            // assert
             actual.ShouldHaveValidationErrorFor(request => request.Username);
         }
 
@@ -40,14 +39,14 @@ namespace OperatorApi.UnitTests
                 Password = "123456",
                 ConfirmPassword = "123456",
                 Username = "123456789012345678901234567890123",
-                AgentInvitationCode = "",
+                AgentInvitationCode = string.Empty,
                 CurrencyCode = "CNY",
                 IsTestPlayer = false
             };
 
             // act
             var actual = sut.TestValidate(request);
-            // assert            
+            // assert
             actual.ShouldHaveValidationErrorFor(request => request.Username);
         }
 
@@ -61,18 +60,16 @@ namespace OperatorApi.UnitTests
                 Password = "123456",
                 ConfirmPassword = "123456",
                 Username = "abc123_",
-                AgentInvitationCode = "",
+                AgentInvitationCode = string.Empty,
                 CurrencyCode = "CNY",
                 IsTestPlayer = false
             };
 
             // act
             var actual = sut.TestValidate(request);
-            // assert            
+            // assert
             actual.ShouldHaveValidationErrorFor(request => request.Username);
         }
-
-
 
         [Test]
         public void Verify_Player_Password_Input_Min_Length()
@@ -83,16 +80,16 @@ namespace OperatorApi.UnitTests
             {
                 Password = "1234",
                 ConfirmPassword = "1234",
-                Username ="username",
-                AgentInvitationCode="",
-                CurrencyCode="CNY",
+                Username = "username",
+                AgentInvitationCode = string.Empty,
+                CurrencyCode = "CNY",
                 IsTestPlayer = false
             };
-            
+
             // act
             var actual = sut.TestValidate(request);
-            // assert            
-            actual.ShouldHaveValidationErrorFor(request => request.Password);                
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.Password);
         }
 
         [Test]
@@ -105,17 +102,15 @@ namespace OperatorApi.UnitTests
                 Password = "123456789012345678901",
                 ConfirmPassword = "123456789012345678901",
                 Username = "username",
-                AgentInvitationCode = "",
+                AgentInvitationCode = string.Empty,
                 CurrencyCode = "CNY",
                 IsTestPlayer = false
             };
 
             // act
             var actual = sut.TestValidate(request);
-            // assert            
+            // assert
             actual.ShouldHaveValidationErrorFor(request => request.Password);
         }
-
-
     }
 }
