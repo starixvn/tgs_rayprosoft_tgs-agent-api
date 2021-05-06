@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
@@ -30,15 +31,38 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         public async ValueTask<GameProviderWalletFundResponse> FundOutAsync(GameProviderWalletFundRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
+            if (player == null)
+            {
+                return new GameProviderWalletFundResponse()
+                {
+                    Error = (int)TgsApiError.PlayerNotFound,
+                    ErrorMessage = TgsApiError.PlayerNotFound.ToString()
+                };
+            }
+            var playerBalance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
+
+            if (playerBalance - request.Amount < 0)
+            {
+                return new GameProviderWalletFundResponse()
+                {
+                    Error = (int)TgsApiError.InsufficientFunds,
+                    ErrorMessage = TgsApiError.InsufficientFunds.ToString()
+                };
+            }
+
+            /*
+            * 建立Game交易單
+            */
 
             /*
              * 扣錢
              */
 
             var response = await FundOutAsync(player, Math.Abs(request.Amount));
+
             /*
-             * 建立Game交易單
-             */
+           * 更新Game交易單
+           */
 
 
             return new() { GameProviderOrderId = response.orderId, TransactionsId = DateTime.UtcNow.ToString("yyyyMMddHHmmss") };
@@ -53,15 +77,44 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         public async ValueTask<GameProviderWalletFundResponse> FundInAsync(GameProviderWalletFundRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
+            if (player == null)
+            {
+                return new GameProviderWalletFundResponse()
+                {
+                    Error = (int)TgsApiError.PlayerNotFound,
+                    ErrorMessage = TgsApiError.PlayerNotFound.ToString()
+                };
+            }
+            var responseBalance = await GameProviderGetBalanceAsync(player);
+            if (responseBalance == null)
+            {
+                return new GameProviderWalletFundResponse()
+                {
+                    Error = (int)TgsApiError.PlayerNotFound,
+                    ErrorMessage = TgsApiError.PlayerNotFound.ToString()
+                };
+            }
 
-
+            if (responseBalance.Value + request.Amount < 0)
+            {
+                return new GameProviderWalletFundResponse()
+                {
+                    Error = (int)TgsApiError.InsufficientFunds,
+                    ErrorMessage = TgsApiError.InsufficientFunds.ToString()
+                };
+            }
+            /*
+              * 建立Game交易單
+              */
             var response = await FundInAsync(player, Math.Abs(request.Amount));
             /*
              * 加錢
              */
+
             /*
-             * 建立Game交易單
-             */
+           * 更新Game交易單
+           */
+
 
             return new() { GameProviderOrderId = response.orderId, TransactionsId = DateTime.UtcNow.ToString("yyyyMMddHHmmss") };
         }
