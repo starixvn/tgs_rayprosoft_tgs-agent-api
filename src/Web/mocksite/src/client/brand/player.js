@@ -873,7 +873,7 @@ export const usePromotionList = ({
     })
 
     return {
-        data: data?.data,
+        data: data?.data?.items,
         error,
         isLoading: keys && !data && !error,
         ...rest
@@ -882,7 +882,7 @@ export const usePromotionList = ({
 
 export const useJoinPromotion = (
     { brandCode, currency, username, platformtype },
-    formData
+    promotionId
 ) => {
     let { token: brandToken, ...brandTokenHook } = useBrandToken({
         brandCode,
@@ -896,10 +896,10 @@ export const useJoinPromotion = (
     })
 
     let keys =
-        brandToken && playerToken && formData
+        brandToken && playerToken && promotionId
             ? [
-                  `/api/Promotion`,
-                  formData,
+                  `/api/Promotion/${promotionId}/join`,
+                  promotionId,
                   brandCode,
                   currency,
                   username,
@@ -907,19 +907,21 @@ export const useJoinPromotion = (
               ]
             : undefined
 
-    let { data, error, ...rest } = useSWR(keys, (url, formData) => {
+    let { data, error, ...rest } = useSWR(keys, (url) => {
         return fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${brandToken}`,
                 Token: playerToken
-            },
-            body: JSON.stringify(formData)
+            }
         })
             .then(toDataOrError)
             .catch(handleError({ brandTokenHook, playerTokenHook }))
     })
+
+    //TODO: rm if api changed
+    error = error ?? (data?.data?.valid === false && data?.data)
 
     return {
         data: data?.data,

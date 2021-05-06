@@ -271,7 +271,24 @@ const FormBody = ({
     platformtype
 }) => {
     let { register, watch, setValue } = useFormContext()
-    let banktype = watch("banktype", "")
+
+    let paymentchannelid = watch("paymentchannelid")
+
+    let { isLoading, data: withdrawList = [], error } = useWithdrawList({
+        brandCode,
+        currency,
+        username,
+        platformtype
+    })
+
+    let banktypeOptions = withdrawList
+        ?.filter((item) => item.channelid === paymentchannelid)
+        ?.map((item) => ({
+            label: item.banktype,
+            value: item.banktype
+        }))
+
+    let banktype = watch("banktype")
     let isBank = banktype === "Bank"
     let isCrypto = banktype === "Crypto"
     return (
@@ -286,17 +303,16 @@ const FormBody = ({
                     currency={currency}
                     username={username}
                     platformtype={platformtype}
-                    onChannelChange={(record = {}) => {
-                        setValue("banktype", record.banktype)
-                    }}
                 />
-                <InputField
-                    name="banktype"
-                    inputRef={register}
-                    value={banktype}
-                    readOnly
-                    label="Bank Type"
-                />
+                {banktypeOptions.length > 0 && (
+                    <SelectField
+                        name="banktype"
+                        selectRef={register}
+                        options={banktypeOptions}
+                        required
+                        label="Bank Type"
+                    />
+                )}
                 {isBank && (
                     <>
                         <InputField
@@ -364,7 +380,7 @@ const PaymentChannelSelect = ({
                 let record = data?.find((item) => {
                     return item.channelid === channelId
                 })
-                onChannelChange(record)
+                onChannelChange?.(record)
             }}
             {...props}
         />
