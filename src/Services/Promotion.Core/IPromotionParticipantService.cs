@@ -3,8 +3,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Settings;
-using TGS.Services.Promotion.Core.Models.Promotion;
 
 namespace TGS.Services.Promotion.Core
 {
@@ -19,8 +17,7 @@ namespace TGS.Services.Promotion.Core
                 IQueryable<PromotionParticipant>> preQuery = null,
             bool tracking = false);
 
-        Task CreatePromotionParticipantAsync(CreatePromotionParticipantRequest request,
-            PromotionType promotionTypeModel);
+        Task CreatePromotionParticipantAsync(Guid promotionId, string playerCode);
 
         Task<bool> ExistsAsync(Expression<Func<PromotionParticipant, bool>> predicate);
     }

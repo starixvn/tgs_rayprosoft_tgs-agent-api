@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Settings;
 using TGS.Services.Promotion.Core;
 using TGS.Services.Promotion.Core.Models.Promotion;
 
@@ -31,13 +30,12 @@ namespace Promotion.Repositories
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        async Task IPromotionParticipantService.CreatePromotionParticipantAsync(
-            CreatePromotionParticipantRequest request,
-            PromotionType promotionTypeModel)
+        async Task IPromotionParticipantService.CreatePromotionParticipantAsync(Guid promotionId, string playerCode)
         {
-            var promotion = new PromotionParticipant {PlayerCode = request.PlayerCode};
+            var promotionParticipant =
+                new PromotionParticipant {PlayerCode = playerCode, PromotionId = promotionId};
 
-            await CreateEntityAsync(promotion);
+            await CreateEntityAsync(promotionParticipant);
         }
 
         Task<PromotionParticipant> IPromotionParticipantService.GetPromotionParticipantAsync(

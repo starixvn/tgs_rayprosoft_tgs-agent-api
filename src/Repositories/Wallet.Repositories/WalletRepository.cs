@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
@@ -24,8 +23,7 @@ namespace TGS.Wallet.Repositories
             _transcationManager = transcationManager ?? throw new ArgumentNullException(nameof(transcationManager));
         }
 
-        public async ValueTask<(Guid TranscationId, decimal PostBalance)> ExchangeAsync(
-            Guid brandId,
+        public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(Guid brandId,
             Guid walletId,
             string playerCode,
             TransactionTypes transactionType,
@@ -53,7 +51,7 @@ namespace TGS.Wallet.Repositories
                             }).ConfigureAwait(false);
 
                         await _tgsRepository.Transactions
-                            .AddAsync(new Transaction
+                            .AddAsync(new()
                             {
                                 Id = transactionId,
                                 WalletId = walletId,
@@ -62,14 +60,14 @@ namespace TGS.Wallet.Repositories
                                 Balance = postBalance,
                                 Type = transactionType switch
                                 {
-                                    TransactionTypes.Deposit => TransactionType.Deposit,
+                                    TransactionTypes.Deposit    => TransactionType.Deposit,
                                     TransactionTypes.Withdrawal => TransactionType.Withdrawal,
-                                    TransactionTypes.Adjust => TransactionType.Adjust,
-                                    TransactionTypes.Bonus => TransactionType.Bonus,
-                                    TransactionTypes.Rebate => TransactionType.Rebate,
-                                    TransactionTypes.Dividend => TransactionType.Dividend,
-                                    TransactionTypes.Promotion => TransactionType.Promotion,
-                                    _ => TransactionType.Other
+                                    TransactionTypes.Adjust     => TransactionType.Adjust,
+                                    TransactionTypes.Bonus      => TransactionType.Bonus,
+                                    TransactionTypes.Rebate     => TransactionType.Rebate,
+                                    TransactionTypes.Dividend   => TransactionType.Dividend,
+                                    TransactionTypes.Promotion  => TransactionType.Promotion,
+                                    _                           => TransactionType.Other
                                 },
                                 RecordedOn = DateTimeOffset.Now
                             })

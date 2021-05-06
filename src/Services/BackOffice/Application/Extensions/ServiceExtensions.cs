@@ -36,6 +36,8 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<ISettingsService, SettingsService>();
             services.AddTransient<IAgentTransactionService, AgentTransactionService>();
 
+            services.AddTgsTransactionRepositoriesServices();
+
             return services;
         }
     }

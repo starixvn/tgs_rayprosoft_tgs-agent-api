@@ -163,7 +163,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                 AgentDividendAmount = x.AgentDividendPercentage *
                                     (x.WinLossAmount - x.AdjustmentAmount -
                                         x.BonusAmount - agents
-                                            .Sum(m => m.pg.VipRebateAmount)) / 100
+                                            .Sum(m => m.pg.VipRebateAmount)) / 100M
                             };
                         })
                     .GroupBy(x => new {x.AgentId, x.BrandId, x.AgentDividendPercentage},
@@ -219,7 +219,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                     return Math.Max(childAgentPlayers.Sum(c =>
                                             c.WinLossAmount - c.BonusAmount - c.AdjustmentAmount - c.RebateAmount) *
                                         (x.AgentDividendPercentage -
-                                            childAgentPlayers.FirstOrDefault().AgentDividendPercentage) / 100, 0);
+                                            childAgentPlayers.FirstOrDefault().AgentDividendPercentage) / 100M, 0M);
                                 }),
                             CreatedOn = DateTimeOffset.Now
                         }).ToList();

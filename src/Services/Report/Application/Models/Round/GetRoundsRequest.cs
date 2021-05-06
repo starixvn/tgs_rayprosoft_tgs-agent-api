@@ -9,6 +9,7 @@ namespace TGS.Services.Report.Application.Models.Round
     {
         public Guid BrandId { get; set; }
         public string Username { get; set; }
+        public string PlayerCode { get; set; }
         public Guid? RoundId { get; set; }
         public Guid? GameProviderId { get; set; }
         public ClientRoundStatus? Status { get; set; }

@@ -24,6 +24,8 @@ namespace TGS.Services.Report.Application.Extensions
             services.AddTransient<IPlayerRebateService, PlayerRebateService>();
             services.AddTransient<ITransactionManager, TransactionManager>();
 
+            services.AddTgsTransactionRepositoriesServices();
+
             return services;
         }
     }

@@ -21,6 +21,7 @@ namespace TGS.Services.Promotion.Core
 
         Task CreatePromotionAsync(CreatePromotionRequest request, PromotionType promotionTypeModel);
         Task UpdatePromotionAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion, UpdatePromotionRequest request);
+        Task ChangePromotionStatusAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion);
         Task<bool> ExistsAsync(Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate);
     }
 }
