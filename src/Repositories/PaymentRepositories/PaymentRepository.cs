@@ -293,12 +293,19 @@ namespace TGS.Payment.Repositories
             return query.SingleAsync();
         }
 
-        public async ValueTask SignOffWithdrawFormAsync(Guid formId, ReviewStatus reviewStatus, string? remark)
+        public async ValueTask SignOffWithdrawFormAsync(
+            Guid formId,
+            Guid brandPaymentId,
+            string? applyInfo,
+            ReviewStatus reviewStatus,
+            string? remark)
         {
             var formData = await _tgsRepository.WithdrawForms
                 .FindAsync(formId)
                 .ConfigureAwait(false);
 
+            formData.BrandPaymentId = brandPaymentId;
+            formData.ApplyInfo = applyInfo;
             formData.Status = reviewStatus switch
             {
                 ReviewStatus.Approve => 8000,

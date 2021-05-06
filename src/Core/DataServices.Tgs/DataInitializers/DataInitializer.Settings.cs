@@ -155,7 +155,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("PlayerManagement")

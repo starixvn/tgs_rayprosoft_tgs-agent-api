@@ -5,6 +5,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
 {
     public record ReviewWithdrawFormCommand(
         Guid FormId,
+        Guid BrandPaymentId,
         ReviewStatus Status,
         string Remark);
 }

@@ -195,7 +195,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 1000M,
                 "tgs.payment.leepay",
                 _ => serializer.Serialize(
-                    new LeePayApplyInfo(
+                    new LeePayDepositApplyInfo(
                             new LeePayDepositSettings(
                                 "systemId",
                                 "systemKey",
@@ -229,7 +229,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 command.BrandPaymentId,
                 command.Amount,
                 serializer.Serialize(
-                    new LeePayApplyInfo(
+                    new LeePayDepositApplyInfo(
                             new LeePayDepositSettings(
                                 "systemId",
                                 "systemKey",

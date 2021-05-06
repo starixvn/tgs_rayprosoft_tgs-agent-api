@@ -38,6 +38,7 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.BackOffice.Application.Extensions;
+using TGS.Services.BackOffice.Domain;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 
@@ -142,7 +143,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[] {new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture)};
+                var supportedCultures = new[] { new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture) };
 
                 options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
@@ -161,7 +162,8 @@ namespace TGS.Apis.BackendOffice.Extensions
 
             services
                 .AddPayment()
-                .UseTgsPaymentRepository();
+                .UseTgsPaymentRepository()
+                .RegisterWithdrawProcessor<LeePayProcessor>("LeePay");
 
             return services;
         }

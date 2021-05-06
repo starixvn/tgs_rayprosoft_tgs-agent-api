@@ -85,6 +85,14 @@ namespace TGS.Services.Operator.Withdraw
                 .GetBankInfoByIdAsync(command.BankInfoId)
                 .ConfigureAwait(false);
 
+            var bankInfoData = new
+            {
+                bankInfo.Id,
+                bankInfo.PaymentChannelId,
+                bankInfo.BankType,
+                Detail = _jsonSerializationProvider.DeserializeFromString<JsonDocument>(bankInfo.Detail)
+            };
+
             await _paymentRepository
                 .CreateWithdrawFormAsync(
                     createFormId,
@@ -95,7 +103,7 @@ namespace TGS.Services.Operator.Withdraw
                         1000,
                         null,
                         command.BankInfoId,
-                        BankInfo: _jsonSerializationProvider.SerializeToString(bankInfo, _jsonSerializerOptions)))
+                        BankInfo: _jsonSerializationProvider.SerializeToString(bankInfoData, _jsonSerializerOptions)))
                 .ConfigureAwait(false);
 
             command.ReturnFormIdSource.SetResult(createFormId);

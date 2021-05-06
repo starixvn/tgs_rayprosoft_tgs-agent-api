@@ -18,6 +18,51 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class DepositController : BaseContextController
     {
         /// <summary>
+        /// Gets the deposit form detail.
+        /// </summary>
+        /// <param name="getDepositFormService">The get deposit form service.</param>
+        /// <param name="brandId">The brand identifier.</param>
+        /// <param name="formId">The form identifier.</param>
+        /// <returns></returns>
+        [HttpGet("{brandId}/{formId}")]
+        public async Task<GenericResponse<DepositFormDetailViewModel>> GetDepositFormDetailAsync(
+            [FromServices] IGetService<GetDepositFormDetailQuery, DepositFormDetail> getDepositFormService,
+            Guid brandId,
+            Guid formId)
+        {
+            var formDetail = await getDepositFormService
+                .GetAsync(new GetDepositFormDetailQuery(formId, brandId))
+                .ConfigureAwait(false);
+
+            return new GenericResponse<DepositFormDetailViewModel>
+            {
+                Valid = true,
+                Data = new DepositFormDetailViewModel
+                {
+                    Id = formDetail.Id,
+                    PlayerCode = formDetail.PlayerCode,
+                    UserName = formDetail.UserName,
+                    BrandId = formDetail.BrandId,
+                    BrandPaymentId = formDetail.BrandPaymentId,
+                    PaymentMethodId = formDetail.PaymentMethodId,
+                    ChannelName = formDetail.ChannelName,
+                    Amount = formDetail.Amount,
+                    Remark = formDetail.Remark,
+                    Status = formDetail.Status switch
+                    {
+                        7000 => FlowStatus.Rejected,
+                        8000 => FlowStatus.Approved,
+                        _ => FlowStatus.Review
+                    },
+                    ApplyInfo = formDetail.ApplyInfo,
+                    PaymentReturn = formDetail.PaymentReturn,
+                    CreatedOn = formDetail.CreatedOn,
+                    UpdatedOn = formDetail.UpdatedOn
+                }
+            };
+        }
+
+        /// <summary>
         /// Queries the deposit forms.
         /// </summary>
         /// <param name="queryDepositFormsService">The query deposit forms service.</param>
@@ -94,51 +139,6 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         /// <summary>
-        /// Gets the deposit form detail.
-        /// </summary>
-        /// <param name="getDepositFormService">The get deposit form service.</param>
-        /// <param name="brandId">The brand identifier.</param>
-        /// <param name="formId">The form identifier.</param>
-        /// <returns></returns>
-        [HttpGet("{brandId}/{formId}")]
-        public async Task<GenericResponse<DepositFormDetailViewModel>> GetDepositFormDetailAsync(
-            [FromServices] IGetService<GetDepositFormDetailQuery, DepositFormDetail> getDepositFormService,
-            Guid brandId,
-            Guid formId)
-        {
-            var formDetail = await getDepositFormService
-                .GetAsync(new GetDepositFormDetailQuery(formId, brandId))
-                .ConfigureAwait(false);
-
-            return new GenericResponse<DepositFormDetailViewModel>
-            {
-                Valid = true,
-                Data = new DepositFormDetailViewModel
-                {
-                    Id = formDetail.Id,
-                    PlayerCode = formDetail.PlayerCode,
-                    UserName = formDetail.UserName,
-                    BrandId = formDetail.BrandId,
-                    BrandPaymentId = formDetail.BrandPaymentId,
-                    PaymentMethodId = formDetail.PaymentMethodId,
-                    ChannelName = formDetail.ChannelName,
-                    Amount = formDetail.Amount,
-                    Remark = formDetail.Remark,
-                    Status = formDetail.Status switch
-                    {
-                        7000 => FlowStatus.Rejected,
-                        8000 => FlowStatus.Approved,
-                        _ => FlowStatus.Review
-                    },
-                    ApplyInfo = formDetail.ApplyInfo,
-                    PaymentReturn = formDetail.PaymentReturn,
-                    CreatedOn = formDetail.CreatedOn,
-                    UpdatedOn = formDetail.UpdatedOn
-                }
-            };
-        }
-
-        /// <summary>
         /// Reviews the deposit form.
         /// </summary>
         /// <param name="reviewCommandService">The review command service.</param>
@@ -148,11 +148,15 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> ReviewDepositFormAsync(
             [FromServices] ICommandService<ReviewDepositFormCommand> reviewCommandService,
             Guid formId,
-            [FromBody] ReviewRequest reviewResponse)
+            [FromBody] DepositReviewRequest reviewResponse)
         {
             var command = new ReviewDepositFormCommand(
                 formId,
-                reviewResponse.ReviewResponse,
+                reviewResponse.ReviewResponse switch
+                {
+                    ReviewResponses.Approve => ReviewStatus.Approve,
+                    _ => ReviewStatus.Reject
+                },
                 reviewResponse.Remark);
 
             await reviewCommandService
