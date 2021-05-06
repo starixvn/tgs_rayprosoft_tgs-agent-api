@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using TGS.Shared.Game.ApiClients.AsiaGaming;
 using TGS.Shared.Game.ApiClients.PragmaticPlay;
 using TGS.Shared.Game.ApiClients.SBOBET;
 
@@ -14,6 +15,7 @@ namespace TGS.Shared.Game.ApiClients.Extensions
         {
             services.AddHttpClient<ISBOApiClient, SBOApiClient>();
             services.AddHttpClient<IPragmaticPlayApiClient, PragmaticPlayApiClient>();
+            services.AddHttpClient<IAsiaGamingApiClient, AsiaGamingApiClient>();
 
             return services;
         }
