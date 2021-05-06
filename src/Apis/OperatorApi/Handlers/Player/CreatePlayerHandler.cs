@@ -53,7 +53,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, username);
             if (playerCode.IsNotNullOrEmpty())
             {
-                return new() {PlayerCode = playerCode, IsNew = false};
+                return new() { PlayerCode = playerCode, IsNew = false };
             }
 
             var externalCurrency = request.CurrencyCode;
@@ -81,7 +81,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                 Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
             });
 
-            return new() {PlayerCode = playerCode, IsNew = true};
+            return new() { PlayerCode = playerCode, IsNew = true };
         }
     }
 }
