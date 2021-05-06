@@ -86,6 +86,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
                     PromotionBonusId = x.PromotionBonusId,
                     PromotionId = x.PromotionId,
                     PlayerCode = x.PlayerCode,
+                    BonusAmount = x.BonusAmount,
                     Username = players.First(p => p.PlayerCode == x.PlayerCode).Username,
                     PromotionName = promotions.First(p => p.Id == x.PromotionId).Name,
                     PromotionGroup =

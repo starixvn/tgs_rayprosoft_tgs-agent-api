@@ -8,9 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Settings;
+using TGS.Core.Models.Enums;
 using TGS.Services.Promotion.Core;
 using TGS.Services.Promotion.Core.Models.Promotion;
+using PromotionType = TGS.Core.Models.Settings.PromotionType;
 
 namespace Promotion.Repositories
 {
@@ -52,7 +53,6 @@ namespace Promotion.Repositories
             promotion.Name = request.Name;
             promotion.From = request.From;
             promotion.To = request.To;
-            promotion.Status = request.Status;
             promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
             promotion.PromotionType = request.PromotionType;
             promotion.BonusAmountLimit = request.BonusAmountLimit;
@@ -85,7 +85,7 @@ namespace Promotion.Repositories
                 Name = request.Name,
                 From = request.From,
                 To = request.To,
-                Status = request.Status,
+                Status = SwitchStatus.Enabled,
                 AutoSentPlayerBonus = request.AutoSentPlayerBonus,
                 PromotionType = request.PromotionType,
                 BonusAmountLimit = request.BonusAmountLimit,
@@ -107,6 +107,9 @@ namespace Promotion.Repositories
 
             await CreateEntityAsync(promotion);
         }
+
+        Task IPromotionService.ChangePromotionStatusAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion) =>
+            UpdateEntityAsync(promotion);
 
         private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
             TGS.Core.DataServices.Tgs.Models.Promotion promotion,

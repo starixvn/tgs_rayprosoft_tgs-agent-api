@@ -9,6 +9,7 @@ using Prometheus;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
+using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -46,6 +47,7 @@ namespace PromotionApi
                 .AddTgsLog()
                 .AddRedis()
                 .AddOperations()
+                .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddReportServices()

@@ -22,13 +22,13 @@ namespace TGS.Workers.Schedulers.Jobs.Promotion
 
         async Task<TgsResponse> IPromotionSettlementDailyWorkerService.ExecutionAsync()
         {
-            var response = await _client.CreatePromotionSettleDataDailyAsync(new());
+            var response = await _client.CreatePromotionSettleDataDailyAsync(new()).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
 
         async Task<TgsResponse> IPromotionSettlementDailyWorkerService.ManualExecutionAsync(string date)
         {
-            var response = await _client.CreatePromotionSettleDataDailyAsync(new(date));
+            var response = await _client.CreatePromotionSettleDataDailyAsync(new(date)).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
     }

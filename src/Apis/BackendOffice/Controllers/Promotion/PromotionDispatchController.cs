@@ -27,7 +27,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Promotion
         [HttpPost]
         [Description("Dispatch promotion")]
         public Task<MessageResponse> DispatchPromotionsAsync(
-            [FromQuery] DispatchPromotionBonusRequest request) =>
+            [FromBody] DispatchPromotionBonusRequest request) =>
             _client.DispatchPromotionAsync(request);
     }
 }
