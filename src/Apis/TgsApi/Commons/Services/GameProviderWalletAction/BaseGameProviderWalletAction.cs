@@ -31,6 +31,11 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         /// <returns></returns>
         public async ValueTask<GameProviderWalletFundResponse> FundOutAsync(GameProviderWalletFundRequest request)
         {
+            if (request.Amount <= 0)
+            {
+                throw new InvalidAmountException(request.Amount.ToString());
+            }
+
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
             if (player == null)
             {
@@ -57,6 +62,10 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
            * 更新Game交易單
            */
 
+            if (!response.success)
+            {
+                //轉帳失敗
+            }
 
             return new() { GameProviderOrderId = response.orderId, TransactionsId = DateTime.UtcNow.ToString("yyyyMMddHHmmss") };
         }
@@ -69,6 +78,11 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         /// <returns></returns>
         public async ValueTask<GameProviderWalletFundResponse> FundInAsync(GameProviderWalletFundRequest request)
         {
+            if (request.Amount >= 0)
+            {
+                throw new InvalidAmountException(request.Amount.ToString());
+            }
+
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
             if (player == null)
             {
@@ -96,6 +110,10 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
            * 更新Game交易單
            */
 
+            if (!response.success)
+            {
+                //轉帳失敗
+            }
 
             return new() { GameProviderOrderId = response.orderId, TransactionsId = DateTime.UtcNow.ToString("yyyyMMddHHmmss") };
         }
@@ -115,12 +133,13 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             }
 
             var balance = await GameProviderGetBalanceAsync(player);
+
             return new() { Balance = balance ?? 0 };
         }
 
-        public abstract ValueTask<(string orderId, decimal balance)> FundOutAsync(CachedPlayer player, decimal amount);
+        public abstract ValueTask<(bool success, string orderId, decimal balance)> FundOutAsync(CachedPlayer player, decimal amount);
 
-        public abstract ValueTask<(string orderId, decimal balance)> FundInAsync(CachedPlayer player, decimal amount);
+        public abstract ValueTask<(bool success, string orderId, decimal balance)> FundInAsync(CachedPlayer player, decimal amount);
 
         public abstract ValueTask<decimal?> GameProviderGetBalanceAsync(CachedPlayer player);
     }

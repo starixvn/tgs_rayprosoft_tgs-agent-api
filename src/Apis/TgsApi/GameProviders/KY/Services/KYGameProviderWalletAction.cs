@@ -36,7 +36,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
         }
 
-        public override async ValueTask<(string orderId, decimal balance)> FundInAsync(CachedPlayer player, decimal amount)
+        public override async ValueTask<(bool success, string orderId, decimal balance)> FundInAsync(CachedPlayer player, decimal amount)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
@@ -78,16 +78,18 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             var response = await _client.GetAPIAsync<KYFnudResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             var balance = default(decimal);
+            var success = false;
             if (response.Data.Code == 0)
             {
                 Decimal.TryParse(response.Data.Balance, out balance);
+                success = true;
             }
 
 
-            return new() { balance = balance, orderId = orderId };
+            return new() { success = success, balance = balance, orderId = orderId };
         }
 
-        public override async ValueTask<(string orderId, decimal balance)> FundOutAsync(CachedPlayer player, decimal amount)
+        public override async ValueTask<(bool success, string orderId, decimal balance)> FundOutAsync(CachedPlayer player, decimal amount)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
@@ -128,13 +130,15 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             var response = await _client.GetAPIAsync<KYFnudResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             var balance = default(decimal);
+            var success = false;
             if (response.Data.Code == 0)
             {
                 Decimal.TryParse(response.Data.Balance, out balance);
+                success = true;
             }
 
 
-            return new() { balance = balance, orderId = orderId };
+            return new() { success = success, balance = balance, orderId = orderId };
         }
 
         public override async ValueTask<decimal?> GameProviderGetBalanceAsync(CachedPlayer player)
