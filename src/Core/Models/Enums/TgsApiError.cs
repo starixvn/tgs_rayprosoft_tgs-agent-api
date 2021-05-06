@@ -27,6 +27,7 @@
         UnderMaintenance = 403,
         InvalidStatus = 404,
         ValidateCodeNotVerify = 405,
+        InvitationCodeNotFound = 406,
 
         SystemError = 900,
         OperationNotAllowed = 901,

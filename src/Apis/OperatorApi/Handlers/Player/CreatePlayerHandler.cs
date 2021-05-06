@@ -12,6 +12,7 @@ using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
+using TGS.Services.Operator;
 
 namespace TGS.Apis.OperatorApi.Handlers.Player
 {
@@ -66,6 +67,9 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             var agent = request.AgentInvitationCode == null
                 ? null
                 : await _playerOperations.GetAgentAsync(request.AgentInvitationCode);
+
+            if (agent == null)
+                throw new InvitationCodeNotFoundException(request.AgentInvitationCode);
 
             playerCode = await _playerOperations.CreatePlayerAsync(new()
             {

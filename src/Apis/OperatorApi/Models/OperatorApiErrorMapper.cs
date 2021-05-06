@@ -13,14 +13,16 @@ namespace TGS.Apis.OperatorApi.Models
             new Dictionary<Type, TgsApiError>
             {
                 [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
-                [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound
+                [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
+                [typeof(InvitationCodeNotFoundException)] = TgsApiError.InvitationCodeNotFound
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> HttpCodeByException =
             new Dictionary<TgsApiError, int>
             {
                 [TgsApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
-                [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound
+                [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
+                [TgsApiError.InvitationCodeNotFound] = StatusCodes.Status400BadRequest
             };
 
         public int GetApiErrorByException(Exception exception)
