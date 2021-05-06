@@ -19,7 +19,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
     public class AdjustAgentAmountHandler : Handler<CreateAgentAdjustmentRequest, MessageResponse>
     {
         private readonly IAgentService _agentService;
-        private readonly IAgentTransactionService _agentTransactionService;
         private readonly IAgentWalletRepository _agentWalletRepository;
         private readonly IPlayerService _playerService;
         private readonly Func<ITgsRepository> _repoFactory;
@@ -27,7 +26,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         private readonly IWalletRepository _walletRepository;
 
 
-        public AdjustAgentAmountHandler(IAgentService agentService, IAgentTransactionService agentTransactionService,
+        public AdjustAgentAmountHandler(IAgentService agentService,
             IAgentWalletRepository agentWalletRepository,
             IWalletRepository walletRepository,
             ITransactionManager transactionManager,
@@ -36,7 +35,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
-            _agentTransactionService = agentTransactionService;
             _agentWalletRepository = agentWalletRepository;
             _walletRepository = walletRepository;
             _transactionManager = transactionManager;
@@ -58,7 +56,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 ? await _agentService.GetAgentAsync(x => x.Username == request.TargetName)
                 : null;
 
-            if (targetAgent is null)
+            if (IsTranslateToAgent(request) && targetAgent is null)
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
             }
@@ -67,7 +65,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 ? await _playerService.GetPlayerAsync(x => x.Username == request.TargetName)
                 : null;
 
-            if (targetPlayer is null)
+            if (IsTranslateToPlayer(request) && targetPlayer is null)
             {
                 return CreateInvalidResponse<MessageResponse>(Player.NotFound);
             }

@@ -36,10 +36,16 @@ import Separator from "../../layout/Separator"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
-import { FundReviewStatusLabel } from "../FundReviewStatus"
+import { FundReviewStatusLabel, isFundUnderReview } from "../FundReviewStatus"
 import { WithdrawMethodSelect } from "./WithdrawMethod"
-import { PaymentChannelSelect } from "../../payment/channel/PaymentChannel"
+import {
+    PaymentChannelLabel,
+    PaymentChannelSelect
+} from "../../payment/channel/PaymentChannel"
 import { TextareaField } from "../../textarea"
+import { BrandPaymentSelect } from "../../system/brandpayments/BrandPayment"
+import BrandPaymentTransferType from "../../system/brandpayments/BrandPaymentTransferType"
+import clone from "clone-deep"
 
 export const ViewFundWithdrawDisclosure = ({ brandId, formId, ...props }) => {
     let dialog = useModalState()
@@ -82,19 +88,23 @@ const ViewFundWithdrawDialog = ({ brandId, formId, dialog, ...props }) => {
     }
 
     return (
-        <Dialog.Modal
+        <FormDialog
             title={title}
+            defaultValues={clone(data)}
             showCloseButton
             hideOnClickOutside={false}
             {...dialog}
+            maxWidth="80vw"
         >
             <FormBody record={data} readonly />
-        </Dialog.Modal>
+        </FormDialog>
     )
 }
 
-export const FormBody = ({ record, readonly }) => {
+export const FormBody = ({ brandId, record, readonly }) => {
     let disabled = readonly
+    let underReview = isFundUnderReview(record?.status)
+
     return (
         <FieldStack>
             <FieldValues marginLeft="1.5rem">
@@ -161,7 +171,13 @@ export const FormBody = ({ record, readonly }) => {
                         <NormalLabel>
                             <Trans zh="出款渠道" en="Channel" />
                         </NormalLabel>
-                        <PaymentChannelSelect disabled={disabled} />
+                        <BrandPaymentSelect
+                            name="brandPaymentId"
+                            brandId={brandId}
+                            transferType={BrandPaymentTransferType.Withdrawal}
+                            required
+                            disabled={disabled}
+                        />
                     </FieldValues>
                 </Columns.Column>
                 <Columns.Column>
@@ -174,13 +190,14 @@ export const FormBody = ({ record, readonly }) => {
             <TextareaField
                 name="remark"
                 label={<Trans zh="备注" en="Remark" />}
+                disabled={disabled}
             />
         </FieldStack>
     )
 }
 
 const PayeeInfo = ({ record }) => {
-    let hasBankInfo = !!record?.applyInfo?.sendBankAccount
+    let hasBankInfo = !!record?.bankInfo
     if (!hasBankInfo) {
         return null
     }
@@ -194,33 +211,31 @@ const PayeeInfo = ({ record }) => {
                 <NormalLabel>
                     <Trans zh="收款银行" en="Bank" />
                 </NormalLabel>
-                <Box alignY="center">{record?.applyInfo?.sendBankAccount}</Box>
+                <PaymentChannelLabel
+                    value={record?.bankInfo?.paymentChannelId}
+                />
 
                 <NormalLabel>
                     <Trans zh="收款账户名" en="Account Name" />
                 </NormalLabel>
-                <Box alignY="center">
-                    {record?.applyInfo?.receiveAccountName}
-                </Box>
+                <Box alignY="center">{record?.bankInfo?.detail?.name}</Box>
 
                 <NormalLabel>
                     <Trans zh="银行卡帐号" en="Account" />
                 </NormalLabel>
-                <Box alignY="center">
-                    {record?.applyInfo?.receiveBankAccount}
-                </Box>
+                <Box alignY="center">{record?.bankInfo?.detail?.account}</Box>
 
                 <NormalLabel>
                     <Trans zh="开户地址" en="Account Address" />
                 </NormalLabel>
                 <Box alignY="center">
-                    {record?.applyInfo?.receiveBankAccountAddress}
+                    {record?.bankInfo?.receiveBankAccountAddress}
                 </Box>
 
                 <NormalLabel>
                     <Trans zh="附言" en="Memo" />
                 </NormalLabel>
-                <Box alignY="center">{record?.applyInfo?.memo}</Box>
+                <Box alignY="center">{record?.bankInfo?.memo}</Box>
             </FieldValues>
         </>
     )

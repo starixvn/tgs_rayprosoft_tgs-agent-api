@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddTransient<IPromotionService, PromotionService>();
             services.AddTransient<IPromotionBonusService, PromotionBonusService>();
+            services.AddTransient<IPromotionParticipantService, PromotionParticipantService>();
 
             return services;
         }

@@ -79,6 +79,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Promotion joined already..
+        /// </summary>
+        internal static string PromotionJoinedAlready {
+            get {
+                return ResourceManager.GetString("PromotionJoinedAlready", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Promotion type is not found..
         /// </summary>
         internal static string PromotionTypeNotFound {

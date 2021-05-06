@@ -20,5 +20,7 @@ namespace TGS.Services.Promotion.Core
             bool tracking = false);
 
         Task CreatePromotionBonusAsync(PromotionBonusModel[] model);
+
+        Task UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);
     }
 }

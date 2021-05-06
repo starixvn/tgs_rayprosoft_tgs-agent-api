@@ -10,6 +10,7 @@ using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
+using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -45,6 +46,7 @@ namespace ReportApi
                 .AddTgsLog()
                 .AddRedis()
                 .AddOperations()
+                .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddReportServices()
@@ -54,7 +56,9 @@ namespace ReportApi
                 .AddPromotionRepositoriesServices()
                 .AddPlayerBucketRepositoriesServices();
 
-            services.AddWallet().AddTgsWalletRepositories().AddTgsAgentWalletRepositories();
+            services.AddWallet()
+                .AddTgsWalletRepositories()
+                .AddTgsAgentWalletRepositories();
 
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Report", "report-db");

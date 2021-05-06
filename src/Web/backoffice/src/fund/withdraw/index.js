@@ -89,6 +89,18 @@ const BodyContent = ({ brandId }) => {
     })
 
     let {
+        pageIndex,
+        pageSize,
+        username,
+        channelName,
+        status,
+        beginCreateOn,
+        endCreateOn,
+        beginUpdateOn,
+        endUpdateOn
+    } = state
+
+    let {
         data: { items, ...data } = {},
         isLoading,
         mutate,
@@ -115,13 +127,43 @@ const BodyContent = ({ brandId }) => {
             actionBar={
                 <SearchBar
                     brandId={brandId}
-                    username={state?.username}
-                    channelName={state?.channelName}
-                    status={state?.status}
-                    beginCreateOn={state?.beginCreateOn}
-                    endCreateOn={state?.endCreateOn}
-                    beginUpdateOn={state?.beginUpdateOn}
-                    endUpdateOn={state?.endUpdateOn}
+                    username={username}
+                    channelName={channelName}
+                    status={status}
+                    beginCreateOn={beginCreateOn}
+                    endCreateOn={endCreateOn}
+                    beginUpdateOn={beginUpdateOn}
+                    endUpdateOn={endUpdateOn}
+                    search={(data) => {
+                        let newState = {
+                            pageIndex: 0,
+                            username: data.username,
+                            channelName: data.channelName,
+                            status: data.status,
+                            beginCreateOn: data.beginCreateOn,
+                            endCreateOn: data.endCreateOn,
+                            beginUpdateOn: data.beginUpdateOn,
+                            endUpdateOn: data.endUpdateOn
+                        }
+                        if (
+                            equals(newState, {
+                                pageIndex,
+                                username,
+                                channelName,
+                                status,
+                                beginCreateOn,
+                                endCreateOn,
+                                beginUpdateOn,
+                                endUpdateOn
+                            })
+                        ) {
+                            mutate()
+                        }
+                        setState({
+                            pageIndex: 0,
+                            ...data
+                        })
+                    }}
                     isLoading={isLoading}
                 />
             }
@@ -130,7 +172,7 @@ const BodyContent = ({ brandId }) => {
                 controlledState={state}
                 columns={columns}
                 data={items}
-                pageCount={pageCount(state.pageSize, data?.totalCount)}
+                pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}

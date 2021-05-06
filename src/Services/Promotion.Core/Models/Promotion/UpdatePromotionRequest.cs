@@ -5,13 +5,12 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Promotion.Core.Models.Promotion
 {
-    public class CreatePromotionRequest : IRequest<MessageResponse>
+    public class UpdatePromotionRequest : IRequest<MessageResponse>
     {
-        public Guid BrandId { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
-        public SwitchStatus Status { get; set; }
         public bool AutoSentPlayerBonus { get; set; }
         public string PromotionType { get; set; }
         public decimal BonusAmountLimit { get; set; }

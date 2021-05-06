@@ -182,7 +182,7 @@ namespace TGS.Core.DataServices.Report.Migrations
                         .HasColumnType("numeric(9,6)")
                         .HasColumnName("vip_card_game_rebate_percentage");
 
-                    b.Property<int>("VipLevel")
+                    b.Property<int?>("VipLevel")
                         .HasColumnType("integer")
                         .HasColumnName("vip_level");
 

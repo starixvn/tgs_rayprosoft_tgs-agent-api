@@ -90,10 +90,11 @@ const ViewFundDepositDialog = ({ brandId, formId, dialog, ...props }) => {
     )
 }
 
-export const FormBody = ({ record }) => {
+export const FormBody = ({ record, readonly }) => {
     let hasAttachment = !!record?.paymentReturn?.manualReceiptFileId
     let attachmentUrl = `/api/fs/${record?.paymentReturn?.manualReceiptFileId}`
 
+    let disabled = readonly
     return (
         <FieldStack>
             <FieldValues marginLeft="1.5rem">
@@ -169,6 +170,7 @@ export const FormBody = ({ record }) => {
             <TextareaField
                 name="remark"
                 label={<Trans zh="备注" en="Remark" />}
+                disabled={disabled}
             />
         </FieldStack>
     )

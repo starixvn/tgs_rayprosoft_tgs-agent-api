@@ -19,7 +19,6 @@ namespace TGS.Services.Report.Application.Queries.Round
             _service = service;
         }
 
-        //TODO: calculate every column amount
         public override Task<PagedResponse<RoundModel>> Handle(
             GetRoundsRequest request,
             CancellationToken cancellationToken) =>
@@ -28,6 +27,7 @@ namespace TGS.Services.Report.Application.Queries.Round
                     .Where(request.GameProviderId, x => request.GameProviderId == x.GameProviderId)
                     .Where(request.Status, x => request.Status == x.ClientStatus)
                     .Where(request.RoundId, x => x.Id == request.RoundId)
+                    .Where(request.PlayerCode, x => x.PlayerCode == request.PlayerCode)
                 )
                 .GroupJoin(
                     _service.TgsRepository.Players,

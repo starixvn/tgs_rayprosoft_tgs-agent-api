@@ -32,7 +32,7 @@ import {
     BrandPaymentStatusSelect,
     BrandPaymentStatusToggleButton
 } from "./BrandPaymentStatus"
-import { Type as TransferType } from "./transfer"
+import TransferType from "./BrandPaymentTransferType"
 import { useChangeBrandPaymentOrders, useBrandPaymentList } from "./client"
 import { View as ViewMenu, Update as UpdateMenu } from "./menu"
 import { Detail as ConditionDetail } from "./condition"

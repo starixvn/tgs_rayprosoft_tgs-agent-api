@@ -22,14 +22,14 @@ namespace TGS.Workers.Schedulers.Jobs.Promotion
 
         async Task<TgsResponse> IPromotionSettlementWeeklyWorkerService.ExecutionAsync()
         {
-            var response = await _client.CreatePromotionSettleDataWeeklyAsync(new());
+            var response = await _client.CreatePromotionSettleDataWeeklyAsync(new()).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
 
         async Task<TgsResponse> IPromotionSettlementWeeklyWorkerService.ManualExecutionAsync(string from,
             string to)
         {
-            var response = await _client.CreatePromotionSettleDataWeeklyAsync(new(from, to));
+            var response = await _client.CreatePromotionSettleDataWeeklyAsync(new(from, to)).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
     }

@@ -53,5 +53,8 @@ namespace Promotion.Repositories
             Func<IQueryable<PromotionBonus>, IQueryable<PromotionBonus>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
+
+        Task IPromotionBonusService.UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players) =>
+            UpdateEntitiesAsync(players);
     }
 }

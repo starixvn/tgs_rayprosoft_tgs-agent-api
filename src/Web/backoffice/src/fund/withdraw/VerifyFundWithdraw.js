@@ -85,8 +85,9 @@ const VerifyFundWithdrawDialog = ({
         return <AlertDialog {...fundWithdrawFormError} {...dialog} />
     }
 
-    const onSubmit = ({ remark, reviewResponse }) => {
+    const onSubmit = ({ remark, reviewResponse, brandPaymentId, ...rest }) => {
         setSubmit({
+            brandPaymentId,
             remark,
             reviewResponse
         })
@@ -129,6 +130,7 @@ const VerifyFundWithdrawDialog = ({
             onSubmitted={onSubmitted}
             title={title}
             dialog={dialog}
+            maxWidth="80vw"
         >
             <FormBody record={fundWithdrawForm} />
         </FormDialog>

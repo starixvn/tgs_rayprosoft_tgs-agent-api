@@ -114,12 +114,27 @@ export const WithdrawDialog = ({
                 {...dialog}
             >
                 <FieldStack>
-                    <SelectField options={cardOptions} label="Bank" />
+                    <SelectField
+                        name="bankinfoid"
+                        options={cardOptions}
+                        selectRef={register}
+                        label="Bank"
+                        required
+                    />
+
                     <InputField
                         name="amount"
                         type="number"
                         inputRef={register}
                         label="Amount"
+                        required
+                    />
+
+                    <InputField
+                        name="paypassword"
+                        inputRef={register}
+                        label="Pay Password"
+                        required
                     />
                 </FieldStack>
             </Dialog.Modal>
