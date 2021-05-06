@@ -64,9 +64,6 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         {
             try
             {
-                var sysTime = DateTimeOffset.UtcNow;
-
-
                 var configuration =
                    await _settingOperations
                    .GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts.GameProviderConfigurations.KY)
@@ -80,7 +77,25 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 var tasks = new List<Task>();
                 foreach (var currency in currencys)
                 {
-                    Task t = Task.Run(async () => { await GameRecordAsync(gameProvider, configuration, currency); });
+                    Task t = Task.Run(async () =>
+                    {
+                        var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, currency).ConfigureAwait(false);
+                        var config = default(KYGameProviderScheduleConfig);
+                        if (gameProviderSchedule == null)
+                        {
+                            var result = await GameProviderScheduleInit(gameProvider, currency).ConfigureAwait(false);
+                            gameProviderSchedule = result.gameProviderSchedule;
+                            config = result.gameProviderScheduleConfig;
+                        }
+                        else
+                        {
+                            config = JsonSerializer.Deserialize<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
+                        }
+                        if (config.Status)
+                        {
+                            await GameRecordAsync(configuration, gameProviderSchedule);
+                        }
+                    });
                     tasks.Add(t);
                 }
                 Task.WaitAll(tasks.ToArray());
@@ -105,43 +120,31 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         /// <param name="configuration">The configuration.</param>
         /// <param name="currency">The currency.</param>
         /// <returns></returns>
-        private async Task GameRecordAsync(Guid gameProvider, KYConfiguration configuration, string currency)
+        private async Task GameRecordAsync(KYConfiguration configuration, GameProviderSchedule gameProviderSchedule)
         {
             var sysTime = DateTimeOffset.UtcNow;
-            var endTime = (DateTimeOffset?)null;
-            while (!endTime.HasValue || endTime < sysTime)
+
+            while (gameProviderSchedule != null)
             {
-                var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, currency).ConfigureAwait(false);
-                var config = default(KYGameProviderScheduleConfig);
-                if (gameProviderSchedule == null)
-                {
-                    var result = await GameProviderScheduleInit(gameProvider, currency).ConfigureAwait(false);
-                    gameProviderSchedule = result.gameProviderSchedule;
-                    config = result.gameProviderScheduleConfig;
-                }
-                else
-                {
-                    config = JsonSerializer.Deserialize<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
-                }
-                if (!config.Status)
+                var config = JsonSerializer.Deserialize<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
+                if (config.EndTime >= sysTime)
                 {
                     break;
                 }
                 var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new KYGPGameRecordRequest()
                 {
-                    CurrencyCode = currency,
+                    CurrencyCode = gameProviderSchedule.CurrencyCode,
                     StartTime = config.StartTime.ToUnixTimeMilliseconds(),
                     EndTime = config.EndTime.ToUnixTimeMilliseconds()
                 }).ConfigureAwait(false);
                 if (responses.Success)
                 {
-                    endTime = await GameProviderScheduleUpdateAsync(gameProviderSchedule, config, responses).ConfigureAwait(false);
+                    gameProviderSchedule = await GameProviderScheduleUpdateAsync(gameProviderSchedule, config, responses, sysTime).ConfigureAwait(false);
                 }
                 else
                 {
                     break;
                 }
-                Thread.Sleep(15 * 10000);
             }
         }
 
@@ -153,14 +156,15 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         /// <returns></returns>
         private async Task<(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProvider, string currency)
         {
+            var sysTime = DateTimeOffset.UtcNow;
             var config = new KYGameProviderScheduleConfig()
             {
                 Status = false,
                 IntervalMinuteMax = 40m,
                 IntervalMinute = 1.5m,
                 LastGameRecorTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
-                StartTime = new DateTimeOffset(Convert.ToDateTime("2021-05-05 08:00:00"), TimeSpan.FromHours(+0)),
-                EndTime = new DateTimeOffset(Convert.ToDateTime("2021-05-05 08:01:30"), TimeSpan.FromHours(+0))
+                StartTime = sysTime.AddSeconds((double)1.5 * 60 * -1),
+                EndTime = sysTime
             };
 
             var gameProviderSchedule = new GameProviderSchedule()
@@ -170,8 +174,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 GameProviderCode = TGS.Core.Models.Consts.GameProvider.KY,
                 CurrencyCode = currency,
                 Config = JsonSerializer.Serialize(config),
-                CreatedOn = DateTimeOffset.UtcNow,
-                UpdatedOn = DateTimeOffset.UtcNow
+                CreatedOn = sysTime,
+                UpdatedOn = sysTime
             };
             await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
 
@@ -185,18 +189,32 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         /// <param name="value">The value.</param>
         /// <param name="responses">The responses.</param>
         /// <returns></returns>
-        private async Task<DateTimeOffset> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig config, KYGPGameRecordResponses responses)
+        private async Task<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig config, KYGPGameRecordResponses responses, DateTimeOffset sysTime)
         {
+            if (config.EndTime > sysTime)
+            {
+                config.StartTime = sysTime.AddSeconds((double)config.IntervalMinute * 60 * -1);
+                config.EndTime = sysTime;
+            }
+            else
+            {
+                var endTime = config.EndTime.AddSeconds((double)config.IntervalMinute * 60);
+                config.StartTime = config.EndTime;
+                config.EndTime = (endTime > sysTime) ? sysTime : endTime;
+            }
             config.LastGameRecorTime = (responses.LastGameRecorTime.HasValue) ? responses.LastGameRecorTime.Value : config.LastGameRecorTime;
-            config.StartTime = config.EndTime;
-            config.EndTime = config.StartTime.AddSeconds((double)config.IntervalMinute * 60);
             gameProviderSchedule.Config = JsonSerializer.Serialize(config);
             gameProviderSchedule.UpdatedOn = DateTimeOffset.UtcNow;
 
-            await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
-            return config.EndTime;
+            var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
+            if (updateResult.ModifiedCount > 0)
+            {
+                return gameProviderSchedule;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
-
-
 }
