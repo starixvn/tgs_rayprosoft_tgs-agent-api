@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
@@ -33,21 +34,13 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
             if (player == null)
             {
-                return new GameProviderWalletFundResponse()
-                {
-                    Error = (int)TgsApiError.PlayerNotFound,
-                    ErrorMessage = TgsApiError.PlayerNotFound.ToString()
-                };
+                throw new PlayerNotFoundException(request.PlayerCode);
             }
             var playerBalance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
             if (playerBalance - request.Amount < 0)
             {
-                return new GameProviderWalletFundResponse()
-                {
-                    Error = (int)TgsApiError.InsufficientFunds,
-                    ErrorMessage = TgsApiError.InsufficientFunds.ToString()
-                };
+                throw new PlayerHasInsufficientFundsException();
             }
 
             /*
@@ -79,29 +72,17 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
             if (player == null)
             {
-                return new GameProviderWalletFundResponse()
-                {
-                    Error = (int)TgsApiError.PlayerNotFound,
-                    ErrorMessage = TgsApiError.PlayerNotFound.ToString()
-                };
+                throw new PlayerNotFoundException(request.PlayerCode);
             }
             var responseBalance = await GameProviderGetBalanceAsync(player);
             if (responseBalance == null)
             {
-                return new GameProviderWalletFundResponse()
-                {
-                    Error = (int)TgsApiError.PlayerNotFound,
-                    ErrorMessage = TgsApiError.PlayerNotFound.ToString()
-                };
+                throw new PlayerNotFoundException(request.PlayerCode);
             }
 
             if (responseBalance.Value + request.Amount < 0)
             {
-                return new GameProviderWalletFundResponse()
-                {
-                    Error = (int)TgsApiError.InsufficientFunds,
-                    ErrorMessage = TgsApiError.InsufficientFunds.ToString()
-                };
+                throw new PlayerHasInsufficientFundsException();
             }
             /*
               * 建立Game交易單
@@ -127,6 +108,12 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         public async ValueTask<GameProviderWalletGetBalanceResponse> GetBalanceAsync(GameProviderWalletGetBalanceRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
+
+            if (player == null)
+            {
+                throw new PlayerNotFoundException(request.PlayerCode);
+            }
+
             var balance = await GameProviderGetBalanceAsync(player);
             return new() { Balance = balance ?? 0 };
         }
