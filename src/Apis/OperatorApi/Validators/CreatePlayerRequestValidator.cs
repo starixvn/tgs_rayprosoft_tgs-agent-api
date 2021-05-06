@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using FluentValidation.Validators;
 using TGS.Apis.OperatorApi.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Validators
@@ -7,13 +8,20 @@ namespace TGS.Apis.OperatorApi.Validators
     {
         public CreatePlayerRequestValidator()
         {
+            RuleFor(x => x.Username)
+                .NotEmpty()
+                .WithName(x=> GetJsonPropertyName(x,nameof(x.Username)))
+                .Length(6,32)                
+                .SetValidator(new RegularExpressionValidator("^[0-9a-zA-Z]+$"));
+                
             RuleFor(x => x.CurrencyCode)
                 .NotEmpty()
                 .WithName(x => GetJsonPropertyName(x, nameof(x.CurrencyCode)));
 
             RuleFor(x => x.Password)
                 .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.Password)));
+                .WithName(x => GetJsonPropertyName(x, nameof(x.Password)))
+                .Length(6,20);
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty()

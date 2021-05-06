@@ -43,7 +43,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             _invitationCodeValidator = invitationCodeValidator;
         }
 
-        async Task<CreatePlayerResponse> IRequestHandler<CreatePlayerRequest, CreatePlayerResponse>.Handle(
+        public async Task<CreatePlayerResponse> Handle(
             CreatePlayerRequest request, CancellationToken cancellationToken)
         {
             var brandId = _httpContext.Items.GetBrandId();
