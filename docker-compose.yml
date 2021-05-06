@@ -134,7 +134,7 @@ services:
           - backoffice.api
     depends_on:
       - operator-api
-      # - promotion-api
+      - promotion-api
 
   promotion-api:
     build:
@@ -243,6 +243,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
       Operator__FileServiceBaseUrl: "http://fileservice"
+      Promotion__Url: "http://promotion-api"
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:

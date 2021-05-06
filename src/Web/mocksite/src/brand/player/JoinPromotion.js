@@ -49,15 +49,14 @@ export const JoinPromotionDialog = ({
     dialog
 }) => {
     let { register, handleSubmit, watch, setError, errors } = useForm()
-    let [formData, setSubmit] = useState()
+    let [promotionId, setSubmit] = useState()
     let platformtype = toValue(platform)
     let { result, error, isLoading, mutate, ...rest } = useJoinPromotion(
         { brandCode, currency, username, platformtype },
-        formData
+        promotionId
     )
-    const onSubmit = handleSubmit((data) => {
-        console.log("data", data)
-        setSubmit(data)
+    const onSubmit = handleSubmit(({ id }) => {
+        setSubmit(id)
     })
 
     const reset = () => {
@@ -98,6 +97,10 @@ export const JoinPromotionDialog = ({
                         selectRef={register}
                         placeholder="Select a Promotion"
                         required
+                        brandCode={brandCode}
+                        currency={currency}
+                        username={username}
+                        platform={platform}
                     />
                 </FieldStack>
             </Dialog.Modal>
@@ -129,7 +132,6 @@ const PromotionSelect = ({
     ...props
 }) => {
     let platformtype = toValue(platform)
-
     let { isLoading, data = [], error } = usePromotionList({
         brandCode,
         currency,
@@ -137,7 +139,6 @@ const PromotionSelect = ({
         platformtype
     })
 
-    /*
     let options = data?.map?.(
         (item) =>
             ({
@@ -145,13 +146,6 @@ const PromotionSelect = ({
                 value: item.id
             } ?? [])
     )
-    */
-    let options = [
-        {
-            label: "promotion name",
-            value: "promotion guid"
-        }
-    ]
 
     return <Select isLoading={isLoading} options={options} {...props} />
 }
