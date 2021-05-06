@@ -10,7 +10,6 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -65,7 +64,7 @@ namespace TGS.Apis.TgsApi.Commons
             {
                 options.Filters.Add<ValidateModelFilter>();
                 AddCustomFilters(options);
-            }).ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
+            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
 
             services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")

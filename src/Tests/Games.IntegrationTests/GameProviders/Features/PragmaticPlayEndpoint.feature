@@ -4,33 +4,33 @@ Feature: PragmaticPlay Endpoint
 	Test PragmaticPlay Endpoint
 
 Scenario: 01.a -  Get authenticate player details
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $125
 	When I call authorize endpoint
 	Then I will get authorize response and player balance will be $125
 
 Scenario: 01.b - Get player details after player logout
-    Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+    Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $125
         And player logout
 	When I call authorize endpoint
     Then I will get error authorize response and no player balance
 
 Scenario: 02.a - Get player balance
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $125
 	When I request the player balance
 	Then player balance response will be for $125
 
 Scenario: 02.b - Get player balance with deauthorized player token
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $125
         And player logout
 	When I request the player balance
 	Then player balance response will be for $125
 
 Scenario: 03.a - Place desktop bet
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	When I place bet of $10 for game "vs50aladdin"
 	Then I will receive bet response of no error and balance of $90
@@ -38,7 +38,7 @@ Scenario: 03.a - Place desktop bet
 		And game action will be recorded in the database of type "PlaceBet" for $-10
 
 Scenario: 03.b - Place mobile bet
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Mobile"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Mobile"
 		And player having balance of $100
 	When I place bet of $10 for game "vs50aladdin"
 	Then I will receive bet response of no error and balance of $90
@@ -46,7 +46,7 @@ Scenario: 03.b - Place mobile bet
 		And game action will be recorded in the database of type "PlaceBet" for $-10
 
 Scenario: 03.c - Place bet with jackpot contribution
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	When I place bet with jackpot of $10  for game "vs50aladdin"
 		| JackpotId | ContributionAmount |
@@ -57,7 +57,7 @@ Scenario: 03.c - Place bet with jackpot contribution
 		And jackpot contribute data in game action is as set value
 
 Scenario: 04 - Win bet
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 		And I place bet of $10 for game "vs50aladdin"
 	When I win bet for $15
@@ -66,7 +66,7 @@ Scenario: 04 - Win bet
 		And game action will be recorded in the database of type "WinBet" for $15
 
 Scenario: 05 - Lose bet
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 		And I place bet of $10 for game "vs50aladdin"
 	When I lose bet
@@ -75,7 +75,7 @@ Scenario: 05 - Lose bet
 		And game action will be recorded in the database of type "LoseBet" for $0
 
 Scenario: 06 - Win Prize Drop Event
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 		And I place bet of $10 for game "vs50aladdin"
 	When I win prize drop event of $50
@@ -84,7 +84,7 @@ Scenario: 06 - Win Prize Drop Event
 		And game action will be recorded in the database of type "FreeBet" for $50
 
 Scenario: 07 - Cancel transaction
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 		And I place bet of $10 for game "vs50aladdin"
 	When I cancel transaction
@@ -93,7 +93,7 @@ Scenario: 07 - Cancel transaction
 		And game action will be recorded in the database of type "CancelTransaction" for $10
 
 Scenario: 08 - Win jackpot
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	When I win jackpot of $1000 for game "vs50aladdin"
 	Then I will receive jackpot win response of no error and balance of $1100
@@ -102,7 +102,7 @@ Scenario: 08 - Win jackpot
 
 @BonusWin
 Scenario: 09.a -  Win Bonus in Bet and Result
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given bonus code is "BigBonus"
 		And I play the bonus for game "vs50aladdin"
@@ -114,7 +114,7 @@ Scenario: 09.a -  Win Bonus in Bet and Result
 
 @BonusWin
 Scenario: 09.b -  Bonus Win
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given bonus code is "BigBonus"
 		And I finish all bonus of 10 rounds and get total win $100 for game "vs50aladdin"
@@ -124,7 +124,7 @@ Scenario: 09.b -  Bonus Win
 
 @PromoWin
 Scenario: 10 -  Promo Win
-	Given player "TP01_cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
 	Given a campaign id is "C001" and type is "T"
 	When I win the campaign of $100 
