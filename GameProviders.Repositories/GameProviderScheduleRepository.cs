@@ -10,9 +10,7 @@ namespace GameProviders.Repositories
 {
     public interface IGameProviderScheduleRepository
     {
-        ValueTask<bool> InsertAsync(GameProviderSchedule data);
-
-        ValueTask<GameProviderSchedule> GetAsync(Guid GameProviderId, string CurrencyCode);
+        ValueTask<GameProviderSchedule> GetAsync(Guid gameProviderId, string brandCode, string agentId, string currencyCode);
 
         ValueTask<UpdateResult> MergeAsync(GameProviderSchedule data);
     }
@@ -34,17 +32,14 @@ namespace GameProviders.Repositories
 
         }
 
-        public async ValueTask<bool> InsertAsync(GameProviderSchedule data)
-        {
-            await _collection.InsertOneAsync(data).ConfigureAwait(false);
-            return true;
-        }
 
-        public async ValueTask<GameProviderSchedule> GetAsync(Guid GameProviderId, string CurrencyCode)
+        public async ValueTask<GameProviderSchedule> GetAsync(Guid gameProviderId, string brandCode, string agentId, string currencyCode)
         {
             var filter = Builders<GameProviderSchedule>.Filter.And(
-                Builders<GameProviderSchedule>.Filter.Where(p => p.GameProviderId == GameProviderId),
-                Builders<GameProviderSchedule>.Filter.Where(p => p.CurrencyCode.Contains(CurrencyCode))
+                Builders<GameProviderSchedule>.Filter.Where(p => p.GameProviderId == gameProviderId),
+                Builders<GameProviderSchedule>.Filter.Where(p => p.BrandCode == brandCode),
+                Builders<GameProviderSchedule>.Filter.Where(p => p.AgentId == agentId),
+                Builders<GameProviderSchedule>.Filter.Where(p => p.CurrencyCode.Contains(currencyCode))
             );
             var result = await _collection.FindAsync<GameProviderSchedule>(filter).ConfigureAwait(false);
             return await result.FirstOrDefaultAsync().ConfigureAwait(false);
@@ -57,6 +52,8 @@ namespace GameProviders.Repositories
             var update = Builders<GameProviderSchedule>.Update
                 .Set(s => s.GameProviderId, data.GameProviderId)
                 .Set(s => s.GameProviderCode, data.GameProviderCode)
+                .Set(s => s.BrandCode, data.BrandCode)
+                .Set(s => s.AgentId, data.AgentId)
                 .Set(s => s.CurrencyCode, data.CurrencyCode)
                 .Set(s => s.Config, data.Config)
                 .Set(s => s.CreatedOn, data.CreatedOn)

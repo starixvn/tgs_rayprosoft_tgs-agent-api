@@ -5,6 +5,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.KY;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -65,23 +66,50 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
+
             Dictionary<string, string> MerchantCodes => new Dictionary<string, string>()
             {
                 ["CNY"] = "72412"
             };
-
+            KYBrandMerchant[] BrandMerchants => new KYBrandMerchant[]{
+                new KYBrandMerchant(){
+                    BrandCode="Default",
+                    ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
+                    ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
+                    Deskey = "E2F3A416006F84F8",
+                    Md5key = "B563DF2A3DE58DFB",
+                    Status=true,
+                    AgentMappers=new  KYAgentMapper[]{
+                        new KYAgentMapper(){
+                            CurrencyCode="CNY",
+                            AgentId="72412",
+                            Status=true
+                        }
+                    }
+                },
+                new KYBrandMerchant(){
+                    BrandCode="TGS",
+                     ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
+                    ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
+                    Deskey = "E2F3A416006F84F8",
+                    Md5key = "B563DF2A3DE58DFB",
+                    Status=false,
+                    AgentMappers=new KYAgentMapper[]{
+                        new KYAgentMapper(){
+                            CurrencyCode="CNY",
+                            AgentId="72412",
+                            Status=false
+                        }
+                    }
+                }
+                };
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() =>
                 new KYConfiguration
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-habanero") : new("http://localhost:62330"),
-
-                    ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
-                    ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
-                    Deskey = "E2F3A416006F84F8",
-                    Md5key = "B563DF2A3DE58DFB",
-                    MerchantCodes = MerchantCodes
+                    BrandMerchants = BrandMerchants
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

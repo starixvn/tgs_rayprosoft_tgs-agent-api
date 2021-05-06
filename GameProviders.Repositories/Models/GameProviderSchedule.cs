@@ -18,6 +18,13 @@ namespace GameProviders.Repositories.Models
 
         [BsonElement("game_provider_code")]
         public string GameProviderCode { get; init; }
+
+        [BsonElement("brand_code")]
+        public string BrandCode { get; init; }
+
+        [BsonElement("agent_id")]
+        public string AgentId { get; init; }
+
         [BsonElement("currency_code")]
         public string CurrencyCode { get; set; }
 

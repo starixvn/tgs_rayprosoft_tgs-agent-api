@@ -9,6 +9,8 @@ namespace TGS.Shared.Game.Models.KY.Incoming
 {
     public record KYGPGameRecordRequest
     {
+        [JsonPropertyName("brandCode")]
+        public string BrandCode { get; init; }
         [JsonPropertyName("currencyCode")]
         public string CurrencyCode { get; init; }
         [JsonPropertyName("startTime")]

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
@@ -41,7 +42,13 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
                     .GameProviderConfigurations.KY);
 
-            configuration.MerchantCodes.TryGetValue(player.DefaultWalletCurrencyCode, out string agentId);
+            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(player.BrandCode) && x.Status).FirstOrDefault();
+            if (brandMerchant == null)
+            {
+                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
+            }
+
+            var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault().AgentId;
 
             var date = DateTimeOffset.UtcNow.AddHours(+8);
             var timestamp = date.ToUnixTimeMilliseconds();
@@ -56,8 +63,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 OrderId = orderId
             };
             var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, configuration.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{configuration.Md5key}";
+            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
+            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
             var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
 
             var apiKYRequest = new KYApiRequest()
@@ -68,7 +75,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYFnudResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<KYFnudResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             var balance = default(decimal);
             if (response.Data.Code == 0)
@@ -86,7 +93,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
                     .GameProviderConfigurations.KY);
 
-            configuration.MerchantCodes.TryGetValue(player.DefaultWalletCurrencyCode, out string agentId);
+            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(player.BrandCode) && x.Status).FirstOrDefault();
+            if (brandMerchant == null)
+            {
+                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
+            }
+            var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault().AgentId;
 
             var date = DateTimeOffset.UtcNow.AddHours(+8);
             var timestamp = date.ToUnixTimeMilliseconds();
@@ -101,8 +113,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 OrderId = orderId
             };
             var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, configuration.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{configuration.Md5key}";
+            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
+            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
             var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
 
             var apiKYRequest = new KYApiRequest()
@@ -113,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYFnudResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<KYFnudResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             var balance = default(decimal);
             if (response.Data.Code == 0)
@@ -131,12 +143,16 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
                     .GameProviderConfigurations.KY);
 
-            configuration.MerchantCodes.TryGetValue(player.DefaultWalletCurrencyCode, out string agentId);
+            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(player.BrandCode) && x.Status).FirstOrDefault();
+            if (brandMerchant == null)
+            {
+                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
+            }
 
+            var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault().AgentId;
             var date = DateTimeOffset.UtcNow.AddHours(+8);
             var timestamp = date.ToUnixTimeMilliseconds();
             var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
-
 
             var data = new KYGetBlaanceRequest()
             {
@@ -144,8 +160,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 PlayerCode = player.PlayerCode
             };
             var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, configuration.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{configuration.Md5key}";
+            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
+            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
             var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
 
             var apiKYRequest = new KYApiRequest()
@@ -156,7 +172,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYGetBlaanceResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<KYGetBlaanceResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             var balance = default(decimal);
             if (response.Data.Code == 0)

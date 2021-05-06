@@ -8,7 +8,6 @@ namespace GameProviders.Repositories.Models.ScheduleConfig.KY
 {
     public record KYGameProviderScheduleConfig
     {
-        public bool Status { get; set; }
         public decimal IntervalMinuteMax { get; set; }
         public decimal IntervalMinute { get; set; }
         public DateTimeOffset StartTime { get; set; }

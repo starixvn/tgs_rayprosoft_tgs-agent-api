@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using TGS.Apis.TgsApi.Models.Interfaces;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -57,7 +59,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
                     .GameProviderConfigurations.KY);
 
-            configuration.MerchantCodes.TryGetValue(player.DefaultWalletCurrencyCode, out string agentId);
+            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(player.BrandCode) && x.Status).FirstOrDefault();
+            if (brandMerchant == null)
+            {
+                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
+            }
+            var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault()?.AgentId;
 
             var date = DateTimeOffset.UtcNow.AddHours(+8);
             var timestamp = date.ToUnixTimeMilliseconds();
@@ -76,8 +83,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             };
             var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, configuration.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{configuration.Md5key}";
+            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
+            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
             var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
 
             var apiKYRequest = new KYApiRequest()
@@ -88,7 +95,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYGameUrlResponse>(configuration.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<KYGameUrlResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             string url = (string)null;
             if (response.Data.Code == 0)

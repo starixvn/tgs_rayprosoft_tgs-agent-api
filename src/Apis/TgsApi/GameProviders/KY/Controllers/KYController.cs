@@ -73,7 +73,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
                 .GameProviderConfigurations.KY);
-            configuration.MerchantCodes.TryGetValue(request.CurrencyCode, out string agentId);
+
+            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(request.BrandCode) && x.Status).FirstOrDefault();
+            if (brandMerchant == null)
+            {
+                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
+            }
+
+            var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(request.CurrencyCode) && x.Status).FirstOrDefault()?.AgentId;
 
             if (string.IsNullOrEmpty(agentId))
             {
@@ -94,8 +101,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             };
 
             var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, configuration.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{configuration.Md5key}";
+            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
+            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
             var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
 
             var apiKYRequest = new KYApiRequest()
@@ -106,7 +113,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYGameRecordResponses>(configuration.ApiRecordUrl, apiKYRequest);
+            var response = await _client.GetAPIAsync<KYGameRecordResponses>(brandMerchant.ApiRecordUrl, apiKYRequest);
 
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode);
             var players = new Dictionary<string, Player>();

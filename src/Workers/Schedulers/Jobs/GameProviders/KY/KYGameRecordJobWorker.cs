@@ -71,34 +71,36 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 var gameProvider = await _gameProviderOperations
                       .GetGameProviderIdByCodeAsync(TGS.Core.Models.Consts.GameProvider.KY)
                       .ConfigureAwait(false);
-                var currencys = await _gameProviderOperations
-                      .CurrencySupportedAsync(gameProvider)
-                      .ConfigureAwait(false);
+
                 var tasks = new List<Task>();
-                foreach (var currency in currencys)
+
+                var brandMerchants = configuration.BrandMerchants.Where(x => x.Status);
+
+                foreach (var brand in brandMerchants)
                 {
-                    Task t = Task.Run(async () =>
+                    foreach (var agent in brand.AgentMappers.Where(x => x.Status))
                     {
-                        var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, currency).ConfigureAwait(false);
-                        var config = default(KYGameProviderScheduleConfig);
-                        if (gameProviderSchedule == null)
+                        Task t = Task.Run(async () =>
                         {
-                            var result = await GameProviderScheduleInit(gameProvider, currency).ConfigureAwait(false);
-                            gameProviderSchedule = result.gameProviderSchedule;
-                            config = result.gameProviderScheduleConfig;
-                        }
-                        else
-                        {
-                            config = JsonSerializer.Deserialize<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
-                        }
-                        if (config.Status)
-                        {
+                            var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, brand.BrandCode, agent.AgentId, agent.CurrencyCode).ConfigureAwait(false);
+                            var config = default(KYGameProviderScheduleConfig);
+                            if (gameProviderSchedule == null)
+                            {
+                                var result = await GameProviderScheduleInit(gameProvider, brand.BrandCode, agent.AgentId, agent.CurrencyCode).ConfigureAwait(false);
+                                gameProviderSchedule = result.gameProviderSchedule;
+                                config = result.gameProviderScheduleConfig;
+                            }
+                            else
+                            {
+                                config = JsonSerializer.Deserialize<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
+                            }
                             await GameRecordAsync(configuration, gameProviderSchedule);
-                        }
-                    });
-                    tasks.Add(t);
+                        });
+                        tasks.Add(t);
+                    }
                 }
-                Task.WaitAll(tasks.ToArray());
+
+                await Task.WhenAll(tasks);
             }
             catch (Exception e)
             {
@@ -133,6 +135,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 }
                 var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new KYGPGameRecordRequest()
                 {
+                    BrandCode = gameProviderSchedule.BrandCode,
                     CurrencyCode = gameProviderSchedule.CurrencyCode,
                     StartTime = config.StartTime.ToUnixTimeMilliseconds(),
                     EndTime = config.EndTime.ToUnixTimeMilliseconds()
@@ -151,15 +154,16 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         /// <summary>
         /// Games the provider schedule initialize.
         /// </summary>
-        /// <param name="gameProvider">The game provider.</param>
-        /// <param name="currency">The currency.</param>
+        /// <param name="gameProviderId">The game provider identifier.</param>
+        /// <param name="brandCode">The brand code.</param>
+        /// <param name="AgentId">The agent identifier.</param>
+        /// <param name="currencyCode">The currency code.</param>
         /// <returns></returns>
-        private async Task<(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProvider, string currency)
+        private async Task<(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProviderId, string brandCode, string agentId, string currencyCode)
         {
             var sysTime = DateTimeOffset.UtcNow;
             var config = new KYGameProviderScheduleConfig()
             {
-                Status = false,
                 IntervalMinuteMax = 40m,
                 IntervalMinute = 1.5m,
                 LastGameRecorTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
@@ -170,9 +174,11 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             var gameProviderSchedule = new GameProviderSchedule()
             {
                 Id = GuidExtensions.NewSequentialGuid(),
-                GameProviderId = gameProvider,
+                GameProviderId = gameProviderId,
                 GameProviderCode = TGS.Core.Models.Consts.GameProvider.KY,
-                CurrencyCode = currency,
+                BrandCode = brandCode,
+                AgentId = agentId,
+                CurrencyCode = currencyCode,
                 Config = JsonSerializer.Serialize(config),
                 CreatedOn = sysTime,
                 UpdatedOn = sysTime
