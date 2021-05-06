@@ -115,6 +115,6 @@ namespace TGS.Workers.Schedulers
         }
 
         private static Type[] GetModuleTypes() =>
-            new[] {typeof(JobManagement)};
-            new[] {typeof(JobManagement), typeof(PromotionJobManagement)};    }
+            new[] { typeof(JobManagement), typeof(PromotionJobManagement) };
+    }
 }
