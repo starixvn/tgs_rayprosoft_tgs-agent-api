@@ -40,6 +40,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
 
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(SabaGameInitializer)},
                 (provider, _) => provider.GetRequiredService<SabaGameInitializer>());
+
+            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(SabaGameHistory)},
+                (provider, _) => provider.GetRequiredService<SabaGameHistory>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

@@ -13,9 +13,11 @@ namespace TGS.Shared.Game.ApiClients.Saba
 {
     public interface ISabaApiClient
     {
-        ValueTask<LoginResponse> LoginAsync(Uri apiUrl, LoginRequest loginRequest);
+        ValueTask<LoginResponse> LoginAsync(Uri apiUrl, LoginRequest request);
 
-        ValueTask<CreateMemberResponse> CreateMemberAsync(Uri apiUrl, CreateMemberRequest createMemberRequest);
+        ValueTask<CreateMemberResponse> CreateMemberAsync(Uri apiUrl, CreateMemberRequest request);
+
+        ValueTask<GetRoundHistoryResponse> GetBetDetailByTransIdAsync(Uri apiUrl, GetRoundHistoryRequest request);
     }
 
     public sealed class SabaApiClient : BaseApiClient, ISabaApiClient
@@ -46,6 +48,17 @@ namespace TGS.Shared.Game.ApiClients.Saba
             var prefix = $"{Consts.GameProvider.Saba}.Login";
             return ExecuteFormRequestAsync<LoginResponse>(apiUrl,
                 "api/LogIn", parameters, logPrefix: prefix);
+        }
+
+        ValueTask<GetRoundHistoryResponse> ISabaApiClient.GetBetDetailByTransIdAsync(Uri apiUrl,
+            GetRoundHistoryRequest request)
+        {
+            var value = Json.SerializeToString(request);
+            var parameters = Json.DeserializeFromString<Dictionary<string, string>>(value);
+
+            var prefix = $"{Consts.GameProvider.Saba}.RoundHistory";
+            return ExecuteFormRequestAsync<GetRoundHistoryResponse>(apiUrl,
+                "api/GetBetDetailByTransID", parameters, logPrefix: prefix);
         }
     }
 }

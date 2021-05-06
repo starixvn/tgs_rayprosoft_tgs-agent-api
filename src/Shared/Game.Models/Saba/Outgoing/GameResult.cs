@@ -136,7 +136,7 @@ namespace TGS.Shared.Game.Models.Saba.Outgoing
         [JsonPropertyName("resettlementinfo")]
         public ResettlementInfo[] ResettlementInfo { get; init; }
 
-        [JsonPropertyName("resettlementinfo")]
+        [JsonPropertyName("match_datetime")]
         public string MatchDateTime { get; init; }
 
         [JsonPropertyName("ParlayData")]
