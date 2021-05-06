@@ -5,9 +5,9 @@ using AutoFixture;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using Report.Client;
-using Report.Client.Models.Market;
 using TGS.Apis.BackendOffice.Controllers.Report;
+using TGS.Clients.Report.Client;
+using TGS.Clients.Report.Client.Models.Market;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers

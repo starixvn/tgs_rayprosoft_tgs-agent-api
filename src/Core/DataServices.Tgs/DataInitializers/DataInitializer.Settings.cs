@@ -60,92 +60,60 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new PromotionTypeGroup
                 {
                     Name = "Deposit",
-                    Trans = new Translation
-                    {
-                        Zh = "充值送",
-                        En = "Deposit Rebate"
-                    },
-                    Types = new[] 
+                    Trans = new() {Zh = "充值送", En = "Deposit Rebate"},
+                    Types = new[]
                     {
                         new PromotionType
                         {
                             Name = "FirstDeposit",
-                            Trans = new Translation
-                            {
-                                Zh = "每日首充",
-                                En = "First Deposit"
-                            }
+                            SettlementIntervalType = "Instantly",
+                            Trans = new() {Zh = "每日首充", En = "First Deposit"}
                         },
                         new PromotionType
                         {
-                            Name = "SecondDeposit",
-                            Trans = new Translation
-                            {
-                                Zh = "每日再充",
-                                En = "Second Deposit"
-                            }
+                            Name = "SecondDeposit", Trans = new() {Zh = "每日再充", En = "Second Deposit"}
                         }
-                    },
+                    }
                 },
                 new PromotionTypeGroup
                 {
                     Name = "Turnover",
-                    Trans = new Translation
-                    {
-                        Zh = "流水",
-                        En = "Turnover"
-                    },
-                    Types = new[] 
+                    Trans = new() {Zh = "流水", En = "Turnover"},
+                    Types = new[]
                     {
                         new PromotionType
                         {
                             Name = "TurnoverRebate",
-                            Trans = new Translation
-                            {
-                                Zh = "流水反水",
-                                En = "Turnover Rebate"
-                            }
+                            SettlementIntervalType = "Daily",
+                            Trans = new() {Zh = "流水反水", En = "Turnover Rebate"}
                         }
-                    },
+                    }
                 },
                 new PromotionTypeGroup
                 {
                     Name = "ReliefMoney",
-                    Trans = new Translation
-                    {
-                        Zh = "救援金",
-                        En = "Relief Money"
-                    },
+                    Trans = new() {Zh = "救援金", En = "Relief Money"},
                     Types = new[]
                     {
                         new PromotionType
                         {
                             Name = "ReliefMoneyDaily",
-                            Trans = new Translation
-                            {
-                                Zh = "每日救援金",
-                                En = "Daily Relief Money"
-                            }
+                            SettlementIntervalType = "Daily",
+                            Trans = new() {Zh = "每日救援金", En = "Daily Relief Money"}
                         },
                         new PromotionType
                         {
                             Name = "ReliefMoneyWeekly",
-                            Trans = new Translation
-                            {
-                                Zh = "每周救援金",
-                                En = "Weekly Relief Money"
-                            }
+                            SettlementIntervalType = "Weekly",
+                            Trans = new() {Zh = "每周救援金", En = "Weekly Relief Money"}
                         },
                         new PromotionType
                         {
                             Name = "ReliefMoneyMonthly",
-                            Trans = new Translation
-                            {
-                                Zh = "每月救援金",
-                                En = "Weekly Relief Money"
-                            }
+                            SettlementIntervalType = "Monthly",
+                            Trans = new() {Zh = "每月救援金", En = "Monthly Relief Money"}
                         }
-                    },
+                    }
                 }
             };
 
@@ -187,10 +155,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("PromotionList")
-                        {
-                            SubMenus = new[] {new MenuSetting("Update")}
-                        }
+                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("PlayerManagement")
@@ -211,10 +177,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment")
-                        {
-                            SubMenus = new[] {new MenuSetting("Update")}
-                        }
+                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Game")
@@ -251,6 +214,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("Update")}}
+                    }
+                },
+                new MenuSetting("FundManagement")
+                {
+                    SubMenus = new[]
+                    {
+                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("System")

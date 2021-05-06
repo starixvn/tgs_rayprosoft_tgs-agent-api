@@ -7,11 +7,12 @@ using Moq;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.BackOffice.Domain.Enums;
+using TGS.Services.Payment;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -21,6 +22,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
         [Test]
         public async Task User_Can_List_DepositForm()
         {
+            var jsonSerializationProvider = new JsonSerializationProvider();
+
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
             dbContextOptionsBuilder
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -62,17 +65,23 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     Id = Guid.NewGuid(),
                     PlayerCode = "PlayerCode",
                     BrandId = brandId,
-                    BankAccount = "123456789",
                     Amount = 1000M,
                     BrandPaymentId = brandPaymentId,
                     Status = 1000,
+                    ApplyInfo = jsonSerializationProvider.SerializeToString(
+                        new
+                        {
+                            BankAccount = "1234567890"
+                        },
+                        null),
+                    PaymentReturn = null,
                     CreatedOn = DateTimeOffset.Now,
-                    UpdateOn = DateTimeOffset.Now
+                    UpdatedOn = DateTimeOffset.Now
                 });
 
             await tgsRepository.SaveChangesAsync();
 
-            var sut = new DepositFormQueryService(tgsRepository);
+            var sut = new DepositFormQueryService(tgsRepository, jsonSerializationProvider);
 
             var query = new DepositFormQuery(
                 brandId,
@@ -97,14 +106,15 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var sut = new ReviewDepositFormCommandService(moqDepositRepository.Object);
 
             var formId = Guid.NewGuid();
-            var command = new ReviewDepositFormCommand(formId, ReviewStatus.Approve);
+            var command = new ReviewDepositFormCommand(formId, ReviewStatus.Approve, null);
 
             await sut.ExecuteAsync(command);
 
             moqDepositRepository.Verify(
                 fake => fake.SignOffDepositFormAsync(
                     It.Is<Guid>(x => x == formId),
-                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve)),
+                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve),
+                    It.IsAny<string>()),
                 Times.Exactly(1));
         }
 

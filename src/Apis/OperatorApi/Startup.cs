@@ -12,26 +12,29 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
+using Tgs.Payment;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Services;
+using TGS.Clients.Promotion.Client.Extensions;
+using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.PluggableServices.Extensions;
-using TGS.Services.Report.Application.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
 
 namespace TGS.Apis.OperatorApi
@@ -45,6 +48,46 @@ namespace TGS.Apis.OperatorApi
         {
             _configuration = configuration;
             _env = env;
+        }
+
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseGlobalExceptionHandler();
+            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
+
+            app.UseRequestLocalization(options =>
+            {
+                options.DefaultRequestCulture = new RequestCulture("en-US");
+                options.ApplyCurrentCultureToResponseHeaders = true;
+            });
+
+            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
+
+            app.UseRouting();
+
+            app.UseHttpMetrics();
+
+            app.UseCors();
+
+            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health", new()
+                {
+                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) =>
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                });
+                endpoints.MapMetrics();
+            });
+
+            if (!_env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
+            }
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -64,7 +107,9 @@ namespace TGS.Apis.OperatorApi
                 .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
-                .AddReportServices();
+                .AddReportClientServices(_configuration)
+                .AddPromotionClientServices(_configuration)
+                .AddTransactions();
 
             services
                 .AddOperatorApiCore()
@@ -76,7 +121,17 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("EmailSetting").Bind(options);
                 })
-                .UseOperatorRepositories();
+                .UseOperatorRepositories()
+                .ConfigurePayment(config =>
+                {
+                    config.UseTgsPaymentRepository();
+                })
+                .ConfigureWallet(config =>
+                {
+                    config.AddTgsWalletRepositories();
+                })
+                .Services
+                .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()
@@ -89,6 +144,7 @@ namespace TGS.Apis.OperatorApi
 
             services.AddIdentityVerifiers();
 
+            services.AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
@@ -138,7 +194,9 @@ namespace TGS.Apis.OperatorApi
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);
                     if (File.Exists(path))
+                    {
                         c.IncludeXmlComments(path);
+                    }
                 });
             }
 
@@ -156,46 +214,6 @@ namespace TGS.Apis.OperatorApi
             });
 
             services.AddSingleton<OperatorApiErrorMapper>();
-        }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseGlobalExceptionHandler();
-            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
-
-            app.UseRequestLocalization(options =>
-            {
-                options.DefaultRequestCulture = new RequestCulture("en-US");
-                options.ApplyCurrentCultureToResponseHeaders = true;
-            });
-
-            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
-
-            app.UseRouting();
-
-            app.UseHttpMetrics();
-
-            app.UseCors();
-
-            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                });
-                endpoints.MapMetrics();
-            });
-
-            if (!_env.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
-            }
         }
     }
 }

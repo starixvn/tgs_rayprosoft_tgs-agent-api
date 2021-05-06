@@ -1,0 +1,39 @@
+﻿using System;
+using System.Text.Json;
+using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
+
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
+{
+    public class WithdrawFormDetailViewModel
+    {
+        public decimal Amount { get; init; }
+
+        public JsonDocument ApplyInfo { get; init; }
+
+        public JsonDocument BankInfo { get; init; }
+
+        public Guid BrandId { get; init; }
+
+        public Guid? BrandPaymentId { get; init; }
+
+        public string ChannelName { get; init; }
+
+        public DateTimeOffset CreatedOn { get; init; }
+
+        public Guid Id { get; init; }
+
+        public Guid? PaymentMethodId { get; init; }
+
+        public JsonDocument PaymentReturn { get; init; }
+
+        public string PlayerCode { get; init; }
+
+        public string Remark { get; init; }
+
+        public FlowStatus Status { get; init; }
+
+        public DateTimeOffset UpdatedOn { get; init; }
+
+        public string UserName { get; init; }
+    }
+}

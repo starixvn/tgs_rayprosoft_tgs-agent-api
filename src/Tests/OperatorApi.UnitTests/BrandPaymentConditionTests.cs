@@ -2,6 +2,7 @@
 using Moq;
 using NUnit.Framework;
 using TGS.Services.Operator;
+using TGS.Services.Payment;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -13,7 +14,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
-                100M,
+                10M,
                 false,
                 false,
                 null);
@@ -39,7 +40,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new DepositedAmountCondition(brandPayment.DepositedAmountLimit);
 
@@ -79,7 +81,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -119,7 +122,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -159,7 +163,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -199,7 +204,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
@@ -239,7 +245,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
@@ -279,7 +286,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new VipCondition(new[] { playerInfo.VipLevel.Value });
 
@@ -319,7 +327,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new VipCondition(Array.Empty<Guid>());
 
@@ -359,7 +368,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new WhiteListCondition(new[] { brandPayment.Id });
 
@@ -399,7 +409,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new BlockListCondition(new[] { brandPayment.Id });
 
@@ -439,7 +450,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var sut = new ShowOnAllPlayersCondition();
 
@@ -479,7 +491,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -525,7 +538,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -571,7 +585,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -621,7 +636,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var fakeCondition1 = new Mock<IBrandPaymentCondition>();
 
@@ -641,7 +657,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
                 .Returns(true);
 
-            var sut = new AllMatchCondition(
+            var sut = new MatchAllCondition(
                 fakeCondition1.Object,
                 fakeCondition2.Object,
                 fakeCondition3.Object);
@@ -682,7 +698,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.AllMatch);
+                ConditionMatchTypes.MatchAll,
+                TransferTypes.Deposit);
 
             var fakeCondition1 = new Mock<IBrandPaymentCondition>();
 
@@ -702,7 +719,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
                 .Returns(false);
 
-            var sut = new SomeOneMatchCondition(
+            var sut = new MatchOneCondition(
                 fakeCondition1.Object,
                 fakeCondition2.Object,
                 fakeCondition3.Object);

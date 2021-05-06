@@ -47,10 +47,10 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                     Email = player.Email,
                     QQ = player.QQ,
                     WeChat = player.Wechat,
-                    Banks = player.Banks.Select(p => new PlayerModel.BankModel
-                    {
-                        Id = p.Id, RealName = p.RealName, BankName = p.BankName, BankAccount = p.BankAccount
-                    }).ToArray()
+                    //Banks = player.Banks.Select(p => new PlayerModel.BankModel
+                    //{
+                    //    Id = p.Id, RealName = p.RealName, BankName = p.BankName, BankAccount = p.BankAccount
+                    //}).ToArray()
                 }
             };
         }

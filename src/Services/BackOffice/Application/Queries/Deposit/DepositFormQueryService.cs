@@ -1,38 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Json;
 using TGS.Paging;
 using TGS.Services.BackOffice.Domain;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
 {
-    internal class DepositFormQueryService : IQueryService<DepositFormQuery, DepositFormInfo>, IGetService<DepositFormQuery, int>
+    internal class DepositFormQueryService : IQueryService<DepositFormQuery, DepositFormModel>, IGetService<DepositFormQuery, int>
     {
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _tgsRepository;
 
-        public DepositFormQueryService(ITgsRepository tgsRepository)
+        public DepositFormQueryService(ITgsRepository tgsRepository, IJsonSerializationProvider jsonSerializationProvider)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async ValueTask<int> GetAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
-        {
-            return await MakeQuery(query).CountAsync().ConfigureAwait(false);
-        }
+            => await MakeQuery(query).CountAsync().ConfigureAwait(false);
 
-        public IAsyncEnumerable<DepositFormInfo> QueryAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<DepositFormModel> QueryAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
         {
             var dataQuery = MakeQuery(query);
 
-            if (!query.Paging.ShowAll)
+            var dbPaging = new Paging<DepositForm>();
+
+            if (query.Paging.ShowAll)
             {
-                var dbPaging = new Paging<DepositForm>();
+                dbPaging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
+
+                dataQuery = dataQuery.ApplyOrderBy(dbPaging);
+            }
+            else
+            {
                 dbPaging.Page = query.Paging.Page;
                 dbPaging.RowCount = query.Paging.Rows;
 
@@ -42,7 +51,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
             }
 
             return dataQuery
-                .Select(form => new DepositFormInfo(
+                .ToAsyncEnumerable()
+                .Select(form => new DepositFormModel(
                     form.Id,
                     form.PlayerCode,
                     form.Player.Username,
@@ -50,12 +60,17 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     form.BrandPaymentId,
                     form.BrandPayment.ChannelName,
                     form.BrandPayment.PaymentMethodChannel.MethodId,
-                    form.Status,
-                    form.BankAccount,
                     form.Amount,
                     form.Remark,
+                    form.Status,
+                    string.IsNullOrWhiteSpace(form.ApplyInfo)
+                        ? null
+                        : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.ApplyInfo, null),
+                    string.IsNullOrWhiteSpace(form.PaymentReturn)
+                        ? null
+                        : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.PaymentReturn, null),
                     form.CreatedOn,
-                    form.UpdateOn))
+                    form.UpdatedOn))
                 .AsAsyncEnumerable();
         }
 
@@ -76,13 +91,21 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
             if (query.PaymentMethodId != null)
                 dataQuery = dataQuery.Where(form => form.BrandPayment.PaymentMethodChannel.MethodId == query.PaymentMethodId);
 
+            if (query.Status != null)
+            {
+                var statusList = query.Status.ToArray();
+
+                if (statusList.Length > 0)
+                    dataQuery = dataQuery.Where(form => statusList.Contains(form.Status));
+            }
+
             if (query.CreateOnRange != null)
                 dataQuery = dataQuery.Where(form => form.CreatedOn >= query.CreateOnRange.Value.Begin
                     && form.CreatedOn < query.CreateOnRange.Value.End);
 
             if (query.UpdateOnRange != null)
-                dataQuery = dataQuery.Where(form => form.UpdateOn >= query.UpdateOnRange.Value.Begin
-                    && form.UpdateOn < query.UpdateOnRange.Value.End);
+                dataQuery = dataQuery.Where(form => form.UpdatedOn >= query.UpdateOnRange.Value.Begin
+                    && form.UpdatedOn < query.UpdateOnRange.Value.End);
 
             return dataQuery;
         }

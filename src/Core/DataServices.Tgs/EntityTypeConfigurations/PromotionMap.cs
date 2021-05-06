@@ -15,7 +15,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasName("pk_promotions_id");
 
             builder.Property(c => c.Name)
-                .HasMaxLength(32)
+                .HasMaxLength(64)
                 .IsRequired();
 
             builder.Property(c => c.From)
@@ -39,7 +39,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired(false);
 
-            builder.Property(c => c.PromotionAmount)
+            builder.Property(c => c.BonusAmountLimit)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
@@ -69,6 +69,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasForeignKey(p => p.PromotionId);
 
             builder.HasMany(p => p.PromotionVipLevels)
+                .WithOne(p => p.Promotion)
+                .HasForeignKey(p => p.PromotionId);
+
+            builder.HasMany(p => p.PromotionParticipants)
                 .WithOne(p => p.Promotion)
                 .HasForeignKey(p => p.PromotionId);
 

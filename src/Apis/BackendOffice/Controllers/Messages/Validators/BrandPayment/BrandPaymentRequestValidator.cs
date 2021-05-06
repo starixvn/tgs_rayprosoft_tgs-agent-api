@@ -18,10 +18,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Validators.BrandPayment
             RuleFor(x => x.TransferLimitTo)
                 .GreaterThan(0)
                 .WithMessage(Resources.BrandPayment.TransferLimitGreaterZero);
-
-            RuleFor(x => x.DepositedAmountMax)
-                .GreaterThan(0)
-                .WithMessage(Resources.BrandPayment.DepositedGreaterZero);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace TGS.Services.Operator
+﻿using TGS.Services.Payment;
+
+namespace TGS.Services.Operator
 {
     internal class DepositedAmountCondition : IBrandPaymentCondition
     {
@@ -10,7 +12,7 @@
         }
 
         public bool IsValid(BrandPaymentInfo brandPayment, PlayerInfo player)
-            => player.DepositedAmount > _depositedAmountLimit.From
-                && player.DepositedAmount <= _depositedAmountLimit.To;
+            => player.DepositedAmount >= _depositedAmountLimit.From
+                && player.DepositedAmount < _depositedAmountLimit.To;
     }
 }

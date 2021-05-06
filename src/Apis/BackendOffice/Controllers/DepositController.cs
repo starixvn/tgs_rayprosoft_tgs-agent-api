@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.BackOffice.Domain.Enums;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -19,69 +17,6 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class DepositController : BaseContextController
     {
-        /// <summary>
-        /// Queries the deposit forms.
-        /// </summary>
-        /// <param name="queryDepositFormsService">The query deposit forms service.</param>
-        /// <param name="countDepositFormsService">The count deposit forms service.</param>
-        /// <param name="brandId">The brand identifier.</param>
-        /// <param name="request">The request.</param>
-        /// <param name="paging">The paging.</param>
-        /// <returns></returns>
-        [HttpGet("{brandId}")]
-        public async Task<PagedResponse<DepositFormViewModel>> QueryDepositFormsAsync(
-            [FromServices] IQueryService<DepositFormQuery, DepositFormInfo> queryDepositFormsService,
-            [FromServices] IGetService<DepositFormQuery, int> countDepositFormsService,
-            Guid brandId,
-            [FromQuery] DepositFormRequest request,
-            [FromQuery] PageableRequest paging)
-        {
-            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
-            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
-
-            if (request.BeginCreateOn != null && request.EndCreateOn != null)
-                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
-
-            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
-                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
-
-            var query = new DepositFormQuery(
-                brandId,
-                request.UserName,
-                request.ChannelName,
-                request.PaymentMethodId,
-                request.Status,
-                createOnRange,
-                updateOnRange,
-                paging);
-
-            var response = new PagedResponse<DepositFormViewModel>
-            {
-                Valid = true,
-                TotalCount = await countDepositFormsService.GetAsync(query).ConfigureAwait(false),
-                Items = await queryDepositFormsService.QueryAsync(query)
-                    .Select(form => new DepositFormViewModel
-                    {
-                        Id = form.Id,
-                        PlayerCode = form.PlayerCode,
-                        UserName = form.UserName,
-                        BrandId = form.BrandId,
-                        BrandPaymentId = form.BrandPaymentId,
-                        PaymentMethodId = form.PaymentMethodId,
-                        ChannelName = form.ChannelName,
-                        Status = form.Status,
-                        Amount = form.Amount,
-                        Remark = form.Remark,
-                        CreatedOn = form.CreateOn,
-                        UpdatedOn = form.UpdateOn
-                    })
-                    .ToArrayAsync()
-                    .ConfigureAwait(false)
-            };
-
-            return response;
-        }
-
         /// <summary>
         /// Gets the deposit form detail.
         /// </summary>
@@ -113,12 +48,94 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ChannelName = formDetail.ChannelName,
                     Amount = formDetail.Amount,
                     Remark = formDetail.Remark,
-                    CreateOn = formDetail.CreateOn,
-                    UpdateOn = formDetail.UpdateOn,
-                    BrandPaymentExtendData = JsonDocument.Parse(formDetail.BrandPaymentExtendData),
-                    ManualReceiptFileId = formDetail.ManualReciptFileId
+                    Status = formDetail.Status switch
+                    {
+                        7000 => FlowStatus.Rejected,
+                        8000 => FlowStatus.Approved,
+                        _ => FlowStatus.Review
+                    },
+                    ApplyInfo = formDetail.ApplyInfo,
+                    PaymentReturn = formDetail.PaymentReturn,
+                    CreatedOn = formDetail.CreatedOn,
+                    UpdatedOn = formDetail.UpdatedOn
                 }
             };
+        }
+
+        /// <summary>
+        /// Queries the deposit forms.
+        /// </summary>
+        /// <param name="queryDepositFormsService">The query deposit forms service.</param>
+        /// <param name="countDepositFormsService">The count deposit forms service.</param>
+        /// <param name="brandId">The brand identifier.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="paging">The paging.</param>
+        /// <returns></returns>
+        [HttpGet("{brandId}")]
+        public async Task<PagedResponse<DepositFormViewModel>> QueryDepositFormsAsync(
+            [FromServices] IQueryService<DepositFormQuery, DepositFormModel> queryDepositFormsService,
+            [FromServices] IGetService<DepositFormQuery, int> countDepositFormsService,
+            Guid brandId,
+            [FromQuery] DepositFormRequest request,
+            [FromQuery] PageableRequest paging)
+        {
+            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+            if (request.BeginCreateOn != null && request.EndCreateOn != null)
+                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+
+            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
+                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+
+            var query = new DepositFormQuery(
+                brandId,
+                request.UserName,
+                request.ChannelName,
+                request.PaymentMethodId,
+                request.Status switch
+                {
+                    FlowStatus.Review => new[] { 0, 1000 },
+                    FlowStatus.Approved => new[] { 8000 },
+                    FlowStatus.Rejected => new[] { 7000 },
+                    _ => null
+                },
+                createOnRange,
+                updateOnRange,
+                paging);
+
+            var totalCount = await countDepositFormsService.GetAsync(query).ConfigureAwait(false);
+
+            var response = new PagedResponse<DepositFormViewModel>
+            {
+                Valid = true,
+                TotalCount = totalCount,
+                Items = await queryDepositFormsService.QueryAsync(query)
+                    .Select(form => new DepositFormViewModel
+                    {
+                        Id = form.Id,
+                        PlayerCode = form.PlayerCode,
+                        UserName = form.UserName,
+                        BrandId = form.BrandId,
+                        BrandPaymentId = form.BrandPaymentId,
+                        PaymentMethodId = form.PaymentMethodId,
+                        ChannelName = form.ChannelName,
+                        Status = form.Status switch
+                        {
+                            7000 => FlowStatus.Rejected,
+                            8000 => FlowStatus.Approved,
+                            _ => FlowStatus.Review
+                        },
+                        Amount = form.Amount,
+                        Remark = form.Remark,
+                        CreatedOn = form.CreateOn,
+                        UpdatedOn = form.UpdateOn
+                    })
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
+            };
+
+            return response;
         }
 
         /// <summary>
@@ -126,16 +143,21 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// </summary>
         /// <param name="reviewCommandService">The review command service.</param>
         /// <param name="formId">The form identifier.</param>
-        /// <param name="reviewResponses">The review responses.</param>
+        /// <param name="reviewResponse">The review responses.</param>
         [HttpPost("{formId}")]
         public async Task<MessageResponse> ReviewDepositFormAsync(
             [FromServices] ICommandService<ReviewDepositFormCommand> reviewCommandService,
             Guid formId,
-            [FromBody] ReviewStatus reviewResponses)
+            [FromBody] DepositReviewRequest reviewResponse)
         {
             var command = new ReviewDepositFormCommand(
                 formId,
-                reviewResponses);
+                reviewResponse.ReviewResponse switch
+                {
+                    ReviewResponses.Approve => ReviewStatus.Approve,
+                    _ => ReviewStatus.Reject
+                },
+                reviewResponse.Remark);
 
             await reviewCommandService
                 .ExecuteAsync(command)

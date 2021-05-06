@@ -24,11 +24,14 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string ApiKey { get; set; }
         public SettlementIntervalType SettlementIntervalType { get; set; }
-        public DateTimeOffset BeforeFromDateTime { get; set; }
-        public DateTimeOffset BeforeToDateTime { get; set; }
-        public DateTimeOffset AfterFromDateTime { get; set; }
-        public DateTimeOffset AfterToDateTime { get; set; }
-
+        public DateTimeOffset PreviousSettlementFrom { get; set; }
+        public DateTimeOffset PreviousSettlementTo { get; set; }
+        public DateTimeOffset CurrentSettlementFrom { get; set; }
+        public DateTimeOffset CurrentSettlementTo { get; set; }
+        public DateTimeOffset NextSettlementFrom { get; set; }
+        public DateTimeOffset NextSettlementTo { get; set; }
+        public bool AutoSentPlayerBonus { get; set; }
+        public bool AutoSentAgentBonus { get; set; }
         public virtual ICollection<Player> Players { get; set; }
 
         public virtual ICollection<BrandGame> Games { get; set; }

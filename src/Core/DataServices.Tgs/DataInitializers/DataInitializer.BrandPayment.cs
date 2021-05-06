@@ -12,33 +12,173 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
     public partial class DataInitializer
     {
-        private const string Help2Pay = "Help2Pay";
-
-        private const string AlipayPayment = "Alipay";
-        private const string WeChatPayPayment = "WeChatPay";
-
-        private const string AlipayScan = "AlipayScan";
-        private const string WeChatPayScan = "WeChatPayScan";
-        private const string BankTransfer = "BankTransfer";
-
-        private static readonly Dictionary<string, Guid> Payments = new()
+        private static readonly Dictionary<string, Guid> PaymentChannels = new()
         {
-            { Help2Pay, new("30CB4D17-2506-4D72-8470-65063B80F9C9") }
+            ["RichBank"] = new("E761A2D3-5705-417F-8D97-43CB7AEA0142"),
+            ["USDT"] = new("B90029F9-F0C6-4E77-9031-0C554028F9BA")
         };
 
-        private static readonly Dictionary<string, (Guid, Guid)> PaymentMethods = new()
+        private static readonly Dictionary<string, (Guid Id, string BankType)> PaymentMethods = new()
         {
-            { AlipayPayment, (new("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), Payments[Help2Pay]) },
-            { WeChatPayPayment, (new("083D8754-1FE3-478A-9417-80DA796C3450"), Payments[Help2Pay]) }
+            ["BankTransfer"] = (new Guid("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), "Bank"),
+            ["Crypto"] = (new Guid("798D21C6-9CF5-4FC0-BD09-8D67D2C9E7E1"), "Crypto")
         };
 
-        private static readonly Dictionary<string, (Guid, (Guid, Guid))> PaymentChannels =
-            new()
-            {
-                { AlipayScan, (new("E761A2D3-5705-417F-8D97-43CB7AEA0142"), PaymentMethods[AlipayPayment]) },
-                { BankTransfer, (new("031FD0E3-A377-48E4-BE11-B52E8B3AD36B"), PaymentMethods[AlipayPayment]) },
-                { WeChatPayScan, (new("450C18AD-214E-4ED1-AAF9-6BAE74BF0BA5"), PaymentMethods[WeChatPayPayment]) }
-            };
+        private static readonly Dictionary<string, (Guid Id, string ExtendedData)> Payments = new()
+        {
+            ["Manual"] = (
+                new Guid("30CB4D17-2506-4D72-8470-65063B80F9C9"),
+                JsonSerializer.Serialize(
+                    new
+                    {
+                        BankAccount = "9876543210",
+                        Name = "測試者"
+                    },
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        WriteIndented = false
+                    })),
+            ["LeePay"] = (
+                new Guid("EC6EBD49-E002-4DB9-B7DE-1750FADC0C8E"),
+                JsonSerializer.Serialize(
+                    new
+                    {
+                        SystemId = "WG",
+                        SystemKey = "7ujm5tgB",
+                        ChannelCurrency = "CNY",
+                        Channel = "ETHEREUM"
+                    },
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        WriteIndented = false
+                    }))
+        };
+
+        private async Task GenerateBrandPaymentsAsync()
+        {
+            var allPaymentMethodChannels = await _repository.PaymentMethodChannels.ToArrayAsync();
+            var allBrands = Resellers
+                .SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+                .Distinct();
+
+            var depositBrandPayments = from brand in allBrands
+                                       from pmc in allPaymentMethodChannels
+                                       let brandPaymentId = GuidExtensions.NewSequentialGuid()
+                                       let payment = Payments.Where(p => p.Value.Id == pmc.PaymentId).First()
+                                       select new BrandPayment
+                                       {
+                                           Id = brandPaymentId,
+                                           DisplayOrder = 1,
+                                           BrandId = brand.Id,
+                                           PaymentMethodChannelId = pmc.Id,
+                                           TransferType = PaymentTransferType.Deposit,
+                                           ChannelName = $"{Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                               $"{PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                               $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
+                                           PaymentStatus = SwitchStatus.Enabled,
+                                           TransferLimitFrom = 10,
+                                           TransferLimitTo = 100000,
+                                           PlayerListCondition = PlayerListCondition.MatchAll,
+                                           AllPlayers = true,
+                                           IdentityAuthentication = false,
+                                           PhoneAuthentication = false,
+                                           DepositedAmountUnlimited = true,
+                                           DepositedAmountMin = 0M,
+                                           DepositedAmountMax = 0M,
+                                           Reason = "Reason",
+                                           FeePercentage = 50,
+                                           LowestFee = 50,
+                                           HighestFee = 500,
+                                           BrandPaymentPlayers =
+                                           new[]
+                                           {
+                                                new BrandPaymentPlayer
+                                                {
+                                                    PlayerCode = _players[0].PlayerCode,
+                                                    ListType = PlayerListType.White,
+                                                    BrandPaymentId = brandPaymentId
+                                                },
+                                                new BrandPaymentPlayer
+                                                {
+                                                    PlayerCode = _players[1].PlayerCode,
+                                                    ListType = PlayerListType.Black,
+                                                    BrandPaymentId = brandPaymentId
+                                                }
+                                                   },
+                                           VipLevels = new[]
+                                                   {
+                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
+                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                           },
+                                           ExtendedData = payment.Value.ExtendedData,
+                                           CreatedByUsername = AdminUsername,
+                                           CreatedOn = DateTimeOffset.Now,
+                                           UpdatedByUsername = AdminUsername,
+                                           UpdatedOn = DateTimeOffset.Now
+                                       };
+
+            var withdrawBrandPayments = from brand in allBrands
+                                        from pmc in allPaymentMethodChannels
+                                        where pmc.PaymentId != Payments["Manual"].Id
+                                        let brandPaymentId = GuidExtensions.NewSequentialGuid()
+                                        let payment = Payments.Where(p => p.Value.Id == pmc.PaymentId).First()
+                                        select new BrandPayment
+                                        {
+                                            Id = brandPaymentId,
+                                            DisplayOrder = 1,
+                                            BrandId = brand.Id,
+                                            PaymentMethodChannelId = pmc.Id,
+                                            TransferType = PaymentTransferType.Withdrawal,
+                                            ChannelName = $"{Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                                $"{PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                                $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
+                                            PaymentStatus = SwitchStatus.Enabled,
+                                            TransferLimitFrom = 10,
+                                            TransferLimitTo = 100000,
+                                            PlayerListCondition = PlayerListCondition.MatchAll,
+                                            AllPlayers = true,
+                                            IdentityAuthentication = false,
+                                            PhoneAuthentication = false,
+                                            DepositedAmountUnlimited = true,
+                                            DepositedAmountMin = 0M,
+                                            DepositedAmountMax = 0M,
+                                            Reason = "Reason",
+                                            FeePercentage = 50,
+                                            LowestFee = 50,
+                                            HighestFee = 500,
+                                            BrandPaymentPlayers =
+                                            new[]
+                                            {
+                                                new BrandPaymentPlayer
+                                                {
+                                                    PlayerCode = _players[0].PlayerCode,
+                                                    ListType = PlayerListType.White,
+                                                    BrandPaymentId = brandPaymentId
+                                                },
+                                                new BrandPaymentPlayer
+                                                {
+                                                    PlayerCode = _players[1].PlayerCode,
+                                                    ListType = PlayerListType.Black,
+                                                    BrandPaymentId = brandPaymentId
+                                                }
+                                                    },
+                                            VipLevels = new[]
+                                                    {
+                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
+                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                           },
+                                            ExtendedData = payment.Value.ExtendedData,
+                                            CreatedByUsername = AdminUsername,
+                                            CreatedOn = DateTimeOffset.Now,
+                                            UpdatedByUsername = AdminUsername,
+                                            UpdatedOn = DateTimeOffset.Now
+                                        };
+
+            await _repository.BrandPayments.AddRangeAsync(depositBrandPayments);
+            await _repository.BrandPayments.AddRangeAsync(withdrawBrandPayments);
+        }
 
         private async Task GeneratePaymentAsync()
         {
@@ -51,11 +191,85 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await GenerateBrandPaymentsAsync();
         }
 
+        private Task GeneratePaymentChannelsAsync()
+        {
+            var paymentVendors = PaymentChannels.Select(p => new PaymentChannel
+            {
+                Id = p.Value,
+                Code = p.Key,
+                Description = "online payment channel",
+            }).ToArray();
+
+            return _repository.PaymentChannels.AddRangeAsync(paymentVendors);
+        }
+
+        private Task GeneratePaymentMethodChannelsAsync()
+        {
+            var paymentMethodChannels = new[] {
+                new PaymentMethodChannel
+                {
+                    Id = Guid.NewGuid(),
+                    PaymentId = Payments["Manual"].Id,
+                    MethodId = PaymentMethods["BankTransfer"].Id,
+                    ChannelId = PaymentChannels["RichBank"],
+                    CreatedByUsername = AdminUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedByUsername = AdminUsername,
+                    UpdatedOn = DateTimeOffset.Now
+                },
+                new PaymentMethodChannel
+                {
+                    Id = Guid.NewGuid(),
+                    PaymentId = Payments["LeePay"].Id,
+                    MethodId = PaymentMethods["Crypto"].Id,
+                    ChannelId = PaymentChannels["USDT"],
+                    CreatedByUsername = AdminUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedByUsername = AdminUsername,
+                    UpdatedOn = DateTimeOffset.Now
+                }
+            };
+            var query = from payment in Payments
+                        from method in PaymentMethods
+                        let ChannelId = method.Value.BankType switch
+                        {
+                            "Bank" => PaymentChannels["RichBank"],
+                            "Crypto" => PaymentChannels["USDT"],
+                            _ => PaymentChannels["USDT"]
+                        }
+                        select new PaymentMethodChannel
+                        {
+                            Id = Guid.NewGuid(),
+                            PaymentId = payment.Value.Id,
+                            MethodId = method.Value.Id,
+                            ChannelId = ChannelId,
+                            CreatedByUsername = AdminUsername,
+                            CreatedOn = DateTimeOffset.Now,
+                            UpdatedByUsername = AdminUsername,
+                            UpdatedOn = DateTimeOffset.Now
+                        };
+
+            return _repository.PaymentMethodChannels.AddRangeAsync(query);
+        }
+
+        private Task GeneratePaymentMethodsAsync()
+        {
+            var paymentMethods = PaymentMethods.Select(p => new PaymentMethod
+            {
+                Id = p.Value.Id,
+                Code = p.Key,
+                BankType = p.Value.BankType,
+                Description = "online payment method",
+            }).ToArray();
+
+            return _repository.PaymentMethods.AddRangeAsync(paymentMethods);
+        }
+
         private Task GeneratePaymentsAsync()
         {
             var payments = Payments.Select(p => new Payment
             {
-                Id = p.Value,
+                Id = p.Value.Id,
                 Code = p.Key,
                 Name = p.Key,
                 Description = "online payment platform",
@@ -66,123 +280,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             }).ToArray();
 
             return _repository.Payments.AddRangeAsync(payments);
-        }
-
-        private Task GeneratePaymentMethodsAsync()
-        {
-            var paymentMethods = PaymentMethods.Select(p => new PaymentMethod
-            {
-                Id = p.Value.Item1,
-                Code = p.Key,
-                Description = "online payment method",
-            }).ToArray();
-
-            return _repository.PaymentMethods.AddRangeAsync(paymentMethods);
-        }
-
-        private Task GeneratePaymentChannelsAsync()
-        {
-            var paymentVendors = PaymentChannels.Select(p => new PaymentChannel
-            {
-                Id = p.Value.Item1,
-                Code = p.Key,
-                Description = "online payment channel",
-            }).ToArray();
-
-            return _repository.PaymentChannels.AddRangeAsync(paymentVendors);
-        }
-
-        private Task GeneratePaymentMethodChannelsAsync()
-        {
-            var query = from payment in Payments
-                        from method in PaymentMethods
-                        from channel in PaymentChannels
-                        select new PaymentMethodChannel
-                        {
-                            Id = Guid.NewGuid(),
-                            PaymentId = payment.Value,
-                            MethodId = method.Value.Item1,
-                            ChannelId = channel.Value.Item1,
-                            CreatedByUsername = AdminUsername,
-                            CreatedOn = DateTimeOffset.Now,
-                            UpdatedByUsername = AdminUsername,
-                            UpdatedOn = DateTimeOffset.Now
-                        };
-
-            return _repository.PaymentMethodChannels.AddRangeAsync(query);
-        }
-
-        private async Task GenerateBrandPaymentsAsync()
-        {
-            var allPaymentMethodChannels = await _repository.PaymentMethodChannels.ToArrayAsync();
-            var allBrands = Resellers
-                .SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
-                .Distinct();
-
-            var brandPayments = from brand in allBrands
-                                from pmc in allPaymentMethodChannels
-                                let brandPaymentId = GuidExtensions.NewSequentialGuid()
-                                select new BrandPayment
-                                {
-                                    Id = brandPaymentId,
-                                    DisplayOrder = 1,
-                                    BrandId = brand.Id,
-                                    PaymentMethodChannelId = pmc.Id,
-                                    TransferType = PaymentTransferType.Deposit,
-                                    ChannelName = "阿里pay",
-                                    PaymentStatus = SwitchStatus.Enabled,
-                                    TransferLimitFrom = 10,
-                                    TransferLimitTo = 100000,
-                                    PlayerListCondition = PlayerListCondition.All,
-                                    AllPlayers = true,
-                                    IdentityAuthentication = true,
-                                    PhoneAuthentication = true,
-                                    DepositedAmountUnlimited = true,
-                                    DepositedAmountMin = 100,
-                                    DepositedAmountMax = 1000,
-                                    Reason = "Reason",
-                                    FeePercentage = 50,
-                                    LowestFee = 50,
-                                    HighestFee = 500,
-                                    BrandPaymentPlayers =
-                                    new[]
-                                    {
-                                        new BrandPaymentPlayer
-                                        {
-                                            PlayerCode = _players[0].PlayerCode,
-                                            ListType = PlayerListType.White,
-                                            BrandPaymentId = brandPaymentId
-                                        },
-                                        new BrandPaymentPlayer
-                                        {
-                                            PlayerCode = _players[1].PlayerCode,
-                                            ListType = PlayerListType.Black,
-                                            BrandPaymentId = brandPaymentId
-                                        }
-                                    },
-                                    VipLevels = new[]
-                                    {
-                                        new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
-                                        new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
-                                    },
-                                    ExtendedData = JsonSerializer.Serialize(
-                                        new
-                                        {
-                                            BankAccount = "987654321",
-                                            Name = "測試者"
-                                        },
-                                        new JsonSerializerOptions
-                                        {
-                                            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                                            WriteIndented = false
-                                        }),
-                                    CreatedByUsername = AdminUsername,
-                                    CreatedOn = DateTimeOffset.Now,
-                                    UpdatedByUsername = AdminUsername,
-                                    UpdatedOn = DateTimeOffset.Now
-                                };
-
-            await _repository.BrandPayments.AddRangeAsync(brandPayments);
         }
     }
 }

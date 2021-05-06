@@ -34,6 +34,9 @@ namespace TGS.Core.DataServices.Report.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(c => c.VipLevel)
+                .IsRequired(false);
+
             builder.Property(c => c.VipLiveDealerRebatePercentage)
                 .HasPrecision(9, 6)
                 .IsRequired();

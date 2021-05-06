@@ -85,7 +85,7 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        DbSet<PlayerBank> PlayerBanks { get; set; }
+        DbSet<PlayerBankInfo> PlayerBankInfos { get; set; }
 
         DbSet<VipLevel> VipLevels { get; set; }
 
@@ -142,20 +142,30 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<AgentBank> AgentBanks { get; set; }
 
         DbSet<AgentWallet> AgentWallets { get; set; }
+
         DbSet<AgentTransaction> AgentTransactions { get; set; }
+
         DbSet<Promotion> Promotions { get; set; }
+
         DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+
         DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
 
         DbSet<DepositForm> DepositForms { get; set; }
+
+        DbSet<WithdrawForm> WithdrawForms { get; set; }
+
+        DbSet<TransactionPromotion> TransactionPromotions { get; set; }
+
+        DbSet<PlayerBucket> PlayerBuckets { get; set; }
+        DbSet<PromotionBonus> PromotionBonus { get; set; }
+        DbSet<PromotionPlayer> PromotionPlayers { get; set; }
+        DbSet<AgentDividend> AgentDividends { get; set; }
+        DbSet<PlayerRebate> PlayerRebates { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
     {
-        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
-        {
-        }
-
         public DbSet<Reseller> Resellers { get; set; }
 
         public DbSet<Game> Games { get; set; }
@@ -220,7 +230,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
-        public DbSet<PlayerBank> PlayerBanks { get; set; }
+        public DbSet<PlayerBankInfo> PlayerBankInfos { get; set; }
 
         public DbSet<VipLevel> VipLevels { get; set; }
 
@@ -281,18 +291,36 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<AgentBank> AgentBanks { get; set; }
 
         public DbSet<AgentWallet> AgentWallets { get; set; }
+
         public DbSet<Promotion> Promotions { get; set; }
+
         public DbSet<PromotionGameProvider> PromotionGameProviders { get; set; }
+
         public DbSet<PromotionVipLevel> PromotionVipLevels { get; set; }
 
         public DbSet<AgentTransaction> AgentTransactions { get; set; }
 
         public DbSet<PaymentMethodChannel> PaymentMethodChannels { get; set; }
 
+        public DbSet<TransactionPromotion> TransactionPromotions { get; set; }
+
+        public DbSet<PlayerBucket> PlayerBuckets { get; set; }
+        public DbSet<PromotionBonus> PromotionBonus { get; set; }
+        public DbSet<PromotionPlayer> PromotionPlayers { get; set; }
+        public DbSet<AgentDividend> AgentDividends { get; set; }
+        public DbSet<PlayerRebate> PlayerRebates { get; set; }
+
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;
 
         public DbSet<DepositForm> DepositForms { get; set; }
+
+        public DbSet<WithdrawForm> WithdrawForms { get; set; }
+
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
+        {
+        }
+
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 
         public void SetTimeoutToSeconds(int seconds) => Database.SetCommandTimeout(seconds);

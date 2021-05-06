@@ -16,8 +16,6 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
         }
 
         public ValueTask ExecuteAsync(ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
-        {
-            return _depositRepository.SignOffDepositFormAsync(command.FormId, command.Status);
-        }
+            => _depositRepository.SignOffDepositFormAsync(command.FormId, command.Status, command.remark);
     }
 }

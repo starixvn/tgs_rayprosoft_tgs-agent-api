@@ -8,7 +8,9 @@ namespace TGS.Core.DataServices.Report.Models
         public int Id { get; set; }
         public Guid BrandId { get; set; }
         public Guid? AgentId { get; set; }
+        public Guid GameProviderId { get; set; }
         public string PlayerCode { get; set; }
+        public int? VipLevel { get; set; }
         public GameType GameType { get; set; }
         public int Hour { get; set; }
         public int Minute { get; set; }

@@ -27,7 +27,6 @@ namespace ReportApi.Controllers
 
         [HttpPost("rebates")]
         [Description("Create player rebates")]
-        public Task<MessageResponse> GetRoundsAsync(CreatePlayerRebateRequest request) =>
-            _mediator.Send(request);
+        public Task<MessageResponse> GetRoundsAsync(CreatePlayerRebateRequest request) => _mediator.Send(request);
     }
 }

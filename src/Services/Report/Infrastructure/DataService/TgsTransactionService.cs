@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.Report.Application.Models.PlayerRebate;
@@ -15,8 +14,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
     {
         ITgsRepository Repository { get; }
 
-        IQueryable<Transaction> GetTransactionQueries(
-            Func<IQueryable<Transaction>, IQueryable<Transaction>> preQuery = null,
+        IQueryable<Core.DataServices.Tgs.Models.Transaction> GetTransactionQueries(
+            Func<IQueryable<Core.DataServices.Tgs.Models.Transaction>,
+                IQueryable<Core.DataServices.Tgs.Models.Transaction>> preQuery = null,
             bool tracking = false);
 
         Task CreateTransactionsAsync(PlayerRebateModel[] models);
@@ -49,7 +49,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     wallet.Balance += rebateAmount;
                     wallet.UpdatedOn = DateTimeOffset.Now;
 
-                    return new Transaction
+                    return new Core.DataServices.Tgs.Models.Transaction
                     {
                         Id = GuidExtensions.NewSequentialGuid(),
                         WalletId = x.player.DefaultWalletId,
@@ -65,8 +65,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
             await CreateEntitiesAsync(playerRebates);
         }
 
-        IQueryable<Transaction> ITgsTransactionService.GetTransactionQueries(
-            Func<IQueryable<Transaction>, IQueryable<Transaction>> preQuery,
+        IQueryable<Core.DataServices.Tgs.Models.Transaction> ITgsTransactionService.GetTransactionQueries(
+            Func<IQueryable<Core.DataServices.Tgs.Models.Transaction>,
+                IQueryable<Core.DataServices.Tgs.Models.Transaction>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
     }

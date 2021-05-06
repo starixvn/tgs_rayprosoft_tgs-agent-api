@@ -7,6 +7,7 @@ using NSubstitute;
 using NUnit.Framework;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Deposit;
+using TGS.Services.Payment;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -16,22 +17,25 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Payment_Methods_Should_Success()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            // arrange
+            // act
+            // assert
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
 
-            var sut = new AllPaymentMethodsQueryService(moqWalletRepository.Object);
+            var sut = new AllPaymentMethodsQueryService(moqPaymentRepository.Object);
 
             var query = new AllPaymentMethodsQuery();
 
-            moqWalletRepository
+            moqPaymentRepository
                 .Setup(fake => fake.GetAllPaymentMethodsAsync())
                 .Returns(new[] {
-                    new PaymentMethodInfo(Guid.NewGuid(), "test1"),
-                    new PaymentMethodInfo(Guid.NewGuid(), "test2")
+                    new PaymentMethodInfo(Guid.NewGuid(), "test1", "Bank"),
+                    new PaymentMethodInfo(Guid.NewGuid(), "test2", "Crypto")
                 }.ToAsyncEnumerable());
 
             _ = await sut.GetAsync(query);
 
-            moqWalletRepository.Verify(
+            moqPaymentRepository.Verify(
                 fake => fake.GetAllPaymentMethodsAsync(),
                 Times.Exactly(1));
         }
@@ -39,13 +43,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Payment_Channels_Should_Success()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
 
-            var sut = new AllPaymentChannelsQueryService(moqWalletRepository.Object);
+            var sut = new AllPaymentChannelsQueryService(moqPaymentRepository.Object);
 
             var query = new AllPaymentChannelsQuery();
 
-            moqWalletRepository
+            moqPaymentRepository
                 .Setup(fake => fake.GetAllPaymentChannelsAsync())
                 .Returns(new[] {
                     new PaymentChannelInfo(Guid.NewGuid(), "test1"),
@@ -54,7 +58,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = await sut.GetAsync(query);
 
-            moqWalletRepository.Verify(
+            moqPaymentRepository.Verify(
                 fake => fake.GetAllPaymentChannelsAsync(),
                 Times.Exactly(1));
         }
@@ -62,9 +66,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task User_Can_Get_PaymentInfo()
         {
-            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
 
-            var sut = new GetPaymentQueryService(moqWalletRepository.Object);
+            var sut = new GetPaymentQueryService(moqPaymentRepository.Object);
 
             var paymentId = Guid.NewGuid();
 
@@ -72,7 +76,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = await sut.GetAsync(query);
 
-            moqWalletRepository.Verify(
+            moqPaymentRepository.Verify(
                 fake => fake.GetPaymentAsync(It.Is<Guid>(x => x == paymentId)),
                 Times.Exactly(1));
         }
@@ -80,22 +84,23 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task User_Can_List_Available_BrandPayments()
         {
-            var fakeWalletRepository = Substitute.For<IWalletRepository>();
+            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakeWalletRepository = Substitute.For<IPlayerRepository>();
 
-            var sut = new BrandPaymentsQueryService(fakeWalletRepository);
+            var sut = new BrandPaymentsQueryService(fakePaymentRepository, fakeWalletRepository);
 
             var brandId = Guid.NewGuid();
             var playerCode = "ThisIsPlayerCode";
 
             var query = new BrandPaymentsQuery(brandId, playerCode);
 
-            fakeWalletRepository
+            fakePaymentRepository
                 .GetBrandPaymentAclsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<string>())
                 .Returns(Array.Empty<BrandPaymentAcl>().ToAsyncEnumerable());
 
             _ = await sut.QueryAsync(query).ToArrayAsync();
 
-            fakeWalletRepository
+            fakePaymentRepository
                 .Received(1)
                 .GetBrandPaymentAclsAsync(Arg.Any<IEnumerable<Guid>>(), Arg.Any<string>());
         }

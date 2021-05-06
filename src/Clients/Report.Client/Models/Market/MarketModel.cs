@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Report.Client.Models.Market
+namespace TGS.Clients.Report.Client.Models.Market
 {
     public class MarketModel
     {

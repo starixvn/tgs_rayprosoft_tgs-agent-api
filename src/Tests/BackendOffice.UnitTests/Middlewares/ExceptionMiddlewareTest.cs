@@ -13,7 +13,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Middlewares;
-using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
@@ -26,28 +25,26 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
     [Parallelizable]
     public class ExceptionMiddlewareTest
     {
-        private readonly Mock<IRequestAnalyzer> _requestAnalyzerMock = new();
-        private readonly Mock<ITgsLog> _tgsLogMock = new();
-        private readonly Mock<IJsonSerializationProvider> _json = new();
-        private readonly Mock<IStreamToString> _streamToString = new();
-        private readonly string _requestString = "Hello World Request!!";
-        private readonly string _responseString = "Hello World Response!!";
-        private readonly Mock<IWebHostEnvironment> _envMock = new();
-        private RequestDelegate _requestDelegate;
-        private IMiddleware _target;
-
         [SetUp]
         public void Setup()
         {
-            _requestDelegate = (innerContext) => Task.FromResult(0);
+            _requestDelegate = innerContext => Task.FromResult(0);
             _target = new ExceptionMiddleware(
                 _requestAnalyzerMock.Object,
                 _tgsLogMock.Object,
                 _json.Object,
                 _envMock.Object,
-                _streamToString.Object,
                 new NullLogger<ExceptionMiddleware>());
         }
+
+        private readonly Mock<IRequestAnalyzer> _requestAnalyzerMock = new();
+        private readonly Mock<ITgsLog> _tgsLogMock = new();
+        private readonly Mock<IJsonSerializationProvider> _json = new();
+        private readonly string _requestString = "Hello World Request!!";
+        private readonly string _responseString = "Hello World Response!!";
+        private readonly Mock<IWebHostEnvironment> _envMock = new();
+        private RequestDelegate _requestDelegate;
+        private IMiddleware _target;
 
         ///TODO: fix  cannot pass   using var sr = new StreamReader(context.Response.Body);
         [Test]
@@ -123,9 +120,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
 
             mockHttpContext.Setup(p => p.Features)
                 .Returns(fc);
-
-            _streamToString.Setup(p => p.GetStringAsync(It.IsAny<Stream>()))
-                .Returns(Task.FromResult("test"));
 
             _json.Setup(p => p.SerializeToString(It.IsAny<ErrorDetails>(), It.IsAny<JsonSerializerOptions>()))
                 .Returns("test");

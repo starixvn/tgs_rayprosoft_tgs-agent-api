@@ -163,7 +163,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
         let columns = [
             sequenceColumn(),
             {
-                Header: <Trans zh="用户名" en="User name" />,
+                Header: <Trans zh="用户名" en="Username" />,
                 accessor: "username",
                 disableSortBy: true,
                 headCell: {
@@ -177,7 +177,8 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 accessor: "vipLevel",
                 Header: <Trans zh="VIP 等级" en="VIP Level" />,
                 disableSortBy: true,
-                Cell: ({ value }) => `VIP ${value}`
+                Cell: ({ value }) =>
+                    Number.isInteger(value) ? `VIP ${value}` : "-"
             }),
             {
                 disableSortBy: true,

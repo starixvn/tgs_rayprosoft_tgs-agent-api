@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Report.Client.Extensions
+namespace TGS.Clients.Report.Client.Extensions
 {
     public static class ServiceExtensions
     {
@@ -24,6 +25,8 @@ namespace Report.Client.Extensions
             services.AddHttpClient<IReportClient, ReportClient>((sp, c) =>
             {
                 var settings = sp.GetRequiredService<ReportSettings>();
+
+                c.Timeout = TimeSpan.FromHours(1);
                 c.BaseAddress = new(settings.Url);
             });
 

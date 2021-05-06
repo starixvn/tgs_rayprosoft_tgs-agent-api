@@ -64,7 +64,7 @@ namespace TGS.Apis.TgsApi.Commons
             {
                 options.Filters.Add<ValidateModelFilter>();
                 AddCustomFilters(options);
-            }).ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
+            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
 
             services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")

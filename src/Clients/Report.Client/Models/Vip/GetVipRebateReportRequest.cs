@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client.Models.Vip
+namespace TGS.Clients.Report.Client.Models.Vip
 {
     public class GetVipRebateReportRequest : PageableRequest
     {

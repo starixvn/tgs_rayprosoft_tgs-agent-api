@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Services.Payment.Configuration;
+using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Operator.Configuration
 {
@@ -13,15 +15,6 @@ namespace TGS.Services.Operator.Configuration
             Services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
-        public OperatorConfiguration ConfigureOperatorOptions<TDep>(Action<OperatorOptions, TDep> configure) where TDep : class
-        {
-            Services
-                .AddOptions<OperatorOptions>()
-                .Configure(configure);
-
-            return this;
-        }
-
         public OperatorConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure) where TDep : class
         {
             Services
@@ -31,10 +24,25 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
-        public OperatorConfiguration UseWalletRepository<TWalletRepository>() where TWalletRepository : class, IWalletRepository
+        public OperatorConfiguration ConfigureOperatorOptions<TDep>(Action<OperatorOptions, TDep> configure) where TDep : class
         {
             Services
-                .AddTransient<IWalletRepository, TWalletRepository>();
+                .AddOptions<OperatorOptions>()
+                .Configure(configure);
+
+            return this;
+        }
+
+        public OperatorConfiguration ConfigurePayment(Action<PaymentConfiguration> configure)
+        {
+            configure(Services.AddPayment());
+
+            return this;
+        }
+
+        public OperatorConfiguration ConfigureWallet(Action<WalletConfiguration> configure)
+        {
+            configure(Services.AddWallet());
 
             return this;
         }
@@ -43,6 +51,14 @@ namespace TGS.Services.Operator.Configuration
             where TStationLetterRepository : class, IStationLetterRepository
         {
             Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration UseWalletRepository<TWalletRepository>() where TWalletRepository : class, IPlayerRepository
+        {
+            Services
+                .AddTransient<IPlayerRepository, TWalletRepository>();
 
             return this;
         }

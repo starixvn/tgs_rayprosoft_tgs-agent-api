@@ -2,6 +2,7 @@ import {
     urlWith,
     useGet,
     usePostData,
+    usePut,
     usePutData,
     useDelete
 } from "../../client"
@@ -31,13 +32,8 @@ export const useUpdatePromotion = (id, data) => {
     return usePutData(url, data)
 }
 
-//TODO: status value type?
 export const useChangePromotionStatus = (id, status) => {
-    let url =
-        id && Number.isFinite(status) ? `${API}/${id}/status/${status}` : ""
+    let url = id && status ? `${API}/${id}/${status}` : ""
 
     return usePut(url)
 }
-
-export const usePromotionTypeList = () =>
-    useSystemSettingValue("PromotionTypes")

@@ -390,34 +390,541 @@ export const useChangePlayerPassword = (
         brandToken && playerToken && formData
             ? [
                   `/api/player/changePassword`,
+                  formData,
                   brandCode,
                   currency,
                   username,
-                  formData
+                  platformtype
               ]
             : undefined
 
-    let { data: result, error, ...rest } = useSWR(
-        keys,
-        (url, brandCode, currency, username, formData) => {
-            return fetch(url, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${brandToken}`,
-                    Token: playerToken
-                },
-                body: JSON.stringify(formData)
-            })
-                .then(toDataOrError)
-                .catch(handleError({ brandTokenHook, playerTokenHook }))
-        }
-    )
+    let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
+        return fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
 
     return {
         result,
         error,
         isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
+export const useInitPlayerPayPassword = (
+    { brandCode, currency, username, platformtype } = {},
+    formData
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && formData
+            ? [
+                  `/api/pay/password`,
+                  formData,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
+export const usePaymentList = ({
+    brandCode,
+    currency,
+    username,
+    platformtype
+} = {}) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken
+            ? [`/api/deposit`, brandCode, currency, username, platformtype]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url) => {
+        return fetch(url, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            }
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
+export const useApplyDeposit = (
+    { brandCode, currency, username, platformtype } = {},
+    formData
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && formData
+            ? [
+                  `/api/deposit/manual`,
+                  formData,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
+        return fetch(url, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
+export const useUploadDepositProof = (
+    { brandCode, currency, username, platformtype, depositFormId } = {},
+    formData
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && depositFormId && formData
+            ? [
+                  `/api/deposit/manual/${depositFormId}`,
+                  formData,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            },
+            body: formData
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
+export const useBankInfoList = ({
+    brandCode,
+    currency,
+    username,
+    platformtype
+}) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken
+            ? [`/api/bankinfo`, brandCode, currency, username, platformtype]
+            : undefined
+
+    let { data, error, ...rest } = useSWR(keys, (url) => {
+        return fetch(url, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            }
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        data: data?.data,
+        error,
+        isLoading: keys && !data && !error,
+        ...rest
+    }
+}
+
+export const useAddBankInfo = (
+    { brandCode, currency, username, platformtype },
+    formData
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && formData
+            ? [
+                  `/api/bankinfo`,
+                  formData,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
+export const useDeleteBankInfo = (
+    { brandCode, currency, username, platformtype },
+    bankInfoId
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && bankInfoId
+            ? [
+                  `/api/bankinfo/${bankInfoId}`,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url) => {
+        return fetch(url, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            }
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
+export const useWithdrawList = ({
+    brandCode,
+    currency,
+    username,
+    platformtype
+} = {}) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken
+            ? [`/api/withdraw`, brandCode, currency, username, platformtype]
+            : undefined
+
+    let { data, error, ...rest } = useSWR(keys, (url) => {
+        return fetch(url, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            }
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        data: data?.data,
+        error,
+        isLoading: keys && !data && !error,
+        ...rest
+    }
+}
+
+export const useApplyWithdraw = (
+    { brandCode, currency, username, platformtype } = {},
+    formData
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && formData
+            ? [
+                  `/api/withdraw`,
+                  formData,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        result,
+        error,
+        isLoading: keys && !result && !error,
+        ...rest
+    }
+}
+
+export const usePromotionList = ({
+    brandCode,
+    currency,
+    username,
+    platformtype
+}) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken
+            ? [`/api/Promotion`, brandCode, currency, username, platformtype]
+            : undefined
+
+    let { data, error, ...rest } = useSWR(keys, (url) => {
+        return fetch(url, {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            }
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        data: data?.data,
+        error,
+        isLoading: keys && !data && !error,
+        ...rest
+    }
+}
+
+export const useJoinPromotion = (
+    { brandCode, currency, username, platformtype },
+    formData
+) => {
+    let { token: brandToken, ...brandTokenHook } = useBrandToken({
+        brandCode,
+        currency
+    })
+    let { token: playerToken, ...playerTokenHook } = usePlayerToken({
+        brandCode,
+        username,
+        currency,
+        platformtype
+    })
+
+    let keys =
+        brandToken && playerToken && formData
+            ? [
+                  `/api/Promotion`,
+                  formData,
+                  brandCode,
+                  currency,
+                  username,
+                  platformtype
+              ]
+            : undefined
+
+    let { data, error, ...rest } = useSWR(keys, (url, formData) => {
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${brandToken}`,
+                Token: playerToken
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(toDataOrError)
+            .catch(handleError({ brandTokenHook, playerTokenHook }))
+    })
+
+    return {
+        data: data?.data,
+        error,
+        isLoading: keys && !data && !error,
         ...rest
     }
 }

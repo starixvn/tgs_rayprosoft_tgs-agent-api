@@ -1,5 +1,6 @@
 import { toDataOrError } from "./response"
 import useSWR, { cache } from "swr"
+import { getAcceptLang } from "../i18n"
 
 export const urlWith = (searchParams = {}, url) => {
     let urlSearchParams = Object.entries(searchParams).reduce(
@@ -28,9 +29,17 @@ export const urlWith = (searchParams = {}, url) => {
 
 const stringOf = (value) => value?.toISOString?.() ?? value
 
-export const get = (url = "", { searchParams = {}, ...options } = {}) => {
+export const get = (
+    url = "",
+    { searchParams = {}, headers = {}, ...options } = {}
+) => {
     url = urlWith(searchParams, url)
-    return fetch(url, options).then(toDataOrError)
+    /*
+    if (!headers["Accept-Language"]) {
+        headers["Accept-Language"] = getAcceptLang()
+    }
+    */
+    return fetch(url, { headers, ...options }).then(toDataOrError)
 }
 
 export const put = (url, options) => fetchApi("PUT", url, options)
@@ -42,6 +51,12 @@ const fetchApi = (
     url,
     { headers = {}, body, data, ...options } = {}
 ) => {
+    /*
+    if (!headers["Accept-Language"]) {
+        headers["Accept-Language"] = getAcceptLang()
+    }
+    */
+
     headers = data
         ? {
               "Content-Type": "application/json",
@@ -73,10 +88,10 @@ const dropEmptyValues = (record) => {
     }, {})
 }
 
-export const useGet = (url) => {
+export const useGet = (url, options) => {
     let fetchData = !!url
     let key = fetchData ? url : null
-    const { data, error, isValidating, mutate } = useSWR(key, get)
+    const { data, error, isValidating, mutate } = useSWR(key, get, options)
 
     return {
         data,

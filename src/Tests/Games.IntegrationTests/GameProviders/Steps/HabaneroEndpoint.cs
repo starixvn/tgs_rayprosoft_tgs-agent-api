@@ -3,26 +3,17 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Moq;
 using TechTalk.SpecFlow;
-using TGS.Apis.OperatorApi;
-using TGS.Apis.TgsApi.GameProviders.Habanero;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
@@ -57,55 +48,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public HabaneroEndpoint(ScenarioContext context)
             : base(context)
         {
-            Environment.SetEnvironmentVariable("GameProviderCode", GameProviderCode);
-
-            var fakeAnalyzer = new Mock<IRequestAnalyzer>();
-            fakeAnalyzer.Setup(x => x.GetIp(It.IsAny<HttpContext>())).Returns("127.0.0.1");
-
             var currentDictionary = Directory.GetCurrentDirectory();
-
-            var opApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/OperatorApi");
-                    builder.SetBasePath(Path.GetFullPath(path));
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<Startup>()
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            opApiHost.StartAsync();
-            var opApiClient = opApiHost.GetTestClient();
-
-            var tgsApiHost = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration(builder =>
-                {
-                    var path = Path.Combine(currentDictionary, "../../../../../Apis/TgsApi");
-
-                    builder.SetBasePath(Path.GetFullPath(path))
-                        .AddJsonFile("GameProviders/Habanero/habanero.json", true);
-                })
-                .ConfigureWebHostDefaults(builder =>
-                {
-                    builder.UseStartup<HabaneroStartup>()
-                        .UseKestrel(o => o.AddServerHeader = false)
-                        .UseTestServer()
-                        .ConfigureTestServices(srv =>
-                        {
-                            srv.AddTransient(_ => fakeAnalyzer.Object);
-                        });
-                })
-                .Build();
-
-            tgsApiHost.StartAsync();
-            var tgsApiClient = tgsApiHost.GetTestClient();
 
             var services = (IServiceCollection)new ServiceCollection();
 
@@ -135,10 +78,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             if (isDev)
             {
                 services.AddTransient<IPlayerApiClient>(sp =>
-                    ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, opApiClient));
+                    ActivatorUtilities.CreateInstance<PlayerApiClient>(sp, Hooks.OpApiClient));
 
                 services.AddTransient<IHabaneroApiClient>(sp =>
-                    ActivatorUtilities.CreateInstance<HabaneroApiClient>(sp, tgsApiClient));
+                    ActivatorUtilities.CreateInstance<HabaneroApiClient>(sp, Hooks.TgsApiClient));
             }
             else
             {
@@ -232,8 +175,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 SentOn = DateTimeOffset.Now,
                 Game = new()
                 {
-                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1",
-                    ExternalId = "AcesandEights1Hand"
+                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1", ExternalId = "AcesandEights1Hand"
                 },
                 Authorization = new()
                 {
@@ -242,11 +184,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     HabaneroBrandId = habaneroBrandId,
                     MachineName = "TESTSERVER"
                 },
-                Detail = new()
-                {
-                    Token = encryptedToken,
-                    GameLaunch = true
-                }
+                Detail = new() {Token = encryptedToken, GameLaunch = true}
             });
 
             Set(SR.Response, response);
@@ -605,6 +543,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         #region Private Method
 
+        private static string GetExternalTransactionId(FundTransferRequest fundTransferRequest,
+            int? transactionIndex = null) =>
+            fundTransferRequest.Detail.IsCancel
+                ? fundTransferRequest.Detail.FundTransfer.CancelTransaction.TransactionId
+                : fundTransferRequest.Detail.FundTransfer.Transactions[(transactionIndex ?? 1) - 1].TransactionId;
+
+        private static int NewRoundId() => (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
         private Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
         {
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
@@ -639,7 +585,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() { ExternalId = externalGameId },
+                Game = new() {ExternalId = externalGameId},
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -651,7 +597,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = false,
-                        Transactions = new Transaction[]
+                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
                         {
                             new()
                             {
@@ -697,7 +643,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() { ExternalId = betRequest.Game.ExternalId },
+                Game = new() {ExternalId = betRequest.Game.ExternalId},
                 Detail = new()
                 {
                     RoundId = betRequest.Detail.RoundId,
@@ -709,7 +655,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = false,
-                        Transactions = new Transaction[]
+                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
                         {
                             new()
                             {
@@ -760,7 +706,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() { ExternalId = externalGameId },
+                Game = new() {ExternalId = externalGameId},
                 Detail = new()
                 {
                     RoundId = betExternalTransactionId,
@@ -772,7 +718,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = true,
-                        Transactions = new Transaction[]
+                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
                         {
                             new()
                             {
@@ -824,7 +770,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() { ExternalId = betRequest.Game.ExternalId },
+                Game = new() {ExternalId = betRequest.Game.ExternalId},
                 Detail = new()
                 {
                     RoundId = betRequest.Detail.RoundId,
@@ -880,7 +826,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() { ExternalId = externalGameId },
+                Game = new() {ExternalId = externalGameId},
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -918,7 +864,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-
         private async Task PlaceBetAndSettleWithInvalidReferenceIdAsync(decimal betAmount, string externalGameId)
         {
             var playerCode = Get<string>(SR.PlayerCode);
@@ -940,7 +885,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() { ExternalId = externalGameId },
+                Game = new() {ExternalId = externalGameId},
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -952,7 +897,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = true,
-                        Transactions = new Transaction[]
+                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
                         {
                             new()
                             {
@@ -991,14 +936,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        private static string GetExternalTransactionId(FundTransferRequest fundTransferRequest,
-            int? transactionIndex = null) =>
-            fundTransferRequest.Detail.IsCancel
-                ? fundTransferRequest.Detail.FundTransfer.CancelTransaction.TransactionId
-                : fundTransferRequest.Detail.FundTransfer.Transactions[(transactionIndex ?? 1) - 1].TransactionId;
-
-        private static int NewRoundId() => (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-        #endregion
+        #endregion Private Method
     }
 }

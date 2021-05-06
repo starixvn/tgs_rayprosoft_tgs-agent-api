@@ -1,7 +1,7 @@
 ﻿using System;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client.Models.Agent
+namespace TGS.Clients.Report.Client.Models.Agent
 {
     public class GetAgentTeamInfoRequest : PageableRequest
     {

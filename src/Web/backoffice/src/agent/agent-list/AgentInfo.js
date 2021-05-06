@@ -33,6 +33,14 @@ import { AgentLevelLabel, AgentLevelSelect, isAgentHead } from "../AgentLevel"
 import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
 import clone from "clone-deep"
 import Select from "../../select/Select"
+import { PercentageNumberInputField } from "../../input/NumberInput"
+import { AgentCommissionPercentageInputField } from "../AgentCommissionPercentage"
+import { AgentLiveDealerRebatePercentageInputField } from "../AgentLiveDealerRebatePercentage"
+import { AgentEgameRebatePercentageInputField } from "../AgentEgameRebatePercentage"
+import { AgentCardGameRebatePercentageInputField } from "../AgentCardGameRebatePercentage"
+import { AgentLotteryRebatePercentageInputField } from "../AgentLotteryRebatePercentage"
+import { AgentSportsRebatePercentageInputField } from "../AgentSportsRebatePercentage"
+import { AgentVirtualSportsRebatePercentageInputField } from "../AgentVirtualSportsRebatePercentage"
 
 const Key = "AgentInfo"
 
@@ -136,13 +144,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                             </AgentTypeBox>
 
                             <BounsBox>
-                                <InputField
-                                    type="number"
-                                    name="dividendPercentage"
-                                    step="0.1"
-                                    min="0"
-                                    addonAfter={<Button isStatic>%</Button>}
-                                />
+                                <AgentCommissionPercentageInputField />
                             </BounsBox>
 
                             <RebateBox
@@ -153,25 +155,15 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                     />
                                 }
                             >
-                                <InputField
-                                    type="number"
-                                    name="liveDealerRebatePercentage"
-                                    step="0.01"
-                                    min="0"
-                                    addonAfter={<Button isStatic>%</Button>}
-                                />
+                                <AgentLiveDealerRebatePercentageInputField />
                             </RebateBox>
 
                             <RebateBox
-                                label={<Trans zh="电子返佣" en="Slot Rebate" />}
+                                label={
+                                    <Trans zh="电子返佣" en="EGame Rebate" />
+                                }
                             >
-                                <InputField
-                                    type="number"
-                                    name="slotRebatePercentage"
-                                    step="0.01"
-                                    min="0"
-                                    addonAfter={<Button isStatic>%</Button>}
-                                />
+                                <AgentEgameRebatePercentageInputField />
                             </RebateBox>
 
                             <RebateBox
@@ -182,13 +174,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                     />
                                 }
                             >
-                                <InputField
-                                    type="number"
-                                    name="cardGameRebatePercentage"
-                                    step="0.01"
-                                    min="0"
-                                    addonAfter={<Button isStatic>%</Button>}
-                                />
+                                <AgentCardGameRebatePercentageInputField />
                             </RebateBox>
 
                             <RebateBox
@@ -196,13 +182,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                     <Trans zh="彩票返佣" en="Lottery Rebate" />
                                 }
                             >
-                                <InputField
-                                    type="number"
-                                    name="lotteryRebatePercentage"
-                                    step="0.01"
-                                    min="0"
-                                    addonAfter={<Button isStatic>%</Button>}
-                                />
+                                <AgentLotteryRebatePercentageInputField />
                             </RebateBox>
 
                             <RebateBox
@@ -210,13 +190,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                     <Trans zh="体育返佣" en="Sports Rebate" />
                                 }
                             >
-                                <InputField
-                                    type="number"
-                                    name="sportsRebatePercentage"
-                                    step="0.01"
-                                    min="0"
-                                    addonAfter={<Button isStatic>%</Button>}
-                                />
+                                <AgentSportsRebatePercentageInputField />
                             </RebateBox>
 
                             <RebateBox
@@ -227,13 +201,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                     />
                                 }
                             >
-                                <InputField
-                                    type="number"
-                                    name="virtualSportsRebatePercentage"
-                                    step="0.01"
-                                    min="0"
-                                    addonAfter={<Button isStatic>%</Button>}
-                                />
+                                <AgentVirtualSportsRebatePercentageInputField />
                             </RebateBox>
                         </FieldValues>
                         <Box alignX="right">
@@ -270,7 +238,7 @@ const ViewPanel = ({ record, ...props }) => {
 
                 <AgentTypeBox value={record?.type} />
 
-                <BounsBox value={record?.bonusPercentage} />
+                <BounsBox value={record?.commissionPercentage} />
 
                 <RebateBox
                     label={<Trans zh="真人返佣" en="Live Dealer Rebate" />}

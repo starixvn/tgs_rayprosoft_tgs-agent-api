@@ -1,6 +1,6 @@
 ﻿using TGS.Core.Models.Enums;
 
-namespace Report.Client.Models.Player
+namespace TGS.Clients.Report.Client.Models.Player
 {
     public class PlayerContributionModel
     {
