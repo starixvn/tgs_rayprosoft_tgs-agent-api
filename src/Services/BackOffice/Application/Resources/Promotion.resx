@@ -106,4 +106,7 @@
   <data name="PromotionTypeNotFound" xml:space="preserve">
     <value>Promotion type is not found.</value>
   </data>
+  <data name="PromotionJoinedAlready" xml:space="preserve">
+    <value>Promotion joined already.</value>
+  </data>
 </root>

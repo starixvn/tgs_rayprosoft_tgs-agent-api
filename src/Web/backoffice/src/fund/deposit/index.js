@@ -36,17 +36,16 @@ import numberColumn, {
     numberDecimalColumn,
     numberDecimalPercentageColumn
 } from "../../table/column/numberColumn"
-import { DateInputRange } from "../../date/DateTimeRangeInput"
+import { DateInputRangeField } from "../../date/DateTimeRangeInput"
 import { today } from "../../date/range"
-import { usePlayerDepositFormList } from "./client"
+import { useFundDepositFormList } from "./client"
 import { Update } from "./menu"
 import {
     PaymentMethodLabel,
     PaymentMethodSelect
 } from "../../payment/method/PaymentMethod"
-import { VerifyPlayerDepositDisclosure } from "./VerifyPlayerDeposit"
-import { ViewPlayerDepositDisclosure } from "./ViewPlayerDeposit"
-import { mutate } from "swr"
+import { VerifyFundDepositDisclosure } from "./VerifyFundDeposit"
+import { ViewFundDepositDisclosure } from "./ViewFundDeposit"
 import FundReviewStatus, {
     FundReviewStatusLabel,
     FundReviewStatusSelect
@@ -96,7 +95,7 @@ const BodyContent = ({ brandId }) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         username: "",
         channelName: "",
-        paymentChannel: "",
+        method: "",
         status: "",
         beginCreateOn: todayRange.start,
         endCreateOn: todayRange.end,
@@ -113,7 +112,7 @@ const BodyContent = ({ brandId }) => {
         pageSize,
         username,
         channelName,
-        paymentChannel,
+        method,
         status,
         beginCreateOn,
         endCreateOn,
@@ -126,7 +125,7 @@ const BodyContent = ({ brandId }) => {
         mutate,
         error,
         deleteCache
-    } = usePlayerDepositFormList(
+    } = useFundDepositFormList(
         brandId,
         {
             ...toApiParams(state),
@@ -183,7 +182,7 @@ const BodyContent = ({ brandId }) => {
                         brandId={brandId}
                         username={username}
                         channelName={channelName}
-                        paymentChannel={paymentChannel}
+                        method={method}
                         status={status}
                         beginCreateOn={beginCreateOn}
                         endCreateOn={endCreateOn}
@@ -194,7 +193,7 @@ const BodyContent = ({ brandId }) => {
                                 pageIndex: 0,
                                 username: data.username,
                                 channelName: data.channelName,
-                                paymentChannel: data.paymentChannel,
+                                method: data.method,
                                 status: data.status,
                                 beginCreateOn: data.beginCreateOn,
                                 endCreateOn: data.endCreateOn,
@@ -206,7 +205,7 @@ const BodyContent = ({ brandId }) => {
                                     pageIndex,
                                     username,
                                     channelName,
-                                    paymentChannel,
+                                    method,
                                     status,
                                     beginCreateOn,
                                     endCreateOn,
@@ -291,7 +290,7 @@ const SearchBar = ({
     brandId,
     username,
     channelName,
-    paymentChannel,
+    method,
     status,
     beginCreateOn,
     endCreateOn,
@@ -305,7 +304,7 @@ const SearchBar = ({
         defaultValues: {
             username,
             channelName,
-            paymentChannel,
+            method,
             status,
             beginCreateOn,
             endCreateOn,
@@ -326,7 +325,7 @@ const SearchBar = ({
 
     let paymentMethodPlaceholder = useTrans({
         zh: "充值类型",
-        en: "Payment Method"
+        en: "Deposit Method"
     })
     return (
         <FormProvider {...formMethods}>
@@ -350,74 +349,26 @@ const SearchBar = ({
                         <FundReviewStatusSelect name="status" />
                     </Set>
                     <Set orientation="horizontal">
-                        <FieldWrapper
+                        <DateInputRangeField
                             label={
-                                <FieldStack
-                                    orientation="horizontal"
-                                    alignY="center"
-                                >
-                                    <Trans
-                                        zh="申请时间"
-                                        en="Application Time"
-                                    />
-                                    <Button.Close
-                                        size="small"
-                                        onClick={() => {
-                                            formMethods.setValue(
-                                                "beginCreateOn",
-                                                ""
-                                            )
-                                            formMethods.setValue(
-                                                "endCreateOn",
-                                                ""
-                                            )
-                                        }}
-                                    />
-                                </FieldStack>
+                                <Trans zh="申请时间" en="Application Time" />
                             }
-                        >
-                            <DateInputRange
-                                startProps={{
-                                    name: "beginCreateOn"
-                                }}
-                                endProps={{
-                                    name: "endCreateOn"
-                                }}
-                            />
-                        </FieldWrapper>
-
-                        <FieldWrapper
-                            label={
-                                <FieldStack
-                                    orientation="horizontal"
-                                    alignY="center"
-                                >
-                                    <Trans zh="更新时间" en="Updated time" />
-                                    <Button.Close
-                                        size="small"
-                                        onClick={() => {
-                                            formMethods.setValue(
-                                                "beginUpdateOn",
-                                                ""
-                                            )
-                                            formMethods.setValue(
-                                                "endUpdateOn",
-                                                ""
-                                            )
-                                        }}
-                                    />
-                                </FieldStack>
-                            }
-                        >
-                            <DateInputRange
-                                startProps={{
-                                    name: "beginUpdateOn"
-                                }}
-                                endProps={{
-                                    name: "endUpdateOn"
-                                }}
-                            />
-                        </FieldWrapper>
+                            startProps={{
+                                name: "beginCreateOn"
+                            }}
+                            endProps={{
+                                name: "endCreateOn"
+                            }}
+                        />
+                        <DateInputRangeField
+                            label={<Trans zh="更新时间" en="Updated Time" />}
+                            startProps={{
+                                name: "beginUpdateOn"
+                            }}
+                            endProps={{
+                                name: "endUpdateOn"
+                            }}
+                        />
                         <SearchButton
                             isLoading={isLoading}
                             disabled={isLoading}
@@ -511,13 +462,13 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                         return (
                             <Set alignX="center">
                                 {underReview && (
-                                    <VerifyPlayerDepositDisclosure
+                                    <VerifyFundDepositDisclosure
                                         brandId={brandId}
                                         formId={value.id}
                                         onSubmitted={mutate}
                                     />
                                 )}
-                                <ViewPlayerDepositDisclosure
+                                <ViewFundDepositDisclosure
                                     brandId={brandId}
                                     formId={value.id}
                                 />

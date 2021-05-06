@@ -2,8 +2,8 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Report.Client;
-using Report.Client.Models.Agent;
+using TGS.Clients.Report.Client;
+using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report

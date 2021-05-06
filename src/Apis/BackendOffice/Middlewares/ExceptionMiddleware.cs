@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
-using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Messages;
 
@@ -27,7 +27,6 @@ namespace TGS.Apis.BackendOffice.Middlewares
         private readonly IJsonSerializationProvider _json;
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
         private readonly IRequestAnalyzer _requestAnalyzer;
-        private readonly IStreamToString _streamToString;
         private readonly ILogger<ExceptionMiddleware> _systemLogger;
         private readonly ITgsLog _tgsLog;
 
@@ -36,17 +35,15 @@ namespace TGS.Apis.BackendOffice.Middlewares
             ITgsLog logger,
             IJsonSerializationProvider json,
             IWebHostEnvironment env,
-            IStreamToString streamToString,
             ILogger<ExceptionMiddleware> systemLogger)
         {
             _requestAnalyzer = requestAnalyzer;
             _tgsLog = logger;
             _json = json;
             _env = env;
-            _streamToString = streamToString;
             _recyclableMemoryStreamManager = new();
             _systemLogger = systemLogger ?? throw new ArgumentNullException(nameof(systemLogger));
-            _recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
+            _recyclableMemoryStreamManager = new();
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext httpContext, RequestDelegate next)
@@ -99,8 +96,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
 
                 var message = new ErrorDetails
                 {
-                    StatusCode = (int)HttpStatusCode.InternalServerError,
-                    Message = "Internal Server Error."
+                    StatusCode = (int)HttpStatusCode.InternalServerError, Message = "Internal Server Error."
                 };
 
                 if (_env.IsDevelopment())
@@ -119,7 +115,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
             $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
 
         private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context,
-                    RequestDelegate next)
+            RequestDelegate next)
         {
             var originalBodyStream = context.Response.Body;
             var responseStream = _recyclableMemoryStreamManager.GetStream();
@@ -132,7 +128,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 sw.Stop();
                 var ms = (int)sw.ElapsedMilliseconds;
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
-                var message = await _streamToString.GetStringAsync(context.Response.Body);
+                var message = await StreamToString.GetStringAsync(context.Response.Body);
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 await context.Response.Body.CopyToAsync(originalBodyStream);
                 return (message, ms);

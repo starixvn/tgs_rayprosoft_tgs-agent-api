@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Report.Client.Models.Round
+namespace TGS.Clients.Report.Client.Models.Round
 {
     public record GetRoundHistoryRequest
     {

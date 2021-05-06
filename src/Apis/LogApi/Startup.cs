@@ -11,12 +11,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
+using TGS.Apis.LogApi.Clients;
 using TGS.Apis.LogApi.Filters;
 using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Loggers;
 using TGS.Apis.LogApi.Services;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Log;
+using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Log.Events;
@@ -52,6 +54,14 @@ namespace TGS.Apis.LogApi
             services.AddScoped<LogRecordWriter>();
             services.AddScoped<AdminLogWriter>();
 
+            services.AddHttpClient<INotifyClient, NotifyClient>((sp, c) =>
+            {
+                var url = _configuration.GetSection("Notify:Url");
+                c.BaseAddress = new(url.Value);
+            });
+
+            services.AddApiClient();
+            services.AddScoped<IGetNotifyTaskService, GetNotifyTaskService>();
             services.AddTransient<Func<string, ILoggerWriter>>(serviceProvider => key =>
             {
                 return key switch

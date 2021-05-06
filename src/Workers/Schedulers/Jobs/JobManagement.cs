@@ -83,7 +83,6 @@ namespace TGS.Workers.Schedulers.Jobs
             return new() {ErrorMessage = "DateTime invalided"};
         }
 
-
         [Queue(Consts.Queue.Schedule)]
         [Job]
         [DisplayName("create player rebates")]

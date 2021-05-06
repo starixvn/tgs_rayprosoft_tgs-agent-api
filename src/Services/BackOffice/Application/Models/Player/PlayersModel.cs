@@ -6,6 +6,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
     {
         public string PlayerCode { get; init; }
         public string Username { get; init; }
+        public decimal Balance { get; set; }
         public int? VipLevel { get; init; }
         public PlayerStatus Status { get; init; }
     }

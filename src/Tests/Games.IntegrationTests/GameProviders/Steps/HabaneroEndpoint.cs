@@ -175,8 +175,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 SentOn = DateTimeOffset.Now,
                 Game = new()
                 {
-                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1",
-                    ExternalId = "AcesandEights1Hand"
+                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1", ExternalId = "AcesandEights1Hand"
                 },
                 Authorization = new()
                 {
@@ -185,11 +184,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     HabaneroBrandId = habaneroBrandId,
                     MachineName = "TESTSERVER"
                 },
-                Detail = new()
-                {
-                    Token = encryptedToken,
-                    GameLaunch = true
-                }
+                Detail = new() {Token = encryptedToken, GameLaunch = true}
             });
 
             Set(SR.Response, response);
@@ -590,7 +585,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() { ExternalId = externalGameId },
+                Game = new() {ExternalId = externalGameId},
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -602,7 +597,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = false,
-                        Transactions = new Transaction[]
+                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
                         {
                             new()
                             {
@@ -648,7 +643,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() { ExternalId = betRequest.Game.ExternalId },
+                Game = new() {ExternalId = betRequest.Game.ExternalId},
                 Detail = new()
                 {
                     RoundId = betRequest.Detail.RoundId,
@@ -660,7 +655,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = false,
-                        Transactions = new Transaction[]
+                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
                         {
                             new()
                             {
@@ -711,7 +706,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() { ExternalId = externalGameId },
+                Game = new() {ExternalId = externalGameId},
                 Detail = new()
                 {
                     RoundId = betExternalTransactionId,
@@ -723,7 +718,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = true,
-                        Transactions = new Transaction[]
+                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
                         {
                             new()
                             {
@@ -775,7 +770,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() { ExternalId = betRequest.Game.ExternalId },
+                Game = new() {ExternalId = betRequest.Game.ExternalId},
                 Detail = new()
                 {
                     RoundId = betRequest.Detail.RoundId,
@@ -831,7 +826,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() { ExternalId = externalGameId },
+                Game = new() {ExternalId = externalGameId},
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -890,7 +885,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() { ExternalId = externalGameId },
+                Game = new() {ExternalId = externalGameId},
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -902,7 +897,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = true,
-                        Transactions = new Transaction[]
+                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
                         {
                             new()
                             {

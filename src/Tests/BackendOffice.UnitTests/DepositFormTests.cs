@@ -12,7 +12,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.BackOffice.Domain.Enums;
+using TGS.Services.Payment;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -106,14 +106,15 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var sut = new ReviewDepositFormCommandService(moqDepositRepository.Object);
 
             var formId = Guid.NewGuid();
-            var command = new ReviewDepositFormCommand(formId, ReviewStatus.Approve);
+            var command = new ReviewDepositFormCommand(formId, ReviewStatus.Approve, null);
 
             await sut.ExecuteAsync(command);
 
             moqDepositRepository.Verify(
                 fake => fake.SignOffDepositFormAsync(
                     It.Is<Guid>(x => x == formId),
-                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve)),
+                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve),
+                    It.IsAny<string>()),
                 Times.Exactly(1));
         }
 

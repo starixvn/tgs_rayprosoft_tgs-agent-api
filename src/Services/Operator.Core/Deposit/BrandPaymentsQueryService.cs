@@ -11,9 +11,9 @@ namespace TGS.Services.Operator.Deposit
     internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, BrandPaymentInfo>
     {
         private readonly IPaymentRepository _paymentRepository;
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPlayerRepository _walletRepository;
 
-        public BrandPaymentsQueryService(IPaymentRepository paymentRepository, IWalletRepository walletRepository)
+        public BrandPaymentsQueryService(IPaymentRepository paymentRepository, IPlayerRepository walletRepository)
         {
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));

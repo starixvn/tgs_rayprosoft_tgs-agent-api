@@ -123,6 +123,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: "Docker"
       File__FileServiceBaseUrl: "http://fileservice"
+      Promotion__Url: "http://promotion-api"
     # For crash debug
     # entrypoint: ["sh", "-c", "sleep infinity"]
     ports:
@@ -133,6 +134,27 @@ services:
           - backoffice.api
     depends_on:
       - operator-api
+      # - promotion-api
+
+  promotion-api:
+    build:
+      context: .
+      dockerfile: ./src/Apis/PromotionApi/Dockerfile
+      args:
+        - BuildConfiguration=Release
+    image: promotion-api
+    container_name: promotion-api
+    environment:
+      ConnectionStrings__Tgs: "Server=postgres;Database=tgs;User Id=tgs;Password=1qaz2wsx!@"
+      ConnectionStrings__Log: "Server=postgres;Database=log;User Id=tgs;Password=1qaz2wsx!@"
+      ConnectionStrings__Report: "Server=postgres;Database=report;User Id=tgs;Password=1qaz2wsx!@"
+      ConnectionStrings__RedisConfigurationString: "redis,abortConnect=false,connectTimeout=3000"
+    ports:
+      - 5201:80
+    networks:
+      tgs:
+    depends_on:
+      - postgres
 
   report-api:
     build:
@@ -340,7 +362,7 @@ services:
       - ./localstack/bin:/docker-entrypoint-initaws.d
 
   postgres:
-    image: postgres:12
+    image: postgres:13.2-alpine
     container_name: postgres
     environment:
       POSTGRES_USER: "tgs"

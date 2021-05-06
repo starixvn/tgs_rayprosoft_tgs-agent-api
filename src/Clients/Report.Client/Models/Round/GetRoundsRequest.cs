@@ -2,12 +2,13 @@
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client.Models.Round
+namespace TGS.Clients.Report.Client.Models.Round
 {
     public class GetRoundsRequest : PageableRequest
     {
         public Guid BrandId { get; set; }
         public string Username { get; set; }
+        public string PlayerCode { get; set; }
         public Guid? RoundId { get; set; }
         public Guid? GameProviderId { get; set; }
         public ClientRoundStatus? Status { get; set; }
