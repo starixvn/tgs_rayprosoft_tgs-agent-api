@@ -167,6 +167,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerBucket.Core", "src\Se
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerBucket.Repositories", "src\Repositories\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj", "{9C2B8455-403C-4156-9541-380AB5C12FAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameProviders.Repositories", "GameProviders.Repositories\GameProviders.Repositories.csproj", "{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -397,6 +399,10 @@ Global
 		{9C2B8455-403C-4156-9541-380AB5C12FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C2B8455-403C-4156-9541-380AB5C12FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C2B8455-403C-4156-9541-380AB5C12FAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -462,9 +468,10 @@ Global
 		{D656E107-C826-483E-97EA-C25C95607CBF} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 		{7BCE28FB-515A-4558-A0C3-B20A454906E2} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 		{9C2B8455-403C-4156-9541-380AB5C12FAA} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
+		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		RESX_TaskErrorCategory = Message
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
+		RESX_TaskErrorCategory = Message
 	EndGlobalSection
 EndGlobal

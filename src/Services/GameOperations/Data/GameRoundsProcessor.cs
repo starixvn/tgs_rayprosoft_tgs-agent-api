@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Services.GameOperations.Models.Data;
 
 namespace TGS.Services.GameOperations.Data
@@ -25,9 +26,15 @@ namespace TGS.Services.GameOperations.Data
 
         public async ValueTask<bool> ExecuteAsync(GameRoundsData data)
         {
-            try
+            var round = _tgsRepository.Rounds.Where(x =>
+            x.ExternalRoundId == data.ExternalRoundId
+            && x.PlayerCode == data.PlayerCode
+            && x.GameProviderId == data.GameProviderId
+            && x.GameId == data.GameId).FirstOrDefault();
+            if (round == null)
             {
                 var roundsId = GuidExtensions.NewSequentialGuid();
+
                 await _tgsRepository.Rounds.AddAsync(new Round()
                 {
                     Id = roundsId,
@@ -55,19 +62,75 @@ namespace TGS.Services.GameOperations.Data
                     ClientStatus = data.ClientStatus
                 }).ConfigureAwait(false);
 
-                await _tgsRepository.RoundDetails.AddAsync(new RoundDetail()
+                if (data.Status == RoundStatus.Closed)
                 {
-                    RoundId = roundsId,
-                    AdditionalData = data.AdditionalData
-                }).ConfigureAwait(false);
-
-                await _tgsRepository.SaveChangesAsync();
-                return true;
+                    await _tgsRepository.RoundDetails.AddAsync(new RoundDetail()
+                    {
+                        RoundId = roundsId,
+                        AdditionalData = data.AdditionalData
+                    }).ConfigureAwait(false);
+                }
             }
-            catch
+            else
             {
-                return false;
+                if (round.Status == RoundStatus.Open && data.Status == RoundStatus.Closed)
+                {
+                    round.ClosedOn = data.ClosedOn;
+                    round.UpdatedOn = data.UpdatedOn;
+                    round.ExternalClosedOn = data.ExternalClosedOn;
+                    round.BetAmount = data.BetAmount;
+                    round.ValidBetAmount = data.ValidBetAmount;
+                    round.SettleAmount = data.SettleAmount;
+                    round.Commission = data.Commission;
+                    round.Turnover = data.Turnover;
+                    round.WinLoss = data.WinLoss;
+                    round.TieBetAdjustment = data.TieBetAdjustment;
+                    round.ClientStatus = data.ClientStatus;
+
+                    _tgsRepository.Rounds.Update(round);
+
+                    await _tgsRepository.RoundDetails.AddAsync(new RoundDetail()
+                    {
+                        RoundId = round.Id,
+                        AdditionalData = data.AdditionalData
+                    }).ConfigureAwait(false);
+                }
+                else
+                {
+                    // 改單
+                    if (round.Status == RoundStatus.Closed)
+                    {
+                        if (round.BetAmount != data.BetAmount ||
+                        round.ValidBetAmount != data.ValidBetAmount ||
+                        round.SettleAmount != data.SettleAmount ||
+                         round.WinLoss != data.WinLoss
+                        )
+                        {
+                            round.ClosedOn = data.ClosedOn;
+                            round.UpdatedOn = data.UpdatedOn;
+                            round.ExternalClosedOn = data.ExternalClosedOn;
+                            round.BetAmount = data.BetAmount;
+                            round.ValidBetAmount = data.ValidBetAmount;
+                            round.SettleAmount = data.SettleAmount;
+                            round.Commission = data.Commission;
+                            round.Turnover = data.Turnover;
+                            round.WinLoss = data.WinLoss;
+                            round.TieBetAdjustment = data.TieBetAdjustment;
+                            round.ClientStatus = data.ClientStatus;
+
+                            _tgsRepository.Rounds.Update(round);
+
+                            var roundDetail = new RoundDetail()
+                            {
+                                RoundId = round.Id,
+                                AdditionalData = data.AdditionalData
+                            };
+                        }
+                    }
+                }
             }
+            await _tgsRepository.SaveChangesAsync();
+            return true;
         }
     }
 }

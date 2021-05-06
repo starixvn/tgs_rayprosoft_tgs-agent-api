@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Shared.Game.Models.KY.Commons;
+using TGS.Shared.Game.Models.KY.Incoming;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.KY
@@ -19,6 +20,7 @@ namespace TGS.Shared.Game.ApiClients.KY
     public interface IKYApiClient
     {
         ValueTask<KYApiResponse<TData>> GetAPIAsync<TData>(Uri apiUrl, KYApiRequest request);
+        ValueTask<KYGPGameRecordResponses> GameRecordAsync(Uri apiUrl, Models.KY.Incoming.KYGPGameRecordRequest request);
 
     }
 
@@ -52,6 +54,12 @@ namespace TGS.Shared.Game.ApiClients.KY
             }
 
             return response;
+        }
+
+        ValueTask<KYGPGameRecordResponses> IKYApiClient.GameRecordAsync(Uri apiUrl, Models.KY.Incoming.KYGPGameRecordRequest request)
+        {
+            return ExecuteJsonRequestAsync<Models.KY.Incoming.KYGPGameRecordRequest, KYGPGameRecordResponses>(HttpMethod.Post, apiUrl,
+              "/api/ky/GameRecord", request);
         }
     }
 }
