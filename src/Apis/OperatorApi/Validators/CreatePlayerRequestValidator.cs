@@ -10,10 +10,10 @@ namespace TGS.Apis.OperatorApi.Validators
         {
             RuleFor(x => x.Username)
                 .NotEmpty()
-                .WithName(x=> GetJsonPropertyName(x,nameof(x.Username)))
-                .Length(6,32)                
+                .WithName(x => GetJsonPropertyName(x, nameof(x.Username)))
+                .Length(6, 32)
                 .SetValidator(new RegularExpressionValidator("^[0-9a-zA-Z]+$"));
-                
+
             RuleFor(x => x.CurrencyCode)
                 .NotEmpty()
                 .WithName(x => GetJsonPropertyName(x, nameof(x.CurrencyCode)));
@@ -21,7 +21,7 @@ namespace TGS.Apis.OperatorApi.Validators
             RuleFor(x => x.Password)
                 .NotEmpty()
                 .WithName(x => GetJsonPropertyName(x, nameof(x.Password)))
-                .Length(6,20);
+                .Length(6, 20);
 
             RuleFor(x => x.ConfirmPassword)
                 .NotEmpty()
