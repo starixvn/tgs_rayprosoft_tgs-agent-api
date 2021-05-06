@@ -221,6 +221,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     SubMenus = new[]
                     {
                         new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("System")

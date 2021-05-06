@@ -226,8 +226,17 @@ const BodyContent = ({ brandId }) => {
                 <AlertDialog
                     {...error}
                     onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
+                        if (sendPromotionPayoutError) {
+                            resetBatchPayout()
+                            deleteSendPromotionPayoutCache()
+                            mutateSendPromotionPayout(
+                                { data: undefined },
+                                false
+                            )
+                        } else if (promotionListError) {
+                            deleteCache()
+                            mutate({ data: undefined }, false)
+                        }
                     }}
                 />
             )}

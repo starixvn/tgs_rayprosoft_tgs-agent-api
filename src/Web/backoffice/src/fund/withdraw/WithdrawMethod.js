@@ -38,7 +38,10 @@ import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
 import { FundReviewStatusLabel } from "../FundReviewStatus"
 import Select from "../../select/Select"
 
-export const WithdrawMethodSelect = ({ ...props }) => {
+export const WithdrawMethodSelect = ({
+    value = "ThirdPartyPayment",
+    ...props
+}) => {
     let options = [
         {
             label: useTrans({
@@ -49,5 +52,5 @@ export const WithdrawMethodSelect = ({ ...props }) => {
         }
     ]
 
-    return <Select options={options} {...props} />
+    return <Select options={options} value={value} {...props} />
 }

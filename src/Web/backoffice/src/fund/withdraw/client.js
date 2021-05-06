@@ -6,7 +6,7 @@ import {
     useDelete
 } from "../../client"
 
-let API = "/api/deposit"
+let API = "/api/Withdraw"
 
 export const useFundWithdrawFormList = (brandId, searchParams, options) => {
     let url =
