@@ -1715,6 +1715,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("jackpot_contribution");
 
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
                     b.Property<string>("PlayerIp")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -1885,6 +1890,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<bool>("SupportTestPlayer")
                         .HasColumnType("boolean")
                         .HasColumnName("support_test_player");
+
+                    b.Property<bool>("TransferWallet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("transfer_wallet");
 
                     b.Property<short>("UniqueId")
                         .HasColumnType("smallint")

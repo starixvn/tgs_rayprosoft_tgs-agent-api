@@ -52,9 +52,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"),
-                new VND1000Currency("VND2"), new IDR1000Currency("IDR2"), new JPYCurrency("JPY"),
-                new KRWCurrency("KRW"), new MYRCurrency("MYR"), new THBCurrency("THB"), new GBPCurrency("GBP")
+                new CNYCurrency("CNY"), new USDCurrency("USD"), new VND1000Currency("VND2"),
+                new IDR1000Currency("IDR2"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new MYRCurrency("MYR"),
+                new THBCurrency("THB"), new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
@@ -75,74 +75,74 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new AsiaGamingConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new ("http://game-asiagaming") : new("http://localhost:62330"),
+                        _env.IsDocker() ? new("http://game-asiagaming") : new("http://localhost:62330"),
                     AgentCode = "B17",
-                    LockGameTypes = new [] { "ROU" },
-                    GameHistoryTypes = new []
+                    LockGameTypes = new[] {"ROU"},
+                    GameHistoryTypes = new[]
                     {
                         new AsiaGamingGameHistoryType
                         {
-                            GameTypes = new []{ "BAC", "LBAC", "CBAC" },
+                            GameTypes = new[] {"BAC", "LBAC", "CBAC"},
                             Descriptions = new Dictionary<string, string>
                             {
-                                { "P", "Player" },
-                                { "B", "Banker" }
+                                {"P", "Player"},
+                                {"B", "Banker"}
                             }
                         },
                         new AsiaGamingGameHistoryType
                         {
-                            GameTypes = new []{ "DT" },
+                            GameTypes = new[] {"DT"},
                             Descriptions = new Dictionary<string, string>
                             {
-                                { "D", "Dragon" },
-                                { "T", "Tiger" }
+                                {"D", "Dragon"},
+                                {"T", "Tiger"}
                             }
                         },
                         new AsiaGamingGameHistoryType
                         {
-                            GameTypes = new []{ "NN" },
+                            GameTypes = new[] {"NN"},
                             Descriptions = new Dictionary<string, string>
                             {
-                                { "F", "First" },
-                                { "P1", "Player1" },
-                                { "P2", "Player2" },
-                                { "P3", "Player3" },
-                                { "B", "Banker" }
+                                {"F", "First"},
+                                {"P1", "Player1"},
+                                {"P2", "Player2"},
+                                {"P3", "Player3"},
+                                {"B", "Banker"}
                             }
                         },
                         new AsiaGamingGameHistoryType
                         {
-                            GameTypes = new []{ "ZJH" },
+                            GameTypes = new[] {"ZJH"},
                             Descriptions = new Dictionary<string, string>
                             {
-                                { "D", "Dragon" },
-                                { "P", "Phoenix" }
+                                {"D", "Dragon"},
+                                {"P", "Phoenix"}
                             }
                         },
                         new AsiaGamingGameHistoryType
                         {
-                            GameTypes = new []{ "BF" },
+                            GameTypes = new[] {"BF"},
                             Descriptions = new Dictionary<string, string>
                             {
-                                { "B", "BlackBull" },
-                                { "R", "RedBull" }
+                                {"B", "BlackBull"},
+                                {"R", "RedBull"}
                             }
                         },
                         new AsiaGamingGameHistoryType
                         {
-                            GameTypes = new []{ "BJ", "SG" },
+                            GameTypes = new[] {"BJ", "SG"},
                             Descriptions = new Dictionary<string, string>
                             {
-                                { "B", "Banker" },
-                                { "P1", "Player1" },
-                                { "P2", "Player2" },
-                                { "P3", "Player3" },
-                                { "P4", "Player4" },
-                                { "P5", "Player5" },
-                                { "P6", "Player6" },
-                                { "P7", "Player7" },
+                                {"B", "Banker"},
+                                {"P1", "Player1"},
+                                {"P2", "Player2"},
+                                {"P3", "Player3"},
+                                {"P4", "Player4"},
+                                {"P5", "Player5"},
+                                {"P6", "Player6"},
+                                {"P7", "Player7"}
                             }
-                        },
+                        }
                     },
                     ApiUrl = new("http://gi.aggdemo.com:81"),
                     LoginApiUrl = new("https://swapi.etwlt.com")

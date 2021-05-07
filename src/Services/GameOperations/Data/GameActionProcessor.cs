@@ -632,6 +632,7 @@ namespace TGS.Services.GameOperations.Data
                 RoundId = s.InternalRoundId.Value,
                 RecordedOn = AdjustRecordedOnIfNeeded(s),
                 SentOn = s.Timestamp,
+                PlayerCode = player.PlayerCode,
                 PlayerIp = player.PlayerIp,
                 Turnover = current.Turnover,
                 WinLoss = current.WinLoss,

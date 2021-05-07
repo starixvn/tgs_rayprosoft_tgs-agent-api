@@ -27,6 +27,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset? SentOn { get; set; }
         public bool IsClosingRound { get; set; }
         public bool? ClosingRoundExplicitRequest { get; set; }
+        public string PlayerCode { get; set; }
         public string PlayerIp { get; set; }
         public string ExtraData { get; set; }
         public string JackpotContribution { get; init; }
