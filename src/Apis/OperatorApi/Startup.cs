@@ -17,7 +17,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
-using TGS.Apis.OperatorApi.Services;
 using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Report.Extensions;
@@ -94,8 +93,6 @@ namespace TGS.Apis.OperatorApi
         {
             services.AddTgsRepository(_configuration, "Tgs");
             services.AddReportRepository(_configuration, "Report");
-
-            services.AddScoped<IInvitationCodeValidator, InvitationCodeValidator>();
 
             services.AddNats(_configuration)
                 .AddWebApiServices()
