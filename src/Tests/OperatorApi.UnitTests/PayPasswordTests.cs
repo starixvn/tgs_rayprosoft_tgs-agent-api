@@ -215,7 +215,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var sut = new SetPayPasswordRequestValidator();
             var request = new SetPayPasswordRequest()
             {
-                Password = ""
+                Password = string.Empty
             };
 
             // act
