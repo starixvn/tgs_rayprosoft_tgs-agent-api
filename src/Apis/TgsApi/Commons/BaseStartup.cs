@@ -53,7 +53,10 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddApiClient()
                 .AddGameApiClients()
                 .AddGameOperations()
-                .AddGameProvidersoRepository();
+                .AddGameProvidersoRepository()
+                .AddWallet()
+                .AddTgsWalletRepositories();
+
 
             services.AddHttpContextAccessor();
 
@@ -79,7 +82,7 @@ namespace TGS.Apis.TgsApi.Commons
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(LogPrefix, new[] {"/health", "/favicon.ico", "/metrics"});
+            app.UseApiLogger(LogPrefix, new[] { "/health", "/favicon.ico", "/metrics" });
 
             app.UseRouting();
 

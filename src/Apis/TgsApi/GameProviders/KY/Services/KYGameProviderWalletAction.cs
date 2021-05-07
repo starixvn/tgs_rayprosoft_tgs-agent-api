@@ -12,6 +12,7 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
+using TGS.Services.WalletService;
 using TGS.Shared.Game.ApiClients.KY;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.KY.Commons;
@@ -31,8 +32,9 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             IGameProviderOperations gameProviderOperations,
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
-            IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository
-            ) : base(playerOperations, gameProviderOperations, gameProviderFundTransferTransactionRepository)
+            IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository,
+            IWalletRepository walletRepository
+            ) : base(playerOperations, gameProviderOperations, gameProviderFundTransferTransactionRepository, walletRepository)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));

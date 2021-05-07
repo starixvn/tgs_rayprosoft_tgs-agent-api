@@ -12,6 +12,7 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
+using TGS.Services.WalletService;
 
 namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 {
@@ -20,17 +21,20 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         private readonly IPlayerOperations _playerOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderFundTransferTransactionRepository _gameProviderFundTransferTransactionRepository;
+        private readonly IWalletRepository _walletRepository;
 
         public BaseGameProviderWalletAction(
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
-            IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository
+            IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository,
+            IWalletRepository walletRepository
             )
 
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _gameProviderFundTransferTransactionRepository = gameProviderFundTransferTransactionRepository ?? throw new ArgumentNullException(nameof(gameProviderFundTransferTransactionRepository));
+            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
         }
 
         /// <summary>
@@ -41,11 +45,8 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         /// <returns></returns>
         public async ValueTask<GameProviderWalletFundResponse> FundOutAsync(GameProviderWalletFundRequest request)
         {
-            if (request.Amount <= 0)
-            {
-                throw new InvalidAmountException(request.Amount.ToString());
-            }
-
+            var fundTransferStatus = FundTransferTransactionStatus.WaitForResponse;
+            var amount = Math.Abs(request.Amount);
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
             if (player == null)
             {
@@ -53,7 +54,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             }
             var playerBalance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
-            if (playerBalance - request.Amount < 0)
+            if (playerBalance - amount < 0)
             {
                 throw new PlayerHasInsufficientFundsException();
             }
@@ -73,54 +74,55 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 FundSource = FundSource.FundOut,
                 FromWallet = "Default",
                 ToWallet = request.GameProviderCode,
-                Amount = request.Amount,
+                Amount = amount,
                 Balance = 0,
                 CreatedOn = DateTimeOffset.UtcNow,
                 Description = string.Empty
             });
 
-            /*
-             * 扣錢
-             */
-            var transactionsId = GuidExtensions.NewSequentialGuid();
-            playerBalance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
-            var fundTransferStatus = FundTransferTransactionStatus.FailureOnSystem;
 
-            /*
-             * 扣錢失敗
-             */
+            #region 扣掉主錢包
+            var wallet = await WalletExchangeAsync(player, amount * -1);
+            #endregion
 
-            var response = await FundOutAsync(player, Math.Abs(request.Amount));
-            fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
-            if (!response.Success)
+            fundTransferStatus = wallet.Status;
+
+
+            var orderId = default(string);
+            if (fundTransferStatus == FundTransferTransactionStatus.Success)
             {
-                var checking = await CheckingOrderIdAsync(player, response.OrderId);
-                if (checking.Checking && !string.IsNullOrEmpty(checking.OrderId))
+                var response = await FundOutAsync(player, amount);
+                fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
+                if (!response.Success)
+                {
+                    var checking = await CheckingOrderIdAsync(player, response.OrderId);
+                    if (checking.Checking && !string.IsNullOrEmpty(checking.OrderId))
+                    {
+                        fundTransferStatus = FundTransferTransactionStatus.Success;
+                        orderId = response.OrderId;
+                    }
+                }
+                else
                 {
                     fundTransferStatus = FundTransferTransactionStatus.Success;
+                    orderId = response.OrderId;
                 }
             }
-            else
-            {
-                fundTransferStatus = FundTransferTransactionStatus.Success;
-            }
 
-            /*
-          * 更新Game交易單
-          */
+
             await _gameProviderFundTransferTransactionRepository.UpdateAsync(new GameProviderFundTransferTransactionUpdateRequest
             {
                 GameProviderFundTransferTransactionId = transactionGameProviderId.Value,
-                TransactionId = transactionsId,
-                GameProviderTransactionId = response.OrderId,
+                TransactionId = wallet.TransactionId,
+                GameProviderTransactionId = orderId,
                 Status = fundTransferStatus,
-                Balance = playerBalance,
+                Balance = wallet.PostBalance ?? 0,
                 UpdatedOn = DateTimeOffset.UtcNow,
-                Description = "完成扣款"
+                Description = (fundTransferStatus == FundTransferTransactionStatus.Success) ? string.Empty : (wallet.Exception == null) ? string.Empty : wallet.Exception.Message
             });
 
-            return new() { GameProviderOrderId = response.OrderId, TransactionsId = transactionsId };
+            return new() { GameProviderTransactionId = orderId, TransactionsId = wallet.TransactionId };
         }
 
         /// <summary>
@@ -131,10 +133,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         /// <returns></returns>
         public async ValueTask<GameProviderWalletFundResponse> FundInAsync(GameProviderWalletFundRequest request)
         {
-            if (request.Amount >= 0)
-            {
-                throw new InvalidAmountException(request.Amount.ToString());
-            }
+            var amount = Math.Abs(request.Amount);
 
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
             if (player == null)
@@ -147,7 +146,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 throw new PlayerNotFoundException(request.PlayerCode);
             }
 
-            if (responseBalance.Value + request.Amount < 0)
+            if (responseBalance.Value - amount < 0)
             {
                 throw new PlayerHasInsufficientFundsException();
             }
@@ -175,7 +174,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 
             var response = await FundInAsync(player, Math.Abs(request.Amount));
 
-            var fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
+            FundTransferTransactionStatus fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
             if (!response.Success)
             {
                 var checking = await CheckingOrderIdAsync(player, response.OrderId);
@@ -183,26 +182,25 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 {
                     fundTransferStatus = FundTransferTransactionStatus.Success;
                 }
-                //轉帳失敗
             }
             else
             {
                 fundTransferStatus = FundTransferTransactionStatus.Success;
             }
 
-            var transactionsId = default(Guid);
-            var playerBalance = default(decimal);
+
+            var transactionsId = default(Guid?);
+            var postBalance = default(decimal?);
+            var exception = default(Exception);
             if (fundTransferStatus == FundTransferTransactionStatus.Success)
             {
-                /*
-                 * 加錢
-                 */
-                transactionsId = GuidExtensions.NewSequentialGuid();
-                playerBalance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
-                /*
-                 * 主錢包失敗
-                 */
+                var wallet = await WalletExchangeAsync(player, amount);
+                fundTransferStatus = wallet.Status;
+                transactionsId = wallet.TransactionId;
+                postBalance = wallet.PostBalance;
+                exception = wallet.Exception;
+
             }
 
             /*
@@ -211,16 +209,16 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             await _gameProviderFundTransferTransactionRepository.UpdateAsync(new GameProviderFundTransferTransactionUpdateRequest
             {
                 GameProviderFundTransferTransactionId = transactionGameProviderId.Value,
-                TransactionId = transactionsId,
+                TransactionId = transactionsId ?? null,
                 GameProviderTransactionId = response.OrderId,
                 Status = fundTransferStatus,
-                Balance = playerBalance,
+                Balance = postBalance ?? 0,
                 UpdatedOn = DateTimeOffset.UtcNow,
-                Description = "完成加錢"
+                Description = (fundTransferStatus == FundTransferTransactionStatus.Success) ? string.Empty : (exception == null) ? string.Empty : exception.Message
             });
 
 
-            return new() { GameProviderOrderId = response.OrderId, TransactionsId = transactionsId };
+            return new() { GameProviderTransactionId = response.OrderId, TransactionsId = transactionsId };
         }
 
         /// <summary>
@@ -242,6 +240,32 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             return new() { Success = balance.HasValue, Balance = balance ?? 0 };
         }
 
+        private async ValueTask<(FundTransferTransactionStatus Status, Guid? TransactionId, decimal? PostBalance, Exception Exception)> WalletExchangeAsync(CachedPlayer player, decimal amount)
+        {
+            try
+            {
+                var wallet = await _walletRepository.ExchangeAsync(
+                    player.BrandId,
+                    player.DefaultWalletId,
+                    player.PlayerCode, TransactionTypes.GameProviderFundOut,
+                    amount
+                    ).ConfigureAwait(false);
+                return new(
+                    FundTransferTransactionStatus.Success,
+                    wallet.TransactionId,
+                    wallet.PostBalance,
+                    null);
+            }
+            catch (Exception ex)
+            {
+                return new(
+                 FundTransferTransactionStatus.FailureOnSystem,
+                 null,
+                 null,
+                 ex);
+            }
+        }
+
         public abstract ValueTask<(bool Success, string OrderId, decimal Balance)> FundOutAsync(CachedPlayer player, decimal amount);
 
         public abstract ValueTask<(bool Success, string OrderId, decimal Balance)> FundInAsync(CachedPlayer player, decimal amount);
@@ -249,5 +273,6 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         public abstract ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId);
 
         public abstract ValueTask<decimal?> GameProviderGetBalanceAsync(CachedPlayer player);
+
     }
 }
