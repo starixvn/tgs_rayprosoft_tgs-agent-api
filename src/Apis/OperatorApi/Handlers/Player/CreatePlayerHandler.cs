@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -60,12 +61,14 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
 
             var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(brandId, currency);
 
-            var agent = request.AgentInvitationCode == null
-                ? null
-                : await _playerOperations.GetAgentAsync(request.AgentInvitationCode);
-
-            if (agent == null)
-                throw new InvalidInvitationCodeException(request.AgentInvitationCode, "Can't find the agent info");
+            var AgentId = new Guid?();
+            if (!string.IsNullOrEmpty(request.AgentInvitationCode))
+            {
+                var agent = await _playerOperations.GetAgentAsync(request.AgentInvitationCode);
+                if (agent == null)
+                    throw new InvalidInvitationCodeException(request.AgentInvitationCode, "Can't find the agent info");
+                AgentId = agent.Id;
+            }
 
             playerCode = await _playerOperations.CreatePlayerAsync(new()
             {
@@ -76,7 +79,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                 CurrencyCode = currency,
                 ExternalCurrencyCode = externalCurrency,
                 BetLimitId = betLimitId,
-                AgentId = agent?.Id,
+                AgentId = AgentId,
                 AgentInvitationCode = request.AgentInvitationCode,
                 Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
             });

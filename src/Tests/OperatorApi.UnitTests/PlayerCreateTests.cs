@@ -135,6 +135,69 @@ namespace OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task Register_Player_With_No_InvitationCode()
+        {
+            // arrange
+            var playerCode = "playerCode";
+            var fakeHttpContext = new DefaultHttpContext();
+            var brandId = Guid.NewGuid();
+            fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData()
+            {
+                PlayerCode = playerCode
+            });
+            var fakeHttpContextAccessor = new HttpContextAccessor()
+            {
+                HttpContext = fakeHttpContext
+            };
+
+            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
+            var jsonSerializationProvider = new JsonSerializationProvider();
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+
+            var tgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+            var fakeFuncWalletQueries = Substitute.For<Func<IWalletQueries>>();
+            var fakeFuncPlayerQueries = Substitute.For<Func<IPlayerQueries>>();
+            var fakePlayerCommands = Substitute.For<IPlayerCommands>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+
+            var BrandQueries = new BrandQueries(tgsRepository);
+
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
+
+            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeStatusValidator = Substitute.For<IStatusValidator>();
+
+            var sut = new CreatePlayerHandler
+                (fakeHttpContextAccessor,
+                fakePlayerOperations,
+                fakeBrandOperations,
+                fakeBrandCurrencyCodeMapper,
+                fakePasswordHandler,
+                fakeStatusValidator
+                );
+            string password = "password";
+
+            var request = new CreatePlayerRequest()
+            {
+                Username = "username",
+                Password = password,
+                ConfirmPassword = password,
+                CurrencyCode = "CNY",
+                IsTestPlayer = false
+            };
+            // act
+            var actual = await sut.Handle(request, default);
+            // assert
+            Assert.IsTrue(actual.IsNew);
+        }
+
+        [Test]
         public void Register_Player_With_Non_Existent_InvitationCode()
         {
             // arrange
