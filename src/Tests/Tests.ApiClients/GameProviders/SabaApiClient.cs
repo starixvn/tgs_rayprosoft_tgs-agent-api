@@ -9,6 +9,7 @@ namespace TGS.Tests.ApiClients.GameProviders
     public interface ISabaApiClient
     {
         ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request);
+        ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request);
     }
 
     public sealed class SabaApiClient : BaseApiClient, ISabaApiClient
@@ -23,5 +24,9 @@ namespace TGS.Tests.ApiClients.GameProviders
         public ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request) =>
             ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post,
                 $"{RoutePrefix}/getbalance", request);
+
+        public ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request) =>
+            ExecuteJsonRequestAsync<PlaceBetRequest, PlaceBetResponse>(HttpMethod.Post,
+                $"{RoutePrefix}/placebet", request);
     }
 }
