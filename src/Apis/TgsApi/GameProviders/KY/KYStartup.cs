@@ -29,10 +29,11 @@ namespace TGS.Apis.TgsApi.GameProviders.KY
             services.AddErrorMappers();
             services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(KYGameInitializer) }, (provider, _) =>
-                  provider.GetRequiredService<KYGameInitializer>());
+            provider.GetRequiredService<KYGameInitializer>());
             services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(KYGameProviderWalletAction) }, (provider, _) =>
-                 provider.GetRequiredService<KYGameProviderWalletAction>());
-            
+            provider.GetRequiredService<KYGameProviderWalletAction>());
+            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(KYGameHistory) }, (provider, _) =>
+            provider.GetRequiredService<KYGameHistory>());
 
         }
 
