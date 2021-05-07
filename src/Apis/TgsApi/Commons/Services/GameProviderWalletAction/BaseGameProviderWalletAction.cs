@@ -134,7 +134,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 
             var balance = await GameProviderGetBalanceAsync(player);
 
-            return new() { Balance = balance ?? 0 };
+            return new() { Success = balance.HasValue, Balance = balance ?? 0 };
         }
 
         public abstract ValueTask<(bool success, string orderId, decimal balance)> FundOutAsync(CachedPlayer player, decimal amount);

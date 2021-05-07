@@ -21,13 +21,13 @@ namespace TGS.Shared.Game.Models.KY.Outgoing
         /// 总余额
         /// </summary>
         [JsonPropertyName("totalMoney")]
-        public int TotalBalance { get; set; }
+        public decimal TotalBalance { get; set; }
         /// <summary>
         /// Gets or sets the balance.
         /// 可下分余额
         /// </summary>
         [JsonPropertyName("freeMoney")]
-        public int Balance { get; set; }
+        public decimal Balance { get; set; }
         /// <summary>
         /// Gets or sets the status.
         /// 状态码（-1、不存在，0、不在线,1、在线，2、封停）

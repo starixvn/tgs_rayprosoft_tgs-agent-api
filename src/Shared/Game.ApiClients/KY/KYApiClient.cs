@@ -56,10 +56,8 @@ namespace TGS.Shared.Game.ApiClients.KY
             return response;
         }
 
-        ValueTask<KYGPGameRecordResponse> IKYApiClient.GameRecordAsync(Uri apiUrl, Models.KY.Incoming.KYGPGameRecordRequest request)
-        {
-            return ExecuteJsonRequestAsync<Models.KY.Incoming.KYGPGameRecordRequest, KYGPGameRecordResponse>(HttpMethod.Post, apiUrl,
-              "/api/ky/GameRecord", request);
-        }
+        ValueTask<KYGPGameRecordResponse> IKYApiClient.GameRecordAsync(Uri apiUrl, KYGPGameRecordRequest request) =>
+            ExecuteJsonRequestAsync<Models.KY.Incoming.KYGPGameRecordRequest, KYGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/ky/GameRecord", request);
+
     }
 }

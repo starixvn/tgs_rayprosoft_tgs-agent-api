@@ -10,6 +10,8 @@ namespace TGS.Services.PluggableServices.Models
 {
     public record GameProviderWalletGetBalanceResponse : TgsResponse
     {
+        [JsonPropertyName("success")]
+        public bool Success { get; init; }
         [JsonPropertyName("balance")]
         public decimal Balance { get; init; }
     }
