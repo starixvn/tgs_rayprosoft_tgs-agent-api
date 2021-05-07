@@ -63,7 +63,7 @@ namespace TGS.Workers.Schedulers
 
             services.AddControllers();
 
-            services.AddGameProvidersRepository((options, sp) =>
+            services.AddGameProvidersMognoRepository((options, sp) =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
                 options.MongoConnectionString = config.GetValue<string>("GameProviders:ConnectionString");

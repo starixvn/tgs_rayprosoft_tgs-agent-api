@@ -37,6 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\GameProviders.Repositories\GameProviders.Repositories.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Services\GameOperations\GameOperations.csproj" />

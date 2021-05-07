@@ -5,9 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.12.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\Core\DataServices.Base\DataServices.Base.csproj" />
+    <ProjectReference Include="..\src\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
   </ItemGroup>
 
 </Project>

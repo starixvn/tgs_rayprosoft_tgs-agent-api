@@ -52,7 +52,8 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddTimeZone()
                 .AddApiClient()
                 .AddGameApiClients()
-                .AddGameOperations();
+                .AddGameOperations()
+                .AddGameProvidersoRepository();
 
             services.AddHttpContextAccessor();
 

@@ -9,7 +9,7 @@ namespace TGS.Services.PluggableServices.Models
 {
     public record GameProviderWalletFundResponse : TgsResponse
     {
-        public string TransactionsId { get; init; }
+        public Guid TransactionsId { get; init; }
         public string GameProviderOrderId { get; init; }
     }
 }
