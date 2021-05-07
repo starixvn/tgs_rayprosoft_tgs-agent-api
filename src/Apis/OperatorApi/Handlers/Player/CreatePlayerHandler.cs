@@ -4,15 +4,14 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Apis.OperatorApi.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
-using TGS.Services.Operator;
 
 namespace TGS.Apis.OperatorApi.Handlers.Player
 {
@@ -21,7 +20,6 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
         private readonly IBrandOperations _brandOperations;
         private readonly IBrandCurrencyCodeMapper _currencyCodeMapper;
         private readonly HttpContext _httpContext;
-        private readonly IInvitationCodeValidator _invitationCodeValidator;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
         private readonly IStatusValidator _statusValidator;
@@ -32,8 +30,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             IBrandOperations brandOperations,
             IBrandCurrencyCodeMapper currencyCodeMapper,
             IPasswordHandler passwordHandler,
-            IStatusValidator statusValidator,
-            IInvitationCodeValidator invitationCodeValidator)
+            IStatusValidator statusValidator)
         {
             _httpContext = httpContextAccessor.HttpContext;
             _passwordHandler = passwordHandler;
@@ -41,7 +38,6 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
             _currencyCodeMapper = currencyCodeMapper;
-            _invitationCodeValidator = invitationCodeValidator;
         }
 
         public async Task<CreatePlayerResponse> Handle(
@@ -69,7 +65,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                 : await _playerOperations.GetAgentAsync(request.AgentInvitationCode);
 
             if (agent == null)
-                throw new InvitationCodeNotFoundException(request.AgentInvitationCode);
+                throw new InvalidInvitationCodeException(request.AgentInvitationCode, "Can't find the agent info");
 
             playerCode = await _playerOperations.CreatePlayerAsync(new()
             {

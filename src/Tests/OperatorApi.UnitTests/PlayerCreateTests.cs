@@ -8,7 +8,6 @@ using NSubstitute;
 using NUnit.Framework;
 using TGS.Apis.OperatorApi.Handlers.Player;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Apis.OperatorApi.Services;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -17,13 +16,13 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Commands;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
-using TGS.Services.Operator;
 
 namespace OperatorApi.UnitTests
 {
@@ -155,7 +154,6 @@ namespace OperatorApi.UnitTests
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
-            var fakeInvitationCodeValidator = Substitute.For<IInvitationCodeValidator>();
 
             var sut = new CreatePlayerHandler
                 (fakeHttpContextAccessor,
@@ -163,8 +161,7 @@ namespace OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakeBrandCurrencyCodeMapper,
                 fakePasswordHandler,
-                fakeStatusValidator,
-                fakeInvitationCodeValidator
+                fakeStatusValidator
                 );
             string password = "password";
             string invitationCode = "NonExistentCode";
@@ -179,7 +176,7 @@ namespace OperatorApi.UnitTests
                 IsTestPlayer = false
             };
 
-            Assert.ThrowsAsync<InvitationCodeNotFoundException>(async () => await sut.Handle(request, default));
+            Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.Handle(request, default));
         }
 
         [Test]
@@ -228,7 +225,6 @@ namespace OperatorApi.UnitTests
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
-            var fakeInvitationCodeValidator = Substitute.For<IInvitationCodeValidator>();
 
             var sut = new CreatePlayerHandler
                 (fakeHttpContextAccessor,
@@ -236,8 +232,7 @@ namespace OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakeBrandCurrencyCodeMapper,
                 fakePasswordHandler,
-                fakeStatusValidator,
-                fakeInvitationCodeValidator
+                fakeStatusValidator
                 );
             string password = "password";
 
