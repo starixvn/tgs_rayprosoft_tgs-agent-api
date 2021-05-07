@@ -71,7 +71,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                     ExternalCurrencyCode = externalCurrency,
                     BetLimitId = betLimitId,
                     AgentId = null,
-                    AgentInvitationCode = request.AgentInvitationCode,
+                    AgentInvitationCode = null,
                     Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
                 });
 
