@@ -220,6 +220,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // act
             var actual = sut.TestValidate(request);
+
             // assert
             actual.ShouldHaveValidationErrorFor(request => request.Password);
         }
@@ -236,6 +237,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // act
             var actual = sut.TestValidate(request);
+
             // assert
             actual.ShouldHaveValidationErrorFor(request => request.Password);
         }
@@ -252,6 +254,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // act
             var actual = sut.TestValidate(request);
+
             // assert
             actual.ShouldHaveValidationErrorFor(request => request.Password);
         }
@@ -268,6 +271,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // act
             var actual = sut.TestValidate(request);
+
             // assert
             actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
         }
@@ -284,6 +288,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // act
             var actual = sut.TestValidate(request);
+
             // assert
             actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
         }
@@ -300,6 +305,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // act
             var actual = sut.TestValidate(request);
+
             // assert
             actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
         }
