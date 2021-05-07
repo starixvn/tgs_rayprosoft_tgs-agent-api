@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.KY.Incoming
 {
-    public record KYGPGameRecordResponses
+    public record KYGPGameRecordResponse
     {
         [JsonPropertyName("success")]
         public bool Success { get; init; }

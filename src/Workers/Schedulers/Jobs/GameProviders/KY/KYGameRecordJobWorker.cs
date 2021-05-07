@@ -195,7 +195,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         /// <param name="value">The value.</param>
         /// <param name="responses">The responses.</param>
         /// <returns></returns>
-        private async Task<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig config, KYGPGameRecordResponses responses, DateTimeOffset sysTime)
+        private async Task<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig config, KYGPGameRecordResponse responses, DateTimeOffset sysTime)
         {
             if (config.EndTime > sysTime)
             {

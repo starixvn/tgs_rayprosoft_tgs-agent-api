@@ -20,7 +20,7 @@ namespace TGS.Shared.Game.ApiClients.KY
     public interface IKYApiClient
     {
         ValueTask<KYApiResponse<TData>> GetAPIAsync<TData>(Uri apiUrl, KYApiRequest request);
-        ValueTask<KYGPGameRecordResponses> GameRecordAsync(Uri apiUrl, Models.KY.Incoming.KYGPGameRecordRequest request);
+        ValueTask<KYGPGameRecordResponse> GameRecordAsync(Uri apiUrl, Models.KY.Incoming.KYGPGameRecordRequest request);
 
     }
 
@@ -56,9 +56,9 @@ namespace TGS.Shared.Game.ApiClients.KY
             return response;
         }
 
-        ValueTask<KYGPGameRecordResponses> IKYApiClient.GameRecordAsync(Uri apiUrl, Models.KY.Incoming.KYGPGameRecordRequest request)
+        ValueTask<KYGPGameRecordResponse> IKYApiClient.GameRecordAsync(Uri apiUrl, Models.KY.Incoming.KYGPGameRecordRequest request)
         {
-            return ExecuteJsonRequestAsync<Models.KY.Incoming.KYGPGameRecordRequest, KYGPGameRecordResponses>(HttpMethod.Post, apiUrl,
+            return ExecuteJsonRequestAsync<Models.KY.Incoming.KYGPGameRecordRequest, KYGPGameRecordResponse>(HttpMethod.Post, apiUrl,
               "/api/ky/GameRecord", request);
         }
     }

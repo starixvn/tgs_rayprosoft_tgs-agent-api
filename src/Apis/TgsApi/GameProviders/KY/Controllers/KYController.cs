@@ -67,7 +67,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
         }
 
         [HttpPost("GameRecord")]
-        public async ValueTask<KYGPGameRecordResponses> GameRecordAsync(KYGPGameRecordRequest request)
+        public async ValueTask<KYGPGameRecordResponse> GameRecordAsync(KYGPGameRecordRequest request)
         {
 
             var configuration =
@@ -84,7 +84,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
 
             if (string.IsNullOrEmpty(agentId))
             {
-                return new KYGPGameRecordResponses()
+                return new KYGPGameRecordResponse()
                 {
                     Success = false
                 };
@@ -113,7 +113,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYGameRecordResponses>(brandMerchant.ApiRecordUrl, apiKYRequest);
+            var response = await _client.GetAPIAsync<KYGameRecordResponse>(brandMerchant.ApiRecordUrl, apiKYRequest);
 
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode);
             var players = new Dictionary<string, Player>();
@@ -129,12 +129,33 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                 count = response.Data.Count;
                 for (int i = 0; i < response.Data.Count; i++)
                 {
+                    var gameRecord = new KYGameRecord()
+                    {
+                        GameID = response.Data.List.GameID[i],
+                        Account = response.Data.List.Accounts[i],
+                        ServerID = response.Data.List.ServerID[i],
+                        KindID = response.Data.List.KindID[i],
+                        TableID = response.Data.List.TableID[i],
+                        ChairID = response.Data.List.ChairID[i],
+                        UserCount = response.Data.List.UserCount[i],
+                        CellScore = Convert.ToDecimal(response.Data.List.CellScore[i]),
+                        AllBet = Convert.ToDecimal(response.Data.List.AllBet[i]),
+                        Profit = Convert.ToDecimal(response.Data.List.Profit[i]),
+                        Revenue = Convert.ToDecimal(response.Data.List.Revenue[i]),
+                        GameStartTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameStartTime[i]), TimeSpan.FromHours(+8)),
+                        GameEndTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]), TimeSpan.FromHours(+8)),
+                        CardValue = response.Data.List.CardValue[i],
+                        ChannelID = Convert.ToInt32(response.Data.List.ChannelID[i]),
+                        LineCode = response.Data.List.LineCode[i]
+                    };
+
+
                     var gameId = default(int?);
                     var game = default(CachedGame);
                     var player = default(Player);
                     var gameProviderConfigurationId = default(Guid?);
                     var success = true;
-                    var PlayerCode = response.Data.List.Accounts[i].Split('_')[1];
+                    var PlayerCode = gameRecord.Account.Split('_')[1];
                     player = players.Where(x => x.Key == PlayerCode).FirstOrDefault().Value;
                     if (player == null)
                     {
@@ -150,10 +171,10 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                     }
 
 
-                    game = gameIds.Where(x => x.Key == response.Data.List.KindID[i]).FirstOrDefault().Value;
+                    game = gameIds.Where(x => x.Key == gameRecord.KindID).FirstOrDefault().Value;
                     if (game == null)
                     {
-                        var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, response.Data.List.KindID[i].ToString()).ConfigureAwait(false);
+                        var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gameRecord.KindID.ToString()).ConfigureAwait(false);
 
                         if (games != null && games.Length > 0)
                         {
@@ -179,7 +200,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                     {
                         result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                         {
-                            ExternalRoundId = response.Data.List.GameID[i],
+                            ExternalRoundId = gameRecord.GameID,
                             GameProviderId = gameProviderId,
                             PlayerCode = player.PlayerCode,
                             GameId = gameId.GetValueOrDefault(-1),
@@ -191,35 +212,17 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                             ClosedOn = sysDateTimeOffset,
                             UpdatedOn = sysDateTimeOffset,
                             BrandId = player.BrandId,
-                            ExternalCreatedOn = new DateTimeOffset(DateTime.Parse(response.Data.List.GameStartTime[i]), TimeSpan.FromHours(+8)),
-                            ExternalClosedOn = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]), TimeSpan.FromHours(+8)),
-                            BetAmount = Convert.ToDecimal(response.Data.List.AllBet[i]),
-                            ValidBetAmount = Convert.ToDecimal(response.Data.List.AllBet[i]),
-                            WinLoss = Convert.ToDecimal(response.Data.List.Profit[i]).Negate(),
-                            Commission = Convert.ToDecimal(response.Data.List.Revenue[i]),
-                            Turnover = Convert.ToDecimal(response.Data.List.CellScore[i]),
-                            SettleAmount = Convert.ToDecimal(response.Data.List.AllBet[i]) + Convert.ToDecimal(response.Data.List.Profit[i]),
+                            ExternalCreatedOn = gameRecord.GameStartTime,
+                            ExternalClosedOn = gameRecord.GameEndTime,
+                            BetAmount = gameRecord.AllBet,
+                            ValidBetAmount = gameRecord.AllBet,
+                            WinLoss = gameRecord.Profit,
+                            Commission = gameRecord.Revenue,
+                            Turnover = gameRecord.CellScore,
+                            SettleAmount = gameRecord.AllBet + gameRecord.Profit,
                             TieBetAdjustment = null,
-                            ClientStatus = GetClientRound(Convert.ToDecimal(response.Data.List.Profit[i])),
-                            AdditionalData = JsonSerializer.Serialize(new
-                            {
-                                GameID = response.Data.List.GameID[i],
-                                Accounts = response.Data.List.Accounts[i],
-                                ServerID = response.Data.List.ServerID[i],
-                                KindID = response.Data.List.KindID[i],
-                                TableID = response.Data.List.TableID[i],
-                                ChairID = response.Data.List.ChairID[i],
-                                UserCount = response.Data.List.UserCount[i],
-                                CellScore = response.Data.List.CellScore[i],
-                                AllBet = response.Data.List.AllBet[i],
-                                Profit = response.Data.List.Profit[i],
-                                Revenue = response.Data.List.Revenue[i],
-                                GameStartTime = response.Data.List.GameStartTime[i],
-                                GameEndTime = response.Data.List.GameEndTime[i],
-                                CardValue = response.Data.List.CardValue[i],
-                                ChannelID = response.Data.List.ChannelID[i],
-                                LineCode = response.Data.List.LineCode[i],
-                            }),
+                            ClientStatus = GetClientRound(gameRecord.Profit),
+                            AdditionalData = JsonSerializer.Serialize(gameRecord),
                             Success = success
                         });
                         lastGameRecorTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]), TimeSpan.FromHours(+8));
@@ -241,7 +244,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             }
 
 
-            var responses = new KYGPGameRecordResponses()
+            var responses = new KYGPGameRecordResponse()
             {
                 Success = (response.Data.Code == 0 || response.Data.Code == 16) ? true : false,
                 LastGameRecorTime = lastGameRecorTime,
@@ -261,42 +264,5 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                 0 => ClientRoundStatus.Draw
             };
         }
-    }
-
-
-
-
-    public record RoundResult
-    {
-        //public Guid RoundId { get; set; }
-        public string ExternalRoundId { get; init; }
-        public Guid GameProviderId { get; init; }
-        public string PlayerCode { get; init; }
-        public int GameId { get; init; }
-        public string CurrencyCode { get; init; }
-        public RoundStatus Status { get; init; }
-        public Guid GameProviderConfigurationId { get; init; }
-        public Guid WalletId { get; init; }
-        public DateTimeOffset CreatedOn { get; init; }
-        public DateTimeOffset? ClosedOn { get; init; }
-        public DateTimeOffset UpdatedOn { get; init; }
-        public DateTimeOffset? ExternalCreatedOn { get; init; }
-        public DateTimeOffset? ExternalClosedOn { get; init; }
-        public Guid BrandId { get; init; }
-        public decimal? BetAmount { get; init; }
-        public decimal? ValidBetAmount { get; init; }
-        public decimal? SettleAmount { get; init; }
-        public decimal? Commission { get; init; }
-        public decimal? Turnover { get; init; }
-        public decimal? WinLoss { get; init; }
-        public decimal? TieBetAdjustment { get; init; }
-        public virtual GameRoundsDetailData RoundDetail { get; init; }
-        public ClientRoundStatus ClientStatus { get; init; }
-        public bool Success { get; init; }
-    }
-
-    public record GameRoundsDetailData
-    {
-        public string AdditionalData { get; set; }
     }
 }

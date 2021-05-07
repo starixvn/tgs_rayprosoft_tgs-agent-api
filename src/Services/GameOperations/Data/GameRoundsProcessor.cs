@@ -14,6 +14,9 @@ namespace TGS.Services.GameOperations.Data
     public interface IGameRoundsProcessor
     {
         ValueTask<bool> ExecuteAsync(GameRoundsData data);
+        ValueTask<(Round round, RoundDetail roundsDetail)> GetAsync(Guid roundsId);
+
+        ValueTask<(Round roundsData, RoundDetail roundsDetail)> GetExternalRoundIdAsync(string externalRoundId, string playerCode, Guid gameProviderId, int gameId);
     }
 
     internal sealed partial class GameRoundsProcessor : IGameRoundsProcessor
@@ -131,6 +134,31 @@ namespace TGS.Services.GameOperations.Data
             }
             await _tgsRepository.SaveChangesAsync();
             return true;
+        }
+        public async ValueTask<(Round round, RoundDetail roundsDetail)> GetAsync(Guid roundsId)
+        {
+            var round = _tgsRepository.Rounds.Where(x => x.Id == roundsId).FirstOrDefault();
+            var roundsDetail = _tgsRepository.RoundDetails.Where(x => x.RoundId == roundsId).FirstOrDefault();
+            return new(round, roundsDetail);
+        }
+
+        public async ValueTask<(Round roundsData, RoundDetail roundsDetail)> GetExternalRoundIdAsync(string externalRoundId, string playerCode, Guid gameProviderId, int gameId)
+        {
+            var round = _tgsRepository.Rounds.Where(x =>
+            x.ExternalRoundId == externalRoundId
+            && x.PlayerCode == playerCode
+            && x.GameProviderId == gameProviderId
+            && x.GameId == gameId).FirstOrDefault();
+            if (round == null)
+            {
+                return new();
+            }
+            else
+            {
+                var roundsDetail = _tgsRepository.RoundDetails.Where(x => x.RoundId == round.Id).FirstOrDefault();
+
+                return (round, roundsDetail);
+            }
         }
     }
 }

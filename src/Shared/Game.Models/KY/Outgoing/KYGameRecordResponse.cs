@@ -8,7 +8,7 @@ using TGS.Shared.Game.Models.KY.Commons;
 
 namespace TGS.Shared.Game.Models.KY.Outgoing
 {
-    public record KYGameRecordResponses : KYBaseDataResponse
+    public record KYGameRecordResponse : KYBaseDataResponse
     {
         [JsonPropertyName("start")]
         public long Start { get; set; }
