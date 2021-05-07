@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -54,37 +53,60 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                 return new() { PlayerCode = playerCode, IsNew = false };
             }
 
-            var externalCurrency = request.CurrencyCode;
-            var currency = await _currencyCodeMapper.ExternalToInternalAsync(externalCurrency, brandId);
-
             var (salt, password) = _passwordHandler.GenerateCredential(request.Password);
 
+            var externalCurrency = request.CurrencyCode;
+            var currency = await _currencyCodeMapper.ExternalToInternalAsync(externalCurrency, brandId);
             var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(brandId, currency);
 
-            var AgentId = new Guid?();
-            if (!string.IsNullOrEmpty(request.AgentInvitationCode))
+            if (string.IsNullOrWhiteSpace(request.AgentInvitationCode))
+            {
+                var result = await _playerOperations.CreatePlayerAsync(new()
+                {
+                    BrandId = brandId,
+                    Username = username,
+                    Salt = salt,
+                    Password = password,
+                    CurrencyCode = currency,
+                    ExternalCurrencyCode = externalCurrency,
+                    BetLimitId = betLimitId,
+                    AgentId = null,
+                    AgentInvitationCode = request.AgentInvitationCode,
+                    Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
+                });
+
+                return new()
+                {
+                    PlayerCode = result,
+                    IsNew = true
+                };
+            }
+            else
             {
                 var agent = await _playerOperations.GetAgentAsync(request.AgentInvitationCode);
                 if (agent == null)
                     throw new InvalidInvitationCodeException(request.AgentInvitationCode, "Can't find the agent info");
-                AgentId = agent.Id;
+
+                var result = await _playerOperations.CreatePlayerAsync(new()
+                {
+                    BrandId = brandId,
+                    Username = username,
+                    Salt = salt,
+                    Password = password,
+                    CurrencyCode = currency,
+                    ExternalCurrencyCode = externalCurrency,
+                    BetLimitId = betLimitId,
+                    AgentId = agent.Id,
+                    AgentInvitationCode = request.AgentInvitationCode,
+                    Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
+                });
+
+                return new()
+                {
+                    PlayerCode = result,
+                    IsNew = true
+                };
             }
-
-            playerCode = await _playerOperations.CreatePlayerAsync(new()
-            {
-                BrandId = brandId,
-                Username = username,
-                Salt = salt,
-                Password = password,
-                CurrencyCode = currency,
-                ExternalCurrencyCode = externalCurrency,
-                BetLimitId = betLimitId,
-                AgentId = AgentId,
-                AgentInvitationCode = request.AgentInvitationCode,
-                Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
-            });
-
-            return new() { PlayerCode = playerCode, IsNew = true };
         }
     }
 }
