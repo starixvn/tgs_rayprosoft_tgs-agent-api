@@ -6,7 +6,7 @@ using TGS.Core.DataServices.Base.Extensions;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
-    public partial class add_player_dividned_player_rebate_promotion_tables : Migration
+    public partial class AddPlayerDividendPlayerRebatePromotionTables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -10,8 +10,8 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210503064044_add_player_dividned_player_rebate_promotion_tables")]
-    partial class add_player_dividned_player_rebate_promotion_tables
+    [Migration("20210503064044_AddPlayerDividendPlayerRebatePromotionTables")]
+    partial class AddPlayerDividendPlayerRebatePromotionTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
