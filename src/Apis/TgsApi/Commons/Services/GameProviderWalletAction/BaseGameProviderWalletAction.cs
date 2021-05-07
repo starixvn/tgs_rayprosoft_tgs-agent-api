@@ -83,7 +83,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 
 
             #region 扣掉主錢包
-            var wallet = await WalletExchangeAsync(player, amount * -1);
+            var wallet = await WalletExchangeAsync(player, amount * -1, TransactionTypes.GameProviderFundOut);
             #endregion
 
             fundTransferStatus = wallet.Status;
@@ -195,7 +195,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             if (fundTransferStatus == FundTransferTransactionStatus.Success)
             {
 
-                var wallet = await WalletExchangeAsync(player, amount);
+                var wallet = await WalletExchangeAsync(player, amount, TransactionTypes.GameProviderFundIn);
                 fundTransferStatus = wallet.Status;
                 transactionsId = wallet.TransactionId;
                 postBalance = wallet.PostBalance;
@@ -240,14 +240,15 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             return new() { Success = balance.HasValue, Balance = balance ?? 0 };
         }
 
-        private async ValueTask<(FundTransferTransactionStatus Status, Guid? TransactionId, decimal? PostBalance, Exception Exception)> WalletExchangeAsync(CachedPlayer player, decimal amount)
+        private async ValueTask<(FundTransferTransactionStatus Status, Guid? TransactionId, decimal? PostBalance, Exception Exception)> WalletExchangeAsync(CachedPlayer player, decimal amount, TransactionTypes transactionTypes)
         {
             try
             {
                 var wallet = await _walletRepository.ExchangeAsync(
                     player.BrandId,
                     player.DefaultWalletId,
-                    player.PlayerCode, TransactionTypes.GameProviderFundOut,
+                    player.PlayerCode,
+                    transactionTypes,
                     amount
                     ).ConfigureAwait(false);
                 return new(
