@@ -257,6 +257,22 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public void Verify_Change_Pay_Password_Input_With_Empty()
+        {
+            // arrange
+            var sut = new ChangePayPasswordRequestValidator();
+            var request = new ChangePayPasswordRequest()
+            {
+                NewPassword = string.Empty
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+        }
+
+        [Test]
         public void Verify_Change_Pay_Password_Input_Min_Length()
         {
             // arrange
