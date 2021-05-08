@@ -31,5 +31,11 @@ namespace TGS.Shared.Game.Models.JDB.Outgoing
         public bool IsApp => false;
         [JsonPropertyName("lobbyURL")]
         public string LobbyUrl => string.Empty;
+        [JsonPropertyName("moreGame")]
+        public int MoreGame { get; set; }
+        [JsonPropertyName("jackpotFlag")]
+        public int JackpotFlag => 1;
+        [JsonPropertyName("isShowDollarSign")]
+        public bool IsShowDollarSign => true;
     }
 }

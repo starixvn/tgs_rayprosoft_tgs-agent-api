@@ -52,11 +52,12 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             var getTokenRequest = new GetTokenRequest
             {
                 Timestamp = DateTime.Now.Ticks,
-                Parent = configuration.Parent,
+                Parent = configuration.MerchantCode,
                 UserId = player.PlayerCode,
                 Language = cultureCode,
                 GameType = ((int)_jdbGameTypeMapper.Get(game.Type)).ToString(),
-                MachineType = game.ExternalId
+                MachineType = game.ExternalId,
+                MoreGame = configuration.MoreGame ? 1 : 0
             };
 
             var response = await

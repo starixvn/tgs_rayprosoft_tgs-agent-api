@@ -77,7 +77,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new Uri("http://game-jdb") : new("http://localhost:62330"),
                     ApiUrl = new("https://ws-test.insvr.com/jsonapi"),
                     ClientDomain = "tgs",
-                    Parent = "tgs"
+                    MerchantCode = "tgs"
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

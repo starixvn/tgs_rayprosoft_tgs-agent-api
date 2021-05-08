@@ -6,6 +6,7 @@ namespace TGS.Core.Models.GameProviders.Settings
     {
         public Uri ApiUrl { get; init; }
         public string ClientDomain { get; init; }
-        public string Parent { get; set; }
+        public string MerchantCode { get; set; }
+        public bool MoreGame { get; set; }
     }
 }

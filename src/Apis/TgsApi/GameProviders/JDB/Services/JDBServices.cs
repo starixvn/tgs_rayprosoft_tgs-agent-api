@@ -6,7 +6,6 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
-using TGS.Services.Operations.Queries;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
@@ -17,18 +16,15 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 
     public sealed class JDBServices : IJDBServices
     {
-        private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly HttpContext _httpContext;
 
         public JDBServices(
             IHttpContextAccessor httpContextAccessor,
-            IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries)
+            IGameProviderOperations gameProviderOperations)
         {
             _httpContext = httpContextAccessor.HttpContext;
             _gameProviderOperations = gameProviderOperations;
-            _gameActionQueries = gameActionQueries;
         }
 
         async ValueTask<GameProviderConfigurationData> IJDBServices.GetGameProviderConfigurationDataAsync()

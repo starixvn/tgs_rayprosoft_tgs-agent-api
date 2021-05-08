@@ -2,12 +2,16 @@
 
 using System;
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
+using TGS.Shared.Game.Models.JDB;
 using TGS.Shared.Game.Models.JDB.Incoming;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 
@@ -21,12 +25,16 @@ namespace TGS.Shared.Game.ApiClients.JDB
     
     public class JDBApiClient : BaseApiClient, IJDBApiClient
     {
-        private readonly ITokenProvider _tokenProvider;
+        private readonly ISymmetricCryptoProvider _cryptoProvider;
         
-        public JDBApiClient(ITokenProvider tokenProvider, HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
+        public JDBApiClient(
+            ISymmetricCryptoProviderFactory cryptoProviderFactory, 
+            HttpClient client, 
+            IApiClientLogger logger, 
+            IJsonSerializationProvider json)
             : base(client, logger, json)
         {
-            _tokenProvider = tokenProvider;
+            _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
         }
         
         #region Game Provider Client Api
@@ -45,10 +53,11 @@ namespace TGS.Shared.Game.ApiClients.JDB
 
         private async ValueTask<TResponse> ExecuteRequestAsync<TRequest, TResponse>(Uri apiUrl, string clientDomain, TRequest data, string logPrefix)
         {
-            var dataString = await _tokenProvider.EncryptAsync(data);
+            var jsonString = Json.SerializeToString(data);
+            var encryptedString = await _cryptoProvider.EncryptStringAsync(jsonString, JDBConsts.AESIV, JDBConsts.AESKEY, encoding: Encoding.UTF8);
             var url = $"{apiUrl}/apiRequest.do"
                 .AppendQueryString($"dc={clientDomain}")
-                .AppendQueryString($"x={dataString}");
+                .AppendQueryString($"x={encryptedString}");
             return await ExecuteFormRequestAsync<TResponse>(url, null, logPrefix: logPrefix);
         }
 

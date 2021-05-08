@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
@@ -22,7 +23,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public sealed class JDBActionModelMapper : IJDBActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.JDB;
+        private readonly IJsonSerializationProvider _json;
 
+        public JDBActionModelMapper(IJsonSerializationProvider json)
+        {
+            _json = json;
+        }
+        
         PlayerValidationData IJDBActionModelMapper.Request(string playerCode, PlatformType platformType) =>
             new()
             {
@@ -42,7 +49,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         {
             var transactions = new List<TransactionData>(2);
             var externalTransactionId = request.TransferId.ToString();
-            
+            var extraData = new Dictionary<string, object> {{nameof(request.GameSequenceNo), request.GameSequenceNo}};
+
             //place bet
             transactions.Add(new TransactionData
             {
@@ -54,7 +62,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ExternalGameId = request.MachineType.ToString(),
                 GameActionType = PlaceBet,
                 TimeStamp = DateTimeOffset.Parse(request.GameDate),
-                RoundClosed = false
+                RoundClosed = false,
+                RoundDetail = AddCustomDescription(extraData)
             });
             
             //settle bet
@@ -140,6 +149,9 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ? PlatformType.Desktop
                 : PlatformType.Mobile;
         }
+        
+        private string AddCustomDescription(Dictionary<string, object> items) =>
+            items == null || items.Count == 0 ? null : _json.SerializeToString(items, new() {WriteIndented = false});
 
         #endregion
     }
