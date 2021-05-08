@@ -6,6 +6,10 @@ namespace TGS.Services.Payment
     {
         string Subject { get; }
 
-        string? MakeApplyInfo(Guid formId, decimal amount, BrandPaymentInfo brandPayment);
+        string? MakeWithdrawSettings(
+            Guid formId,
+            decimal amount,
+            string? bankInfo,
+            BrandPaymentInfo brandPayment);
     }
 }

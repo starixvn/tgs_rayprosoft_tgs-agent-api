@@ -47,7 +47,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         SystemId = "WG",
                         SystemKey = "7ujm5tgB",
                         ChannelCurrency = "CNY",
-                        Channel = "ETHEREUM"
+                        Channel = "TRON"
                     },
                     new JsonSerializerOptions
                     {
