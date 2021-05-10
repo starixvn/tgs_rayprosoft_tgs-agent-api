@@ -76,8 +76,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-asiagaming") : new("http://localhost:62330"),
-                    AgentCode = "B17",
+                    AgentCode = "JH2_AGIN",
                     LockGameTypes = new[] {"ROU"},
+                    DesKey = "jh2hnM6K",
+                    Md5Key = "jh2bKFbpLZuW",
                     GameHistoryTypes = new[]
                     {
                         new AsiaGamingGameHistoryType

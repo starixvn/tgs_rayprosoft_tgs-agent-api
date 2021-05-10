@@ -22,7 +22,7 @@ namespace TGS.Tests.ApiClients.GameProviders
 
     public sealed class SBOBETApiClient : BaseApiClient, ISBOBETApiClient
     {
-        private static readonly string RoutePrefix = "api/provider";
+        private static readonly string RoutePrefix = "api/sbo";
 
         public SBOBETApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
             : base(client, logger, json)
@@ -54,7 +54,7 @@ namespace TGS.Tests.ApiClients.GameProviders
                 $"{RoutePrefix}/GetBetStatus", request);
 
         ValueTask<BatchResponse> ISBOBETApiClient.CancelTransactionsAsync(BatchRequest request) =>
-            ExecuteJsonRequestAsync<BatchRequest, BatchResponse>(HttpMethod.Post, "api/batch/transactions/cancel",
+            ExecuteJsonRequestAsync<BatchRequest, BatchResponse>(HttpMethod.Post, $"{RoutePrefix}/batch/transactions/cancel",
                 request);
     }
 }

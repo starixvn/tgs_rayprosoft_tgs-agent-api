@@ -3,6 +3,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Services.GameOperations.Models.Data;
+using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Services.GameOperations
 {
@@ -66,7 +67,7 @@ namespace TGS.Services.GameOperations
             {
                 // re-open round
                 if (requestToCloseRound == false &&
-                    gameActionType.IsNotAllOf(GameActionType.PlaceBet))
+                    gameActionType.IsNotAllOf(PlaceBet, WinJackpot))
                 {
                     return RoundStatus.Open;
                 }
@@ -89,8 +90,8 @@ namespace TGS.Services.GameOperations
                 return requestToCloseRound.Value ? RoundStatus.Closed : oldStatus;
             }
 
-            if (gameActionType.IsNotAllOf(GameActionType.WinBet, GameActionType.LoseBet, GameActionType.TieBet,
-                GameActionType.CancelTransaction))
+            if (gameActionType.IsNotAllOf(WinBet, LoseBet, TieBet,
+                CancelTransaction))
             {
                 return oldStatus;
             }
@@ -98,12 +99,12 @@ namespace TGS.Services.GameOperations
             // AutoCloseRound=true and if all bets are settled, then close the round
 
             var allBetIdsInTheRound = data.ValidPreviousActions
-                .Where(r => r.Reference?.Type == GameActionType.PlaceBet)
+                .Where(r => r.Reference?.Type == PlaceBet)
                 .Select(r => r.Reference.Id).ToHashSet();
 
             var unsettledBetIds = data.PreviousActions
                 .Where(b => b.Reference == null &&
-                    b.Type.IsNotAllOf(GameActionType.FreeBet) &&
+                    b.Type.IsNotAllOf(FreeBet, LockAmount, UnlockAmount) &&
                     !allBetIdsInTheRound.Contains(b.Id))
                 .Select(r => r.Id);
 
