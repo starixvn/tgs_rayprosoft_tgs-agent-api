@@ -23,5 +23,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         public Task<PagedResponse<PlayerContributionModel>> GetRoundsAsync(
             [FromQuery] GetPlayerContributionsRequest request) =>
             _client.GetPlayerContributionsAsync(request);
+
+        [HttpGet("accountChanges")]
+        [Description("Get player account changes")]
+        public Task<PagedResponse<PlayerAccountChangeModel>> GetRoundsAsync(
+            [FromQuery] GetPlayerAccountChangesRequest request) =>
+            _client.GetPlayerAccountChangesAsync(request);
     }
 }
