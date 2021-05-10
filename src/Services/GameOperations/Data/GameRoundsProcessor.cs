@@ -60,7 +60,7 @@ namespace TGS.Services.GameOperations.Data
                     SettleAmount = data.SettleAmount,
                     Commission = data.Commission,
                     Turnover = data.Turnover,
-                    WinLoss = data.WinLoss,
+                    WinLoss = (data.WinLoss ?? 0).Negate(),
                     TieBetAdjustment = data.TieBetAdjustment,
                     ClientStatus = data.ClientStatus
                 }).ConfigureAwait(false);
@@ -86,7 +86,7 @@ namespace TGS.Services.GameOperations.Data
                     round.SettleAmount = data.SettleAmount;
                     round.Commission = data.Commission;
                     round.Turnover = data.Turnover;
-                    round.WinLoss = data.WinLoss;
+                    round.WinLoss = (data.WinLoss ?? 0).Negate();
                     round.TieBetAdjustment = data.TieBetAdjustment;
                     round.ClientStatus = data.ClientStatus;
 
@@ -117,7 +117,7 @@ namespace TGS.Services.GameOperations.Data
                             round.SettleAmount = data.SettleAmount;
                             round.Commission = data.Commission;
                             round.Turnover = data.Turnover;
-                            round.WinLoss = data.WinLoss;
+                            round.WinLoss = (data.WinLoss ?? 0).Negate();
                             round.TieBetAdjustment = data.TieBetAdjustment;
                             round.ClientStatus = data.ClientStatus;
 
