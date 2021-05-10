@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using GameProviders.Repositories;
-using GameProviders.Repositories.Models.GameProviderFundTransferTransaction;
 using TGS.Apis.TgsApi.Models.Interfaces;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
+using TGS.GameProviders.Repositories;
+using TGS.GameProviders.Repositories.Models.GameProviderFundTransferTransaction;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Services.WalletService;

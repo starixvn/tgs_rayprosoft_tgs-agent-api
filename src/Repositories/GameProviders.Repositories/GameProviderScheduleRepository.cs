@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GameProviders.Repositories.Models;
-using GameProviders.Repositories.Options;
+using TGS.GameProviders.Repositories.Options;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
+using TGS.GameProviders.Repositories.Models;
 
-namespace GameProviders.Repositories
+namespace TGS.GameProviders.Repositories
 {
     public interface IGameProviderScheduleRepository
     {

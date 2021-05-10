@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GameProviders.Repositories;
+using TGS.GameProviders.Repositories;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
@@ -11,7 +10,6 @@ using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
-using TGS.Services.PluggableServices.Models;
 using TGS.Services.WalletService;
 using TGS.Shared.Game.ApiClients.KY;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TGS.Core.Models.Enums;
 
-namespace GameProviders.Repositories.Models.GameProviderFundTransferTransaction
+namespace TGS.GameProviders.Repositories.Models.GameProviderFundTransferTransaction
 {
     public record GameProviderFundTransferTransactionUpdateRequest
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace GameProviders.Repositories.Models
+namespace TGS.GameProviders.Repositories.Models
 {
     public class GameProviderSchedule
     {

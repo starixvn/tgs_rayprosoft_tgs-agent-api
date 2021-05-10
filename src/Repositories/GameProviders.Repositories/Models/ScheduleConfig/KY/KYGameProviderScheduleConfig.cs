@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GameProviders.Repositories.Models.ScheduleConfig.KY
+namespace TGS.GameProviders.Repositories.Models.ScheduleConfig.KY
 {
     public record KYGameProviderScheduleConfig
     {

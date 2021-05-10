@@ -1,7 +1,6 @@
 ﻿using System;
-using GameProviders.Repositories;
-using GameProviders.Repositories.Options;
-using Microsoft.Extensions.DependencyInjection;
+using TGS.GameProviders.Repositories;
+using TGS.GameProviders.Repositories.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

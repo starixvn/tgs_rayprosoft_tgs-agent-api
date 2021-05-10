@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using GameProviders.Repositories.Models.GameProviderFundTransferTransaction;
-using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
+using TGS.GameProviders.Repositories.Models.GameProviderFundTransferTransaction;
 
-namespace GameProviders.Repositories
+namespace TGS.GameProviders.Repositories
 {
     public interface IGameProviderFundTransferTransactionRepository
     {

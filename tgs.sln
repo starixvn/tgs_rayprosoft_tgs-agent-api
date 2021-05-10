@@ -167,11 +167,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerBucket.Core", "src\Se
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PlayerBucket.Repositories", "src\Repositories\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj", "{9C2B8455-403C-4156-9541-380AB5C12FAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameProviders.Repositories", "GameProviders.Repositories\GameProviders.Repositories.csproj", "{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TgsTransaction.Repositories", "src\Repositories\TgsTransaction.Repositories\TgsTransaction.Repositories.csproj", "{90604ADD-6332-4F16-BA7E-E61E60E162FA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TgsTransaction.Core", "src\Services\TgsTransaction.Core\TgsTransaction.Core.csproj", "{F2D3B83D-620B-48D7-8A0C-7F2DA02435D1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameProviders.Repositories", "src\Repositories\GameProviders.Repositories\GameProviders.Repositories.csproj", "{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -403,12 +403,6 @@ Global
 		{9C2B8455-403C-4156-9541-380AB5C12FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C2B8455-403C-4156-9541-380AB5C12FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C2B8455-403C-4156-9541-380AB5C12FAA}.Release|Any CPU.Build.0 = Release|Any CPU
-<<<<<<< HEAD
-		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058}.Release|Any CPU.Build.0 = Release|Any CPU
-=======
 		{90604ADD-6332-4F16-BA7E-E61E60E162FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{90604ADD-6332-4F16-BA7E-E61E60E162FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90604ADD-6332-4F16-BA7E-E61E60E162FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -417,7 +411,10 @@ Global
 		{F2D3B83D-620B-48D7-8A0C-7F2DA02435D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2D3B83D-620B-48D7-8A0C-7F2DA02435D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2D3B83D-620B-48D7-8A0C-7F2DA02435D1}.Release|Any CPU.Build.0 = Release|Any CPU
->>>>>>> develop
+		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -483,15 +480,12 @@ Global
 		{D656E107-C826-483E-97EA-C25C95607CBF} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 		{7BCE28FB-515A-4558-A0C3-B20A454906E2} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 		{9C2B8455-403C-4156-9541-380AB5C12FAA} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
-<<<<<<< HEAD
-		{C6F17396-E3CF-4BC0-AA75-DBBEBBA7C058} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
-=======
 		{90604ADD-6332-4F16-BA7E-E61E60E162FA} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 		{F2D3B83D-620B-48D7-8A0C-7F2DA02435D1} = {2D13A664-6549-483A-9659-22362B2C1DE9}
->>>>>>> develop
+		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 		RESX_TaskErrorCategory = Message
+		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 	EndGlobalSection
 EndGlobal
