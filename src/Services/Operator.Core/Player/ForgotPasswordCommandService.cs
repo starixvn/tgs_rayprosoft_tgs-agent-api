@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Core.DataServices.Tgs;
-using TGS.Services.Operator.Properties;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Player
@@ -28,11 +27,11 @@ namespace TGS.Services.Operator.Player
         public async ValueTask<string> GetAsync(ForgotPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var player = _tgsRepository.Players.AsQueryable()
-                .Where(player => player.PhoneAuthentication == true && player.Phone == command.Phone)
+                .Where(player => player.Email == command.Email)
                 .FirstOrDefault();
 
             if (player == null)
-                throw new PlayerNotFoundException(command.Phone);
+                throw new PlayerNotFoundException(command.Email);
 
             var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
                 .RetryAsync(5)
@@ -54,13 +53,7 @@ namespace TGS.Services.Operator.Player
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            var shortMessage = string.Format(
-                Resources.ResourceManager.GetString(nameof(Resources.ForgotPasswordMessage), command.CultureInfo)!,
-                saveResult.ValidateCode);
-
-            await _validateCodeOperator
-                .SendMessageAsync(player.Phone, shortMessage, player.DefaultWalletCurrencyCode, player.BrandId)
-                .ConfigureAwait(false);
+            await _validateCodeOperator.SendEmailAsync(command.CultureInfo, player.Email, saveResult.ValidateCode);
 
             return saveResult.Token;
         }
