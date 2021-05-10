@@ -156,7 +156,7 @@ namespace TGS.Services.GameOperations.Data
 
             var transactionResult = await _transactionManager.ExecuteTransactionAsync(
                     _repoFactory,
-                    IsolationLevel.RepeatableRead,
+                    IsolationLevel.ReadCommitted,
                     externalTransactionIds,
                     async r => await _processor.ExecuteAsync(new()
                     {

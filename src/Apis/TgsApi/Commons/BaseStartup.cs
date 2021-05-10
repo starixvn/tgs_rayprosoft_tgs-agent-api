@@ -98,7 +98,7 @@ namespace TGS.Apis.TgsApi.Commons
                             var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
                             var feature = sp.GetRequiredService<IFeatureManager>();
-                            var isFeatureEnabled = !gpCode.IsNullOrEmpty() && await feature.IsEnabledAsync(gpCode);
+                            var isFeatureEnabled = gpCode.IsNotNullOrEmpty() && await feature.IsEnabledAsync(gpCode);
 
                             return new Dictionary<string, object>
                             {

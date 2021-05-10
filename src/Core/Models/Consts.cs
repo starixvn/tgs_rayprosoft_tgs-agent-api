@@ -57,6 +57,7 @@ namespace TGS.Core.Models
             public const string Habanero = "HABA";
             public const string PragmaticPlay = "PP";
             public const string AsiaGaming = "AG";
+            public const string Saba = "SABA";
         }
 
         public static class EnvironmentVariable

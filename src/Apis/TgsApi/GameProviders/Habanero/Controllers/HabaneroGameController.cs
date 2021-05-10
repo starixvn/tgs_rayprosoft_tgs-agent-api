@@ -18,7 +18,7 @@ using TGS.Shared.Game.Models.Habanero.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Habanero.Controllers
 {
-    [Route("api/provider")]
+    [Route("api/haba")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
