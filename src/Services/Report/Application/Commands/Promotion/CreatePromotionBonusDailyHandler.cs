@@ -26,21 +26,21 @@ namespace TGS.Services.Report.Application.Commands.Promotion
         CreatePromotionBonusDailyQueryHandler : Handler<CreatePromotionBonusDailyRequest,
             MessageResponse>
     {
-        private readonly IPlayerBucketService _playerBucketService;
+        private readonly IPlayerBucketRepository _playerBucketService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly ITgsPlayerService _playerService;
-        private readonly IPromotionBonusService _promotionBonusService;
+        private readonly IPromotionBonusRepository _promotionBonusService;
         private readonly ITgsPromotionService _promotionService;
-        private readonly ITgsTransaction _transaction;
+        private readonly ITgsTransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public CreatePromotionBonusDailyQueryHandler(IPromotionBonusService promotionBonusService,
+        public CreatePromotionBonusDailyQueryHandler(IPromotionBonusRepository promotionBonusService,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             ITgsPlayerService playerService,
             ITgsPromotionService promotionService,
-            IPlayerBucketService playerBucketService,
+            IPlayerBucketRepository playerBucketService,
             IWalletRepository walletRepository,
-            ITgsTransaction transaction,
+            ITgsTransactionRepository transactionRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _promotionBonusService = promotionBonusService;
@@ -49,7 +49,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             _playerBucketService = playerBucketService;
             _walletRepository = walletRepository;
             _playerService = playerService;
-            _transaction = transaction;
+            _transactionRepository = transactionRepository;
         }
 
         public override async Task<MessageResponse> Handle(CreatePromotionBonusDailyRequest request,
@@ -174,7 +174,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 });
             }
 
-            await _transaction.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
+            await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
 
             return CreateValidResponse<MessageResponse>();
         }

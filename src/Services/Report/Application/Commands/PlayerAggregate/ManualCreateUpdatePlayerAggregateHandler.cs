@@ -20,12 +20,12 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
         private readonly IPlayerAggregateService _playerAggregateService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly IRoundAggregateService _roundAggregateService;
-        private readonly ITransactionManager _transactionManager;
+        private readonly SystemTransactionManager _transactionManager;
 
         public ManualCreateUpdatePlayerAggregateHandler(IPlayerAggregateService playerAggregateService,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             IRoundAggregateService roundAggregateService,
-            ITransactionManager transactionManager,
+            SystemTransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _playerAggregateService = playerAggregateService;
@@ -73,7 +73,7 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                     0, 0, result.Offset).AddHours(1);
 
                 var response = await _transactionManager.ExecuteTransactionAsync(
-                    () => _playerAggregateService.Repository,
+                    _playerAggregateService.Repository,
                     IsolationLevel.ReadCommitted, id,
                     async _ =>
                     {

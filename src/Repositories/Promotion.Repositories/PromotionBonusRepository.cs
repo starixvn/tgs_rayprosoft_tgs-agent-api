@@ -9,18 +9,18 @@ using TGS.Services.Promotion.Core.Models.PromotionBonus;
 
 namespace Promotion.Repositories
 {
-    public class PromotionBonusService : BaseRepositoryOperations<ITgsRepository>, IPromotionBonusService
+    public class PromotionBonusRepository : BaseRepositoryOperations<ITgsRepository>, IPromotionBonusRepository
     {
         private readonly ITgsRepository _repository;
 
-        public PromotionBonusService(ITgsRepository repository) : base(repository)
+        public PromotionBonusRepository(ITgsRepository repository) : base(repository)
         {
             _repository = repository;
         }
 
-        ITgsRepository IPromotionBonusService.Repository => _repository;
+        ITgsRepository IPromotionBonusRepository.Repository => _repository;
 
-        Task IPromotionBonusService.CreatePromotionBonusAsync(PromotionBonusModel[] models) =>
+        Task IPromotionBonusRepository.CreatePromotionBonusAsync(PromotionBonusModel[] models) =>
             CreateEntitiesAsync(models.Select(model => new PromotionBonus
             {
                 Id = model.Id,
@@ -44,17 +44,17 @@ namespace Promotion.Repositories
                 }).ToHashSet()
             }).ToArray());
 
-        IQueryable<PromotionPlayer> IPromotionBonusService.GetPromotionBonusPlayersQueries(
+        IQueryable<PromotionPlayer> IPromotionBonusRepository.GetPromotionBonusPlayersQueries(
             Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>> preQuery, bool tracking)
             =>
                 GetQueriesAsync(preQuery, tracking);
 
-        IQueryable<PromotionBonus> IPromotionBonusService.GetPromotionBonusQueries(
+        IQueryable<PromotionBonus> IPromotionBonusRepository.GetPromotionBonusQueries(
             Func<IQueryable<PromotionBonus>, IQueryable<PromotionBonus>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        Task IPromotionBonusService.UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players) =>
+        Task IPromotionBonusRepository.UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players) =>
             UpdateEntitiesAsync(players);
     }
 }

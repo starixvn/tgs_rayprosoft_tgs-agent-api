@@ -7,7 +7,7 @@ using TGS.Services.Promotion.Core.Models.PromotionBonus;
 
 namespace TGS.Services.Promotion.Core
 {
-    public interface IPromotionBonusService
+    public interface IPromotionBonusRepository
     {
         ITgsRepository Repository { get; }
 

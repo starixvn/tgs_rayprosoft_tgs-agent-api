@@ -11,26 +11,27 @@ using TGS.Services.Promotion.Core.Models.Promotion;
 
 namespace Promotion.Repositories
 {
-    public class PromotionParticipantService : BaseRepositoryOperations<ITgsRepository>, IPromotionParticipantService
+    public class PromotionParticipantRepository : BaseRepositoryOperations<ITgsRepository>,
+        IPromotionParticipantRepository
     {
         private readonly ITgsRepository _repository;
 
-        public PromotionParticipantService(ITgsRepository tgsRepository) : base(
+        public PromotionParticipantRepository(ITgsRepository tgsRepository) : base(
             tgsRepository)
         {
             _repository = tgsRepository;
         }
 
-        Task<bool> IPromotionParticipantService.ExistsAsync(
+        Task<bool> IPromotionParticipantRepository.ExistsAsync(
             Expression<Func<PromotionParticipant, bool>> predicate) => ExistsAsync(predicate);
 
-        IQueryable<PromotionParticipant> IPromotionParticipantService.GetPromotionParticipantQueries(
+        IQueryable<PromotionParticipant> IPromotionParticipantRepository.GetPromotionParticipantQueries(
             Func<IQueryable<PromotionParticipant>,
                 IQueryable<PromotionParticipant>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        async Task IPromotionParticipantService.CreatePromotionParticipantAsync(Guid promotionId, string playerCode)
+        async Task IPromotionParticipantRepository.CreatePromotionParticipantAsync(Guid promotionId, string playerCode)
         {
             var promotionParticipant =
                 new PromotionParticipant {PlayerCode = playerCode, PromotionId = promotionId};
@@ -38,7 +39,7 @@ namespace Promotion.Repositories
             await CreateEntityAsync(promotionParticipant);
         }
 
-        Task<PromotionParticipant> IPromotionParticipantService.GetPromotionParticipantAsync(
+        Task<PromotionParticipant> IPromotionParticipantRepository.GetPromotionParticipantAsync(
             Expression<Func<PromotionParticipant, bool>> predicate,
             Func<IQueryable<PromotionParticipant>,
                 IQueryable<PromotionParticipant>> preQuery) =>

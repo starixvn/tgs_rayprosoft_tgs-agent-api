@@ -38,10 +38,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
     {
         private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _repository;
-        private readonly ITransactionManager _transactionManager;
+        private readonly SystemTransactionManager _transactionManager;
 
         public AgentService(ITgsRepository repository, IPasswordHandler passwordHandler,
-            ITransactionManager transactionManager) : base(repository)
+            SystemTransactionManager transactionManager) : base(repository)
         {
             _passwordHandler = passwordHandler;
             _repository = repository;
@@ -131,7 +131,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
-            return _transactionManager.ExecuteTransactionAsync(() => _repository,
+            return _transactionManager.ExecuteTransactionAsync(_repository,
                 IsolationLevel.ReadCommitted, id,
                 async _ =>
                 {
