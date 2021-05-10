@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Services\Bucket\PlayerBucket.Core.csproj" />
+    <ProjectReference Include="..\..\Services\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 
 </Project>

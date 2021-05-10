@@ -7,7 +7,7 @@ using TGS.Services.Promotion.Core.Models.Promotion;
 
 namespace TGS.Services.Promotion.Core
 {
-    public interface IPromotionService
+    public interface IPromotionRepository
     {
         Task<TGS.Core.DataServices.Tgs.Models.Promotion> GetPromotionAsync(
             Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate,

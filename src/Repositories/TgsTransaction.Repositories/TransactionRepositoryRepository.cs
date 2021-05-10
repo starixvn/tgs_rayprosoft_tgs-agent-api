@@ -6,17 +6,17 @@ using TGS.Services.TgsTransaction.Core;
 
 namespace Transaction.Repositories
 {
-    public class TransactionService : BaseRepositoryOperations<ITgsRepository>, ITgsTransaction
+    public class TransactionRepositoryRepository : BaseRepositoryOperations<ITgsRepository>, ITgsTransactionRepository
     {
         private readonly ITgsRepository _repository;
 
-        public TransactionService(ITgsRepository tgsRepository) : base(
+        public TransactionRepositoryRepository(ITgsRepository tgsRepository) : base(
             tgsRepository)
         {
             _repository = tgsRepository;
         }
 
-        Task ITgsTransaction.CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotions) =>
+        Task ITgsTransactionRepository.CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotions) =>
             CreateEntitiesAsync(transactionPromotions);
     }
 }

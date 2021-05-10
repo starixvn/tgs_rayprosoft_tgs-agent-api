@@ -6,7 +6,7 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.Promotion.Core
 {
-    public interface IPromotionParticipantService
+    public interface IPromotionParticipantRepository
     {
         Task<PromotionParticipant> GetPromotionParticipantAsync(Expression<Func<PromotionParticipant, bool>> predicate,
             Func<IQueryable<PromotionParticipant>,

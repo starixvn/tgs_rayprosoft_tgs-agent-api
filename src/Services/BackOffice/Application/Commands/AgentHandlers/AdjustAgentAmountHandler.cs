@@ -21,17 +21,17 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         private readonly IAgentService _agentService;
         private readonly IAgentWalletRepository _agentWalletRepository;
         private readonly IPlayerService _playerService;
-        private readonly Func<ITgsRepository> _repoFactory;
-        private readonly ITransactionManager _transactionManager;
+        private readonly ITgsRepository _repository;
+        private readonly SystemTransactionManager _transactionManager;
         private readonly IWalletRepository _walletRepository;
 
 
         public AdjustAgentAmountHandler(IAgentService agentService,
             IAgentWalletRepository agentWalletRepository,
             IWalletRepository walletRepository,
-            ITransactionManager transactionManager,
+            SystemTransactionManager transactionManager,
             IPlayerService playerService,
-            Func<ITgsRepository> repoFactory,
+            ITgsRepository repository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
@@ -39,7 +39,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             _walletRepository = walletRepository;
             _transactionManager = transactionManager;
             _playerService = playerService;
-            _repoFactory = repoFactory;
+            _repository = repository;
         }
 
         public override async Task<MessageResponse> Handle(CreateAgentAdjustmentRequest request,
@@ -82,10 +82,9 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.BalanceMustGreaterThanZero);
             }
 
-            await _transactionManager.ExecuteTransactionAsync(_repoFactory,
+            await _transactionManager.ExecuteTransactionAsync(_repository,
                 IsolationLevel.ReadCommitted,
-                Guid.NewGuid().ToString(),
-                async repo =>
+                Guid.NewGuid().ToString(), async repo =>
                 {
                     await _agentWalletRepository.ExchangeAsync(agent.BrandId, agent.DefaultWalletId, agent.Id,
                         TransactionTypes.Adjust,

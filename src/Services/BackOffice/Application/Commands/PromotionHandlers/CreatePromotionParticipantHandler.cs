@@ -9,9 +9,9 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 {
     public class CreatePromotionParticipantHandler : Handler<CreatePromotionParticipantRequest, MessageResponse>
     {
-        private readonly IPromotionParticipantService _promotionParticipantService;
+        private readonly IPromotionParticipantRepository _promotionParticipantService;
 
-        public CreatePromotionParticipantHandler(IPromotionParticipantService promotionParticipantService,
+        public CreatePromotionParticipantHandler(IPromotionParticipantRepository promotionParticipantService,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _promotionParticipantService = promotionParticipantService;

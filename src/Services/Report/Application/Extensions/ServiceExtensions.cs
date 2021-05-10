@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Extensions
@@ -22,7 +21,6 @@ namespace TGS.Services.Report.Application.Extensions
             services.AddTransient<IPlayerGameTypeAggregateService, PlayerGameTypeAggregateService>();
             services.AddTransient<IRoundAggregateService, RoundAggregateService>();
             services.AddTransient<IPlayerRebateService, PlayerRebateService>();
-            services.AddTransient<ITransactionManager, TransactionManager>();
 
             services.AddTgsTransactionRepositoriesServices();
 
