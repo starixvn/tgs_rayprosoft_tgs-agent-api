@@ -25,7 +25,7 @@ namespace TGS.Wallet.Repositories
         }
 
         public async ValueTask<Guid> ExchangeAsync(Guid brandId, Guid walletId, Guid agentId,
-            TransactionTypes transactionType, decimal amount)
+            TransactionTypes transactionType, decimal amount, string? description)
         {
             const string sql = "dbo.agent_wallet_update_wallet_balance";
             var updatedOn = DateTimeOffset.UtcNow;
@@ -48,7 +48,7 @@ namespace TGS.Wallet.Repositories
                                 {":updated_on", updatedOn}
                             }).ConfigureAwait(false);
 
-                        await _tgsRepository.Transactions
+                        await _tgsRepository.AgentTransactions
                             .AddAsync(new()
                             {
                                 Id = transactionId,
@@ -67,6 +67,7 @@ namespace TGS.Wallet.Repositories
                                     TransactionTypes.Promotion  => TransactionType.Promotion,
                                     _                           => TransactionType.Other
                                 },
+                                Description = description,
                                 RecordedOn = DateTimeOffset.Now
                             })
                             .ConfigureAwait(false);

@@ -9,7 +9,7 @@ namespace TGS.Services.BackOffice.Application.Models.AgentAdjust
     {
         public Guid BrandId { get; set; }
         public Guid AgentId { get; set; }
-        public AdjustType AdjustType { get; set; }
+        public AdjustmentType AdjustmentType { get; set; }
         public TransactionType TransactionType { get; set; }
         public decimal Amount { get; set; }
         public string Remark { get; set; }

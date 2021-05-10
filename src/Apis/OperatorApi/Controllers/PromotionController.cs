@@ -9,7 +9,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -30,7 +29,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<PagedResponse<PromotionModel>> GetPromotionsAsync(
+        public async ValueTask<PagingResponse<PromotionModel>> GetPromotionsAsync(
             [FromQuery] PagingRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -46,7 +45,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };
-            return await _client.GetPromotionsAsync(promotionsRequest);
+            var response = await _client.GetPromotionsAsync(promotionsRequest);
+
+            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
         }
 
         [HttpPost("{id}/join")]
@@ -54,10 +55,12 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<MessageResponse> JoinPromotionAsync(Guid id)
+        public async ValueTask<JoinPromotionResponse> JoinPromotionAsync(Guid id)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            return await _client.JoinAsync(new(id, playerTokenData.PlayerCode));
+            var response = await _client.JoinAsync(new(id, playerTokenData.PlayerCode));
+
+            return new() {Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty};
         }
     }
 }

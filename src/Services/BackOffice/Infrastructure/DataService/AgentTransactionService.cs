@@ -40,7 +40,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 async _ =>
                 {
                     var wallet = agent.Wallets.First(x => x.Id == agent.DefaultWalletId);
-                    var amount = request.AdjustType == AdjustType.Add
+                    var amount = request.AdjustmentType == AdjustmentType.Add
                         ? wallet.Balance + request.Amount
                         : wallet.Balance - request.Amount;
 

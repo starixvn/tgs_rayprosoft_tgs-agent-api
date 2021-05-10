@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -8,7 +9,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Round;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -31,7 +31,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagedResponse<RoundModel>> GetRoundsAsync(
+        public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
             [FromQuery] GetPlayerRoundReportRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -50,7 +50,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ShowAll = request.ShowAll
             };
 
-            return await _client.GetRoundsAsync(roundsRequest);
+            var response = await _client.GetRoundsAsync(roundsRequest);
+
+            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<RoundModel>()};
         }
     }
 }
