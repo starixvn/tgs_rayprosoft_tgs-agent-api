@@ -74,7 +74,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     null,
                     null,
                     DateTimeOffset.UtcNow,
-DateTimeOffset.UtcNow)));
+                    DateTimeOffset.UtcNow)));
             moqPlayerService
                 .Setup(fake => fake.GetPlayerAsync(
                     It.IsAny<Expression<Func<Player, bool>>>(),
@@ -100,7 +100,8 @@ DateTimeOffset.UtcNow)));
                     It.Is<Guid>(x => x == walletId),
                     It.Is<string>(x => x == "ThisIsPlayerCode"),
                     It.Is<TransactionTypes>(x => x == TransactionTypes.Withdrawal),
-                    It.Is<decimal>(x => x == 1000M)),
+                    It.Is<decimal>(x => x == 1000M),
+                    It.IsAny<string>()),
                 Times.Exactly(1));
         }
 
