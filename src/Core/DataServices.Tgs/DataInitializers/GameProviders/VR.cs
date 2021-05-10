@@ -49,6 +49,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             short IGameProvider.UniqueId => 11;
 
+            bool IGameProvider.SupportTestPlayer => false;
+
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new VRConfiguration

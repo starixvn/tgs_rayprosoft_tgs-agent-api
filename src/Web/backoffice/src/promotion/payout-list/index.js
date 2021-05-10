@@ -30,7 +30,6 @@ import { GameTypeLabel } from "../../game/GameType"
 import { useGameTypeGroupList } from "../../game/client"
 import { formatNumber } from "../../number/format"
 import { usePromotionPayoutList, useSendPromotionPayout } from "./client"
-import { PromotionStatusSelect } from "../PromotionStatus"
 import {
     PromotionTypeGroupSelect,
     PromotionTypeLabel,
@@ -76,20 +75,22 @@ const Body = () => {
     )
 }
 
+const includePayout = (record = {}, list = []) => {
+    return !!list.find(({ id }) => id === record?.id)
+}
+
 const BodyContent = ({ brandId }) => {
     let todayRange = today()
     let [batchPayouts, setBatchPayouts] = useState([])
 
-    const appendBatchPayout = (id) => {
-        if (!batchPayouts.includes(id)) {
-            setBatchPayouts((batchPayouts = []) => [...batchPayouts, id])
+    const appendBatchPayout = (record) => {
+        if (!includePayout(record?.id, batchPayouts)) {
+            setBatchPayouts((batchPayouts = []) => [...batchPayouts, record])
         }
     }
 
-    const dropBatchPayout = (id) => {
-        let payouts = batchPayouts.filter(
-            (batchPayoutId) => batchPayoutId != id
-        )
+    const dropBatchPayout = (record) => {
+        let payouts = batchPayouts.filter((payout) => payout.id != record?.id)
         setBatchPayouts(payouts)
     }
 
@@ -201,10 +202,19 @@ const BodyContent = ({ brandId }) => {
                     <Button
                         isLoading={isLoadingSendPromotionPayout}
                         onClick={() => {
-                            let data = batchPayouts.map((record) =>
-                                clone(record)
+                            let players = batchPayouts.map(
+                                ({
+                                    promotionBonusId,
+                                    playerCode,
+                                    ...record
+                                }) => {
+                                    return {
+                                        promotionBonusId,
+                                        playerCode
+                                    }
+                                }
                             )
-                            setSubmit(data)
+                            setSubmit({ players })
                         }}
                     >
                         <Trans zh="批量派发" en="Batch Payout" />
@@ -216,8 +226,17 @@ const BodyContent = ({ brandId }) => {
                 <AlertDialog
                     {...error}
                     onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
+                        if (sendPromotionPayoutError) {
+                            resetBatchPayout()
+                            deleteSendPromotionPayoutCache()
+                            mutateSendPromotionPayout(
+                                { data: undefined },
+                                false
+                            )
+                        } else if (promotionListError) {
+                            deleteCache()
+                            mutate({ data: undefined }, false)
+                        }
                     }}
                 />
             )}
@@ -302,13 +321,10 @@ const useColumns = ({
                             onChange={(event) => {
                                 let checked = event.target.checked
                                 if (checked) {
-                                    let ids = items.map(({ id }) => id)
-                                    /*
-                                    let ids = items.map(
-                                        ({ promotionId }) => promotionId
+                                    let records = items.map((promotion) =>
+                                        clone(promotion)
                                     )
-                                    */
-                                    setBatchPayouts(ids)
+                                    setBatchPayouts(records)
                                 } else {
                                     resetBatchPayout()
                                 }
@@ -317,21 +333,17 @@ const useColumns = ({
                     )
                 },
                 disableSortBy: true,
-                Cell: ({ value }) => {
-                    // let promotionId = value?.promotionId
-                    let promotionId = value?.id
-                    let checked = !!batchPayouts.find(
-                        (id) => id === promotionId
-                    )
+                Cell: ({ value: record }) => {
+                    let checked = includePayout(record, batchPayouts)
                     return (
                         <Checkbox
                             checked={checked}
                             onChange={(event) => {
                                 let checked = event.target.checked
                                 if (checked) {
-                                    appendBatchPayout(promotionId)
+                                    appendBatchPayout(record)
                                 } else {
-                                    dropBatchPayout(promotionId)
+                                    dropBatchPayout(record)
                                 }
                             }}
                         />
@@ -344,8 +356,8 @@ const useColumns = ({
                 disableSortBy: true
             }),
             textColumn({
-                accessor: "name",
-                Header: <Trans zh="活动名称" en="promotionName " />,
+                accessor: "promotionName",
+                Header: <Trans zh="活动名称" en="Promotion Name " />,
                 disableSortBy: true
             }),
             textColumn({
@@ -366,31 +378,30 @@ const useColumns = ({
                 Cell: ({ value }) => <PromotionTypeLabel value={value} />
             }),
             textColumn({
-                id: "promotionTime",
-                accessor: (row) => row,
+                id: "createdOn",
+                accessor: "createdOn",
                 Header: <Trans zh="生成时间" en="Created Time" />,
                 disableSortBy: true,
                 Cell: ({ value }) => (
                     <FormatHourMinuteSecondDayMonthYear
-                        value={value?.from}
+                        value={value}
                         placeholder="-"
                     />
                 )
             }),
             textColumn({
-                id: "sentTime",
-                accessor: (row) => row,
+                accessor: "sentOn",
                 Header: <Trans zh="派发时间" en="Sent On" />,
                 disableSortBy: true,
                 Cell: ({ value }) => (
                     <FormatHourMinuteSecondDayMonthYear
-                        value={value?.from}
+                        value={value}
                         placeholder="-"
                     />
                 )
             }),
             textColumn({
-                accessor: "amount",
+                accessor: "bonusAmount",
                 Header: <Trans zh="领取金额" en="Payout" />,
                 disableSortBy: true,
                 Cell: ({ value }) => <FormattedNumberDecimal value={value} />

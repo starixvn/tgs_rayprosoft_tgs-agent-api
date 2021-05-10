@@ -6,7 +6,8 @@ import {
     useDelete
 } from "../../client"
 
-let API = "/api/promotion"
+// let API = "/api/promotion"
+let API = "/api/PromotionDispatch"
 
 export const usePromotionPayoutList = (searchParams) => {
     let url = searchParams ? urlWith(searchParams, API) : ""
@@ -15,5 +16,5 @@ export const usePromotionPayoutList = (searchParams) => {
 
 export const useSendPromotionPayout = (formData) => {
     let url = formData ? `${API}` : ""
-    return usePutData(url, formData)
+    return usePostData(url, formData)
 }

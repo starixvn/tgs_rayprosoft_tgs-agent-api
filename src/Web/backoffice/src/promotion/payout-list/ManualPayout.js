@@ -79,23 +79,26 @@ const ManualPayoutDialog = ({ brandId, record, onSubmitted, dialog }) => {
         en: "Manual Payout"
     })
 
-    let [promotionId, setPromotionId] = useState()
+    let [formData, setSubmit] = useState()
     let {
         isLoading,
         result,
         error,
         mutate,
         deleteCache
-    } = useSendPromotionPayout(promotionId)
+    } = useSendPromotionPayout(formData)
 
     const onSubmit = () => {
-        setPromotionId(record?.promotionId)
+        let players = [record]
+        setSubmit({
+            players
+        })
     }
 
     const reset = () => {
         deleteCache()
         mutate(undefined, false)
-        setPromotionId(undefined)
+        setSubmit(undefined)
     }
 
     return (

@@ -1,4 +1,4 @@
-﻿using TGS.Services.Wallet.Configuration;
+﻿using TGS.Services.WalletService.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

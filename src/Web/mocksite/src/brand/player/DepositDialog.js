@@ -83,9 +83,9 @@ export const DepositDialog = ({
     }, [error])
 
     let paymentOptions =
-        paymentResult?.data?.map?.(({ channelName, id }) => {
+        paymentResult?.data?.map?.(({ channelname, id }) => {
             return {
-                label: channelName,
+                label: channelname,
                 value: id
             }
         }) ?? []

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.BackOffice.Domain.Enums;
+using TGS.Services.Payment;
 
 namespace TGS.BackOffice.Repositories
 {
@@ -49,7 +49,7 @@ namespace TGS.BackOffice.Repositories
             return query.SingleAsync();
         }
 
-        public async ValueTask SignOffDepositFormAsync(Guid formId, ReviewStatus reviewStatus)
+        public async ValueTask SignOffDepositFormAsync(Guid formId, ReviewStatus reviewStatus, string remark)
         {
             var formData = await _tgsRepository.DepositForms
                 .FindAsync(formId)
@@ -61,6 +61,7 @@ namespace TGS.BackOffice.Repositories
                 ReviewStatus.Reject => 7000,
                 _ => formData.Status
             };
+            formData.Remark = remark;
             formData.UpdatedOn = DateTimeOffset.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);

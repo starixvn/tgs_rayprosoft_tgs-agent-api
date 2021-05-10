@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Report.Client;
+using TGS.Clients.Report.Client;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Workers.Schedulers.Jobs.Reports
@@ -22,13 +22,13 @@ namespace TGS.Workers.Schedulers.Jobs.Reports
 
         async Task<TgsResponse> IPlayerAggregateReportWorkerService.ExecutionAsync()
         {
-            var response = await _client.CreatePlayerAggregateAsync(new());
+            var response = await _client.CreatePlayerAggregateAsync(new()).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
 
         async Task<TgsResponse> IPlayerAggregateReportWorkerService.ManualExecutionAsync(string date, int hour)
         {
-            var response = await _client.ManualCreatePlayerAggregateAsync(new(date, hour));
+            var response = await _client.ManualCreatePlayerAggregateAsync(new(date, hour)).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
     }

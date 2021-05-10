@@ -25,7 +25,7 @@ root * /usr/share/caddy
 header @static +Cache-Control "no-cache"
 
 @try_files {
-    not path /api/* /healthcheck
+    not path /api/* /global-api/* /healthcheck
     file {
         try_files {path} /index.html
     }

@@ -33,6 +33,30 @@ namespace TGS.Apis.TgsApi.Commons.Controllers
                 .ConfigureAwait(false);
 
         [HttpPost]
+        [Route("player/balance")]
+        public async ValueTask<GameProviderWalletGetBalanceResponse> GetBalanceAsync(
+            [FromServices] Func<string, IGameProviderWalletAction> walletActionFactory,
+            GameProviderWalletGetBalanceRequest request) =>
+            await walletActionFactory(request.GameProviderCode).GetBalanceAsync(request)
+        .ConfigureAwait(false);
+
+        [HttpPost]
+        [Route("player/fundout")]
+        public async ValueTask<GameProviderWalletFundResponse> FundOutPlayerAsync(
+            [FromServices] Func<string, IGameProviderWalletAction> walletActionFactory,
+            GameProviderWalletFundRequest request) =>
+            await walletActionFactory(request.GameProviderCode).FundOutAsync(request)
+            .ConfigureAwait(false);
+
+        [HttpPost]
+        [Route("player/fundin")]
+        public async ValueTask<GameProviderWalletFundResponse> FundInPlayerAsync(
+            [FromServices] Func<string, IGameProviderWalletAction> walletActionFactory,
+            GameProviderWalletFundRequest request) =>
+            await walletActionFactory(request.GameProviderCode).FundInAsync(request)
+            .ConfigureAwait(false);
+
+        [HttpPost]
         [Route("player/kick")]
         public async ValueTask<PlayerKickResponse> KickPlayerAsync(
             [FromServices] IGameProviderOperations gameProviderOperations,

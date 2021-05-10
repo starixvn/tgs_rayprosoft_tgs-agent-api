@@ -8,7 +8,7 @@ import {
 
 let API = "/api/deposit"
 
-export const usePlayerDepositFormList = (brandId, searchParams, options) => {
+export const useFundDepositFormList = (brandId, searchParams, options) => {
     let url =
         brandId && searchParams
             ? urlWith(searchParams, `${API}/${brandId}`)
@@ -16,7 +16,7 @@ export const usePlayerDepositFormList = (brandId, searchParams, options) => {
     return useGet(url, options)
 }
 
-export const usePlayerDepositForm = (brandId, formId, searchParams) => {
+export const useFundDepositForm = (brandId, formId, searchParams) => {
     let url =
         brandId && formId
             ? urlWith(searchParams, `${API}/${brandId}/${formId}`)
@@ -29,7 +29,7 @@ export const usePlayerDepositForm = (brandId, formId, searchParams) => {
     }
 }
 
-export const useVerifyPlayerDepositForm = (brandId, formId, formData) => {
+export const useVerifyFundDepositForm = (brandId, formId, formData) => {
     let url = brandId && formId && formData ? `${API}/${formId}` : ""
 
     return usePostData(url, formData)

@@ -32,10 +32,7 @@ import { GameTypeLabel, useGameTypeGroupLabelOf } from "../../game/GameType"
 import { GameProviderListDialogDisclosure } from "../../game/providers/GameProviderList"
 import { VipLevelListDialogDisclosure } from "../../vip-levels/VipLevelList"
 import { formatNumber } from "../../number/format"
-import {
-    PromotionStatusSelect,
-    PromotionStatusSwitch
-} from "../PromotionStatus"
+import { PromotionStatusSelect, PromotionStatusSwitch } from "./PromotionStatus"
 
 export { Code }
 
@@ -273,7 +270,13 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                     accessor: (row) => row,
                     disableSortBy: true,
                     Cell: ({ value: record }) => {
-                        return <PromotionStatusSwitch value={record?.status} />
+                        return (
+                            <PromotionStatusSwitch
+                                record={record}
+                                value={record?.status}
+                                onSubmitted={mutate}
+                            />
+                        )
                     }
                 })
             )

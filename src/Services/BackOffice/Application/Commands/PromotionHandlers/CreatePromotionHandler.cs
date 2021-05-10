@@ -6,19 +6,19 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Settings;
-using TGS.Services.BackOffice.Application.Models.Promotion;
-using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Services.Promotion.Core;
+using TGS.Services.Promotion.Core.Models.Promotion;
 
 namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 {
     public class CreatePromotionHandler : Handler<CreatePromotionRequest, MessageResponse>
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPromotionService _service;
+        private readonly IPromotionRepository _service;
         private readonly ISettingsService _settingsService;
 
-        public CreatePromotionHandler(IPromotionService service, ISettingsService settingsService,
+        public CreatePromotionHandler(IPromotionRepository service, ISettingsService settingsService,
             IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
@@ -31,7 +31,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
         {
             if (await _service.ExistsAsync(x => x.Name == request.Name))
             {
-                return CreateInvalidResponse<MessageResponse>(Promotion.NameExisted);
+                return CreateInvalidResponse<MessageResponse>(Resources.Promotion.NameExisted);
             }
 
             var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
@@ -40,7 +40,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 
             if (promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {
-                return CreateInvalidResponse<MessageResponse>(Promotion.PromotionTypeNotFound);
+                return CreateInvalidResponse<MessageResponse>(Resources.Promotion.PromotionTypeNotFound);
             }
 
             var promotionType = promotionTypeGroups.SelectMany(x => x.Types)

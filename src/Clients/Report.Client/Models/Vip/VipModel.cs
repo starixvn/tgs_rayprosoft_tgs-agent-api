@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Report.Client.Models.Vip
+namespace TGS.Clients.Report.Client.Models.Vip
 {
     public class VipModel
     {

@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Report.Client;
+using TGS.Clients.Promotion.Client;
 using TGS.Core.Models.Messages;
 
 namespace TGS.Workers.Schedulers.Jobs.Promotion
@@ -12,23 +12,23 @@ namespace TGS.Workers.Schedulers.Jobs.Promotion
 
     public class PromotionSettlementDailyWorkerService : IPromotionSettlementDailyWorkerService
     {
-        private readonly IPromotionSettlementClient _client;
+        private readonly IPromotionBonusClient _client;
 
         public PromotionSettlementDailyWorkerService(
-            IPromotionSettlementClient client)
+            IPromotionBonusClient client)
         {
             _client = client;
         }
 
         async Task<TgsResponse> IPromotionSettlementDailyWorkerService.ExecutionAsync()
         {
-            var response = await _client.CreatePromotionSettleDataDailyAsync(new());
+            var response = await _client.CreatePromotionSettleDataDailyAsync(new()).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
 
         async Task<TgsResponse> IPromotionSettlementDailyWorkerService.ManualExecutionAsync(string date)
         {
-            var response = await _client.CreatePromotionSettleDataDailyAsync(new(date));
+            var response = await _client.CreatePromotionSettleDataDailyAsync(new(date)).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
     }

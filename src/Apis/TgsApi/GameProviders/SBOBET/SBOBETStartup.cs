@@ -53,9 +53,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            const string Route = "/api/provider";
+            const string Route = "/api/sbo";
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            app.UseWhen(context =>
+                {
+                    var path = context.Request.Path;
+
+                    return path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase) &&
+                        path.Value.IgnoreCaseNotContains("batch");
+                },
                 builder =>
                 {
                     builder.UseMiddleware<HandleSBOBETExceptionMiddleware>();

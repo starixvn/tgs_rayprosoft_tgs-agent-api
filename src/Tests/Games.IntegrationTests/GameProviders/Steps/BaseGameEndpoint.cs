@@ -141,7 +141,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 });
         }
 
-        protected async Task<Wallet> GetPlayerWalletAsync(ServiceProvider serviceProvider)
+        protected async Task<Core.DataServices.Tgs.Models.Wallet> GetPlayerWalletAsync(ServiceProvider serviceProvider)
         {
             await using var db = serviceProvider.GetRequiredService<Func<ITgsRepository>>()();
             var playerCode = Get<string>(SR.PlayerCode);

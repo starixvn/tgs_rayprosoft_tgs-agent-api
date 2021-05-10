@@ -2,5 +2,5 @@
 
 namespace TGS.Services.Payment
 {
-    public record PaymentMethodInfo(Guid Id, string Name);
+    public record PaymentMethodInfo(Guid Id, string Name, string BankType);
 }
