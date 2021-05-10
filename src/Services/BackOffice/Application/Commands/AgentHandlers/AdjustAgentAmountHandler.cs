@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -19,29 +20,30 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
     public class AdjustAgentAmountHandler : Handler<CreateAgentAdjustmentRequest, MessageResponse>
     {
         private readonly IAgentService _agentService;
-        private readonly IAgentTransactionService _agentTransactionService;
         private readonly IAgentWalletRepository _agentWalletRepository;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerService _playerService;
-        private readonly Func<ITgsRepository> _repoFactory;
-        private readonly ITransactionManager _transactionManager;
+        private readonly ITgsRepository _repository;
+        private readonly SystemTransactionManager _transactionManager;
         private readonly IWalletRepository _walletRepository;
 
 
-        public AdjustAgentAmountHandler(IAgentService agentService, IAgentTransactionService agentTransactionService,
+        public AdjustAgentAmountHandler(IAgentService agentService,
             IAgentWalletRepository agentWalletRepository,
             IWalletRepository walletRepository,
-            ITransactionManager transactionManager,
+            SystemTransactionManager transactionManager,
             IPlayerService playerService,
-            Func<ITgsRepository> repoFactory,
+            ITgsRepository repository,
+            IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
-            _agentTransactionService = agentTransactionService;
             _agentWalletRepository = agentWalletRepository;
             _walletRepository = walletRepository;
             _transactionManager = transactionManager;
             _playerService = playerService;
-            _repoFactory = repoFactory;
+            _repository = repository;
+            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         public override async Task<MessageResponse> Handle(CreateAgentAdjustmentRequest request,
@@ -54,22 +56,38 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
             }
 
-            var targetAgent = IsTranslateToAgent(request)
+            var targetAgent = IsTransferToAgent(request)
                 ? await _agentService.GetAgentAsync(x => x.Username == request.TargetName)
                 : null;
 
-            if (targetAgent is null)
+            if (IsTransferToAgent(request))
             {
-                return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
+                if (targetAgent is null)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent.TargetAgentNotFound);
+                }
+
+                if (!(targetAgent.ParentAgentId == agent.Id || targetAgent.Id == agent.ParentAgentId))
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent.TargetAgentNotHomologue);
+                }
             }
 
-            var targetPlayer = IsTranslateToPlayer(request)
+            var targetPlayer = IsTransferToPlayer(request)
                 ? await _playerService.GetPlayerAsync(x => x.Username == request.TargetName)
                 : null;
 
-            if (targetPlayer is null)
+            if (IsTransferToPlayer(request))
             {
-                return CreateInvalidResponse<MessageResponse>(Player.NotFound);
+                if (targetPlayer is null)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent.TargetPlayerNotFound);
+                }
+
+                if (targetPlayer.AgentId != agent.Id)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent.TargetPlayerNotUnderAgent);
+                }
             }
 
             var wallet = agent.Wallets.First(x => x.Id == agent.DefaultWalletId);
@@ -79,28 +97,35 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.WalletNotFound);
             }
 
-            if (request.AdjustType == AdjustType.Subtract && wallet.Balance - request.Amount < 0)
+            if (request.AdjustmentType == AdjustmentType.Subtract && wallet.Balance - request.Amount < 0)
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.BalanceMustGreaterThanZero);
             }
 
-            await _transactionManager.ExecuteTransactionAsync(_repoFactory,
+            await _transactionManager.ExecuteTransactionAsync(_repository,
                 IsolationLevel.ReadCommitted,
-                Guid.NewGuid().ToString(),
-                async repo =>
+                Guid.NewGuid().ToString(), async repo =>
                 {
+                    var remark = _jsonSerializationProvider.SerializeToString(new
+                    {
+                        request.TransactionType,
+                        TargetAgent = targetAgent,
+                        TargetPlayer = targetPlayer,
+                        request.Remark
+                    });
+
                     await _agentWalletRepository.ExchangeAsync(agent.BrandId, agent.DefaultWalletId, agent.Id,
                         TransactionTypes.Adjust,
-                        request.AdjustType == AdjustType.Subtract ? -request.Amount : request.Amount);
+                        request.AdjustmentType == AdjustmentType.Subtract ? -request.Amount : request.Amount, remark);
 
-                    if (IsTranslateToAgent(request))
+                    if (IsTransferToAgent(request))
                     {
                         await _agentWalletRepository.ExchangeAsync(targetAgent.BrandId, targetAgent.DefaultWalletId,
                             targetAgent.Id,
                             TransactionTypes.Adjust, request.Amount);
                     }
 
-                    if (IsTranslateToPlayer(request))
+                    if (IsTransferToPlayer(request))
                     {
                         await _walletRepository.ExchangeAsync(targetPlayer.BrandId, targetPlayer.DefaultWalletId,
                             targetPlayer.PlayerCode,
@@ -113,10 +138,12 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             return CreateValidResponse<MessageResponse>();
         }
 
-        private static bool IsTranslateToAgent(CreateAgentAdjustmentRequest request) =>
-            request.AdjustType == AdjustType.Subtract && request.AccountType == AccountType.Agent;
+        private static bool IsTransferToAgent(CreateAgentAdjustmentRequest request) =>
+            request.AdjustmentType == AdjustmentType.Subtract &&
+            request.TransactionType == AdjustmentTransactionType.Transfer && request.AccountType == AccountType.Agent;
 
-        private static bool IsTranslateToPlayer(CreateAgentAdjustmentRequest request) =>
-            request.AdjustType == AdjustType.Subtract && request.AccountType == AccountType.Player;
+        private static bool IsTransferToPlayer(CreateAgentAdjustmentRequest request) =>
+            request.AdjustmentType == AdjustmentType.Subtract &&
+            request.TransactionType == AdjustmentTransactionType.Transfer && request.AccountType == AccountType.Player;
     }
 }

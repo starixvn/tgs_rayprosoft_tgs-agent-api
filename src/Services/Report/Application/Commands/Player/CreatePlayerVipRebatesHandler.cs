@@ -89,20 +89,20 @@ namespace TGS.Services.Report.Application.Commands.Player
                                 .Sum(a => a.Turnover),
                         SportsRebateAmount = x.VipSportsRebatePercentage * list.Where(a =>
                                 a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
-                            .Sum(a => a.Turnover) / 100,
+                            .Sum(a => a.Turnover) / 100M,
                         VirtualSportsTurnover =
                             list.Where(l => l.GameType == GameType.VirtualSports).Sum(a => a.Turnover),
                         VirtualSportsRebateAmount = x.VipVirtualSportsRebatePercentage * list
                             .Where(a => a.GameType == GameType.VirtualSports)
-                            .Sum(a => a.Turnover) / 100,
+                            .Sum(a => a.Turnover) / 100M,
                         LiveDealerTurnover = list.Where(l => l.GameType == GameType.LiveDealer).Sum(a => a.Turnover),
                         LiveDealerRebateAmount = x.VipLiveDealerRebatePercentage * list
                             .Where(a => a.GameType == GameType.LiveDealer)
-                            .Sum(a => a.Turnover) / 100,
+                            .Sum(a => a.Turnover) / 100M,
                         CardGameTurnover = list.Where(l => l.GameType == GameType.CardGame).Sum(a => a.Turnover),
                         CardGameRebateAmount =
                             x.VipCardGameRebatePercentage * list.Where(a => a.GameType == GameType.CardGame)
-                                .Sum(a => a.Turnover) / 100,
+                                .Sum(a => a.Turnover) / 100M,
                         SlotTurnover = list.Where(l =>
                             (l.GameType == GameType.Fishing) | (l.GameType == GameType.Arcade) ||
                             l.GameType == GameType.Slot || l.GameType == GameType.TableGame).Sum(a => a.Turnover),
@@ -110,18 +110,18 @@ namespace TGS.Services.Report.Application.Commands.Player
                             x.VipSlotRebatePercentage * list.Where(a =>
                                     a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
                                     a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
-                                .Sum(a => a.Turnover) / 100,
+                                .Sum(a => a.Turnover) / 100M,
                         LotteryTurnover = list.Where(l => l.GameType == GameType.Lottery).Sum(a => a.Turnover),
                         LotteryRebateAmount =
                             x.VipLotteryRebatePercentage * list.Where(a => a.GameType == GameType.Lottery)
-                                .Sum(a => a.Turnover) / 100,
+                                .Sum(a => a.Turnover) / 100M,
                         RebateAmount = list.Sum(l => l.VipRebateAmount)
                     })
                 .ToArrayAsync(cancellationToken);
 
             if (playerRebates.Length <= 0)
             {
-                return new() { Valid = false, Message = "Has no player rebate data." };
+                return new() {Valid = false, Message = "Has no player rebate data."};
             }
 
             var brandIds = playerRebates.Select(x => x.BrandId);
@@ -129,16 +129,16 @@ namespace TGS.Services.Report.Application.Commands.Player
                 .ToArrayAsync(cancellationToken);
 
             var playerBonuses = playerRebates
-                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new { player, brand })
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
                 .Where(x => x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
             var playerBonusesNotSend = playerRebates
-                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new { player, brand })
+                .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
                 .Where(x => !x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
             var players = await _playerService.GetPlayerQueries()
                 .Where(x => playerBonuses.Select(p => p.PlayerCode).Contains(x.PlayerCode))
-                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
+                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
                 .ToArrayAsync(cancellationToken);
 
             await _playerRebateService.CreatePlayerRebatesAsync(playerBonuses, DateTimeOffset.Now);
@@ -146,7 +146,7 @@ namespace TGS.Services.Report.Application.Commands.Player
             await _playerRebateService.CreatePlayerRebatesAsync(playerBonusesNotSend, null);
 
             foreach (var playerBonus in playerBonuses.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
-                (pb, p) => new { pb, p }))
+                (pb, p) => new {pb, p}))
             {
                 await _walletRepository.ExchangeAsync(playerBonus.pb.BrandId, playerBonus.p.DefaultWalletId,
                     playerBonus.pb.PlayerCode, TransactionTypes.Rebate,

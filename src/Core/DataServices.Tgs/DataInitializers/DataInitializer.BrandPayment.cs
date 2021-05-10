@@ -231,13 +231,18 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             };
             var query = from payment in Payments
                         from method in PaymentMethods
-                        from channel in PaymentChannels
+                        let ChannelId = method.Value.BankType switch
+                        {
+                            "Bank" => PaymentChannels["RichBank"],
+                            "Crypto" => PaymentChannels["USDT"],
+                            _ => PaymentChannels["USDT"]
+                        }
                         select new PaymentMethodChannel
                         {
                             Id = Guid.NewGuid(),
                             PaymentId = payment.Value.Id,
                             MethodId = method.Value.Id,
-                            ChannelId = channel.Value,
+                            ChannelId = ChannelId,
                             CreatedByUsername = AdminUsername,
                             CreatedOn = DateTimeOffset.Now,
                             UpdatedByUsername = AdminUsername,

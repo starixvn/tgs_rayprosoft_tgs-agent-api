@@ -10,7 +10,8 @@ namespace TGS.Core.Infrastructures.Transactions
         /// </summary>
         public static IServiceCollection AddTransactions(this IServiceCollection services)
         {
-            services.AddScoped<ITransactionManager, TransactionManager>();
+            services.AddTransient<ITransactionManager, TransactionManager>();
+            services.AddTransient<SystemTransactionManager>();
 
             return services;
         }

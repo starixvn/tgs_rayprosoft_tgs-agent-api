@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -9,22 +10,28 @@ using TGS.Services.PlayerBucket.Core;
 using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.Promotion.Core;
 using TGS.Services.Promotion.Core.Models.PromotionDispatch;
+using TGS.Services.TgsTransaction.Core;
 using TGS.Services.WalletService;
 
 namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 {
     public class DispatchPromotionBonusHandler : Handler<DispatchPromotionBonusRequest, MessageResponse>
     {
-        private readonly IPromotionBonusService _promotionBonusService;
-        private readonly IPlayerBucketService _service;
+        private readonly IPromotionBonusRepository _promotionBonusService;
+        private readonly IPlayerBucketRepository _service;
+        private readonly ITgsTransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public DispatchPromotionBonusHandler(IPlayerBucketService service, IPromotionBonusService promotionBonusService,
-            IWalletRepository walletRepository, IHttpContextAccessor accessor) : base(accessor)
+        public DispatchPromotionBonusHandler(IPlayerBucketRepository service,
+            IPromotionBonusRepository promotionBonusService,
+            IWalletRepository walletRepository, ITgsTransactionRepository transactionRepository,
+            IHttpContextAccessor accessor) : base(
+            accessor)
         {
             _service = service;
             _walletRepository = walletRepository;
             _promotionBonusService = promotionBonusService;
+            _transactionRepository = transactionRepository;
         }
 
         public override async Task<MessageResponse> Handle(DispatchPromotionBonusRequest request,
@@ -35,12 +42,16 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 
             var playerBonus = await _promotionBonusService.GetPromotionBonusPlayersQueries()
                 .Include(x => x.Player)
+                .Include(x => x.PromotionBonus)
                 .Where(x => promotionBonusIds.Contains(x.PromotionBonusId))
-                .Where(x => playerCodes.Contains(x.PlayerCode)).ToArrayAsync(cancellationToken);
+                .Where(x => playerCodes.Contains(x.PlayerCode))
+                .Where(x => x.SentOn == null).ToArrayAsync(cancellationToken);
 
-            var playerBuckets = playerBonus.Where(x =>
+            var players = playerBonus.Where(x =>
                     request.Players.Any(p => p.PlayerCode == x.PlayerCode && p.PromotionBonusId == x.PromotionBonusId))
-                .Select(x => new
+                .ToArray();
+
+            var playerBuckets = players.Select(x => new
                 {
                     x.Player.BrandId,
                     x.PlayerCode,
@@ -51,10 +62,17 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
                 })
                 .ToArray();
 
+            foreach (var promotionPlayer in players)
+            {
+                promotionPlayer.SentOn = DateTimeOffset.Now;
+            }
+
             await _service.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
                     new CreatePlayerBucketRequest(x.BrandId, x.PlayerCode, x.DefaultWalletId, x.BucketType,
                         x.BucketAmount))
                 .ToArray()).ConfigureAwait(false);
+
+            await _promotionBonusService.UpdatePromotionBonusPlayersAsync(players);
 
             foreach (var promotionPlayer in playerBuckets)
             {

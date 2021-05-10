@@ -27,7 +27,7 @@ namespace PromotionApi.Controllers
         [HttpPost]
         [Description("Dispatch promotion")]
         public Task<MessageResponse> DispatchPromotionsAsync(
-            [FromQuery] DispatchPromotionBonusRequest request) =>
+            [FromBody] DispatchPromotionBonusRequest request) =>
             _mediator.Send(request);
     }
 }

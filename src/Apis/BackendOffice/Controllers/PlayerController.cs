@@ -46,5 +46,14 @@ namespace TGS.Apis.BackendOffice.Controllers
             request.Type = type;
             return _mediator.Send(request);
         }
+
+        [HttpPost("{playerCode}/adjust")]
+        [Description("Create a player adjustment")]
+        public Task<MessageResponse> CreateAgentAdjustmentAsync(string playerCode,
+            CreatePlayerAdjustmentRequest request)
+        {
+            request.PlayerCode = playerCode;
+            return _mediator.Send(request);
+        }
     }
 }

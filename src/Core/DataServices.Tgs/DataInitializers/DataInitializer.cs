@@ -72,7 +72,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             _gameProviders = new IGameProvider[]
             {
-                new SBOGameProvider(env), new HabaneroGameProvider(env), new PragmaticPlayGameProvider(env)
+                new SBOGameProvider(env), new HabaneroGameProvider(env), new PragmaticPlayGameProvider(env), 
+                new AsiaGamingGameProvider(env), new SabaGameProvider(env)
             };
         }
 
@@ -137,7 +138,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             .ToHashSet(),
                     PromotionVipLevels =
                         x.Value.VipLevels.Select(v =>
-                                new PromotionVipLevel {PromotionId = promotionId, VipLevelId = v.Id})
+                                new PromotionVipLevel {PromotionId = promotionId, VipLevelId = v.Id, Level = v.Level})
                             .ToHashSet(),
                     PromotionParticipants = x.Value.Players.Select(p => new PromotionParticipant
                     {

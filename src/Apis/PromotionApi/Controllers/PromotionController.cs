@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Core.Models.Promotion;
 
@@ -37,9 +38,14 @@ namespace PromotionApi.Controllers
             return _mediator.Send(request);
         }
 
-        [HttpPost("{id}/addPlayer")]
+        [HttpPost("{promotionId}/addPlayer/{playerCode}")]
         [Description("Add player to promotion")]
-        public Task<MessageResponse> AddPlayerToPromotionAsync(string playerCode) =>
-            _mediator.Send(new CreatePromotionParticipantRequest(playerCode));
+        public Task<MessageResponse> AddPlayerToPromotionAsync(Guid promotionId, string playerCode) =>
+            _mediator.Send(new CreatePromotionParticipantRequest(promotionId, playerCode));
+
+        [HttpPut("{promotionId}/{status}")]
+        [Description("Add player to promotion")]
+        public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, SwitchStatus status) =>
+            _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
     }
 }

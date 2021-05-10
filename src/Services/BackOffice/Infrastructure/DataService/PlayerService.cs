@@ -37,9 +37,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private readonly IRedisCacheManager _cacheManager;
         private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _repository;
-        private readonly ITransactionManager _transactionManager;
+        private readonly SystemTransactionManager _transactionManager;
 
-        public PlayerService(ITgsRepository tgsRepository, ITransactionManager transactionManager,
+        public PlayerService(ITgsRepository tgsRepository, SystemTransactionManager transactionManager,
             IPasswordHandler passwordHandler, IRedisCacheManager cacheManager) : base(
             tgsRepository)
         {
@@ -62,7 +62,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             Player player, UpdatePlayerRequest request)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
-            return _transactionManager.ExecuteTransactionAsync(() => _repository,
+            return _transactionManager.ExecuteTransactionAsync(_repository,
                 IsolationLevel.ReadCommitted, id,
                 async _ =>
                 {

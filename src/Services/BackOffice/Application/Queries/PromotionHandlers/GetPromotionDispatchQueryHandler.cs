@@ -19,13 +19,13 @@ namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
         GetPromotionDispatchQueryHandler : Handler<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPromotionBonusService _promotionBonusService;
+        private readonly IPromotionBonusRepository _promotionBonusService;
         private readonly ISettingRepository _settingRepository;
         private readonly IPlayerService _tgsPlayerService;
-        private readonly IPromotionService _tgsPromotionService;
+        private readonly IPromotionRepository _tgsPromotionService;
 
-        public GetPromotionDispatchQueryHandler(IPromotionBonusService promotionBonusService,
-            IPromotionService tgsPromotionService,
+        public GetPromotionDispatchQueryHandler(IPromotionBonusRepository promotionBonusService,
+            IPromotionRepository tgsPromotionService,
             IPlayerService tgsPlayerService,
             ISettingRepository settingRepository,
             IJsonSerializationProvider jsonSerializationProvider,
@@ -86,6 +86,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
                     PromotionBonusId = x.PromotionBonusId,
                     PromotionId = x.PromotionId,
                     PlayerCode = x.PlayerCode,
+                    BonusAmount = x.BonusAmount,
                     Username = players.First(p => p.PlayerCode == x.PlayerCode).Username,
                     PromotionName = promotions.First(p => p.Id == x.PromotionId).Name,
                     PromotionGroup =

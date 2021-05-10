@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
@@ -16,28 +15,28 @@ namespace TGS.Wallet.Repositories
     internal class WalletRepository : IWalletRepository
     {
         private readonly ITgsRepository _tgsRepository;
-        private readonly ITransactionManager _transcationManager;
+        private readonly SystemTransactionManager _transactionManager;
 
-        public WalletRepository(ITgsRepository tgsRepository, ITransactionManager transcationManager)
+        public WalletRepository(ITgsRepository tgsRepository, SystemTransactionManager transactionManager)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-            _transcationManager = transcationManager ?? throw new ArgumentNullException(nameof(transcationManager));
+            _transactionManager = transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
         }
 
-        public async ValueTask<(Guid TranscationId, decimal PostBalance)> ExchangeAsync(
-            Guid brandId,
+        public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(Guid brandId,
             Guid walletId,
             string playerCode,
             TransactionTypes transactionType,
-            decimal amount)
+            decimal amount,
+            string? description)
         {
             const string sql = "dbo.wallet_update_wallet_balance";
             var updatedOn = DateTimeOffset.UtcNow;
             var transactionId = GuidExtensions.NewSequentialGuid();
 
-            var postBalance = await _transcationManager
+            var postBalance = await _transactionManager
                 .ExecuteTransactionAsync(
-                    () => _tgsRepository,
+                    _tgsRepository,
                     IsolationLevel.ReadCommitted,
                     transactionId.ToString(),
                     async ctx =>
@@ -53,7 +52,7 @@ namespace TGS.Wallet.Repositories
                             }).ConfigureAwait(false);
 
                         await _tgsRepository.Transactions
-                            .AddAsync(new Transaction
+                            .AddAsync(new()
                             {
                                 Id = transactionId,
                                 WalletId = walletId,
@@ -62,15 +61,16 @@ namespace TGS.Wallet.Repositories
                                 Balance = postBalance,
                                 Type = transactionType switch
                                 {
-                                    TransactionTypes.Deposit => TransactionType.Deposit,
+                                    TransactionTypes.Deposit    => TransactionType.Deposit,
                                     TransactionTypes.Withdrawal => TransactionType.Withdrawal,
-                                    TransactionTypes.Adjust => TransactionType.Adjust,
-                                    TransactionTypes.Bonus => TransactionType.Bonus,
-                                    TransactionTypes.Rebate => TransactionType.Rebate,
-                                    TransactionTypes.Dividend => TransactionType.Dividend,
-                                    TransactionTypes.Promotion => TransactionType.Promotion,
-                                    _ => TransactionType.Other
+                                    TransactionTypes.Adjust     => TransactionType.Adjust,
+                                    TransactionTypes.Bonus      => TransactionType.Bonus,
+                                    TransactionTypes.Rebate     => TransactionType.Rebate,
+                                    TransactionTypes.Dividend   => TransactionType.Dividend,
+                                    TransactionTypes.Promotion  => TransactionType.Promotion,
+                                    _                           => TransactionType.Other
                                 },
+                                Description = description,
                                 RecordedOn = DateTimeOffset.Now
                             })
                             .ConfigureAwait(false);

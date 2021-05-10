@@ -7,8 +7,9 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddPromotionRepositoriesServices(this IServiceCollection services)
         {
-            services.AddTransient<IPromotionService, PromotionService>();
-            services.AddTransient<IPromotionBonusService, PromotionBonusService>();
+            services.AddTransient<IPromotionRepository, PromotionRepository>();
+            services.AddTransient<IPromotionBonusRepository, PromotionBonusRepository>();
+            services.AddTransient<IPromotionParticipantRepository, PromotionParticipantRepository>();
 
             return services;
         }

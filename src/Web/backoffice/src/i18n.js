@@ -123,7 +123,7 @@ export const FormattedDateTime = ({
 }) => {
     let format = `${dateFormat} ${timeFormat}`
     let formatted = formatDateTime(format, value)
-    return <Text>{formatted ?? placeholder}</Text>
+    return <Text>{formatted ? formatted : placeholder}</Text>
 }
 
 export const FormatHourMinuteSecondDayMonthYear = ({

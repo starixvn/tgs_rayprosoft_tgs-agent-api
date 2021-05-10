@@ -17,6 +17,8 @@ namespace TGS.Core.Models
             public static readonly string SBOBET = string.Format(Template, Consts.GameProvider.SBOBET);
             public static readonly string Habanero = string.Format(Template, Consts.GameProvider.Habanero);
             public static readonly string PragmaticPlay = string.Format(Template, Consts.GameProvider.PragmaticPlay);
+            public static readonly string AsiaGaming = string.Format(Template, Consts.GameProvider.AsiaGaming);
+            public static readonly string Saba = string.Format(Template, Consts.GameProvider.Saba);
         }
     }
 }
