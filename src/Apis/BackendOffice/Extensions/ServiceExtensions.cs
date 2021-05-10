@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using Tgs.Payment.LeePay;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
@@ -164,6 +165,19 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddPayment()
                 .UseTgsPaymentRepository()
                 .RegisterWithdrawProcessor<LeePayProcessor>("LeePay");
+
+            services
+                .AddPaymentClient()
+                .AddSingleton<LeePaySerializer>()
+                .AddNatsMessageQueue(config =>
+                {
+                    config.ConfigQueueOptions((options, sp) =>
+                    {
+                        var configuration = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                    });
+                });
 
             return services;
         }

@@ -16,7 +16,7 @@ namespace TGS.Services.BackOffice.Domain
         public string Subject => "tgs.payment.leepay.withdraw";
 
         public LeePayProcessor(
-                    IJsonSerializationProvider jsonSerializationProvider,
+            IJsonSerializationProvider jsonSerializationProvider,
             IOptions<JsonOptions> jsonOptionsAccessor,
             LeePaySerializer leePaySerializer)
         {

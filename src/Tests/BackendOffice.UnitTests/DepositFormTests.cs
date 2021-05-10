@@ -12,7 +12,10 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
+using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Services.Operations;
 using TGS.Services.Payment;
+using TGS.Services.WalletService;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -102,11 +105,17 @@ namespace TGS.Tests.BackendOffice.UnitTests
         public async Task Manager_Can_Review_DepositForm()
         {
             var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPlayerService = new Mock<IPlayerService>();
 
-            var sut = new ReviewDepositFormCommandService(moqDepositRepository.Object);
+            var sut = new ReviewDepositFormCommandService(
+                moqDepositRepository.Object,
+                moqWalletRepository.Object,
+                moqPlayerService.Object);
 
+            var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();
-            var command = new ReviewDepositFormCommand(formId, ReviewStatus.Approve, null);
+            var command = new ReviewDepositFormCommand(brandId, formId, ReviewStatus.Approve, null);
 
             await sut.ExecuteAsync(command);
 
