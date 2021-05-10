@@ -12,6 +12,6 @@ namespace TGS.Services.Operator
 
         ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token);
 
-        Task SendEmailAsync(CultureInfo cultureInfo, string email, string ValidateCode);
+        ValueTask SendEmailAsync(CultureInfo cultureInfo, string email, string ValidateCode);
     }
 }
