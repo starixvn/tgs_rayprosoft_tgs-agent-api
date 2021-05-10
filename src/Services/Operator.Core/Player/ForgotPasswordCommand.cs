@@ -2,5 +2,5 @@
 
 namespace TGS.Services.Operator.Player
 {
-    public record ForgotPasswordCommand(CultureInfo CultureInfo, string Phone);
+    public record ForgotPasswordCommand(CultureInfo CultureInfo, string Email);
 }

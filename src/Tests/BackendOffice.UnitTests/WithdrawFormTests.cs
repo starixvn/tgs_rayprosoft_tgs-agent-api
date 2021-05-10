@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -42,8 +43,12 @@ namespace TGS.Tests.BackendOffice.UnitTests
         {
             var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqWithdrawProcessorFactory = new Mock<IWithdrawProcessorFactory>();
+            var moqPaymentClient = new Mock<IPaymentClient>();
 
-            var sut = new ReviewWithdrawFormCommandService(moqPaymentRepository.Object, moqWithdrawProcessorFactory.Object);
+            var sut = new ReviewWithdrawFormCommandService(
+                moqPaymentRepository.Object,
+                moqWithdrawProcessorFactory.Object,
+                moqPaymentClient.Object);
 
             var formId = Guid.NewGuid();
             var brandPaymentId = Guid.NewGuid();

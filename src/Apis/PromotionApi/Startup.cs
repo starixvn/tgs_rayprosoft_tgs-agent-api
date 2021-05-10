@@ -18,7 +18,9 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
+using Tgs.Payment.LeePay;
 using TGS.Services.BackOffice.Application.Extensions;
+using TGS.Services.BackOffice.Domain;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 using TGS.Services.Report.Application.Extensions;
@@ -60,7 +62,21 @@ namespace PromotionApi
             services.AddWallet().AddTgsWalletRepositories().AddTgsAgentWalletRepositories();
             services
                 .AddPayment()
-                .UseTgsPaymentRepository();
+                .UseTgsPaymentRepository()
+                .RegisterWithdrawProcessor<LeePayProcessor>("LeePay");
+
+            services
+                .AddPaymentClient()
+                .AddSingleton<LeePaySerializer>()
+                .AddNatsMessageQueue(config =>
+                {
+                    config.ConfigQueueOptions((options, sp) =>
+                    {
+                        var configuration = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                    });
+                });
 
             services.AddHttpContextAccessor();
             services.AddControllers();

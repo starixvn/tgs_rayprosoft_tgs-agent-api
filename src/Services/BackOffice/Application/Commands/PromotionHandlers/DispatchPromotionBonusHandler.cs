@@ -17,19 +17,21 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 {
     public class DispatchPromotionBonusHandler : Handler<DispatchPromotionBonusRequest, MessageResponse>
     {
-        private readonly IPromotionBonusService _promotionBonusService;
-        private readonly IPlayerBucketService _service;
-        private readonly ITgsTransaction _transaction;
+        private readonly IPromotionBonusRepository _promotionBonusService;
+        private readonly IPlayerBucketRepository _service;
+        private readonly ITgsTransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public DispatchPromotionBonusHandler(IPlayerBucketService service, IPromotionBonusService promotionBonusService,
-            IWalletRepository walletRepository, ITgsTransaction transaction, IHttpContextAccessor accessor) : base(
+        public DispatchPromotionBonusHandler(IPlayerBucketRepository service,
+            IPromotionBonusRepository promotionBonusService,
+            IWalletRepository walletRepository, ITgsTransactionRepository transactionRepository,
+            IHttpContextAccessor accessor) : base(
             accessor)
         {
             _service = service;
             _walletRepository = walletRepository;
             _promotionBonusService = promotionBonusService;
-            _transaction = transaction;
+            _transactionRepository = transactionRepository;
         }
 
         public override async Task<MessageResponse> Handle(DispatchPromotionBonusRequest request,

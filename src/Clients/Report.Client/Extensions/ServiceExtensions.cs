@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reflection;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -15,6 +17,7 @@ namespace TGS.Clients.Report.Client.Extensions
         public static IServiceCollection AddReportClientServices(this IServiceCollection services,
             IConfiguration configuration, string configSectionName = "Report")
         {
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Singleton);
             services.Configure<ReportSettings>(configuration.GetSection(configSectionName));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<ReportSettings>>().Value);
             services.AddHttpClient<IReportAggregateClient, ReportAggregateClient>((sp, c) =>

@@ -20,7 +20,7 @@ namespace ReportApi.Controllers
         }
 
         [HttpGet("contribution")]
-        [Description("Get agent contributions")]
+        [Description("Get player contributions")]
         public Task<PagedResponse<PlayerContributionModel>> GetRoundsAsync(
             [FromQuery] GetPlayerContributionsRequest request) =>
             _mediator.Send(request);
@@ -28,5 +28,11 @@ namespace ReportApi.Controllers
         [HttpPost("rebates")]
         [Description("Create player rebates")]
         public Task<MessageResponse> GetRoundsAsync(CreatePlayerRebateRequest request) => _mediator.Send(request);
+
+        [HttpGet("accountChanges")]
+        [Description("Get player account changes")]
+        public Task<PagedResponse<PlayerAccountChangeModel>> GetRoundsAsync(
+            [FromQuery] GetPlayerAccountChangesRequest request) =>
+            _mediator.Send(request);
     }
 }

@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
-using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -52,7 +51,6 @@ namespace ReportApi
                 .AddReportServices()
                 .AddTransactions()
                 .AddBackendOfficeRepositories()
-                .AddPromotionClientServices(_configuration)
                 .AddPromotionRepositoriesServices()
                 .AddPlayerBucketRepositoriesServices();
 

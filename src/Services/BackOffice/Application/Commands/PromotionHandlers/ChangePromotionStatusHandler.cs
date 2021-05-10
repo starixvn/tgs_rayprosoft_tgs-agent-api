@@ -12,10 +12,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
     public class ChangePromotionStatusHandler : Handler<ChangePromotionStatusRequest, MessageResponse>
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPromotionService _service;
+        private readonly IPromotionRepository _service;
         private readonly ISettingsService _settingsService;
 
-        public ChangePromotionStatusHandler(IPromotionService service, ISettingsService settingsService,
+        public ChangePromotionStatusHandler(IPromotionRepository service, ISettingsService settingsService,
             IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;

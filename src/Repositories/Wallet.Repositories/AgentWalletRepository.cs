@@ -16,24 +16,24 @@ namespace TGS.Wallet.Repositories
     internal class AgentWalletRepository : IAgentWalletRepository
     {
         private readonly ITgsRepository _tgsRepository;
-        private readonly ITransactionManager _transcationManager;
+        private readonly SystemTransactionManager _transactionManager;
 
-        public AgentWalletRepository(ITgsRepository tgsRepository, ITransactionManager transcationManager)
+        public AgentWalletRepository(ITgsRepository tgsRepository, SystemTransactionManager transactionManager)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-            _transcationManager = transcationManager ?? throw new ArgumentNullException(nameof(transcationManager));
+            _transactionManager = transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
         }
 
         public async ValueTask<Guid> ExchangeAsync(Guid brandId, Guid walletId, Guid agentId,
-            TransactionTypes transactionType, decimal amount)
+            TransactionTypes transactionType, decimal amount, string? description)
         {
             const string sql = "dbo.agent_wallet_update_wallet_balance";
             var updatedOn = DateTimeOffset.UtcNow;
             var transactionId = GuidExtensions.NewSequentialGuid();
 
-            return await _transcationManager
+            return await _transactionManager
                 .ExecuteTransactionAsync(
-                    () => _tgsRepository,
+                    _tgsRepository,
                     IsolationLevel.ReadCommitted,
                     transactionId.ToString(),
                     async ctx =>
@@ -48,7 +48,7 @@ namespace TGS.Wallet.Repositories
                                 {":updated_on", updatedOn}
                             }).ConfigureAwait(false);
 
-                        await _tgsRepository.Transactions
+                        await _tgsRepository.AgentTransactions
                             .AddAsync(new()
                             {
                                 Id = transactionId,
@@ -58,15 +58,16 @@ namespace TGS.Wallet.Repositories
                                 Balance = postBalance,
                                 Type = transactionType switch
                                 {
-                                    TransactionTypes.Deposit => TransactionType.Deposit,
+                                    TransactionTypes.Deposit    => TransactionType.Deposit,
                                     TransactionTypes.Withdrawal => TransactionType.Withdrawal,
-                                    TransactionTypes.Adjust => TransactionType.Adjust,
-                                    TransactionTypes.Bonus => TransactionType.Bonus,
-                                    TransactionTypes.Rebate => TransactionType.Rebate,
-                                    TransactionTypes.Dividend => TransactionType.Dividend,
-                                    TransactionTypes.Promotion => TransactionType.Promotion,
-                                    _ => TransactionType.Other
+                                    TransactionTypes.Adjust     => TransactionType.Adjust,
+                                    TransactionTypes.Bonus      => TransactionType.Bonus,
+                                    TransactionTypes.Rebate     => TransactionType.Rebate,
+                                    TransactionTypes.Dividend   => TransactionType.Dividend,
+                                    TransactionTypes.Promotion  => TransactionType.Promotion,
+                                    _                           => TransactionType.Other
                                 },
+                                Description = description,
                                 RecordedOn = DateTimeOffset.Now
                             })
                             .ConfigureAwait(false);

@@ -151,6 +151,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             [FromBody] DepositReviewRequest reviewResponse)
         {
             var command = new ReviewDepositFormCommand(
+                reviewResponse.BrandId,
                 formId,
                 reviewResponse.ReviewResponse switch
                 {

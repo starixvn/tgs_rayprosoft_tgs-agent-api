@@ -10,7 +10,8 @@ namespace TGS.Services.WalletService
             Guid walletId,
             string playerCode,
             TransactionTypes transactionType,
-            decimal amount);
+            decimal amount,
+            string? description = null);
 
         ValueTask<decimal> GetBalanceAsync(Guid walletId, string playerCode);
     }

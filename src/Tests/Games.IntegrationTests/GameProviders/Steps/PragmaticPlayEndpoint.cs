@@ -130,14 +130,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var platform = Get<PlatformType>(SR.PlatformType);
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
 
-            var model = new AuthorizePlayerRequest
-            {
-                Token = encryptedToken,
-                ProviderId = configuration.ProviderId
-            };
+            var model = new AuthorizePlayerRequest {Token = encryptedToken, ProviderId = configuration.ProviderId};
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.AuthorizePlayerAsync(request).ConfigureAwait(false);
@@ -156,13 +152,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var model = new GetBalanceRequest
             {
-                Token = encryptedToken,
-                ProviderId = configuration.ProviderId,
-                UserId = playerCode
+                Token = encryptedToken, ProviderId = configuration.ProviderId, UserId = playerCode
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.GetBalanceAsync(request).ConfigureAwait(false);
@@ -255,7 +249,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.ResultAsync(request).ConfigureAwait(false);
@@ -289,7 +283,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.EndRoundAsync(request).ConfigureAwait(false);
@@ -299,8 +293,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        [Given(@"I cancel transaction")]
-        [When(@"I cancel transaction")]
+        [Given(@"I cancel transactionRepository")]
+        [When(@"I cancel transactionRepository")]
         public async Task WhenICancelTransaction()
         {
             var configuration = await GetConfigurationAsync();
@@ -325,7 +319,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.RefundAsync(request).ConfigureAwait(false);
@@ -361,7 +355,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.WinJackpotAsync(request).ConfigureAwait(false);
@@ -403,7 +397,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.WinBonusAsync(request).ConfigureAwait(false);
@@ -437,7 +431,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.WinPromoAsync(request).ConfigureAwait(false);
@@ -721,7 +715,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.PlaceBetAsync(request).ConfigureAwait(false);
@@ -766,7 +760,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with { Hash = hash };
+            var request = model with {Hash = hash};
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.ResultAsync(request).ConfigureAwait(false);

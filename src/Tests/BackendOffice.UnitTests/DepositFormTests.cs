@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -12,13 +13,98 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
+using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Payment;
+using TGS.Services.WalletService;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
     [TestFixture]
     public class DepositFormTests
     {
+        [Test]
+        public async Task Manager_Can_Get_The_DepositForm_Detail()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+
+            var sut = new GetDepositFormDetailQueryService(moqDepositRepository.Object);
+
+            var formId = Guid.NewGuid();
+            var brandId = Guid.NewGuid();
+
+            var query = new GetDepositFormDetailQuery(formId, brandId);
+
+            await sut.GetAsync(query);
+
+            moqDepositRepository.Verify(
+                fake => fake.GetDepositFormDetailAsync(It.Is<Guid>(x => x == formId)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Manager_Can_Review_DepositForm()
+        {
+            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPlayerService = new Mock<IPlayerService>();
+
+            var sut = new ReviewDepositFormCommandService(
+                moqDepositRepository.Object,
+                moqWalletRepository.Object,
+                moqPlayerService.Object);
+
+            var brandId = Guid.NewGuid();
+            var formId = Guid.NewGuid();
+            var walletId = Guid.NewGuid();
+            var command = new ReviewDepositFormCommand(brandId, formId, ReviewStatus.Approve, null);
+
+            moqDepositRepository
+                .Setup(fake => fake.GetDepositFormDetailAsync(It.Is<Guid>(x => x == formId)))
+                .Returns(ValueTask.FromResult(new DepositFormDetail(
+                    formId,
+                    "ThisIsPlayerCode",
+                    "UserName",
+                    brandId,
+                    Guid.NewGuid(),
+                    "TestChannel",
+                    Guid.NewGuid(),
+                    1000,
+                    null,
+                    1000,
+                    null,
+                    null,
+                    DateTimeOffset.UtcNow,
+                    DateTimeOffset.UtcNow)));
+            moqPlayerService
+                .Setup(fake => fake.GetPlayerAsync(
+                    It.IsAny<Expression<Func<Player, bool>>>(),
+                    It.IsAny<Func<IQueryable<Player>, IQueryable<Player>>>()))
+                .Returns(Task.FromResult(new Player
+                {
+                    PlayerCode = "ThisIsPlayerCode",
+                    DefaultWalletId = walletId
+                }));
+
+            await sut.ExecuteAsync(command);
+
+            moqDepositRepository.Verify(
+                fake => fake.SignOffDepositFormAsync(
+                    It.Is<Guid>(x => x == formId),
+                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve),
+                    It.IsAny<string>()),
+                Times.Exactly(1));
+
+            moqWalletRepository.Verify(
+                fake => fake.ExchangeAsync(
+                    It.Is<Guid>(x => x == brandId),
+                    It.Is<Guid>(x => x == walletId),
+                    It.Is<string>(x => x == "ThisIsPlayerCode"),
+                    It.Is<TransactionTypes>(x => x == TransactionTypes.Withdrawal),
+                    It.Is<decimal>(x => x == 1000M),
+                    It.IsAny<string>()),
+                Times.Exactly(1));
+        }
+
         [Test]
         public async Task User_Can_List_DepositForm()
         {
@@ -96,45 +182,6 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var actual = await sut.QueryAsync(query).ToArrayAsync();
 
             Assert.IsTrue(actual.Length == 1);
-        }
-
-        [Test]
-        public async Task Manager_Can_Review_DepositForm()
-        {
-            var moqDepositRepository = new Mock<IDepositRepository>();
-
-            var sut = new ReviewDepositFormCommandService(moqDepositRepository.Object);
-
-            var formId = Guid.NewGuid();
-            var command = new ReviewDepositFormCommand(formId, ReviewStatus.Approve, null);
-
-            await sut.ExecuteAsync(command);
-
-            moqDepositRepository.Verify(
-                fake => fake.SignOffDepositFormAsync(
-                    It.Is<Guid>(x => x == formId),
-                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve),
-                    It.IsAny<string>()),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task Manager_Can_Get_The_DepositForm_Detail()
-        {
-            var moqDepositRepository = new Mock<IDepositRepository>();
-
-            var sut = new GetDepositFormDetailQueryService(moqDepositRepository.Object);
-
-            var formId = Guid.NewGuid();
-            var brandId = Guid.NewGuid();
-
-            var query = new GetDepositFormDetailQuery(formId, brandId);
-
-            await sut.GetAsync(query);
-
-            moqDepositRepository.Verify(
-                fake => fake.GetDepositFormDetailAsync(It.Is<Guid>(x => x == formId)),
-                Times.Exactly(1));
         }
     }
 }
