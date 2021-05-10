@@ -2066,6 +2066,90 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("game_provider_currencies");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderFundTransferTransaction", b =>
+                {
+                    b.Property<Guid>("GameProviderFundTransferTransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_fund_transfer_transaction_id");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("amount");
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("FromWallet")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("from_wallet");
+
+                    b.Property<short>("FundSource")
+                        .HasColumnType("smallint")
+                        .HasColumnName("fund_source");
+
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
+
+                    b.Property<string>("GameProviderTransactionId")
+                        .HasColumnType("text")
+                        .HasColumnName("game_provider_transaction_id");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<short>("Status")
+                        .HasColumnType("smallint")
+                        .HasColumnName("status");
+
+                    b.Property<string>("ToWallet")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("to_wallet");
+
+                    b.Property<Guid?>("TransactionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.Property<Guid>("WalletId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("wallet_id");
+
+                    b.HasKey("GameProviderFundTransferTransactionId")
+                        .HasName("pk_game_provider_fund_transfer_transaction_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_game_provider_fund_transfer_transactions_player_code");
+
+                    b.HasIndex("TransactionId")
+                        .HasDatabaseName("ix_game_provider_fund_transfer_transactions_transaction_id");
+
+                    b.HasIndex("WalletId")
+                        .HasDatabaseName("ix_game_provider_fund_transfer_transactions_wallet_id");
+
+                    b.ToTable("game_provider_fund_transfer_transactions");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderLanguage", b =>
                 {
                     b.Property<Guid>("GameProviderId")

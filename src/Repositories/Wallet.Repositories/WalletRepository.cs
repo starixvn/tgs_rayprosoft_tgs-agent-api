@@ -68,6 +68,8 @@ namespace TGS.Wallet.Repositories
                                     TransactionTypes.Rebate     => TransactionType.Rebate,
                                     TransactionTypes.Dividend   => TransactionType.Dividend,
                                     TransactionTypes.Promotion  => TransactionType.Promotion,
+                                    TransactionTypes.GameProviderFundIn => TransactionType.GameProviderFundIn,
+                                    TransactionTypes.GameProviderFundOut => TransactionType.GameProviderFundOut,
                                     _                           => TransactionType.Other
                                 },
                                 Description = description,

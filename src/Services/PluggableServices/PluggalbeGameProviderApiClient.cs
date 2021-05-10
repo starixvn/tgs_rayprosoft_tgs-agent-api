@@ -12,6 +12,12 @@ namespace TGS.Services.PluggableServices
         ValueTask<GetGameUrlResponse> GetGameUrlAsync(Uri apiUrl, GetGameUrlRequest request);
 
         ValueTask<GetRoundHistoryResponse> GetGameProviderRoundHistory(Uri apiUrl, GetRoundHistoryRequest request);
+
+        ValueTask<GameProviderWalletGetBalanceResponse> GetBalanceAsync(Uri apiUrl, GameProviderWalletGetBalanceRequest request);
+
+        ValueTask<GameProviderWalletFundResponse> FundOutAsync(Uri apiUrl, GameProviderWalletFundRequest request);
+
+        ValueTask<GameProviderWalletFundResponse> FundInAsync(Uri apiUrl, GameProviderWalletFundRequest request);
     }
 
     public sealed class PluggalbeGameProviderApiClient : BaseApiClient, IPluggalbeGameProviderApiClient
@@ -30,12 +36,35 @@ namespace TGS.Services.PluggableServices
                 "/api/pluggable/gameurl", request, logPrefix: prefix);
         }
 
+
+
         ValueTask<GetRoundHistoryResponse> IPluggalbeGameProviderApiClient.GetGameProviderRoundHistory(Uri apiUrl,
             GetRoundHistoryRequest request)
         {
             var prefix = $"Pluggable.{request.GameProviderCode}.GetRoundHistory";
             return ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(HttpMethod.Post, apiUrl,
                 "/api/pluggable/history/round", request, logPrefix: prefix);
+        }
+
+        ValueTask<GameProviderWalletGetBalanceResponse> IPluggalbeGameProviderApiClient.GetBalanceAsync(Uri apiUrl, GameProviderWalletGetBalanceRequest request)
+        {
+            var prefix = $"Pluggable.{request.GameProviderCode}.GetBalance";
+            return ExecuteJsonRequestAsync<GameProviderWalletGetBalanceRequest, GameProviderWalletGetBalanceResponse>(HttpMethod.Post, apiUrl,
+                "/api/pluggable/player/blaance", request, logPrefix: prefix);
+        }
+
+        ValueTask<GameProviderWalletFundResponse> IPluggalbeGameProviderApiClient.FundOutAsync(Uri apiUrl, GameProviderWalletFundRequest request)
+        {
+            var prefix = $"Pluggable.{request.GameProviderCode}.FundOut";
+            return ExecuteJsonRequestAsync<GameProviderWalletFundRequest, GameProviderWalletFundResponse>(HttpMethod.Post, apiUrl,
+                "/api/pluggable/player/fundOut", request, logPrefix: prefix);
+        }
+
+        ValueTask<GameProviderWalletFundResponse> IPluggalbeGameProviderApiClient.FundInAsync(Uri apiUrl, GameProviderWalletFundRequest request)
+        {
+            var prefix = $"Pluggable.{request.GameProviderCode}.FundIn";
+            return ExecuteJsonRequestAsync<GameProviderWalletFundRequest, GameProviderWalletFundResponse>(HttpMethod.Post, apiUrl,
+                "/api/pluggable/player/fundIn", request, logPrefix: prefix);
         }
     }
 }

@@ -31,6 +31,7 @@ COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataS
 COPY ["src/Shared/Game.ApiClients/Game.ApiClients.csproj", "src/Shared/Game.ApiClients/"]
 COPY ["src/Shared/Game.Models/Game.Models.csproj", "src/Shared/Game.Models/"]
 COPY ["src/Clients/Promotion.Client/Promotion.Client.csproj", "src/Clients/Promotion.Client/"]
+COPY ["src/Repositories/GameProviders.Repositories/GameProviders.Repositories.csproj", "src/Repositories/GameProviders.Repositories/"]
 RUN dotnet restore "src/Workers/Schedulers/Schedulers.csproj"
 COPY . .
 WORKDIR "/src/src/Workers/Schedulers"
