@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <UserSecretsId>4740bb64-dc6f-4226-804a-68294f80c9b6</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerfileContext>..\..\..</DockerfileContext>
+    <AssemblyName>TGS.Apis.AgentApi</AssemblyName>
+    <RootNamespace>TGS.Apis.AgentApi</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="9.5.3" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.4" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
+    <PackageReference Include="prometheus-net.AspNetCore" Version="4.1.1" />
+    <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="4.1.1" />
+    <PackageReference Include="Scrutor" Version="3.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Report\DataServices.Report.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
+    <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
+    <ProjectReference Include="..\..\Libraries\IdentityVerifiers\IdentityVerifiers.csproj" />
+    <ProjectReference Include="..\..\Repositories\Operator.Repositories\Operator.Repositories.csproj" />
+    <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
+    <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
+    <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
+    <ProjectReference Include="..\OperatorApi\OperatorApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+
+</Project>

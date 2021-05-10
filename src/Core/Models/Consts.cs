@@ -73,6 +73,7 @@ namespace TGS.Core.Models
             public static readonly string GameProviderId = "gameProviderId";
             public static readonly string GameProviderConfigurationId = "gameProviderConfigurationId";
             public static readonly string PlatformType = "platformType";
+            public static readonly string AgentToken = "agentToken";
             public static readonly string PlayerToken = "playerToken";
             public static readonly string PlayerCode = "playerCode";
             public static readonly string RequestType = "requestType";

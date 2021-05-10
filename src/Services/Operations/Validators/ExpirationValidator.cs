@@ -10,6 +10,7 @@ namespace TGS.Services.Operations.Validators
         Task ThrowIfPlayerLoginExpiredAsync(string playerCode, PlatformType? platform = null);
 
         Task ThrowIfPlayerLoginExpiredAsync(Guid loginRecordId, string playerCode);
+        Task ThrowIfAgentLoginExpiredAsync(Guid loginRecordId, Guid agentId);
     }
 
     public sealed class ExpirationValidator : IExpirationValidator
@@ -34,6 +35,9 @@ namespace TGS.Services.Operations.Validators
             VerifyLoginRecordStatus(loginRecord?.Status, playerCode);
             VerifyLoginRecordExpiredTime(loginRecord?.ExpiredOn, playerCode);
         }
+
+        Task IExpirationValidator.ThrowIfAgentLoginExpiredAsync(Guid loginRecordId, Guid agentId) =>
+            throw new NotImplementedException();
 
         private static void VerifyLoginRecordPlayer(string loginRecordPlayerCode, string playerCode)
         {
