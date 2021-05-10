@@ -10,7 +10,7 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
-    <GlobalNugetConfig Condition="'$(UserProfile)'==''">~/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
+    <GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
     <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
     <DockerfileTag Condition="$(DockerfileTag) == ''">tgs-api</DockerfileTag>
   </PropertyGroup>
@@ -18,6 +18,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;8618;8601;8602</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Dockerfile.original" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
