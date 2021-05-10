@@ -28,14 +28,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 type: "boolean",
                 nullable: false,
                 defaultValue: false);
-
-            migrationBuilder.AddColumn<string>(
-                name: "player_code",
-                schema: "bet",
-                table: "game_actions",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -54,11 +46,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 name: "transfer_wallet",
                 schema: "dbo",
                 table: "game_providers");
-
-            migrationBuilder.DropColumn(
-                name: "player_code",
-                schema: "bet",
-                table: "game_actions");
         }
     }
 }
