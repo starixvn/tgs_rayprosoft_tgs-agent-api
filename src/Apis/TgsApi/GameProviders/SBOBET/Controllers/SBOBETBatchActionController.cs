@@ -17,7 +17,7 @@ using TGS.Shared.Game.Models.SBOBET.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 {
-    [Route("api/batch")]
+    [Route("api/sbo/batch")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]

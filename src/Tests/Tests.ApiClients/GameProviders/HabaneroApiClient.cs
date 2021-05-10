@@ -17,7 +17,7 @@ namespace TGS.Tests.ApiClients.GameProviders
 
     public sealed class HabaneroApiClient : BaseApiClient, IHabaneroApiClient
     {
-        private static readonly string RoutePrefix = "api/provider";
+        private static readonly string RoutePrefix = "api/haba";
 
         public HabaneroApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json) :
             base(client, logger, json)

@@ -43,11 +43,18 @@ namespace TGS.Services.GameOperations.Data
                     $"Missing game external id for '{s.PlatformType}' of provider config with id={s.GameProviderConfigurationId}",
                     InvalidGameActionErrorCode.GameNotFound);
             }
+        }
 
-            if (s.GameActionType.IsNotAllOf(LockAmount, PlaceBet, UnlockAmount) && !s.HasExtBetId)
+        private static void ThrowIfHaveNoExternalBetIds(GameActionState s)
+        {
+            if (s.HasExtBetId ||
+                s.GameActionType.IsOneOf(LockAmount, PlaceBet, UnlockAmount) ||
+                s.GameActionType == CancelTransaction && s.ReferencedGameAction.Type == LockAmount)
             {
-                throw new InvalidGameActionException("Missing external bet ID.");
+                return;
             }
+
+            throw new InvalidGameActionException("Missing external bet ID.");
         }
 
         private static async Task ThrowIfExternalTransactionIdBelongsToDifferentRoundAsync(ITgsRepository repository,

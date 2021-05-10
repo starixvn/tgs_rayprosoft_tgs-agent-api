@@ -23,7 +23,7 @@ using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
 {
-    [Route("api/provider")]
+    [Route("api/sbo")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
