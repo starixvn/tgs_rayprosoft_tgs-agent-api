@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -13,11 +14,27 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasKey(e => e.Id)
                 .HasName("pk_transactions");
 
+            builder.Property(c => c.PlayerCode)
+                .IsRequired();
+
             builder.Property(c => c.Amount)
                 .HasPrecision(18, 6);
 
             builder.Property(c => c.Balance)
                 .HasPrecision(18, 6);
+
+            builder.Property(c => c.Type)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
+
+            builder.Property(e => e.RecordedOn)
+                .IsRequired();
+
+            builder.Property(e => e.SentOn)
+                .IsRequired(false);
+
+            builder.HasIndex(e => e.PlayerCode)
+                .HasDatabaseName("ix_transactions_player_code");
 
             builder
                 .HasOne(e => e.Brand)

@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,12 +35,21 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Agent.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\Player.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Player.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Update="Application\Resources\Agent.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Agent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\Player.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Player.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

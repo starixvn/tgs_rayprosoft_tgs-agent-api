@@ -55,6 +55,7 @@ namespace TGS.Wallet.Repositories
                             .AddAsync(new()
                             {
                                 Id = transactionId,
+                                PlayerCode = playerCode,
                                 WalletId = walletId,
                                 BrandId = brandId,
                                 Amount = amount,
