@@ -8,7 +8,6 @@
         Bonus = 3,
         Rebate = 4,
         Dividend = 5,
-        Promotion = 6,
-        Other = 99
+        Promotion = 6
     }
 }

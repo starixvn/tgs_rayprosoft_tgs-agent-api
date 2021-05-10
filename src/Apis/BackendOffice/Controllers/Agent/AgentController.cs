@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
+using TGS.Services.BackOffice.Application.Models.AgentAdjust;
 
 namespace TGS.Apis.BackendOffice.Controllers.Agent
 {
@@ -42,6 +43,14 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
         public Task<MessageResponse> UpdateAgentAsync(Guid id, UpdateAgentRequest request)
         {
             request.Id = id;
+            return _mediator.Send(request);
+        }
+
+        [HttpPost("{id}/adjust")]
+        [Description("Create an agent adjustment")]
+        public Task<MessageResponse> CreateAgentAdjustmentAsync(Guid id, CreateAgentAdjustmentRequest request)
+        {
+            request.AgentId = id;
             return _mediator.Send(request);
         }
     }

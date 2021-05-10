@@ -132,4 +132,16 @@
   <data name="BalanceMustGreaterThanZero" xml:space="preserve">
     <value>余额必须大于零</value>
   </data>
+  <data name="TargetAgentNotFound" xml:space="preserve">
+    <value>找不到目标代理</value>
+  </data>
+  <data name="TargetAgentNotHomologue" xml:space="preserve">
+    <value>目标代理非同源</value>
+  </data>
+  <data name="TargetPlayerNotFound" xml:space="preserve">
+    <value>找不到目标玩家</value>
+  </data>
+  <data name="TargetPlayerNotUnderAgent" xml:space="preserve">
+    <value>目标玩家不在代理下</value>
+  </data>
 </root>

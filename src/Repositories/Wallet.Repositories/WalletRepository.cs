@@ -27,7 +27,8 @@ namespace TGS.Wallet.Repositories
             Guid walletId,
             string playerCode,
             TransactionTypes transactionType,
-            decimal amount)
+            decimal amount,
+            string? description)
         {
             const string sql = "dbo.wallet_update_wallet_balance";
             var updatedOn = DateTimeOffset.UtcNow;
@@ -69,6 +70,7 @@ namespace TGS.Wallet.Repositories
                                     TransactionTypes.Promotion  => TransactionType.Promotion,
                                     _                           => TransactionType.Other
                                 },
+                                Description = description,
                                 RecordedOn = DateTimeOffset.Now
                             })
                             .ConfigureAwait(false);
