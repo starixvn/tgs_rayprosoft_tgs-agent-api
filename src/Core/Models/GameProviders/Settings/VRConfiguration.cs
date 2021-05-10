@@ -3,14 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TGS.Core.Models.GameProviders.Settings.VR;
 
 namespace TGS.Core.Models.GameProviders.Settings
 {
+    /// <summary>
+    /// VR 設定檔案
+    /// </summary>
     public record VRConfiguration : PluggableConfigurationBase
     {
-        public Uri ApiUrl { get; init; }
-        public string Deskey { get; init; }
-        public string Merchantid { get; init; }
-        public Dictionary<string, string> MerchantCodes { get; init; }
+        /// <summary>
+        /// Gets or sets the brand merchants.
+        /// </summary>
+        /// <value>
+        /// The brand merchants.
+        /// </value>
+        public VRBrandMerchant[] BrandMerchants { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.VR;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -56,9 +57,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new VRConfiguration
             {
                 ServiceEndpointUrl =
-                    _env.IsDocker() ? new Uri("http://game-VR") : new("http://localhost:62330"),
-                ApiUrl = new("https://api.prerelease-env.biz"),
-                Deskey = "PLFNNVZ68DF4V88XZ8B0688660Z2LBP2"
+                _env.IsDocker() ? new Uri("http://game-VR") : new("http://localhost:62330"),
+                BrandMerchants = new VRBrandMerchant[] {
+                    new VRBrandMerchant(){
+                        BrandCode="Default",
+                        ApiUrl = new("https://pmws.vrbetapi.com/"),
+                        Version= "1.0",
+                        Merchantid="WGWG",
+                        Deskey = "PLFNNVZ68DF4V88XZ8B0688660Z2LBP2",
+                        Status=true
+                    }
+                }
             };
         }
 

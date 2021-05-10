@@ -1,2 +1,2 @@
 Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-Lottery Lobby,,,,Lottery,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Lottery Lobby,,,,LotteryLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
