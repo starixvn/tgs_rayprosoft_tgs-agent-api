@@ -60,7 +60,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             /*
             * 建立Game交易單
             */
-            var transactionGameProviderId = await _gameProviderFundTransferTransactionRepository.AddAsync(new GameProviderFundTransferTransactionAddRequest()
+            var transactionGameProviderId = await _gameProviderFundTransferTransactionRepository.AddAsync(new AddGameProviderFundTransferTransactionRequest()
             {
                 TransactionId = null,
                 GameProviderId = gameProviderId,
@@ -107,7 +107,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             }
 
 
-            await _gameProviderFundTransferTransactionRepository.UpdateAsync(new GameProviderFundTransferTransactionUpdateRequest
+            await _gameProviderFundTransferTransactionRepository.UpdateAsync(new UpdateGameProviderFundTransferTransactionRequest
             {
                 GameProviderFundTransferTransactionId = transactionGameProviderId.Value,
                 TransactionId = wallet.TransactionId,
@@ -152,7 +152,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             /*
           * 建立Game交易單
           */
-            var transactionGameProviderId = await _gameProviderFundTransferTransactionRepository.AddAsync(new GameProviderFundTransferTransactionAddRequest()
+            var transactionGameProviderId = await _gameProviderFundTransferTransactionRepository.AddAsync(new AddGameProviderFundTransferTransactionRequest()
             {
                 TransactionId = null,
                 GameProviderId = gameProviderId,
@@ -202,7 +202,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             /*
            * 更新Game交易單
            */
-            await _gameProviderFundTransferTransactionRepository.UpdateAsync(new GameProviderFundTransferTransactionUpdateRequest
+            await _gameProviderFundTransferTransactionRepository.UpdateAsync(new UpdateGameProviderFundTransferTransactionRequest
             {
                 GameProviderFundTransferTransactionId = transactionGameProviderId.Value,
                 TransactionId = transactionsId ?? null,

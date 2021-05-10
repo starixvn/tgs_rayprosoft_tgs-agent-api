@@ -7,7 +7,7 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.GameProviders.Repositories.Models.GameProviderFundTransferTransaction
 {
-    public record GameProviderFundTransferTransactionAddRequest
+    public record AddGameProviderFundTransferTransactionRequest
     {
         public Guid? TransactionId { get; set; }
         public Guid GameProviderId { get; set; }

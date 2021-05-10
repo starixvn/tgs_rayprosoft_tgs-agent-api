@@ -12,9 +12,9 @@ namespace TGS.GameProviders.Repositories
     public interface IGameProviderFundTransferTransactionRepository
     {
 
-        ValueTask<Guid?> AddAsync(GameProviderFundTransferTransactionAddRequest request);
-        ValueTask<Guid?> UpdateAsync(GameProviderFundTransferTransactionUpdateRequest request);
-        ValueTask<GameProviderFundTransferTransactionGetResponse?> GetAsync(Guid gameProviderFundTransferTransactionId);
+        ValueTask<Guid?> AddAsync(AddGameProviderFundTransferTransactionRequest request);
+        ValueTask<Guid?> UpdateAsync(UpdateGameProviderFundTransferTransactionRequest request);
+        ValueTask<GetGameProviderFundTransferTransactionResponse?> GetAsync(Guid gameProviderFundTransferTransactionId);
     }
 
     internal sealed class GameProviderFundTransferTransactionRepository : IGameProviderFundTransferTransactionRepository
@@ -31,7 +31,7 @@ namespace TGS.GameProviders.Repositories
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        async ValueTask<Guid?> IGameProviderFundTransferTransactionRepository.AddAsync(GameProviderFundTransferTransactionAddRequest request)
+        async ValueTask<Guid?> IGameProviderFundTransferTransactionRepository.AddAsync(AddGameProviderFundTransferTransactionRequest request)
         {
             var gameProviderFundTransferTransactionId = GuidExtensions.NewSequentialGuid();
             var data = new GameProviderFundTransferTransaction()
@@ -64,7 +64,7 @@ namespace TGS.GameProviders.Repositories
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        async ValueTask<Guid?> IGameProviderFundTransferTransactionRepository.UpdateAsync(GameProviderFundTransferTransactionUpdateRequest request)
+        async ValueTask<Guid?> IGameProviderFundTransferTransactionRepository.UpdateAsync(UpdateGameProviderFundTransferTransactionRequest request)
         {
             var data = _repository.TransactionGameProviders.Where(x => x.GameProviderFundTransferTransactionId == request.GameProviderFundTransferTransactionId).FirstOrDefault();
             if (data == null)
@@ -88,7 +88,7 @@ namespace TGS.GameProviders.Repositories
         /// </summary>
         /// <param name="gameProviderFundTransferTransactionId">The game provider fund transfer transaction identifier.</param>
         /// <returns></returns>
-        async ValueTask<GameProviderFundTransferTransactionGetResponse?> IGameProviderFundTransferTransactionRepository.GetAsync(Guid gameProviderFundTransferTransactionId)
+        async ValueTask<GetGameProviderFundTransferTransactionResponse?> IGameProviderFundTransferTransactionRepository.GetAsync(Guid gameProviderFundTransferTransactionId)
         {
             var data = _repository.TransactionGameProviders.Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId).FirstOrDefault();
 
@@ -97,7 +97,7 @@ namespace TGS.GameProviders.Repositories
                 return new();
             }
 
-            return new GameProviderFundTransferTransactionGetResponse()
+            return new GetGameProviderFundTransferTransactionResponse()
             {
                 GameProviderFundTransferTransactionId = data.GameProviderFundTransferTransactionId,
                 TransactionId = data.TransactionId,
