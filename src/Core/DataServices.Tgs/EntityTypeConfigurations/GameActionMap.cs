@@ -63,9 +63,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Balance)
                 .HasPrecision(18, 6);
 
-            builder.Property(c => c.PlayerCode)
-                .IsRequired();
-
             builder.Property(c => c.PlayerIp)
                 .HasMaxLength(128)
                 .IsRequired();
