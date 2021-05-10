@@ -51,12 +51,12 @@ namespace TGS.Services.Operator
 
         private string SerializeValidateCodeData<TData>(TData data) => JsonSerializer.Serialize(data);
 
-        public async ValueTask SendEmailAsync(CultureInfo cultureInfo, string email, string ValidateCode)
+        public async ValueTask SendEmailAsync(CultureInfo cultureInfo, string email, string validateCode)
         {
             var mailSubject = Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailSubject), cultureInfo)!;
             var mailBody = string.Format(
                 Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), cultureInfo)!,
-                ValidateCode);
+                validateCode);
 
             var mailMessage = new EmailPackage(
                 new[] { email },
