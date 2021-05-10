@@ -12,7 +12,8 @@ namespace TGS.Core.Models.Services.Games
         public bool IsDuplicate { get; init; }
         public DateTimeOffset BatchTime { get; init; }
         public int TransactionsCount { get; init; }
-        public BatchBetResultError[] Errors { get; init; }
+        public BatchBetResultData[] Errors { get; init; }
+        public BatchBetResultData[] Results { get; init; }
         public Dictionary<string, decimal> PlayerBalances { get; init; }
     }
 }
