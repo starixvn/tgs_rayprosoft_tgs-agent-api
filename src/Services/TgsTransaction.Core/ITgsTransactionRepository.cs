@@ -3,7 +3,7 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.TgsTransaction.Core
 {
-    public interface ITgsTransaction
+    public interface ITgsTransactionRepository
     {
         Task CreateTransactionPromotionsAsync(TransactionPromotion[] transactionPromotion);
     }

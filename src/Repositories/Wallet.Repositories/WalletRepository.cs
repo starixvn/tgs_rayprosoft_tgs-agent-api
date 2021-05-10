@@ -15,27 +15,28 @@ namespace TGS.Wallet.Repositories
     internal class WalletRepository : IWalletRepository
     {
         private readonly ITgsRepository _tgsRepository;
-        private readonly ITransactionManager _transcationManager;
+        private readonly SystemTransactionManager _transactionManager;
 
-        public WalletRepository(ITgsRepository tgsRepository, ITransactionManager transcationManager)
+        public WalletRepository(ITgsRepository tgsRepository, SystemTransactionManager transactionManager)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-            _transcationManager = transcationManager ?? throw new ArgumentNullException(nameof(transcationManager));
+            _transactionManager = transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
         }
 
         public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(Guid brandId,
             Guid walletId,
             string playerCode,
             TransactionTypes transactionType,
-            decimal amount)
+            decimal amount,
+            string? description)
         {
             const string sql = "dbo.wallet_update_wallet_balance";
             var updatedOn = DateTimeOffset.UtcNow;
             var transactionId = GuidExtensions.NewSequentialGuid();
 
-            var postBalance = await _transcationManager
+            var postBalance = await _transactionManager
                 .ExecuteTransactionAsync(
-                    () => _tgsRepository,
+                    _tgsRepository,
                     IsolationLevel.ReadCommitted,
                     transactionId.ToString(),
                     async ctx =>
@@ -71,6 +72,7 @@ namespace TGS.Wallet.Repositories
                                     TransactionTypes.GameProviderFundOut => TransactionType.GameProviderFundOut,
                                     _                           => TransactionType.Other
                                 },
+                                Description = description,
                                 RecordedOn = DateTimeOffset.Now
                             })
                             .ConfigureAwait(false);

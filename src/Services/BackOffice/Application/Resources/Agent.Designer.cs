@@ -97,6 +97,42 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Target agent is not found..
+        /// </summary>
+        public static string TargetAgentNotFound {
+            get {
+                return ResourceManager.GetString("TargetAgentNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target agent is not homologue..
+        /// </summary>
+        public static string TargetAgentNotHomologue {
+            get {
+                return ResourceManager.GetString("TargetAgentNotHomologue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target player is not found..
+        /// </summary>
+        public static string TargetPlayerNotFound {
+            get {
+                return ResourceManager.GetString("TargetPlayerNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Target player is not under agent..
+        /// </summary>
+        public static string TargetPlayerNotUnderAgent {
+            get {
+                return ResourceManager.GetString("TargetPlayerNotUnderAgent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wallet is not found..
         /// </summary>
         public static string WalletNotFound {

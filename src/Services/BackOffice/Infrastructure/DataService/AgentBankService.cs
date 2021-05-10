@@ -30,9 +30,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
     public class AgentBankService : BaseRepositoryOperations<ITgsRepository>, IAgentBankService
     {
         private readonly ITgsRepository _repository;
-        private readonly ITransactionManager _transactionManager;
+        private readonly SystemTransactionManager _transactionManager;
 
-        public AgentBankService(ITgsRepository repository, ITransactionManager transactionManager) : base(repository)
+        public AgentBankService(ITgsRepository repository, SystemTransactionManager transactionManager) : base(
+            repository)
         {
             _repository = repository;
             _transactionManager = transactionManager;
@@ -68,7 +69,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
-            return _transactionManager.ExecuteTransactionAsync(() => _repository,
+            return _transactionManager.ExecuteTransactionAsync(_repository,
                 IsolationLevel.ReadCommitted, id,
                 async _ =>
                 {

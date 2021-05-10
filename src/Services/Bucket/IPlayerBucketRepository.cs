@@ -3,9 +3,9 @@ using TGS.Services.PlayerBucket.Core.Models;
 
 namespace TGS.Services.PlayerBucket.Core
 {
-    public interface IPlayerBucketService
+    public interface IPlayerBucketRepository
     {
-        ValueTask<decimal> CreateDepositAsync(CreatePlayerBucketWithDepositRequest request);
+        ValueTask<decimal> CreatePlayerBucketWithDepositAsync(CreatePlayerBucketWithDepositRequest request);
         Task CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] request);
         ValueTask<bool> IsBucketFull(string playerCode);
     }

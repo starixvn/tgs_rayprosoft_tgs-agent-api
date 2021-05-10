@@ -19,11 +19,11 @@ namespace TGS.Services.Report.Application.Commands.RoundAggregate
     {
         private readonly IRoundAggregateService _roundAggregateService;
         private readonly ITgsRoundService _roundService;
-        private readonly ITransactionManager _transactionManager;
+        private readonly SystemTransactionManager _transactionManager;
 
         public ManualCreateUpdateRoundAggregateHandler(ITgsRoundService roundService,
             IRoundAggregateService roundAggregateService,
-            ITransactionManager transactionManager,
+            SystemTransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _roundService = roundService;
@@ -70,7 +70,7 @@ namespace TGS.Services.Report.Application.Commands.RoundAggregate
                     0, 0, result.Offset).AddHours(1);
 
                 var response = await _transactionManager.ExecuteTransactionAsync(
-                    () => _roundAggregateService.Repository,
+                    _roundAggregateService.Repository,
                     IsolationLevel.ReadCommitted, id,
                     async _ =>
                     {

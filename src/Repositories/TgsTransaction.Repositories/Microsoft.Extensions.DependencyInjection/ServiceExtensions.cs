@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddTgsTransactionRepositoriesServices(this IServiceCollection services)
         {
-            services.AddTransient<ITgsTransaction, TransactionService>();
+            services.AddTransient<ITgsTransactionRepository, TransactionRepositoryRepository>();
 
             return services;
         }

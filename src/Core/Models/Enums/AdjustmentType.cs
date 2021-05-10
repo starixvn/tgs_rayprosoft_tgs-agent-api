@@ -1,6 +1,6 @@
 ﻿namespace TGS.Core.Models.Enums
 {
-    public enum AdjustType
+    public enum AdjustmentType
     {
         Add = 1,
         Subtract = 2

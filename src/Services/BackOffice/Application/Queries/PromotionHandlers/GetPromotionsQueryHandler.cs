@@ -16,9 +16,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
         PagedResponse<PromotionModel>>
     {
         private readonly IPlayerService _playerService;
-        private readonly IPromotionService _service;
+        private readonly IPromotionRepository _service;
 
-        public GetPromotionsQueryHandler(IPromotionService service, IPlayerService playerService,
+        public GetPromotionsQueryHandler(IPromotionRepository service, IPlayerService playerService,
             IHttpContextAccessor accessor) :
             base(accessor)
         {

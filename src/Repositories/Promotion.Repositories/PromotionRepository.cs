@@ -15,32 +15,32 @@ using PromotionType = TGS.Core.Models.Settings.PromotionType;
 
 namespace Promotion.Repositories
 {
-    public class PromotionService : BaseRepositoryOperations<ITgsRepository>, IPromotionService
+    public class PromotionRepository : BaseRepositoryOperations<ITgsRepository>, IPromotionRepository
     {
         private readonly ITgsRepository _repository;
 
-        public PromotionService(ITgsRepository tgsRepository) : base(
+        public PromotionRepository(ITgsRepository tgsRepository) : base(
             tgsRepository)
         {
             _repository = tgsRepository;
         }
 
-        Task<TGS.Core.DataServices.Tgs.Models.Promotion> IPromotionService.GetPromotionAsync(
+        Task<TGS.Core.DataServices.Tgs.Models.Promotion> IPromotionRepository.GetPromotionAsync(
             Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate,
             Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
                 IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        Task<bool> IPromotionService.ExistsAsync(
+        Task<bool> IPromotionRepository.ExistsAsync(
             Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate) => ExistsAsync(predicate);
 
-        IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion> IPromotionService.GetPromotionQueries(
+        IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion> IPromotionRepository.GetPromotionQueries(
             Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
                 IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        async Task IPromotionService.UpdatePromotionAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion,
+        async Task IPromotionRepository.UpdatePromotionAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion,
             UpdatePromotionRequest request)
         {
             var vips = await _repository.VipLevels.AsQueryable()
@@ -75,7 +75,7 @@ namespace Promotion.Repositories
             await tran.CommitAsync();
         }
 
-        async Task IPromotionService.CreatePromotionAsync(CreatePromotionRequest request,
+        async Task IPromotionRepository.CreatePromotionAsync(CreatePromotionRequest request,
             PromotionType promotionTypeModel)
         {
             var promotion = new TGS.Core.DataServices.Tgs.Models.Promotion
@@ -108,7 +108,7 @@ namespace Promotion.Repositories
             await CreateEntityAsync(promotion);
         }
 
-        Task IPromotionService.ChangePromotionStatusAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion) =>
+        Task IPromotionRepository.ChangePromotionStatusAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion) =>
             UpdateEntityAsync(promotion);
 
         private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(

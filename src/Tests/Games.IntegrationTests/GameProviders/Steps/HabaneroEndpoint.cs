@@ -223,12 +223,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        [Given(@"I cancel transaction")]
-        [When(@"I cancel transaction")]
+        [Given(@"I cancel transactionRepository")]
+        [When(@"I cancel transactionRepository")]
         public Task WhenICancelTransaction() =>
             CancelTransactionAsync();
 
-        [When(@"I cancel non-existent transaction for game ""(.*)""")]
+        [When(@"I cancel non-existent transactionRepository for game ""(.*)""")]
         public Task WhenICancelNonExistentTransactionForGame(string externalGameId) =>
             CancelNonExistentTransactionForGameAsync(externalGameId);
 
@@ -482,7 +482,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .FirstAsync(ga => ga.ExternalTransactionId == externalTransactionId);
 
             gameAction.Type.Should().Be(type, " The type of the game action should be as expected ");
-            gameAction.Amount.Should().Be(amount, "The amount of the transaction should be as expected");
+            gameAction.Amount.Should().Be(amount, "The amount of the transactionRepository should be as expected");
         }
 
         [Then(@"\#(.*) game action will NOT be recorded in the database")]

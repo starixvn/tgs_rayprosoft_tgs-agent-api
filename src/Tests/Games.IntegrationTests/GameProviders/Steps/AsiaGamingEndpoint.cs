@@ -164,12 +164,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             }
         }
 
-        [Given(@"I cancel transaction")]
-        [When(@"I cancel transaction")]
+        [Given(@"I cancel transactionRepository")]
+        [When(@"I cancel transactionRepository")]
         public Task WhenICancelTransaction() =>
             CancelTransactionAsync();
 
-        [When(@"I cancel non-existent transaction for game ""(.*)""")]
+        [When(@"I cancel non-existent transactionRepository for game ""(.*)""")]
         public Task WhenICancelNonExistentTransactionForGame(string externalGameId) =>
             CancelTransactionAsync(externalGameId, true);
 

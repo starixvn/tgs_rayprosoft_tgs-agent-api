@@ -31,21 +31,21 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
         private static readonly DateTimeOffset _PreviousMonday = _Now.AddDays(-7).GetMonday();
         private static readonly DateTimeOffset _PreviousSunday = _Now.AddDays(-7).GetSunday();
-        private readonly IPlayerBucketService _playerBucketService;
+        private readonly IPlayerBucketRepository _playerBucketService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly ITgsPlayerService _playerService;
-        private readonly IPromotionBonusService _promotionBonusService;
+        private readonly IPromotionBonusRepository _promotionBonusService;
         private readonly ITgsPromotionService _promotionService;
-        private readonly ITgsTransaction _transaction;
+        private readonly ITgsTransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public CreatePromotionBonusWeeklyHandler(IPromotionBonusService promotionBonusService,
+        public CreatePromotionBonusWeeklyHandler(IPromotionBonusRepository promotionBonusService,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             ITgsPromotionService promotionService,
             ITgsPlayerService playerService,
-            IPlayerBucketService playerBucketService,
+            IPlayerBucketRepository playerBucketService,
             IWalletRepository walletRepository,
-            ITgsTransaction transaction,
+            ITgsTransactionRepository transactionRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _promotionBonusService = promotionBonusService;
@@ -54,7 +54,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             _playerBucketService = playerBucketService;
             _walletRepository = walletRepository;
             _playerService = playerService;
-            _transaction = transaction;
+            _transactionRepository = transactionRepository;
         }
 
         public override async Task<MessageResponse> Handle(CreatePromotionBonusWeeklyRequest request,
@@ -174,7 +174,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 });
             }
 
-            await _transaction.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
+            await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
 
             return CreateValidResponse<MessageResponse>();
         }

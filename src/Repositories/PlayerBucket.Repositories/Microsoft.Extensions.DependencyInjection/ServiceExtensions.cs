@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddPlayerBucketRepositoriesServices(this IServiceCollection services)
         {
-            services.AddTransient<IPlayerBucketService, PlayerBucketService>();
+            services.AddTransient<IPlayerBucketRepository, PlayerBucketRepository>();
 
             return services;
         }
