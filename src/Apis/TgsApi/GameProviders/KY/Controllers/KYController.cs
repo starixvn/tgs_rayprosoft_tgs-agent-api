@@ -156,7 +156,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                     var gameProviderConfigurationId = default(Guid?);
                     var success = true;
                     var PlayerCode = gameRecord.Account.Split('_')[1];
-                    player = players.Where(x => x.Key == PlayerCode).FirstOrDefault().Value;
+                    players.TryGetValue(PlayerCode, out player);
                     if (player == null)
                     {
                         player = await _playerOperations.GetPlayerByCodeAsync(PlayerCode);
@@ -171,14 +171,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                     }
 
 
-                    game = gameIds.Where(x => x.Key == gameRecord.KindID).FirstOrDefault().Value;
+                    gameIds.TryGetValue(gameRecord.KindID, out game);
                     if (game == null)
                     {
                         var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gameRecord.KindID.ToString()).ConfigureAwait(false);
 
                         if (games != null && games.Length > 0)
                         {
-                            game = games.FirstOrDefault();
+                            game = games[0];
                             gameIds.Add(response.Data.List.KindID[i], game);
                         }
                     }

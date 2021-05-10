@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\GameProviders.Repositories\GameProviders.Repositories.csproj" />
     <ProjectReference Include="..\..\Clients\Promotion.Client\Promotion.Client.csproj" />
     <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />

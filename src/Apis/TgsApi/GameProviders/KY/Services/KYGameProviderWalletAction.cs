@@ -18,7 +18,7 @@ using TGS.Shared.Game.Models.KY.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 {
-    public record KYGameProviderWalletAction : BaseGameProviderWalletAction
+    public class KYGameProviderWalletAction : BaseGameProviderWalletAction
     {
         private readonly IKYApiClient _client;
         private readonly ISettingOperations _settingOperations;
@@ -79,12 +79,9 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             var response = await _client.GetAPIAsync<KYFundCheckingResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
             var checking = false;
-            if (response.Data.Code == 0)
+            if (response.Data.Code == 0 && response.Data.Status == 0)
             {
-                if (response.Data.Status == 0)
-                {
-                    checking = true;
-                }
+                checking = true;
             }
 
             return new() { Checking = checking, OrderId = (checking) ? orderId : null };
@@ -196,7 +193,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             return new() { Success = success, Balance = balance, OrderId = orderId };
         }
 
-        public override async ValueTask<decimal?> GameProviderGetBalanceAsync(CachedPlayer player)
+        public override async ValueTask<decimal?> GetGameProviderBalanceAsync(CachedPlayer player)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts

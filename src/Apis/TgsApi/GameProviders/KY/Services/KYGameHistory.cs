@@ -31,14 +31,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
-            var response = await _gameRoundsProcessor.GetAsync(round.Id).ConfigureAwait(false);
-
-            if (response.roundsDetail == null)
-            {
-                return null;
-            }
-
-            var gameRecord = JsonSerializer.Deserialize<KYGameRecord>(response.roundsDetail.AdditionalData);
+            var gameRecord = JsonSerializer.Deserialize<KYGameRecord>(round.RoundDetail.AdditionalData);
 
             if (gameRecord == null)
             {

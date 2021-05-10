@@ -34,7 +34,7 @@ namespace TGS.Services.Operations
 
         Task<bool> CurrencySupportedAsync(Guid gameProviderId, string currencyCode);
 
-        Task<string[]> CurrencySupportedAsync(Guid gameProviderId);
+        Task<string[]> GetGameProviderCurrenciesAsync(Guid gameProviderId);
 
         //Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
 
@@ -199,7 +199,7 @@ namespace TGS.Services.Operations
             return currencies.IgnoreCaseContains(currencyCode);
         }
 
-        async Task<string[]> IGameProviderOperations.CurrencySupportedAsync(Guid gameProviderId)
+        async Task<string[]> IGameProviderOperations.GetGameProviderCurrenciesAsync(Guid gameProviderId)
         {
             return await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderCurrencies,
                 gameProviderId, TimeSpan.FromHours(2),

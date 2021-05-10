@@ -14,6 +14,7 @@ using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
@@ -97,13 +98,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var response = await _client.GetAPIAsync<KYGameUrlResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
-            string url = (string)null;
-            if (response.Data.Code == 0)
+            if (response.Data.Code != 0)
             {
-                url = response.Data.Url;
+                throw new GameProviderApiErrorException(response.Message);
             }
 
-            return new() { Url = url };
+            return new() { Url = response.Data.Url };
         }
     }
 }

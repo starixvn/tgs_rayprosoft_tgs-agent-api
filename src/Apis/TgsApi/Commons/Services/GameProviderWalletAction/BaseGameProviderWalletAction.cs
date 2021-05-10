@@ -12,7 +12,7 @@ using TGS.Services.WalletService;
 
 namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 {
-    public abstract record BaseGameProviderWalletAction : IGameProviderWalletAction
+    public abstract class BaseGameProviderWalletAction : IGameProviderWalletAction
     {
         private readonly IPlayerOperations _playerOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
@@ -136,7 +136,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             {
                 throw new PlayerNotFoundException(request.PlayerCode);
             }
-            var responseBalance = await GameProviderGetBalanceAsync(player);
+            var responseBalance = await GetGameProviderBalanceAsync(player);
             if (responseBalance == null)
             {
                 throw new PlayerNotFoundException(request.PlayerCode);
@@ -231,7 +231,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 throw new PlayerNotFoundException(request.PlayerCode);
             }
 
-            var balance = await GameProviderGetBalanceAsync(player);
+            var balance = await GetGameProviderBalanceAsync(player);
 
             return new() { Success = balance.HasValue, Balance = balance ?? 0 };
         }
@@ -269,7 +269,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 
         public abstract ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId);
 
-        public abstract ValueTask<decimal?> GameProviderGetBalanceAsync(CachedPlayer player);
+        public abstract ValueTask<decimal?> GetGameProviderBalanceAsync(CachedPlayer player);
 
     }
 }

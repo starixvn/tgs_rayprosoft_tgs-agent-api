@@ -53,7 +53,7 @@ namespace TGS.GameProviders.Repositories
                 Description = request.Description
             };
 
-            await _repository.TransactionGameProviders.AddAsync(data).ConfigureAwait(false);
+            await _repository.GameProviderFundTransferTransactions.AddAsync(data).ConfigureAwait(false);
             await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             return gameProviderFundTransferTransactionId;
@@ -66,7 +66,7 @@ namespace TGS.GameProviders.Repositories
         /// <returns></returns>
         async ValueTask<Guid?> IGameProviderFundTransferTransactionRepository.UpdateAsync(UpdateGameProviderFundTransferTransactionRequest request)
         {
-            var data = _repository.TransactionGameProviders.Where(x => x.GameProviderFundTransferTransactionId == request.GameProviderFundTransferTransactionId).FirstOrDefault();
+            var data = _repository.GameProviderFundTransferTransactions.Where(x => x.GameProviderFundTransferTransactionId == request.GameProviderFundTransferTransactionId).FirstOrDefault();
             if (data == null)
             {
                 return new();
@@ -78,7 +78,7 @@ namespace TGS.GameProviders.Repositories
             data.Balance = request.Balance;
             data.UpdatedOn = request.UpdatedOn;
             data.Description = request.Description;
-            _repository.TransactionGameProviders.Update(data);
+            _repository.GameProviderFundTransferTransactions.Update(data);
             await _repository.SaveChangesAsync().ConfigureAwait(false);
             return data.GameProviderFundTransferTransactionId;
         }
@@ -90,7 +90,7 @@ namespace TGS.GameProviders.Repositories
         /// <returns></returns>
         async ValueTask<GetGameProviderFundTransferTransactionResponse?> IGameProviderFundTransferTransactionRepository.GetAsync(Guid gameProviderFundTransferTransactionId)
         {
-            var data = _repository.TransactionGameProviders.Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId).FirstOrDefault();
+            var data = _repository.GameProviderFundTransferTransactions.Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId).FirstOrDefault();
 
             if (data == null)
             {
