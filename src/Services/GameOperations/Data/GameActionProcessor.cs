@@ -582,6 +582,8 @@ namespace TGS.Services.GameOperations.Data
             {
                 round.Status = s.NewRoundStatus;
                 round.ClientStatus = ClientRoundStatus.Open;
+                round.ReopenedOn = DateTimeOffset.UtcNow;
+                round.ReopenTurnoverAdjustment = s.BetValueResult.Turnover;
             }
             else if (s.NewRoundStatus == RoundStatus.Closed)
             {

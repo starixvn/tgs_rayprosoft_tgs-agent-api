@@ -3639,6 +3639,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("player_code");
 
+                    b.Property<decimal?>("ReopenTurnoverAdjustment")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reopen_turnover_adjustment");
+
+                    b.Property<DateTimeOffset?>("ReopenedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reopened_on");
+
                     b.Property<decimal?>("SettleAmount")
                         .HasColumnType("numeric")
                         .HasColumnName("settle_amount");

@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210507081351_AddExtraInfoForGameProviderRelatedTables")]
+    [Migration("20210510051723_AddExtraInfoForGameProviderRelatedTables")]
     partial class AddExtraInfoForGameProviderRelatedTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3640,6 +3640,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("player_code");
+
+                    b.Property<decimal?>("ReopenTurnoverAdjustment")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reopen_turnover_adjustment");
+
+                    b.Property<DateTimeOffset?>("ReopenedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reopened_on");
 
                     b.Property<decimal?>("SettleAmount")
                         .HasColumnType("numeric")

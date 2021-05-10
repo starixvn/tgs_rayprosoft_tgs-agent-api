@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
@@ -6,6 +7,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<decimal>(
+                name: "reopen_turnover_adjustment",
+                schema: "bet",
+                table: "rounds",
+                type: "numeric",
+                nullable: true);
+
+            migrationBuilder.AddColumn<DateTimeOffset>(
+                name: "reopened_on",
+                schema: "bet",
+                table: "rounds",
+                type: "timestamp with time zone",
+                nullable: true);
+
             migrationBuilder.AddColumn<bool>(
                 name: "transfer_wallet",
                 schema: "dbo",
@@ -25,6 +40,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "reopen_turnover_adjustment",
+                schema: "bet",
+                table: "rounds");
+
+            migrationBuilder.DropColumn(
+                name: "reopened_on",
+                schema: "bet",
+                table: "rounds");
+
             migrationBuilder.DropColumn(
                 name: "transfer_wallet",
                 schema: "dbo",
