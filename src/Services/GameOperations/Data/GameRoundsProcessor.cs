@@ -78,6 +78,7 @@ namespace TGS.Services.GameOperations.Data
             {
                 if (round.Status == RoundStatus.Open && data.Status == RoundStatus.Closed)
                 {
+                    round.Status = data.Status;
                     round.ClosedOn = data.ClosedOn;
                     round.UpdatedOn = data.UpdatedOn;
                     round.ExternalClosedOn = data.ExternalClosedOn;
@@ -120,7 +121,7 @@ namespace TGS.Services.GameOperations.Data
                             round.WinLoss = (data.WinLoss ?? 0).Negate();
                             round.TieBetAdjustment = data.TieBetAdjustment;
                             round.ClientStatus = data.ClientStatus;
-
+                            round.ReopenedOn = DateTimeOffset.UtcNow;
                             _tgsRepository.Rounds.Update(round);
 
                             var roundDetail = new RoundDetail()
@@ -128,11 +129,13 @@ namespace TGS.Services.GameOperations.Data
                                 RoundId = round.Id,
                                 AdditionalData = data.AdditionalData
                             };
+                            _tgsRepository.RoundDetails.Update(roundDetail);
                         }
                     }
                 }
             }
             await _tgsRepository.SaveChangesAsync();
+
             return true;
         }
         public async ValueTask<(Round round, RoundDetail roundsDetail)> GetAsync(Guid roundsId)

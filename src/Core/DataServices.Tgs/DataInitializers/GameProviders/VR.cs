@@ -12,7 +12,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record VRGameProvider : IGameProvider
         {
-            private static readonly string EndpointPath = "?playerName={PLAYERNAME}&loginTime={LOGINTIME}&channelId={CHANNELID}&departureUrl={DEPARTUREURL}&isCreateUser={ISCREATEUSER}&channelType={CHANNELTYPE}";
+            //private static readonly string EndpointPath = "?playerName={PLAYERNAME}&loginTime={LOGINTIME}&channelId={CHANNELID}&departureUrl={DEPARTUREURL}&isCreateUser={ISCREATEUSER}&channelType={CHANNELTYPE}";
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -26,7 +26,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with { EndpointPath = EndpointPath };
+                        return (Game)g with { EndpointPath = string.Empty };
                     })
                     .ToArray();
 

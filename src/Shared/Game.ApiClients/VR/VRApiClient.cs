@@ -12,6 +12,7 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.GameProviders.Settings.VR;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.VR.Commons;
+using TGS.Shared.Game.Models.VR.Incoming;
 using TGS.Shared.Game.Models.VR.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.VR
@@ -20,6 +21,7 @@ namespace TGS.Shared.Game.ApiClients.VR
     {
         ValueTask<ResultData> GetAPIAsync<SourceData, ResultData>(VRBrandMerchant brandMerchant, GPAction action, SourceData request);
         Uri GetGameURLAsync(VRBrandMerchant brandMerchant, VRGameUrlRequest request);
+        ValueTask<VRGPGameRecordResponse> GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request);
 
     }
 
@@ -84,5 +86,8 @@ namespace TGS.Shared.Game.ApiClients.VR
 
             return response;
         }
+
+        ValueTask<VRGPGameRecordResponse> IVRApiClient.GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request) =>
+          ExecuteJsonRequestAsync<VRGPGameRecordRequest, VRGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/vr/GameRecord", request);
     }
 }
