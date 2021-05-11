@@ -8,6 +8,7 @@ using Moq;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Operator.Repositories;
 using TGS.Paging;
@@ -124,7 +125,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = playerCode,
                 StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
                 {
-                    Status = Core.Models.Enums.StationLetterStatus.InVerify
+                    Status = StationLetterStatus.InVerify
                 }
             });
             stationLetterPlayers.Add(new StationLetterPlayer()
@@ -132,7 +133,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = playerCode,
                 StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
                 {
-                    Status = Core.Models.Enums.StationLetterStatus.Published
+                    Status = StationLetterStatus.Published
                 }
             });
             stationLetterPlayers.Add(new StationLetterPlayer()
@@ -140,7 +141,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = playerCode,
                 StationLetter = new Core.DataServices.Tgs.Models.StationLetter()
                 {
-                    Status = Core.Models.Enums.StationLetterStatus.Rejected
+                    Status = StationLetterStatus.Rejected
                 }
             });
 
