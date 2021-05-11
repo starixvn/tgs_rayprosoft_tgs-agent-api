@@ -431,21 +431,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
                     b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("amount");
 
                     b.Property<decimal>("Balance")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("balance");
 
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
-
-                    b.Property<DateTimeOffset>("ConfirmedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("confirmed_on");
 
                     b.Property<string>("Description")
                         .HasColumnType("text")
@@ -459,12 +461,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("recorded_on");
 
-                    b.Property<DateTimeOffset>("SentOn")
+                    b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("sent_on");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
                         .HasColumnName("type");
 
                     b.Property<Guid>("WalletId")
@@ -473,6 +475,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_agent_transactions");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_transactions_agent_id");
 
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_agent_transactions_brand_id");
@@ -1715,6 +1720,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("jackpot_contribution");
 
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
                     b.Property<string>("PlayerIp")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -1767,6 +1777,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("GameActionBatchId")
                         .HasDatabaseName("ix_game_actions_game_action_batch_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_game_actions_player_code");
 
                     b.HasIndex("ReferencedGameActionId")
                         .HasDatabaseName("ix_game_actions_referenced_game_action_id");
@@ -4013,10 +4026,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
-                    b.Property<DateTimeOffset>("ConfirmedOn")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("confirmed_on");
-
                     b.Property<string>("Description")
                         .HasColumnType("text")
                         .HasColumnName("description");
@@ -4025,16 +4034,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("external_transaction_id");
 
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
                     b.Property<DateTimeOffset>("RecordedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("recorded_on");
 
-                    b.Property<DateTimeOffset>("SentOn")
+                    b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("sent_on");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("integer")
+                    b.Property<short>("Type")
+                        .HasColumnType("smallint")
                         .HasColumnName("type");
 
                     b.Property<Guid>("WalletId")
@@ -4046,6 +4060,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("BrandId")
                         .HasDatabaseName("ix_transactions_brand_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_transactions_player_code");
 
                     b.HasIndex("WalletId")
                         .HasDatabaseName("ix_transactions_wallet_id");
@@ -4543,7 +4560,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.AgentWallet", "Wallet")
                         .WithMany()
                         .HasForeignKey("WalletId")
-                        .HasConstraintName("fk_agent_transactions_agent_wallets_wallet_id")
+                        .HasConstraintName("fk_agent_transaction_wallet_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

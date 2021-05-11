@@ -64,7 +64,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient<ILicenseeService, LicenseeService>();
             services.AddTransient<IBrandPaymentService, BrandPaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
-            services.AddBackOfficeApplicationServices();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
@@ -79,6 +78,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddTransactions()
+                .AddBackOfficeApplicationServices()
                 .AddReportClientServices(configuration)
                 .AddPromotionClientServices(configuration)
                 .AddPromotionRepositoriesServices()
@@ -143,7 +143,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[] { new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture) };
+                var supportedCultures = new[] {new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture)};
 
                 options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;

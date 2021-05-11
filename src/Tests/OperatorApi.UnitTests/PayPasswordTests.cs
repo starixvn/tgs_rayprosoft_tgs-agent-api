@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Globalization;
+using System.Net.Mail;
 using System.Threading.Tasks;
+using ExpectedObjects;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
@@ -75,52 +78,95 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Start_Change_Pay_Password_Should_Send_Short_Message()
+        public void Start_Change_Pay_Password_Should_Verify_Email()
         {
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var playerCode = "abcdef123456";
+            var player = new Player
+            {
+                PlayerCode = playerCode,
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "CNY"
+            };
+            fakePlayerOperations.GetPlayerByCodeAsync(playerCode).Returns(player);
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeEmailManager = Substitute.For<IEmailManager>();
+
+            var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
 
             var sut = new StartChangePayPasswordCommandService(
                 fakePlayerOperations,
                 fakeValidateCodeGenerator,
-                fakeValidateCodeOperator);
+                fakeValidateCodeOperator,
+                fakeEmailManager);
 
+            Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
+        }
+
+        [Test]
+        public async Task Start_Change_Pay_Password_Should_Send_Confirm_Email()
+        {
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeEmailManager = Substitute.For<IEmailManager>();
+
+            var sut = new StartChangePayPasswordCommandService(
+                fakePlayerOperations,
+                fakeValidateCodeGenerator,
+                fakeValidateCodeOperator,
+                fakeEmailManager);
+
+            var email = "email@test.com";
             var player = new Player
             {
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                Phone = "0988123456",
-                PhoneAuthentication = true,
+                Email = email,
                 DefaultWalletCurrencyCode = "CNY"
             };
 
             var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
 
             var validateCode = "123456";
-            var token = "abc123";
+            var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
             fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
 
             fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
+            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
 
             fakeValidateCodeOperator
-                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<ValidateCodeData>())
                 .Returns(true);
 
-            var expected = $"Your ID verification code is : {validateCode}";
+            var expected = new
+            {
+                To = new MailAddressCollection() {
+                    new MailAddress(email)
+                },
+                Subject = "Verification Code",
+                Content = $"Your ID verification code is : {validateCode}"
+            }.ToExpectedObject();
 
-            await sut.GetAsync(command);
+            EmailPackage actual = null;
+            fakeEmailManager
+                .SendEmailAsync(Arg.Do<EmailPackage>(msg =>
+                {
+                    actual = msg;
+                }))
+                .Returns(Task.CompletedTask);
+            var actualSecurityKey = await sut.GetAsync(command);
 
-            _ = fakeValidateCodeOperator
+            _ = fakeEmailManager
                 .Received(1)
-                .SendMessageAsync(
-                    Arg.Is(player.Phone),
-                    Arg.Is(expected),
-                    Arg.Is(player.DefaultWalletCurrencyCode),
-                    Arg.Any<Guid>());
+                .SendEmailAsync(Arg.Any<EmailPackage>());
+
+            expected.ShouldMatch(actual);
+            Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
         }
 
         [Test]
