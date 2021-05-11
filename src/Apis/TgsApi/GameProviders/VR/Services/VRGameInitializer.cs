@@ -12,6 +12,7 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
+using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.ApiClients.VR;
 using TGS.Shared.Game.Models.VR.Outgoing;
 
@@ -21,18 +22,20 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
     {
         private readonly IVRApiClient _client;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IVRGamePlayerCreate _gamePlayerCreate;
         private readonly ISettingOperations _settingOperations;
 
+
         public VRGameInitializer(
-            IHttpContextAccessor httpContextAccessor,
             IVRApiClient client,
-            IHashProvider hashProvider,
-            ISettingOperations settingOperations,
-            IPlayerOperations playerOperations
+            IPlayerOperations playerOperations,
+            IVRGamePlayerCreate gamePlayerCreate,
+            ISettingOperations settingOperations
             )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _gamePlayerCreate = gamePlayerCreate ?? throw new ArgumentNullException(nameof(gamePlayerCreate));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
         }
 
@@ -55,6 +58,24 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 throw new GameProviderApiErrorException("Get configuration brandMerchant is null");
             }
 
+            var dataGetBalance = new VRGetBalanceRequest()
+            {
+                PlayerCode = player.PlayerCode
+            };
+            var response = await _client.GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, dataGetBalance).ConfigureAwait(false);
+
+            if (string.IsNullOrEmpty(response.playerName) || response.balance == -1)
+            {
+                if (await _gamePlayerCreate.CreatePlayerAsync(player).ConfigureAwait(false))
+                {
+                    response = await _client.GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, dataGetBalance).ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new PlayerNotFoundException(request.Token.PlayerCode);
+                }
+            }
+
             var date = DateTimeOffset.UtcNow.AddHours(+8);
 
             var data = new VRGameUrlRequest()
@@ -65,8 +86,6 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 IsCreateUser = "true",
                 ChannelType = 0
             };
-
-
 
             return new() { Url = _client.GetGameURLAsync(brandMerchant, data).ToString() };
         }

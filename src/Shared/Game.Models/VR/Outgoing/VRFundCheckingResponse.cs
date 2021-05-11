@@ -16,6 +16,6 @@ namespace TGS.Shared.Game.Models.VR.Outgoing
         [JsonPropertyName("recordCountPerPage")]
         public int RecordCountPerPage { get; set; }
         [JsonPropertyName("records")]
-        public IEnumerable<VRFundCheckingRecordResponse> Records { get; set; }
+        public VRFundCheckingRecordResponse[] Records { get; set; }
     }
 }

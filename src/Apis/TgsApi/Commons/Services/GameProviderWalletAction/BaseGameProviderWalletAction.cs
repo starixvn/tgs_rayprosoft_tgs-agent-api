@@ -48,6 +48,13 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             {
                 throw new PlayerNotFoundException(request.PlayerCode);
             }
+
+            var responseBalance = await GetGameProviderBalanceAsync(player);
+            if (!responseBalance.Success)
+            {
+                throw new PlayerNotFoundException(request.PlayerCode);
+            }
+
             var playerBalance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
 
             if (playerBalance - amount < 0)
