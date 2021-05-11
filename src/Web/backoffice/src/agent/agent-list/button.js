@@ -306,7 +306,7 @@ const ConfigFormBody = ({ record }) => {
                         <Trans zh="上级代理" en="Upper level agent" />
                     </Box>
                     <Text.Block alignY="center">
-                        {record?.parentAgentUsername}
+                        {record?.parentUsername}
                     </Text.Block>
 
                     <NormalLabel>

@@ -14,7 +14,7 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public AgentLevelType LevelType { get; init; }
         public string InvitationCode { get; set; }
         public Guid BrandId { get; set; }
-        public string ParentAgentUsername { get; set; }
+        public string ParentUsername { get; set; }
         public DateTimeOffset RegisteredOn { get; set; }
         public decimal Balance { get; set; }
         public decimal CommissionPercentage { get; set; } //佔成
