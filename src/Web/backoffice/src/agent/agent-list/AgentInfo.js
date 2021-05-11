@@ -105,7 +105,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                             {!agentHead && (
                                 <>
                                     <ParentAgentUsername>
-                                        <Input name="parentAgentUsername" />
+                                        <Input name="parentUsername" />
                                     </ParentAgentUsername>
                                 </>
                             )}
@@ -226,7 +226,7 @@ const ViewPanel = ({ record, ...props }) => {
 
                 <RealNameBox value={record?.realName} />
 
-                <ParentAgentUsername value={record?.parentAgentUsername} />
+                <ParentAgentUsername value={record?.parentUsername} />
 
                 <RegistrationBox value={record?.registeredOn} />
 

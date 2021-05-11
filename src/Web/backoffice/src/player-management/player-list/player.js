@@ -134,7 +134,7 @@ const EditForm = ({
                 <AgentUsernameLabel />
                 <Box>
                     <Input
-                        name="agentUsername"
+                        name="parentUsername"
                         placeholder={agentUsernamePlaceholder}
                     />
                 </Box>
@@ -196,7 +196,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
 
                 <AgentUsernameLabel />
                 <Box>
-                    <Text>{player?.agentUsername}</Text>
+                    <Text>{player?.parentUsername}</Text>
                 </Box>
 
                 <RegistrationLabel />
