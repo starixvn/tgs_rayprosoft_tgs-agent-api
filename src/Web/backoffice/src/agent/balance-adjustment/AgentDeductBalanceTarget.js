@@ -33,7 +33,7 @@ export const DeductBalanceTargetSelect = ({ placeholder, ...props }) => {
         },
         {
             label: useTrans(AgentTrans),
-            value: AgentTrans
+            value: Agent
         }
     ]
 

@@ -83,7 +83,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 {
                     var remark = _jsonSerializationProvider.SerializeToString(new
                     {
-                        request.TransactionType, TargetAgent = targetAgent, request.Remark
+                        request.TransactionType, TargetAgent = targetAgent?.Username, request.Remark
                     });
 
                     await _walletRepository.ExchangeAsync(player.BrandId, player.DefaultWalletId, player.PlayerCode,
