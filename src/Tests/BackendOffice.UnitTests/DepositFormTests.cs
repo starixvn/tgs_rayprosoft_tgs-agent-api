@@ -181,7 +181,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var actual = await sut.QueryAsync(query).ToArrayAsync();
 
-            Assert.IsTrue(actual.Length == 1);
+            Assert.AreEqual(1, actual.Length);
         }
     }
 }
