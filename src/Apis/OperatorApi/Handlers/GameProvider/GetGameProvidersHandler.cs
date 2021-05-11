@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Http;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -26,10 +24,8 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
         private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
         private readonly IBrandOperations _brandOperations;
-        private readonly IRedisCacheManager _cacheManager;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly HttpContext _httpContext;
-        private readonly IJsonSerializationProvider _json;
         private readonly ILocalizationOperations _localizationOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<Status> _validStatus;
@@ -42,9 +38,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
             ILocalizationOperations localizationOperations,
             IBrandLanguageCodeMapper brandLanguageCodeMapper,
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
-            IValidStatus<Status> validStatus,
-            IRedisCacheManager cacheManager,
-            IJsonSerializationProvider json)
+            IValidStatus<Status> validStatus)
         {
             _httpContext = httpContextAccessor.HttpContext;
             _brandOperations = brandOperations;
@@ -54,8 +48,6 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
             _brandLanguageCodeMapper = brandLanguageCodeMapper;
             _brandCurrencyCodeMapper = brandCurrencyCodeMapper;
             _validStatus = validStatus;
-            _cacheManager = cacheManager;
-            _json = json;
         }
 
         async Task<GetGameProvidersResponse> IRequestHandler<GetGameProvidersRequest, GetGameProvidersResponse>.Handle(
@@ -143,6 +135,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                     Name = gameProvider.Name,
                     Description = gameProvider.Description,
                     Status = gameProvider.Status,
+                    TransferWallet = gameProvider.TransferWallet,
                     GameTypes = games.Select(g => g.Type).OrderBy(t => (int)t)
                         .Distinct().ToArray()
                 };
