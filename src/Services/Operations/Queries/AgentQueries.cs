@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -7,7 +10,10 @@ namespace TGS.Services.Operations.Queries
 {
     public interface IAgentQueries
     {
-        Task<Agent> GetAgentAsync(string username);
+        Task<Agent> GetAgentAsync(Expression<Func<Agent, bool>> predicate,
+            Func<IQueryable<Agent>, IQueryable<Agent>> preQuery = null);
+
+        Task<Agent> GetAgentByInvitationCodeAsync(string invitationCode);
     }
 
     public class AgentQueries : IAgentQueries
@@ -19,7 +25,15 @@ namespace TGS.Services.Operations.Queries
             _repository = repository;
         }
 
-        Task<Agent> IAgentQueries.GetAgentAsync(string invitationCode) =>
+        Task<Agent> IAgentQueries.GetAgentAsync(Expression<Func<Agent, bool>> predicate,
+            Func<IQueryable<Agent>, IQueryable<Agent>> preQuery)
+        {
+            preQuery ??= c => c;
+
+            return preQuery(_repository.Agents).FirstOrDefaultAsync(predicate);
+        }
+
+        Task<Agent> IAgentQueries.GetAgentByInvitationCodeAsync(string invitationCode) =>
             _repository.Agents.FirstOrDefaultAsync(x => x.InvitationCode == invitationCode);
     }
 }

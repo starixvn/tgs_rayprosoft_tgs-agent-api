@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using TGS.Apis.OperatorApi.Attributes;
-using TGS.Apis.OperatorApi.Models;
+using TGS.Apis.AgentApi.Attributes;
+using TGS.Apis.AgentApi.Models;
 
 namespace TGS.Apis.AgentApi.Filters.Swaggers
 {

@@ -162,10 +162,16 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<PromotionPlayer> PromotionPlayers { get; set; }
         DbSet<AgentDividend> AgentDividends { get; set; }
         DbSet<PlayerRebate> PlayerRebates { get; set; }
+        DbSet<AgentLoginRecord> AgentLoginRecords { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
     {
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
+        {
+        }
+
+        public DbSet<AgentLoginRecord> AgentLoginRecord { get; set; }
         public DbSet<Reseller> Resellers { get; set; }
 
         public DbSet<Game> Games { get; set; }
@@ -316,10 +322,6 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<DepositForm> DepositForms { get; set; }
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
-
-        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
-        {
-        }
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 

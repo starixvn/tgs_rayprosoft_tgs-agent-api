@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.AgentApi.Attributes;
 
 namespace TGS.Apis.AgentApi.Filters.Swaggers
 {

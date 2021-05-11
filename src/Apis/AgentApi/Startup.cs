@@ -27,7 +27,6 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
-using TGS.Services.Operator;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
 
@@ -62,15 +61,6 @@ namespace TGS.Apis.AgentApi
                 .AddPluggableServices()
                 .AddReportClientServices(_configuration)
                 .AddTransactions();
-
-            services
-                .AddOptions<ConstValidateCodeOptions>()
-                .Configure<IConfiguration>((options, config) =>
-                {
-                    config.GetSection("Operator").Bind(options);
-                })
-                .Services
-                .Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
 
             services.AddIdentityVerifiers();
 
@@ -178,7 +168,7 @@ namespace TGS.Apis.AgentApi
             if (!_env.IsProduction())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Operator API"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Agent API"));
             }
         }
     }

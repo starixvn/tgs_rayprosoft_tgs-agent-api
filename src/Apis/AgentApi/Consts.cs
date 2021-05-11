@@ -7,7 +7,7 @@
         public const string DefaultCulture = "zh-CN";
         public const string DefaultCurrency = "CNY";
 
-        public const string Site = "operator-api";
+        public const string Site = "agent-api";
 
         public static readonly string[] DefaultBypassRouting = {"/health", "/metrics", "/favicon.ico", "/swagger"};
 
@@ -18,7 +18,7 @@
 
         public static class UserInfo
         {
-            public const string PlayerCodeKey = "PlayerCode";
+            public const string AgentId = "AgentId";
         }
     }
 }

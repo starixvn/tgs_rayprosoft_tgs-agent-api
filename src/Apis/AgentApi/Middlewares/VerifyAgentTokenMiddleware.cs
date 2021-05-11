@@ -5,7 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
-using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.AgentApi.Attributes;
+using TGS.Apis.AgentApi.Resources;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
@@ -28,7 +29,7 @@ namespace TGS.Apis.AgentApi.Middlewares
             HttpContext context,
             ITokenProvider tokenProvider,
             IHashProvider hashProvider,
-            IPlayerOperations playerOperations,
+            IAgentOperations agentOperations,
             IBrandOperations brandOperations,
             IExpirationValidator expirationValidator,
             IJwtTokenHandler handler)
@@ -47,7 +48,7 @@ namespace TGS.Apis.AgentApi.Middlewares
             {
                 if (!attribute.AllowNullOrEmpty)
                 {
-                    throw new MissingTokenException(AgentApi);
+                    throw new MissingTokenException(Agent.MissingAgentToken);
                 }
 
                 await _next(context);
@@ -59,7 +60,7 @@ namespace TGS.Apis.AgentApi.Middlewares
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
             if (sub.IsNullOrEmpty())
             {
-                throw new MissingTokenException(Resources.Player.MissingPlayerToken);
+                throw new MissingTokenException(Agent.MissingAgentToken);
             }
 
             var data = await tokenProvider.DecryptAsync<AgentTokenData>(sub);
@@ -74,8 +75,8 @@ namespace TGS.Apis.AgentApi.Middlewares
                 return;
             }
 
-            var licenseeId = await playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-            var secretKey = await brandOperations.GetBrandSecretKeyAsync(licenseeId);
+            var agent = await agentOperations.GetAgentAsync(agentId);
+            var secretKey = await brandOperations.GetBrandSecretKeyAsync(agent.BrandId);
 
             var jti = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti)?.Value;
             var payload = hashProvider.Hash($"{sub}:{jti}");
@@ -93,7 +94,7 @@ namespace TGS.Apis.AgentApi.Middlewares
                     ClockSkew = TimeSpan.Zero
                 },
                 exception => throw new InvalidCredentialsException(exception.Message),
-                _ => throw new PlayerLoginExpiredException(playerCode));
+                _ => throw new AgentLoginExpiredException(agentId));
 
             await _next(context);
         }

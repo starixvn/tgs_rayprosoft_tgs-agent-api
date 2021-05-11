@@ -30,11 +30,21 @@
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
-    <ProjectReference Include="..\OperatorApi\OperatorApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
+    <Compile Update="Resources\Agent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Agent.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Agent.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Agent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

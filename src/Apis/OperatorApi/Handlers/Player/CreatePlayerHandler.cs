@@ -17,6 +17,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
 {
     public sealed class CreatePlayerHandler : IRequestHandler<CreatePlayerRequest, CreatePlayerResponse>
     {
+        private readonly IAgentOperations _agentOperations;
         private readonly IBrandOperations _brandOperations;
         private readonly IBrandCurrencyCodeMapper _currencyCodeMapper;
         private readonly HttpContext _httpContext;
@@ -30,7 +31,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             IBrandOperations brandOperations,
             IBrandCurrencyCodeMapper currencyCodeMapper,
             IPasswordHandler passwordHandler,
-            IStatusValidator statusValidator)
+            IStatusValidator statusValidator,
+            IAgentOperations agentOperations)
         {
             _httpContext = httpContextAccessor.HttpContext;
             _passwordHandler = passwordHandler;
@@ -38,6 +40,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
             _currencyCodeMapper = currencyCodeMapper;
+            _agentOperations = agentOperations;
         }
 
         public async Task<CreatePlayerResponse> Handle(
@@ -50,7 +53,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(brandId, username);
             if (playerCode.IsNotNullOrEmpty())
             {
-                return new() { PlayerCode = playerCode, IsNew = false };
+                return new() {PlayerCode = playerCode, IsNew = false};
             }
 
             var (salt, password) = _passwordHandler.GenerateCredential(request.Password);
@@ -75,17 +78,15 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                     Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
                 });
 
-                return new()
-                {
-                    PlayerCode = result,
-                    IsNew = true
-                };
+                return new() {PlayerCode = result, IsNew = true};
             }
             else
             {
-                var agent = await _playerOperations.GetAgentAsync(request.AgentInvitationCode);
+                var agent = await _agentOperations.GetAgentByInvitationCodeAsync(request.AgentInvitationCode);
                 if (agent == null)
+                {
                     throw new InvalidInvitationCodeException(request.AgentInvitationCode, "Can't find the agent info");
+                }
 
                 var result = await _playerOperations.CreatePlayerAsync(new()
                 {
@@ -101,11 +102,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Player
                     Type = request.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
                 });
 
-                return new()
-                {
-                    PlayerCode = result,
-                    IsNew = true
-                };
+                return new() {PlayerCode = result, IsNew = true};
             }
         }
     }

@@ -50,6 +50,12 @@ namespace TGS.Core.Models
             public const int Jwt = 60 * 60;           // 1 hours
         }
 
+        public static class AgentTokenExpireSeconds
+        {
+            public const int AgentLogin = 3600 * 12; // 12 hours
+            public const int Jwt = 60 * 60;          // 1 hours
+        }
+
         public static class GameProvider
         {
             public const string RedTiger = "RT";

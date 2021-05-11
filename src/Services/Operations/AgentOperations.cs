@@ -1,29 +1,37 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Redis;
+using TGS.Services.Operations.Commands;
+using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
 
 namespace TGS.Services.Operations
 {
     public interface IAgentOperations
     {
-        Task<Agent> GetAgentAsync(string invitationCode);
+        Task<Agent> GetAgentAsync(Guid agentId);
+        Task<Agent> GetAgentByInvitationCodeAsync(string invitationCode);
+        Task<AgentLoginRecord> AgentLoginAsync(AgentLoginData data);
     }
 
     public sealed class AgentOperations : IAgentOperations
     {
+        private readonly IAgentCommands _agentCommands;
         private readonly IAgentQueries _agentQueries;
-        private readonly IRedisCacheManager _cacheManager;
 
-        public AgentOperations(
-            IRedisCacheManager cacheManager,
-            IAgentQueries agentQueries)
+        public AgentOperations(IAgentQueries agentQueries, IAgentCommands agentCommands)
         {
-            _cacheManager = cacheManager;
             _agentQueries = agentQueries;
+            _agentCommands = agentCommands;
         }
 
-        public Task<Agent> GetAgentAsync(string invitationCode) =>
-            _agentQueries.GetAgentAsync(invitationCode);
+        public Task<Agent> GetAgentAsync(Guid agentId) =>
+            _agentQueries.GetAgentAsync(x => x.Id == agentId);
+
+        Task<AgentLoginRecord> IAgentOperations.AgentLoginAsync(AgentLoginData data) =>
+            _agentCommands.AgentLoginAsync(data);
+
+        Task<Agent> IAgentOperations.GetAgentByInvitationCodeAsync(string invitationCode) =>
+            _agentQueries.GetAgentByInvitationCodeAsync(invitationCode);
     }
 }
