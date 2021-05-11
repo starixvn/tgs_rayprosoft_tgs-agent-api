@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.VR.Outgoing
 {
-    public record VRGetBlaanceResponse
+    public record VRGetBalanceResponse
     {
         public string playerName { get; set; }
-        public float balance { get; set; }
-        public IEnumerable<VRGetBlaanceGamesResponse> games { get; set; }
+        public decimal balance { get; set; }
+        public IEnumerable<VRGetBalanceGamesResponse> games { get; set; }
     }
 }

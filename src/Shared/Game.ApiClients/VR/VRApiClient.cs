@@ -77,7 +77,7 @@ namespace TGS.Shared.Game.ApiClients.VR
                 using (var sr = new StreamReader(httpResponseMessage.Content.ReadAsStreamAsync().Result))
                 {
                     var Content = await sr.ReadToEndAsync() ?? string.Empty;
-                    var contentDecrypt = VRUtility.AesDecrypt(Content, brandMerchant.Deskey);
+                    var contentDecrypt = VRUtility.AesDecrypt(Content, brandMerchant.Deskey, false);
                     response = JsonSerializer.Deserialize<ResultData>(contentDecrypt);
                 }
             }

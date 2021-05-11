@@ -137,12 +137,12 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 throw new PlayerNotFoundException(request.PlayerCode);
             }
             var responseBalance = await GetGameProviderBalanceAsync(player);
-            if (responseBalance == null)
+            if (!responseBalance.Success)
             {
                 throw new PlayerNotFoundException(request.PlayerCode);
             }
 
-            if (responseBalance.Value - amount < 0)
+            if (responseBalance.Balance - amount < 0)
             {
                 throw new PlayerHasInsufficientFundsException();
             }
@@ -231,9 +231,9 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 throw new PlayerNotFoundException(request.PlayerCode);
             }
 
-            var balance = await GetGameProviderBalanceAsync(player);
+            var getBalance = await GetGameProviderBalanceAsync(player);
 
-            return new() { Success = balance.HasValue, Balance = balance ?? 0 };
+            return new() { Success = getBalance.Success, Balance = getBalance.Balance };
         }
 
         private async ValueTask<(FundTransferTransactionStatus Status, Guid? TransactionId, decimal? PostBalance, Exception Exception)> WalletExchangeAsync(CachedPlayer player, decimal amount, TransactionTypes transactionTypes)
@@ -269,7 +269,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 
         public abstract ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId);
 
-        public abstract ValueTask<decimal?> GetGameProviderBalanceAsync(CachedPlayer player);
+        public abstract ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player);
 
     }
 }

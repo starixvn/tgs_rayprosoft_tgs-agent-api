@@ -28,8 +28,10 @@ namespace TGS.Apis.TgsApi.GameProviders.VR
         {
             services.AddErrorMappers();
 
+            services.AddTransient<IVRGamePlayerCreate, VRGamePlayerCreate>();
+
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(VRGameInitializer) }, (provider, _) =>
-            provider.GetRequiredService<VRGameInitializer>());
+              provider.GetRequiredService<VRGameInitializer>());
 
             services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(VRGameProviderWalletAction) }, (provider, _) =>
             provider.GetRequiredService<VRGameProviderWalletAction>());

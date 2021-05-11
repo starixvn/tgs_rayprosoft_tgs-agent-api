@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.VR.Outgoing
 {
-    public record VRGetBlaanceGamesResponse
+    public record VRGetBalanceGamesResponse
     {
         /// <summary>
         /// 电子游戏种类
@@ -23,7 +23,7 @@ namespace TGS.Shared.Game.Models.VR.Outgoing
         /// 电子游戏钱包余额, 只有当 errorCode 为成功(0)时, 会显示余额, 其他情况都为 0
         /// </summary>
         [JsonPropertyName("balance")]
-        public int Balance { get; set; }
+        public decimal Balance { get; set; }
         /// <summary>
         /// 错误代码
         /// 0: 成功
