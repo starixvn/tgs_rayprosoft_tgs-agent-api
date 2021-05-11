@@ -60,6 +60,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             GameProviderBetLimit[] BetLimits { get; }
             Dictionary<string, string> SportTypes => new();
             Dictionary<string, string> MarketTypes => new();
+            bool TransferWallet => false;
             PluggableConfigurationBase GetConfiguration();
         }
 

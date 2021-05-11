@@ -37,6 +37,7 @@ import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
 import Separator from "../../layout/Separator"
 import { FundReviewStatusLabel } from "../FundReviewStatus"
 import Textarea, { TextareaField } from "../../textarea"
+import Input from "../../input/Input"
 
 export const ViewFundDepositDisclosure = ({ brandId, formId, ...props }) => {
     let dialog = useModalState()
@@ -90,89 +91,92 @@ const ViewFundDepositDialog = ({ brandId, formId, dialog, ...props }) => {
     )
 }
 
-export const FormBody = ({ record, readonly }) => {
+export const FormBody = ({ brandId, record, readonly }) => {
     let hasAttachment = !!record?.paymentReturn?.manualReceiptFileId
     let attachmentUrl = `/api/fs/${record?.paymentReturn?.manualReceiptFileId}`
 
     let disabled = readonly
     return (
-        <FieldStack>
-            <FieldValues marginLeft="1.5rem">
-                <NormalLabel>
-                    <Trans zh="用户名" en="Username" />
-                </NormalLabel>
-                <Box alignY="center">{record?.userName}</Box>
+        <>
+            <FieldStack>
+                <FieldValues marginLeft="1.5rem">
+                    <NormalLabel>
+                        <Trans zh="用户名" en="Username" />
+                    </NormalLabel>
+                    <Box alignY="center">{record?.userName}</Box>
 
-                <NormalLabel>
-                    <Trans zh="订单号" en="Order Id" />
-                </NormalLabel>
-                <Box alignY="center">{record?.id}</Box>
+                    <NormalLabel>
+                        <Trans zh="订单号" en="Order Id" />
+                    </NormalLabel>
+                    <Box alignY="center">{record?.id}</Box>
 
-                <NormalLabel>
-                    <Trans zh="充值类型 " en="Payment Method" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <PaymentMethodLabel value={record?.paymentMethodId} />
-                </Box>
+                    <NormalLabel>
+                        <Trans zh="充值类型 " en="Payment Method" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <PaymentMethodLabel value={record?.paymentMethodId} />
+                    </Box>
 
-                <NormalLabel>
-                    <Trans zh="通道名称" en="Channel Name" />
-                </NormalLabel>
-                <Box alignY="center">{record?.channelName}</Box>
+                    <NormalLabel>
+                        <Trans zh="通道名称" en="Channel Name" />
+                    </NormalLabel>
+                    <Box alignY="center">{record?.channelName}</Box>
 
-                <NormalLabel>
-                    <Trans zh="充值金额" en="Deposit Amount" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <FormattedNumberDecimal value={record?.amount} />
-                </Box>
+                    <NormalLabel>
+                        <Trans zh="充值金额" en="Deposit Amount" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <FormattedNumberDecimal value={record?.amount} />
+                    </Box>
 
-                <NormalLabel>
-                    <Trans zh="申请时间" en="Application Time" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <FormattedDateTime value={record?.createdOn} />
-                </Box>
+                    <NormalLabel>
+                        <Trans zh="申请时间" en="Application Time" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <FormattedDateTime value={record?.createdOn} />
+                    </Box>
 
-                <NormalLabel>
-                    <Trans zh="更新时间" en="Updated Time" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <FormattedDateTime
-                        value={record?.updatedOn}
-                        placeholder="-"
-                    />
-                </Box>
+                    <NormalLabel>
+                        <Trans zh="更新时间" en="Updated Time" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <FormattedDateTime
+                            value={record?.updatedOn}
+                            placeholder="-"
+                        />
+                    </Box>
 
-                <NormalLabel>
-                    <Trans zh="状态" en="Status" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <FundReviewStatusLabel value={record?.status} />
-                </Box>
+                    <NormalLabel>
+                        <Trans zh="状态" en="Status" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <FundReviewStatusLabel value={record?.status} />
+                    </Box>
 
-                {hasAttachment && (
-                    <>
-                        <NormalLabel>
-                            <Trans zh="附件" en="Attachment" />
-                        </NormalLabel>
-                        <Box alignY="center">
-                            <Link href={attachmentUrl} target="_blank">
-                                <Trans zh="连结" en="Link" />
-                            </Link>
-                        </Box>
-                    </>
-                )}
-            </FieldValues>
-            <Separator />
-            <BankInfoBox record={record} />
-            <Separator />
-            <TextareaField
-                name="remark"
-                label={<Trans zh="备注" en="Remark" />}
-                disabled={disabled}
-            />
-        </FieldStack>
+                    {hasAttachment && (
+                        <>
+                            <NormalLabel>
+                                <Trans zh="附件" en="Attachment" />
+                            </NormalLabel>
+                            <Box alignY="center">
+                                <Link href={attachmentUrl} target="_blank">
+                                    <Trans zh="连结" en="Link" />
+                                </Link>
+                            </Box>
+                        </>
+                    )}
+                </FieldValues>
+                <Separator />
+                <BankInfoBox record={record} />
+                <Separator />
+                <TextareaField
+                    name="remark"
+                    label={<Trans zh="备注" en="Remark" />}
+                    disabled={disabled}
+                />
+            </FieldStack>
+            <Input type="hidden" value={brandId} />
+        </>
     )
 }
 
@@ -182,6 +186,8 @@ const BankInfoBox = ({ record }) => {
         return null
     }
 
+    let hasBankAddress = !!record?.applyInfo?.receiveBankAccountAddress
+    let hasMemo = !!record?.applyInfo?.memo
     return (
         <>
             <Heading use="h6">
@@ -207,17 +213,25 @@ const BankInfoBox = ({ record }) => {
                     {record?.applyInfo?.receiveBankAccount}
                 </Box>
 
-                <NormalLabel>
-                    <Trans zh="开户地址" en="Account Address" />
-                </NormalLabel>
-                <Box alignY="center">
-                    {record?.applyInfo?.receiveBankAccountAddress}
-                </Box>
+                {hasBankAddress && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="开户地址" en="Account Address" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            {record?.applyInfo?.receiveBankAccountAddress}
+                        </Box>
+                    </>
+                )}
 
-                <NormalLabel>
-                    <Trans zh="附言" en="Memo" />
-                </NormalLabel>
-                <Box alignY="center">{record?.applyInfo?.memo}</Box>
+                {hasMemo && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="附言" en="Memo" />
+                        </NormalLabel>
+                        <Box alignY="center">{record?.applyInfo?.memo}</Box>
+                    </>
+                )}
             </FieldValues>
         </>
     )

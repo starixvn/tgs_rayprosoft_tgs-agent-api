@@ -1899,6 +1899,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("support_test_player");
 
+                    b.Property<bool>("TransferWallet")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("transfer_wallet");
+
                     b.Property<short>("UniqueId")
                         .HasColumnType("smallint")
                         .HasColumnName("unique_id");
@@ -3724,6 +3730,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("player_code");
+
+                    b.Property<decimal?>("ReopenTurnoverAdjustment")
+                        .HasColumnType("numeric")
+                        .HasColumnName("reopen_turnover_adjustment");
+
+                    b.Property<DateTimeOffset?>("ReopenedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reopened_on");
 
                     b.Property<decimal?>("SettleAmount")
                         .HasColumnType("numeric")

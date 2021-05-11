@@ -15,6 +15,29 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class PaymentTests
     {
         [Test]
+        public async Task Get_Payment_Channels_Should_Success()
+        {
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+
+            var sut = new AllPaymentChannelsQueryService(moqPaymentRepository.Object);
+
+            var query = new AllPaymentChannelsQuery();
+
+            moqPaymentRepository
+                .Setup(fake => fake.GetAllPaymentChannelsAsync())
+                .Returns(new[] {
+                    new PaymentChannelInfo(Guid.NewGuid(), "test1"),
+                    new PaymentChannelInfo(Guid.NewGuid(), "test2")
+                }.ToAsyncEnumerable());
+
+            _ = await sut.GetAsync(query);
+
+            moqPaymentRepository.Verify(
+                fake => fake.GetAllPaymentChannelsAsync(),
+                Times.Exactly(1));
+        }
+
+        [Test]
         public async Task Get_Payment_Methods_Should_Success()
         {
             // arrange
@@ -37,29 +60,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             moqPaymentRepository.Verify(
                 fake => fake.GetAllPaymentMethodsAsync(),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task Get_Payment_Channels_Should_Success()
-        {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
-
-            var sut = new AllPaymentChannelsQueryService(moqPaymentRepository.Object);
-
-            var query = new AllPaymentChannelsQuery();
-
-            moqPaymentRepository
-                .Setup(fake => fake.GetAllPaymentChannelsAsync())
-                .Returns(new[] {
-                    new PaymentChannelInfo(Guid.NewGuid(), "test1"),
-                    new PaymentChannelInfo(Guid.NewGuid(), "test2")
-                }.ToAsyncEnumerable());
-
-            _ = await sut.GetAsync(query);
-
-            moqPaymentRepository.Verify(
-                fake => fake.GetAllPaymentChannelsAsync(),
                 Times.Exactly(1));
         }
 
