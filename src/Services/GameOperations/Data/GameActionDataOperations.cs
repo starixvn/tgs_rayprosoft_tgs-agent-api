@@ -216,6 +216,7 @@ namespace TGS.Services.GameOperations.Data
                             await ExecuteSegmentTransactionsAsync(
                                 gameProviderId, gameProviderCode,
                                 data.AutoCloseRound, data.HasCurrencyFromGameProvider,
+                                data.AllowCancelCancelTransaction,
                                 t, state, execute, errorMapper);
                         }).ConfigureAwait(false);
 
@@ -250,9 +251,11 @@ namespace TGS.Services.GameOperations.Data
             return result;
         }
 
-        private async Task ExecuteSegmentTransactionsAsync(Guid gameProviderId,
+        private async Task ExecuteSegmentTransactionsAsync(
+            Guid gameProviderId,
             string gameProviderCode, bool autoCloseRound,
             bool hasCurrencyFromGameProvider,
+            bool allowCancelCancelTransaction,
             BatchTransactionData transaction,
             BatchBetPartitionState state, Func<BetData, ValueTask<BetResult>> execute,
             IErrorMapper errorMapper)
@@ -260,7 +263,7 @@ namespace TGS.Services.GameOperations.Data
             try
             {
                 var betData = MapBetData(state.BatchId, gameProviderId, gameProviderCode, autoCloseRound,
-                    hasCurrencyFromGameProvider, transaction);
+                    hasCurrencyFromGameProvider, allowCancelCancelTransaction, transaction);
 
                 var betResult = await execute(betData).ConfigureAwait(false);
                 var isSuccess = betResult.Error == TgsApiError.None;
@@ -363,7 +366,8 @@ namespace TGS.Services.GameOperations.Data
         }
 
         private static BetData MapBetData(Guid batchId, Guid gameProviderId, string gameProviderCode,
-            bool autoCloseRound, bool hasCurrencyFromGameProvider, BatchTransactionData transaction) =>
+            bool autoCloseRound, bool hasCurrencyFromGameProvider, bool allowCancelCancelTransaction,
+            BatchTransactionData transaction) =>
             new()
             {
                 PlayerCode = transaction.PlayerCode,
@@ -373,6 +377,7 @@ namespace TGS.Services.GameOperations.Data
                 GameProviderCode = gameProviderCode,
                 GameProviderConfigurationId = transaction.GameProviderConfigurationId,
                 HasCurrencyFromGameProvider = hasCurrencyFromGameProvider,
+                AllowCancelCancelTransaction = allowCancelCancelTransaction,
                 AutoCloseRound = autoCloseRound,
                 Transactions = new TransactionData[]
                 {

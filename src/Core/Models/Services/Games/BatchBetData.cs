@@ -10,6 +10,7 @@ namespace TGS.Core.Models.Services.Games
         public string GameProviderCode { get; init; }
         public bool AutoCloseRound { get; init; }
         public string ExternalBatchId { get; init; }
+        public bool AllowCancelCancelTransaction { get; init; } = false;
         public bool HasCurrencyFromGameProvider { get; init; } = true;
         public BatchTransactionData[] Transactions { get; init; }
 
