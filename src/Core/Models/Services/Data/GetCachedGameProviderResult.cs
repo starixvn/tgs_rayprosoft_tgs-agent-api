@@ -15,6 +15,6 @@ namespace TGS.Core.Models.Services.Data
         public int PlaceBetTimeout { get; init; }
         public int SettleBetTimeout { get; init; }
         public bool AllowKickPlayer { get; init; }
-        public bool TransferWallet { get; init; }
+        public bool IsTransferWallet { get; init; }
     }
 }

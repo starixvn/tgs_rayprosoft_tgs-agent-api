@@ -103,7 +103,7 @@ namespace TGS.Services.Operations
                 PlaceBetTimeout = r.PlaceBetTimeout,
                 SettleBetTimeout = r.SettleBetTimeout,
                 AllowKickPlayer = r.AllowKickPlayer,
-                TransferWallet = r.TransferWallet
+                IsTransferWallet = r.IsTransferWallet
             };
 
             await CacheGameProviderAsync(gameProviderId, cachedGameProvider);
@@ -325,7 +325,7 @@ namespace TGS.Services.Operations
                     CachedGameProviderFields.Description, CachedGameProviderFields.AutoCloseRound,
                     CachedGameProviderFields.SupportTestPlayer, CachedGameProviderFields.PlaceBetTimeout,
                     CachedGameProviderFields.SettleBetTimeout, CachedGameProviderFields.AllowKickPlayer,
-                    CachedGameProviderFields.TransferWallet
+                    CachedGameProviderFields.IsTransferWallet
                 });
 
             if (values.All(a => !a.IsNull))
@@ -342,7 +342,7 @@ namespace TGS.Services.Operations
                     PlaceBetTimeout = (int)values[7],
                     SettleBetTimeout = (int)values[8],
                     AllowKickPlayer = (bool)values[9],
-                    TransferWallet = (bool)values[10]
+                    IsTransferWallet = (bool)values[10]
                 };
             }
 
@@ -363,7 +363,7 @@ namespace TGS.Services.Operations
                 new(CachedGameProviderFields.PlaceBetTimeout, gameProvider.PlaceBetTimeout),
                 new(CachedGameProviderFields.SettleBetTimeout, gameProvider.SettleBetTimeout),
                 new(CachedGameProviderFields.AllowKickPlayer, gameProvider.AllowKickPlayer),
-                new(CachedGameProviderFields.TransferWallet, gameProvider.TransferWallet)
+                new(CachedGameProviderFields.IsTransferWallet, gameProvider.IsTransferWallet)
             };
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProvider, gameProviderId, fields,
@@ -432,7 +432,7 @@ namespace TGS.Services.Operations
             public const string PlaceBetTimeout = "placeBetTimeout";
             public const string SettleBetTimeout = "settleBetTimeout";
             public const string AllowKickPlayer = "allowKickPlayer";
-            public const string TransferWallet = "transferWallet";
+            public const string IsTransferWallet = "isTransferWallet";
         }
 
         #endregion Private Methods

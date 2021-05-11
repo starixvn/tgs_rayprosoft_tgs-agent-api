@@ -10,7 +10,7 @@ RETURNS TABLE(
 	"PlaceBetTimeout" smallint,
 	"SettleBetTimeout" smallint,
 	"AllowKickPlayer" bool,
-    "TransferWallet" bool)
+    "IsTransferWallet" bool)
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -26,7 +26,7 @@ BEGIN
         gp.place_bet_timeout as "PlaceBetTimeout",
         gp.settle_bet_timeout as "SettleBetTimeout",
         gp.allow_kick_player as "AllowKickPlayer",
-        gp.transfer_wallet as "TransferWallet"
+        gp.transfer_wallet as "IsTransferWallet"
     from dbo.game_providers gp
     where gp.id = $1;
 END;

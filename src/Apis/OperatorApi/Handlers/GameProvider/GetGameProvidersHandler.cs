@@ -135,7 +135,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                     Name = gameProvider.Name,
                     Description = gameProvider.Description,
                     Status = gameProvider.Status,
-                    TransferWallet = gameProvider.TransferWallet,
+                    IsTransferWallet = gameProvider.IsTransferWallet,
                     GameTypes = games.Select(g => g.Type).OrderBy(t => (int)t)
                         .Distinct().ToArray()
                 };

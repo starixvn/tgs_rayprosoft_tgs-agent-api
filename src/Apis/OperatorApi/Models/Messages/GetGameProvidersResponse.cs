@@ -29,7 +29,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         public Status Status { get; init; }
 
         [JsonPropertyName("transferwallet")]
-        public bool TransferWallet { get; init; }
+        public bool IsTransferWallet { get; init; }
 
         [JsonPropertyName("gametypes")]
         public GameType[] GameTypes { get; init; }
