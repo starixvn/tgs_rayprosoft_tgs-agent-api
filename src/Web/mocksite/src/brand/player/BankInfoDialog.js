@@ -74,6 +74,11 @@ export const BankInfoDialog = ({
         }
     }, [error])
 
+    const reset = () => {
+        mutate(undefined, false)
+        dialog?.hide()
+    }
+
     return (
         <>
             <Dialog.Modal
@@ -124,9 +129,7 @@ export const BankInfoDialog = ({
                         showCloseButton
                         type="warning"
                         hideBackdrop={true}
-                        onClickClose={() => {
-                            reset()
-                        }}
+                        onClickClose={reset}
                         {...errorDialog}
                     >
                         <Text.Block>{JSON.stringify(error)}</Text.Block>
