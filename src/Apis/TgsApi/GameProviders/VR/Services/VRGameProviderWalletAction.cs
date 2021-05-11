@@ -86,11 +86,11 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 SerialNumber = date.AddHours(+8).ToUnixTimeSeconds().ToString(),
                 PlayerCode = player.PlayerCode,
                 Type = 1,
-                Amount = 1,
+                Amount = amount,
                 CreateTime = date.ToString("yyyy-MM-ddTHH:mm:ssZ")
             };
 
-            var response = await _client.GetAPIAsync<VRFnudRequest, VRFnudResponse>(brandMerchant, GPAction.GetBalance, data).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<VRFnudRequest, VRFnudResponse>(brandMerchant, GPAction.FundIn, data).ConfigureAwait(false);
             if (response.State != 0)
             {
                 return new() { Success = false, Balance = 0, OrderId = string.Empty };
@@ -117,11 +117,11 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 SerialNumber = date.AddHours(+8).ToUnixTimeSeconds().ToString(),
                 PlayerCode = player.PlayerCode,
                 Type = 0,
-                Amount = 1,
+                Amount = amount,
                 CreateTime = date.ToString("yyyy-MM-ddTHH:mm:ssZ")
             };
 
-            var response = await _client.GetAPIAsync<VRFnudRequest, VRFnudResponse>(brandMerchant, GPAction.GetBalance, data).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<VRFnudRequest, VRFnudResponse>(brandMerchant, GPAction.FundOut, data).ConfigureAwait(false);
             if (response.State != 0)
             {
                 return new() { Success = false, Balance = 0, OrderId = string.Empty };

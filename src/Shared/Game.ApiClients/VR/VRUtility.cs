@@ -21,8 +21,8 @@ namespace TGS.Shared.Game.ApiClients.VR
             _MapAction.Add(GPAction.GetGameUrl, "/Account/LoginValidate");
             _MapAction.Add(GPAction.CreatePlayer, "/Account/CreateUser");
             _MapAction.Add(GPAction.GetBalance, "/UserWallet/Balance");
-            _MapAction.Add(GPAction.FnudOut, "/UserWallet/Transaction");
-            _MapAction.Add(GPAction.FnudIn, "/UserWallet/Transaction");
+            _MapAction.Add(GPAction.FundOut, "/UserWallet/Transaction");
+            _MapAction.Add(GPAction.FundIn, "/UserWallet/Transaction");
             _MapAction.Add(GPAction.FundChecking, "/UserWallet/TransactionRecord");
             _MapAction.Add(GPAction.GameRecord, "/MerchantQuery/Bet");
         }

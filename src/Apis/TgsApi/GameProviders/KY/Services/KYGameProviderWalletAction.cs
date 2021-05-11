@@ -109,7 +109,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYFnudRequest()
             {
-                Action = KYUtility.GetAction(GPAction.FnudIn) ?? -1,
+                Action = KYUtility.GetAction(GPAction.FundIn) ?? -1,
                 PlayerCode = player.PlayerCode,
                 Amount = amount,
                 OrderId = orderId
@@ -161,7 +161,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYFnudRequest()
             {
-                Action = KYUtility.GetAction(GPAction.FnudOut) ?? -1,
+                Action = KYUtility.GetAction(GPAction.FundOut) ?? -1,
                 PlayerCode = player.PlayerCode,
                 Amount = amount,
                 OrderId = orderId
