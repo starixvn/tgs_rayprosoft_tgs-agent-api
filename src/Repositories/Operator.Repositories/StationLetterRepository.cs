@@ -36,6 +36,7 @@ namespace TGS.Operator.Repositories
                             .Include(letterPlayer => letterPlayer.StationLetter)
                             .AsAsyncEnumerable()
                         where letterPlayer.PlayerCode == playerCode
+                            && letterPlayer.StationLetter.Status == Core.Models.Enums.StationLetterStatus.Published
                         select new StationLetter(
                             letterPlayer.StationLetterId,
                             letterPlayer.StationLetter.Subject,
