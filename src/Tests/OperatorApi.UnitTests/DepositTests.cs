@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment;
 using Tgs.Payment.LeePay;
@@ -19,6 +20,29 @@ namespace TGS.Tests.OperatorApi.UnitTests
     [TestFixture]
     public class DepositTests
     {
+        [Test]
+        public void Bank_Deposit_Form_If_Not_Player_Own_Will_Throw_Exception()
+        {
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+
+            var sut = new GetBankDepositFromQueryService(moqPaymentRepository.Object);
+
+            var query = new GetBankDepositFormQuery(
+                "ThisIsPlayerCode",
+                Guid.NewGuid());
+
+            moqPaymentRepository
+                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
+                .Returns(ValueTask.FromResult(new DepositFormInfo(
+                    "OtherPlayerCode",
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    1000M,
+                    string.Empty)));
+
+            Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
+        }
+
         [Test]
         public async Task Create_Bank_Deposit_Form_Should_Success()
         {
@@ -64,117 +88,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fake => fake.CreateDepositFormAsync(
                     It.IsAny<Guid>(),
                     It.Is<DepositFormInfo>(form => expected.Matches(form))),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task Get_Bank_Deposit_Form_By_Id_Should_Success()
-        {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-
-            var sut = new GetBankDepositFromQueryService(moqPaymentRepository.Object);
-
-            var query = new GetBankDepositFormQuery(
-                "ThisIsPlayerCode",
-                Guid.NewGuid());
-
-            moqPaymentRepository
-                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
-                .Returns(ValueTask.FromResult(new DepositFormInfo(
-                    query.PlayerCode,
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    1000M,
-                    string.Empty)));
-
-            var actual = await sut.GetAsync(query);
-
-            moqPaymentRepository.Verify(
-                fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public void Bank_Deposit_Form_If_Not_Player_Own_Will_Throw_Exception()
-        {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
-
-            var sut = new GetBankDepositFromQueryService(moqPaymentRepository.Object);
-
-            var query = new GetBankDepositFormQuery(
-                "ThisIsPlayerCode",
-                Guid.NewGuid());
-
-            moqPaymentRepository
-                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
-                .Returns(ValueTask.FromResult(new DepositFormInfo(
-                    "OtherPlayerCode",
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    1000M,
-                    string.Empty)));
-
-            Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
-        }
-
-        [Test]
-        public async Task Get_Brand_Payment_Should_SuccessAsync()
-        {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
-
-            var sut = new GetBrandPaymentQueryService(moqPaymentRepository.Object);
-
-            var query = new GetBrandPaymentQuery(Guid.NewGuid());
-
-            _ = await sut.GetAsync(query);
-
-            moqPaymentRepository.Verify(
-                fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == query.Id)),
-                Times.Exactly(1));
-        }
-
-        [Test]
-        public async Task Submit_BankDepositForm_Should_Success()
-        {
-            var moqFileServiceClient = new Mock<IFileServiceClient>();
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
-            var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
-
-            var sut = new SubmitBankDepositFormCommandService(
-                moqFileServiceClient.Object,
-                moqPaymentRepository.Object,
-                serializer);
-
-            var playerCode = "ThisIsPlayerCode";
-            var formId = Guid.NewGuid();
-            var contentType = "image/jpeg";
-            var fileStream = new MemoryStream();
-
-            var command = new SubmitBankDepositFormCommand(
-                playerCode,
-                formId,
-                contentType,
-                fileStream);
-
-            moqFileServiceClient
-                .Setup(fake => fake.UploadFileAsync(
-                    It.IsAny<string>(),
-                    It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
-                    It.IsAny<Stream>()))
-                .Returns(ValueTask.FromResult(new FileView
-                {
-                    Id = "testFileId",
-                    ContentType = contentType
-                }));
-
-            await sut.ExecuteAsync(command);
-
-            moqFileServiceClient.Verify(
-                fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
-                Times.Exactly(1));
-            moqPaymentRepository.Verify(
-                fake => fake.SubmitFormStatusAsync(It.IsAny<Guid>(), It.Is<int>(x => x == 1000), It.IsAny<string>()),
                 Times.Exactly(1));
         }
 
@@ -257,6 +170,119 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<Guid>(),
                     It.Is<DepositFormInfo>(form => expected.Matches(form))),
                 Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Get_Bank_Deposit_Form_By_Id_Should_Success()
+        {
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var jsonSerializationProvider = new JsonSerializationProvider();
+
+            var sut = new GetBankDepositFromQueryService(moqPaymentRepository.Object);
+
+            var query = new GetBankDepositFormQuery(
+                "ThisIsPlayerCode",
+                Guid.NewGuid());
+
+            moqPaymentRepository
+                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
+                .Returns(ValueTask.FromResult(new DepositFormInfo(
+                    query.PlayerCode,
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    1000M,
+                    string.Empty)));
+
+            var actual = await sut.GetAsync(query);
+
+            moqPaymentRepository.Verify(
+                fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Get_Brand_Payment_Should_SuccessAsync()
+        {
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+
+            var sut = new GetBrandPaymentQueryService(moqPaymentRepository.Object);
+
+            var query = new GetBrandPaymentQuery(Guid.NewGuid());
+
+            _ = await sut.GetAsync(query);
+
+            moqPaymentRepository.Verify(
+                fake => fake.GetBrandPaymentByIdAsync(It.Is<Guid>(x => x == query.Id)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Submit_BankDepositForm_Should_Success()
+        {
+            var moqFileServiceClient = new Mock<IFileServiceClient>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
+
+            var sut = new SubmitBankDepositFormCommandService(
+                moqFileServiceClient.Object,
+                moqPaymentRepository.Object,
+                serializer);
+
+            var playerCode = "ThisIsPlayerCode";
+            var formId = Guid.NewGuid();
+            var contentType = "image/jpeg";
+            var fileStream = new MemoryStream();
+
+            var command = new SubmitBankDepositFormCommand(
+                playerCode,
+                formId,
+                contentType,
+                fileStream);
+
+            moqFileServiceClient
+                .Setup(fake => fake.UploadFileAsync(
+                    It.IsAny<string>(),
+                    It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
+                    It.IsAny<Stream>()))
+                .Returns(ValueTask.FromResult(new FileView
+                {
+                    Id = "testFileId",
+                    ContentType = contentType
+                }));
+
+            await sut.ExecuteAsync(command);
+
+            moqFileServiceClient.Verify(
+                fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
+                Times.Exactly(1));
+            moqPaymentRepository.Verify(
+                fake => fake.SubmitFormStatusAsync(It.IsAny<Guid>(), It.Is<int>(x => x == 1000), It.IsAny<string>()),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task User_Can_Get_Deposit_Form()
+        {
+            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+
+            var sut = new GetDepositFormQueryService(fakePaymentRepository);
+
+            var query = new GetDepositFormQuery("ThisIsPlayerCode", Guid.NewGuid());
+
+            fakePaymentRepository
+                .GetDepositFormByIdAsync(Arg.Is(query.FormId))
+                .Returns(new DepositFormInfo(
+                    query.PlayerCode,
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    1000M,
+                    null));
+
+            await sut.GetAsync(query);
+
+            _ = fakePaymentRepository
+                .Received(1)
+                .GetDepositFormByIdAsync(Arg.Is(query.FormId));
         }
     }
 }
