@@ -85,8 +85,9 @@ const VerifyFundDepositDialog = ({
         return <AlertDialog {...fundDepositFormError} {...dialog} />
     }
 
-    const onSubmit = ({ remark, reviewResponse }) => {
+    const onSubmit = ({ remark, reviewResponse, ...rest }) => {
         setSubmit({
+            brandId,
             remark,
             reviewResponse
         })
@@ -111,7 +112,7 @@ const VerifyFundDepositDialog = ({
             }}
             addonButtons={
                 <Button
-                    type="button"
+                    type="submit"
                     onClick={() => {
                         setValue("reviewResponse", ReviewFund.Reject)
                     }}
@@ -130,7 +131,7 @@ const VerifyFundDepositDialog = ({
             title={title}
             dialog={dialog}
         >
-            <FormBody record={fundDepositForm} />
+            <FormBody brandId={brandId} record={fundDepositForm} />
         </FormDialog>
     )
 }

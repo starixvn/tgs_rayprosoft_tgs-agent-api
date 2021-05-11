@@ -50,7 +50,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             short IGameProvider.UniqueId => 11;
 
+            bool IGameProvider.AllowKickPlayer => false;
+
             bool IGameProvider.SupportTestPlayer => false;
+
+            bool IGameProvider.TransferWallet => true;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 

@@ -16,6 +16,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasKey(c => c.Id)
                 .HasName("pk_game_actions");
 
+            builder.Property(c => c.PlayerCode)
+                .IsRequired();
+
             builder.Property(c => c.IsClosingRound)
                 .IsRequired();
 
@@ -79,6 +82,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.JackpotContribution)
                 .HasColumnType(ColumnTypes.Jsonb);
+
+            builder.HasIndex(e => e.PlayerCode)
+                .HasDatabaseName("ix_game_actions_player_code");
 
             builder.HasOne(c => c.Round)
                 .WithMany(c => c.GameActions)

@@ -111,28 +111,28 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             DepositAmount =
                                 players.Where(p =>
                                     p.transaction.Type == TransactionType.Deposit &&
-                                    p.transaction.ConfirmedOn >= start &&
-                                    p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                    p.transaction.RecordedOn >= start &&
+                                    p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             WithdrawalAmount =
                                 players.Where(p =>
                                     p.transaction.Type == TransactionType.Withdrawal &&
-                                    p.transaction.ConfirmedOn >= start &&
-                                    p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                    p.transaction.RecordedOn >= start &&
+                                    p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             AdjustmentAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Adjust && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Adjust && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             BonusAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Bonus && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Bonus && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             RebateAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Rebate && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Rebate && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             DividendAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Dividend && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Dividend && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             PromotionAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Promotion && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Promotion && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             CreatedOn = DateTimeOffset.Now
                         }).ToArrayAsync();
 

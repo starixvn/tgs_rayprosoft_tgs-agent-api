@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
@@ -50,66 +49,68 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 new CNYCurrency("RMB"), new USDCurrency("USD"), new VND1000Currency("VND"),
                 new IDR1000Currency("IDR"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new MYRCurrency("MYR"),
-                new THBCurrency("THB"),new EURCurrency("EUR")
+                new THBCurrency("THB"), new EURCurrency("EUR")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage(""), new CNLanguage(""),  new TWLanguage("")
+                new USLanguage(), new CNLanguage(), new TWLanguage()
             };
 
             IGame[] IGameProvider.Games => _games;
 
-            bool IGameProvider.AllowKickPlayer => true;
+            bool IGameProvider.AllowKickPlayer => false;
+
+            bool IGameProvider.TransferWallet => true;
 
             short IGameProvider.UniqueId => 10;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
-
-
-            Dictionary<string, string> MerchantCodes => new Dictionary<string, string>()
-            {
-                ["CNY"] = "72412"
-            };
-            KYBrandMerchant[] BrandMerchants => new KYBrandMerchant[]{
-                new KYBrandMerchant(){
-                    BrandCode="Default",
-                    ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
-                    ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
-                    Deskey = "E2F3A416006F84F8",
-                    Md5key = "B563DF2A3DE58DFB",
-                    Status=true,
-                    AgentMappers=new  KYAgentMapper[]{
-                        new KYAgentMapper(){
-                            CurrencyCode="CNY",
-                            AgentId="72412",
-                            Status=true
-                        }
-                    }
-                },
-                new KYBrandMerchant(){
-                    BrandCode="TGS",
-                     ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
-                    ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
-                    Deskey = "E2F3A416006F84F8",
-                    Md5key = "B563DF2A3DE58DFB",
-                    Status=false,
-                    AgentMappers=new KYAgentMapper[]{
-                        new KYAgentMapper(){
-                            CurrencyCode="CNY",
-                            AgentId="72412",
-                            Status=false
-                        }
-                    }
-                }
-                };
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() =>
                 new KYConfiguration
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-habanero") : new("http://localhost:62330"),
-                    BrandMerchants = BrandMerchants
+                    BrandMerchants = new[]
+                    {
+                        new KYBrandMerchant
+                        {
+                            BrandCode = "Default",
+                            ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
+                            ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
+                            Deskey = "E2F3A416006F84F8",
+                            Md5key = "B563DF2A3DE58DFB",
+                            Status = true,
+                            AgentMappers = new KYAgentMapper[]
+                            {
+                                new()
+                                {
+                                    CurrencyCode = "CNY",
+                                    AgentId = "72412",
+                                    Status = true
+                                }
+                            }
+                        },
+                        new KYBrandMerchant
+                        {
+                            BrandCode = "TGS",
+                            ApiUrl = new("https://wc1-api.hddv1.com/channelHandle"),
+                            ApiRecordUrl = new("https://wc1-record.hddv1.com/getRecordHandle"),
+                            Deskey = "E2F3A416006F84F8",
+                            Md5key = "B563DF2A3DE58DFB",
+                            Status = false,
+                            AgentMappers = new KYAgentMapper[]
+                            {
+                                new()
+                                {
+                                    CurrencyCode = "CNY",
+                                    AgentId = "72412",
+                                    Status = false
+                                }
+                            }
+                        }
+                    }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

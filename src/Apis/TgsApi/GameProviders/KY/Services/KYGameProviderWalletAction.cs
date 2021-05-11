@@ -230,7 +230,6 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var response = await _client.GetAPIAsync<KYGetBalanceResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
-            var balance = default(decimal?);
             if (response.Data.Code != 0)
             {
                 return new(false, 0);

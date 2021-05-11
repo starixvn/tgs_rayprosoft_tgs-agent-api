@@ -2,7 +2,7 @@
 
 namespace TGS.Core.Models.Services.Games
 {
-    public record BatchBetResultError
+    public record BatchBetResultData
     {
         public int Error { get; init; }
         public string ErrorMessage { get; init; }

@@ -67,6 +67,7 @@ import {
     PaymentChannelLabel,
     PaymentChannelSelect
 } from "../../payment/channel/PaymentChannel"
+import { parseJSON } from "../../text/json"
 
 export const EditButton = ({ brandId, record, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -89,18 +90,6 @@ export const EditButton = ({ brandId, record, onSubmitted, ...props }) => {
             )}
         </>
     )
-}
-
-const parseJsonString = (value = "") => {
-    let result = value
-    try {
-        if (typeof value === "string") {
-            result = JSON.parse(value)
-        }
-    } catch {
-        //ignore
-    }
-    return result
 }
 
 const EditDialog = ({
@@ -140,7 +129,7 @@ const EditDialog = ({
         )
     }
 
-    extendedData = parseJsonString(extendedData)
+    extendedData = parseJSON(extendedData)
     return (
         <FormDialog
             defaultValues={clone({

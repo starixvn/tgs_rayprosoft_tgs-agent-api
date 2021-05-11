@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator;
-using TGS.ServiceUtility;
 using TGS.Services.Operator.Player;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -41,7 +40,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromBody] ForgotPasswordRequest request)
         {
             return forgotPasswordService
-                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Phone));
+                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Email));
         }
 
         /// <summary>

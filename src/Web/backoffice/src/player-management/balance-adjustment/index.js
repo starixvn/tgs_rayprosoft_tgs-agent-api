@@ -86,10 +86,9 @@ const BodyContent = ({ brandId = "" }) => {
     )
 
     let columns = useColumns({ mutate, items: data?.items, brandId })
-
     return (
         <PageContent
-            title={<Trans zh="玩家列表" en="Players" />}
+            title={<Trans zh="玩家调账" en="Balance Adjustment" />}
             actionBar={
                 <Flex justifyContent="space-between">
                     <SearchBar
@@ -191,16 +190,19 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                     Header: <Trans zh="操作" en="Actions" />,
                     Cell: ({ value }) => {
                         let username = value?.username
+                        let playerCode = value?.playerCode
                         return (
                             <Set alignX="center">
                                 <PlayerAddBalanceDisclosure
                                     brandId={brandId}
                                     username={username}
+                                    playerCode={playerCode}
                                     onSubmitted={mutate}
                                 />
                                 <PlayerDeductBalanceDisclosure
                                     brandId={brandId}
                                     username={username}
+                                    playerCode={playerCode}
                                     onSubmitted={mutate}
                                 />
                             </Set>

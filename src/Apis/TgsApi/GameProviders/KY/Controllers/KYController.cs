@@ -227,7 +227,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                         });
                         lastGameRecorTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]), TimeSpan.FromHours(+8));
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         result = false;
                     }

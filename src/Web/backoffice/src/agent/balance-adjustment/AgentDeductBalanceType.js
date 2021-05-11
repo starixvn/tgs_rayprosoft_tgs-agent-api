@@ -19,10 +19,10 @@ const BonusTrans = {
     en: "Bonus"
 }
 
-export const Recharge = "Recharge"
-const RechargeTrans = {
+export const Deposit = "Deposit"
+const DepositTrans = {
     zh: "充值",
-    en: "Recharge"
+    en: "Deposit"
 }
 
 export const Dividend = "Dividend"
@@ -43,7 +43,7 @@ const OtherTrans = {
     en: "Other"
 }
 
-export const AddBalanceTypeSelect = ({ placeholder, ...props }) => {
+export const AgentDeductBalanceTypeSelect = ({ placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "交易类型",
         en: "Transaction Type"
@@ -56,8 +56,8 @@ export const AddBalanceTypeSelect = ({ placeholder, ...props }) => {
             value: Bonus
         },
         {
-            label: useTrans(RechargeTrans),
-            value: Recharge
+            label: useTrans(DepositTrans),
+            value: Deposit
         },
         {
             label: useTrans(DividendTrans),
@@ -78,7 +78,7 @@ export const AddBalanceTypeSelect = ({ placeholder, ...props }) => {
 
 export default {
     Bonus,
-    Recharge,
+    Deposit,
     Dividend,
     Transfer,
     Other
