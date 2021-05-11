@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public class LeePayDepositFormCreatedResponse
+    public record LeePayDepositFormCreatedResponse
     {
         [JsonPropertyName("formid")]
         public Guid FormId { get; init; }
