@@ -10,7 +10,7 @@ namespace TGS.Core.Models
         public const string DefaultCultureCode = "en-US";
         public const string Default = "default";
 
-        public static readonly GameType[] Sports = {GameType.Sportsbook, GameType.VirtualSports, GameType.ESports};
+        public static readonly GameType[] Sports = { GameType.Sportsbook, GameType.VirtualSports, GameType.ESports };
 
         public static readonly GamePlatformType[] AllGamePlatformTypes =
         {
@@ -65,6 +65,7 @@ namespace TGS.Core.Models
             public const string KY = "KY";
             public const string AsiaGaming = "AG";
             public const string Saba = "SABA";
+            public const string VR = "VR";
         }
 
         public static class EnvironmentVariable

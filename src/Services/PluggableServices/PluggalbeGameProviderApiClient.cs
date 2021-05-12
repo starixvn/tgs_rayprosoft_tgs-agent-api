@@ -50,7 +50,7 @@ namespace TGS.Services.PluggableServices
         {
             var prefix = $"Pluggable.{request.GameProviderCode}.GetBalance";
             return ExecuteJsonRequestAsync<GameProviderWalletGetBalanceRequest, GameProviderWalletGetBalanceResponse>(HttpMethod.Post, apiUrl,
-                "/api/pluggable/player/blaance", request, logPrefix: prefix);
+                "/api/pluggable/player/balance", request, logPrefix: prefix);
         }
 
         ValueTask<GameProviderWalletFundResponse> IPluggalbeGameProviderApiClient.FundOutAsync(Uri apiUrl, GameProviderWalletFundRequest request)

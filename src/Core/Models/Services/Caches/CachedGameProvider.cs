@@ -14,6 +14,7 @@ namespace TGS.Core.Models.Services.Caches
         public bool SupportTestPlayer { get; init; }
         public int PlaceBetTimeout { get; init; }
         public int SettleBetTimeout { get; init; }
-        public bool AllowKickPlayer { get; set; }
+        public bool AllowKickPlayer { get; init; }
+        public bool IsTransferWallet { get; init; }
     }
 }

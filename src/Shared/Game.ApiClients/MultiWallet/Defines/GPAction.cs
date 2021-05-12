@@ -19,11 +19,11 @@ namespace TGS.Shared.Game.ApiClients.MultiWallet.Defines
         /// <summary>
         /// The fnud out(Tgs -> Gp)
         /// </summary>
-        FnudOut,
+        FundOut,
         /// <summary>
         /// The fnud in(GP -> Tgs)
         /// </summary>
-        FnudIn,
+        FundIn,
         /// <summary>
         /// The fund checking
         /// </summary>

@@ -6,6 +6,7 @@ using TGS.Apis.TgsApi.GameProviders.KY;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.Saba;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
+using TGS.Apis.TgsApi.GameProviders.VR;
 using TGS.Core.Models;
 
 namespace TGS.Apis.TgsApi
@@ -21,7 +22,8 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.PragmaticPlay, typeof(PragmaticPlayStartup)},
             {Consts.GameProvider.AsiaGaming, typeof(AsiaGamingStartup)},
             {Consts.GameProvider.Saba, typeof(SabaStartup)},
-            {Consts.GameProvider.KY, typeof(KYStartup)}
+            {Consts.GameProvider.KY, typeof(KYStartup)},
+            {Consts.GameProvider.VR, typeof(VRStartup)}
 
         };
 
@@ -33,6 +35,7 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.AsiaGaming, "AsiaGaming/asiagaming.json"},
             {Consts.GameProvider.Saba, "Saba/saba.json"},
             {Consts.GameProvider.KY, "KY/ky.json"},
+            {Consts.GameProvider.VR, "VR/vr.json"},
         };
     }
 }

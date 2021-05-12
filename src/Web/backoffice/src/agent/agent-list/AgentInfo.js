@@ -12,7 +12,8 @@ import {
     Dialog,
     Modal,
     Table,
-    useClassName
+    useClassName,
+    Alert
 } from "bumbag"
 import { FieldValues } from "../../layout/Grid"
 import {
@@ -71,9 +72,22 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
 
     useEffect(() => {
         if (result && !error) {
+            reset()
             onSubmitted && onSubmitted()
         }
     }, [result])
+
+    let agentUsernamePlaceholder = useTrans({
+        zh: "代理用户名",
+        en: "Agent Username"
+    })
+
+    let currentParentUsername = record.parentUsername
+    let parentUsername = formMethods.watch("parentUsername")
+    let changeParent =
+        currentParentUsername &&
+        parentUsername &&
+        currentParentUsername != parentUsername
 
     const onSubmit = (data) => {
         setSubmit({
@@ -105,7 +119,17 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                             {!agentHead && (
                                 <>
                                     <ParentAgentUsername>
-                                        <Input name="parentAgentUsername" />
+                                        <Set orientation="vertical" isFilled>
+                                            <Input
+                                                name="parentUsername"
+                                                placeholder={
+                                                    agentUsernamePlaceholder
+                                                }
+                                            />
+                                            {changeParent && (
+                                                <ChangeParentWarning />
+                                            )}
+                                        </Set>
                                     </ParentAgentUsername>
                                 </>
                             )}
@@ -143,66 +167,89 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                 </Box>
                             </AgentTypeBox>
 
-                            <BounsBox>
-                                <AgentCommissionPercentageInputField />
-                            </BounsBox>
+                            {!changeParent && (
+                                <BounsBox>
+                                    <AgentCommissionPercentageInputField />
+                                </BounsBox>
+                            )}
 
-                            <RebateBox
-                                label={
-                                    <Trans
-                                        zh="真人返佣"
-                                        en="Live Dealer Rebate"
-                                    />
-                                }
-                            >
-                                <AgentLiveDealerRebatePercentageInputField />
-                            </RebateBox>
+                            {!changeParent && (
+                                <RebateBox
+                                    label={
+                                        <Trans
+                                            zh="真人返佣"
+                                            en="Live Dealer Rebate"
+                                        />
+                                    }
+                                >
+                                    <AgentLiveDealerRebatePercentageInputField />
+                                </RebateBox>
+                            )}
 
-                            <RebateBox
-                                label={
-                                    <Trans zh="电子返佣" en="EGame Rebate" />
-                                }
-                            >
-                                <AgentEgameRebatePercentageInputField />
-                            </RebateBox>
+                            {!changeParent && (
+                                <RebateBox
+                                    label={
+                                        <Trans
+                                            zh="电子返佣"
+                                            en="EGame Rebate"
+                                        />
+                                    }
+                                >
+                                    <AgentEgameRebatePercentageInputField />
+                                </RebateBox>
+                            )}
 
-                            <RebateBox
-                                label={
-                                    <Trans
-                                        zh="棋牌返佣"
-                                        en="Card Game Rebate"
-                                    />
-                                }
-                            >
-                                <AgentCardGameRebatePercentageInputField />
-                            </RebateBox>
+                            {!changeParent && (
+                                <RebateBox
+                                    label={
+                                        <Trans
+                                            zh="棋牌返佣"
+                                            en="Card Game Rebate"
+                                        />
+                                    }
+                                >
+                                    <AgentCardGameRebatePercentageInputField />
+                                </RebateBox>
+                            )}
 
-                            <RebateBox
-                                label={
-                                    <Trans zh="彩票返佣" en="Lottery Rebate" />
-                                }
-                            >
-                                <AgentLotteryRebatePercentageInputField />
-                            </RebateBox>
+                            {!changeParent && (
+                                <RebateBox
+                                    label={
+                                        <Trans
+                                            zh="彩票返佣"
+                                            en="Lottery Rebate"
+                                        />
+                                    }
+                                >
+                                    <AgentLotteryRebatePercentageInputField />
+                                </RebateBox>
+                            )}
 
-                            <RebateBox
-                                label={
-                                    <Trans zh="体育返佣" en="Sports Rebate" />
-                                }
-                            >
-                                <AgentSportsRebatePercentageInputField />
-                            </RebateBox>
+                            {!changeParent && (
+                                <RebateBox
+                                    label={
+                                        <Trans
+                                            zh="体育返佣"
+                                            en="Sports Rebate"
+                                        />
+                                    }
+                                >
+                                    <AgentSportsRebatePercentageInputField />
+                                </RebateBox>
+                            )}
 
-                            <RebateBox
-                                label={
-                                    <Trans
-                                        zh="虚拟体育返佣"
-                                        en="Virtual Sports Rebate"
-                                    />
-                                }
-                            >
-                                <AgentVirtualSportsRebatePercentageInputField />
-                            </RebateBox>
+                            {!changeParent && (
+                                <RebateBox
+                                    label={
+                                        <Trans
+                                            zh="虚拟体育返佣"
+                                            en="Virtual Sports Rebate"
+                                        />
+                                    }
+                                >
+                                    <AgentVirtualSportsRebatePercentageInputField />
+                                </RebateBox>
+                            )}
                         </FieldValues>
                         <Box alignX="right">
                             <SubmitCancel
@@ -218,6 +265,14 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
     )
 }
 
+const ChangeParentWarning = () => {
+    let warning = useTrans({
+        zh: "更改上級需重新配置",
+        en: "Change the upper level agent required to re-config."
+    })
+    return <Alert variant="tint" title={warning} type="warning" />
+}
+
 const ViewPanel = ({ record, ...props }) => {
     return (
         <TabPanel tabId={Key} {...props}>
@@ -226,7 +281,7 @@ const ViewPanel = ({ record, ...props }) => {
 
                 <RealNameBox value={record?.realName} />
 
-                <ParentAgentUsername value={record?.parentAgentUsername} />
+                <ParentAgentUsername value={record?.parentUsername} />
 
                 <RegistrationBox value={record?.registeredOn} />
 
@@ -257,7 +312,7 @@ const ViewPanel = ({ record, ...props }) => {
 
                 <RebateBox
                     label={<Trans zh="彩票返佣" en="Lottery Rebate" />}
-                    value={record?.liveDealerRebatePercentage}
+                    value={record?.lotteryRebatePercentage}
                 />
 
                 <RebateBox
@@ -398,7 +453,6 @@ const RebateBox = ({ label, value, children }) => {
     return (
         <>
             {label}
-            {/* <Trans zh="返佣比例" en="Rebate Percentage" /> */}
             {children ? (
                 children
             ) : (

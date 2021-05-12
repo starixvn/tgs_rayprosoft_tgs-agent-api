@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -28,6 +26,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
     [Queue(Consts.Queue.GameProvider)]
     public sealed class KYGameRecordJobWorker : BaseWork<TgsResponse>
     {
+        private readonly string _gameProvider = GameProviderConst.KY;
+        private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.KY;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly IRoundQueries _roundQueries;
@@ -66,10 +66,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             {
                 var configuration =
                    await _settingOperations
-                   .GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts.GameProviderConfigurations.KY)
+                   .GetValueFromJsonByKeyAsync<KYConfiguration>(_gameProviderConfigurations)
                    .ConfigureAwait(false);
                 var gameProvider = await _gameProviderOperations
-                      .GetGameProviderIdByCodeAsync(TGS.Core.Models.Consts.GameProvider.KY)
+                      .GetGameProviderIdByCodeAsync(_gameProvider)
                       .ConfigureAwait(false);
 
                 var tasks = new List<Task>();
@@ -166,7 +166,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             {
                 IntervalMinuteMax = 40m,
                 IntervalMinute = 1.5m,
-                LastGameRecorTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
+                LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
                 StartTime = sysTime.AddSeconds((double)1.5 * 60 * -1),
                 EndTime = sysTime
             };
@@ -175,7 +175,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 GameProviderId = gameProviderId,
-                GameProviderCode = TGS.Core.Models.Consts.GameProvider.KY,
+                GameProviderCode = _gameProvider,
                 BrandCode = brandCode,
                 AgentId = agentId,
                 CurrencyCode = currencyCode,
@@ -197,7 +197,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         /// <returns></returns>
         private async Task<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig config, KYGPGameRecordResponse responses, DateTimeOffset sysTime)
         {
-            if (config.EndTime > sysTime)
+            if (config.EndTime > sysTime || (sysTime - config.EndTime).TotalSeconds < (double)config.IntervalMinute * 60)
             {
                 config.StartTime = sysTime.AddSeconds((double)config.IntervalMinute * 60 * -1);
                 config.EndTime = sysTime;
@@ -208,7 +208,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 config.StartTime = config.EndTime;
                 config.EndTime = (endTime > sysTime) ? sysTime : endTime;
             }
-            config.LastGameRecorTime = (responses.LastGameRecorTime.HasValue) ? responses.LastGameRecorTime.Value : config.LastGameRecorTime;
+            config.LastGameRecordTime = (responses.LastGameRecorTime.HasValue) ? responses.LastGameRecorTime.Value : config.LastGameRecordTime;
             gameProviderSchedule.Config = JsonSerializer.Serialize(config);
             gameProviderSchedule.UpdatedOn = DateTimeOffset.UtcNow;
 

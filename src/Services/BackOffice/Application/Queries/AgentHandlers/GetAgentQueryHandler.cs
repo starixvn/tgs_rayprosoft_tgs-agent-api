@@ -40,7 +40,7 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     Type = agent.Type,
                     LevelType = agent.LevelType,
                     InvitationCode = agent.InvitationCode,
-                    ParentAgentUsername = agent.ParentAgent?.Username,
+                    ParentUsername = agent.ParentAgent?.Username,
                     RegisteredOn = agent.RegisteredOn,
                     Balance = agent.Wallets.FirstOrDefault()?.Balance ?? 0,
                     CommissionPercentage = agent.CommissionPercentage,
