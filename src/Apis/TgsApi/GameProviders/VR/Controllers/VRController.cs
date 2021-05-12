@@ -19,7 +19,6 @@ using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.Operations;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.ApiClients.VR;
-using TGS.Shared.Game.Models.KY.Outgoing;
 using TGS.Shared.Game.Models.VR.Incoming;
 using TGS.Shared.Game.Models.VR.Outgoing;
 
