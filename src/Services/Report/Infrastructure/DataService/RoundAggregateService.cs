@@ -61,7 +61,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 Turnover = model.Turnover,
                 WinLoss = model.WinLoss,
                 ReportDate = model.ReportDate,
-                CreatedOn = model.CreatedOn
+                CreatedOn = DateTimeOffset.Now
             }).ToArray());
 
         Task IRoundAggregateService.DeleteRoundAggregatesAsync(RoundAggregate[] roundAggregates) =>

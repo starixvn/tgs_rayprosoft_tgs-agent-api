@@ -39,6 +39,7 @@ namespace TGS.Services.Report.Application.Commands.Player
             _playerGameTypeAggregateService = playerGameTypeAggregateService;
             _walletRepository = walletRepository;
             _playerService = playerService;
+            _transactionManager = transactionManager;
         }
 
         public override async Task<MessageResponse> Handle(CreatePlayerRebateRequest request,
