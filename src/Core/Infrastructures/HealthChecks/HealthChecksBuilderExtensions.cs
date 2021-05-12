@@ -41,7 +41,6 @@ namespace TGS.Core.Infrastructures.HealthChecks
         {
             var section = configuration.GetSection(sectionName);
             var connectionString = section.GetValue<string>("ConnectionString");
-
             builder.AddMongoDb(connectionString, name, failureStatus, tags, timeout);
             return builder;
         }
