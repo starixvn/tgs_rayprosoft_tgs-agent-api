@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SqlScripts\Indexes\players_email.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -41,6 +45,7 @@
     <EmbeddedResource Include="SqlScripts\Indexes\roles.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\resellers.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\players.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\players_email.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_in_same_round.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_currencies_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_currencies_by_external_code.sql" />
