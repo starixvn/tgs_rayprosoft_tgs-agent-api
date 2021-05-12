@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.VR.Outgoing
 {
-    public record VRGameRecordBet
+    public record VRGameRecord
     {
         /// <summary>
         /// 投注訂單號.

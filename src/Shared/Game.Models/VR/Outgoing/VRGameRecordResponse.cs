@@ -16,6 +16,6 @@ namespace TGS.Shared.Game.Models.VR.Outgoing
         [JsonPropertyName("totalRecords")]
         public int TotalCount { get; set; }
         [JsonPropertyName("betRecords")]
-        public VRGameRecordBet[] Records { get; set; }
+        public VRGameRecord[] Records { get; set; }
     }
 }
