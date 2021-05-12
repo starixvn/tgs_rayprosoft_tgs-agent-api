@@ -3,10 +3,12 @@ using System.Threading.Tasks;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Core.Infrastructures.Aws;
 using TGS.Core.Infrastructures.Prometheus;
+using TGS.Core.Models;
 
 namespace TGS.Apis.FileService
 {
@@ -36,7 +38,9 @@ namespace TGS.Apis.FileService
             var sp = scope.ServiceProvider;
             var amazonS3 = sp.GetRequiredService<IAmazonS3>();
             var settings = sp.GetRequiredService<AwsSettings>();
-            if (settings != null && !await amazonS3.DoesS3BucketExistAsync(settings.S3.Bucket))
+            var configuration = sp.GetRequiredService<IConfiguration>();
+
+            if (configuration.GetValue<string>(Consts.EnvironmentVariable.Environment) != "Production" && settings != null && !await amazonS3.DoesS3BucketExistAsync(settings.S3.Bucket))
             {
                 var putBucketRequest = new PutBucketRequest
                 {

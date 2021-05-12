@@ -22,8 +22,8 @@ namespace TGS.Shared.Game.ApiClients.KY
             _MapAction = new Dictionary<GPAction, int>();
             _MapAction.Add(GPAction.GetGameUrl, 0);
             _MapAction.Add(GPAction.GetBalance, 7);
-            _MapAction.Add(GPAction.FnudOut, 2);
-            _MapAction.Add(GPAction.FnudIn, 3);
+            _MapAction.Add(GPAction.FundOut, 2);
+            _MapAction.Add(GPAction.FundIn, 3);
             _MapAction.Add(GPAction.FundChecking, 4);
             _MapAction.Add(GPAction.Kick, 8);
             _MapAction.Add(GPAction.GameRecord, 6);

@@ -28,7 +28,7 @@ namespace TGS.Services.GameOperations.Models.Data
         public decimal? SettleAmount { get; init; }
         public decimal? Commission { get; init; }
         public decimal? Turnover { get; init; }
-        public decimal? WinLoss { get; init; }
+        public decimal? PlayerWinLoss { get; init; }
         public decimal? TieBetAdjustment { get; init; }
         public string AdditionalData { get; init; }
         public ClientRoundStatus ClientStatus { get; init; }

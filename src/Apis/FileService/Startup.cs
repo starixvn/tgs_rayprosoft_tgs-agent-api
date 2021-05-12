@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -40,15 +41,15 @@ namespace TGS.Apis.FileService
                 _configuration.GetSection("DatabaseSettings"));
 
             services.AddSingleton<IDatabaseSettings>(provider =>
-                provider.GetRequiredService<IOptions<DatabaseSettings>>().Value);
-
+               provider.GetRequiredService<IOptions<DatabaseSettings>>().Value);
+             
             services.AddSingleton<IMongoClient>(sp =>
             {
                 var settings = sp.GetRequiredService<IDatabaseSettings>();
                 return new MongoClient(settings.ConnectionString);
             });
 
-            services.AddTransient(c =>
+            services.AddTransient(c => 
                 c.GetService<IMongoClient>()?.StartSession());
 
             services

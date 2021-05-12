@@ -10,7 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.12.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="5.0.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.12.3" />
   </ItemGroup>
 
   <ItemGroup>
