@@ -92,8 +92,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             var data = new KYGameRecordRequest()
             {
                 Action = KYUtility.GetAction(GPAction.GameRecord) ?? -1,
-                StartTime = request.StartTime,
-                EndTime = request.EndTime,
+                StartTime = request.StartTime.ToUnixTimeMilliseconds(),
+                EndTime = request.EndTime.ToUnixTimeMilliseconds(),
             };
 
             var dataPath = KYUtility.GetPath(data);
@@ -148,14 +148,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
 
 
                     var gameId = default(int?);
-                    var game = default(CachedGame);
-                    var player = default(Player);
                     var gameProviderConfigurationId = default(Guid?);
                     var success = true;
                     var PlayerCode = gameRecord.Account.Split('_')[1];
 
                     #region Get Player
-                    if (players.TryGetValue(PlayerCode, out player))
+                    if (players.TryGetValue(PlayerCode, out Player player))
                     {
                         gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
 
@@ -165,13 +163,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                         player = await _playerOperations.GetPlayerByCodeAsync(PlayerCode);
                         if (player != null)
                         {
+                            gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
                             players.Add(PlayerCode, player);
                         }
                     }
                     #endregion
 
                     #region Get Game
-                    if (gameIds.TryGetValue(gameRecord.KindID, out game))
+                    if (gameIds.TryGetValue(gameRecord.KindID, out CachedGame game))
                     {
                         gameId = game.Id;
                     }
@@ -182,6 +181,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                         if (games != null && games.Length > 0)
                         {
                             game = games[0];
+                            gameId = game.Id;
                             gameIds.Add(response.Data.List.KindID[i], game);
                         }
                     }
@@ -203,8 +203,10 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                         {
                             ExternalRoundId = gameRecord.GameID,
                             GameProviderId = gameProviderId,
+                            GameProviderCode = GameProviderCode,
                             PlayerCode = player.PlayerCode,
                             GameId = gameId.GetValueOrDefault(-1),
+                            ExternalId = gameRecord.KindID.ToString(),
                             CurrencyCode = request.CurrencyCode,
                             Status = RoundStatus.Closed,
                             GameProviderConfigurationId = gameProviderConfigurationId.GetValueOrDefault(),

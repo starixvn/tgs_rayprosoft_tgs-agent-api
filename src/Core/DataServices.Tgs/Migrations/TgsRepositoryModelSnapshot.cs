@@ -1552,6 +1552,77 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("deposit_forms");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.FailedGameRecordOperation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<short>("AutoStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("auto_status");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Detail")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("detail");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("external_id");
+
+                    b.Property<string>("ExternalRoundId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("external_round_id");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<string>("GameProviderCode")
+                        .HasColumnType("text")
+                        .HasColumnName("game_provider_code");
+
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<short>("ProcesStatus")
+                        .HasColumnType("smallint")
+                        .HasColumnName("proces_status");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_failed_game_record_operations");
+
+                    b.HasIndex("GameProviderId", "AutoStatus", "ProcesStatus")
+                        .HasDatabaseName("ix_failed_game_record_operations_game_provider_id_auto_status_proces_status");
+
+                    b.HasIndex("ExternalRoundId", "PlayerCode", "GameProviderId", "GameId")
+                        .IsUnique()
+                        .HasDatabaseName("ux_failed_game_record_operations_external_round_id_player_code_game_provider_id_game_id");
+
+                    b.ToTable("failed_game_record_operations", "bet");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Game", b =>
                 {
                     b.Property<int>("Id")
