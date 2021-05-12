@@ -61,7 +61,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new VRConfiguration
             {
                 ServiceEndpointUrl =
-                _env.IsDocker() ? new Uri("http://game-VR") : new("http://localhost:62330"),
+                _env.IsDocker() ? new Uri("http://game-vr") : new("http://localhost:62330"),
                 BrandMerchants = new VRBrandMerchant[] {
                     new VRBrandMerchant(){
                         BrandCode="Default",
