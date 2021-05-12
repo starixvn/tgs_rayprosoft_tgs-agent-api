@@ -68,7 +68,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new PragmaticPlayConfiguration
             {
                 ServiceEndpointUrl =
-                    _env.IsDocker() ? new Uri("http://game-pragmaticplay") : new("http://localhost:62330"),
+                    _env.IsDocker() ? new Uri("http://game-pp") : new("http://localhost:62330"),
                 SecureLogin = "tgs_tgs",
                 SecretKey = "testKey",
                 ProviderId = "PragmaticPlay",

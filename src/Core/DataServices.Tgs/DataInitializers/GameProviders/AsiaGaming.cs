@@ -75,7 +75,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new AsiaGamingConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new("http://game-asiagaming") : new("http://localhost:62330"),
+                        _env.IsDocker() ? new("http://game-ag") : new("http://localhost:62330"),
                     AgentCode = "JH2_AGIN",
                     LockGameTypes = new[] {"ROU"},
                     DesKey = "jh2hnM6K",
@@ -146,8 +146,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             }
                         }
                     },
-                    ApiUrl = new("http://gi.aggdemo.com:81"),
-                    LoginApiUrl = new("https://swapi.etwlt.com")
+                    LoginApiUrl = new("http://gi.aggdemo.com:81"),
+                    ApiUrl = new("https://swapi.etwlt.com")
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();
