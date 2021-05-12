@@ -37,7 +37,7 @@ export const AgentTypeSelect = ({ placeholder, ...props }) => {
     return <Select placeholder={placeholder} options={options} {...props} />
 }
 
-export const AgentTypeLabel = ({ value }) => {
+export const AgentTypeLabel = ({ value = "" }) => {
     let code = value
     switch (code) {
         case Cash:

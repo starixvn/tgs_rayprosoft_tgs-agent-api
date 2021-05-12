@@ -48,7 +48,7 @@ const EditPanel = ({ record, onSubmitted, ...props }) => {
     return (
         <TabPanel tabId={Key} {...props}>
             <TwoColumns>
-                {record?.banks.map((bank, index) => (
+                {record?.banks?.map?.((bank, index) => (
                     <Bank key={index} bank={bank} onSubmitted={onSubmitted} />
                 ))}
             </TwoColumns>
@@ -61,7 +61,7 @@ const ViewPanel = ({ record = {}, ...props }) => {
     return (
         <TabPanel tabId={Key} {...props}>
             <TwoColumns>
-                {record?.banks.map((bank, index) => (
+                {record?.banks?.map?.((bank, index) => (
                     <Bank key={index} bank={bank} readonly />
                 ))}
             </TwoColumns>
