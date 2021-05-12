@@ -216,7 +216,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                             ExternalClosedOn = gameRecord.GameEndTime,
                             BetAmount = gameRecord.AllBet,
                             ValidBetAmount = gameRecord.AllBet,
-                            WinLoss = gameRecord.Profit,
+                            PlayerWinLoss = gameRecord.Profit,
                             Commission = gameRecord.Revenue,
                             Turnover = gameRecord.CellScore,
                             SettleAmount = gameRecord.AllBet + gameRecord.Profit,
