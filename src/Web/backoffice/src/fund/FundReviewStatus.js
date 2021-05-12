@@ -23,6 +23,8 @@ const RejectedTrans = {
 
 export const isFundUnderReview = (value) => value === Review
 
+export const isFundApproved = (value) => value === Approved
+
 export const FundReviewStatusLabel = ({ value }) => {
     switch (value) {
         case Review:

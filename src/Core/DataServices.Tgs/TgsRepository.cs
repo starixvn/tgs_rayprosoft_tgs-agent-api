@@ -163,6 +163,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<AgentDividend> AgentDividends { get; set; }
         DbSet<PlayerRebate> PlayerRebates { get; set; }
         DbSet<AgentLoginRecord> AgentLoginRecords { get; set; }
+        DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
@@ -315,6 +316,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<PromotionPlayer> PromotionPlayers { get; set; }
         public DbSet<AgentDividend> AgentDividends { get; set; }
         public DbSet<PlayerRebate> PlayerRebates { get; set; }
+
+        public DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;

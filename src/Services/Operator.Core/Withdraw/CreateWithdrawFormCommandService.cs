@@ -14,10 +14,10 @@ namespace TGS.Services.Operator.Withdraw
 {
     internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdrawFormCommand>
     {
-        private readonly IPaymentRepository _paymentRepository;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IWalletRepository _walletRepository;
 
         public CreateWithdrawFormCommandService(
@@ -85,13 +85,11 @@ namespace TGS.Services.Operator.Withdraw
                 .GetBankInfoByIdAsync(command.BankInfoId)
                 .ConfigureAwait(false);
 
-            var bankInfoData = new
-            {
+            var bankInfoData = new WithdrawBankInfo<JsonDocument>(
                 bankInfo.Id,
                 bankInfo.PaymentChannelId,
                 bankInfo.BankType,
-                Detail = _jsonSerializationProvider.DeserializeFromString<JsonDocument>(bankInfo.Detail)
-            };
+                _jsonSerializationProvider.DeserializeFromString<JsonDocument>(bankInfo.Detail));
 
             await _paymentRepository
                 .CreateWithdrawFormAsync(

@@ -14,7 +14,12 @@ import {
 import { useBrandPaymentList } from "./client"
 import { Select, SelectField } from "../../select/Select"
 
-export const BrandPaymentSelect = ({ brandId, transferType, ...props }) => {
+export const BrandPaymentSelect = ({
+    brandId,
+    transferType,
+    paymentChannelId,
+    ...props
+}) => {
     let { isLoading, data, error, deleteCache, mutate } = useBrandPaymentList({
         brandId,
         transferType,
@@ -22,9 +27,20 @@ export const BrandPaymentSelect = ({ brandId, transferType, ...props }) => {
         showAll: true
     })
 
-    let options = data?.items?.map((item) => ({
-        label: item.channelName,
-        value: item.id
-    }))
+    let options = data?.items
+        ?.filter((brandPayment) => {
+            if (
+                paymentChannelId &&
+                paymentChannelId != brandPayment.paymentChannelId
+            ) {
+                return false
+            }
+
+            return true
+        })
+        ?.map((item) => ({
+            label: item.channelName,
+            value: item.id
+        }))
     return <Select isLoading={isLoading} options={options} {...props} />
 }

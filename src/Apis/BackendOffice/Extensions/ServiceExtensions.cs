@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using Tgs.Payment.LeePay;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
@@ -63,7 +64,6 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddTransient<ILicenseeService, LicenseeService>();
             services.AddTransient<IBrandPaymentService, BrandPaymentService>();
             services.AddTransient<IStationLetterService, StationLetterService>();
-            services.AddBackOfficeApplicationServices();
 
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
@@ -78,6 +78,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddTransactions()
+                .AddBackOfficeApplicationServices()
                 .AddReportClientServices(configuration)
                 .AddPromotionClientServices(configuration)
                 .AddPromotionRepositoriesServices()
@@ -142,7 +143,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[] { new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture) };
+                var supportedCultures = new[] {new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture)};
 
                 options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
@@ -163,6 +164,19 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddPayment()
                 .UseTgsPaymentRepository()
                 .RegisterWithdrawProcessor<LeePayProcessor>("LeePay");
+
+            services
+                .AddPaymentClient()
+                .AddSingleton<LeePaySerializer>()
+                .AddNatsMessageQueue(config =>
+                {
+                    config.ConfigQueueOptions((options, sp) =>
+                    {
+                        var configuration = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                    });
+                });
 
             return services;
         }

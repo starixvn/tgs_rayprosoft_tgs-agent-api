@@ -8,6 +8,9 @@
         Bonus = 3,
         Rebate = 4,
         Dividend = 5,
-        Promotion = 6
+        Promotion = 6,
+        GameProviderFundOut = 7,
+        GameProviderFundIn = 8,
+        Other = 99
     }
 }

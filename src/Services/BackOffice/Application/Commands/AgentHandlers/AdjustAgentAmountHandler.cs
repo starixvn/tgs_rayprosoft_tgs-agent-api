@@ -102,7 +102,10 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 
             var remark = _jsonSerializationProvider.SerializeToString(new
             {
-                request.TransactionType, TargetAgent = targetAgent, TargetPlayer = targetPlayer, request.Remark
+                request.TransactionType,
+                TargetAgent = targetAgent?.Username,
+                TargetPlayer = targetPlayer?.Username,
+                request.Remark
             });
 
             await _agentWalletRepository.ExchangeAsync(agent.BrandId, agent.DefaultWalletId, agent.Id,

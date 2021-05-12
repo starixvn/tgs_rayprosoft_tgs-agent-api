@@ -10,7 +10,7 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
-    <GlobalNugetConfig Condition="'$(UserProfile)'==''">~/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
+    <GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
     <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
     <DockerfileTag Condition="$(DockerfileTag) == ''">tgs-api</DockerfileTag>
   </PropertyGroup>
@@ -18,6 +18,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;8618;8601;8602</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Dockerfile.original" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
@@ -39,9 +43,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
+    <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+    <ProjectReference Include="..\..\Repositories\GameProviders.Repositories\GameProviders.Repositories.csproj" />
+    <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\GameOperations\GameOperations.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
+    <ProjectReference Include="..\..\Services\Wallet.Core\Wallet.Core.csproj" />
     <ProjectReference Include="..\..\Shared\Game.ApiClients\Game.ApiClients.csproj" />
     <ProjectReference Include="..\..\Shared\Game.Models\Game.Models.csproj" />
   </ItemGroup>
@@ -50,6 +58,10 @@
     <Compile Include="..\..\GlobalAssemblyInfo.cs">
       <Link>GlobalAssemblyInfo.cs</Link>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\GameProviderWalletAction\" />
   </ItemGroup>
 
 

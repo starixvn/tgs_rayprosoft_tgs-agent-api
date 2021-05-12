@@ -87,6 +87,7 @@ const VerifyFundWithdrawDialog = ({
 
     const onSubmit = ({ remark, reviewResponse, brandPaymentId, ...rest }) => {
         setSubmit({
+            brandId,
             brandPaymentId,
             remark,
             reviewResponse
@@ -102,7 +103,7 @@ const VerifyFundWithdrawDialog = ({
     return (
         <FormDialog
             formMethods={formMethods}
-            defaultValues={clone(fundWithdrawForm)}
+            defaultValues={clone({ ...fundWithdrawForm })}
             actionButtonsProps={{
                 submitText: approveLabel,
                 palette: "success"
@@ -112,7 +113,7 @@ const VerifyFundWithdrawDialog = ({
             }}
             addonButtons={
                 <Button
-                    type="button"
+                    type="submit"
                     onClick={() => {
                         setValue("reviewResponse", ReviewFund.Reject)
                     }}
@@ -132,7 +133,7 @@ const VerifyFundWithdrawDialog = ({
             dialog={dialog}
             maxWidth="80vw"
         >
-            <FormBody record={fundWithdrawForm} />
+            <FormBody brandId={brandId} record={fundWithdrawForm} />
         </FormDialog>
     )
 }

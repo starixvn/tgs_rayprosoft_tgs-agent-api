@@ -42,7 +42,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
-                "tgs.payment.manual",
+                "tgs.payment.manual.deposit",
                 _ => serializer.Serialize(
                     new ManualDepositApplyInfo(
                             request.BankAccount,
@@ -59,7 +59,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
-        public async Task<DepositFormResponse> GetDepositFormAsync(
+        public async Task<ManualDepositFormResponse> GetDepositFormAsync(
             [FromServices] IGetService<GetBankDepositFormQuery, DepositFormInfo> getBankDepositService,
             [FromServices] IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>> getAllPaymentChannelService,
             [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
@@ -88,7 +88,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var bankInfo = serializer.Deserialize<ManualDepositApplyInfo>(form.ApplyInfo);
 
-            return new DepositFormResponse
+            return new ManualDepositFormResponse
             {
                 MethodName = paymentMethods[brandPayment.MethodId].Name,
                 ChannelName = paymentChannels[brandPayment.ChannelId].Name,

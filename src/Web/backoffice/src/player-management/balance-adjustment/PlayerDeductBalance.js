@@ -39,15 +39,19 @@ import { formatNumberDecimal } from "../../number/format"
 import Separator from "../../layout/Separator"
 import { Update } from "./menu"
 import FormDialog from "../../form/FormDialog"
-import PlayerAddBalanceTypeSelect from "./PlayerAddBalanceType"
+import PlayerDeductBalanceType, {
+    PlayerDeductBalanceTypeSelect
+} from "./PlayerDeductBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
 import { NumberInputField } from "../../input/NumberInput"
 import AdjustType from "./AdjustType"
+import { usePlayer } from "../player-list/client"
 
 export const PlayerDeductBalanceDisclosure = ({
     brandId,
     username,
+    playerCode,
     onSubmitted,
     ...props
 }) => {
@@ -67,6 +71,7 @@ export const PlayerDeductBalanceDisclosure = ({
                 <DeductDialog
                     brandId={brandId}
                     username={username}
+                    playerCode={playerCode}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
                 />
@@ -75,7 +80,13 @@ export const PlayerDeductBalanceDisclosure = ({
     )
 }
 
-const DeductDialog = ({ brandId, username, onSubmitted, dialog }) => {
+const DeductDialog = ({
+    brandId,
+    username,
+    playerCode,
+    onSubmitted,
+    dialog
+}) => {
     let [formData, setSubmit] = useState()
     let {
         result,
@@ -83,7 +94,7 @@ const DeductDialog = ({ brandId, username, onSubmitted, dialog }) => {
         error,
         mutate,
         deleteCache
-    } = usePlayerAdjustBalance(username, formData)
+    } = usePlayerAdjustBalance(playerCode, formData)
 
     let title = useTrans({
         zh: "余额扣分",
@@ -123,17 +134,21 @@ const DeductDialog = ({ brandId, username, onSubmitted, dialog }) => {
                 />
             }
         >
-            <FormBody brandId={brandId} username={username} />
+            <FormBody
+                brandId={brandId}
+                username={username}
+                playerCode={playerCode}
+            />
         </FormDialog>
     )
 }
 
-const FormBody = ({ brandId, username }) => {
+const FormBody = ({ brandId, username, playerCode }) => {
     let { watch } = useFormContext()
+    let { data: player } = usePlayer(playerCode)
 
-    let typeFieldName = "type"
-    let type = watch(typeFieldName)
-
+    let typeFieldName = "transactionType"
+    let transactionType = watch(typeFieldName)
     return (
         <>
             <Input type="hidden" name="brandId" value={brandId} />
@@ -147,7 +162,24 @@ const FormBody = ({ brandId, username }) => {
                 <Text.Block alignY="center">
                     <Trans zh="交易类型" en="Transaction Type" />
                 </Text.Block>
-                <PlayerAddBalanceTypeSelect name={typeFieldName} required />
+                <PlayerDeductBalanceTypeSelect
+                    name={typeFieldName}
+                    playerCode={playerCode}
+                    required
+                />
+
+                {transactionType == PlayerDeductBalanceType.Transfer &&
+                    player?.agentUsername && (
+                        <>
+                            <Text.Block alignY="center">
+                                <Trans
+                                    zh="转账代理用户名"
+                                    en="Transfer Agent Username"
+                                />
+                            </Text.Block>
+                            <Input value={player?.agentUsername} readOnly />
+                        </>
+                    )}
 
                 <Text.Block alignY="center">
                     <Trans zh="交易金额" en="Amount" />

@@ -224,6 +224,7 @@ namespace TGS.Services.GameOperations.Data
             }
 
             var errors = states.SelectMany(s => s.Errors).ToArray();
+            var results = states.SelectMany(s => s.Results).ToArray();
 
             Dictionary<string, decimal> playerBalances = new();
             foreach (var (playerCode, balance) in states.SelectMany(s => s.PlayerBalances))
@@ -240,6 +241,7 @@ namespace TGS.Services.GameOperations.Data
                 BatchTime = DateTimeOffset.Now,
                 TransactionsCount = states.Sum(s => s.Successes),
                 Errors = errors,
+                Results = results,
                 PlayerBalances = playerBalances
             };
 
@@ -261,25 +263,29 @@ namespace TGS.Services.GameOperations.Data
                     hasCurrencyFromGameProvider, transaction);
 
                 var betResult = await execute(betData).ConfigureAwait(false);
+                var isSuccess = betResult.Error == TgsApiError.None;
 
-                if (betResult.Error == TgsApiError.None)
+                var firstTran = betResult.Transactions.FirstOrDefault();
+
+                var batchBetResultData = new BatchBetResultData
+                {
+                    Error = (int)betResult.Error,
+                    ErrorMessage = isSuccess ? string.Empty : betResult.Error.ToString(),
+                    PlayerCode = transaction.PlayerCode,
+                    ExternalTransactionId = transaction.ExternalTransactionId,
+                    InternalTransactionId = firstTran?.InternalTransactionId,
+                    IsDuplicate = firstTran?.IsDuplicate ?? false
+                };
+
+                if (isSuccess)
                 {
                     ++state.Successes;
                     state.PlayerBalances[transaction.PlayerCode] = betResult.Balance;
+                    state.Results.Add(batchBetResultData);
                 }
                 else
                 {
-                    var firstTran = betResult.Transactions.FirstOrDefault();
-
-                    state.Errors.Add(new()
-                    {
-                        Error = (int)betResult.Error,
-                        ErrorMessage = betResult.Error.ToString(),
-                        PlayerCode = transaction.PlayerCode,
-                        ExternalTransactionId = transaction.ExternalTransactionId,
-                        InternalTransactionId = firstTran?.InternalTransactionId,
-                        IsDuplicate = firstTran?.IsDuplicate ?? false
-                    });
+                    state.Errors.Add(batchBetResultData);
                 }
             }
             catch (Exception ex)

@@ -1,0 +1,22 @@
+﻿namespace TGS.Core.Models.Enums
+{
+    public enum AccountChangeType
+    {
+        Deposit = 0,
+        Withdrawal = 1,
+        Adjust = 2,
+        Bonus = 3,
+        Rebate = 4,
+        Dividend = 5,
+        Promotion = 6,
+        PlaceBet = 100,
+        WinBet = 101,
+        LoseBet = 102,
+        FreeBet = 103,
+        TieBet = 104,
+        CancelTransaction = 105,
+        LockAmount = 106,
+        UnlockAmount = 107,
+        WinJackpot = 108
+    }
+}

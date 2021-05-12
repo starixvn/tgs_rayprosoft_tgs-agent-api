@@ -10,3 +10,15 @@ export const stringifyJSON = (value = "") => {
 
     return value
 }
+
+export const parseJSON = (value = "") => {
+    let result = value
+    try {
+        if (typeof value === "string") {
+            result = JSON.parse(value)
+        }
+    } catch {
+        //ignore
+    }
+    return result
+}
