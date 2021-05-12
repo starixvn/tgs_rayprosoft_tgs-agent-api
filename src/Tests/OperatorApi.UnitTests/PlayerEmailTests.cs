@@ -129,8 +129,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public void Commit_Set_Player_Email_IF_Mail_Duplicate_Should_Throw_Exception()
         {
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
             dbContextOptionsBuilder
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
