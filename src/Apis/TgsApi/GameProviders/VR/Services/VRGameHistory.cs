@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
@@ -12,7 +10,7 @@ using TGS.Services.GameOperations.Data;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.VR.Outgoing;
-using TGS.Core.Infrastructures.Extensions;
+
 namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 {
     public sealed class VRGameHistory : BaseBetHistory

@@ -18,7 +18,6 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.VR;
-using TGS.Shared.Game.Models.KY.Incoming;
 using TGS.Shared.Game.Models.VR.Incoming;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 

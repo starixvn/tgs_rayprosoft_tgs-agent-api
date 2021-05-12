@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;

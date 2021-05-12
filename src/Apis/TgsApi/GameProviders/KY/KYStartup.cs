@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
@@ -9,8 +7,6 @@ using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Services.GameOperations.Extensions;
-using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY
 {
