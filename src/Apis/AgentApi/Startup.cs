@@ -62,8 +62,6 @@ namespace TGS.Apis.AgentApi
                 .AddReportClientServices(_configuration)
                 .AddTransactions();
 
-            services.AddIdentityVerifiers();
-
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)

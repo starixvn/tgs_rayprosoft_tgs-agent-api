@@ -11,7 +11,7 @@
     <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
     <GlobalNugetConfig Condition="'$(UserProfile)'==''">~/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
     <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
-    <DockerfileTag Condition="$(DockerfileTag) == ''">log-api</DockerfileTag>
+    <DockerfileTag Condition="$(DockerfileTag) == ''">agent-api</DockerfileTag>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +23,7 @@
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="4.1.1" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.1" />
+    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,10 +31,7 @@
     <ProjectReference Include="..\..\Core\DataServices.Report\DataServices.Report.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
-    <ProjectReference Include="..\..\Libraries\IdentityVerifiers\IdentityVerifiers.csproj" />
-    <ProjectReference Include="..\..\Repositories\Operator.Repositories\Operator.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
-    <ProjectReference Include="..\..\Services\Operator.Core\Operator.Core.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />
   </ItemGroup>
 
