@@ -160,12 +160,14 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
         private async Task<(GameProviderSchedule gameProviderSchedule, VRGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProviderId, string brandCode, string merchantid)
         {
             var sysTime = DateTimeOffset.UtcNow;
+            var intervalMinuteMax = 24 * 60m;
+            var intervalMinute = 20m;
             var config = new VRGameProviderScheduleConfig()
             {
-                IntervalMinuteMax = 24 * 60,
-                IntervalMinute = 5m,
+                IntervalMinuteMax = intervalMinuteMax,
+                IntervalMinute = intervalMinute,
                 LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+0)),
-                StartTime = sysTime.AddSeconds((double)5m * 60 * -1),
+                StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1),
                 EndTime = sysTime
             };
 
