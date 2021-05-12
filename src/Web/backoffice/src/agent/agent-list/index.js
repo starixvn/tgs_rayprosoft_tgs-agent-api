@@ -431,7 +431,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                                     palette="warning"
                                     variant="outlined"
                                     brandId={brandId}
-                                    record={value}
+                                    agentId={value?.id}
                                     onSubmitted={mutate}
                                 />
                             )}

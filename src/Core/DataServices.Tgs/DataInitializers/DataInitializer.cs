@@ -72,8 +72,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             _gameProviders = new IGameProvider[]
             {
-                new SBOGameProvider(env), new HabaneroGameProvider(env), new PragmaticPlayGameProvider(env),
-                new AsiaGamingGameProvider(env), new SabaGameProvider(env), new KYGameProvider(env)
+                new SBOGameProvider(env),
+                new HabaneroGameProvider(env),
+                new PragmaticPlayGameProvider(env),
+                new AsiaGamingGameProvider(env),
+                new SabaGameProvider(env),
+                new KYGameProvider(env),
+                new VRGameProvider(env)
             };
         }
 
