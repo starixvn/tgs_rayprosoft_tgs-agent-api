@@ -64,10 +64,10 @@ namespace TGS.Apis.AgentApi.Middlewares
             }
 
             var data = await tokenProvider.DecryptAsync<AgentTokenData>(sub);
-            context.Items.Add(Core.Models.Consts.ContextItems.PlayerToken, data);
+            context.Items.Add(Core.Models.Consts.ContextItems.AgentToken, data);
 
             var agentId = data.AgentId;
-            await expirationValidator.ThrowIfAgentLoginExpiredAsync(data.LoginRecordId, agentId);
+            await expirationValidator.ThrowIfAgentLoginExpiredAsync(data.LoginRecordId);
 
             if (!attribute.NeedAuthorize)
             {

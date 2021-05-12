@@ -93,7 +93,7 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
             var token = await GenerateAgentJwtTokenAsync(brandId,
                 new() {AgentId = agent.Id, LoginRecordId = record.Id, ExpiredOn = record.ExpiredOn});
 
-            return new() {PlayerToken = token, LoginTime = createdOn.ToUnixTimeMilliseconds()};
+            return new() {AgentToken = token, LoginTime = createdOn.ToUnixTimeMilliseconds()};
         }
 
         private async Task<string> GenerateAgentJwtTokenAsync(Guid brandId, AgentTokenData agentTokenData)

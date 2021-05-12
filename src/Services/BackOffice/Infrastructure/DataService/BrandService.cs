@@ -87,6 +87,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.BetLimits = await GenerateBetLimitsAsync(brand, request);
             brand.Games = await GenerateWithCreateGamesAsync(brand);
             brand.BrandGroups = GenerateWithCreateGroups(brand, request);
+            brand.Domains = GenerateBrandDomains(brand, request);
 
             await CreateEntityAsync(brand);
         }
@@ -112,6 +113,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await DeleteEntitiesAsync(brand.Languages);
             await DeleteEntitiesAsync(brand.Currencies);
             await DeleteEntitiesAsync(brand.BrandGroups);
+            await DeleteEntitiesAsync(brand.Domains);
 
             brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
             brand.Currencies = GenerateBrandCurrencies(brand, request);
@@ -119,6 +121,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.Games = await GenerateWithUpdateGamesAsync(brand, request);
             brand.GameProviders = await GenerateBrandGameProvidersAsync(brand, request);
             brand.BrandGroups = GenerateWithUpdateGroups(brand, request);
+            brand.Domains = GenerateBrandDomains(brand, request);
 
             await UpdateEntityAsync(brand);
 
@@ -151,6 +154,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .Where(x => request.CurrencyCodes.Contains(x.Code)).Select(x =>
                     new BrandCurrency {BrandId = brand.Id, CurrencyCode = x.Code, BrandCurrencyCode = x.Code});
             return new(brandCurrencies);
+        }
+
+        private HashSet<BrandDomain> GenerateBrandDomains(Brand brand, BrandRequest request)
+        {
+            var brandDomains = request.Domains.Select(x => new BrandDomain {Url = x, BrandId = brand.Id});
+            return new(brandDomains);
         }
 
         private async Task<HashSet<BrandBetLimit>> GenerateBetLimitsAsync(Brand brand, BrandRequest request)
@@ -202,7 +211,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var gameProviderIds = brand.GameProviders.Select(x => x.GameProviderId).ToArray();
 
             var brandGames = await _repository.Games.AsQueryable()
-                .Where(x => x.AvailableToBrand == true)
+                .Where(x => x.AvailableToBrand)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
             var games = brandGames.Select((x, count) =>
@@ -250,7 +259,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId);
             var games = await _repository.Games.AsQueryable()
-                .Where(x => x.AvailableToBrand == true)
+                .Where(x => x.AvailableToBrand)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
             var brandGames = games.Select(x =>

@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Models;
+using TGS.Clients.Report.Client;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -12,32 +13,17 @@ namespace TGS.Apis.AgentApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AgentController : ControllerBase
     {
+        private readonly IReportClient _client;
         private readonly IMediator _mediator;
 
-        public AgentController(IMediator mediator)
+        public AgentController(IMediator mediator, IReportClient client)
         {
             _mediator = mediator;
+            _client = client;
         }
 
-        ///// <summary>
-        /////     Check username exists
-        ///// </summary>
-        //[HttpGet]
-        //[Route("checkUsername")]
-        //public Task<CheckUsernameResponse> CheckUsernameAsync([FromQuery] CheckUsernameRequest request) =>
-        //    _mediator.Send(request);
-
-        ///// <summary>
-        /////     Create a player
-        ///// </summary>
-        //[HttpPost]
-        //[Route("create")]
-        //[Consumes(MediaTypeNames.Application.Json)]
-        //public Task<CreatePlayerResponse> CreateAsync(CreatePlayerRequest request) =>
-        //    _mediator.Send(request);
-
         /// <summary>
-        ///     Player login
+        ///     Agent login
         /// </summary>
         [HttpPost]
         [Route("login")]
@@ -45,17 +31,8 @@ namespace TGS.Apis.AgentApi.Controllers
         public Task<LoginResponse> LoginAsync(LoginRequest request) =>
             _mediator.Send(request);
 
-        ///// <summary>
-        /////     Player logout, player login is needed when use this
-        ///// </summary>
-        //[HttpDelete]
-        //[Route("logout")]
-        //[AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        //public Task<LogoutResponse> LogoutAsync() =>
-        //    _mediator.Send(new LogoutRequest());
-
         /// <summary>
-        ///     Get player information
+        ///     Get an agent information
         /// </summary>
         [HttpGet]
         [Route("info")]

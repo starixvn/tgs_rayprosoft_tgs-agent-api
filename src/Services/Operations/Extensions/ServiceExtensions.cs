@@ -47,6 +47,7 @@ namespace TGS.Services.Operations.Extensions
             #region Commands
 
             services.AddFactory<IPlayerCommands, PlayerCommands>();
+            services.AddFactory<IAgentCommands, AgentCommands>();
 
             #endregion
 

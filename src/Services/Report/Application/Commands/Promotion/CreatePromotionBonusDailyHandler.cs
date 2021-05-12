@@ -187,7 +187,8 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             var promotionLevels = promotion.PromotionVipLevels.Select(v => v.Level).ToArray();
 
             var players = aggregates
-                .Where(pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
+                .Where(promotionLevels.Length > 0,
+                    pa => pa.VipLevel != null && promotionLevels.Contains(pa.VipLevel.Value))
                 .Where(promotion.GameType is not null, pa => pa.GameType == promotion.GameType)
                 .Where(pa =>
                     promotion.PromotionGameProviders.Select(pg => pg.GameProviderId)

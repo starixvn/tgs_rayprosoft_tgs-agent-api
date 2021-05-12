@@ -10,16 +10,18 @@ namespace TGS.Services.Operations.Validators
         Task ThrowIfPlayerLoginExpiredAsync(string playerCode, PlatformType? platform = null);
 
         Task ThrowIfPlayerLoginExpiredAsync(Guid loginRecordId, string playerCode);
-        Task ThrowIfAgentLoginExpiredAsync(Guid loginRecordId, Guid agentId);
+        Task ThrowIfAgentLoginExpiredAsync(Guid loginRecordId);
     }
 
     public sealed class ExpirationValidator : IExpirationValidator
     {
+        private readonly IAgentOperations _agentOperations;
         private readonly IPlayerOperations _playerOperations;
 
-        public ExpirationValidator(IPlayerOperations playerOperations)
+        public ExpirationValidator(IPlayerOperations playerOperations, IAgentOperations agentOperations)
         {
             _playerOperations = playerOperations;
+            _agentOperations = agentOperations;
         }
 
         async Task IExpirationValidator.ThrowIfPlayerLoginExpiredAsync(string playerCode, PlatformType? platform)
@@ -36,8 +38,15 @@ namespace TGS.Services.Operations.Validators
             VerifyLoginRecordExpiredTime(loginRecord?.ExpiredOn, playerCode);
         }
 
-        Task IExpirationValidator.ThrowIfAgentLoginExpiredAsync(Guid loginRecordId, Guid agentId) =>
-            throw new NotImplementedException();
+        async Task IExpirationValidator.ThrowIfAgentLoginExpiredAsync(Guid loginRecordId)
+        {
+            var agentLoginRecord = await _agentOperations.GetAgentLoginRecordAsync(loginRecordId);
+
+            if (agentLoginRecord is null || agentLoginRecord.ExpiredOn < DateTimeOffset.UtcNow)
+            {
+                throw new("Agent login token is expired");
+            }
+        }
 
         private static void VerifyLoginRecordPlayer(string loginRecordPlayerCode, string playerCode)
         {

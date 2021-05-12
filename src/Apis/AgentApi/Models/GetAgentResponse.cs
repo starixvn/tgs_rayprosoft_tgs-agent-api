@@ -31,5 +31,8 @@ namespace TGS.Apis.AgentApi.Models
 
         [JsonPropertyName("invitationCode")]
         public string InvitationCode { get; init; }
+
+        [JsonPropertyName("brandUrl")]
+        public string BrandUrl { get; init; }
     }
 }

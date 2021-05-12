@@ -24,6 +24,10 @@ namespace TGS.Services.BackOffice.Validation.Brand
                 .NotEmpty()
                 .WithMessage(Application.Resources.Brand.CurrencyRequired);
 
+            RuleFor(x => x.SettlementIntervalType)
+                .IsInEnum()
+                .WithMessage(Application.Resources.Brand.SettlementIntervalInvalid);
+
             RuleForEach(x => x.CurrencyCodes)
                 .Must((m, n) => m.BetLimits.FirstOrDefault(x => x.CurrencyCode == n && x.IsDefault) != null)
                 .WithMessage(Application.Resources.Brand.BetLimitDefaultRequired);

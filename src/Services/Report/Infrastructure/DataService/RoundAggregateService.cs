@@ -154,11 +154,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     playerAggregate.PromotionAmount;
             }
 
-            playerAggregates = playerAggregates.Where(x =>
-                x.RegisteredCount > 0 || x.FirstFundInCount > 0 || x.DepositAmount > 0 || x.WithdrawalAmount > 0 ||
-                x.AdjustmentAmount != 0 || x.BonusAmount > 0 || x.BetAmount > 0 || x.Turnover > 0 ||
-                x.WinLossAmount != 0 || x.NetProfit != 0).ToArray();
-
             var playerAggregateByGameType = roundAggregates.GroupJoin(
                     _tgsRepository.Players.Include(x => x.Agent).Include(x => x.Vip),
                     r => r.PlayerCode, p => p.PlayerCode, (r, p) => new {r, p = p.DefaultIfEmpty()})

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -52,7 +53,8 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
                     Phone = agent.Phone,
                     QQ = agent.QQ,
                     Wechat = agent.Wechat,
-                    InvitationCode = agent.InvitationCode
+                    InvitationCode = agent.InvitationCode,
+                    BrandUrl = agent.Brand.Domains.FirstOrDefault()?.Url
                 }
             };
         }

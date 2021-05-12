@@ -33,7 +33,7 @@ namespace OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
-            var request = new CreatePlayerRequest()
+            var request = new CreatePlayerRequest
             {
                 Password = "123456",
                 ConfirmPassword = "123456",
@@ -55,7 +55,7 @@ namespace OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
-            var request = new CreatePlayerRequest()
+            var request = new CreatePlayerRequest
             {
                 Password = "123456",
                 ConfirmPassword = "123456",
@@ -76,7 +76,7 @@ namespace OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
-            var request = new CreatePlayerRequest()
+            var request = new CreatePlayerRequest
             {
                 Password = "123456",
                 ConfirmPassword = "123456",
@@ -97,7 +97,7 @@ namespace OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
-            var request = new CreatePlayerRequest()
+            var request = new CreatePlayerRequest
             {
                 Password = "1234",
                 ConfirmPassword = "1234",
@@ -118,7 +118,7 @@ namespace OperatorApi.UnitTests
         {
             // arrange
             var sut = new CreatePlayerRequestValidator();
-            var request = new CreatePlayerRequest()
+            var request = new CreatePlayerRequest
             {
                 Password = "123456789012345678901",
                 ConfirmPassword = "123456789012345678901",
@@ -142,14 +142,8 @@ namespace OperatorApi.UnitTests
             var fakeHttpContext = new DefaultHttpContext();
             var brandId = Guid.NewGuid();
             fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData()
-            {
-                PlayerCode = playerCode
-            });
-            var fakeHttpContextAccessor = new HttpContextAccessor()
-            {
-                HttpContext = fakeHttpContext
-            };
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData {PlayerCode = playerCode});
+            var fakeHttpContextAccessor = new HttpContextAccessor {HttpContext = fakeHttpContext};
 
             var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
             var jsonSerializationProvider = new JsonSerializationProvider();
@@ -172,18 +166,20 @@ namespace OperatorApi.UnitTests
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
 
             var sut = new CreatePlayerHandler
-                (fakeHttpContextAccessor,
+            (fakeHttpContextAccessor,
                 fakePlayerOperations,
                 fakeBrandOperations,
                 fakeBrandCurrencyCodeMapper,
                 fakePasswordHandler,
-                fakeStatusValidator
-                );
-            string password = "password";
+                fakeStatusValidator,
+                fakeAgentOperations
+            );
+            var password = "password";
 
-            var request = new CreatePlayerRequest()
+            var request = new CreatePlayerRequest
             {
                 Username = "username",
                 Password = password,
@@ -203,33 +199,29 @@ namespace OperatorApi.UnitTests
             // arrange
             var playerCode = "testPlayerCode";
             var fakeHttpContext = new DefaultHttpContext();
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData()
-            {
-                PlayerCode = playerCode
-            });
-            var fakeHttpContextAccessor = new HttpContextAccessor()
-            {
-                HttpContext = fakeHttpContext
-            };
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData {PlayerCode = playerCode});
+            var fakeHttpContextAccessor = new HttpContextAccessor {HttpContext = fakeHttpContext};
 
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
 
             var sut = new CreatePlayerHandler
-                (fakeHttpContextAccessor,
+            (fakeHttpContextAccessor,
                 fakePlayerOperations,
                 fakeBrandOperations,
                 fakeBrandCurrencyCodeMapper,
                 fakePasswordHandler,
-                fakeStatusValidator
-                );
-            string password = "password";
-            string invitationCode = "NonExistentCode";
+                fakeStatusValidator,
+                fakeAgentOperations
+            );
+            var password = "password";
+            var invitationCode = "NonExistentCode";
 
-            var request = new CreatePlayerRequest()
+            var request = new CreatePlayerRequest
             {
                 AgentInvitationCode = invitationCode,
                 Username = "username",
@@ -251,14 +243,8 @@ namespace OperatorApi.UnitTests
             var fakeHttpContext = new DefaultHttpContext();
             var brandId = Guid.NewGuid();
             fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData()
-            {
-                PlayerCode = playerCode
-            });
-            var fakeHttpContextAccessor = new HttpContextAccessor()
-            {
-                HttpContext = fakeHttpContext
-            };
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData {PlayerCode = playerCode});
+            var fakeHttpContextAccessor = new HttpContextAccessor {HttpContext = fakeHttpContext};
 
             var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
             var jsonSerializationProvider = new JsonSerializationProvider();
@@ -274,9 +260,10 @@ namespace OperatorApi.UnitTests
             var fakePlayerCommands = Substitute.For<IPlayerCommands>();
 
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
 
-            fakePlayerOperations
-                .GetAgentAsync(Arg.Is(invitationCode))
+            fakeAgentOperations
+                .GetAgentByInvitationCodeAsync(Arg.Is(invitationCode))
                 .Returns(new Agent());
 
             var BrandQueries = new BrandQueries(tgsRepository);
@@ -290,16 +277,17 @@ namespace OperatorApi.UnitTests
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
 
             var sut = new CreatePlayerHandler
-                (fakeHttpContextAccessor,
+            (fakeHttpContextAccessor,
                 fakePlayerOperations,
                 fakeBrandOperations,
                 fakeBrandCurrencyCodeMapper,
                 fakePasswordHandler,
-                fakeStatusValidator
-                );
-            string password = "password";
+                fakeStatusValidator,
+                fakeAgentOperations
+            );
+            var password = "password";
 
-            var request = new CreatePlayerRequest()
+            var request = new CreatePlayerRequest
             {
                 AgentInvitationCode = invitationCode,
                 Username = "username",

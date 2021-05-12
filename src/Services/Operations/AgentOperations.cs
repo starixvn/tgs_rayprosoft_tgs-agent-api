@@ -10,6 +10,7 @@ namespace TGS.Services.Operations
     public interface IAgentOperations
     {
         Task<Agent> GetAgentAsync(Guid agentId);
+        Task<AgentLoginRecord> GetAgentLoginRecordAsync(Guid loginRecordId);
         Task<Agent> GetAgentByInvitationCodeAsync(string invitationCode);
         Task<AgentLoginRecord> AgentLoginAsync(AgentLoginData data);
     }
@@ -33,5 +34,8 @@ namespace TGS.Services.Operations
 
         Task<Agent> IAgentOperations.GetAgentByInvitationCodeAsync(string invitationCode) =>
             _agentQueries.GetAgentByInvitationCodeAsync(invitationCode);
+
+        Task<AgentLoginRecord> IAgentOperations.GetAgentLoginRecordAsync(Guid loginRecordId) =>
+            _agentQueries.GetAgentLoginRecordAsync(x => x.Id == loginRecordId);
     }
 }
