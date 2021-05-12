@@ -44,6 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 BetAmount = round.BetAmount ?? 0,
                 Turnover = round.Turnover ?? 0,
                 Winloss = round.WinLoss ?? 0,
+                GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
                {
                     new JsonData {Value = JsonSerializer.Serialize(gameRecord.PrizeDetail)}
