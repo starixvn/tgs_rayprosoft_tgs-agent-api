@@ -61,6 +61,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
 
             var brand = await _repository.Brands.AsQueryable().FirstAsync(x => x.Id == request.BrandId);
+            var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
             var agent = new Agent
             {
@@ -70,6 +71,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 BrandId = request.BrandId,
                 Status = AgentStatus.Enabled,
                 ParentAgentId = parentAgent?.Id,
+                DefaultWalletId = defaultWalletId,
                 AgentStatus =
                     request.LiveDealerRebatePercentage == 0 && request.BonusPercentage == 0
                     && request.SlotRebatePercentage == 0 && request.LotteryRebatePercentage == 0 &&
@@ -103,6 +105,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 new AgentWallet
                 {
+                    Id = defaultWalletId,
                     Agent = agent,
                     Balance = 0,
                     CurrencyCode = brand.Currencies.First().CurrencyCode,

@@ -10,7 +10,8 @@ import {
     Set,
     Popover,
     List,
-    useModalState
+    useModalState,
+    Flex
 } from "bumbag"
 import {
     Create as CreateMenu,
@@ -112,6 +113,12 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     )
 }
 
+/*
+    & .bb-DialogContent > .bb-Box {
+        display: flex;
+        flex-direction: column;
+    }
+*/
 const DialogCss = css`
     min-width: 80vw;
     min-height: 90vh;
@@ -216,148 +223,154 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
     }, [dialog.visible, contentEditorRef.current])
 
     return (
-        <FieldValues>
-            <Label name="target" required={required}>
-                <Trans zh="对象" en="Target" />
-            </Label>
-            <Set>
-                <PlayerTargetSelect required={required} disabled={readonly} />
-                {!readonly && target === DesignatedPlayers && (
-                    <Controller
-                        control={control}
-                        name="playerUsernames"
-                        render={({
-                            field: { onChange, onBlur, value, name, ref },
-                            fieldState: { invalid, isTouched, isDirty }
-                        }) => (
+        <Box alignY="start" flex="1">
+            <FieldValues>
+                <Label name="target" required={required}>
+                    <Trans zh="对象" en="Target" />
+                </Label>
+                <Set>
+                    <PlayerTargetSelect
+                        required={required}
+                        disabled={readonly}
+                    />
+                    {!readonly && target === DesignatedPlayers && (
+                        <Controller
+                            control={control}
+                            name="playerUsernames"
+                            render={({
+                                field: { onChange, onBlur, value, name, ref },
+                                fieldState: { invalid, isTouched, isDirty }
+                            }) => (
+                                <>
+                                    <input
+                                        ref={uploadInputRef}
+                                        type="file"
+                                        onChange={(event) => {
+                                            let [file] = event.target.files
+                                            if (file) {
+                                                let formData = new FormData()
+                                                formData.append(
+                                                    "file",
+                                                    file,
+                                                    file.name
+                                                )
+                                                setFormData(formData)
+                                            } else {
+                                                resetFormData()
+                                            }
+                                        }}
+                                        css={css`
+                                            display: none;
+                                        `}
+                                    />
+                                    <Button
+                                        type="button"
+                                        palette="primary"
+                                        size="small"
+                                        onClick={(event) => {
+                                            uploadInputRef?.current.click()
+                                        }}
+                                        isLoading={isLoading}
+                                        disabled={isLoading}
+                                    >
+                                        <Trans zh="上传文件" en="Upload file" />
+                                    </Button>
+                                    <Button
+                                        use="a"
+                                        href="/download/payments/list.xlsx"
+                                        download="players.xlsx"
+                                        palette="primary"
+                                        size="small"
+                                    >
+                                        <Trans
+                                            zh="下载文件格式"
+                                            en="Download Format File"
+                                        />
+                                    </Button>
+                                    {error && (
+                                        <Alert
+                                            {...error}
+                                            onClickClose={resetFormData}
+                                        />
+                                    )}
+                                </>
+                            )}
+                        />
+                    )}
+                    {readonly &&
+                        target === DesignatedPlayers &&
+                        playerUsernames.length > 0 && (
+                            <Popover.State>
+                                <Popover.Disclosure
+                                    use={Button}
+                                    palette="primary"
+                                    background="primary"
+                                >
+                                    <Trans zh="玩家列表" en="Players" />
+                                </Popover.Disclosure>
+                                <Popover hasArrow>
+                                    <List maxHeight="15em" overflow="auto">
+                                        {playerUsernames.map((name, index) => (
+                                            <List.Item key={index}>
+                                                {name}
+                                            </List.Item>
+                                        ))}
+                                    </List>
+                                </Popover>
+                            </Popover.State>
+                        )}
+                </Set>
+
+                <Label name="subject" required={required}>
+                    <Trans zh="主题" en="Subject" />
+                </Label>
+                <Input name="subject" required={required} disabled={readonly} />
+
+                <Label name="content" required={required}>
+                    <Trans zh="内容" en="Content" />
+                </Label>
+                <Controller
+                    control={control}
+                    name="content"
+                    rules={{ required }}
+                    render={({
+                        field: { onChange, onBlur, value, ref, ...props },
+                        fieldState: { invalid, isTouched, isDirty }
+                    }) => {
+                        useEffect(() => {
+                            if (formState.isSubmitting && invalid) {
+                                editor?.focus()
+                            }
+                        }, [formState.isSubmitting])
+
+                        return (
                             <>
-                                <input
-                                    ref={uploadInputRef}
-                                    type="file"
-                                    onChange={(event) => {
-                                        let [file] = event.target.files
-                                        if (file) {
-                                            let formData = new FormData()
-                                            formData.append(
-                                                "file",
-                                                file,
-                                                file.name
-                                            )
-                                            setFormData(formData)
-                                        } else {
-                                            resetFormData()
+                                <Global
+                                    styles={css`
+                                        body .tox-tinymce-aux {
+                                            z-index: 19900420;
                                         }
-                                    }}
+                                        body.tox-fullscreen
+                                            .tox.tox-tinymce-aux {
+                                            z-index: 19900420;
+                                        }
+                                    `}
+                                />
+                                <textarea
+                                    id="content"
+                                    ref={contentEditorRef}
+                                    disabled={readonly}
                                     css={css`
                                         display: none;
                                     `}
-                                />
-                                <Button
-                                    type="button"
-                                    palette="primary"
-                                    size="small"
-                                    onClick={(event) => {
-                                        uploadInputRef?.current.click()
-                                    }}
-                                    isLoading={isLoading}
-                                    disabled={isLoading}
-                                >
-                                    <Trans zh="上传文件" en="Upload file" />
-                                </Button>
-                                <Button
-                                    use="a"
-                                    href="/download/payments/list.xlsx"
-                                    download="players.xlsx"
-                                    palette="primary"
-                                    size="small"
-                                >
-                                    <Trans
-                                        zh="下载文件格式"
-                                        en="Download Format File"
-                                    />
-                                </Button>
-                                {error && (
-                                    <Alert
-                                        {...error}
-                                        onClickClose={resetFormData}
-                                    />
-                                )}
+                                    defaultValue={value}
+                                ></textarea>
                             </>
-                        )}
-                    />
-                )}
-                {readonly &&
-                    target === DesignatedPlayers &&
-                    playerUsernames.length > 0 && (
-                        <Popover.State>
-                            <Popover.Disclosure
-                                use={Button}
-                                palette="primary"
-                                background="primary"
-                            >
-                                <Trans zh="玩家列表" en="Players" />
-                            </Popover.Disclosure>
-                            <Popover hasArrow>
-                                <List maxHeight="15em" overflow="auto">
-                                    {playerUsernames.map((name, index) => (
-                                        <List.Item key={index}>
-                                            {name}
-                                        </List.Item>
-                                    ))}
-                                </List>
-                            </Popover>
-                        </Popover.State>
-                    )}
-            </Set>
-
-            <Label name="subject" required={required}>
-                <Trans zh="主题" en="Subject" />
-            </Label>
-            <Input name="subject" required={required} disabled={readonly} />
-
-            <Label name="content" required={required}>
-                <Trans zh="内容" en="Content" />
-            </Label>
-            <Controller
-                control={control}
-                name="content"
-                rules={{ required }}
-                render={({
-                    field: { onChange, onBlur, value, ref, ...props },
-                    fieldState: { invalid, isTouched, isDirty }
-                }) => {
-                    useEffect(() => {
-                        if (formState.isSubmitting && invalid) {
-                            editor?.focus()
-                        }
-                    }, [formState.isSubmitting])
-
-                    return (
-                        <>
-                            <Global
-                                styles={css`
-                                    body .tox-tinymce-aux {
-                                        z-index: 19900420;
-                                    }
-                                    body.tox-fullscreen .tox.tox-tinymce-aux {
-                                        z-index: 19900420;
-                                    }
-                                `}
-                            />
-                            <textarea
-                                id="content"
-                                ref={contentEditorRef}
-                                disabled={readonly}
-                                css={css`
-                                    display: none;
-                                `}
-                                defaultValue={value}
-                            ></textarea>
-                        </>
-                    )
-                }}
-            />
-        </FieldValues>
+                        )
+                    }}
+                />
+            </FieldValues>
+        </Box>
     )
 }
 

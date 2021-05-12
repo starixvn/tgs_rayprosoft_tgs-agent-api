@@ -165,6 +165,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<AgentLoginRecord> AgentLoginRecords { get; set; }
         DbSet<BrandDomain> BrandDomains { get; set; }
         DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
+        DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
@@ -320,6 +321,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<AgentLoginRecord> AgentLoginRecords { get; set; }
         public DbSet<BrandDomain> BrandDomains { get; set; }
         public DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
+
+        public DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;
