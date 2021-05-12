@@ -9,7 +9,6 @@ using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
-using TGS.Clients.Report.Client;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
@@ -25,12 +24,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new(
-                _mediatorMock.Object, _client.Object);
+                _mediatorMock.Object);
         }
 
         private PlayerController _controller;
         private readonly Mock<IMediator> _mediatorMock = new();
-        private readonly Mock<IReportClient> _client = new();
 
         [TestCase(true)]
         [TestCase(false)]
