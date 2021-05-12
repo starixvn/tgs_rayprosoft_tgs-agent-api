@@ -109,7 +109,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYFnudRequest()
             {
-                Action = KYUtility.GetAction(GPAction.FnudIn) ?? -1,
+                Action = KYUtility.GetAction(GPAction.FundIn) ?? -1,
                 PlayerCode = player.PlayerCode,
                 Amount = amount,
                 OrderId = orderId
@@ -161,7 +161,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var data = new KYFnudRequest()
             {
-                Action = KYUtility.GetAction(GPAction.FnudOut) ?? -1,
+                Action = KYUtility.GetAction(GPAction.FundOut) ?? -1,
                 PlayerCode = player.PlayerCode,
                 Amount = amount,
                 OrderId = orderId
@@ -193,7 +193,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             return new() { Success = success, Balance = balance, OrderId = orderId };
         }
 
-        public override async ValueTask<decimal?> GetGameProviderBalanceAsync(CachedPlayer player)
+        public override async ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
@@ -210,7 +210,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             var timestamp = date.ToUnixTimeMilliseconds();
             var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
 
-            var data = new KYGetBlaanceRequest()
+            var data = new KYGetBalanceRequest()
             {
                 Action = KYUtility.GetAction(GPAction.GetBalance) ?? -1,
                 PlayerCode = player.PlayerCode
@@ -228,15 +228,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Key = key
             };
 
-            var response = await _client.GetAPIAsync<KYGetBlaanceResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetAPIAsync<KYGetBalanceResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
 
-            var balance = default(decimal?);
-            if (response.Data.Code == 0)
+            if (response.Data.Code != 0)
             {
-                balance = response.Data.Balance;
+                return new(false, 0);
             }
 
-            return balance;
+            return new(true, response.Data.Balance);
         }
     }
 }

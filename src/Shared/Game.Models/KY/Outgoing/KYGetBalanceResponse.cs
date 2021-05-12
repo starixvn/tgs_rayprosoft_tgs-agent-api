@@ -8,7 +8,7 @@ using TGS.Shared.Game.Models.KY.Commons;
 
 namespace TGS.Shared.Game.Models.KY.Outgoing
 {
-    public record KYGetBlaanceResponse : KYBaseDataResponse
+    public record KYGetBalanceResponse : KYBaseDataResponse
     {
         /// <summary>
         /// Gets or sets the player code.

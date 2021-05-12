@@ -60,7 +60,7 @@ namespace TGS.Services.GameOperations.Data
                     SettleAmount = data.SettleAmount,
                     Commission = data.Commission,
                     Turnover = data.Turnover,
-                    WinLoss = (data.WinLoss ?? 0).Negate(),
+                    WinLoss = (data.PlayerWinLoss ?? 0).Negate(),
                     TieBetAdjustment = data.TieBetAdjustment,
                     ClientStatus = data.ClientStatus
                 }).ConfigureAwait(false);
@@ -78,6 +78,7 @@ namespace TGS.Services.GameOperations.Data
             {
                 if (round.Status == RoundStatus.Open && data.Status == RoundStatus.Closed)
                 {
+                    round.Status = data.Status;
                     round.ClosedOn = data.ClosedOn;
                     round.UpdatedOn = data.UpdatedOn;
                     round.ExternalClosedOn = data.ExternalClosedOn;
@@ -86,7 +87,7 @@ namespace TGS.Services.GameOperations.Data
                     round.SettleAmount = data.SettleAmount;
                     round.Commission = data.Commission;
                     round.Turnover = data.Turnover;
-                    round.WinLoss = (data.WinLoss ?? 0).Negate();
+                    round.WinLoss = (data.PlayerWinLoss ?? 0).Negate();
                     round.TieBetAdjustment = data.TieBetAdjustment;
                     round.ClientStatus = data.ClientStatus;
 
@@ -106,7 +107,7 @@ namespace TGS.Services.GameOperations.Data
                         if (round.BetAmount != data.BetAmount ||
                         round.ValidBetAmount != data.ValidBetAmount ||
                         round.SettleAmount != data.SettleAmount ||
-                         round.WinLoss != data.WinLoss
+                         round.WinLoss != (data.PlayerWinLoss ?? 0).Negate()
                         )
                         {
                             round.ClosedOn = data.ClosedOn;
@@ -117,10 +118,10 @@ namespace TGS.Services.GameOperations.Data
                             round.SettleAmount = data.SettleAmount;
                             round.Commission = data.Commission;
                             round.Turnover = data.Turnover;
-                            round.WinLoss = (data.WinLoss ?? 0).Negate();
+                            round.WinLoss = (data.PlayerWinLoss ?? 0).Negate();
                             round.TieBetAdjustment = data.TieBetAdjustment;
                             round.ClientStatus = data.ClientStatus;
-
+                            round.ReopenedOn = DateTimeOffset.UtcNow;
                             _tgsRepository.Rounds.Update(round);
 
                             var roundDetail = new RoundDetail()
@@ -128,11 +129,13 @@ namespace TGS.Services.GameOperations.Data
                                 RoundId = round.Id,
                                 AdditionalData = data.AdditionalData
                             };
+                            _tgsRepository.RoundDetails.Update(roundDetail);
                         }
                     }
                 }
             }
             await _tgsRepository.SaveChangesAsync();
+
             return true;
         }
         public async ValueTask<(Round round, RoundDetail roundsDetail)> GetAsync(Guid roundsId)
