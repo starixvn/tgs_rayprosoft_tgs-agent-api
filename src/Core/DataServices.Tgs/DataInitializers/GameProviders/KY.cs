@@ -27,7 +27,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with {EndpointPath = string.Empty};
+                        return (Game)g with { EndpointPath = string.Empty };
                     })
                     .ToArray();
 
@@ -59,7 +59,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             IGame[] IGameProvider.Games => _games;
 
-            bool IGameProvider.AllowKickPlayer => true;
+            bool IGameProvider.AllowKickPlayer => false;
 
             bool IGameProvider.TransferWallet => true;
 

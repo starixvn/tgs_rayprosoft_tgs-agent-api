@@ -64,6 +64,7 @@ import { AgentCardGameRebatePercentageInputField } from "../AgentCardGameRebateP
 import { AgentLotteryRebatePercentageInputField } from "../AgentLotteryRebatePercentage"
 import { AgentSportsRebatePercentageInputField } from "../AgentSportsRebatePercentage"
 import { AgentVirtualSportsRebatePercentageInputField } from "../AgentVirtualSportsRebatePercentage"
+import clone from "clone-deep"
 
 export const AddAgentButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -423,7 +424,7 @@ export const EditButton = ({ brandId, record, onSubmitted, ...props }) => {
     )
 }
 
-export const ConfigButton = ({ brandId, record, onSubmitted, ...props }) => {
+export const ConfigButton = ({ brandId, agentId, onSubmitted, ...props }) => {
     let dialog = useModalState()
 
     let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
@@ -439,7 +440,7 @@ export const ConfigButton = ({ brandId, record, onSubmitted, ...props }) => {
             {dialog.visible && (
                 <ConfigDialog
                     brandId={brandId}
-                    record={record}
+                    agentId={agentId}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
                 />
@@ -448,19 +449,39 @@ export const ConfigButton = ({ brandId, record, onSubmitted, ...props }) => {
     )
 }
 
-const ConfigDialog = ({ brandId, record, onSubmitted, dialog }) => {
-    let agentId = record?.id
+const ConfigDialog = ({ brandId, agentId, onSubmitted, dialog }) => {
+    let {
+        isLoading: isLoadingAgent,
+        data: agent,
+        error: loadingAgentError,
+        mutate: mutateAgent,
+        deleteCache: deleteAgentCache
+    } = useAgent(agentId)
+
     let [formData, setSubmit] = useState()
     let { result, error, mutate, deleteCache, isLoading } = useUpdateAgent(
         agentId,
         formData
     )
 
+    let title = useTrans({
+        zh: "比例配制",
+        en: "Config Agent"
+    })
+
+    if (isLoadingAgent) {
+        return <LoadingBackdrop {...dialog} />
+    }
+
+    if (loadingAgentError) {
+        return <AlertDialog {...loadingAgentError} onClickClose={dialog.hide} />
+    }
+
     const onSubmit = (data) => {
         setSubmit({
             updateType: AgentUpdateType.Info,
             brandId,
-            ...record,
+            ...agent,
             ...data
         })
     }
@@ -471,20 +492,30 @@ const ConfigDialog = ({ brandId, record, onSubmitted, dialog }) => {
         setSubmit(undefined)
     }
 
-    let title = useTrans({
-        zh: "比例配制",
-        en: "Config Agent"
-    })
-
     return (
         <FormDialog
-            defaultValues={{}}
+            defaultValues={{
+                ...clone(agent),
+                commissionPercentage: "",
+                liveDealerRebatePercentage: "",
+                slotRebatePercentage: "",
+                cardGameRebatePercentage: "",
+                lotteryRebatePercentage: "",
+                sportsRebatePercentage: "",
+                virtualSportsRebatePercentage: ""
+            }}
             onSubmit={onSubmit}
             isLoading={isLoading}
             result={result}
             error={error}
             onCloseErrorAlert={reset}
-            onSubmitted={onSubmitted}
+            onSubmitted={() => {
+                deleteAgentCache()
+                mutateAgent(undefined, false)
+
+                reset()
+                onSubmitted?.()
+            }}
             title={title}
             dialog={dialog}
             showActionButtons={false}
@@ -495,7 +526,7 @@ const ConfigDialog = ({ brandId, record, onSubmitted, dialog }) => {
             minWidth="60vw"
             placement="top"
         >
-            <ConfigFormBody record={record} />
+            <ConfigFormBody record={agent} />
         </FormDialog>
     )
 }
@@ -561,7 +592,7 @@ const TabsDialog = ({
                 <ViewTabs
                     agentId={agentId}
                     brandId={brandId}
-                    record={data}
+                    record={clone(data)}
                     tab={tab}
                 />
             )}
@@ -569,7 +600,7 @@ const TabsDialog = ({
                 <EditTabs
                     agentId={agentId}
                     brandId={brandId}
-                    record={data}
+                    record={clone(data)}
                     tab={tab}
                     onSubmitted={onSubmitted}
                     onBankSubmitted={onBankSubmitted}
