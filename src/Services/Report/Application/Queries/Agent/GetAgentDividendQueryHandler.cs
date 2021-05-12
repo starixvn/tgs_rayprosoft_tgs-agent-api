@@ -65,11 +65,6 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         AgentDividendAmount = list.Sum(l => l.AgentDividendAmount)
                     }).ToArrayAsync(cancellationToken);
 
-            //var agentDividendIds = agentDividends.Select(x => x.AgentId).ToArray();
-            //var agents = await _tgsAgentService.GetAgentQueries(q => q.Where(x => agentDividendIds.Contains(x.Id)))
-            //    .ToArrayAsync(cancellationToken);
-
-
             var models = agentDividends.Join(agents.ToArray(), ad => ad.AgentId, a => a.Id,
                 (ad, a) => new AgentDividendModel
                 {
