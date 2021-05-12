@@ -175,8 +175,13 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                         {
                             _lastGameRecordTime = recordBet.UpdateTime;
                         }
-                        _players.TryGetValue(PlayerCode, out player);
-                        if (player == null)
+
+                        #region Get Player
+                        if (_players.TryGetValue(PlayerCode, out player))
+                        {
+                            gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
+                        }
+                        else
                         {
                             player = await _playerOperations.GetPlayerByCodeAsync(PlayerCode);
                             if (player != null)
@@ -184,13 +189,14 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                                 _players.Add(PlayerCode, player);
                             }
                         }
-                        if (player != null)
-                        {
-                            gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
-                        }
+                        #endregion
 
-                        _gameIds.TryGetValue(recordBet.ChannelId, out game);
-                        if (game == null)
+                        #region Get Game
+                        if (_gameIds.TryGetValue(recordBet.ChannelId, out game))
+                        {
+                            gameId = game.Id;
+                        }
+                        else
                         {
                             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, recordBet.ChannelId.ToString()).ConfigureAwait(false);
 
@@ -200,11 +206,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                                 _gameIds.Add(recordBet.ChannelId, game);
                             }
                         }
-
-                        if (game != null)
-                        {
-                            gameId = game.Id;
-                        }
+                        #endregion
 
                         if (player == null || !gameId.HasValue || !gameProviderConfigurationId.HasValue)
                         {
@@ -217,11 +219,9 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                         }
 
 
-
-                        var result = false;
                         try
                         {
-                            result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
+                            var result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                             {
                                 ExternalRoundId = recordBet.SerialNumber,
                                 GameProviderId = gameProviderId,

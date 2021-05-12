@@ -122,9 +122,10 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             {
                 var sysDateTimeOffset = DateTimeOffset.UtcNow;
 
-                count = response.Data.Count;
                 for (int i = 0; i < response.Data.Count; i++)
                 {
+                    count++;
+
                     var gameRecord = new KYGameRecord()
                     {
                         GameID = response.Data.List.GameID[i],
@@ -152,8 +153,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                     var gameProviderConfigurationId = default(Guid?);
                     var success = true;
                     var PlayerCode = gameRecord.Account.Split('_')[1];
-                    players.TryGetValue(PlayerCode, out player);
-                    if (player == null)
+
+                    #region Get Player
+                    if (players.TryGetValue(PlayerCode, out player))
+                    {
+                        gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
+
+                    }
+                    else
                     {
                         player = await _playerOperations.GetPlayerByCodeAsync(PlayerCode);
                         if (player != null)
@@ -161,14 +168,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                             players.Add(PlayerCode, player);
                         }
                     }
-                    if (player != null)
+                    #endregion
+
+                    #region Get Game
+                    if (gameIds.TryGetValue(gameRecord.KindID, out game))
                     {
-                        gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
+                        gameId = game.Id;
                     }
-
-
-                    gameIds.TryGetValue(gameRecord.KindID, out game);
-                    if (game == null)
+                    else
                     {
                         var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gameRecord.KindID.ToString()).ConfigureAwait(false);
 
@@ -178,23 +185,21 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                             gameIds.Add(response.Data.List.KindID[i], game);
                         }
                     }
-
-
-                    if (game != null)
-                    {
-                        gameId = game.Id;
-                    }
+                    #endregion
 
                     if (player == null || !gameId.HasValue || !gameProviderConfigurationId.HasValue)
                     {
                         success = false;
+                        failCount++;
+                    }
+                    else
+                    {
+                        successCount++;
                     }
 
-
-                    var result = false;
                     try
                     {
-                        result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
+                        var result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                         {
                             ExternalRoundId = gameRecord.GameID,
                             GameProviderId = gameProviderId,
@@ -225,26 +230,16 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                     }
                     catch
                     {
-                        result = false;
-                    }
-
-                    if (result)
-                    {
-                        successCount++;
-                    }
-                    else
-                    {
-                        failCount++;
+                        break;
                     }
                 }
             }
 
-
             var responses = new KYGPGameRecordResponse()
             {
-                Success = (response.Data.Code == 0 || response.Data.Code == 16) ? true : false,
+                Success = (response.Data.Code is 0 or 16),
                 LastGameRecorTime = lastGameRecordTime,
-                Count = (response.Data.Code == 0 || response.Data.Code == 16) ? response.Data.Count : 0,
+                Count = (response.Data.Code is 0 or 16) ? count : 0,
                 SuccessCount = successCount,
                 FailCount = failCount
             };
