@@ -25,6 +25,10 @@ import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
 import Disclosure from "../../dialog/Disclosure"
 import { Modal, useModalState } from "../../dialog/Modal"
 import { Tabs, TabList, useTabState } from "../../tab"
+import {
+    PlayerBalanceChangePanel,
+    PlayerBalanceChangeTab
+} from "./PlayerBalanceChange"
 
 export const ViewButton = ({ player, brandId, ...props }) => {
     let dialog = useModalState()
@@ -161,6 +165,7 @@ const ViewTabs = ({ playerCode, brandId, player, tab }) => {
                 <BankTab {...tab} />
                 <BettingTab {...tab} />
                 <OperationTab {...tab} />
+                <PlayerBalanceChangeTab {...tab} />
             </TabList>
             <PlayerPanel player={player} {...tab} />
             <ContractPanel player={player} {...tab} />
@@ -172,6 +177,11 @@ const ViewTabs = ({ playerCode, brandId, player, tab }) => {
                 {...tab}
             />
             <OperationPanel playerCode={playerCode} {...tab} />
+            <PlayerBalanceChangePanel
+                playerCode={playerCode}
+                brandId={brandId}
+                {...tab}
+            />
         </Tabs>
     )
 }

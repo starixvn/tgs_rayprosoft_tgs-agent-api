@@ -102,7 +102,8 @@ namespace TGS.Services.Operations
                 SupportTestPlayer = r.SupportTestPlayer,
                 PlaceBetTimeout = r.PlaceBetTimeout,
                 SettleBetTimeout = r.SettleBetTimeout,
-                AllowKickPlayer = r.AllowKickPlayer
+                AllowKickPlayer = r.AllowKickPlayer,
+                IsTransferWallet = r.IsTransferWallet
             };
 
             await CacheGameProviderAsync(gameProviderId, cachedGameProvider);
@@ -199,9 +200,8 @@ namespace TGS.Services.Operations
             return currencies.IgnoreCaseContains(currencyCode);
         }
 
-        async Task<string[]> IGameProviderOperations.GetGameProviderCurrenciesAsync(Guid gameProviderId)
-        {
-            return await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderCurrencies,
+        async Task<string[]> IGameProviderOperations.GetGameProviderCurrenciesAsync(Guid gameProviderId) =>
+            await _cacheManager.SafeGetAndCacheAsync(RedisCacheType.GameProviderCurrencies,
                 gameProviderId, TimeSpan.FromHours(2),
                 async () =>
                 {
@@ -209,7 +209,6 @@ namespace TGS.Services.Operations
                         .GetGameProviderCurrenciesByInternalCodeAsync(gameProviderId);
                     return dict.Keys.ToArray();
                 });
-        }
 
         //async Task<string> IGameProviderOperations.GetGameProviderBetLimitCodeAsync(Guid gameProviderId,
         //    string currencyCode, int betLimitGroupId)
@@ -325,7 +324,8 @@ namespace TGS.Services.Operations
                     CachedGameProviderFields.GameProviderName, CachedGameProviderFields.Status,
                     CachedGameProviderFields.Description, CachedGameProviderFields.AutoCloseRound,
                     CachedGameProviderFields.SupportTestPlayer, CachedGameProviderFields.PlaceBetTimeout,
-                    CachedGameProviderFields.SettleBetTimeout, CachedGameProviderFields.AllowKickPlayer
+                    CachedGameProviderFields.SettleBetTimeout, CachedGameProviderFields.AllowKickPlayer,
+                    CachedGameProviderFields.IsTransferWallet
                 });
 
             if (values.All(a => !a.IsNull))
@@ -341,7 +341,8 @@ namespace TGS.Services.Operations
                     SupportTestPlayer = (bool)values[6],
                     PlaceBetTimeout = (int)values[7],
                     SettleBetTimeout = (int)values[8],
-                    AllowKickPlayer = (bool)values[9]
+                    AllowKickPlayer = (bool)values[9],
+                    IsTransferWallet = (bool)values[10]
                 };
             }
 
@@ -361,7 +362,8 @@ namespace TGS.Services.Operations
                 new(CachedGameProviderFields.SupportTestPlayer, gameProvider.SupportTestPlayer),
                 new(CachedGameProviderFields.PlaceBetTimeout, gameProvider.PlaceBetTimeout),
                 new(CachedGameProviderFields.SettleBetTimeout, gameProvider.SettleBetTimeout),
-                new(CachedGameProviderFields.AllowKickPlayer, gameProvider.AllowKickPlayer)
+                new(CachedGameProviderFields.AllowKickPlayer, gameProvider.AllowKickPlayer),
+                new(CachedGameProviderFields.IsTransferWallet, gameProvider.IsTransferWallet)
             };
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProvider, gameProviderId, fields,
@@ -393,7 +395,7 @@ namespace TGS.Services.Operations
         private async Task CacheGameProviderConfigurationAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
             CachedGameProviderConfiguration gpc)
         {
-            var fields = new HashEntry[] { new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc)) };
+            var fields = new HashEntry[] {new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc))};
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProviderConfiguration, gameProviderId, fields,
                 TimeSpan.FromHours(2), true);
@@ -418,7 +420,6 @@ namespace TGS.Services.Operations
                 $"{clientId}{secretKey}", TimeSpan.FromDays(1),
                 () => _gameProviderQueries.GetGameProviderIdsByCredentialsAsync(clientId, secretKey));
 
-
         private static class CachedGameProviderFields
         {
             public const string GameProviderId = "gameProviderId";
@@ -431,6 +432,7 @@ namespace TGS.Services.Operations
             public const string PlaceBetTimeout = "placeBetTimeout";
             public const string SettleBetTimeout = "settleBetTimeout";
             public const string AllowKickPlayer = "allowKickPlayer";
+            public const string IsTransferWallet = "isTransferWallet";
         }
 
         #endregion Private Methods

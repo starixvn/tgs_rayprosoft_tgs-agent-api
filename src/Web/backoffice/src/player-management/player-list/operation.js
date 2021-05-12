@@ -31,8 +31,7 @@ export const Panel = ({ playerCode, ...props }) => {
     let dateRange = pastWeek()
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         from: dateRange.start,
-        to: dateRange.end,
-        sortBy: [{ id: "createdOn", desc: true }]
+        to: dateRange.end
     })
 
     let { pageSize, from, to } = state
