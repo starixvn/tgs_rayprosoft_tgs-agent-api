@@ -14,12 +14,12 @@ namespace TGS.Apis.BackendOffice.Controllers
     public partial class PlayerController : BaseContextController
     {
         private readonly IMediator _mediator;
-        private readonly IReportClient _client;
+       
 
-        public PlayerController(IMediator mediator, IReportClient client)
+        public PlayerController(IMediator mediator)
         {
             _mediator = mediator;
-            _client = client;
+            
         }
 
         [HttpGet]
@@ -63,7 +63,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         [HttpGet("accountChanges")]
         [Description("Get player account changes")]
         public Task<PagedResponse<PlayerAccountChangeModel>> GetRoundsAsync(
+            [FromServices] IReportClient client,
             [FromQuery] GetPlayerAccountChangesRequest request) =>
-            _client.GetPlayerAccountChangesAsync(request);
+            client.GetPlayerAccountChangesAsync(request);
     }
 }
