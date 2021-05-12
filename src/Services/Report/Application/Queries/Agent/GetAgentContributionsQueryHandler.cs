@@ -30,7 +30,9 @@ namespace TGS.Services.Report.Application.Queries.Agent
             CancellationToken cancellationToken)
         {
             var agent = await _tgsAgentService.GetAgentAsync(x =>
-                x.BrandId == request.BrandId && x.Username == request.Username);
+                    x.BrandId == request.BrandId,
+                x => x.Where(request.AgentId, a => a.Id == request.AgentId)
+                    .Where(request.Username, a => a.Username == request.Username));
 
             if (agent == null)
             {

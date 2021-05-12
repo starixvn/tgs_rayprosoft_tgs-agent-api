@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -24,6 +26,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
         private readonly ITgsAgentService _agentService;
         private readonly ITgsBrandService _brandService;
         private readonly IPlayerAggregateService _playerAggregateService;
+        private readonly ITransactionManager _transactionManager;
         private readonly IAgentWalletRepository _walletRepository;
 
         public CreateAgentDividendsHandler(
@@ -32,6 +35,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
             ITgsBrandService brandService,
             IAgentDividendService agentDividendService,
             IAgentWalletRepository walletRepository,
+            ITransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
@@ -39,6 +43,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
             _playerAggregateService = playerAggregateService;
             _agentDividendService = agentDividendService;
             _walletRepository = walletRepository;
+            _transactionManager = transactionManager;
         }
 
         public override async Task<MessageResponse> Handle(CreateAgentDividendsRequest request,
@@ -244,17 +249,20 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 brand.NextSettlementTo = nextToDate;
             }
 
-            await using var tgsTransaction =
-                await _brandService.Repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            await _transactionManager.ExecuteTransactionAsync(() => _agentDividendService.Repository,
+                IsolationLevel.ReadCommitted,
+                GuidExtensions.NewSequentialGuid().ToString(),
+                async repo =>
+                {
+                    await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray(), null);
 
-            await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray(), null);
+                    await _agentDividendService.CreateAgentDividendsAsync(createAutoSendModels.ToArray(),
+                        DateTimeOffset.Now);
 
-            await _agentDividendService.CreateAgentDividendsAsync(createAutoSendModels.ToArray(), DateTimeOffset.Now);
+                    await _brandService.UpdateBrandsAsync(brands);
 
-            await _brandService.UpdateBrandsAsync(brands);
-
-            await tgsTransaction.CommitAsync(cancellationToken);
-
+                    return Task.CompletedTask;
+                });
 
             var createdAgentIds = createAutoSendModels.Select(x => x.AgentId).ToArray();
             var createdAgents = await _agentService.GetAgentQueries().Where(x => createdAgentIds.Contains(x.Id))

@@ -17,6 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Resources\Agent.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Agent.resx</DependentUpon>
+    </Compile>
     <Compile Update="Resources\Player.Designer.cs">
       <DependentUpon>Player.resx</DependentUpon>
       <DesignTime>True</DesignTime>
@@ -25,6 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Resources\Agent.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Agent.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Player.resx">
       <LastGenOutput>Player.Designer.cs</LastGenOutput>
       <Generator>ResXFileCodeGenerator</Generator>

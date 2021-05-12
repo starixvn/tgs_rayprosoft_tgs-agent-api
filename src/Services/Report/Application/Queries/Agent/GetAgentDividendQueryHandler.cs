@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -28,9 +29,27 @@ namespace TGS.Services.Report.Application.Queries.Agent
             GetAgentDividendsRequest request,
             CancellationToken cancellationToken)
         {
+            var mainAgent = await _tgsAgentService.GetAgentQueries().Where(x => x.BrandId == request.BrandId)
+                .Where(request.Username, x => request.Username == x.Username)
+                .Where(request.AgentId, x => x.Id == request.AgentId).FirstOrDefaultAsync(cancellationToken);
+
+            if (mainAgent is null)
+            {
+                return CreateInvalidResponse<PagedResponse<AgentDividendModel>>(Resources.Agent.NotFound);
+            }
+
+            var subAgents = await _tgsAgentService.GetAgentQueries().Where(x => x.ParentAgentId == mainAgent.Id)
+                .ToListAsync(cancellationToken);
+
+            var agents = new List<Core.DataServices.Tgs.Models.Agent> {mainAgent};
+            agents.AddRange(subAgents);
+
+            var agentIds = agents.Select(x => x.Id).ToArray();
+
             var agentDividends = await _service.GetAgentDividendQueries(q => q.Where(x => x.BrandId == request.BrandId)
                     .Where(x => x.CreatedOn >= request.From)
                     .Where(x => x.CreatedOn <= request.To))
+                .Where(x => agentIds.Contains(x.AgentId))
                 .GroupBy(x => x.AgentId,
                     (agentId, list) => new
                     {
@@ -46,12 +65,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         AgentDividendAmount = list.Sum(l => l.AgentDividendAmount)
                     }).ToArrayAsync(cancellationToken);
 
-            var agentIds = agentDividends.Select(x => x.AgentId).ToArray();
-            var agents = await _tgsAgentService.GetAgentQueries(q => q.Where(x => agentIds.Contains(x.Id)))
-                .ToArrayAsync(cancellationToken);
-
-
-            var models = agentDividends.Join(agents, ad => ad.AgentId, a => a.Id,
+            var models = agentDividends.Join(agents.ToArray(), ad => ad.AgentId, a => a.Id,
                 (ad, a) => new AgentDividendModel
                 {
                     Id = ad.AgentId,

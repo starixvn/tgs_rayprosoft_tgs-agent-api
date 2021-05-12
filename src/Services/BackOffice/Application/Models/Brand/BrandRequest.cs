@@ -19,5 +19,6 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public string[] CurrencyCodes { get; set; }
         public BrandLanguageModel[] Languages { get; set; }
         public BrandBetLimitModel[] BetLimits { get; set; }
+        public string[] Domains { get; set; }
     }
 }
