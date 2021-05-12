@@ -12,6 +12,6 @@ namespace TGS.GameProviders.Repositories.Models.ScheduleConfig.KY
         public decimal IntervalMinute { get; set; }
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset EndTime { get; set; }
-        public DateTimeOffset LastGameRecorTime { get; set; }
+        public DateTimeOffset LastGameRecordTime { get; set; }
     }
 }

@@ -166,7 +166,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             {
                 IntervalMinuteMax = 40m,
                 IntervalMinute = 1.5m,
-                LastGameRecorTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
+                LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
                 StartTime = sysTime.AddSeconds((double)1.5 * 60 * -1),
                 EndTime = sysTime
             };
@@ -208,7 +208,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 config.StartTime = config.EndTime;
                 config.EndTime = (endTime > sysTime) ? sysTime : endTime;
             }
-            config.LastGameRecorTime = (responses.LastGameRecorTime.HasValue) ? responses.LastGameRecorTime.Value : config.LastGameRecorTime;
+            config.LastGameRecordTime = (responses.LastGameRecorTime.HasValue) ? responses.LastGameRecorTime.Value : config.LastGameRecordTime;
             gameProviderSchedule.Config = JsonSerializer.Serialize(config);
             gameProviderSchedule.UpdatedOn = DateTimeOffset.UtcNow;
 

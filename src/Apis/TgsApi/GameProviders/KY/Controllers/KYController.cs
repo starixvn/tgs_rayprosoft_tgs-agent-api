@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
@@ -8,12 +7,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
-using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
-using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -26,7 +23,6 @@ using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 using TGS.Shared.Game.Models.KY.Commons;
 using TGS.Shared.Game.Models.KY.Incoming;
 using TGS.Shared.Game.Models.KY.Outgoing;
-using static TGS.Core.Models.SettingConsts;
 
 namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
 {
@@ -121,7 +117,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             var count = 0;
             var successCount = 0;
             var failCount = 0;
-            var lastGameRecorTime = default(DateTimeOffset?);
+            var lastGameRecordTime = default(DateTimeOffset?);
             if (response.Data.Code == 0)
             {
                 var sysDateTimeOffset = DateTimeOffset.UtcNow;
@@ -225,7 +221,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                             AdditionalData = JsonSerializer.Serialize(gameRecord),
                             Success = success
                         });
-                        lastGameRecorTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]), TimeSpan.FromHours(+8));
+                        lastGameRecordTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]), TimeSpan.FromHours(+8));
                     }
                     catch
                     {
@@ -247,7 +243,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
             var responses = new KYGPGameRecordResponse()
             {
                 Success = (response.Data.Code == 0 || response.Data.Code == 16) ? true : false,
-                LastGameRecorTime = lastGameRecorTime,
+                LastGameRecorTime = lastGameRecordTime,
                 Count = (response.Data.Code == 0 || response.Data.Code == 16) ? response.Data.Count : 0,
                 SuccessCount = successCount,
                 FailCount = failCount

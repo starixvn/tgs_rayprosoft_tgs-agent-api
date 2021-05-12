@@ -44,7 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
         private int _count;
         private int _successCount;
         private int _failCount;
-        private DateTimeOffset? _lastGameRecorTime;
+        private DateTimeOffset? _lastGameRecordTime;
 
         public VRController(
             IVRApiClient client,
@@ -91,7 +91,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
             _count = 0;
             _successCount = 0;
             _failCount = 0;
-            _lastGameRecorTime = default(DateTimeOffset?);
+            _lastGameRecordTime = default(DateTimeOffset?);
             var unsettled = await GetGameRoundAsync(request, brandMerchant, gameProviderId, false);
             if (!unsettled)
             {
@@ -109,7 +109,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                 return new VRGPGameRecordResponse()
                 {
                     Success = false,
-                    LastGameRecorTime = _lastGameRecorTime,
+                    LastGameRecorTime = _lastGameRecordTime,
                     SuccessCount = _successCount,
                     FailCount = _failCount,
                     Count = _count
@@ -119,7 +119,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
             return new VRGPGameRecordResponse()
             {
                 Success = true,
-                LastGameRecorTime = _lastGameRecorTime,
+                LastGameRecorTime = _lastGameRecordTime,
                 SuccessCount = _successCount,
                 FailCount = _failCount,
                 Count = _count
@@ -173,7 +173,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
 
                         if (isUpdateTime)
                         {
-                            _lastGameRecorTime = recordBet.UpdateTime;
+                            _lastGameRecordTime = recordBet.UpdateTime;
                         }
                         _players.TryGetValue(PlayerCode, out player);
                         if (player == null)
