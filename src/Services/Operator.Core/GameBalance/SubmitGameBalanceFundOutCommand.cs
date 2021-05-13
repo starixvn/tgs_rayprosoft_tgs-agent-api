@@ -1,15 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace TGS.Services.Operator.GameBalance
+﻿namespace TGS.Services.Operator.GameBalance
 {
-    public record SubmitGameBalanceFundOutCommand(
-        string PlayerCode,
-        Guid BrandId,
-        Guid BrandPaymentId,
-        decimal Amount,
-        string Subject)
+    public record SubmitGameBalanceFundOutCommand(string GameProviderCode, string PlayerCode, int Amount)
     {
-        public TaskCompletionSource<Guid> ReturnFormIdSource { get; } = new TaskCompletionSource<Guid>();
     }
 }

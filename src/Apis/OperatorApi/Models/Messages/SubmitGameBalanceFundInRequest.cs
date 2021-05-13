@@ -8,8 +8,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
     {
         [JsonPropertyName("gpcode")]
         public string GameProviderCode { get; init; }
-        //[JsonPropertyName("playercode")]
-        //public string PlayerCode { get; init; }
+        [JsonPropertyName("playercode")]
+        public string PlayerCode { get; init; }
         [JsonPropertyName("amount")]        
         public int Amount { get; init; }
     }

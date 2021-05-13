@@ -5,7 +5,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.GameBalance;
-using TGS.Services.PluggableServices.Models;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -13,18 +12,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Route("api/game/balance")]
     [ApiController]
     public class GameBalanceController : ControllerBase
-    {
-        //private readonly ITgsCommands<PaymentData> _commands;
-        //private readonly ITgsQueries<PaymentData> _queries;
-
-        //public GameBalanceController(
-        //    ITgsQueries<PaymentData> queries,
-        //    ITgsCommands<PaymentData> commands)
-        //{
-        //    _queries = queries;
-        //    _commands = commands;
-        //}
-
+    {        
         public GameBalanceController()
         {
         }
@@ -52,14 +40,19 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async ValueTask SubmitGameBalanceFundInRequestAsync(
             [FromServices] ICommandService<SubmitGameBalanceFundInCommand> submitGameBalanceFundInCommandService,
-            //[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            //[FromServices] ManualDepositSerializer serializer,
+            //[FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,            
             [FromBody] SubmitGameBalanceFundInRequest request)
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            //var brandId = HttpContext.Items.GetBrandId();
+            var command = new SubmitGameBalanceFundInCommand
+            (
+                request.PlayerCode,
+                request.GameProviderCode,
+                request.Amount
+            );
 
-            
+            await submitGameBalanceFundInCommandService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);            
         }
 
         [HttpPut]
