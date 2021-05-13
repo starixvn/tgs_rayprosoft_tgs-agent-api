@@ -26,7 +26,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             return g;
                         }
-                        return (Game)g with {EndpointPath = string.Empty};
+                        return (Game)g with { EndpointPath = string.Empty };
                     })
                     .ToArray();
 
