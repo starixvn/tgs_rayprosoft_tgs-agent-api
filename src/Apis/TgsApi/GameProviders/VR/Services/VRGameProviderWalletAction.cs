@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.GameProviders.Settings.VR;
 using TGS.Core.Models.Services.Caches;
 using TGS.GameProviders.Repositories;
 using TGS.Services.Operations;
@@ -20,8 +17,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 {
     public class VRGameProviderWalletAction : BaseGameProviderWalletAction
     {
-        private readonly string _gameProvider = Consts.GameProvider.VR;
-        private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.VR;
+        private readonly string _gameProviderCode = Consts.GameProvider.VR;
         private readonly IVRApiClient _client;
         private readonly ISettingOperations _settingOperations;
         private readonly IVRGamePlayerCreate _gamePlayerCreate;
@@ -160,8 +156,8 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 
         public override async ValueTask<(Guid GameProviderId, string GameProviderCode)> GetGameProviderAsync()
         {
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProvider).ConfigureAwait(false);
-            return new(gameProviderId, _gameProvider);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProviderCode).ConfigureAwait(false);
+            return new(gameProviderId, _gameProviderCode);
         }
 
         public override async ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player)

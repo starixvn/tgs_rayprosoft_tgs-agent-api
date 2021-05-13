@@ -26,7 +26,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
     [Queue(Consts.Queue.GameProvider)]
     public sealed class KYGameRecordJobWorker : BaseWork<TgsResponse>
     {
-        private readonly string _gameProvider = GameProviderConst.KY;
+        private readonly string _gameProviderCode = GameProviderConst.KY;
         private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.KY;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ISettingOperations _settingOperations;
@@ -69,7 +69,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                    .GetValueFromJsonByKeyAsync<KYConfiguration>(_gameProviderConfigurations)
                    .ConfigureAwait(false);
                 var gameProvider = await _gameProviderOperations
-                      .GetGameProviderIdByCodeAsync(_gameProvider)
+                      .GetGameProviderIdByCodeAsync(_gameProviderCode)
                       .ConfigureAwait(false);
 
                 var tasks = new List<Task>();
@@ -177,7 +177,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 GameProviderId = gameProviderId,
-                GameProviderCode = _gameProvider,
+                GameProviderCode = _gameProviderCode,
                 BrandCode = brandCode,
                 AgentId = agentId,
                 CurrencyCode = currencyCode,

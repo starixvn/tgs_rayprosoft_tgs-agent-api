@@ -20,8 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 {
     public class KYGameProviderWalletAction : BaseGameProviderWalletAction
     {
-        private readonly string _gameProvider = Consts.GameProvider.KY;
-        private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.KY;
+        private readonly string _gameProviderCode = Consts.GameProvider.KY;
         private readonly IKYApiClient _client;
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
@@ -224,8 +223,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
         public override async ValueTask<(Guid GameProviderId, string GameProviderCode)> GetGameProviderAsync()
         {
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProvider).ConfigureAwait(false);
-            return new(gameProviderId, _gameProvider);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProviderCode).ConfigureAwait(false);
+            return new(gameProviderId, _gameProviderCode);
         }
 
         public override async ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player)
