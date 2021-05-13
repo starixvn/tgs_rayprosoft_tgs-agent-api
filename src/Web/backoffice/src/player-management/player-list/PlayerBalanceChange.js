@@ -124,12 +124,21 @@ const useColumns = ({ items = [] }) =>
                 disableSortBy: true
             }),
             textColumn({
-                accessor: "transactionType",
+                id: "transactionType",
+                accessor: (row) => row,
                 Header: <Trans zh="交易类型" en="Transaction Type" />,
                 disableSortBy: true,
-                Cell: ({ value }) => (
-                    <PlayerTransactionTypeLabel value={value} />
-                )
+                Cell: ({ value: record }) => {
+                    let { transactionType, gameActionType } = record
+                    if (transactionType) {
+                        return (
+                            <PlayerTransactionTypeLabel
+                                value={transactionType}
+                            />
+                        )
+                    }
+                    return <GameActionLabel value={gameActionType} />
+                }
             }),
             numberDecimalColumn({
                 accessor: "amount",
@@ -298,7 +307,7 @@ const PlayerTransactionTypeSelect = ({ placeholder, ...props }) => {
     return <Select placeholder={placeholder} options={options} {...props} />
 }
 
-const PlayerTransactionTypeLabel = ({ value }) => {
+const PlayerTransactionTypeLabel = ({ value = "" }) => {
     switch (value) {
         case Deposit:
             return <Trans {...DepositTrans} />
@@ -374,11 +383,11 @@ const UnlockAmountTrans = {
 
 const WinJackpot = "WinJackpot"
 const WinJackpotTrans = {
-    zh: "Win Jackpot",
+    zh: "赢 Jackpot",
     en: "Win Jackpot"
 }
 
-const GameActionLabel = ({ value }) => {
+const GameActionLabel = ({ value = "" }) => {
     switch (value) {
         case PlaceBet:
             return <Trans {...PlaceBetTrans} />
