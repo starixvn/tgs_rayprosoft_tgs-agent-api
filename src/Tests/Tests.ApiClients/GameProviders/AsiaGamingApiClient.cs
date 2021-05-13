@@ -41,7 +41,7 @@ namespace TGS.Tests.ApiClients.GameProviders
             TRequest request)
         {
             var requestMessage = CreateHttpRequestMessage(path, method);
-            var httpContent = new StringContent(ObjectToXml(request), Encoding.UTF8, MediaTypeNames.Application.Xml);
+            var httpContent = new StringContent(ObjectToXml(request), Encoding.UTF8, MediaTypeNames.Text.Xml);
             requestMessage.Content = httpContent;
 
             var response = await SendAsync(requestMessage, string.Empty);
