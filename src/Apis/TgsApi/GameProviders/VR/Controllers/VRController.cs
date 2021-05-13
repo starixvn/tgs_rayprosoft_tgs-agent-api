@@ -165,8 +165,6 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                     {
                         _count++;
                         var gameId = default(int?);
-                        var game = default(CachedGame);
-                        var player = default(Player);
                         var gameProviderConfigurationId = default(Guid?);
                         var success = true;
                         var PlayerCode = recordBet.PlayerName;
@@ -177,7 +175,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                         }
 
                         #region Get Player
-                        if (_players.TryGetValue(PlayerCode, out player))
+                        if (_players.TryGetValue(PlayerCode, out Player player))
                         {
                             gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
                         }
@@ -186,13 +184,14 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                             player = await _playerOperations.GetPlayerByCodeAsync(PlayerCode);
                             if (player != null)
                             {
+                                gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
                                 _players.Add(PlayerCode, player);
                             }
                         }
                         #endregion
 
                         #region Get Game
-                        if (_gameIds.TryGetValue(recordBet.ChannelId, out game))
+                        if (_gameIds.TryGetValue(recordBet.ChannelId, out CachedGame game))
                         {
                             gameId = game.Id;
                         }
@@ -203,12 +202,13 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                             if (games != null && games.Length > 0)
                             {
                                 game = games[0];
+                                gameId = game.Id;
                                 _gameIds.Add(recordBet.ChannelId, game);
                             }
                         }
                         #endregion
 
-                        if (player == null || !gameId.HasValue || !gameProviderConfigurationId.HasValue)
+                        if (player == null || game == null || !gameProviderConfigurationId.HasValue)
                         {
                             success = false;
                             _failCount++;
@@ -225,8 +225,10 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                             {
                                 ExternalRoundId = recordBet.SerialNumber,
                                 GameProviderId = gameProviderId,
+                                GameProviderCode = GameProviderCode,
                                 PlayerCode = player.PlayerCode,
                                 GameId = gameId.GetValueOrDefault(-1),
+                                ExternalId = recordBet.ChannelId.ToString(),
                                 CurrencyCode = player.DefaultWalletCurrencyCode,
                                 Status = GetRoundStatus(recordBet.State),
                                 GameProviderConfigurationId = gameProviderConfigurationId.GetValueOrDefault(),
@@ -238,8 +240,8 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                                 ExternalCreatedOn = recordBet.CreateTime,
                                 ExternalClosedOn = recordBet.UpdateTime,
                                 BetAmount = recordBet.Cost,
-                                ValidBetAmount = recordBet.Cost,
-                                PlayerWinLoss = (GetRoundStatus(recordBet.State) == RoundStatus.Closed) ? recordBet.PlayerPrize - recordBet.Cost : null,
+                                ValidBetAmount = (recordBet.State == 1) ? 0 : recordBet.Cost,
+                                PlayerWinLoss = (recordBet.State == 1) ? 0 : (GetRoundStatus(recordBet.State) == RoundStatus.Closed) ? recordBet.PlayerPrize - recordBet.Cost : null,
                                 Commission = 0,
                                 Turnover = 0,
                                 SettleAmount = recordBet.PlayerPrize,
@@ -247,7 +249,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                                 ClientStatus = GetClientRound(recordBet.State),
                                 AdditionalData = JsonSerializer.Serialize(recordBet),
                                 Success = success
-                            });
+                            }); ;
                         }
                         catch
                         {

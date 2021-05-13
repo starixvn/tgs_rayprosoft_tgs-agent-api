@@ -50,6 +50,12 @@ namespace TGS.Core.Models
             public const int Jwt = 60 * 60;           // 1 hours
         }
 
+        public static class AgentTokenExpireSeconds
+        {
+            public const int AgentLogin = 3600 * 12; // 12 hours
+            public const int Jwt = 60 * 60;          // 1 hours
+        }
+
         public static class GameProvider
         {
             public const string RedTiger = "RT";
@@ -75,6 +81,7 @@ namespace TGS.Core.Models
             public static readonly string GameProviderId = "gameProviderId";
             public static readonly string GameProviderConfigurationId = "gameProviderConfigurationId";
             public static readonly string PlatformType = "platformType";
+            public static readonly string AgentToken = "agentToken";
             public static readonly string PlayerToken = "playerToken";
             public static readonly string PlayerCode = "playerCode";
             public static readonly string RequestType = "requestType";

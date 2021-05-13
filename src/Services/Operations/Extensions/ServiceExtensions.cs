@@ -47,6 +47,7 @@ namespace TGS.Services.Operations.Extensions
             #region Commands
 
             services.AddFactory<IPlayerCommands, PlayerCommands>();
+            services.AddFactory<IAgentCommands, AgentCommands>();
 
             #endregion
 
@@ -58,6 +59,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddScoped<IBrandGameProviderOperations, BrandGameProviderOperations>();
             services.AddScoped<ISettingOperations, SettingOperations>();
             services.AddScoped<ILocalizationOperations, LocalizationOperations>();
+            services.AddScoped<IAgentOperations, AgentOperations>();
 
             #endregion
 

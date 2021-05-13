@@ -137,8 +137,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 {
                     BrandCode = gameProviderSchedule.BrandCode,
                     CurrencyCode = gameProviderSchedule.CurrencyCode,
-                    StartTime = config.StartTime.ToUnixTimeMilliseconds(),
-                    EndTime = config.EndTime.ToUnixTimeMilliseconds()
+                    StartTime = config.StartTime,
+                    EndTime = config.EndTime
                 }).ConfigureAwait(false);
                 if (responses.Success)
                 {
@@ -162,12 +162,14 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         private async Task<(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProviderId, string brandCode, string agentId, string currencyCode)
         {
             var sysTime = DateTimeOffset.UtcNow;
+            var intervalMinuteMax = 40m;
+            var intervalMinute = 10m;
             var config = new KYGameProviderScheduleConfig()
             {
-                IntervalMinuteMax = 40m,
-                IntervalMinute = 1.5m,
+                IntervalMinuteMax = intervalMinuteMax,
+                IntervalMinute = intervalMinute,
                 LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
-                StartTime = sysTime.AddSeconds((double)1.5 * 60 * -1),
+                StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1),
                 EndTime = sysTime
             };
 

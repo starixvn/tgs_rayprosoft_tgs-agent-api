@@ -41,7 +41,9 @@ namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(request.Status, x => x.Status == request.Status)
                 .Where(request.Name, x => x.Name == request.Name)
-                .Where(request.PlayerCode, x => x.PromotionVipLevels.Select(p => p.Level).Contains(player.Vip.Level))
+                .Where(request.PlayerCode,
+                    x => x.PromotionVipLevels.Count == 0 ||
+                        x.PromotionVipLevels.Select(p => p.Level).Contains(player.Vip.Level))
                 .Select(x => new PromotionModel
                 {
                     Id = x.Id,
