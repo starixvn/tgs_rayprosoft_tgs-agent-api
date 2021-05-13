@@ -24,6 +24,7 @@ import { InputField } from "../../input/Input"
 import BrandBar from "../../report/BrandBar"
 import AlertDialog from "../../dialog/Alert"
 import textColumn from "../../table/column/textColumn"
+import { VipLevelLabel } from "../../vip-levels/VipLevel"
 
 export { Code }
 
@@ -177,8 +178,9 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 accessor: "vipLevel",
                 Header: <Trans zh="VIP 等级" en="VIP Level" />,
                 disableSortBy: true,
-                Cell: ({ value }) =>
-                    Number.isInteger(value) ? `VIP ${value}` : "-"
+                Cell: ({ value }) => (
+                    <VipLevelLabel value={value} placeholder="-" />
+                )
             }),
             {
                 disableSortBy: true,
