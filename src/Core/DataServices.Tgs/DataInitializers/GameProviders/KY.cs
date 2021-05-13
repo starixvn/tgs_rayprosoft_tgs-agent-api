@@ -26,8 +26,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             return g;
                         }
-
-                        return (Game)g with {EndpointPath = string.Empty};
+                        return (Game)g with { EndpointPath = string.Empty };
                     })
                     .ToArray();
 
@@ -72,6 +71,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-ky") : new("http://localhost:62330"),
+                    AmountMaximum = 10000000m,
+                    AmountFormat = "10,2",
                     BrandMerchants = new[]
                     {
                         new KYBrandMerchant

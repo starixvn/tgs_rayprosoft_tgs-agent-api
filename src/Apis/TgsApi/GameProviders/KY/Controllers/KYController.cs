@@ -34,7 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
     [FeatureGate(Consts.GameProvider.KY)]
     public class KYController : ControllerBase
     {
-        private static readonly string GameProviderCode = Consts.GameProvider.KY;
+        private static readonly string _gameProvider = Consts.GameProvider.KY;
         private readonly IKYApiClient _client;
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
@@ -111,7 +111,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
 
             var response = await _client.GetAPIAsync<KYGameRecordResponse>(brandMerchant.ApiRecordUrl, apiKYRequest);
 
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProvider);
             var players = new Dictionary<string, Player>();
             var gameIds = new Dictionary<int, CachedGame>();
             var count = 0;
@@ -203,7 +203,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Controllers
                         {
                             ExternalRoundId = gameRecord.GameID,
                             GameProviderId = gameProviderId,
-                            GameProviderCode = GameProviderCode,
+                            GameProviderCode = _gameProvider,
                             PlayerCode = player.PlayerCode,
                             GameId = gameId.GetValueOrDefault(-1),
                             ExternalId = gameRecord.KindID.ToString(),
