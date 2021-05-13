@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
@@ -25,7 +26,6 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             IGameProviderFundTransferTransactionRepository gameProviderFundTransferTransactionRepository,
             IWalletRepository walletRepository
             )
-
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
@@ -41,12 +41,23 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         /// <returns></returns>
         public async ValueTask<GameProviderWalletFundResponse> FundOutAsync(GameProviderWalletFundRequest request)
         {
-            var fundTransferStatus = FundTransferTransactionStatus.WaitForResponse;
+            var getGameProvider = await GetGameProviderAsync();
             var amount = Math.Abs(request.Amount);
+
+            if (!getGameProvider.GameProviderCode.IgnoreCaseEquals(request.GameProviderCode))
+            {
+                throw new ArgumentException($"{request.GameProviderCode} does not match the system setting GameProviderCode");
+            }
+
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
             if (player == null)
             {
                 throw new PlayerNotFoundException(request.PlayerCode);
+            }
+
+            if (!await CheckingAmountAsync(player, amount).ConfigureAwait(false))
+            {
+                throw new InvalidAmountException("The transfer amount exceeds the game manufacturer's limit");
             }
 
             var responseBalance = await GetGameProviderBalanceAsync(player);
@@ -62,7 +73,6 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 throw new PlayerHasInsufficientFundsException();
             }
 
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
 
             /*
             * 建立Game交易單
@@ -70,14 +80,14 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             var transactionGameProviderId = await _gameProviderFundTransferTransactionRepository.AddAsync(new AddGameProviderFundTransferTransactionRequest()
             {
                 TransactionId = null,
-                GameProviderId = gameProviderId,
+                GameProviderId = getGameProvider.GameProviderId,
                 WalletId = player.DefaultWalletId,
                 GameProviderTransactionId = string.Empty,
                 PlayerCode = player.PlayerCode,
                 FundSource = FundSource.FundOut,
                 FromWallet = "Default",
-                ToWallet = request.GameProviderCode,
-                Amount = amount,
+                ToWallet = getGameProvider.GameProviderCode,
+                Amount = amount * -1,
                 Balance = 0,
                 CreatedOn = DateTimeOffset.UtcNow,
                 Description = string.Empty
@@ -89,7 +99,7 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             var wallet = await WalletExchangeAsync(player, amount * -1, TransactionTypes.GameProviderFundOut);
             #endregion
 
-            fundTransferStatus = wallet.Status;
+            var fundTransferStatus = wallet.Status;
 
 
             var orderId = default(string);
@@ -136,13 +146,25 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         /// <returns></returns>
         public async ValueTask<GameProviderWalletFundResponse> FundInAsync(GameProviderWalletFundRequest request)
         {
+            var getGameProvider = await GetGameProviderAsync();
             var amount = Math.Abs(request.Amount);
+
+            if (!getGameProvider.GameProviderCode.IgnoreCaseEquals(request.GameProviderCode))
+            {
+                throw new ArgumentException($"{request.GameProviderCode} does not match the system setting GameProviderCode");
+            }
 
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
             if (player == null)
             {
                 throw new PlayerNotFoundException(request.PlayerCode);
             }
+
+            if (!await CheckingAmountAsync(player, amount).ConfigureAwait(false))
+            {
+                throw new InvalidAmountException("The transfer amount exceeds the game manufacturer's limit");
+            }
+
             var responseBalance = await GetGameProviderBalanceAsync(player);
             if (!responseBalance.Success)
             {
@@ -154,20 +176,19 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 throw new PlayerHasInsufficientFundsException();
             }
 
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
 
             /*
-          * 建立Game交易單
-          */
+             * 建立Game交易單
+             */
             var transactionGameProviderId = await _gameProviderFundTransferTransactionRepository.AddAsync(new AddGameProviderFundTransferTransactionRequest()
             {
                 TransactionId = null,
-                GameProviderId = gameProviderId,
+                GameProviderId = getGameProvider.GameProviderId,
                 WalletId = player.DefaultWalletId,
                 GameProviderTransactionId = string.Empty,
                 PlayerCode = player.PlayerCode,
                 FundSource = FundSource.FundIn,
-                FromWallet = request.GameProviderCode,
+                FromWallet = getGameProvider.GameProviderCode,
                 ToWallet = "Default",
                 Amount = request.Amount,
                 Balance = 0,
@@ -231,6 +252,13 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
         /// <returns></returns>
         public async ValueTask<GameProviderWalletGetBalanceResponse> GetBalanceAsync(GameProviderWalletGetBalanceRequest request)
         {
+            var getGameProvider = await GetGameProviderAsync();
+
+            if (!getGameProvider.GameProviderCode.IgnoreCaseEquals(request.GameProviderCode))
+            {
+                throw new ArgumentException($"{request.GameProviderCode} does not match the system setting GameProviderCode");
+            }
+
             var player = await _playerOperations.GetCachedPlayerAsync(request.PlayerCode);
 
             if (player == null)
@@ -270,11 +298,15 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             }
         }
 
+        public abstract ValueTask<bool> CheckingAmountAsync(CachedPlayer player, decimal amount);
+
         public abstract ValueTask<(bool Success, string OrderId, decimal Balance)> FundOutAsync(CachedPlayer player, decimal amount);
 
         public abstract ValueTask<(bool Success, string OrderId, decimal Balance)> FundInAsync(CachedPlayer player, decimal amount);
 
         public abstract ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId);
+
+        public abstract ValueTask<(Guid GameProviderId, string GameProviderCode)> GetGameProviderAsync();
 
         public abstract ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player);
 

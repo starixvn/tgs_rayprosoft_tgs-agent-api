@@ -72,6 +72,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-habanero") : new("http://localhost:62330"),
+                    AmountMaximum = 10000000m,
+                    AmountFormat = "10,2",
                     BrandMerchants = new[]
                     {
                         new KYBrandMerchant

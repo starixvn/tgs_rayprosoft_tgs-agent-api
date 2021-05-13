@@ -32,7 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
     [FeatureGate(Consts.GameProvider.VR)]
     public class VRController : ControllerBase
     {
-        private static readonly string GameProviderCode = Consts.GameProvider.VR;
+        private static readonly string _gameProvider = Consts.GameProvider.VR;
         private readonly IVRApiClient _client;
         private readonly ISettingOperations _settingOperations;
         private readonly IPlayerOperations _playerOperations;
@@ -85,7 +85,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                 };
             }
 
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProvider);
             _players = new Dictionary<string, Player>();
             _gameIds = new Dictionary<int, CachedGame>();
             _count = 0;
@@ -225,7 +225,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                             {
                                 ExternalRoundId = recordBet.SerialNumber,
                                 GameProviderId = gameProviderId,
-                                GameProviderCode = GameProviderCode,
+                                GameProviderCode = _gameProvider,
                                 PlayerCode = player.PlayerCode,
                                 GameId = gameId.GetValueOrDefault(-1),
                                 ExternalId = recordBet.ChannelId.ToString(),

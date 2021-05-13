@@ -20,9 +20,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 {
     public class KYGameProviderWalletAction : BaseGameProviderWalletAction
     {
+        private readonly string _gameProvider = Consts.GameProvider.KY;
+        private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.KY;
         private readonly IKYApiClient _client;
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
+        private readonly IGameProviderOperations _gameProviderOperations;
 
         public KYGameProviderWalletAction(
             IKYApiClient client,
@@ -36,7 +39,33 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+        }
+
+        public override async ValueTask<bool> CheckingAmountAsync(CachedPlayer player, decimal amount)
+        {
+            var configuration =
+                  await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
+                      .GameProviderConfigurations.KY);
+
+            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(player.BrandCode) && x.Status).FirstOrDefault();
+            if (brandMerchant == null)
+            {
+                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
+            }
+
+            if (configuration.AmountMaximum < amount)
+            {
+                return false;
+            }
+
+            if (amount.Truncate(Convert.ToInt32(configuration.AmountFormat.Split(',')[1])) < amount)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public override async ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId)
@@ -191,6 +220,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
 
             return new() { Success = success, Balance = balance, OrderId = orderId };
+        }
+
+        public override async ValueTask<(Guid GameProviderId, string GameProviderCode)> GetGameProviderAsync()
+        {
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProvider).ConfigureAwait(false);
+            return new(gameProviderId, _gameProvider);
         }
 
         public override async ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player)
