@@ -71,14 +71,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 
             if (string.IsNullOrEmpty(response.playerName) || response.balance == -1)
             {
-                if (await _gamePlayerCreate.CreatePlayerAsync(player).ConfigureAwait(false))
-                {
-                    response = await _client.GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, dataGetBalance).ConfigureAwait(false);
-                }
-                else
-                {
-                    throw new PlayerNotFoundException(request.Token.PlayerCode);
-                }
+                await _gamePlayerCreate.CreatePlayerAsync(player).ConfigureAwait(false);
             }
 
             var date = DateTimeOffset.UtcNow.AddHours(+8);
