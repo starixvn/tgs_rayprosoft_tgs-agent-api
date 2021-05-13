@@ -30,6 +30,7 @@ import { Verify as VerifyMenu, View as ViewMenu } from "./menu"
 import { useFormContext, useForm, FormProvider } from "react-hook-form"
 import BrandBar from "../../report/BrandBar"
 import AlertDialog from "../../dialog/Alert"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -84,7 +85,9 @@ const BodyContent = ({ brandId }) => {
         deleteCache
     } = useStationLetterList({
         ...toApiParams(state),
-        status: statusFrom(statusName)
+        status: statusFrom(statusName),
+        sortby: "createdOn",
+        orderby: SortOrder.Descending
     })
 
     let columns = useColumns({ mutate, statusName, items: data?.items })

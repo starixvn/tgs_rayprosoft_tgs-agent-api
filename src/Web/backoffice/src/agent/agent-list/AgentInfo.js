@@ -42,6 +42,7 @@ import { AgentCardGameRebatePercentageInputField } from "../AgentCardGameRebateP
 import { AgentLotteryRebatePercentageInputField } from "../AgentLotteryRebatePercentage"
 import { AgentSportsRebatePercentageInputField } from "../AgentSportsRebatePercentage"
 import { AgentVirtualSportsRebatePercentageInputField } from "../AgentVirtualSportsRebatePercentage"
+import AgentLevel from "../AgentLevel"
 
 const Key = "AgentInfo"
 
@@ -89,6 +90,11 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
         parentUsername &&
         currentParentUsername != parentUsername
 
+    let levelType = formMethods.watch("levelType")
+    let changeLevelType = levelType != record.levelType
+    let displayParentUsername =
+        changeLevelType && levelType == AgentLevel.Chief ? "none" : "block"
+
     const onSubmit = (data) => {
         setSubmit({
             ...record,
@@ -116,14 +122,33 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                 <Input name="realName" />
                             </RealNameBox>
 
+                            <AgentLevelBox>
+                                <AgentLevelSelect
+                                    name="levelType"
+                                    disabled={agentHead}
+                                />
+                            </AgentLevelBox>
+
                             {!agentHead && (
                                 <>
-                                    <ParentAgentUsername>
-                                        <Set orientation="vertical" isFilled>
+                                    <ParentAgentUsername
+                                        display={displayParentUsername}
+                                    >
+                                        <Set
+                                            orientation="vertical"
+                                            isFilled
+                                            display={displayParentUsername}
+                                        >
                                             <Input
                                                 name="parentUsername"
                                                 placeholder={
                                                     agentUsernamePlaceholder
+                                                }
+                                                required
+                                                disabled={
+                                                    changeLevelType &&
+                                                    levelType ==
+                                                        AgentLevel.Chief
                                                 }
                                             />
                                             {changeParent && (
@@ -353,14 +378,25 @@ const RealNameBox = ({ value = "", children }) => {
     )
 }
 
-const ParentAgentUsername = ({ value = "", children }) => {
+const AgentLevelBox = ({ value = "", children }) => {
     return (
         <>
             <Box alignY="center">
+                <Trans zh="代理种类" en="Level Type" />
+            </Box>
+            {children ? children : <AgentLevelLabel value={value} />}
+        </>
+    )
+}
+
+const ParentAgentUsername = ({ value = "", children, display }) => {
+    return (
+        <>
+            <Box alignY="center" display={display}>
                 <Trans zh="上级代理" en="Upper level agent" />
             </Box>
 
-            {children ? children : <Text>{value}</Text>}
+            {children ? children : <Text display={display}>{value}</Text>}
         </>
     )
 }
