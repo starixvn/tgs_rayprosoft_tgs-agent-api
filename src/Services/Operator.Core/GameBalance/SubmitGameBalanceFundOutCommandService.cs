@@ -1,31 +1,41 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
-using TGS.Services.WalletService;
+using TGS.Services.PluggableServices;
+using TGS.Services.PluggableServices.Models;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.GameBalance
 {
     internal class SubmitGameBalanceFundOutCommandService : ICommandService<SubmitGameBalanceFundOutCommand>
     {
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPluggalbeGameProviderApiClient _pluggalbe;
+        private readonly ISettingOperations _settingOperations;
 
-        public SubmitGameBalanceFundOutCommandService(IPlayerOperations playerOperations, IWalletRepository walletRepository)
+        public SubmitGameBalanceFundOutCommandService(IPluggalbeGameProviderApiClient pluggalbe, ISettingOperations settingOperations)
         {
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+            _pluggalbe = pluggalbe ?? throw new ArgumentNullException(nameof(pluggalbe));
+
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
         }
 
         public async ValueTask ExecuteAsync(SubmitGameBalanceFundOutCommand command, CancellationToken cancellationToken = default)
         {
-            var playerData = await _playerOperations
-                .GetCachedPlayerAsync(command.PlayerCode)
-                .ConfigureAwait(false);
-            var balance = await _walletRepository
-                .GetBalanceAsync(playerData.DefaultWalletId, command.PlayerCode)
-                .ConfigureAwait(false);
+            var config = await _settingOperations.GetValueFromJsonByKeyAsync<PluggableConfigurationBase>(
+                    SettingConsts.GameProviderConfigurations.Template.Args(command.PlayerCode));
+            var url = config.ServiceEndpointUrl;
+
+            await _pluggalbe.FundOutAsync(url, new GameProviderWalletFundRequest()
+            {
+                GameProviderCode = command.GameProviderCode,
+                PlayerCode = command.PlayerCode,
+                Amount = command.Amount
+            })
+            .ConfigureAwait(false);
         }
     }
 }
