@@ -11,12 +11,8 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Route("api/game/balance")]
     [ApiController]
     public class GameBalanceController : ControllerBase
-    {
-        public GameBalanceController()
-        {
-        }
-
-        [HttpGet("{gpCode}")]
+    {        
+        [HttpGet("{gpCode}/{playerCode}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task<GetGameBalanceResponse> GetGameBalanceAsync(
@@ -34,7 +30,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
-        [HttpPut]
+        [HttpPut("{gpCode}/{playerCode}/{Amount}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async ValueTask SubmitGameBalanceFundInRequestAsync(
