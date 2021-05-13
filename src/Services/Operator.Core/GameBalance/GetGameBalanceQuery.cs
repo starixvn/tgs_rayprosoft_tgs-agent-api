@@ -1,4 +1,4 @@
 ﻿namespace TGS.Services.Operator.GameBalance
 {
-    public record GetGameBalanceQuery(string playercode, string gpcode);
+    public record GetGameBalanceQuery(string PlayerCode, string GameProviderCode);
 }

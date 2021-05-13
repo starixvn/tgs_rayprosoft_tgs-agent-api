@@ -1,37 +1,37 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models;
-using TGS.Core.Models.GameProviders.Settings;
-using TGS.Services.Operations;
 using TGS.Services.PluggableServices;
 using TGS.Services.PluggableServices.Models;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.GameBalance
 {
-    internal class GetGameBalanceQueryService : IGetService<GetGameBalanceQuery, decimal>
+    internal class GetGameBalanceQueryService : IGetService<GetGameBalanceQuery, GameBalanceInfo>
     {
         private readonly IPluggalbeGameProviderApiClient _client;
 
-        private readonly ISettingOperations _settingOperations;
+        private readonly IPluggableOperations _pluggableOperations;
 
-        public GetGameBalanceQueryService(IPluggalbeGameProviderApiClient client, ISettingOperations settingOperations)
+        public GetGameBalanceQueryService(IPluggalbeGameProviderApiClient client, IPluggableOperations pluggableOperations)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            _pluggableOperations = pluggableOperations ?? throw new ArgumentNullException(nameof(pluggableOperations));
         }
 
-        public async ValueTask<decimal> GetAsync(GetGameBalanceQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<GameBalanceInfo> GetAsync(GetGameBalanceQuery query, CancellationToken cancellationToken = default)
         {
-            var config = await _settingOperations.GetValueFromJsonByKeyAsync<PluggableConfigurationBase>(
-                SettingConsts.GameProviderConfigurations.Template.Args(query.playercode));
-            var url = config.ServiceEndpointUrl;
+            var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(query.GameProviderCode);
 
-            var info = await _client.GetBalanceAsync(url, new GameProviderWalletGetBalanceRequest() { GameProviderCode = query.gpcode, PlayerCode = query.playercode });
+            var info = await _client.GetBalanceAsync(
+                serviceUrl,
+                new GameProviderWalletGetBalanceRequest()
+                {
+                    GameProviderCode = query.GameProviderCode,
+                    PlayerCode = query.PlayerCode
+                });
 
-            return info.Balance;
+            return new GameBalanceInfo(info.Balance);
         }
     }
 }
