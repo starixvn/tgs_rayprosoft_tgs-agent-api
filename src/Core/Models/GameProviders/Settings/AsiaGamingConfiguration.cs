@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace TGS.Core.Models.GameProviders.Settings
@@ -7,6 +6,7 @@ namespace TGS.Core.Models.GameProviders.Settings
     public record AsiaGamingConfiguration : PluggableConfigurationBase
     {
         public string AgentCode { get; init; }
+        public string ProductionId { get; init; }
         public string DesKey { get; init; }
         public string Md5Key { get; init; }
         public Uri LoginApiUrl { get; init; }

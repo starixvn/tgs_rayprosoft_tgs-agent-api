@@ -6,7 +6,7 @@ namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
     public record CreateGameSessionRequest
     {
         [JsonPropertyName("productid")]
-        public string AgentCode { get; init; }
+        public string ProductId { get; init; }
 
         [JsonPropertyName("username")]
         public string PlayerCode { get; init; }
