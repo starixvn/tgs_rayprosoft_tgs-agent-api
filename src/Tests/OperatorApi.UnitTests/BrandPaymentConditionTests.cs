@@ -26,6 +26,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -41,7 +42,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new DepositedAmountCondition(brandPayment.DepositedAmountLimit);
 
@@ -67,6 +68,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -82,7 +84,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -108,6 +110,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -123,7 +126,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -149,6 +152,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -164,7 +168,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -190,6 +194,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -205,7 +210,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
@@ -231,6 +236,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -246,7 +252,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
@@ -272,6 +278,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -287,7 +294,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new VipCondition(new[] { playerInfo.VipLevel.Value });
 
@@ -313,6 +320,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -328,7 +336,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new VipCondition(Array.Empty<Guid>());
 
@@ -354,6 +362,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -369,7 +378,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new WhiteListCondition(new[] { brandPayment.Id });
 
@@ -395,6 +404,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -410,7 +420,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new BlockListCondition(new[] { brandPayment.Id });
 
@@ -436,6 +446,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -451,7 +462,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var sut = new ShowOnAllPlayersCondition();
 
@@ -477,6 +488,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -492,7 +504,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -524,6 +536,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -539,7 +552,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -571,6 +584,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -586,7 +600,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -622,6 +636,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -637,7 +652,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var fakeCondition1 = new Mock<IBrandPaymentCondition>();
 
@@ -684,6 +699,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -699,7 +715,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 1000M
                 },
                 ConditionMatchTypes.MatchAll,
-                TransferTypes.Deposit);
+                TransferType.Deposit);
 
             var fakeCondition1 = new Mock<IBrandPaymentCondition>();
 

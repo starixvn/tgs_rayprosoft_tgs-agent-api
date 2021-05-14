@@ -15,6 +15,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("channelname")]
         public string ChannelName { get; init; }
 
+        [JsonPropertyName("channelcode")]
+        public string ChannelCode { get; init; }
+
         [JsonPropertyName("extended")]
         public JsonDocument ExtendedData { get; init; }
 

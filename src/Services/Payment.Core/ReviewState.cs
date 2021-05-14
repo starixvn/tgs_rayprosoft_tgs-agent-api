@@ -1,6 +1,6 @@
 ﻿namespace TGS.Services.Payment
 {
-    public enum ReviewStatus
+    public enum ReviewState
     {
         Approve,
         Reject

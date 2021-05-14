@@ -155,8 +155,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 formId,
                 reviewResponse.ReviewResponse switch
                 {
-                    ReviewResponses.Approve => ReviewStatus.Approve,
-                    _ => ReviewStatus.Reject
+                    ReviewResponses.Approve => ReviewState.Approve,
+                    _ => ReviewState.Reject
                 },
                 reviewResponse.Remark);
 
