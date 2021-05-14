@@ -219,6 +219,7 @@ const EditTabs = ({
                 {...tab}
             />
             <BankPanel
+                brandId={brandId}
                 playerCode={playerCode}
                 banks={player.banks}
                 edit={true}

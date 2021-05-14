@@ -517,7 +517,7 @@ const EditBody = ({
 
                                     <Label required>
                                         <Trans
-                                            zh="银行帐号"
+                                            zh="银行卡号"
                                             en="Bank Account"
                                         />
                                     </Label>

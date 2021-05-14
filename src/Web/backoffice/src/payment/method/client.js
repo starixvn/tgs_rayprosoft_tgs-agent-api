@@ -10,6 +10,13 @@ let API = "/api/PaymentMethod"
 
 let CodeTranPairs = [
     [
+        "Crypto",
+        {
+            zh: "数字货币",
+            en: "Crypto"
+        }
+    ],
+    [
         "BankTransfer",
         {
             zh: "银行卡转账",

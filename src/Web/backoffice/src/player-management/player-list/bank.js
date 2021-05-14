@@ -13,7 +13,8 @@ import {
     Label,
     Dialog,
     Table,
-    useClassName
+    useClassName,
+    FieldStack
 } from "bumbag"
 import { FieldValues, TwoColumns } from "../../layout/Grid"
 import { Trans, FormattedDateTime, FormattedNumber } from "../../i18n"
@@ -31,6 +32,16 @@ import { Modal, useModalState } from "../../dialog/Modal"
 import { CancelText, SubmitText } from "../../button/ActionButtons"
 import Input from "../../input/Input"
 import FormDialog from "../../form/FormDialog"
+import {
+    PaymentChannelLabel,
+    PaymentChannelSelect
+} from "../../payment/channel/PaymentChannel"
+import { BrandPaymentMethodBankTypeSelect } from "../../payment/method/BrandPaymentMethodBankType"
+import { useFormContext } from "react-hook-form"
+import PaymentMethodBankType from "../../payment/method/PaymentMethodBankType"
+import { useBrandPaymentList } from "../../system/brandpayments/client"
+import BrandPaymentTransferType from "../../system/brandpayments/BrandPaymentTransferType"
+import clone from "clone-deep"
 
 export const Key = "banks"
 
@@ -43,6 +54,7 @@ export const Tab = ({ ...props }) => {
 }
 
 export const Panel = ({
+    brandId,
     playerCode,
     banks = [],
     edit = false,
@@ -55,25 +67,38 @@ export const Panel = ({
                 {banks.map((bank, index) => (
                     <Bank
                         key={index}
+                        brandId={brandId}
                         playerCode={playerCode}
-                        bank={bank}
+                        record={bank}
                         onSubmitted={onSubmitted}
                         edit={edit}
                     />
                 ))}
             </TwoColumns>
             {edit && (
-                <AddBank playerCode={playerCode} onSubmitted={onSubmitted} />
+                <AddBank
+                    brandId={brandId}
+                    playerCode={playerCode}
+                    onSubmitted={onSubmitted}
+                />
             )}
         </TabPanel>
     )
 }
 
-const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
-    let { realName = "", bankName = "", bankAccount = "" } = bank
+const Bank = ({
+    brandId,
+    playerCode,
+    record = {},
+    edit = false,
+    onSubmitted
+}) => {
+    let { bankType = "" } = record
     let deleteDialog = useModalState()
     let editDialog = useModalState()
 
+    let isBank = PaymentMethodBankType.isBank(bankType)
+    let isCrypto = PaymentMethodBankType.isCrypto(bankType)
     return (
         <Card>
             {edit && (
@@ -92,7 +117,7 @@ const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
                     {deleteDialog.visible && (
                         <DeleteDialog
                             playerCode={playerCode}
-                            bank={bank}
+                            bank={record}
                             onSubmitted={onSubmitted}
                             dialog={deleteDialog}
                         />
@@ -102,8 +127,9 @@ const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
                     </Disclosure>
                     {editDialog.visible && (
                         <EditDialog
+                            brandId={brandId}
                             playerCode={playerCode}
-                            bank={bank}
+                            record={record}
                             onSubmitted={onSubmitted}
                             dialog={editDialog}
                         />
@@ -111,20 +137,43 @@ const Bank = ({ playerCode, bank = {}, edit = false, onSubmitted }) => {
                 </Set>
             )}
             <FieldValues>
-                <RealnameLabel />
-                <Text>{realName}</Text>
+                <Box alignY="center">
+                    <PaymentChannelTrans />
+                </Box>
+                <PaymentChannelLabel value={record?.paymentChannelId} />
 
-                <BankLabel />
-                <Text>{bankName}</Text>
+                {isBank && (
+                    <>
+                        <Box alignY="center">
+                            <BankLabel />
+                        </Box>
+                        <Box alignY="center">{record?.detail?.name ?? ""}</Box>
 
-                <BankAccount />
-                <Text>{bankAccount}</Text>
+                        <Box alignY="center">
+                            <BankAccount />
+                        </Box>
+                        <Box alignY="center">
+                            {record?.detail?.account ?? ""}
+                        </Box>
+                    </>
+                )}
+
+                {isCrypto && (
+                    <>
+                        <Box alignY="center">
+                            <Trans zh="钱包地址" en="Wallet address" />
+                        </Box>
+                        <Box alignY="center">
+                            {record?.detail?.address ?? ""}
+                        </Box>
+                    </>
+                )}
             </FieldValues>
         </Card>
     )
 }
 
-const AddBank = ({ playerCode, onSubmitted }) => {
+const AddBank = ({ brandId, playerCode, onSubmitted }) => {
     let dialog = useModalState()
     return (
         <>
@@ -141,6 +190,7 @@ const AddBank = ({ playerCode, onSubmitted }) => {
             </TwoColumns>
             {dialog.visible && (
                 <AddDialog
+                    brandId={brandId}
                     playerCode={playerCode}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
@@ -163,18 +213,29 @@ const Card = ({ children, ...props }) => (
     </_Card>
 )
 
+const PaymentBankTypeTrans = () => <Trans zh="支付类型" en="Payment Type" />
+
+const PaymentChannelTrans = () => <Trans zh="支付通道" en="Payment Channel" />
+
 const RealnameLabel = () => <Trans zh="真实姓名" en="Real name" />
 
-const BankLabel = () => <Trans zh="银行" en="Bank" />
+const BankLabel = () => <Trans zh="帐号名称" en="Account Name" />
 
 const BankAccount = () => <Trans zh="银行卡号" en="Bank Account" />
 
-const AddDialog = ({ playerCode, onSubmitted, dialog }) => {
+const AddDialog = ({ brandId, playerCode, onSubmitted, dialog }) => {
     let [submitData, setSubmit] = useState()
     let { result, isLoading, error, deleteCache, mutate } = useAddPlayerBank(
         playerCode,
         submitData
     )
+
+    const onSubmit = (data = {}) => {
+        setSubmit({
+            brandId,
+            ...data
+        })
+    }
 
     const reset = () => {
         deleteCache()
@@ -186,11 +247,9 @@ const AddDialog = ({ playerCode, onSubmitted, dialog }) => {
         <Backdrop {...dialog}>
             <FormDialog
                 defaultValues={{
-                    realName: "",
-                    bankName: "",
-                    bankAccount: ""
+                    detail: {}
                 }}
-                onSubmit={setSubmit}
+                onSubmit={onSubmit}
                 isLoading={isLoading}
                 result={result}
                 error={error}
@@ -198,66 +257,133 @@ const AddDialog = ({ playerCode, onSubmitted, dialog }) => {
                 onSubmitted={onSubmitted}
                 dialog={dialog}
             >
-                <EditBody />
+                <EditBody brandId={brandId} />
             </FormDialog>
         </Backdrop>
     )
 }
 
-const EditDialog = ({ playerCode, bank, onSubmitted, dialog }) => {
+const EditDialog = ({ brandId, playerCode, record, onSubmitted, dialog }) => {
     let [submitData, setSubmit] = useState()
-    let { result, isLoading, error } = useEditPlayerBank(
+    let { result, isLoading, error, deleteCache, mutate } = useEditPlayerBank(
         {
             playerCode,
-            id: bank?.id
+            id: record?.id
         },
         submitData
     )
 
-    const clearResult = () => setSubmit(undefined)
+    const onSubmit = (data = {}) => {
+        setSubmit({
+            brandId,
+            ...data
+        })
+    }
+
+    const reset = () => {
+        deleteCache()
+        mutate(undefined, false)
+        setSubmit(undefined)
+    }
 
     return (
         <Backdrop {...dialog}>
             <FormDialog
-                defaultValues={{ ...bank }}
-                onSubmit={setSubmit}
+                defaultValues={clone(record)}
+                onSubmit={onSubmit}
                 isLoading={isLoading}
                 result={result}
                 error={error}
-                onCloseErrorAlert={clearResult}
+                onCloseErrorAlert={reset}
                 onSubmitted={onSubmitted}
                 dialog={dialog}
             >
-                <EditBody />
+                <EditBody brandId={brandId} />
             </FormDialog>
         </Backdrop>
     )
 }
 
-const EditBody = ({}) => {
+const EditBody = ({ brandId }) => {
+    let {
+        isLoading: isLoadingBrandPaymentList,
+        data,
+        error
+    } = useBrandPaymentList({
+        brandId,
+        transferType: BrandPaymentTransferType.Withdrawal,
+        shoAll: true
+    })
+    let { watch } = useFormContext()
+
+    let BankTypeFieldName = "bankType"
+    let bankType = watch(BankTypeFieldName)
+    let paymentChannelIdRange =
+        data?.items
+            ?.filter((item) => item.bankType === bankType)
+            ?.map(({ paymentChannelId }) => paymentChannelId) ?? []
+
+    let isBank = PaymentMethodBankType.isBank(bankType)
+    let isCrypto = PaymentMethodBankType.isCrypto(bankType)
+
     return (
         <FieldValues>
-            <RealnameLabel />
-            <Box>
-                <Input name="realName" />
+            <Box alignY="center">
+                <PaymentBankTypeTrans />
             </Box>
+            <BrandPaymentMethodBankTypeSelect name={BankTypeFieldName} />
 
-            <BankLabel />
-            <Box>
-                <Input name="bankName" />
+            <Box alignY="center">
+                <PaymentChannelTrans />
             </Box>
+            <PaymentChannelSelect
+                name="paymentChannelId"
+                isLoadingRange={isLoadingBrandPaymentList}
+                range={paymentChannelIdRange}
+                required
+            />
 
-            <BankAccount />
-            <Box>
-                <Input name="bankAccount" />
-            </Box>
+            {isBank && (
+                <>
+                    {/* <RealnameLabel />
+                    <Box>
+                        <Input name="realName" />
+                    </Box> */}
+
+                    <Box alignY="center">
+                        <BankLabel />
+                    </Box>
+                    <Box>
+                        <Input name="detail.name" />
+                    </Box>
+
+                    <Box alignY="center">
+                        <BankAccount />
+                    </Box>
+                    <Box>
+                        <Input name="detail.account" />
+                    </Box>
+                </>
+            )}
+
+            {isCrypto && (
+                <>
+                    <Trans zh="钱包地址" en="Wallet address" />
+                    <Box>
+                        <Input name="detail.address" />
+                    </Box>
+                </>
+            )}
         </FieldValues>
     )
 }
 
 const DeleteDialog = ({ playerCode, bank, onSubmitted, dialog }) => {
     let [id, setDeleteId] = useState()
-    let { result, isLoading, error } = useDeletePlayerBank(playerCode, id)
+    let { result, isLoading, error, deleteCache, mutate } = useDeletePlayerBank(
+        playerCode,
+        id
+    )
     useEffect(() => {
         if (result && !error) {
             onSubmitted?.()
@@ -265,7 +391,11 @@ const DeleteDialog = ({ playerCode, bank, onSubmitted, dialog }) => {
         }
     }, [result, error])
 
-    const clearResult = () => setDeleteId(undefined)
+    const reset = () => {
+        deleteCache()
+        mutate(false, undefined)
+        setDeleteId(undefined)
+    }
 
     return (
         <Modal
@@ -279,7 +409,7 @@ const DeleteDialog = ({ playerCode, bank, onSubmitted, dialog }) => {
             }}
             {...dialog}
         >
-            {error && <AlertDialog {...error} onClickClose={clearResult} />}
+            {error && <AlertDialog {...error} onClickClose={reset} />}
             <Box alignX="center" margin="major-1">
                 <Trans
                     zh="是否删除此银行卡？"
