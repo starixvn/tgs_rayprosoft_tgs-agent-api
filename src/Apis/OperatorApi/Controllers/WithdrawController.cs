@@ -101,7 +101,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         From = bp.TransferLimit.From,
                         To = bp.TransferLimit.To
                     },
-                    ExtendedData = JsonDocument.Parse(bp.ExtendedData),
+                    ExtendedData = JsonDocument.Parse("{}"),
                     PaymentId = bp.PaymentId,
                     PaymentCode = paymentInfo.Code,
                     MethodId = bp.MethodId,

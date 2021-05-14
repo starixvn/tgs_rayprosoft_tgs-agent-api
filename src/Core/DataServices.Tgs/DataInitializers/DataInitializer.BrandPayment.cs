@@ -345,24 +345,25 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           HighestFee = 500,
                                           BrandPaymentPlayers = new[]
                                           {
-                                                     new BrandPaymentPlayer
-                                                     {
-                                                         PlayerCode = _players[0].PlayerCode,
-                                                         ListType = PlayerListType.White,
-                                                         BrandPaymentId = brandPaymentId
-                                                     },
-                                                     new BrandPaymentPlayer
-                                                     {
-                                                         PlayerCode = _players[1].PlayerCode,
-                                                         ListType = PlayerListType.Black,
-                                                         BrandPaymentId = brandPaymentId
-                                                     }
-                                                 },
+                                              new BrandPaymentPlayer
+                                              {
+                                                  PlayerCode = _players[0].PlayerCode,
+                                                  ListType = PlayerListType.White,
+                                                  BrandPaymentId = brandPaymentId
+                                              },
+                                              new BrandPaymentPlayer
+                                              {
+                                                  PlayerCode = _players[1].PlayerCode,
+                                                  ListType = PlayerListType.Black,
+                                                  BrandPaymentId = brandPaymentId
+                                              }
+                                          },
                                           VipLevels = new[]
                                           {
-                                                     new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
-                                                     new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
-                                                 },
+                                              new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
+                                              new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                          },
+                                          ExtendedData = "{}",
                                           CreatedByUsername = AdminUsername,
                                           CreatedOn = DateTimeOffset.Now,
                                           UpdatedByUsername = AdminUsername,
