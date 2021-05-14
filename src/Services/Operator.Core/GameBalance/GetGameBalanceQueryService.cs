@@ -23,7 +23,7 @@ namespace TGS.Services.Operator.GameBalance
         {
             var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(query.GameProviderCode);
 
-            var info = await _client.GetBalanceAsync(
+            var resp = await _client.GetBalanceAsync(
                 serviceUrl,
                 new GameProviderWalletGetBalanceRequest()
                 {
@@ -31,7 +31,12 @@ namespace TGS.Services.Operator.GameBalance
                     PlayerCode = query.PlayerCode
                 });
 
-            return new GameBalanceInfo(info.Balance);
+            return new GameBalanceInfo()
+            {
+                Balance = resp.Balance,
+                Error = resp.Error,
+                ErrorMessage = resp.ErrorMessage
+            };
         }
     }
 }

@@ -34,7 +34,9 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return new GetGameBalanceResponse
             {
-                Balance = info.Balance
+                Balance = info.Balance,
+                Error = info.Error,
+                ErrorMessage = info.ErrorMessage
             };
         }
 
