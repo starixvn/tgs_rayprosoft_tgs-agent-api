@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DataInitializers\Games\BG.csv" />
     <None Remove="SqlScripts\Indexes\players_email.sql" />
   </ItemGroup>
 
@@ -20,6 +21,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\BG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\PP.csv" />
     <EmbeddedResource Include="DataInitializers\Games\KY.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SABA.csv" />
