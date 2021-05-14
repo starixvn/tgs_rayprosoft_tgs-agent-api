@@ -20,7 +20,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="gpCode"></param>
         /// <returns></returns>
         [HttpGet("{gpCode}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task<GetGameBalanceResponse> GetGameBalanceAsync(
             [FromServices] IGetService<GetGameBalanceQuery, GameBalanceInfo> getGameBalanceService,
