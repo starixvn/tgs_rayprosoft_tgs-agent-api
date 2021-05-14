@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Transactions;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.PlayerRebate;
@@ -90,33 +91,32 @@ namespace TGS.Services.Report.Application.Commands.Player
                         VipSportsRebatePercentage = x.VipSportsRebatePercentage,
                         VipVirtualSportsRebatePercentage = x.VipVirtualSportsRebatePercentage,
                         SportsTurnover =
-                            list.Where(l => l.GameType == GameType.Sportsbook || l.GameType == GameType.ESports)
-                                .Sum(a => a.Turnover),
-                        SportsRebateAmount = x.VipSportsRebatePercentage * list.Where(a =>
-                                a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
-                            .Sum(a => a.Turnover) / 100M,
+                            list.Where(l => Consts.SportsGroup.Contains(l.GameType))
+                                .Sum(x => x.Turnover),
+                        SportsRebateAmount = x.VipSportsRebatePercentage * list.Where(l =>
+                                Consts.SportsGroup.Contains(l.GameType))
+                            .Sum(x => x.Turnover) / 100M,
                         VirtualSportsTurnover =
                             list.Where(l => l.GameType == GameType.VirtualSports).Sum(a => a.Turnover),
-                        VirtualSportsRebateAmount = x.VipVirtualSportsRebatePercentage * list
-                            .Where(a => a.GameType == GameType.VirtualSports)
-                            .Sum(a => a.Turnover) / 100M,
+                        VirtualSportsRebateAmount =
+                            x.VipVirtualSportsRebatePercentage *
+                            list.Where(l => l.GameType == GameType.VirtualSports).Sum(a => a.Turnover) / 100M,
                         LiveDealerTurnover = list.Where(l => l.GameType == GameType.LiveDealer).Sum(a => a.Turnover),
-                        LiveDealerRebateAmount = x.VipLiveDealerRebatePercentage * list
-                            .Where(a => a.GameType == GameType.LiveDealer)
-                            .Sum(a => a.Turnover) / 100M,
+                        LiveDealerRebateAmount =
+                            x.VipLiveDealerRebatePercentage *
+                            list.Where(l => l.GameType == GameType.LiveDealer).Sum(a => a.Turnover) / 100M,
                         CardGameTurnover = list.Where(l => l.GameType == GameType.CardGame).Sum(a => a.Turnover),
                         CardGameRebateAmount =
-                            x.VipCardGameRebatePercentage * list.Where(a => a.GameType == GameType.CardGame)
-                                .Sum(a => a.Turnover) / 100M,
+                            x.VipCardGameRebatePercentage *
+                            list.Where(l => l.GameType == GameType.CardGame).Sum(a => a.Turnover) / 100M,
                         SlotTurnover = list.Where(l =>
-                            (l.GameType == GameType.Fishing) | (l.GameType == GameType.Arcade) ||
-                            l.GameType == GameType.Slot || l.GameType == GameType.TableGame).Sum(a => a.Turnover),
+                            Consts.SlotGroup.Contains(l.GameType)).Sum(a => a.Turnover),
                         SlotRebateAmount =
-                            x.VipSlotRebatePercentage * list.Where(a =>
-                                    a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
-                                    a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
-                                .Sum(a => a.Turnover) / 100M,
-                        LotteryTurnover = list.Where(l => l.GameType == GameType.Lottery).Sum(a => a.Turnover),
+                            x.VipSlotRebatePercentage * list.Where(l =>
+                                Consts.SlotGroup.Contains(l.GameType)).Sum(a => a.Turnover) /
+                            100M,
+                        LotteryTurnover = list.Where(a => a.GameType == GameType.Lottery)
+                            .Sum(a => a.Turnover),
                         LotteryRebateAmount =
                             x.VipLotteryRebatePercentage * list.Where(a => a.GameType == GameType.Lottery)
                                 .Sum(a => a.Turnover) / 100M,
