@@ -411,7 +411,6 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                         name="vipLevels"
                         valueFieldName="level"
                         brandId={brandId}
-                        required
                         disabled={disabled}
                     />
                 </Box>

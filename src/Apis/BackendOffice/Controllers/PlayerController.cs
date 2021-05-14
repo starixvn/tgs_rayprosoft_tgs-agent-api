@@ -14,12 +14,10 @@ namespace TGS.Apis.BackendOffice.Controllers
     public partial class PlayerController : BaseContextController
     {
         private readonly IMediator _mediator;
-       
 
         public PlayerController(IMediator mediator)
         {
             _mediator = mediator;
-            
         }
 
         [HttpGet]
