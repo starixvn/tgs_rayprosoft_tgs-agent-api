@@ -1,7 +1,7 @@
 ﻿
 namespace TGS.Services.Payment
 {
-    public enum PaymentFlowStatus
+    public enum PaymentFlowState
     {
         Init = 0,
         WaitApprove = 1000,

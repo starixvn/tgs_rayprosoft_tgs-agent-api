@@ -36,7 +36,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 .SignOffDepositFormAsync(command.FormId, command.Status, command.remark)
                 .ConfigureAwait(false);
 
-            if (command.Status == ReviewStatus.Approve)
+            if (command.Status == ReviewState.Approve)
             {
                 var player = await _playerService
                     .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)

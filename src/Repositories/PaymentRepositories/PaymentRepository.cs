@@ -183,8 +183,8 @@ namespace TGS.Payment.Repositories
                 row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
                 row.TransferType switch
                 {
-                    PaymentTransferType.Withdrawal => TransferTypes.Withdraw,
-                    _ => TransferTypes.Deposit,
+                    PaymentTransferType.Withdrawal => TransferType.Withdraw,
+                    _ => TransferType.Deposit,
                 });
         }
 
@@ -220,8 +220,8 @@ namespace TGS.Payment.Repositories
                 bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
                 bp.TransferType switch
                 {
-                    PaymentTransferType.Withdrawal => TransferTypes.Withdraw,
-                    _ => TransferTypes.Deposit
+                    PaymentTransferType.Withdrawal => TransferType.Withdraw,
+                    _ => TransferType.Deposit
                 }));
         }
 
@@ -297,7 +297,7 @@ namespace TGS.Payment.Repositories
             Guid formId,
             Guid brandPaymentId,
             string? applyInfo,
-            ReviewStatus reviewStatus,
+            ReviewState reviewStatus,
             string? remark)
         {
             var formData = await _tgsRepository.WithdrawForms
@@ -308,8 +308,8 @@ namespace TGS.Payment.Repositories
             formData.ApplyInfo = applyInfo;
             formData.Status = reviewStatus switch
             {
-                ReviewStatus.Approve => 8000,
-                ReviewStatus.Reject => 7000,
+                ReviewState.Approve => 8000,
+                ReviewState.Reject => 7000,
                 _ => formData.Status
             };
             formData.Remark = remark;

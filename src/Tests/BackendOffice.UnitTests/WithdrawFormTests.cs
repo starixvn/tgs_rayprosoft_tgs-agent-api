@@ -55,7 +55,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var command = new ReviewWithdrawFormCommand(
                 formId,
                 brandPaymentId,
-                ReviewStatus.Approve,
+                ReviewState.Approve,
                 null);
 
             moqPaymentRepository
@@ -96,7 +96,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         To = decimal.MaxValue
                     },
                     ConditionMatchTypes.MatchOne,
-                    TransferTypes.Withdraw)));
+                    TransferType.Withdraw)));
 
             moqPaymentRepository
                 .Setup(fake => fake.GetPaymentAsync(It.IsAny<Guid>()))
@@ -114,7 +114,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<Guid>(x => x == formId),
                     It.Is<Guid>(x => x == brandPaymentId),
                     It.IsAny<string>(),
-                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve),
+                    It.Is<ReviewState>(x => x == ReviewState.Approve),
                     It.IsAny<string>()),
                 Times.Exactly(1));
         }

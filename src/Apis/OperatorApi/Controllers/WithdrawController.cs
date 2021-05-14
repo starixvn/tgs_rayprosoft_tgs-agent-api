@@ -80,7 +80,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             foreach (var bp in brandPayments)
             {
-                if (bp.TransferType != TransferTypes.Withdraw)
+                if (bp.TransferType != TransferType.Withdraw)
                     continue;
 
                 var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);

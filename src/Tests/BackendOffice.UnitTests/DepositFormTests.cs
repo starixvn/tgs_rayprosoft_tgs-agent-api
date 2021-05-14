@@ -56,7 +56,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();
             var walletId = Guid.NewGuid();
-            var command = new ReviewDepositFormCommand(brandId, formId, ReviewStatus.Approve, null);
+            var command = new ReviewDepositFormCommand(brandId, formId, ReviewState.Approve, null);
 
             moqDepositRepository
                 .Setup(fake => fake.GetDepositFormDetailAsync(It.Is<Guid>(x => x == formId)))
@@ -90,7 +90,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             moqDepositRepository.Verify(
                 fake => fake.SignOffDepositFormAsync(
                     It.Is<Guid>(x => x == formId),
-                    It.Is<ReviewStatus>(x => x == ReviewStatus.Approve),
+                    It.Is<ReviewState>(x => x == ReviewState.Approve),
                     It.IsAny<string>()),
                 Times.Exactly(1));
 
