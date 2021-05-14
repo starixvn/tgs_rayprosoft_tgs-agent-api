@@ -9,7 +9,7 @@ namespace TGS.Core.Models.GameProviders.Settings
     /// <summary>
     /// BG 設定檔案
     /// </summary>
-    public record BGConfiguration : PluggableConfigurationBase
+    public record BigGamingConfiguration : PluggableConfigurationBase
     {
         public Uri ApiUrl { get; init; }
 
