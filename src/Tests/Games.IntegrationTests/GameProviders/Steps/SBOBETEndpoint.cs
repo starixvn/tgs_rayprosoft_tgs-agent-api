@@ -165,8 +165,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var manager = _serviceProvider.GetRequiredService<IRedisCacheManager>();
             return manager.ClearCacheByBatchAsync(new CacheKey[]
             {
-                new() {CacheType = RedisCacheType.PlayerLoginRecords, Key = playerCode},
-                new() {CacheType = RedisCacheType.PlayerLoginRecords, Key = tokenData.LoginRecordId}
+                new()
+                {
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = playerCode
+                },
+                new()
+                {
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = tokenData.LoginRecordId
+                }
             });
         }
 
@@ -191,7 +199,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await client.GetPlayerBalanceAsync(new()
             {
-                CompanyKey = config.CompanyKey, PlayerCode = playerCode, GameType = 1, ProductType = 1
+                CompanyKey = config.CompanyKey,
+                PlayerCode = playerCode,
+                GameType = 1,
+                ProductType = 1
             });
 
             Set(SR.Response, response);
@@ -252,8 +263,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task WhenITieBetForAsync(decimal amount) =>
             SettleBetAsync(GameActionType.TieBet, amount);
 
-        [Given(@"I cancel transactionRepository")]
-        [When(@"I cancel transactionRepository")]
+        [Given(@"I cancel transaction")]
+        [When(@"I cancel transaction")]
         public async Task WhenICancelTransactionAsync()
         {
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
@@ -268,7 +279,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.ExternalRoundId, externalRoundId);
         }
 
-        [When(@"I cancel transactionRepository for game ""(.*)""")]
+        [When(@"I cancel transaction for game ""(.*)""")]
         public async Task WhenICancelTransactionForGame(string externalGameId)
         {
             var betRequest = Get<PlaceBetRequest>(SR.PlaceBetRequest);
@@ -306,8 +317,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.ExternalRoundId, externalRoundId);
         }
 
-        [Given(@"I cancel the settle transactionRepository")]
-        [When(@"I cancel the settle transactionRepository")]
+        [Given(@"I cancel the settle transaction")]
+        [When(@"I cancel the settle transaction")]
         public async Task WhenICancelTheSettleTransactionAsync()
         {
             var playerCode = Get<string>(SR.PlayerCode);
@@ -374,7 +385,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task WhenIResendTheTieBetAsync() =>
             ResentSettleBetAsync();
 
-        [When(@"I resend cancel transactionRepository")]
+        [When(@"I resend cancel transaction")]
         public async Task WhenIResendCancelTransactionAsync()
         {
             var request = Get<CancelBetRequest>(SR.Request);
@@ -385,7 +396,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        [When(@"I resend cancel settlement transactionRepository")]
+        [When(@"I resend cancel settlement transaction")]
         public async Task WhenIResendCancelSettlementTransactionAsync()
         {
             var request = Get<RollbackRequest>(SR.Request);
@@ -396,7 +407,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        [When(@"I resend cancel the cancellation transactionRepository")]
+        [When(@"I resend cancel the cancellation transaction")]
         public async Task WhenIResendCancelTheCancellationTransactionAsync()
         {
             var request = Get<RollbackRequest>(SR.Request);
@@ -452,7 +463,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Timestamp = DateTimeOffset.Now,
                 Transactions = roundData.GroupBy(r => new
                     {
-                        r.PlayerCode, r.CurrencyCode, r.ExternalRoundId, r.ExternalGameId
+                        r.PlayerCode,
+                        r.CurrencyCode,
+                        r.ExternalRoundId,
+                        r.ExternalGameId
                     })
                     .SelectMany(g => g.SelectMany(a => a.GameActions.Select(ga =>
                     {
@@ -661,7 +675,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var gameActions = await db.GameActions
                 .AsQueryable()
                 .Where(ga => txids.Contains(ga.ExternalTransactionId))
-                .Select(ga => new {ga.Round.PlayerCode, ga.Id}).ToArrayAsync();
+                .Select(ga => new
+                {
+                    ga.Round.PlayerCode,
+                    ga.Id
+                }).ToArrayAsync();
 
             gameActions.Length.Should().Be(txids.Length);
 
@@ -671,7 +689,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 var data = await db.Wallets
                     .AsQueryable()
                     .Where(w => w.PlayerCode == ga.PlayerCode)
-                    .Select(w => new {w.Player.Username, w.Balance}).FirstOrDefaultAsync();
+                    .Select(w => new
+                    {
+                        w.Player.Username,
+                        w.Balance
+                    }).FirstOrDefaultAsync();
 
                 var expectdBalance = players[data.Username];
                 data.Balance.Should().Be(expectdBalance);

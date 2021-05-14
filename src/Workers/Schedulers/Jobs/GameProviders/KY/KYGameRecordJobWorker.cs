@@ -26,7 +26,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
     [Queue(Consts.Queue.GameProvider)]
     public sealed class KYGameRecordJobWorker : BaseWork<TgsResponse>
     {
-        private readonly string _gameProvider = GameProviderConst.KY;
+        private readonly string _gameProviderCode = GameProviderConst.KY;
         private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.KY;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly ISettingOperations _settingOperations;
@@ -69,7 +69,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                    .GetValueFromJsonByKeyAsync<KYConfiguration>(_gameProviderConfigurations)
                    .ConfigureAwait(false);
                 var gameProvider = await _gameProviderOperations
-                      .GetGameProviderIdByCodeAsync(_gameProvider)
+                      .GetGameProviderIdByCodeAsync(_gameProviderCode)
                       .ConfigureAwait(false);
 
                 var tasks = new List<Task>();
@@ -137,8 +137,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 {
                     BrandCode = gameProviderSchedule.BrandCode,
                     CurrencyCode = gameProviderSchedule.CurrencyCode,
-                    StartTime = config.StartTime.ToUnixTimeMilliseconds(),
-                    EndTime = config.EndTime.ToUnixTimeMilliseconds()
+                    StartTime = config.StartTime,
+                    EndTime = config.EndTime
                 }).ConfigureAwait(false);
                 if (responses.Success)
                 {
@@ -162,12 +162,14 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         private async Task<(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProviderId, string brandCode, string agentId, string currencyCode)
         {
             var sysTime = DateTimeOffset.UtcNow;
+            var intervalMinuteMax = 40m;
+            var intervalMinute = 10m;
             var config = new KYGameProviderScheduleConfig()
             {
-                IntervalMinuteMax = 40m,
-                IntervalMinute = 1.5m,
+                IntervalMinuteMax = intervalMinuteMax,
+                IntervalMinute = intervalMinute,
                 LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
-                StartTime = sysTime.AddSeconds((double)1.5 * 60 * -1),
+                StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1),
                 EndTime = sysTime
             };
 
@@ -175,7 +177,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 GameProviderId = gameProviderId,
-                GameProviderCode = _gameProvider,
+                GameProviderCode = _gameProviderCode,
                 BrandCode = brandCode,
                 AgentId = agentId,
                 CurrencyCode = currencyCode,

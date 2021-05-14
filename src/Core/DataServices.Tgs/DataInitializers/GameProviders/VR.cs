@@ -62,6 +62,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 ServiceEndpointUrl =
                 _env.IsDocker() ? new Uri("http://game-vr") : new("http://localhost:62330"),
+                AmountMaximum = 3000000m,
+                AmountFormat = "10,3",
                 BrandMerchants = new VRBrandMerchant[] {
                     new VRBrandMerchant(){
                         BrandCode="Default",

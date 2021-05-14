@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
@@ -20,14 +16,12 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 {
     public record VRGameInitializer : IGameInitializer
     {
-        private readonly string GameProviderCode = Consts.GameProvider.VR;
+        private readonly string _gameProviderCode = Consts.GameProvider.VR;
         private readonly IVRApiClient _client;
         private readonly IPlayerOperations _playerOperations;
         private readonly IVRGamePlayerCreate _gamePlayerCreate;
         private readonly ISettingOperations _settingOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
-
-
 
         public VRGameInitializer(
             IVRApiClient client,
@@ -71,25 +65,18 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 
             if (string.IsNullOrEmpty(response.playerName) || response.balance == -1)
             {
-                if (await _gamePlayerCreate.CreatePlayerAsync(player).ConfigureAwait(false))
-                {
-                    response = await _client.GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, dataGetBalance).ConfigureAwait(false);
-                }
-                else
-                {
-                    throw new PlayerNotFoundException(request.Token.PlayerCode);
-                }
+                await _gamePlayerCreate.CreatePlayerAsync(player).ConfigureAwait(false);
             }
 
             var date = DateTimeOffset.UtcNow.AddHours(+8);
-            var ChannelId = 0;
+            var channelId = 0;
             if (request.GameId > 0)
             {
-                var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode).ConfigureAwait(false);
+                var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProviderCode).ConfigureAwait(false);
                 var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
                 if (cachedGame != null)
                 {
-                    ChannelId = Convert.ToInt32(cachedGame.ExternalId);
+                    channelId = Convert.ToInt32(cachedGame.ExternalId);
                 }
             }
 
@@ -99,7 +86,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 PlayerCode = request.Token.PlayerCode,
                 LoginTime = date.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                 IsCreateUser = "true",
-                ChannelId = ChannelId,
+                ChannelId = channelId,
                 ChannelType = 0
             };
 

@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json.Linq;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
@@ -27,12 +21,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 {
     public record KYGameInitializer : IGameInitializer
     {
+        private readonly string _gameProviderCode = Consts.GameProvider.KY;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IKYApiClient _client;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
         private readonly IRequestAnalyzer _requestAnalyzer;
+        private readonly IGameProviderOperations _gameProviderOperations;
 
         public KYGameInitializer(
             IHttpContextAccessor httpContextAccessor,
@@ -40,7 +36,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             IHashProvider hashProvider,
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
-            IRequestAnalyzer requestAnalyzer
+            IRequestAnalyzer requestAnalyzer,
+            IGameProviderOperations gameProviderOperations
             )
         {
             _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
@@ -49,6 +46,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _requestAnalyzer = requestAnalyzer ?? throw new ArgumentNullException(nameof(requestAnalyzer));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
@@ -67,6 +65,17 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             }
             var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault()?.AgentId;
 
+            var externalID = 0;
+            if (request.GameId > 0)
+            {
+                var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProviderCode).ConfigureAwait(false);
+                var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
+                if (cachedGame != null)
+                {
+                    externalID = Convert.ToInt32(cachedGame.ExternalId);
+                }
+            }
+
             var date = DateTimeOffset.UtcNow.AddHours(+8);
             var timestamp = date.ToUnixTimeMilliseconds();
             var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
@@ -80,7 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Amount = 0m,
                 IP = ip,
                 BrandsCode = player.BrandCode,
-                ExternalID = 0,
+                ExternalID = externalID,
 
             };
             var dataPath = KYUtility.GetPath(data);

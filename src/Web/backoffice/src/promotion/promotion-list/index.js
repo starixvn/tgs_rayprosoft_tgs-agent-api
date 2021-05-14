@@ -218,14 +218,19 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                 accessor: "gameProviderIds",
                 Header: <Trans zh="活动厂商" en="Game Providers" />,
                 disableSortBy: true,
-                Cell: ({ value }) => {
+                Cell: ({ value: gameProviderIds }) => {
                     let dialogTitle = useTrans({
                         zh: "活动厂商",
                         en: "Game Providers"
                     })
+
+                    if (!gameProviderIds || gameProviderIds?.length == 0) {
+                        return "-"
+                    }
+
                     return (
                         <GameProviderListDialogDisclosure
-                            gameProviderIds={value}
+                            gameProviderIds={gameProviderIds}
                             dialogTitle={dialogTitle}
                         />
                     )
@@ -235,15 +240,20 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                 accessor: "vipLevels",
                 Header: <Trans zh="活动用户群" en="VIP Levels" />,
                 disableSortBy: true,
-                Cell: ({ value }) => {
+                Cell: ({ value: vipLevels }) => {
                     let dialogTitle = useTrans({
                         zh: "活动用户群",
                         en: "VIP Levels"
                     })
+
+                    if (!vipLevels || vipLevels?.length === 0) {
+                        return "-"
+                    }
+
                     return (
                         <VipLevelListDialogDisclosure
                             dialogTitle={dialogTitle}
-                            vipLevels={value}
+                            vipLevels={vipLevels}
                         />
                     )
                 }

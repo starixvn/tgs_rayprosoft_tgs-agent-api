@@ -26,8 +26,8 @@ export const ResellerIdSelect = ({ placeholder, ...props }) => {
 
 const useResellerPlaceholder = () =>
     useTrans({
-        zh: "选择总公司",
-        en: "Select Reseller"
+        zh: "总公司",
+        en: "Reseller"
     })
 
 export default ResellerIdSelect

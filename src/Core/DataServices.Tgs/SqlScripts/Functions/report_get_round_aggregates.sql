@@ -1,4 +1,5 @@
-﻿CREATE OR REPLACE FUNCTION dbo.report_get_round_aggregates(
+﻿DROP FUNCTION IF EXISTS dbo.report_get_round_aggregates;
+CREATE OR REPLACE FUNCTION dbo.report_get_round_aggregates(
 	_from timestamptz, 
 	_to timestamptz,
 	_report_date timestamptz,
@@ -17,8 +18,7 @@ RETURNS TABLE(
 	 "ValidBetAmount" decimal, 
 	 "Turnover" decimal, 
 	 "WinLoss" decimal, 
-	 "ReportDate" timestamptz, 
-	 "CreatedOn" timestamptz)
+	 "ReportDate" timestamptz)
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -36,12 +36,11 @@ BEGIN
 	sum(r.valid_bet_amount) "ValidBetAmount",
 	sum(r.turnover) "Turnover", 
 	sum(r.win_loss) "WinLoss", 
-	_report_date "ReportDate", 
-	NOW() "CreatedOn"
+	_report_date "ReportDate"
     from bet.rounds r 
 	join dbo.games g on r.game_id = g.id
 	join dbo.players p on r.player_code = p.player_code
-    where r.closed_on >= _from and r.closed_on < _to
+    where r.closed_on >= _from and r.closed_on < _to and r.reopened_on is null
 	group by p.brand_id, g.game_provider_id, p.player_code, p.agent_id, p.username,g.type;
 	
 END;

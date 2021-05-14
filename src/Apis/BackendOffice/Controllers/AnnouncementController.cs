@@ -11,6 +11,7 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
@@ -20,13 +21,15 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public partial class AnnouncementController : BaseContextController
     {
+        private readonly IRedisCacheManager _cacheManager;
         private readonly ITgsCommands<Announcement> _commands;
         private readonly ITgsQueries<Announcement> _queries;
 
         private readonly Dictionary<string, dynamic> _typeDictionary = new()
         {
             {
-                "pass", new
+                "pass",
+                new
                 {
                     AllowedStatus = AnnounceStatus.InVerify,
                     VerifiedStatus = AnnounceStatus.Effective,
@@ -35,7 +38,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 }
             },
             {
-                "reject", new
+                "reject",
+                new
                 {
                     AllowedStatus = AnnounceStatus.InVerify,
                     VerifiedStatus = AnnounceStatus.Rejected,
@@ -44,7 +48,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 }
             },
             {
-                "invalid", new
+                "invalid",
+                new
                 {
                     AllowedStatus = AnnounceStatus.Effective,
                     VerifiedStatus = AnnounceStatus.Invalid,
@@ -56,10 +61,12 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         public AnnouncementController(
             ITgsQueries<Announcement> queries,
-            ITgsCommands<Announcement> commands)
+            ITgsCommands<Announcement> commands,
+            IRedisCacheManager cacheManager)
         {
             _queries = queries;
             _commands = commands;
+            _cacheManager = cacheManager;
         }
 
         [HttpGet]
@@ -158,6 +165,9 @@ namespace TGS.Apis.BackendOffice.Controllers
             announcement.Status = AnnounceStatus.InVerify;
 
             await _commands.UpdateAsync(announcement);
+
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Announcements, announcement.BrandId);
+
             return CreateValidResponse<MessageResponse>();
         }
 

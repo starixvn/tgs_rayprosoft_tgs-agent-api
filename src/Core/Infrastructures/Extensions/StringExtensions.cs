@@ -55,6 +55,11 @@ namespace TGS.Core.Infrastructures.Extensions
                 return url;
             }
 
+            if (queryString.StartsWith("/"))
+            {
+                return $"{url}{queryString}";
+            }
+
             if (queryString.StartsWith("&") || queryString.StartsWith("?"))
             {
                 queryString = queryString[1..];

@@ -162,12 +162,19 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<PromotionPlayer> PromotionPlayers { get; set; }
         DbSet<AgentDividend> AgentDividends { get; set; }
         DbSet<PlayerRebate> PlayerRebates { get; set; }
-
+        DbSet<AgentLoginRecord> AgentLoginRecords { get; set; }
+        DbSet<BrandDomain> BrandDomains { get; set; }
         DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
+        DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
     {
+        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
+        {
+        }
+
+        public DbSet<AgentLoginRecord> AgentLoginRecord { get; set; }
         public DbSet<Reseller> Resellers { get; set; }
 
         public DbSet<Game> Games { get; set; }
@@ -311,8 +318,11 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<PromotionPlayer> PromotionPlayers { get; set; }
         public DbSet<AgentDividend> AgentDividends { get; set; }
         public DbSet<PlayerRebate> PlayerRebates { get; set; }
-
+        public DbSet<AgentLoginRecord> AgentLoginRecords { get; set; }
+        public DbSet<BrandDomain> BrandDomains { get; set; }
         public DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
+
+        public DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;
@@ -320,10 +330,6 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<DepositForm> DepositForms { get; set; }
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
-
-        public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
-        {
-        }
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 

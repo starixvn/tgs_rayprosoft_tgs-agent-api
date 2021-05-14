@@ -25,7 +25,7 @@ export const BrandIdSelect = ({ placeholder, licenseeId, ...props }) => {
 
 const useBrandPlaceholder = () =>
     useTrans({
-        zh: "选择品牌",
-        en: "Select Brand"
+        zh: "品牌",
+        en: "Brand"
     })
 export default BrandIdSelect

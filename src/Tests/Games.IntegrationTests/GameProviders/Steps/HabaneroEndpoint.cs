@@ -175,7 +175,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 SentOn = DateTimeOffset.Now,
                 Game = new()
                 {
-                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1", ExternalId = "AcesandEights1Hand"
+                    ExternalRtpId = "af834712-47b4-4063-b63b-a826979a01e1",
+                    ExternalId = "AcesandEights1Hand"
                 },
                 Authorization = new()
                 {
@@ -184,7 +185,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     HabaneroBrandId = habaneroBrandId,
                     MachineName = "TESTSERVER"
                 },
-                Detail = new() {Token = encryptedToken, GameLaunch = true}
+                Detail = new()
+                {
+                    Token = encryptedToken,
+                    GameLaunch = true
+                }
             });
 
             Set(SR.Response, response);
@@ -223,12 +228,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        [Given(@"I cancel transactionRepository")]
-        [When(@"I cancel transactionRepository")]
+        [Given(@"I cancel transaction")]
+        [When(@"I cancel transaction")]
         public Task WhenICancelTransaction() =>
             CancelTransactionAsync();
 
-        [When(@"I cancel non-existent transactionRepository for game ""(.*)""")]
+        [When(@"I cancel non-existent transaction for game ""(.*)""")]
         public Task WhenICancelNonExistentTransactionForGame(string externalGameId) =>
             CancelNonExistentTransactionForGameAsync(externalGameId);
 

@@ -25,16 +25,16 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
     public sealed class AsiaGamingGameInitializer : IGameInitializer
     {
         private const string Separator = "/\\\\/";
-        private readonly IPlayerOperations _playerOperations;
-        private readonly ISettingOperations _settingOperations;
+        private readonly IAsiaGamingApiClient _apiClient;
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
-        private readonly IAsiaGamingApiClient _apiClient;
         private readonly ISymmetricCryptoProvider _cryptoProvider;
+        private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IHashProvider _hashProvider;
         private readonly IJsonSerializationProvider _json;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly ISettingOperations _settingOperations;
 
         public AsiaGamingGameInitializer(
             ISettingOperations settingOperations,
@@ -65,7 +65,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
             var cur = await _currencyMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
-            
+
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(SettingConsts
                     .GameProviderConfigurations.AsiaGaming);
@@ -73,20 +73,22 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var isValidAccount = await CheckOrCreateAccountAsync(configuration, player, cur);
             if (isValidAccount.Result != "0")
             {
-                throw new InvalidOperationException($"CheckOrCreateAccount error {isValidAccount.Result} to player {request.Token.PlayerCode}");
+                throw new InvalidOperationException(
+                    $"CheckOrCreateAccount error {isValidAccount.Result} to player {request.Token.PlayerCode}");
             }
-            
+
             var balance = await _playerOperations.GetPlayerBalanceAsync(player.DefaultWalletId, false);
             var result = await CreateGameSessionAsync(configuration, request, balance);
             if (result.Error != "OK")
             {
-                throw new InvalidOperationException($"CreateGameSession error {result.Error} to player {request.Token.PlayerCode}");
+                throw new InvalidOperationException(
+                    $"CreateGameSession error {result.Error} to player {request.Token.PlayerCode}");
             }
 
             var url = await GetGameUrlAsync(configuration, player, request, gameProviderId, cur);
             return new() {Url = url};
         }
-        
+
         private async Task<CheckOrCreateAccountResponse> CheckOrCreateAccountAsync(
             AsiaGamingConfiguration configuration, CachedPlayer player, string cur)
         {
@@ -94,15 +96,14 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             {
                 AgentCode = configuration.AgentCode,
                 PlayerCode = player.PlayerCode,
-                BetLimitId = player.BetLimitId.ToString(),
                 Currency = cur
             };
 
             var paras = GetQueryString(request, Separator);
-            var encodedParas = await _cryptoProvider.EncryptStringAsync(paras, 
-                configuration.DesKey, configuration.DesKey, 
+            var encodedParas = await _cryptoProvider.EncryptStringAsync(paras,
+                configuration.DesKey, configuration.DesKey,
                 CipherMode.ECB, PaddingMode.PKCS7, Encoding.UTF8);
-            var key = _hashProvider.Hash(encodedParas + configuration.Md5Key, 
+            var key = _hashProvider.Hash(encodedParas + configuration.Md5Key,
                 HashAlgorithmKind.Md5, HashStringKind.Hex, Encoding.UTF8);
 
             return await _apiClient.CheckOrCreateAccountAsync(configuration.LoginApiUrl, encodedParas, key);
@@ -113,7 +114,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         {
             var request = new CreateGameSessionRequest
             {
-                AgentCode = configuration.AgentCode,
+                ProductId = configuration.ProductionId,
                 PlayerCode = urlRequest.Token.PlayerCode,
                 LoginRecordId = urlRequest.Token.LoginRecordId,
                 Balance = balance
@@ -124,13 +125,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             return await _apiClient.CreateGameSessionAsync(configuration.ApiUrl, queryString);
         }
 
-        private async Task<string> GetGameUrlAsync(AsiaGamingConfiguration configuration, CachedPlayer player, 
+        private async Task<string> GetGameUrlAsync(AsiaGamingConfiguration configuration, CachedPlayer player,
             GetGameUrlRequest urlRequest, Guid gameProviderId, string cur)
         {
             var brandId = player.BrandId;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId,
                 urlRequest.Language);
-            
+
             var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, urlRequest.GameId);
 
             var request = new GameUrlRequest
@@ -140,17 +141,16 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 Sid = configuration.AgentCode + GenerateSequenceNumber(),
                 Lang = cultureCode,
                 GameId = game.ExternalId,
-                BetLimitId = player.BetLimitId.ToString(),
                 Currency = cur
             };
-            
+
             var paras = GetQueryString(request, Separator);
-            var encodedParas = await _cryptoProvider.EncryptStringAsync(paras, 
-                configuration.DesKey, configuration.DesKey, 
+            var encodedParas = await _cryptoProvider.EncryptStringAsync(paras,
+                configuration.DesKey, configuration.DesKey,
                 CipherMode.ECB, PaddingMode.PKCS7, Encoding.UTF8);
-            var key = _hashProvider.Hash(encodedParas + configuration.Md5Key, 
+            var key = _hashProvider.Hash(encodedParas + configuration.Md5Key,
                 HashAlgorithmKind.Md5, HashStringKind.Hex, Encoding.UTF8);
-            
+
             var platform = urlRequest.Token.PlatformType;
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
             var gpc = await _gameProviderOperations.GetCachedGameProviderConfigurationAsync(gameProviderId,
@@ -161,7 +161,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 .Replace("{PARAS}", encodedParas)
                 .Replace("{KEY}", key);
         }
-        
+
         private string GetQueryString<T>(T data, string separator)
         {
             var index = 0;
@@ -188,10 +188,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
             return parameters;
         }
-        
-        private string GenerateSequenceNumber()
-        {
-            return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
-        }
+
+        private string GenerateSequenceNumber() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
     }
 }

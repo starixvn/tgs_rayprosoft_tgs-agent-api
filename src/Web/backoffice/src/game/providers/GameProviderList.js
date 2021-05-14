@@ -61,6 +61,9 @@ const GameProviderListDialog = ({
                     <List.Item key={index}>{name}</List.Item>
                 ))}
             </List>
+            {gameProviders.length == 0 && (
+                <Trans zh="无活动厂商" en="No Game Providers" />
+            )}
         </Dialog.Modal>
     )
 }

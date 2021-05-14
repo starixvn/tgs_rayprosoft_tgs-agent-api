@@ -19,7 +19,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             _client = client;
         }
 
-        [HttpGet("contribution")]
+        [HttpGet("contributions")]
         [Description("Get agent contributions")]
         public Task<PagedResponse<AgentContributionModel>> GetRoundsAsync(
             [FromQuery] GetAgentContributionsRequest request) =>

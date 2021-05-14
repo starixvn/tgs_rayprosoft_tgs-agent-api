@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
@@ -7,7 +6,6 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.BetHistories;
 using TGS.Core.Models.Services.Caches;
-using TGS.Services.GameOperations.Data;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.KY.Outgoing;
@@ -16,16 +14,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 {
     public sealed class KYGameHistory : BaseBetHistory
     {
-        private readonly IGameRoundsProcessor _gameRoundsProcessor;
-
         public KYGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations,
-            IGameRoundsProcessor gameRoundsProcessor
+            ILocalizationOperations localizationOperations
             ) : base(roundQueries, gameProviderOperations, localizationOperations)
         {
-            _gameRoundsProcessor = gameRoundsProcessor ?? throw new ArgumentNullException(nameof(gameRoundsProcessor));
         }
 
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,

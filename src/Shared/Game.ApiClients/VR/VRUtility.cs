@@ -86,23 +86,30 @@ namespace TGS.Shared.Game.ApiClients.VR
         /// <returns></returns>
         public static string AesDecrypt(string str, string key, bool isDecodeUrl = true)
         {
-            if (string.IsNullOrEmpty(str)) return null;
-            if (isDecodeUrl)
-                str = System.Web.HttpUtility.UrlDecode(str);
-
-            Byte[] toEncryptArray = Convert.FromBase64String(str);
-
-            System.Security.Cryptography.RijndaelManaged rm = new System.Security.Cryptography.RijndaelManaged
+            try
             {
-                Key = Encoding.UTF8.GetBytes(key),
-                Mode = System.Security.Cryptography.CipherMode.ECB,
-                Padding = System.Security.Cryptography.PaddingMode.PKCS7
-            };
+                if (string.IsNullOrEmpty(str)) return null;
+                if (isDecodeUrl)
+                    str = System.Web.HttpUtility.UrlDecode(str);
 
-            System.Security.Cryptography.ICryptoTransform cTransform = rm.CreateDecryptor();
-            Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+                Byte[] toEncryptArray = Convert.FromBase64String(str);
 
-            return Encoding.UTF8.GetString(resultArray);
+                System.Security.Cryptography.RijndaelManaged rm = new System.Security.Cryptography.RijndaelManaged
+                {
+                    Key = Encoding.UTF8.GetBytes(key),
+                    Mode = System.Security.Cryptography.CipherMode.ECB,
+                    Padding = System.Security.Cryptography.PaddingMode.PKCS7
+                };
+
+                System.Security.Cryptography.ICryptoTransform cTransform = rm.CreateDecryptor();
+                Byte[] resultArray = cTransform.TransformFinalBlock(toEncryptArray, 0, toEncryptArray.Length);
+
+                return Encoding.UTF8.GetString(resultArray);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
 

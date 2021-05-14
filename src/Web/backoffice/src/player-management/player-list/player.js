@@ -31,6 +31,7 @@ import { Tab as _Tab, TabPanel } from "../../tab"
 import { FormProvider, useForm } from "react-hook-form"
 import Input from "../../input/Input"
 import clone from "clone-deep"
+import { VipLevelLabel } from "../../vip-levels/VipLevel"
 
 export const Key = "player"
 
@@ -134,7 +135,7 @@ const EditForm = ({
                 <AgentUsernameLabel />
                 <Box>
                     <Input
-                        name="parentUsername"
+                        name="agentUsername"
                         placeholder={agentUsernamePlaceholder}
                     />
                 </Box>
@@ -191,12 +192,12 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
 
                 <VIPLevelLabel />
                 <Box>
-                    <Text>{`VIP ${vipLevel}`}</Text>
+                    <VipLevelLabel value={vipLevel} />
                 </Box>
 
                 <AgentUsernameLabel />
                 <Box>
-                    <Text>{player?.parentUsername}</Text>
+                    <Text>{player?.agentUsername}</Text>
                 </Box>
 
                 <RegistrationLabel />

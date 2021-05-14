@@ -318,11 +318,6 @@ export const VerifyButton = ({ record, onSubmitted, ...props }) => {
 
 const DialogCss = css`
     min-width: 65vw;
-    min-height: 65vh;
-
-    & .bb-DialogContent {
-        min-height: 65vh;
-    }
 `
 
 const VerifyDialog = ({

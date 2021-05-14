@@ -61,7 +61,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 Turnover = model.Turnover,
                 WinLoss = model.WinLoss,
                 ReportDate = model.ReportDate,
-                CreatedOn = model.CreatedOn
+                CreatedOn = DateTimeOffset.Now
             }).ToArray());
 
         Task IRoundAggregateService.DeleteRoundAggregatesAsync(RoundAggregate[] roundAggregates) =>
@@ -154,11 +154,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     playerAggregate.PromotionAmount;
             }
 
-            playerAggregates = playerAggregates.Where(x =>
-                x.RegisteredCount > 0 || x.FirstFundInCount > 0 || x.DepositAmount > 0 || x.WithdrawalAmount > 0 ||
-                x.AdjustmentAmount != 0 || x.BonusAmount > 0 || x.BetAmount > 0 || x.Turnover > 0 ||
-                x.WinLossAmount != 0 || x.NetProfit != 0).ToArray();
-
             var playerAggregateByGameType = roundAggregates.GroupJoin(
                     _tgsRepository.Players.Include(x => x.Agent).Include(x => x.Vip),
                     r => r.PlayerCode, p => p.PlayerCode, (r, p) => new {r, p = p.DefaultIfEmpty()})
@@ -186,7 +181,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             GameType = x.GameType,
                             Hour = start.Hour,
                             VipSportsRebatePercentage = x.Vip?.SportsRebatePercentage ?? 0M,
-                            VipVirtualSportsRebatePercentage = x.Vip?.CardGameRebatePercentage ?? 0M,
+                            VipVirtualSportsRebatePercentage = x.Vip?.VirtualSportsRebatePercentage ?? 0M,
                             VipLiveDealerRebatePercentage = x.Vip?.LiveDealerRebatePercentage ?? 0M,
                             VipCardGameRebatePercentage = x.Vip?.CardGameRebatePercentage ?? 0M,
                             VipLotteryRebatePercentage = x.Vip?.LotteryRebatePercentage ?? 0M,
@@ -218,27 +213,27 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.VirtualSports:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.VirtualSportsRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.VirtualSports)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.LiveDealer:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.LiveDealerRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.LiveDealer)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.CardGame:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.CardGameRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Sportsbook || a.GameType == GameType.CardGame)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.Fishing:
                 case GameType.Arcade:
                 case GameType.Slot:
                 case GameType.TableGame:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.SlotRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
                             a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.Lottery:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.LotteryRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Lottery)
                         .Sum(a => a.Turnover) / 100M;
                 default:

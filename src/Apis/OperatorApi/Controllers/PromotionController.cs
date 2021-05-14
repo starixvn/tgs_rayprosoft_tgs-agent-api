@@ -28,17 +28,15 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Description("Get promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async ValueTask<PagingResponse<PromotionModel>> GetPromotionsAsync(
             [FromQuery] PagingRequest request)
         {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
             var promotionsRequest = new GetPromotionsRequest
             {
                 BrandId = brandId,
-                PlayerCode = playerTokenData.PlayerCode,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,

@@ -15,16 +15,12 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 {
     public sealed class VRGameHistory : BaseBetHistory
     {
-        private readonly IGameRoundsProcessor _gameRoundsProcessor;
-
         public VRGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations,
-            IGameRoundsProcessor gameRoundsProcessor
+            ILocalizationOperations localizationOperations
             ) : base(roundQueries, gameProviderOperations, localizationOperations)
         {
-            _gameRoundsProcessor = gameRoundsProcessor ?? throw new ArgumentNullException(nameof(gameRoundsProcessor));
         }
 
         protected async override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round, CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
