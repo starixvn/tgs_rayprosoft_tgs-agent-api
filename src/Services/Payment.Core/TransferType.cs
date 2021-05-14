@@ -1,6 +1,6 @@
 ﻿namespace TGS.Services.Payment
 {
-    public enum TransferTypes
+    public enum TransferType
     {
         Deposit,
         Withdraw

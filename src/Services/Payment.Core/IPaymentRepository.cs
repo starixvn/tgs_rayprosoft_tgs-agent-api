@@ -42,7 +42,7 @@ namespace TGS.Services.Payment
             Guid formId,
             Guid brandPaymentId,
             string? applyInfo,
-            ReviewStatus reviewStatus,
+            ReviewState reviewStatus,
             string? remark = null);
 
         ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn);

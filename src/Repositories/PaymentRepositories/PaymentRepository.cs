@@ -155,6 +155,7 @@ namespace TGS.Payment.Repositories
         {
             var row = await _tgsRepository.BrandPayments
                 .Include(bp => bp.PaymentMethodChannel)
+                .ThenInclude(pmc => pmc.Channel)
                 .Where(bp => bp.Id == id)
                 .SingleAsync()
                 .ConfigureAwait(false);
@@ -166,6 +167,7 @@ namespace TGS.Payment.Repositories
                 row.PaymentMethodChannel.MethodId,
                 row.PaymentMethodChannel.ChannelId,
                 row.ChannelName,
+                row.PaymentMethodChannel.Channel.Code,
                 row.ExtendedData,
                 new ValueRange<decimal>
                 {
@@ -183,8 +185,8 @@ namespace TGS.Payment.Repositories
                 row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
                 row.TransferType switch
                 {
-                    PaymentTransferType.Withdrawal => TransferTypes.Withdraw,
-                    _ => TransferTypes.Deposit,
+                    PaymentTransferType.Withdrawal => TransferType.Withdraw,
+                    _ => TransferType.Deposit,
                 });
         }
 
@@ -192,6 +194,7 @@ namespace TGS.Payment.Repositories
         {
             var query = from bp in _tgsRepository.BrandPayments
                             .Include(bp => bp.PaymentMethodChannel)
+                            .ThenInclude(pmc => pmc.Channel)
                             .AsAsyncEnumerable()
                         where bp.BrandId == brandId
                         select bp;
@@ -203,6 +206,7 @@ namespace TGS.Payment.Repositories
                 bp.PaymentMethodChannel.MethodId,
                 bp.PaymentMethodChannel.ChannelId,
                 bp.ChannelName,
+                bp.PaymentMethodChannel.Channel.Code,
                 bp.ExtendedData,
                 new ValueRange<decimal>
                 {
@@ -220,8 +224,8 @@ namespace TGS.Payment.Repositories
                 bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
                 bp.TransferType switch
                 {
-                    PaymentTransferType.Withdrawal => TransferTypes.Withdraw,
-                    _ => TransferTypes.Deposit
+                    PaymentTransferType.Withdrawal => TransferType.Withdraw,
+                    _ => TransferType.Deposit
                 }));
         }
 
@@ -297,7 +301,7 @@ namespace TGS.Payment.Repositories
             Guid formId,
             Guid brandPaymentId,
             string? applyInfo,
-            ReviewStatus reviewStatus,
+            ReviewState reviewStatus,
             string? remark)
         {
             var formData = await _tgsRepository.WithdrawForms
@@ -308,8 +312,8 @@ namespace TGS.Payment.Repositories
             formData.ApplyInfo = applyInfo;
             formData.Status = reviewStatus switch
             {
-                ReviewStatus.Approve => 8000,
-                ReviewStatus.Reject => 7000,
+                ReviewState.Approve => 8000,
+                ReviewState.Reject => 7000,
                 _ => formData.Status
             };
             formData.Remark = remark;

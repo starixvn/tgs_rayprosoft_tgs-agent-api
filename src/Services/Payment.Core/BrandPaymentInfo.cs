@@ -9,6 +9,7 @@ namespace TGS.Services.Payment
         Guid MethodId,
         Guid ChannelId,
         string ChannelName,
+        string ChannelCode,
         string ExtendedData,
         ValueRange<decimal> TransferLimit,
         bool IsAllPlayers,
@@ -16,5 +17,5 @@ namespace TGS.Services.Payment
         bool AuthenticatePhone,
         ValueRange<decimal> DepositedAmountLimit,
         ConditionMatchTypes ConditionMatchType,
-        TransferTypes TransferType);
+        TransferType TransferType);
 }
