@@ -8,6 +8,7 @@ namespace TGS.Services.Report.Application.Models.Agent
     public class GetAgentDividendsRequest : PageableRequest, IRequest<PagedResponse<AgentDividendModel>>
     {
         public Guid BrandId { get; set; }
+        public Guid? AgentId { get; set; }
         public string Username { get; set; }
         public AgentType? Type { get; set; }
         public DateTimeOffset From { get; set; }

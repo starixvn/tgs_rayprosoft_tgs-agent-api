@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -102,38 +100,31 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.BalanceMustGreaterThanZero);
             }
 
-            await _transactionManager.ExecuteTransactionAsync(_repository,
-                IsolationLevel.ReadCommitted,
-                Guid.NewGuid().ToString(), async repo =>
-                {
-                    var remark = _jsonSerializationProvider.SerializeToString(new
-                    {
-                        request.TransactionType,
-                        TargetAgent = targetAgent,
-                        TargetPlayer = targetPlayer,
-                        request.Remark
-                    });
+            var remark = _jsonSerializationProvider.SerializeToString(new
+            {
+                request.TransactionType,
+                TargetAgent = targetAgent?.Username,
+                TargetPlayer = targetPlayer?.Username,
+                request.Remark
+            });
 
-                    await _agentWalletRepository.ExchangeAsync(agent.BrandId, agent.DefaultWalletId, agent.Id,
-                        TransactionTypes.Adjust,
-                        request.AdjustmentType == AdjustmentType.Subtract ? -request.Amount : request.Amount, remark);
+            await _agentWalletRepository.ExchangeAsync(agent.BrandId, agent.DefaultWalletId, agent.Id,
+                TransactionTypes.Adjust,
+                request.AdjustmentType == AdjustmentType.Subtract ? -request.Amount : request.Amount, remark);
 
-                    if (IsTransferToAgent(request))
-                    {
-                        await _agentWalletRepository.ExchangeAsync(targetAgent.BrandId, targetAgent.DefaultWalletId,
-                            targetAgent.Id,
-                            TransactionTypes.Adjust, request.Amount);
-                    }
+            if (IsTransferToAgent(request))
+            {
+                await _agentWalletRepository.ExchangeAsync(targetAgent.BrandId, targetAgent.DefaultWalletId,
+                    targetAgent.Id,
+                    TransactionTypes.Adjust, request.Amount);
+            }
 
-                    if (IsTransferToPlayer(request))
-                    {
-                        await _walletRepository.ExchangeAsync(targetPlayer.BrandId, targetPlayer.DefaultWalletId,
-                            targetPlayer.PlayerCode,
-                            TransactionTypes.Adjust, request.Amount);
-                    }
-
-                    return Task.CompletedTask;
-                });
+            if (IsTransferToPlayer(request))
+            {
+                await _walletRepository.ExchangeAsync(targetPlayer.BrandId, targetPlayer.DefaultWalletId,
+                    targetPlayer.PlayerCode,
+                    TransactionTypes.Adjust, request.Amount);
+            }
 
             return CreateValidResponse<MessageResponse>();
         }

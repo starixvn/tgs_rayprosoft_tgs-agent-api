@@ -30,6 +30,8 @@ import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
 import { FormProvider, useForm } from "react-hook-form"
 import Input from "../../input/Input"
+import clone from "clone-deep"
+import { VipLevelLabel } from "../../vip-levels/VipLevel"
 
 export const Key = "player"
 
@@ -49,15 +51,8 @@ export const EditPanel = ({
     onClickClose,
     ...props
 }) => {
-    let { realName = "", vipId = "", parentUsername = "", status = "" } = player
-
     let formMethods = useForm({
-        defaultValues: {
-            realName: realName ?? "",
-            vipId,
-            parentUsername: parentUsername ?? "",
-            status
-        }
+        defaultValues: clone(player)
     })
 
     let [submitData, setSubmit] = useState()
@@ -109,6 +104,10 @@ const EditForm = ({
     onClickClose,
     ...props
 }) => {
+    let agentUsernamePlaceholder = useTrans({
+        zh: "代理用户名",
+        en: "Agent Username"
+    })
     let { username = "", registeredOn, balance } = player
 
     return (
@@ -135,7 +134,10 @@ const EditForm = ({
 
                 <AgentUsernameLabel />
                 <Box>
-                    <Input name="agentUsername" />
+                    <Input
+                        name="agentUsername"
+                        placeholder={agentUsernamePlaceholder}
+                    />
                 </Box>
 
                 <RegistrationLabel />
@@ -190,7 +192,7 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
 
                 <VIPLevelLabel />
                 <Box>
-                    <Text>{`VIP ${vipLevel}`}</Text>
+                    <VipLevelLabel value={vipLevel} />
                 </Box>
 
                 <AgentUsernameLabel />

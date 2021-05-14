@@ -28,6 +28,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("status")]
         public Status Status { get; init; }
 
+        [JsonPropertyName("transferwallet")]
+        public bool IsTransferWallet { get; init; }
+
         [JsonPropertyName("gametypes")]
         public GameType[] GameTypes { get; init; }
     }

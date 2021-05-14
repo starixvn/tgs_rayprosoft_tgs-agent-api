@@ -7,13 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Application\Queries\Promotion\**" />
     <Compile Remove="Application\Queries\ReportHandlers\**" />
+    <Compile Remove="Domain\**" />
+    <EmbeddedResource Remove="Application\Queries\Promotion\**" />
     <EmbeddedResource Remove="Application\Queries\ReportHandlers\**" />
+    <EmbeddedResource Remove="Domain\**" />
+    <None Remove="Application\Queries\Promotion\**" />
     <None Remove="Application\Queries\ReportHandlers\**" />
+    <None Remove="Domain\**" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +41,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Agent.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\Player.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Player.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -41,11 +53,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Agent.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Application\Queries\Promotion\" />
-    <Folder Include="Domain\" />
+    <EmbeddedResource Update="Application\Resources\Player.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Player.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

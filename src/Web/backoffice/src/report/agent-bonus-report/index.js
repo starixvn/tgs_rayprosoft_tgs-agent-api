@@ -86,12 +86,16 @@ const ReportContent = ({ brandId }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, username, from, to } = state
-    let { isLoading, data, error, mutate, deleteCache } = useAgentDividendList({
-        ...toApiParams(state),
-        sortby: "username",
-        from,
-        to: startOfNextDay(to)
-    })
+    let { isLoading, data, error, mutate, deleteCache } = useAgentDividendList(
+        username
+            ? {
+                  ...toApiParams(state),
+                  sortby: "username",
+                  from,
+                  to: startOfNextDay(to)
+              }
+            : undefined
+    )
 
     let DataRetentionDays = 180
     let minDate = subDays(dateRange.start, DataRetentionDays)

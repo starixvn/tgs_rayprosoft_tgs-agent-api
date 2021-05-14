@@ -71,7 +71,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new HabaneroConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new Uri("http://game-habanero") : new("http://localhost:62330"),
+                        _env.IsDocker() ? new Uri("http://game-haba") : new("http://localhost:62330"),
                     BrandId = "a5df0ada-7b6a-eb11-9889-00155db5435a",
                     ApiKey = "349F896E-DBC8-4A9D-963D-EFC921AD19FC",
                     ApiUrl = new("https://ws-test.insvr.com/jsonapi"),

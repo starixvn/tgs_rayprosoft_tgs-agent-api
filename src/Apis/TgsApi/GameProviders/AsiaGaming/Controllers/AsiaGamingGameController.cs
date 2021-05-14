@@ -20,8 +20,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Controllers
 {
     [Route("api/ag")]
     [ApiController]
-    [Consumes(MediaTypeNames.Application.Xml)]
-    [Produces(MediaTypeNames.Application.Xml)]
+    [Consumes(MediaTypeNames.Text.Xml, MediaTypeNames.Application.Xml)]
+    [Produces(MediaTypeNames.Text.Xml, MediaTypeNames.Application.Xml)]
     [AllowAnonymous]
     [FeatureGate(Consts.GameProvider.AsiaGaming)]
     public sealed class AsiaGamingGameController : ControllerBase

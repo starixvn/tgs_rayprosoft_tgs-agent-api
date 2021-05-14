@@ -4,8 +4,12 @@ import { getTrans, Trans, useLocale, useTrans } from "../../i18n"
 import Select from "../../select/Select"
 import { usePaymentChannelList } from "./client"
 
-//TODO: filter by payment id and payment method id
-export const PaymentChannelSelect = ({ placeholder, ...props }) => {
+export const PaymentChannelSelect = ({
+    placeholder,
+    isLoadingRange,
+    range = [],
+    ...props
+}) => {
     let defaultPlaceholder = useTrans({
         zh: "支付通道",
         en: "Payment Channel"
@@ -13,17 +17,28 @@ export const PaymentChannelSelect = ({ placeholder, ...props }) => {
     placeholder = placeholder ?? defaultPlaceholder
 
     let locale = useLocale()
-    let { isLoading, data, error } = usePaymentChannelList()
+    let {
+        isLoading: isLoadingPaymentChannelList,
+        data,
+        error
+    } = usePaymentChannelList()
 
-    let options = data?.map?.(({ trans, code, id }) => ({
-        label: trans?.[locale] ?? code,
-        value: id
-    }))
+    let options = data
+        ?.filter((item) => {
+            if (range?.length > 0) {
+                return range.includes(item.id)
+            }
+            return true
+        })
+        ?.map?.(({ trans, code, id }) => ({
+            label: trans?.[locale] ?? code,
+            value: id
+        }))
 
     return (
         <Select
             placeholder={placeholder}
-            isLoading={isLoading}
+            isLoading={isLoadingPaymentChannelList || isLoadingRange}
             options={options}
             {...props}
         />

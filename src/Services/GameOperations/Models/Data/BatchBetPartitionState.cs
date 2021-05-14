@@ -14,6 +14,7 @@ namespace TGS.Services.GameOperations.Models.Data
         internal Guid BatchId { get; }
         internal int Successes { get; set; } = 0;
         internal Dictionary<string, decimal> PlayerBalances { get; } = new();
-        internal List<BatchBetResultError> Errors { get; } = new();
+        internal List<BatchBetResultData> Errors { get; } = new();
+        internal List<BatchBetResultData> Results { get; } = new();
     }
 }

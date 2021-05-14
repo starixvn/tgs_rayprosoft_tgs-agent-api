@@ -149,6 +149,7 @@ services:
       ConnectionStrings__Log: "Server=postgres;Database=log;User Id=tgs;Password=1qaz2wsx!@"
       ConnectionStrings__Report: "Server=postgres;Database=report;User Id=tgs;Password=1qaz2wsx!@"
       ConnectionStrings__RedisConfigurationString: "redis,abortConnect=false,connectTimeout=3000"
+      NatsSetting__Urls: "nats://nats:4222"
     ports:
       - 5201:80
     networks:

@@ -8,7 +8,8 @@ import {
     Text,
     Box,
     Set,
-    FieldStack
+    FieldStack,
+    Group
 } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure, { AddDisclosure } from "../../dialog/Disclosure"
@@ -39,10 +40,11 @@ import { formatNumberDecimal } from "../../number/format"
 import Separator from "../../layout/Separator"
 import { Update } from "./menu"
 import FormDialog from "../../form/FormDialog"
-import AddBalanceTypeSelect from "./AgentAddBalanceType"
+import AgentDeductBalanceType, {
+    AgentDeductBalanceTypeSelect
+} from "./AgentDeductBalanceType"
 import { useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
-import DeductBalanceType from "./AgentDeductBalanceType"
 import { DeductBalanceTargetSelect } from "./AgentDeductBalanceTarget"
 import AdjustType from "./AdjustType"
 import { NumberInput } from "../../input/NumberInput"
@@ -97,7 +99,7 @@ const DeductDialog = ({ brandId, agentId, username, onSubmitted, dialog }) => {
     const onSubmit = (data) => {
         setSubmit({
             ...data,
-            adjustType: AdjustType.Subtract
+            adjustmentType: AdjustType.Subtract
         })
     }
 
@@ -135,7 +137,7 @@ const DeductDialog = ({ brandId, agentId, username, onSubmitted, dialog }) => {
 const FormBody = ({ brandId, username }) => {
     let { watch } = useFormContext()
 
-    let typeFieldName = "type"
+    let typeFieldName = "transactionType"
     let type = watch(typeFieldName)
 
     return (
@@ -151,19 +153,20 @@ const FormBody = ({ brandId, username }) => {
                 <Text.Block alignY="center">
                     <Trans zh="交易类型" en="Transaction Type" />
                 </Text.Block>
-                <AddBalanceTypeSelect name={typeFieldName} required />
+                <AgentDeductBalanceTypeSelect name={typeFieldName} required />
 
-                {type == DeductBalanceType.Transfer && (
+                {type == AgentDeductBalanceType.Transfer && (
                     <>
-                        <Text.Block alignY="center">
-                            <Trans zh="转账对象" en="Transfer Target" />
-                        </Text.Block>
-                        <DeductBalanceTargetSelect name="target" required />
-
                         <Text.Block alignY="center">
                             <Trans zh="转账用户名" en="Transfer Username" />
                         </Text.Block>
-                        <Input name="transferUsername" required />
+                        <Group>
+                            <DeductBalanceTargetSelect
+                                name="accountType"
+                                required
+                            />
+                            <Input name="targetName" required />
+                        </Group>
                     </>
                 )}
 

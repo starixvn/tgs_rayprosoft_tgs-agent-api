@@ -130,7 +130,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var platform = Get<PlatformType>(SR.PlatformType);
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
 
-            var model = new AuthorizePlayerRequest {Token = encryptedToken, ProviderId = configuration.ProviderId};
+            var model = new AuthorizePlayerRequest
+            {
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId
+            };
 
             var hash = ComputeHash(model, configuration.SecretKey);
             var request = model with {Hash = hash};
@@ -152,7 +156,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var model = new GetBalanceRequest
             {
-                Token = encryptedToken, ProviderId = configuration.ProviderId, UserId = playerCode
+                Token = encryptedToken,
+                ProviderId = configuration.ProviderId,
+                UserId = playerCode
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
@@ -293,8 +299,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-        [Given(@"I cancel transactionRepository")]
-        [When(@"I cancel transactionRepository")]
+        [Given(@"I cancel transaction")]
+        [When(@"I cancel transaction")]
         public async Task WhenICancelTransaction()
         {
             var configuration = await GetConfigurationAsync();

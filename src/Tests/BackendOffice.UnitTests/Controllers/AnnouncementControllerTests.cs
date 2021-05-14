@@ -15,6 +15,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
@@ -29,13 +30,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             base.Setup();
             _controller = new AnnouncementController(
                 _queriesMock.Object,
-                _commandsMock.Object);
+                _commandsMock.Object,
+                _redisCacheManagerMock.Object);
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private AnnouncementController _controller;
         private readonly Mock<ITgsQueries<Announcement>> _queriesMock = new();
         private readonly Mock<ITgsCommands<Announcement>> _commandsMock = new();
+        private readonly Mock<IRedisCacheManager> _redisCacheManagerMock = new();
 
         [TestCase(true, new[] {AnnounceStatus.Effective, AnnounceStatus.Invalid})]
         [TestCase(false, new[] {AnnounceStatus.Expired})]

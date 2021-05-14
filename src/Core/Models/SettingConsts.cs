@@ -19,6 +19,8 @@ namespace TGS.Core.Models
             public static readonly string PragmaticPlay = string.Format(Template, Consts.GameProvider.PragmaticPlay);
             public static readonly string AsiaGaming = string.Format(Template, Consts.GameProvider.AsiaGaming);
             public static readonly string Saba = string.Format(Template, Consts.GameProvider.Saba);
+            public static readonly string KY = string.Format(Template, Consts.GameProvider.KY);
+            public static readonly string VR = string.Format(Template, Consts.GameProvider.VR);
         }
     }
 }

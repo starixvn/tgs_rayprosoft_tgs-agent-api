@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Clients.Report.Client;
+using TGS.Clients.Report.Client.Models.Player;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 
@@ -55,5 +57,12 @@ namespace TGS.Apis.BackendOffice.Controllers
             request.PlayerCode = playerCode;
             return _mediator.Send(request);
         }
+
+        [HttpGet("accountChanges")]
+        [Description("Get player account changes")]
+        public Task<PagedResponse<PlayerAccountChangeModel>> GetRoundsAsync(
+            [FromServices] IReportClient client,
+            [FromQuery] GetPlayerAccountChangesRequest request) =>
+            client.GetPlayerAccountChangesAsync(request);
     }
 }

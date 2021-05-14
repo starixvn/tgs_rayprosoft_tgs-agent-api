@@ -36,6 +36,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(e => e.AllowKickPlayer)
                 .IsRequired();
+
+            builder.Property(e => e.TransferWallet)
+                .HasDefaultValue(false)
+                .IsRequired();
         }
     }
 }

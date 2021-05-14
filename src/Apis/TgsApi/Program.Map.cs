@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using TGS.Apis.TgsApi.GameProviders.AsiaGaming;
 using TGS.Apis.TgsApi.GameProviders.Habanero;
+using TGS.Apis.TgsApi.GameProviders.KY;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.Saba;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
+using TGS.Apis.TgsApi.GameProviders.VR;
 using TGS.Core.Models;
 
 namespace TGS.Apis.TgsApi
@@ -19,8 +21,10 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.Habanero, typeof(HabaneroStartup)},
             {Consts.GameProvider.PragmaticPlay, typeof(PragmaticPlayStartup)},
             {Consts.GameProvider.AsiaGaming, typeof(AsiaGamingStartup)},
-            {Consts.GameProvider.Saba, typeof(SabaStartup)}
-            //{ Consts.GameProvider.RedTiger, typeof(RedTigerStartup) },
+            {Consts.GameProvider.Saba, typeof(SabaStartup)},
+            {Consts.GameProvider.KY, typeof(KYStartup)},
+            {Consts.GameProvider.VR, typeof(VRStartup)}
+
         };
 
         private static readonly IReadOnlyDictionary<string, string> ConfigFileMap = new Dictionary<string, string>
@@ -29,8 +33,9 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.Habanero, "Habanero/habanero.json"},
             {Consts.GameProvider.PragmaticPlay, "PragmaticPlay/pragmaticplay.json"},
             {Consts.GameProvider.AsiaGaming, "AsiaGaming/asiagaming.json"},
-            {Consts.GameProvider.Saba, "Saba/saba.json"}
-            //{ Consts.GameProvider.RedTiger, "RedTiger/redtiger.json" }
+            {Consts.GameProvider.Saba, "Saba/saba.json"},
+            {Consts.GameProvider.KY, "KY/ky.json"},
+            {Consts.GameProvider.VR, "VR/vr.json"},
         };
     }
 }

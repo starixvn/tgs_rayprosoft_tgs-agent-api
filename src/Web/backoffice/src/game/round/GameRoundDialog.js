@@ -29,9 +29,13 @@ import { NormalLabel } from "../../form/Label"
 import defaultFormatDateTime from "../../date/format"
 import { GameRoundStatusLabel } from "./GameRoundStatus"
 import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
-import MonacoEditor from "@monaco-editor/react"
+import MonacoEditor, { loader } from "@monaco-editor/react"
 import Textarea from "../../textarea"
 import formatXml from "xml-formatter"
+
+loader.config({
+    paths: { vs: "/monaco-editor@0.24.0/min/vs" }
+})
 
 export const GameRoundDialog = ({
     record = {},

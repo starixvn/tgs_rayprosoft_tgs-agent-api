@@ -36,7 +36,11 @@ import Separator from "../../layout/Separator"
 import { FieldValues } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
-import { FundReviewStatusLabel, isFundUnderReview } from "../FundReviewStatus"
+import {
+    FundReviewStatusLabel,
+    isFundApproved,
+    isFundUnderReview
+} from "../FundReviewStatus"
 import { WithdrawMethodSelect } from "./WithdrawMethod"
 import {
     PaymentChannelLabel,
@@ -46,6 +50,13 @@ import { TextareaField } from "../../textarea"
 import { BrandPaymentSelect } from "../../system/brandpayments/BrandPayment"
 import BrandPaymentTransferType from "../../system/brandpayments/BrandPaymentTransferType"
 import clone from "clone-deep"
+import { useFormContext } from "react-hook-form"
+import {
+    useBrandPayment,
+    useBrandPaymentList
+} from "../../system/brandpayments/client"
+import { parseJSON } from "../../text/json"
+import Input from "../../input/Input"
 
 export const ViewFundWithdrawDisclosure = ({ brandId, formId, ...props }) => {
     let dialog = useModalState()
@@ -96,103 +107,174 @@ const ViewFundWithdrawDialog = ({ brandId, formId, dialog, ...props }) => {
             {...dialog}
             maxWidth="80vw"
         >
-            <FormBody record={data} readonly />
+            <FormBody brandId={brandId} record={data} readonly />
         </FormDialog>
     )
 }
 
 export const FormBody = ({ brandId, record, readonly }) => {
     let disabled = readonly
-    let underReview = isFundUnderReview(record?.status)
-
     return (
-        <FieldStack>
+        <>
+            <FieldStack>
+                <FieldValues marginLeft="1.5rem">
+                    <NormalLabel>
+                        <Trans zh="用户名" en="Username" />
+                    </NormalLabel>
+                    <Box alignY="center">{record?.userName}</Box>
+
+                    <NormalLabel>
+                        <Trans zh="订单号" en="Order Id" />
+                    </NormalLabel>
+                    <Box alignY="center">{record?.id}</Box>
+
+                    <NormalLabel>
+                        <Trans zh="提款类型 " en="Payment Channel" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <PaymentChannelLabel
+                            value={record?.bankInfo?.paymentChannelId}
+                        />
+                    </Box>
+
+                    <NormalLabel>
+                        <Trans zh="提款金额" en="Withdraw Amount" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <FormattedNumberDecimal value={record?.amount} />
+                    </Box>
+
+                    <NormalLabel>
+                        <Trans zh="申请时间" en="Application Time" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <FormattedDateTime value={record?.createdOn} />
+                    </Box>
+
+                    <NormalLabel>
+                        <Trans zh="更新时间" en="Updated Time" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <FormattedDateTime
+                            value={record?.updatedOn}
+                            placeholder="-"
+                        />
+                    </Box>
+
+                    <NormalLabel>
+                        <Trans zh="状态" en="Status" />
+                    </NormalLabel>
+                    <Box alignY="center">
+                        <FundReviewStatusLabel value={record?.status} />
+                    </Box>
+                </FieldValues>
+                <Separator />
+                <Columns orientation="horizontal" alignY="top">
+                    <Columns.Column>
+                        <PayerInfo
+                            brandId={brandId}
+                            record={record}
+                            disabled={disabled}
+                            readonly={readonly}
+                        />
+                    </Columns.Column>
+                    <Columns.Column>
+                        <PayeeInfo record={record} />
+                    </Columns.Column>
+                </Columns>
+
+                <Separator />
+
+                <TextareaField
+                    name="remark"
+                    label={<Trans zh="备注" en="Remark" />}
+                    disabled={disabled}
+                />
+            </FieldStack>
+            <Input type="hidden" value={brandId} />
+        </>
+    )
+}
+
+const PayerInfo = ({ brandId, record, disabled }) => {
+    let { watch } = useFormContext()
+
+    let underReview = isFundUnderReview(record?.status)
+    let isApproved = isFundApproved(record?.status)
+
+    let { isLoading, data: brandPayment, error } = useBrandPayment(
+        record?.brandPaymentId,
+        isApproved
+            ? {
+                  brandId,
+                  transferType: BrandPaymentTransferType.Withdrawal,
+                  showAll: true
+              }
+            : undefined
+    )
+
+    let detail = parseJSON(brandPayment?.extendedData)
+    return (
+        <>
+            <Heading use="h6">
+                <Trans zh="出款信息" en="Payout Info" />
+            </Heading>
             <FieldValues marginLeft="1.5rem">
-                <NormalLabel>
-                    <Trans zh="用户名" en="Username" />
-                </NormalLabel>
-                <Box alignY="center">{record?.userName}</Box>
-
-                <NormalLabel>
-                    <Trans zh="订单号" en="Order Id" />
-                </NormalLabel>
-                <Box alignY="center">{record?.id}</Box>
-
-                <NormalLabel>
-                    <Trans zh="提款类型 " en="Payment Method" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <PaymentMethodLabel value={record?.paymentMethodId} />
-                </Box>
-
-                <NormalLabel>
-                    <Trans zh="提款金额" en="Withdraw Amount" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <FormattedNumberDecimal value={record?.amount} />
-                </Box>
-
-                <NormalLabel>
-                    <Trans zh="申请时间" en="Application Time" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <FormattedDateTime value={record?.createdOn} />
-                </Box>
-
-                <NormalLabel>
-                    <Trans zh="更新时间" en="Updated Time" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <FormattedDateTime
-                        value={record?.updatedOn}
-                        placeholder="-"
-                    />
-                </Box>
-
-                <NormalLabel>
-                    <Trans zh="状态" en="Status" />
-                </NormalLabel>
-                <Box alignY="center">
-                    <FundReviewStatusLabel value={record?.status} />
-                </Box>
-            </FieldValues>
-            <Separator />
-            <Columns orientation="horizontal" alignY="top">
-                <Columns.Column>
-                    <Heading use="h6">
-                        <Trans zh="银行信息" en="Bank Info" />
-                    </Heading>
-                    <FieldValues marginLeft="1.5rem">
+                {underReview && (
+                    <>
                         <NormalLabel>
                             <Trans zh="出款方式" en="Status" />
                         </NormalLabel>
                         <WithdrawMethodSelect disabled={disabled} />
+                    </>
+                )}
 
+                <NormalLabel>
+                    <Trans zh="出款渠道" en="Withdrawal Payment" />
+                </NormalLabel>
+                <Box alignY="center">
+                    <BrandPaymentSelect
+                        name="brandPaymentId"
+                        brandId={brandId}
+                        transferType={BrandPaymentTransferType.Withdrawal}
+                        paymentChannelId={record?.bankInfo?.paymentChannelId}
+                        required
+                        disabled={disabled}
+                    />
+                </Box>
+
+                {isApproved && brandPayment && (
+                    <>
                         <NormalLabel>
-                            <Trans zh="出款渠道" en="Channel" />
+                            <Trans zh="出款通道" en="Channel" />
                         </NormalLabel>
-                        <BrandPaymentSelect
-                            name="brandPaymentId"
-                            brandId={brandId}
-                            transferType={BrandPaymentTransferType.Withdrawal}
-                            required
-                            disabled={disabled}
-                        />
-                    </FieldValues>
-                </Columns.Column>
-                <Columns.Column>
-                    <PayeeInfo record={record} />
-                </Columns.Column>
-            </Columns>
+                        <Box alignY="center">
+                            <PaymentChannelLabel
+                                value={brandPayment?.paymentChannelId}
+                            />
+                        </Box>
 
-            <Separator />
+                        {detail?.name && (
+                            <>
+                                <NormalLabel>
+                                    <Trans zh="帐号名称" en="Account Name" />
+                                </NormalLabel>
+                                <Box alignY="center">{detail?.name}</Box>
+                            </>
+                        )}
 
-            <TextareaField
-                name="remark"
-                label={<Trans zh="备注" en="Remark" />}
-                disabled={disabled}
-            />
-        </FieldStack>
+                        {detail?.bankAccount && (
+                            <>
+                                <NormalLabel>
+                                    <Trans zh="银行帐号" en="Account" />
+                                </NormalLabel>
+                                <Box alignY="center">{detail?.bankAccount}</Box>
+                            </>
+                        )}
+                    </>
+                )}
+            </FieldValues>
+        </>
     )
 }
 
@@ -202,6 +284,15 @@ const PayeeInfo = ({ record }) => {
         return null
     }
 
+    let hasAccountName = !!record?.bankInfo?.detail?.name
+    let hasAccount = !!record?.bankInfo?.detail?.account
+    let isBank = hasAccountName && hasAccount
+
+    let hasAddress = !!record?.bankInfo?.detail?.address
+    let isCrypto = hasAddress
+
+    let hasBankAddress = !!record?.bankInfo?.detail?.bankAccountAddress
+    let hasMemo = !!record?.bankInfo?.detail?.memo
     return (
         <>
             <Heading use="h6">
@@ -209,33 +300,70 @@ const PayeeInfo = ({ record }) => {
             </Heading>
             <FieldValues marginLeft="1.5rem">
                 <NormalLabel>
-                    <Trans zh="收款银行" en="Bank" />
-                </NormalLabel>
-                <PaymentChannelLabel
-                    value={record?.bankInfo?.paymentChannelId}
-                />
-
-                <NormalLabel>
-                    <Trans zh="收款账户名" en="Account Name" />
-                </NormalLabel>
-                <Box alignY="center">{record?.bankInfo?.detail?.name}</Box>
-
-                <NormalLabel>
-                    <Trans zh="银行卡帐号" en="Account" />
-                </NormalLabel>
-                <Box alignY="center">{record?.bankInfo?.detail?.account}</Box>
-
-                <NormalLabel>
-                    <Trans zh="开户地址" en="Account Address" />
+                    <Trans zh="收款通道" en="Channel" />
                 </NormalLabel>
                 <Box alignY="center">
-                    {record?.bankInfo?.receiveBankAccountAddress}
+                    <PaymentChannelLabel
+                        value={record?.bankInfo?.paymentChannelId}
+                    />
                 </Box>
 
-                <NormalLabel>
-                    <Trans zh="附言" en="Memo" />
-                </NormalLabel>
-                <Box alignY="center">{record?.bankInfo?.memo}</Box>
+                {hasAccountName && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="收款账户名" en="Account Name" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            {record?.bankInfo?.detail?.name}
+                        </Box>
+                    </>
+                )}
+
+                {hasAccount && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="银行卡帐号" en="Account" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            {record?.bankInfo?.detail?.account}
+                        </Box>
+                    </>
+                )}
+
+                {hasBankAddress && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="开户地址" en="Account Address" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            {record?.bankInfo?.detail?.bankAccountAddress}
+                        </Box>
+                    </>
+                )}
+
+                {hasAddress && (
+                    <>
+                        <>
+                            <NormalLabel>
+                                <Trans zh="钱包地址" en="Wallet address" />
+                            </NormalLabel>
+                            <Box alignY="center">
+                                {record?.bankInfo?.detail?.address}
+                            </Box>
+                        </>
+                    </>
+                )}
+
+                {hasMemo && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="附言" en="Memo" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            {record?.bankInfo?.detail?.memo}
+                        </Box>
+                    </>
+                )}
             </FieldValues>
         </>
     )

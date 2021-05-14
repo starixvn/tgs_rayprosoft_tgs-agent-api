@@ -35,5 +35,13 @@ export const PercentageNumberInputField = ({
     ...props
 }) => {
     addonAfter = addonAfter ?? <DefaultPercentageAddon />
-    return <NumberInputField step={step} addonAfter={addonAfter} {...props} />
+    return (
+        <NumberInputField
+            step={step}
+            min={min}
+            max={max}
+            addonAfter={addonAfter}
+            {...props}
+        />
+    )
 }

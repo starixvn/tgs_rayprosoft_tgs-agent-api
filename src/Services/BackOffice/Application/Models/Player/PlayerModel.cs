@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Services.BackOffice.Application.Models.Player
@@ -25,9 +26,9 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public class BankModel
         {
             public Guid Id { get; init; }
-            public string RealName { get; init; }
-            public string BankName { get; init; }
-            public string BankAccount { get; init; }
+            public Guid PaymentChannelId { get; init; }
+            public string BankType { get; init; }
+            public JsonDocument Detail { get; init; }
         }
     }
 }

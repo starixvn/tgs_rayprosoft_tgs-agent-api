@@ -23,5 +23,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         public Task<PagedResponse<PlayerContributionModel>> GetRoundsAsync(
             [FromQuery] GetPlayerContributionsRequest request) =>
             _client.GetPlayerContributionsAsync(request);
+
     }
 }

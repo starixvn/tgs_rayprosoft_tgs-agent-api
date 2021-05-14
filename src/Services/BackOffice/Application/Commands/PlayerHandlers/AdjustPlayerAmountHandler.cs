@@ -55,11 +55,11 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.NotFound);
             }
 
-            var targetAgent = IsTranslateToAgent(request)
+            var targetAgent = IsTransferToAgent(request)
                 ? await _agentService.GetAgentAsync(x => x.Id == player.AgentId)
                 : null;
 
-            if (request.AdjustType == AdjustmentType.Subtract && targetAgent is null)
+            if (IsTransferToAgent(request) && targetAgent is null)
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.TargetAgentNotFound);
             }
@@ -83,7 +83,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 {
                     var remark = _jsonSerializationProvider.SerializeToString(new
                     {
-                        request.TransactionType, TargetAgent = targetAgent, request.Remark
+                        request.TransactionType, TargetAgent = targetAgent?.Username, request.Remark
                     });
 
                     await _walletRepository.ExchangeAsync(player.BrandId, player.DefaultWalletId, player.PlayerCode,
@@ -91,7 +91,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                         request.AdjustType == AdjustmentType.Subtract ? -request.Amount : request.Amount,
                         remark);
 
-                    if (IsTranslateToAgent(request))
+                    if (IsTransferToAgent(request))
                     {
                         await _agentWalletRepository.ExchangeAsync(targetAgent.BrandId, targetAgent.DefaultWalletId,
                             targetAgent.Id,
@@ -104,7 +104,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             return CreateValidResponse<MessageResponse>();
         }
 
-        private static bool IsTranslateToAgent(CreatePlayerAdjustmentRequest request) =>
+        private static bool IsTransferToAgent(CreatePlayerAdjustmentRequest request) =>
             request.AdjustType == AdjustmentType.Subtract &&
             request.TransactionType == AdjustmentTransactionType.Transfer;
     }

@@ -9,6 +9,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public Guid Id { get; set; }
         public Guid RoundId { get; set; }
         public virtual Round Round { get; set; }
+        public string PlayerCode { get; set; }
         public string ExternalTransactionId { get; set; }
         public GameActionType Type { get; set; }
         public decimal Amount { get; set; }

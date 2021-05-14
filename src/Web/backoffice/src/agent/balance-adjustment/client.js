@@ -6,7 +6,7 @@ import {
     useDelete
 } from "../../client"
 
-let API = "/api/AgentAdjust"
+let API = "/api/Agent"
 
 export const useAgentAdjustmentList = (searchParams) => {
     let url = searchParams ? urlWith(searchParams, API) : ""

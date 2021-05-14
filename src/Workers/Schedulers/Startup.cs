@@ -63,6 +63,12 @@ namespace TGS.Workers.Schedulers
 
             services.AddControllers();
 
+            services.AddGameProvidersMognoRepository((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                options.MongoConnectionString = config.GetValue<string>("GameProviders:ConnectionString");
+            });
+
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")
                 .AddRedis(_configuration)
@@ -86,7 +92,7 @@ namespace TGS.Workers.Schedulers
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseHangfireScheduler(new[] {Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report});
+            app.UseHangfireScheduler(new[] { Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report });
 
             app.UseRouting();
 
@@ -104,11 +110,11 @@ namespace TGS.Workers.Schedulers
                 endpoints.MapMetrics();
 
                 endpoints.MapHangfireDashboard("/hangfire",
-                    new() {Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}});
+                    new() { Authorization = new[] { new IgnoreHangfireAuthorizationFilter() } });
             });
         }
 
         private static Type[] GetModuleTypes() =>
-            new[] {typeof(JobManagement), typeof(PromotionJobManagement)};
+            new[] { typeof(JobManagement), typeof(PromotionJobManagement) };
     }
 }

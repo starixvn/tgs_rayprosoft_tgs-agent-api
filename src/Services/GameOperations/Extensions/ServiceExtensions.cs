@@ -19,7 +19,7 @@ namespace TGS.Services.GameOperations.Extensions
             services.AddScoped<IGameActionDataOperations, GameActionDataOperations>();
             services.AddScoped<IGameActionProcessor, GameActionProcessor>();
             services.AddScoped<IGamePlayActions, GamePlayActions>();
-
+            services.AddScoped<IGameRoundsProcessor, GameRoundsProcessor>();
             services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();
             services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
             services.AddSingleton<IBetValuesCalculator, BetValuesCalculator>();

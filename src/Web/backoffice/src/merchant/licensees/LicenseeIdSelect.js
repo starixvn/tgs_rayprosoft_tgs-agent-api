@@ -28,8 +28,8 @@ export const LicenseeIdSelect = ({ placeholder, resellerId, ...props }) => {
 
 const useLicenseePlaceholder = () =>
     useTrans({
-        zh: "选择公司",
-        en: "Select Licensee"
+        zh: "公司",
+        en: "Licensee"
     })
 
 export default LicenseeIdSelect

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.PlayerRebate;
@@ -21,6 +23,7 @@ namespace TGS.Services.Report.Application.Commands.Player
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly IPlayerRebateService _playerRebateService;
         private readonly ITgsPlayerService _playerService;
+        private readonly ITransactionManager _transactionManager;
         private readonly IWalletRepository _walletRepository;
 
         public CreatePlayerVipRebatesHandler(ITgsBrandService brandService,
@@ -28,6 +31,7 @@ namespace TGS.Services.Report.Application.Commands.Player
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             IWalletRepository walletRepository,
             ITgsPlayerService playerService,
+            ITransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _brandService = brandService;
@@ -35,6 +39,7 @@ namespace TGS.Services.Report.Application.Commands.Player
             _playerGameTypeAggregateService = playerGameTypeAggregateService;
             _walletRepository = walletRepository;
             _playerService = playerService;
+            _transactionManager = transactionManager;
         }
 
         public override async Task<MessageResponse> Handle(CreatePlayerRebateRequest request,
@@ -141,9 +146,17 @@ namespace TGS.Services.Report.Application.Commands.Player
                 .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
                 .ToArrayAsync(cancellationToken);
 
-            await _playerRebateService.CreatePlayerRebatesAsync(playerBonuses, DateTimeOffset.Now);
+            await _transactionManager.ExecuteTransactionAsync(() => _playerRebateService.Repository,
+                IsolationLevel.ReadCommitted,
+                GuidExtensions.NewSequentialGuid().ToString(),
+                async repo =>
+                {
+                    await _playerRebateService.CreatePlayerRebatesAsync(playerBonuses, DateTimeOffset.Now);
 
-            await _playerRebateService.CreatePlayerRebatesAsync(playerBonusesNotSend, null);
+                    await _playerRebateService.CreatePlayerRebatesAsync(playerBonusesNotSend, null);
+
+                    return Task.CompletedTask;
+                });
 
             foreach (var playerBonus in playerBonuses.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
                 (pb, p) => new {pb, p}))
