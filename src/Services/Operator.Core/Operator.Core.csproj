@@ -26,6 +26,7 @@
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\Operations\Operations.csproj" />
     <ProjectReference Include="..\Payment.Core\Payment.Core.csproj" />
+    <ProjectReference Include="..\PluggableServices\PluggableServices.csproj" />
     <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 
