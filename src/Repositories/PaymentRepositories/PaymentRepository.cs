@@ -155,6 +155,7 @@ namespace TGS.Payment.Repositories
         {
             var row = await _tgsRepository.BrandPayments
                 .Include(bp => bp.PaymentMethodChannel)
+                .ThenInclude(pmc => pmc.Channel)
                 .Where(bp => bp.Id == id)
                 .SingleAsync()
                 .ConfigureAwait(false);
@@ -166,6 +167,7 @@ namespace TGS.Payment.Repositories
                 row.PaymentMethodChannel.MethodId,
                 row.PaymentMethodChannel.ChannelId,
                 row.ChannelName,
+                row.PaymentMethodChannel.Channel.Code,
                 row.ExtendedData,
                 new ValueRange<decimal>
                 {
@@ -192,6 +194,7 @@ namespace TGS.Payment.Repositories
         {
             var query = from bp in _tgsRepository.BrandPayments
                             .Include(bp => bp.PaymentMethodChannel)
+                            .ThenInclude(pmc => pmc.Channel)
                             .AsAsyncEnumerable()
                         where bp.BrandId == brandId
                         select bp;
@@ -203,6 +206,7 @@ namespace TGS.Payment.Repositories
                 bp.PaymentMethodChannel.MethodId,
                 bp.PaymentMethodChannel.ChannelId,
                 bp.ChannelName,
+                bp.PaymentMethodChannel.Channel.Code,
                 bp.ExtendedData,
                 new ValueRange<decimal>
                 {

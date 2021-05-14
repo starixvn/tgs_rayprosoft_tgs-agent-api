@@ -81,6 +81,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     Guid.NewGuid(),
                     Guid.NewGuid(),
                     "TestChannel",
+                    "TestChannelCode",
                     "{}",
                     new ValueRange<decimal>
                     {

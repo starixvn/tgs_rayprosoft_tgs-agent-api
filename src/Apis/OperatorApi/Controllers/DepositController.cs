@@ -62,6 +62,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Id = bp.Id,
                     ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
+                    ChannelCode = bp.ChannelCode,
                     TransferLimit = new Models.ValueRange<decimal>
                     {
                         From = bp.TransferLimit.From,

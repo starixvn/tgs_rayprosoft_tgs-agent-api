@@ -26,6 +26,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -67,6 +68,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -108,6 +110,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -149,6 +152,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -190,6 +194,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -231,6 +236,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -272,6 +278,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -313,6 +320,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -354,6 +362,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -395,6 +404,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -436,6 +446,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -477,6 +488,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -524,6 +536,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -571,6 +584,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -622,6 +636,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {
@@ -684,6 +699,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 "TestChannel",
+                "TestChannelCode",
                 string.Empty,
                 new ValueRange<decimal>
                 {

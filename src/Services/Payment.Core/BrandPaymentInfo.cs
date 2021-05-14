@@ -9,6 +9,7 @@ namespace TGS.Services.Payment
         Guid MethodId,
         Guid ChannelId,
         string ChannelName,
+        string ChannelCode,
         string ExtendedData,
         ValueRange<decimal> TransferLimit,
         bool IsAllPlayers,
