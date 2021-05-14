@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
 using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
@@ -33,11 +34,13 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
     public class GameProviderService : BaseRepositoryOperations<ITgsRepository>, IGameProviderService
     {
+        private readonly IRedisCacheManager _cacheManager;
         private readonly ITgsRepository _repository;
 
-        public GameProviderService(ITgsRepository tgsRepository) : base(tgsRepository)
+        public GameProviderService(ITgsRepository tgsRepository, IRedisCacheManager cacheManager) : base(tgsRepository)
         {
             _repository = tgsRepository;
+            _cacheManager = cacheManager;
         }
 
         Task<GameProvider> IGameProviderService.GetGameProviderAsync(
@@ -76,15 +79,33 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await UpdateEntityAsync(gameProvider);
 
             await tran.CommitAsync();
+
+            var cacheKeys = new[]
+            {
+                new CacheKey {CacheType = RedisCacheType.Currencies, Key = gameProvider.Id},
+                new CacheKey {CacheType = RedisCacheType.Languages, Key = gameProvider.Id},
+                new CacheKey {CacheType = RedisCacheType.GameProvider, Key = gameProvider.Id},
+                new CacheKey {CacheType = RedisCacheType.GameProviderIdByCode, Key = gameProvider.Code},
+                new CacheKey {CacheType = RedisCacheType.GameProviderConfiguration, Key = gameProvider.Id},
+                new CacheKey {CacheType = RedisCacheType.GameProviderLanguages, Key = gameProvider.Id},
+                new CacheKey {CacheType = RedisCacheType.GameProviderCurrencies, Key = gameProvider.Id},
+                new CacheKey {CacheType = RedisCacheType.Games, Key = gameProvider.Id},
+                new CacheKey {CacheType = RedisCacheType.SubGames, Key = gameProvider.Id},
+                new CacheKey {CacheType = RedisCacheType.Localization, Key = gameProvider.Id}
+            };
+
+            await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
         }
 
-        Task IGameProviderService.ChangeStatusAsync(GameProvider gameProvider, UpdateGameProviderStatusRequest request)
+        async Task IGameProviderService.ChangeStatusAsync(GameProvider gameProvider,
+            UpdateGameProviderStatusRequest request)
         {
             gameProvider.Status = request.Status;
             gameProvider.UpdatedByUsername = request.EditorUsername;
             gameProvider.UpdatedOn = DateTimeOffset.Now;
 
-            return UpdateEntityAsync(gameProvider);
+            await UpdateEntityAsync(gameProvider);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.GameProvider, gameProvider.Id);
         }
 
         async Task IGameProviderService.CreateGameProviderAsync(CreateGameProviderRequest request)

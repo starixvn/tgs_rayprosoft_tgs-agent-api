@@ -12,6 +12,7 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
 using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.Infrastructures.Redis;
 using Setting = TGS.Core.DataServices.Tgs.Models.Setting;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
@@ -24,15 +25,17 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new SettingController(
+            _controller = new(
                 _queriesMock.Object,
-                _commandsMock.Object);
+                _commandsMock.Object,
+                _redisCacheManagerMock.Object);
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private SettingController _controller;
         private readonly Mock<ITgsQueries<Setting>> _queriesMock = new();
         private readonly Mock<ITgsCommands<Setting>> _commandsMock = new();
+        private readonly Mock<IRedisCacheManager> _redisCacheManagerMock = new();
 
         [TestCase(true)]
         [TestCase(false)]

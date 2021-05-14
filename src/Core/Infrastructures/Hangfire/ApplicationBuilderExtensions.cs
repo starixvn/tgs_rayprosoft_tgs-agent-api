@@ -29,7 +29,8 @@ namespace TGS.Core.Infrastructures.Hangfire
                 var method = job.Worker.GetMethod("ExecuteWorkerAsync");
 
                 manager.RemoveIfExists(jobId);
-                manager.AddOrUpdate(job.Id.ToString(), new(job.Worker, method, job.Name, job.Context), job.CronExpression, TimeZoneInfo.Utc);
+                manager.AddOrUpdate(job.Id.ToString(), new(job.Worker, method, job.Name, job.Context),
+                    job.CronExpression, job.TimeZone);
             }
 
             return app;

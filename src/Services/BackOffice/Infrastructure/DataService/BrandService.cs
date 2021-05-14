@@ -9,6 +9,7 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -33,23 +34,27 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
     public class BrandService : BaseRepositoryOperations<ITgsRepository>, IBrandService
     {
+        private readonly IRedisCacheManager _cacheManager;
         private readonly ICredentialGenerator _credentialGenerator;
         private readonly ITgsRepository _repository;
 
-        public BrandService(ITgsRepository tgsRepository, ICredentialGenerator credentialGenerator) : base(
+        public BrandService(ITgsRepository tgsRepository, ICredentialGenerator credentialGenerator,
+            IRedisCacheManager cacheManager) : base(
             tgsRepository)
         {
             _repository = tgsRepository;
             _credentialGenerator = credentialGenerator;
+            _cacheManager = cacheManager;
         }
 
-        Task IBrandService.ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request)
+        async Task IBrandService.ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request)
         {
             brand.Status = request.Status;
             brand.UpdatedOn = DateTimeOffset.Now;
             brand.UpdatedByUsername = request.EditorUsername;
 
-            return UpdateEntityAsync(brand);
+            await UpdateEntityAsync(brand);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Brand, brand.Id);
         }
 
         async Task IBrandService.CreateBrandAsync(CreateBrandRequest request)
@@ -126,6 +131,19 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await UpdateEntityAsync(brand);
 
             await tran.CommitAsync();
+
+            var cacheKeys = new[]
+            {
+                new CacheKey {CacheType = RedisCacheType.Brand, Key = brand.Id},
+                new CacheKey {CacheType = RedisCacheType.Currencies, Key = brand.Id},
+                new CacheKey {CacheType = RedisCacheType.Languages, Key = brand.Id},
+                new CacheKey {CacheType = RedisCacheType.BrandGameProviderConfiguration, Key = brand.Code},
+                new CacheKey {CacheType = RedisCacheType.BrandGameProviders, Key = brand.Id},
+                new CacheKey {CacheType = RedisCacheType.BrandGames, Key = brand.Id},
+                new CacheKey {CacheType = RedisCacheType.BrandDefaultBetLimit, Key = brand.Id}
+            };
+
+            await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
         }
 
         IQueryable<Brand> IBrandService.GetBrandQueries(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery,
