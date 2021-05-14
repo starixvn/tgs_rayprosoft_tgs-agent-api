@@ -99,7 +99,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<Guid>(x => x == brandId),
                     It.Is<Guid>(x => x == walletId),
                     It.Is<string>(x => x == "ThisIsPlayerCode"),
-                    It.Is<TransactionTypes>(x => x == TransactionTypes.Withdrawal),
+                    It.Is<TransactionTypes>(x => x == TransactionTypes.Deposit),
                     It.Is<decimal>(x => x == 1000M),
                     It.IsAny<string>()),
                 Times.Exactly(1));
