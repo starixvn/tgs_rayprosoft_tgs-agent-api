@@ -47,7 +47,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                         command.BrandId,
                         player.DefaultWalletId,
                         player.PlayerCode,
-                        TransactionTypes.Withdrawal,
+                        TransactionTypes.Deposit,
                         form.Amount)
                     .ConfigureAwait(false);
             }
