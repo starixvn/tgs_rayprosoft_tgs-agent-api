@@ -52,12 +52,14 @@ namespace TGS.Services.Report.Application.Queries.Vip
                     .Select(x => x.PlayerCode).ToArray();
 
             var vips = await _service.GetPlayerAggregateQueries()
-                .GroupBy(x => new {x.PlayerCode, x.BrandId, x.ReportDate},
+                .Where(x => x.BrandId == request.BrandId)
+                .Where(x => x.ReportDate >= from && x.ReportDate < to)
+                .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
+                .GroupBy(x => new {x.PlayerCode, x.BrandId},
                     (x, players) => new
                     {
                         x.BrandId,
                         x.PlayerCode,
-                        x.ReportDate,
                         DepositAmount = players.Sum(m => m.DepositAmount),
                         WithdrawalAmount = players.Sum(m => m.WithdrawalAmount),
                         AdjustmentAmount = players.Sum(m => m.AdjustmentAmount),
@@ -67,16 +69,18 @@ namespace TGS.Services.Report.Application.Queries.Vip
                         WinLossAmount = players.Sum(m => m.WinLossAmount),
                         NetProfit = players.Sum(m => m.NetProfit)
                     })
-                .GroupJoin(_service.Repository.PlayerGameTypeAggregates,
-                    p => new {p.BrandId, p.PlayerCode, p.ReportDate},
-                    pg => new {pg.BrandId, pg.PlayerCode, pg.ReportDate},
+                .GroupJoin(_service.Repository.PlayerGameTypeAggregates
+                        .Where(x => x.BrandId == request.BrandId)
+                        .Where(x => x.ReportDate >= from && x.ReportDate < to)
+                        .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode),
+                    p => new {p.BrandId, p.PlayerCode},
+                    pg => new {pg.BrandId, pg.PlayerCode},
                     (p, pg) => new {p, pg})
                 .SelectMany(x => x.pg.DefaultIfEmpty(),
                     (x, pg) => new
                     {
                         x.p.BrandId,
                         x.p.PlayerCode,
-                        x.p.ReportDate,
                         x.p.DepositAmount,
                         x.p.WithdrawalAmount,
                         x.p.AdjustmentAmount,
@@ -87,9 +91,6 @@ namespace TGS.Services.Report.Application.Queries.Vip
                         x.p.NetProfit,
                         pg
                     })
-                .Where(x => x.BrandId == request.BrandId)
-                .Where(x => x.ReportDate >= from && x.ReportDate < to)
-                .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
                 .Where(request.Level, x => tgsPlayers.Contains(x.PlayerCode))
                 .GroupBy(x => new
                     {

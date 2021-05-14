@@ -181,7 +181,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             GameType = x.GameType,
                             Hour = start.Hour,
                             VipSportsRebatePercentage = x.Vip?.SportsRebatePercentage ?? 0M,
-                            VipVirtualSportsRebatePercentage = x.Vip?.CardGameRebatePercentage ?? 0M,
+                            VipVirtualSportsRebatePercentage = x.Vip?.VirtualSportsRebatePercentage ?? 0M,
                             VipLiveDealerRebatePercentage = x.Vip?.LiveDealerRebatePercentage ?? 0M,
                             VipCardGameRebatePercentage = x.Vip?.CardGameRebatePercentage ?? 0M,
                             VipLotteryRebatePercentage = x.Vip?.LotteryRebatePercentage ?? 0M,
@@ -213,27 +213,27 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.VirtualSports:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.VirtualSportsRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.VirtualSports)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.LiveDealer:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.LiveDealerRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.LiveDealer)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.CardGame:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.CardGameRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Sportsbook || a.GameType == GameType.CardGame)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.Fishing:
                 case GameType.Arcade:
                 case GameType.Slot:
                 case GameType.TableGame:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.SlotRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
                             a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.Lottery:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.LotteryRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Lottery)
                         .Sum(a => a.Turnover) / 100M;
                 default:

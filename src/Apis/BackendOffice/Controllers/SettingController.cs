@@ -7,6 +7,8 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Settings;
 using TGS.Apis.BackendOffice.Resources;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
+using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using Setting = TGS.Core.DataServices.Tgs.Models.Setting;
 
@@ -16,23 +18,25 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class SettingController : BaseContextController
     {
+        private readonly IRedisCacheManager _cacheManager;
         private readonly ITgsCommands<Setting> _commands;
         private readonly ITgsQueries<Setting> _queries;
 
         public SettingController(
             ITgsQueries<Setting> queries,
-            ITgsCommands<Setting> commands)
+            ITgsCommands<Setting> commands,
+            IRedisCacheManager cacheManager)
         {
             _queries = queries;
             _commands = commands;
+            _cacheManager = cacheManager;
         }
 
         [Route("")]
         [HttpGet]
         [Description("Get setting list")]
-        public Task<PagedResponse<SettingModel>> GetListAsync([FromQuery] GetSettingsRequest request)
-        {
-            return _queries.GetQueries()
+        public Task<PagedResponse<SettingModel>> GetListAsync([FromQuery] GetSettingsRequest request) =>
+            _queries.GetQueries()
                 .Where(request.Key, p => p.Key.Contains(request.Key))
                 .Select(setting => new SettingModel
                 {
@@ -44,7 +48,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                     CreatedOn = setting.CreatedOn,
                     UpdatedOn = setting.UpdatedOn
                 }).CreatePagedResponseAsync(request);
-        }
 
         [Route("{key}")]
         [HttpGet]
@@ -57,10 +60,10 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetSettingResponse>(Common.NotFound);
             }
 
-            return new GetSettingResponse
+            return new()
             {
                 Valid = true,
-                Setting = new SettingModel
+                Setting = new()
                 {
                     Key = setting.Key,
                     Value = setting.Value,
@@ -112,6 +115,9 @@ namespace TGS.Apis.BackendOffice.Controllers
             setting.UpdatedByUsername = Username;
 
             await _commands.UpdateAsync(setting);
+
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Setting, setting.Key);
+
             return CreateValidResponse<MessageResponse>();
         }
 
