@@ -10,7 +10,6 @@ import {
     useLocation,
     useRouteMatch
 } from "react-router-dom"
-import logo from "./logo.svg"
 import {
     Container,
     PageContent,
@@ -26,9 +25,14 @@ import {
     Alert,
     Modal,
     Icon,
-    Flex
+    Flex,
+    useModalState
 } from "bumbag"
-import { useIsAuthed as useUserIsAuthed, useMenuCodes } from "./user/context"
+import {
+    useIsAuthed as useUserIsAuthed,
+    useMenuCodes,
+    useUserId
+} from "./user/context"
 import { Form as Login, Path as LoginPath } from "./user/login"
 import { Route as AuthRouter } from "./user/auth"
 import { AllMenus } from "./menu"
@@ -36,6 +40,7 @@ import { AllContents } from "./content"
 import { useUsername, useDeauth } from "./user/context"
 import { SWRConfig } from "swr"
 import { Trans, useLocale, Locales, useEnglish, useChinese } from "./i18n"
+import { AdminUserChangePasswordDialog } from "./system/admins/edit"
 
 function App() {
     let isUserAuthed = useUserIsAuthed()
@@ -107,8 +112,11 @@ export const getSidebarWidth = () => {
 }
 
 const Header = () => {
+    let userId = useUserId()
     let usename = useUsername()
     let deauth = useDeauth()
+
+    let changePasswordDialog = useModalState()
 
     const logout = () => {
         deauth()
@@ -116,27 +124,45 @@ const Header = () => {
     }
 
     return (
-        <TopNav>
-            <TopNav.Section>
-                <TopNav.Item href="/" fontWeight="semibold"></TopNav.Item>
-            </TopNav.Section>
-            <TopNav.Section marginRight="major-2">
-                <TopNav.Item>
-                    <DropdownMenu
-                        menu={
-                            <DropdownMenu.Item onClick={logout}>
-                                <Trans zh="登出" en="Logout" />
-                            </DropdownMenu.Item>
-                        }
-                    >
-                        <Button variant="ghost" iconAfter="chevron-down">
-                            {usename}
-                        </Button>
-                    </DropdownMenu>
-                </TopNav.Item>
-                <LangItem />
-            </TopNav.Section>
-        </TopNav>
+        <>
+            <TopNav>
+                <TopNav.Section>
+                    <TopNav.Item href="/" fontWeight="semibold"></TopNav.Item>
+                </TopNav.Section>
+                <TopNav.Section marginRight="major-2">
+                    <TopNav.Item>
+                        <DropdownMenu
+                            menu={
+                                <>
+                                    <DropdownMenu.Item
+                                        onClick={changePasswordDialog.show}
+                                    >
+                                        <Trans
+                                            zh="修改密码"
+                                            en="Change Password"
+                                        />
+                                    </DropdownMenu.Item>
+                                    <DropdownMenu.Item onClick={logout}>
+                                        <Trans zh="登出" en="Logout" />
+                                    </DropdownMenu.Item>
+                                </>
+                            }
+                        >
+                            <Button variant="ghost" iconAfter="chevron-down">
+                                {usename}
+                            </Button>
+                        </DropdownMenu>
+                    </TopNav.Item>
+                    <LangItem />
+                </TopNav.Section>
+            </TopNav>
+            {changePasswordDialog.visible && (
+                <AdminUserChangePasswordDialog
+                    userId={userId}
+                    dialog={changePasswordDialog}
+                />
+            )}
+        </>
     )
 }
 

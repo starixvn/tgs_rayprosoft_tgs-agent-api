@@ -95,6 +95,11 @@ export const useUsername = () => {
     return state?.userInfo?.username ?? ""
 }
 
+export const useUserId = () => {
+    let { state = {} } = useContext(Store)
+    return state?.userInfo?.userId ?? ""
+}
+
 export const useUserRoleType = () => {
     let { state = {} } = useContext(Store)
     return state?.userInfo?.roleType ?? ""

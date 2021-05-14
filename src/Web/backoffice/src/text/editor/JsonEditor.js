@@ -24,6 +24,10 @@ import { useForm, useFormContext, Controller } from "react-hook-form"
 import { stringifyJSON } from "../json"
 import clone from "clone-deep"
 
+loader.config({
+    paths: { vs: "/monaco-editor@0.24.0/min/vs" }
+})
+
 const DefaultJsonOptions = {
     colorDecorators: true,
     contextmenu: false,
