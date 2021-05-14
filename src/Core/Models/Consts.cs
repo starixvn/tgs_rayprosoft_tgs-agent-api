@@ -66,6 +66,7 @@ namespace TGS.Core.Models
             public const string AsiaGaming = "AG";
             public const string Saba = "SABA";
             public const string VR = "VR";
+            public const string IMESports = "IMES";
         }
 
         public static class EnvironmentVariable

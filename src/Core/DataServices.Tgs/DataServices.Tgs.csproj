@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\IMES.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\PP.csv" />
     <EmbeddedResource Include="DataInitializers\Games\KY.csv" />

@@ -78,7 +78,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new AsiaGamingGameProvider(env),
                 new SabaGameProvider(env),
                 new KYGameProvider(env),
-                new VRGameProvider(env)
+                new VRGameProvider(env),
+                new IMESportsGameProvider(env)
             };
         }
 
