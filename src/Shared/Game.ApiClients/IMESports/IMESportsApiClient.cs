@@ -18,7 +18,7 @@ namespace TGS.Shared.Game.ApiClients.IMESports
     {
         ValueTask<NewLaunchGameResponse> NewLaunchGameAsync(Uri apiUrl, PlatformType platformType, NewLaunchGameRequest request);
 
-        ValueTask<RegisterPlayerResponse> RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request);
+        ValueTask<BaseResponse> RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request);
 
         ValueTask<GetRoundHistoryResponse> GetRoundHistoryAsync(Uri apiUrl, GetRoundHistoryRequest request);
     }
@@ -38,10 +38,10 @@ namespace TGS.Shared.Game.ApiClients.IMESports
                 $"/Game/{path}", request, logPrefix: prefix);
         }
 
-        ValueTask<RegisterPlayerResponse> IIMESportsApiClient.RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request)
+        ValueTask<BaseResponse> IIMESportsApiClient.RegisterPlayerAsync(Uri apiUrl, RegisterPlayerRequest request)
         {
             var prefix = $"{Consts.GameProvider.IMESports}.RegisterPlayer";
-            return ExecuteJsonRequestAsync<RegisterPlayerRequest, RegisterPlayerResponse>(
+            return ExecuteJsonRequestAsync<RegisterPlayerRequest, BaseResponse>(
                 HttpMethod.Post, apiUrl,
                 "/Player/Register",
                 request, logPrefix: prefix);

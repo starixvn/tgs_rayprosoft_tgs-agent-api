@@ -1,14 +1,18 @@
 ﻿// ReSharper disable IdentifierTypo
 // ReSharper disable InconsistentNaming
 
+using System;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.IMESports;
+using TGS.Shared.Game.Models.IMESports.Common;
 using TGS.Shared.Game.Models.IMESports.Outgoing;
 using static TGS.Shared.Game.Models.IMESports.Enums.GameApiError;
 
@@ -21,18 +25,21 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
+        private readonly IRedisCacheManager _cacheManager;
 
         public IMESportsGameInitializer(
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
+            IRedisCacheManager cacheManager,
             IIMESportsApiClient client)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
             _gameProviderOperations = gameProviderOperations;
             _brandGameProviderOperations = brandGameProviderOperations;
+            _cacheManager = cacheManager;
             _client = client;
         }
 
@@ -40,15 +47,23 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         {
             var response = await NewLaunchGameAsync(request);
 
-            if (response.response.ErrorCode != Success)
+            if (response.ErrorCode != Success)
             {
-                throw new GameProviderApiErrorException(response.response.Message);
+                throw new GameProviderApiErrorException(response.Message);
             }
+
+            await _cacheManager.SafeCacheAsync(IMESportsConsts.RedisKey.SessionToken, 
+                request.Token.PlayerCode,
+                TimeSpan.FromSeconds(response.TimeToLeave), new IMSessionToken
+                {
+                    SessionToken = response.SessionToken,
+                    TimeToLeave = response.TimeToLeave
+                });
             
-            return new() {Url = response.url};
+            return new() {Url = response.GameUrl};
         }
 
-        private async Task<(BaseResponse response, string url)> NewLaunchGameAsync(GetGameUrlRequest request)
+        private async Task<NewLaunchGameResponse> NewLaunchGameAsync(GetGameUrlRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
             
@@ -77,23 +92,28 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             var launchResponse = await _client.NewLaunchGameAsync(apiUrl, platformType, launchRequest);
             if (launchResponse.ErrorCode == Success || launchResponse.ErrorCode != PlayerDoesNotExist)
             {
-                return (launchResponse, launchResponse.GameUrl);
+                return launchResponse;
             }
 
-            var registerResponse = await _client.RegisterPlayerAsync(config.ApiUrl,
+            var registerResponse = await RegisterPlayerAsync(config, player);
+            if (registerResponse.ErrorCode != Success && registerResponse.ErrorCode != PlayerAlreadyExist)
+            {
+                return (NewLaunchGameResponse)registerResponse;
+            }
+            
+            launchResponse = await _client.NewLaunchGameAsync(apiUrl, platformType, launchRequest);
+            return launchResponse;
+        }
+        
+        private ValueTask<BaseResponse> RegisterPlayerAsync(IMESportsConfiguration config, CachedPlayer player)
+        {
+            return _client.RegisterPlayerAsync(config.ApiUrl,
                 new RegisterPlayerRequest
                 {
                     MerchantCode = config.MerchantCode,
                     PlayerCode = player.PlayerCode,
                     Currency = player.DefaultWalletCurrencyCode
                 });
-            if (registerResponse.ErrorCode != Success && registerResponse.ErrorCode != PlayerAlreadyExist)
-            {
-                return (registerResponse, string.Empty);
-            }
-            
-            launchResponse = await _client.NewLaunchGameAsync(apiUrl, platformType, launchRequest);
-            return (launchResponse, launchResponse.GameUrl);
         }
     }
 }
