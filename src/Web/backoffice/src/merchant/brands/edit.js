@@ -66,6 +66,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     let userLicenseeId = useUserLicenseeId()
     let formMethods = useForm({
         defaultValues: {
+            domains: [],
             licenseeId: userLicenseeId
         }
     })
@@ -359,6 +360,7 @@ const EditDialog = ({ brandId, licenseeId, onSubmitted, dialog, ...props }) => {
     }
 
     let record = {
+        domains: [],
         ...brand,
         licensee,
         languages,
@@ -504,6 +506,13 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
                     {readonly && (
                         <Text.Block>{record.operationalEmail}</Text.Block>
                     )}
+                </Box>
+
+                <NormalLabel>
+                    <Trans zh="品牌域名" en="Brand Domain" />
+                </NormalLabel>
+                <Box alignY="center">
+                    <Input name="domains.0" disabled={readonly} />
                 </Box>
 
                 {!isAdd && (

@@ -14,10 +14,10 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
 {
-    internal class DepositFormQueryService : IQueryService<DepositFormQuery, DepositFormInfo>, IGetService<DepositFormQuery, int>
+    internal class DepositFormQueryService : IQueryService<DepositFormQuery, DepositFormModel>, IGetService<DepositFormQuery, int>
     {
-        private readonly ITgsRepository _tgsRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ITgsRepository _tgsRepository;
 
         public DepositFormQueryService(ITgsRepository tgsRepository, IJsonSerializationProvider jsonSerializationProvider)
         {
@@ -26,11 +26,9 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
         }
 
         public async ValueTask<int> GetAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
-        {
-            return await MakeQuery(query).CountAsync().ConfigureAwait(false);
-        }
+            => await MakeQuery(query).CountAsync().ConfigureAwait(false);
 
-        public IAsyncEnumerable<DepositFormInfo> QueryAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<DepositFormModel> QueryAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
         {
             var dataQuery = MakeQuery(query);
 
@@ -54,7 +52,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
 
             return dataQuery
                 .ToAsyncEnumerable()
-                .Select(form => new DepositFormInfo(
+                .Select(form => new DepositFormModel(
                     form.Id,
                     form.PlayerCode,
                     form.Player.Username,

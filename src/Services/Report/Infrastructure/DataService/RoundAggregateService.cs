@@ -61,7 +61,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 Turnover = model.Turnover,
                 WinLoss = model.WinLoss,
                 ReportDate = model.ReportDate,
-                CreatedOn = model.CreatedOn
+                CreatedOn = DateTimeOffset.Now
             }).ToArray());
 
         Task IRoundAggregateService.DeleteRoundAggregatesAsync(RoundAggregate[] roundAggregates) =>
@@ -111,28 +111,28 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             DepositAmount =
                                 players.Where(p =>
                                     p.transaction.Type == TransactionType.Deposit &&
-                                    p.transaction.ConfirmedOn >= start &&
-                                    p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                    p.transaction.RecordedOn >= start &&
+                                    p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             WithdrawalAmount =
                                 players.Where(p =>
                                     p.transaction.Type == TransactionType.Withdrawal &&
-                                    p.transaction.ConfirmedOn >= start &&
-                                    p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                    p.transaction.RecordedOn >= start &&
+                                    p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             AdjustmentAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Adjust && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Adjust && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             BonusAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Bonus && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Bonus && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             RebateAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Rebate && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Rebate && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             DividendAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Dividend && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Dividend && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             PromotionAmount = players.Where(p =>
-                                p.transaction.Type == TransactionType.Promotion && p.transaction.ConfirmedOn >= start &&
-                                p.transaction.ConfirmedOn < end).Sum(t => t.transaction.Amount),
+                                p.transaction.Type == TransactionType.Promotion && p.transaction.RecordedOn >= start &&
+                                p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
                             CreatedOn = DateTimeOffset.Now
                         }).ToArrayAsync();
 
@@ -153,11 +153,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     playerAggregate.BonusAmount - playerAggregate.RebateAmount - playerAggregate.DividendAmount -
                     playerAggregate.PromotionAmount;
             }
-
-            playerAggregates = playerAggregates.Where(x =>
-                x.RegisteredCount > 0 || x.FirstFundInCount > 0 || x.DepositAmount > 0 || x.WithdrawalAmount > 0 ||
-                x.AdjustmentAmount != 0 || x.BonusAmount > 0 || x.BetAmount > 0 || x.Turnover > 0 ||
-                x.WinLossAmount != 0 || x.NetProfit != 0).ToArray();
 
             var playerAggregateByGameType = roundAggregates.GroupJoin(
                     _tgsRepository.Players.Include(x => x.Agent).Include(x => x.Vip),
@@ -181,21 +176,24 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             BrandId = x.BrandId,
                             AgentId = x.AgentId,
                             PlayerCode = x.PlayerCode,
-                            VipLevel = x.Vip.Level,
+                            VipLevel = x.Vip?.Level,
                             GameProviderId = x.GameProviderId,
                             GameType = x.GameType,
                             Hour = start.Hour,
-                            VipSportsRebatePercentage = x.Vip.SportsRebatePercentage,
-                            VipVirtualSportsRebatePercentage = x.Vip.CardGameRebatePercentage,
-                            VipLiveDealerRebatePercentage = x.Vip.LiveDealerRebatePercentage,
-                            VipCardGameRebatePercentage = x.Vip.CardGameRebatePercentage,
-                            VipLotteryRebatePercentage = x.Vip.LotteryRebatePercentage,
-                            VipSlotRebatePercentage = x.Vip.SlotRebatePercentage,
+                            VipSportsRebatePercentage = x.Vip?.SportsRebatePercentage ?? 0M,
+                            VipVirtualSportsRebatePercentage = x.Vip?.VirtualSportsRebatePercentage ?? 0M,
+                            VipLiveDealerRebatePercentage = x.Vip?.LiveDealerRebatePercentage ?? 0M,
+                            VipCardGameRebatePercentage = x.Vip?.CardGameRebatePercentage ?? 0M,
+                            VipLotteryRebatePercentage = x.Vip?.LotteryRebatePercentage ?? 0M,
+                            VipSlotRebatePercentage = x.Vip?.SlotRebatePercentage ?? 0M,
                             Turnover = aggregate.Sum(a => a.r.Turnover),
                             WinLoss = aggregate.Sum(a => a.r.WinLoss),
                             VipRebateAmount =
-                                GetPlayerRebateAmountByGameType(x.Vip, x.GameType, aggregate.Select(a => a.r)),
-                            AgentDividendPercentage = x.Agent?.DividendPercentage ?? 0,
+                                x.Vip == null
+                                    ? 0M
+                                    : GetPlayerRebateAmountByGameType(x.Vip, x.GameType,
+                                        aggregate.Select(a => a.r)),
+                            AgentDividendPercentage = x.Agent?.DividendPercentage ?? 0M,
                             CreatedOn = DateTimeOffset.Now,
                             ReportDate = reportDate
                         };
@@ -213,33 +211,33 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 case GameType.ESports:
                     return vip.SportsRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Sportsbook || a.GameType == GameType.ESports)
-                        .Sum(a => a.Turnover) / 100;
+                        .Sum(a => a.Turnover) / 100M;
                 case GameType.VirtualSports:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.VirtualSportsRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.VirtualSports)
-                        .Sum(a => a.Turnover) / 100;
+                        .Sum(a => a.Turnover) / 100M;
                 case GameType.LiveDealer:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.LiveDealerRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.LiveDealer)
-                        .Sum(a => a.Turnover) / 100;
+                        .Sum(a => a.Turnover) / 100M;
                 case GameType.CardGame:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.CardGameRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Sportsbook || a.GameType == GameType.CardGame)
-                        .Sum(a => a.Turnover) / 100;
+                        .Sum(a => a.Turnover) / 100M;
                 case GameType.Fishing:
                 case GameType.Arcade:
                 case GameType.Slot:
                 case GameType.TableGame:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.SlotRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Fishing || a.GameType == GameType.Arcade ||
                             a.GameType == GameType.Slot || a.GameType == GameType.TableGame)
-                        .Sum(a => a.Turnover) / 100;
+                        .Sum(a => a.Turnover) / 100M;
                 case GameType.Lottery:
-                    return vip.SportsRebatePercentage * roundAggregates.Where(a =>
+                    return vip.LotteryRebatePercentage * roundAggregates.Where(a =>
                             a.GameType == GameType.Lottery)
-                        .Sum(a => a.Turnover) / 100;
+                        .Sum(a => a.Turnover) / 100M;
                 default:
-                    return 0;
+                    return 0M;
             }
         }
     }

@@ -32,14 +32,16 @@ namespace TGS.Apis.BackendOffice
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() { Title = "TGS FileService API", Version = "v1" });
+                c.SwaggerDoc("v1", new() {Title = "TGS FileService API", Version = "v1"});
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 
-                var xml = $"TGS.Apis.BackendOffice.xml";
+                var xml = "TGS.Apis.BackendOffice.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);
                 if (File.Exists(path))
+                {
                     c.IncludeXmlComments(path);
+                }
             });
         }
 

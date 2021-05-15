@@ -32,7 +32,7 @@ import {
     BrandPaymentStatusSelect,
     BrandPaymentStatusToggleButton
 } from "./BrandPaymentStatus"
-import { Type as TransferType } from "./transfer"
+import TransferType from "./BrandPaymentTransferType"
 import { useChangeBrandPaymentOrders, useBrandPaymentList } from "./client"
 import { View as ViewMenu, Update as UpdateMenu } from "./menu"
 import { Detail as ConditionDetail } from "./condition"
@@ -83,10 +83,6 @@ const BodyContent = ({ brandId }) => {
         keyword: ""
     })
 
-    useEffect(() => {
-        setState({ pageIndex: 0, brandId })
-    }, [brandId])
-
     let [transferType, setTransferType] = useState(TransferType.Deposit)
 
     let { isLoading, data, error, mutate, deleteCache } = useBrandPaymentList({
@@ -99,6 +95,16 @@ const BodyContent = ({ brandId }) => {
         selectedId: transferType
     })
 
+    useEffect(() => {
+        setState({
+            pageIndex: 0,
+            brandId,
+            transferType,
+            paymentStatus: "",
+            keyword: ""
+        })
+    }, [brandId, transferType])
+
     const activeTab = (newTransferType) => () => {
         if (transferType === newTransferType) {
             mutate()
@@ -107,8 +113,9 @@ const BodyContent = ({ brandId }) => {
         setTransferType(newTransferType)
         setState({
             pageIndex: 0,
-            paymentStatus: null,
-            keyword: ""
+            paymentStatus: "",
+            keyword: "",
+            transferType: newTransferType
         })
     }
     let isDepositTab = transferType === TransferType.Deposit

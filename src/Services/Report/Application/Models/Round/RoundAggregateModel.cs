@@ -17,7 +17,6 @@ namespace TGS.Services.Report.Application.Models.Round
         public decimal ValidBetAmount { get; set; }
         public decimal Turnover { get; set; }
         public decimal WinLoss { get; set; }
-        public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset ReportDate { get; set; }
     }
 }

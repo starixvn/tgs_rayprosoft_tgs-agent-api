@@ -38,4 +38,8 @@ export const DayMonthYearFormat = "dd/MM/yyyy"
 export const formatDayMonthYear = (value) =>
     formatDateTime(DayMonthYearFormat, value)
 
+export const HourMinuteSecondDayMonthYear = `${Format.Time} ${DayMonthYearFormat}`
+export const formatHourMinuteSecondDayMonthYear = (value) =>
+    formatDateTime(HourMinuteSecondDayMonthYear, value)
+
 export default defaultFormatDateTime

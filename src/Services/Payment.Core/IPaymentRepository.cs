@@ -10,11 +10,15 @@ namespace TGS.Services.Payment
 
         ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormInfo form);
 
+        ValueTask CreateWithdrawFormAsync(Guid createFormId, WithdrawFormCreateInfo form);
+
         ValueTask DeleteBankInfoAsync(string playerCode, Guid bankInfoId);
 
         IAsyncEnumerable<PaymentChannelInfo> GetAllPaymentChannelsAsync();
 
         IAsyncEnumerable<PaymentMethodInfo> GetAllPaymentMethodsAsync();
+
+        ValueTask<BankInfo> GetBankInfoByIdAsync(Guid id);
 
         IAsyncEnumerable<BankInfo> GetBankInfosByPlayerCodeAsync(string playerCode);
 
@@ -31,6 +35,15 @@ namespace TGS.Services.Payment
         ValueTask<PaymentInfo> GetPaymentAsync(Guid id);
 
         IAsyncEnumerable<PaymentMethodChannelInfo> GetPaymentMethodChannelsAsync();
+
+        ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid formId);
+
+        ValueTask SignOffWithdrawFormAsync(
+            Guid formId,
+            Guid brandPaymentId,
+            string? applyInfo,
+            ReviewState reviewStatus,
+            string? remark = null);
 
         ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn);
     }

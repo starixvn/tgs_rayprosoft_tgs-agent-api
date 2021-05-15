@@ -55,6 +55,11 @@ namespace TGS.Core.Infrastructures.Extensions
                 return url;
             }
 
+            if (queryString.StartsWith("/"))
+            {
+                return $"{url}{queryString}";
+            }
+
             if (queryString.StartsWith("&") || queryString.StartsWith("?"))
             {
                 queryString = queryString[1..];
@@ -146,5 +151,8 @@ namespace TGS.Core.Infrastructures.Extensions
 
         public static bool IgnoreCaseContains(this string str, string second) =>
             str.Contains(second, StringComparison.OrdinalIgnoreCase);
+
+        public static bool IgnoreCaseNotContains(this string str, string second) =>
+            !str.IgnoreCaseContains(second);
     }
 }

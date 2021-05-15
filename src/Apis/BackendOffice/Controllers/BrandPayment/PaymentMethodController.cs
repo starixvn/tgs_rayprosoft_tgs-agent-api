@@ -40,7 +40,8 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     .Select(q => new PaymentMethodModel
                     {
                         Id = q.Id,
-                        Code = q.Code
+                        Code = q.Code,
+                        BankType = q.BankType
                     })
                     .AsNoTracking()
                     .ToArray()

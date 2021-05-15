@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Models.Enums;
 using TGS.Paging;
 using TGS.Services.Operator;
 
@@ -36,6 +37,7 @@ namespace TGS.Operator.Repositories
                             .Include(letterPlayer => letterPlayer.StationLetter)
                             .AsAsyncEnumerable()
                         where letterPlayer.PlayerCode == playerCode
+                            && letterPlayer.StationLetter.Status == StationLetterStatus.Published
                         select new StationLetter(
                             letterPlayer.StationLetterId,
                             letterPlayer.StationLetter.Subject,

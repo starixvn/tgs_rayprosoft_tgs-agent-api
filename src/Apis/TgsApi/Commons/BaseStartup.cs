@@ -10,7 +10,6 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -53,7 +52,11 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddTimeZone()
                 .AddApiClient()
                 .AddGameApiClients()
-                .AddGameOperations();
+                .AddGameOperations()
+                .AddGameProvidersoRepository()
+                .AddWallet()
+                .AddTgsWalletRepositories();
+
 
             services.AddHttpContextAccessor();
 
@@ -65,7 +68,7 @@ namespace TGS.Apis.TgsApi.Commons
             {
                 options.Filters.Add<ValidateModelFilter>();
                 AddCustomFilters(options);
-            }).ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
+            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
 
             services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")
@@ -79,7 +82,7 @@ namespace TGS.Apis.TgsApi.Commons
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(LogPrefix, new[] {"/health", "/favicon.ico", "/metrics"});
+            app.UseApiLogger(LogPrefix, new[] { "/health", "/favicon.ico", "/metrics" });
 
             app.UseRouting();
 
@@ -99,7 +102,7 @@ namespace TGS.Apis.TgsApi.Commons
                             var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
                             var feature = sp.GetRequiredService<IFeatureManager>();
-                            var isFeatureEnabled = !gpCode.IsNullOrEmpty() && await feature.IsEnabledAsync(gpCode);
+                            var isFeatureEnabled = gpCode.IsNotNullOrEmpty() && await feature.IsEnabledAsync(gpCode);
 
                             return new Dictionary<string, object>
                             {

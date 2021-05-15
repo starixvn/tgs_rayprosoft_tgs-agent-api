@@ -16,7 +16,7 @@ import {
 } from "./contact"
 import { Tab as BankTab, Panel as BankPanel } from "./bank"
 import { Tab as BettingTab, Panel as BettingPanel } from "./betting"
-import { Tab as OperationTab, Panel as OperationPanel } from "./operation"
+import { PlayerOperationTab, PlayerOperationPanel } from "./PlayerOperation"
 import { Tab as PasswordTab, Panel as PasswordPanel } from "./password"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
@@ -25,6 +25,10 @@ import { Trans, FormattedDateTime, FormattedNumber, useTrans } from "../../i18n"
 import Disclosure from "../../dialog/Disclosure"
 import { Modal, useModalState } from "../../dialog/Modal"
 import { Tabs, TabList, useTabState } from "../../tab"
+import {
+    PlayerBalanceChangePanel,
+    PlayerBalanceChangeTab
+} from "./PlayerBalanceChange"
 
 export const ViewButton = ({ player, brandId, ...props }) => {
     let dialog = useModalState()
@@ -160,7 +164,8 @@ const ViewTabs = ({ playerCode, brandId, player, tab }) => {
                 <ContractTab {...tab} />
                 <BankTab {...tab} />
                 <BettingTab {...tab} />
-                <OperationTab {...tab} />
+                <PlayerOperationTab {...tab} />
+                <PlayerBalanceChangeTab {...tab} />
             </TabList>
             <PlayerPanel player={player} {...tab} />
             <ContractPanel player={player} {...tab} />
@@ -171,7 +176,12 @@ const ViewTabs = ({ playerCode, brandId, player, tab }) => {
                 brandId={brandId}
                 {...tab}
             />
-            <OperationPanel playerCode={playerCode} {...tab} />
+            <PlayerOperationPanel playerCode={playerCode} {...tab} />
+            <PlayerBalanceChangePanel
+                playerCode={playerCode}
+                brandId={brandId}
+                {...tab}
+            />
         </Tabs>
     )
 }
@@ -209,6 +219,7 @@ const EditTabs = ({
                 {...tab}
             />
             <BankPanel
+                brandId={brandId}
                 playerCode={playerCode}
                 banks={player.banks}
                 edit={true}

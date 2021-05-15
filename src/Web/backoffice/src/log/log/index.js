@@ -155,11 +155,11 @@ const SearchBar = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
                     <DateTimeRangeInput />
-                    {/* <InputField
+                    <InputField
                         name="trackingId"
                         showEmptyFieldValueAddonAfter
                         placeholder="Tracking Id"
-                    /> */}
+                    />
                     <InputField
                         name="serverName"
                         showEmptyFieldValueAddonAfter
@@ -180,43 +180,43 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
-            // textColumn({
-            //     accessor: "trackingId",
-            //     Header: <Trans zh="Tracking Id" en="Tracking Id" />,
-            //     disableSortBy: true,
-            //     Cell: ({ value }) => value
-            // }),
+            textColumn({
+                accessor: "trackingId",
+                Header: <Trans zh="Tracking Id" en="Tracking Id" />,
+                disableSortBy: true,
+                Cell: ({ value = "" }) => value
+            }),
             textColumn({
                 accessor: "serverName",
                 Header: <Trans zh="Server Name" en="Server Name" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "level",
                 Header: <Trans zh="Level" en="Level" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "logger",
                 Header: <Trans zh="Logger" en="Logger" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "message",
                 Header: <Trans zh="Message" en="Message" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "exception",
                 Header: <Trans zh="Exception" en="Exception" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             dateTimeColumn({
                 accessor: "recordedOn",

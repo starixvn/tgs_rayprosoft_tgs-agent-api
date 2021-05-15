@@ -90,8 +90,8 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
                 <Trans zh="修改密码" en="Change Password" />
             </Disclosure>
             {dialog.visible && (
-                <PasswordDialog
-                    user={user}
+                <AdminUserChangePasswordDialog
+                    userId={user.id}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
                 />
@@ -100,10 +100,15 @@ export const EditPasswordButton = ({ user, onSubmitted, ...props }) => {
     )
 }
 
-const PasswordDialog = ({ user = {}, onSubmitted, dialog, ...props }) => {
+export const AdminUserChangePasswordDialog = ({
+    userId,
+    onSubmitted,
+    dialog,
+    ...props
+}) => {
     let [submitData, setSubmit] = useState()
     let { result, error, mutate, isLoading } = useEditPassword(
-        user?.id,
+        userId,
         submitData
     )
 

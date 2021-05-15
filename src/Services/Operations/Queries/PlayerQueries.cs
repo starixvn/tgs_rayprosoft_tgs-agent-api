@@ -17,16 +17,19 @@ namespace TGS.Services.Operations.Queries
     {
         Task<CachedPlayer> GetCachedPlayerAsync(string playerCode);
 
-        Task<GetPlayerLoginRecordResult[]> GetPlayerLoginsRecordsInOneDayAsync(string playerCode,
-            params LoginStatus[] statuses);
-
-        Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId);
-
-        Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
+        Task<(byte[] Salt, byte[] Password)> GetPaySaltAndPasswordByPlayerCodeAsync(string playerCode);
 
         Task<Player> GetPlayerByCodeAsync(string playerCode);
 
-        Task<(byte[] salt, byte[] password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);
+        Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username);
+
+        Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId);
+
+        Task<GetPlayerLoginRecordResult[]> GetPlayerLoginsRecordsInOneDayAsync(
+            string playerCode,
+            params LoginStatus[] statuses);
+
+        Task<(byte[] Salt, byte[] Password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode);
     }
 
     public sealed class PlayerQueries : IPlayerQueries
@@ -38,14 +41,42 @@ namespace TGS.Services.Operations.Queries
             _repository = repository;
         }
 
-        Task<CachedPlayer> IPlayerQueries.GetCachedPlayerAsync(string playerCode)
+        public Task<CachedPlayer> GetCachedPlayerAsync(string playerCode)
         {
             const string spName = "dbo.player_get_player_for_cache";
             return _repository.SqlQuerySingleAsync<CachedPlayer>(spName,
-                parameters: new Dictionary<string, object> {{":player_code", playerCode}});
+                parameters: new Dictionary<string, object> { { ":player_code", playerCode } });
         }
 
-        async Task<GetPlayerLoginRecordResult[]> IPlayerQueries.GetPlayerLoginsRecordsInOneDayAsync(string playerCode,
+        public Task<(byte[] Salt, byte[] Password)> GetPaySaltAndPasswordByPlayerCodeAsync(string playerCode)
+            => _repository.Players.Where(p => p.PlayerCode == playerCode)
+                .Select(p => new ValueTuple<byte[], byte[]>(p.WithdrawSalt, p.WithdrawPassword))
+                .FirstOrDefaultAsync();
+
+        public Task<Player> GetPlayerByCodeAsync(string playerCode) =>
+            _repository.Players
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.PlayerCode == playerCode);
+
+        public Task<string> GetPlayerCodeByUsernameAsync(Guid brandId, string username) =>
+            _repository.Players
+                .Where(p => p.BrandId == brandId &&
+                    p.Username.ToLower().Equals(username.ToLower()))
+                .Select(p => p.PlayerCode)
+                .FirstOrDefaultAsync();
+
+        public Task<CachedPlayerLoginRecord> GetPlayerLoginRecordAsync(Guid loginRecordId) =>
+            _repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId)
+                .Select(r => new CachedPlayerLoginRecord
+                {
+                    PlayerCode = r.PlayerCode,
+                    PlatformType = r.PlatformType,
+                    Status = r.Status,
+                    ExpiredOn = r.ExpiredOn
+                }).FirstOrDefaultAsync();
+
+        public async Task<GetPlayerLoginRecordResult[]> GetPlayerLoginsRecordsInOneDayAsync(
+            string playerCode,
             LoginStatus[] statuses)
         {
             const string spName = "dbo.player_get_player_login_records";
@@ -61,31 +92,9 @@ namespace TGS.Services.Operations.Queries
             return results.ToArray();
         }
 
-        Task<CachedPlayerLoginRecord> IPlayerQueries.GetPlayerLoginRecordAsync(Guid loginRecordId) =>
-            _repository.PlayerLoginRecords.Where(r => r.Id == loginRecordId)
-                .Select(r => new CachedPlayerLoginRecord
-                {
-                    PlayerCode = r.PlayerCode,
-                    PlatformType = r.PlatformType,
-                    Status = r.Status,
-                    ExpiredOn = r.ExpiredOn
-                }).FirstOrDefaultAsync();
-
-        Task<string> IPlayerQueries.GetPlayerCodeByUsernameAsync(Guid brandId, string username) =>
-            _repository.Players
-                .Where(p => p.BrandId == brandId &&
-                    p.Username.ToLower().Equals(username.ToLower()))
-                .Select(p => p.PlayerCode)
-                .FirstOrDefaultAsync();
-
-        Task<Player> IPlayerQueries.GetPlayerByCodeAsync(string playerCode) =>
-            _repository.Players
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.PlayerCode == playerCode);
-
-        Task<(byte[] salt, byte[] password)> IPlayerQueries.GetSaltAndPasswordByPlayerCodeAsync(string playerCode) =>
+        public Task<(byte[] Salt, byte[] Password)> GetSaltAndPasswordByPlayerCodeAsync(string playerCode) =>
             _repository.Players.Where(p => p.PlayerCode == playerCode)
-                .Select(p => new Tuple<byte[], byte[]>(p.Salt, p.Password).ToValueTuple())
+                .Select(p => new ValueTuple<byte[], byte[]>(p.Salt, p.Password))
                 .FirstOrDefaultAsync();
     }
 }

@@ -9,6 +9,8 @@ namespace TGS.Core.Infrastructures.ApiClient
 {
     public interface IApiClientLogger
     {
+        void LogHttpResponse(ApiLogEvent apiLogEvent);
+
         Task LogHttpResponseAsync(HttpResponseMessage response, int executionTimeMs, string requestContent, string logPrefix);
     }
 
@@ -50,6 +52,11 @@ namespace TGS.Core.Infrastructures.ApiClient
         {
             var arr = path.Split('/');
             return arr.Length < 3 ? arr[^1] : arr[2];
+        }
+
+        void IApiClientLogger.LogHttpResponse(ApiLogEvent apiLogEvent)
+        {
+            _log.LogApi(apiLogEvent);
         }
     }
 }

@@ -61,8 +61,6 @@ namespace TGS.Services.Operations
             string identity,
             bool isAuthenticate,
             DateTimeOffset updatedOn);
-
-        Task<Agent> GetAgentAsync(string invitationCode);
     }
 
     public sealed class PlayerOperations : IPlayerOperations
@@ -209,9 +207,6 @@ namespace TGS.Services.Operations
             GetCachedPlayerValueAsync(playerCode, CachedPlayerFields.Username,
                 value => (string)value,
                 cachedPlayer => cachedPlayer?.Username);
-
-        public Task<Agent> GetAgentAsync(string invitationCode) =>
-            _agentQueries.GetAgentAsync(invitationCode);
 
         #region Private Methods
 

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator;
 using TGS.Services.Operator.Deposit;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
@@ -47,26 +46,36 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             foreach (var bp in brandPayments)
             {
+                if (bp.TransferType != TransferType.Deposit)
+                    continue;
+
                 var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
 
                 var paymentInfo = await getPaymentService
                     .GetAsync(getPaymentQuery)
                     .ConfigureAwait(false);
 
+                var paymentMethod = paymentMethods[bp.MethodId];
+
                 yield return new BrandPaymentResponse
                 {
                     Id = bp.Id,
+                    ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
+                    ChannelCode = bp.ChannelCode,
                     TransferLimit = new Models.ValueRange<decimal>
                     {
                         From = bp.TransferLimit.From,
                         To = bp.TransferLimit.To
                     },
-                    ExtendedData = JsonDocument.Parse(bp.ExtendedData),
+                    ExtendedData = paymentInfo.Code == "Manual"
+                        ? JsonDocument.Parse(bp.ExtendedData)
+                        : JsonDocument.Parse("{}"),
                     PaymentId = bp.PaymentId,
                     PaymentCode = paymentInfo.Code,
                     MethodId = bp.MethodId,
-                    MethodCode = paymentMethods[bp.MethodId].Name
+                    MethodCode = paymentMethod.Name,
+                    BankType = paymentMethod.BankType
                 };
             }
         }

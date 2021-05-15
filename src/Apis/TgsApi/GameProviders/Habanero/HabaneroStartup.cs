@@ -48,7 +48,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            const string Route = "/api/provider";
+            const string Route = "/api/haba";
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>

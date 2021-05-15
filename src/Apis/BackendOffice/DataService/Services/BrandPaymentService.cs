@@ -116,6 +116,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             payment.PaymentMethodChannelId = request.PaymentMethodChannelId;
             payment.ChannelName = request.ChannelName;
+            payment.ExtendedData = JsonSerializer.Serialize(request.ExtendedData);
             payment.PaymentStatus = request.PaymentStatus;
             payment.TransferLimitFrom = request.TransferLimitFrom;
             payment.TransferLimitTo = request.TransferLimitTo;

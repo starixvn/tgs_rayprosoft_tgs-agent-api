@@ -9,7 +9,8 @@ import {
     Set,
     useModalState,
     Flex,
-    Level
+    Level,
+    Text
 } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
@@ -160,11 +161,11 @@ const SearchBar = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
                     <DateTimeRangeInput />
-                    {/* <InputField
+                    <InputField
                         name="trackingId"
                         showEmptyFieldValueAddonAfter
                         placeholder="Tracking Id"
-                    /> */}
+                    />
                     <InputField
                         name="ip"
                         showEmptyFieldValueAddonAfter
@@ -194,37 +195,38 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
-            // textColumn({
-            //     accessor: "trackingId",
-            //     Header: <Trans zh="Tracking Id" en="Tracking Id" />,
-            //     disableSortBy: true,
-            //     Cell: ({ value }) => value
-            // }),
+            textColumn({
+                accessor: "trackingId",
+                Header: <Trans zh="Tracking Id" en="Tracking Id" />,
+                disableSortBy: true,
+                Cell: ({ value = "" }) => value
+            }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "path",
                 Header: <Trans zh="Path" en="Path" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                textAlign: "left",
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "method",
                 Header: <Trans zh="Method" en="Method" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "responseCode",
                 Header: <Trans zh="Response Code" en="Response Code" />,
                 disableSortBy: true,
-                Cell: ({ value }) => value
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "executionTimeMs",

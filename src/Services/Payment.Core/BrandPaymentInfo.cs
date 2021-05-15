@@ -9,11 +9,13 @@ namespace TGS.Services.Payment
         Guid MethodId,
         Guid ChannelId,
         string ChannelName,
+        string ChannelCode,
         string ExtendedData,
         ValueRange<decimal> TransferLimit,
         bool IsAllPlayers,
         bool AuthenticateIdentity,
         bool AuthenticatePhone,
         ValueRange<decimal> DepositedAmountLimit,
-        ConditionMatchTypes ConditionMatchType);
+        ConditionMatchTypes ConditionMatchType,
+        TransferType TransferType);
 }

@@ -54,6 +54,8 @@ import { DepositDialog } from "./DepositDialog"
 import { UploadDepositProofDialog } from "./UploadDepositProofDialog"
 import { BankInfoDialog } from "./BankInfoDialog"
 import { WithdrawDialog } from "./WithdrawDialog"
+import { InitPayPasswordDialog } from "./InitPayPasswordDialog"
+import { JoinPromotionDialog } from "./JoinPromotion"
 
 export const PlayerPage = ({ brandToken, ...props }) => {
     let { path, url } = useRouteMatch()
@@ -150,6 +152,11 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
 
     const bankInfoDialog = Modal.useState()
 
+    const initPayPasswordDialog = Modal.useState()
+    const changePayPasswordDialog = Modal.useState()
+
+    const joinPromotionDialog = Modal.useState()
+
     const viewInfoDialog = Modal.useState()
     const editInfoDialog = Modal.useState()
     const changePasswordDialog = Modal.useState()
@@ -164,7 +171,10 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                         uploadDepositProofDialog={uploadDepositProofDialog}
                         withdrawDialog={withdrawDialog}
                         bankInfoDialog={bankInfoDialog}
+                        initPayPasswordDialog={initPayPasswordDialog}
+                        changePayPasswordDialog={changePayPasswordDialog}
                         playerInfoDialog={viewInfoDialog}
+                        joinPromotionDialog={joinPromotionDialog}
                         editPlayerInfoDialog={editInfoDialog}
                         editPasswordDialog={changePasswordDialog}
                         logout={() => setLogoutToken(playerToken)}
@@ -219,6 +229,24 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                     dialog={bankInfoDialog}
                 />
             )}
+            {initPayPasswordDialog.visible && (
+                <InitPayPasswordDialog
+                    brandCode={brandCode}
+                    currency={currency}
+                    username={username}
+                    platform={platform}
+                    dialog={initPayPasswordDialog}
+                />
+            )}
+            {joinPromotionDialog.visible && (
+                <JoinPromotionDialog
+                    brandCode={brandCode}
+                    currency={currency}
+                    username={username}
+                    platform={platform}
+                    dialog={joinPromotionDialog}
+                />
+            )}
             {viewInfoDialog.visible && (
                 <ViewPlayerInfoDialog
                     brandCode={brandCode}
@@ -255,7 +283,10 @@ const PlayerMenu = ({
     showUploadDepositProofMenu,
     uploadDepositProofDialog,
     withdrawDialog,
+    joinPromotionDialog,
     bankInfoDialog,
+    initPayPasswordDialog,
+    changePayPasswordDialog,
     playerInfoDialog,
     editPlayerInfoDialog,
     editPasswordDialog,
@@ -271,11 +302,20 @@ const PlayerMenu = ({
                     Upload Deposit Proof
                 </DropdownMenu.Item>
             )}
+            <DropdownMenu.Item onClick={bankInfoDialog.show}>
+                Bank List
+            </DropdownMenu.Item>
+            <DropdownMenu.Item onClick={initPayPasswordDialog.show}>
+                Init Pay Password
+            </DropdownMenu.Item>
+            {/* <DropdownMenu.Item onClick={changePayPasswordDialog.show}>
+                Change Pay Password
+            </DropdownMenu.Item> */}
             <DropdownMenu.Item onClick={withdrawDialog.show}>
                 Withdraw
             </DropdownMenu.Item>
-            <DropdownMenu.Item onClick={bankInfoDialog.show}>
-                Bank List
+            <DropdownMenu.Item onClick={joinPromotionDialog.show}>
+                Join Promotion
             </DropdownMenu.Item>
             <DropdownMenu.Item onClick={playerInfoDialog.show}>
                 View Info

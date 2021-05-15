@@ -1,15 +1,16 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
-using Report.Client.Models.Agent;
-using Report.Client.Models.Market;
-using Report.Client.Models.Player;
-using Report.Client.Models.Round;
-using Report.Client.Models.Vip;
+using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Clients.Report.Client.Models.Market;
+using TGS.Clients.Report.Client.Models.Player;
+using TGS.Clients.Report.Client.Models.Round;
+using TGS.Clients.Report.Client.Models.Vip;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
 
-namespace Report.Client
+namespace TGS.Clients.Report.Client
 {
     public interface IReportClient
     {
@@ -27,6 +28,9 @@ namespace Report.Client
             GetAgentDividendDetailsRequest request);
 
         Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(GetAgentPlayerWinLossRequest request);
+
+        Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
+            GetPlayerAccountChangesRequest request);
     }
 
     public class ReportClient : BaseApiClient, IReportClient
@@ -40,7 +44,7 @@ namespace Report.Client
         async Task<PagedResponse<VipModel>> IReportClient.GetVipReportAsync(GetVipReportRequest request)
         {
             var prefix = $"Report.{request.BrandId}.GetVipReport";
-            var path = Path.AppendWithProperties("/api/vipReport?", request);
+            var path = ClientPath.AppendWithProperties("/api/vipReport?", request);
 
             return await ExecuteJsonRequestAsync<GetVipReportRequest, PagedResponse<VipModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
@@ -51,7 +55,7 @@ namespace Report.Client
             GetVipRebateReportRequest request)
         {
             var prefix = $"Report.{request.BrandId}.GetVipRebateReport";
-            var path = Path.AppendWithProperties($"/api/vipReport/{request.Username}?", request);
+            var path = ClientPath.AppendWithProperties($"/api/vipReport/{request.Username}?", request);
             return await ExecuteJsonRequestAsync<GetVipRebateReportRequest, PagedResponse<VipRebateModel>>(
                 HttpMethod.Get, path, request, logPrefix: prefix, options: new() {PropertyNameCaseInsensitive = true});
         }
@@ -59,7 +63,7 @@ namespace Report.Client
         async Task<PagedResponse<RoundModel>> IReportClient.GetRoundsAsync(GetRoundsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetRounds";
-            var path = Path.AppendWithProperties("/api/roundReport?", request);
+            var path = ClientPath.AppendWithProperties("/api/roundReport?", request);
 
             return await ExecuteJsonRequestAsync<GetRoundsRequest, PagedResponse<RoundModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
@@ -69,7 +73,7 @@ namespace Report.Client
         async Task<GetRoundHistoryResponse> IReportClient.GetRoundHistoriesAsync(GetRoundHistoryRequest request)
         {
             var prefix = $"Report.RoundId.{request.RoundId}.GetRound";
-            var path = Path.AppendWithProperties($"/api/roundReport/{request.RoundId}?", request);
+            var path = ClientPath.AppendWithProperties($"/api/roundReport/{request.RoundId}?", request);
 
             return await ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
@@ -79,7 +83,7 @@ namespace Report.Client
         async Task<PagedResponse<MarketModel>> IReportClient.GetMarketsAsync(GetMarketsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetMarkets";
-            var path = Path.AppendWithProperties("/api/marketReport?", request);
+            var path = ClientPath.AppendWithProperties("/api/marketReport?", request);
 
             return await ExecuteJsonRequestAsync<GetMarketsRequest, PagedResponse<MarketModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
@@ -90,7 +94,7 @@ namespace Report.Client
             GetAgentContributionsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetAgentContributions";
-            var path = Path.AppendWithProperties("/api/agentReport/contribution?", request);
+            var path = ClientPath.AppendWithProperties("/api/agentReport/contribution?", request);
             return await ExecuteJsonRequestAsync<GetAgentContributionsRequest, PagedResponse<AgentContributionModel>>(
                 HttpMethod.Get, path, request, logPrefix: prefix, options: new() {PropertyNameCaseInsensitive = true});
         }
@@ -99,7 +103,7 @@ namespace Report.Client
             GetPlayerContributionsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetPlayerContributions";
-            var path = Path.AppendWithProperties("/api/playerReport/contribution?", request);
+            var path = ClientPath.AppendWithProperties("/api/playerReport/contribution?", request);
 
             return await ExecuteJsonRequestAsync<GetPlayerContributionsRequest, PagedResponse<PlayerContributionModel>>(
                 HttpMethod.Get,
@@ -111,7 +115,7 @@ namespace Report.Client
             GetAgentTeamInfoRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentTeamInfo";
-            var path = Path.AppendWithProperties($"/api/agentReport/{request.AgentId}/teamInfo?", request);
+            var path = ClientPath.AppendWithProperties($"/api/agentReport/{request.AgentId}/teamInfo?", request);
 
             return await ExecuteJsonRequestAsync<GetAgentTeamInfoRequest, PagedResponse<TeamInfoModel>>(
                 HttpMethod.Get,
@@ -123,7 +127,7 @@ namespace Report.Client
             GetAgentDividendsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetAgentDividends";
-            var path = Path.AppendWithProperties("/api/agentReport/dividends?", request);
+            var path = ClientPath.AppendWithProperties("/api/agentReport/dividends?", request);
 
             return await ExecuteJsonRequestAsync<GetAgentDividendsRequest, PagedResponse<AgentDividendModel>>(
                 HttpMethod.Get,
@@ -135,7 +139,7 @@ namespace Report.Client
             GetAgentPlayerWinLossRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentPlayerWinLoss";
-            var path = Path.AppendWithProperties($"/api/agentReport/{request.AgentId}/winLoss?", request);
+            var path = ClientPath.AppendWithProperties($"/api/agentReport/{request.AgentId}/winLoss?", request);
 
             return await ExecuteJsonRequestAsync<GetAgentPlayerWinLossRequest, PagedResponse<AgentPlayerWinLossModel>>(
                 HttpMethod.Get,
@@ -147,9 +151,22 @@ namespace Report.Client
             GetAgentDividendDetailsRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentDividendDetails";
-            var path = Path.AppendWithProperties("/api/agentReport/dividendDetails?", request);
+            var path = ClientPath.AppendWithProperties("/api/agentReport/dividendDetails?", request);
 
             return await ExecuteJsonRequestAsync<GetAgentDividendDetailsRequest, PagedResponse<AgentDividendDetailModel>
+            >(
+                HttpMethod.Get,
+                path, request, logPrefix: prefix,
+                options: new() {PropertyNameCaseInsensitive = true});
+        }
+
+        async Task<PagedResponse<PlayerAccountChangeModel>> IReportClient.GetPlayerAccountChangesAsync(
+            GetPlayerAccountChangesRequest request)
+        {
+            var prefix = $"Report.PlayerCode.{request.PlayerCode}.GetPlayerAccountChanges";
+            var path = ClientPath.AppendWithProperties("/api/playerReport/accountChanges?", request);
+
+            return await ExecuteJsonRequestAsync<GetPlayerAccountChangesRequest, PagedResponse<PlayerAccountChangeModel>
             >(
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,

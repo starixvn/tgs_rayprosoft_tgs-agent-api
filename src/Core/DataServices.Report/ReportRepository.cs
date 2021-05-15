@@ -18,10 +18,6 @@ namespace TGS.Core.DataServices.Report
         DbSet<RoundAggregate> RoundAggregates { get; set; }
         DbSet<PlayerAggregate> PlayerAggregates { get; set; }
         DbSet<PlayerGameTypeAggregate> PlayerGameTypeAggregates { get; set; }
-        DbSet<PromotionBonus> PromotionBonus { get; set; }
-        DbSet<PromotionPlayer> PromotionPlayers { get; set; }
-        DbSet<AgentDividend> AgentDividends { get; set; }
-        DbSet<PlayerRebate> PlayerRebates { get; set; }
     }
 
     public class ReportRepository : DbContext, IReportRepository
@@ -33,10 +29,6 @@ namespace TGS.Core.DataServices.Report
         DbSet<RoundAggregate> IReportRepository.RoundAggregates { get; set; }
         DbSet<PlayerAggregate> IReportRepository.PlayerAggregates { get; set; }
         DbSet<PlayerGameTypeAggregate> IReportRepository.PlayerGameTypeAggregates { get; set; }
-        DbSet<PromotionBonus> IReportRepository.PromotionBonus { get; set; }
-        DbSet<PromotionPlayer> IReportRepository.PromotionPlayers { get; set; }
-        DbSet<AgentDividend> IReportRepository.AgentDividends { get; set; }
-        DbSet<PlayerRebate> IReportRepository.PlayerRebates { get; set; }
 
         IDbContextTransaction IBaseRepository.CurrentTransaction =>
             Database.CurrentTransaction;

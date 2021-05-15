@@ -1,14 +1,11 @@
 ﻿using System;
 using Hangfire;
+using Hangfire.PostgreSql;
 using Hangfire.Console;
 using Hangfire.Dashboard.Management;
-using Hangfire.Mongo;
-using Hangfire.Mongo.Migration.Strategies;
-using Hangfire.Mongo.Migration.Strategies.Backup;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using Newtonsoft.Json;
 using TGS.Core.Infrastructures.Hangfire.Services;
 
@@ -26,11 +23,9 @@ namespace TGS.Core.Infrastructures.Hangfire
             services.AddHangfire((sp, option) =>
             {
                 var settings = sp.GetRequiredService<HangfireSettings>();
-                var mongoUrlBuilder = new MongoUrlBuilder(settings.ConnectionString);
-                var mongoClient = new MongoClient(mongoUrlBuilder.ToMongoUrl());
+                option.UsePostgreSqlStorage(settings.ConnectionString);
 
-                option.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
-                    .UseSimpleAssemblyNameTypeSerializer()
+                option.UseSimpleAssemblyNameTypeSerializer()
                     .UseColouredConsoleLogProvider()
                     .UseConsole()
                     .UseRecommendedSerializerSettings(s =>
@@ -39,16 +34,6 @@ namespace TGS.Core.Infrastructures.Hangfire
                         s.TypeNameHandling = TypeNameHandling.None;
                         s.NullValueHandling = NullValueHandling.Include;
                         s.DefaultValueHandling = DefaultValueHandling.Include;
-                    })
-                    .UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, new()
-                    {
-                        MigrationOptions = new()
-                        {
-                            MigrationStrategy = new DropMongoMigrationStrategy(),
-                            BackupStrategy = new CollectionMongoBackupStrategy()
-                        },
-                        Prefix = settings.Prefix,
-                        CheckConnection = false
                     });
 
                 if (typesToUseManagementPage?.Length > 0)

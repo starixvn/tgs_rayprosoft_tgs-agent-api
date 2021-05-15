@@ -25,6 +25,9 @@ namespace TGS.Core.Models
                 {HealthStatus.Degraded, StatusCodes.Status500InternalServerError}
             };
 
+        public static GameType[] SportsGroup = {GameType.Sportsbook, GameType.ESports};
+        public static GameType[] SlotGroup = {GameType.Fishing, GameType.Arcade, GameType.Slot, GameType.TableGame};
+
         public static class CachePrefix
         {
             public const string GameProviderToTgsMap = "GameProviderToTgsMap";
@@ -50,13 +53,23 @@ namespace TGS.Core.Models
             public const int Jwt = 60 * 60;           // 1 hours
         }
 
+        public static class AgentTokenExpireSeconds
+        {
+            public const int AgentLogin = 3600 * 12; // 12 hours
+            public const int Jwt = 60 * 60;          // 1 hours
+        }
+
         public static class GameProvider
         {
             public const string RedTiger = "RT";
             public const string SBOBET = "SBO";
             public const string Habanero = "HABA";
             public const string PragmaticPlay = "PP";
+            public const string KY = "KY";
             public const string JDB = "JDB";
+            public const string AsiaGaming = "AG";
+            public const string Saba = "SABA";
+            public const string VR = "VR";
         }
 
         public static class EnvironmentVariable
@@ -72,6 +85,7 @@ namespace TGS.Core.Models
             public static readonly string GameProviderId = "gameProviderId";
             public static readonly string GameProviderConfigurationId = "gameProviderConfigurationId";
             public static readonly string PlatformType = "platformType";
+            public static readonly string AgentToken = "agentToken";
             public static readonly string PlayerToken = "playerToken";
             public static readonly string PlayerCode = "playerCode";
             public static readonly string RequestType = "requestType";

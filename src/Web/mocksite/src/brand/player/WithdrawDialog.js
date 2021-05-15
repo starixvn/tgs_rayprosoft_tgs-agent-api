@@ -40,7 +40,8 @@ import {
     useApplyWithdraw,
     useBankInfoList,
     useDeleteBankInfo,
-    usePaymentList
+    usePaymentList,
+    useWithdrawList
 } from "../../client/brand/player"
 import { useForm, useFormContext, FormProvider } from "react-hook-form"
 import { toValue } from "../../platform"
@@ -56,7 +57,7 @@ export const WithdrawDialog = ({
 }) => {
     let platformtype = toValue(platform)
     let formMethods = useForm()
-    let { register } = formMethods
+    let { register, watch } = formMethods
 
     let {
         data: bankInfoList = [],
@@ -67,6 +68,13 @@ export const WithdrawDialog = ({
         username,
         platformtype
     })
+    let { data: withdrawList = [] } = useWithdrawList({
+        brandCode,
+        currency,
+        username,
+        platformtype
+    })
+
     let [formData, setSubmit] = useState()
     let { result, error, isLoading, mutate, ...rest } = useApplyWithdraw(
         { brandCode, currency, username, platformtype },
@@ -96,7 +104,7 @@ export const WithdrawDialog = ({
     }, [error])
 
     let cardOptions = bankInfoList?.map((bankInfo) => ({
-        label: bankInfo.id,
+        label: toChannelName(bankInfo, withdrawList),
         value: bankInfo.id
     }))
 
@@ -114,12 +122,27 @@ export const WithdrawDialog = ({
                 {...dialog}
             >
                 <FieldStack>
-                    <SelectField options={cardOptions} label="Bank" />
+                    <SelectField
+                        name="bankinfoid"
+                        options={cardOptions}
+                        selectRef={register}
+                        label="Bank"
+                        required
+                    />
+
                     <InputField
                         name="amount"
                         type="number"
                         inputRef={register}
                         label="Amount"
+                        required
+                    />
+
+                    <InputField
+                        name="paypassword"
+                        inputRef={register}
+                        label="Pay Password"
+                        required
                     />
                 </FieldStack>
             </Dialog.Modal>
@@ -141,4 +164,12 @@ export const WithdrawDialog = ({
             )}
         </>
     )
+}
+
+const toChannelName = (bankInfo = {}, withdrawList = []) => {
+    let channel = withdrawList?.find?.(
+        (item) => item.channelid === bankInfo?.paymentchannelid
+    )
+
+    return channel?.channelname ?? bankInfo?.id
 }

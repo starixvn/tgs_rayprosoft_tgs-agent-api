@@ -39,7 +39,8 @@ import {
     useApplyDeposit,
     useBankInfoList,
     useDeleteBankInfo,
-    usePaymentList
+    usePaymentList,
+    useWithdrawList
 } from "../../client/brand/player"
 import { useForm, useFormContext, FormProvider } from "react-hook-form"
 import { toValue } from "../../platform"
@@ -73,6 +74,11 @@ export const BankInfoDialog = ({
         }
     }, [error])
 
+    const reset = () => {
+        mutate(undefined, false)
+        dialog?.hide()
+    }
+
     return (
         <>
             <Dialog.Modal
@@ -95,6 +101,7 @@ export const BankInfoDialog = ({
                         currency={currency}
                         username={username}
                         platform={platform}
+                        platformtype={platformtype}
                         onSubmitted={() => {
                             mutate()
                             onSubmitted?.()
@@ -122,9 +129,7 @@ export const BankInfoDialog = ({
                         showCloseButton
                         type="warning"
                         hideBackdrop={true}
-                        onClickClose={() => {
-                            reset()
-                        }}
+                        onClickClose={reset}
                         {...errorDialog}
                     >
                         <Text.Block>{JSON.stringify(error)}</Text.Block>
@@ -193,7 +198,13 @@ const AddBankInfoDialog = ({
                     hideOnClickOutside={false}
                     {...dialog}
                 >
-                    <FormBody />
+                    <FormBody
+                        brandCode={brandCode}
+                        currency={currency}
+                        username={username}
+                        platform={platform}
+                        platformtype={platformtype}
+                    />
                 </Dialog.Modal>
             </Modal.Backdrop>
         </>
@@ -210,7 +221,6 @@ const CardForm = ({
     ...props
 }) => {
     let platformtype = toValue(platform)
-
     let formMethods = useForm({ defaultValues: clone(record) })
     let { handleSubmit } = formMethods
 
@@ -227,7 +237,7 @@ const CardForm = ({
     }, [deleteBankInfoResult])
 
     return (
-        <FormProvider>
+        <FormProvider {...formMethods}>
             <Card
                 {...props}
                 headerAddon={
@@ -244,42 +254,138 @@ const CardForm = ({
                     </Set>
                 }
             >
-                <FormBody />
+                <FormBody
+                    brandCode={brandCode}
+                    currency={currency}
+                    username={username}
+                    platform={platform}
+                    platformtype={platformtype}
+                />
             </Card>
         </FormProvider>
     )
 }
 
-const FormBody = ({}) => {
-    let { register } = useFormContext()
+const FormBody = ({
+    brandCode,
+    currency,
+    username,
+    platform,
+    platformtype
+}) => {
+    let { register, watch, setValue } = useFormContext()
+
+    let paymentchannelid = watch("paymentchannelid")
+
+    let { isLoading, data: withdrawList = [], error } = useWithdrawList({
+        brandCode,
+        currency,
+        username,
+        platformtype
+    })
+
+    let banktypeOptions = withdrawList
+        ?.filter((item) => item.channelid === paymentchannelid)
+        ?.map((item) => ({
+            label: item.banktype,
+            value: item.banktype
+        }))
+
+    let banktype = watch("banktype")
+    let isBank = banktype === "Bank"
+    let isCrypto = banktype === "Crypto"
     return (
         <>
             <FieldStack>
-                <InputField
+                <PaymentChannelSelect
                     name="paymentchannelid"
-                    inputRef={register}
-                    value="e761a2d3-5705-417f-8d97-43cb7aea0142"
-                    label="Channel"
+                    placeholder="Payment Channel"
+                    setValue={setValue}
+                    selectRef={register}
+                    brandCode={brandCode}
+                    currency={currency}
+                    username={username}
+                    platformtype={platformtype}
                 />
-                <BankTypeSelect name="banktype" selectRef={register} />
-                <InputField name="detail.name" inputRef={register} />
-                <InputField name="detail.account" inputRef={register} />
+                {banktypeOptions.length > 0 && (
+                    <SelectField
+                        name="banktype"
+                        selectRef={register}
+                        options={banktypeOptions}
+                        required
+                        label="Bank Type"
+                    />
+                )}
+                {isBank && (
+                    <>
+                        <InputField
+                            name="detail.name"
+                            inputRef={register}
+                            label="Account Name"
+                        />
+                        <InputField
+                            name="detail.account"
+                            inputRef={register}
+                            label="Account"
+                        />
+                    </>
+                )}
+                {isCrypto && (
+                    <>
+                        <InputField
+                            name="detail.address"
+                            inputRef={register}
+                            label="Address"
+                        />
+                    </>
+                )}
             </FieldStack>
         </>
     )
 }
 
-const BankTypeSelect = ({ ...props }) => {
-    let options = [
-        {
-            label: "Bank",
-            value: "Bank"
-        },
-        {
-            label: "Crypto",
-            value: "Crypto"
-        }
-    ]
+const PaymentChannelSelect = ({
+    brandCode,
+    currency,
+    username,
+    platformtype,
+    onChange,
+    onChannelChange,
+    name,
+    setValue,
+    ...props
+}) => {
+    let { isLoading, data, error } = useWithdrawList({
+        brandCode,
+        currency,
+        username,
+        platformtype
+    })
 
-    return <SelectField options={options} label="Type" {...props} />
+    let options =
+        data?.map?.((item) => ({
+            label: item.channelname,
+            value: item.channelid
+        })) ?? []
+
+    return (
+        <SelectField
+            name={name}
+            isLoading={isLoading}
+            options={options}
+            label="Channel"
+            onChange={(event) => {
+                onChange?.(event)
+
+                let channelId = event.target.value
+                setValue(name, channelId)
+
+                let record = data?.find((item) => {
+                    return item.channelid === channelId
+                })
+                onChannelChange?.(record)
+            }}
+            {...props}
+        />
+    )
 }

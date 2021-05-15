@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Models;
 using TGS.Shared.Game.Models.PragmaticPlay.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.PragmaticPlay
@@ -26,8 +27,9 @@ namespace TGS.Shared.Game.ApiClients.PragmaticPlay
             var value = Json.SerializeToString(request);
             var parameters = Json.DeserializeFromString<Dictionary<string, string>>(value);
 
+            var prefix = $"{Consts.GameProvider.PragmaticPlay}.RoundHistory";
             return await ExecuteFormRequestAsync<OpenHistoryExtendedResponse>(apiUrl,
-                    "IntegrationService/v3/http/HistoryAPI/OpenHistoryExtended/", parameters)
+                    "IntegrationService/v3/http/HistoryAPI/OpenHistoryExtended/", parameters, logPrefix: prefix)
                 .ConfigureAwait(false);
         }
     }

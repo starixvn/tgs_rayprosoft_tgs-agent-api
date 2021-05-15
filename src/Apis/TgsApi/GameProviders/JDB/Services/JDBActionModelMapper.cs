@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
@@ -15,7 +14,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     {
         PlayerValidationData Request(string playerCode, PlatformType platformType);
         BetData Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request);
-        BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request);
+        BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request, string externalRoundId);
         BaseActionResponse Response(GetBalanceResult result);
         BaseActionResponse Response(BetResult result);
     }
@@ -23,13 +22,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public sealed class JDBActionModelMapper : IJDBActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.JDB;
-        private readonly IJsonSerializationProvider _json;
 
-        public JDBActionModelMapper(IJsonSerializationProvider json)
-        {
-            _json = json;
-        }
-        
         PlayerValidationData IJDBActionModelMapper.Request(string playerCode, PlatformType platformType) =>
             new()
             {
@@ -49,21 +42,20 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         {
             var transactions = new List<TransactionData>(2);
             var externalTransactionId = request.TransferId.ToString();
-            var extraData = new Dictionary<string, object> {{nameof(request.GameSequenceNo), request.GameSequenceNo}};
+            var externalRoundId = request.GameSequenceNo.ToString();
 
             //place bet
             transactions.Add(new TransactionData
             {
                 Amount = Math.Abs(request.Bet),
                 ExternalTransactionId = externalTransactionId,
-                ExternalGameActionGroupId = externalTransactionId,
+                ExternalGameActionGroupId = externalRoundId,
                 ExternalBetId = externalTransactionId,
-                ExternalRoundId = externalTransactionId,
+                ExternalRoundId = externalRoundId,
                 ExternalGameId = request.MachineType.ToString(),
                 GameActionType = PlaceBet,
                 TimeStamp = DateTimeOffset.Parse(request.GameDate),
-                RoundClosed = false,
-                RoundDetail = AddCustomDescription(extraData)
+                RoundClosed = false
             });
             
             //settle bet
@@ -72,9 +64,9 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 Amount = request.Win,
                 ExternalTransactionId = $"{externalTransactionId}_settle",
                 ExternalTransactionReferenceId = externalTransactionId,
-                ExternalGameActionGroupId = externalTransactionId,
+                ExternalGameActionGroupId = externalRoundId,
                 ExternalBetId = externalTransactionId,
-                ExternalRoundId = externalTransactionId,
+                ExternalRoundId = externalRoundId,
                 ExternalGameId = request.GameSequenceNo.ToString(),
                 GameActionType = request.Win > 0 ? WinBet : LoseBet,
                 TimeStamp = DateTimeOffset.Parse(request.LastModifyTime),
@@ -85,19 +77,19 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             return GetBetData(request.UserId, request.Currency, data, transactions.ToArray(), platformType);
         }
         
-        BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, CancelTransactionRequest request)
+        BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, CancelTransactionRequest request, string externalRoundId)
         {
-            var clientRoundId = request.TransferId.ToString();
-            
+            var externalTransactionId = request.TransferId.ToString();
+
             var transactions = new TransactionData[]
             {
                 new()
                 {
                     ExternalTransactionId = $"{request.TransferId}_settle_cancel",
                     ExternalTransactionReferenceId = $"{request.TransferId}_settle",
-                    ExternalRoundId = clientRoundId,
-                    ExternalBetId = clientRoundId,
-                    ExternalGameActionGroupId = clientRoundId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
                     GameActionType = CancelTransaction,
                     TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(request.SystemTime),
                     RoundClosed = false
@@ -106,9 +98,9 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 {
                     ExternalTransactionId = $"{request.TransferId}_cancel",
                     ExternalTransactionReferenceId = request.TransferId.ToString(),
-                    ExternalRoundId = clientRoundId,
-                    ExternalBetId = clientRoundId,
-                    ExternalGameActionGroupId = clientRoundId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
                     GameActionType = CancelTransaction,
                     TimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(request.SystemTime),
                     RoundClosed = true
@@ -149,9 +141,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ? PlatformType.Desktop
                 : PlatformType.Mobile;
         }
-        
-        private string AddCustomDescription(Dictionary<string, object> items) =>
-            items == null || items.Count == 0 ? null : _json.SerializeToString(items, new() {WriteIndented = false});
 
         #endregion
     }

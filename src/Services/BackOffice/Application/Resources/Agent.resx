@@ -112,4 +112,16 @@
   <data name="BalanceMustGreaterThanZero" xml:space="preserve">
     <value>Balance must greater than 0.</value>
   </data>
+  <data name="TargetAgentNotFound" xml:space="preserve">
+    <value>Target agent is not found.</value>
+  </data>
+  <data name="TargetAgentNotHomologue" xml:space="preserve">
+    <value>Target agent is not homologue.</value>
+  </data>
+  <data name="TargetPlayerNotFound" xml:space="preserve">
+    <value>Target player is not found.</value>
+  </data>
+  <data name="TargetPlayerNotUnderAgent" xml:space="preserve">
+    <value>Target player is not under agent.</value>
+  </data>
 </root>

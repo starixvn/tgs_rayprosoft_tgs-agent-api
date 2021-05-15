@@ -10,7 +10,8 @@ import {
     Set,
     Popover,
     List,
-    useModalState
+    useModalState,
+    Flex
 } from "bumbag"
 import {
     Create as CreateMenu,
@@ -114,10 +115,10 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
 
 const DialogCss = css`
     min-width: 80vw;
-    min-height: 90vh;
+    max-height: 90vh;
 
     & .bb-DialogContent {
-        min-height: 80vh;
+        max-height: 80vh;
     }
 
     .tox-fullscreen & {
@@ -179,7 +180,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
             selector,
             readonly,
             base_url: "/tinymce",
-            height: readonly ? 280 : 380,
+            height: readonly ? 300 : 480,
             plugins:
                 "preview paste importcss searchreplace autolink code visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists imagetools textpattern noneditable charmap emoticons",
             menubar: "file edit insert view format table upload",
@@ -315,7 +316,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
             </Label>
             <Input name="subject" required={required} disabled={readonly} />
 
-            <Label name="content" required={required}>
+            <Label name="content" required={required} flex="1 auto">
                 <Trans zh="内容" en="Content" />
             </Label>
             <Controller

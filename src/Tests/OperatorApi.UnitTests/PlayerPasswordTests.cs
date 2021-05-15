@@ -102,9 +102,9 @@ namespace OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Forgot_Password_Will_Sent_ShortMessage()
+        public async Task Forgot_Password_Will_Sent_Email()
         {
-            var playerPhone = "0911123456";
+            var email = "email@test.com";
 
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
             dbContextOptionsBuilder
@@ -118,7 +118,7 @@ namespace OperatorApi.UnitTests
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                Phone = playerPhone,
+                Email = email,
                 PhoneAuthentication = true,
                 DefaultWalletCurrencyCode = "CNY"
             };
@@ -134,7 +134,8 @@ namespace OperatorApi.UnitTests
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator);
 
-            var command = new ForgotPasswordCommand(CultureInfo.GetCultureInfo("en-US"), "0911123456");
+            var command = new ForgotPasswordCommand(CultureInfo.GetCultureInfo("en-US"), email);
+
             var validateCode = "123456";
             var token = "abc123";
 
@@ -151,11 +152,10 @@ namespace OperatorApi.UnitTests
 
             _ = fakeValidateCodeOperator
                 .Received(1)
-                .SendMessageAsync(
-                    Arg.Is(playerPhone),
-                    Arg.Is(expected),
-                    Arg.Is(player.DefaultWalletCurrencyCode),
-                    Arg.Is(player.BrandId));
+                .SendEmailAsync(
+                    Arg.Is(command.CultureInfo),
+                    Arg.Is(player.Email),
+                    Arg.Is(validateCode));
         }
 
         [Test]

@@ -85,7 +85,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 ShowAll = showAll
             };
 
-            var list = CreatePlayerOperationModelFixture()
+            var fixture = new Fixture();
+            var list = fixture
                 .CreateMany<PlayerOperationModel>(105)
                 .AsQueryable()
                 .BuildMock().Object;
@@ -131,6 +132,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Can_Get_Player()
         {
+            var fixture = new Fixture();
             var player = CreatePlayersModelFixture().Create<PlayerModel>();
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
@@ -191,14 +193,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private Fixture CreatePlayersModelFixture()
         {
             var fixture = new Fixture();
-            fixture.Create<PlayersModel>();
-            return fixture;
-        }
-
-        private Fixture CreatePlayerOperationModelFixture()
-        {
-            var fixture = new Fixture();
-            fixture.Create<PlayerOperationModel>();
+            fixture.Customize<PlayerModel>(u => u
+                .With(s => s.Banks, new PlayerModel.BankModel[] { }));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
     }

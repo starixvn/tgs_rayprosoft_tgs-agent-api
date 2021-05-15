@@ -3,37 +3,36 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
-using TGS.Core.DataServices.Report;
-using TGS.Core.DataServices.Report.Models;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 
 namespace TGS.Services.Report.Infrastructure.DataService
 {
     public interface IPlayerRebateService
     {
-        IReportRepository Repository { get; }
+        ITgsRepository Repository { get; }
 
         IQueryable<PlayerRebate> GetPlayerRebateQueries(
             Func<IQueryable<PlayerRebate>, IQueryable<PlayerRebate>> preQuery = null,
             bool tracking = false);
 
-        Task CreatePlayerRebatesAsync(PlayerRebateModel[] request);
+        Task CreatePlayerRebatesAsync(PlayerRebateModel[] request, DateTimeOffset? sentOn);
         Task<bool> ExistsAsync(Expression<Func<PlayerRebate, bool>> predicate);
     }
 
-    public class PlayerRebateService : BaseRepositoryOperations<IReportRepository>, IPlayerRebateService
+    public class PlayerRebateService : BaseRepositoryOperations<ITgsRepository>, IPlayerRebateService
     {
-        private readonly IReportRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public PlayerRebateService(IReportRepository repository, ITgsRepository tgsRepository) : base(repository)
+        public PlayerRebateService(ITgsRepository repository) : base(repository)
         {
             _repository = repository;
         }
 
-        IReportRepository IPlayerRebateService.Repository => _repository;
+        ITgsRepository IPlayerRebateService.Repository => _repository;
 
-        Task IPlayerRebateService.CreatePlayerRebatesAsync(PlayerRebateModel[] models) =>
+        Task IPlayerRebateService.CreatePlayerRebatesAsync(PlayerRebateModel[] models, DateTimeOffset? sentOn) =>
             CreateEntitiesAsync(models.Select(model => new PlayerRebate
             {
                 BrandId = model.BrandId,
@@ -41,6 +40,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 PlayerCode = model.PlayerCode,
                 ReportDate = model.ReportDate,
                 CreatedOn = DateTimeOffset.Now,
+                SentOn = sentOn,
                 VipCardGameRebatePercentage = model.VipCardGameRebatePercentage,
                 VipLiveDealerRebatePercentage = model.VipLiveDealerRebatePercentage,
                 VipLotteryRebatePercentage = model.VipLotteryRebatePercentage,

@@ -53,7 +53,7 @@ namespace TGS.Shared.Game.ApiClients.SBOBET
         {
             var prefix = $"{Consts.GameProvider.SBOBET}.BatchCancellation";
             return ExecuteJsonRequestAsync<BatchRequest, BatchResponse>(HttpMethod.Post, apiUrl,
-                "/api/batch/transactions/cancel", request, logPrefix: prefix);
+                "/api/sbo/batch/transactions/cancel", request, logPrefix: prefix);
         }
 
         #endregion

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,8 +6,6 @@ using Tgs.Payment.LeePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.Json;
-using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator.Deposit;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
@@ -19,12 +16,13 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class CryptoDepositController : ControllerBase
     {
-        [HttpPut]
+        [HttpPut("leepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
-        public async ValueTask<Guid> SubmitDepositRequestAsync(
+        public async ValueTask<LeePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] LeePaySerializer serializer,
             [FromBody] SubmitCryptoDepositRequest request)
         {
@@ -42,7 +40,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 brandId,
                 request.BrandPaymentId,
                 request.Amount,
-                "tgs.payment.leepay",
+                "tgs.payment.leepay.deposit",
                 formId => serializer.Serialize(
                     new LeePayDepositSettings(
                             brandPaymentInfo.RootElement.GetProperty("systemId").GetString(),
@@ -56,7 +54,21 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ExecuteAsync(command)
                 .ConfigureAwait(false);
 
-            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(playerTokenData.PlayerCode, createdFormId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<LeePayDepositApplyInfo>(formData.ApplyInfo!);
+
+            return new LeePayDepositFormCreatedResponse
+            {
+                FormId = createdFormId,
+                PaymentUrl = applyInfo.Response.PaymentUrl
+            };
         }
     }
 }

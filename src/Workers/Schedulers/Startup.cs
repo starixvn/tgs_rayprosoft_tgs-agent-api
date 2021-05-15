@@ -5,7 +5,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using Report.Client.Extensions;
+using TGS.Clients.Promotion.Client.Extensions;
+using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -56,10 +57,17 @@ namespace TGS.Workers.Schedulers
                 .AddGameApiClients()
                 .AddOperations()
                 .AddReportClientServices(_configuration)
+                .AddPromotionClientServices(_configuration)
                 .AddHangfireScheduler(_configuration, jobProvider: new JobProvider(),
                     typesToUseManagementPage: GetModuleTypes());
 
             services.AddControllers();
+
+            services.AddGameProvidersMognoRepository((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+                options.MongoConnectionString = config.GetValue<string>("GameProviders:ConnectionString");
+            });
 
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")
@@ -84,7 +92,7 @@ namespace TGS.Workers.Schedulers
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseHangfireScheduler(new[] {Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report});
+            app.UseHangfireScheduler(new[] { Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report });
 
             app.UseRouting();
 
@@ -102,11 +110,11 @@ namespace TGS.Workers.Schedulers
                 endpoints.MapMetrics();
 
                 endpoints.MapHangfireDashboard("/hangfire",
-                    new() {Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}});
+                    new() { Authorization = new[] { new IgnoreHangfireAuthorizationFilter() } });
             });
         }
 
         private static Type[] GetModuleTypes() =>
-            new[] {typeof(JobManagement)};
+            new[] { typeof(JobManagement), typeof(PromotionJobManagement) };
     }
 }

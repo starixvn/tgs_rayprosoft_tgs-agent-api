@@ -38,10 +38,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
     {
         private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _repository;
-        private readonly ITransactionManager _transactionManager;
+        private readonly SystemTransactionManager _transactionManager;
 
         public AgentService(ITgsRepository repository, IPasswordHandler passwordHandler,
-            ITransactionManager transactionManager) : base(repository)
+            SystemTransactionManager transactionManager) : base(repository)
         {
             _passwordHandler = passwordHandler;
             _repository = repository;
@@ -61,6 +61,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x => x.Username == request.ParentUsername);
 
             var brand = await _repository.Brands.AsQueryable().FirstAsync(x => x.Id == request.BrandId);
+            var defaultWalletId = GuidExtensions.NewSequentialGuid();
 
             var agent = new Agent
             {
@@ -70,6 +71,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 BrandId = request.BrandId,
                 Status = AgentStatus.Enabled,
                 ParentAgentId = parentAgent?.Id,
+                DefaultWalletId = defaultWalletId,
                 AgentStatus =
                     request.LiveDealerRebatePercentage == 0 && request.BonusPercentage == 0
                     && request.SlotRebatePercentage == 0 && request.LotteryRebatePercentage == 0 &&
@@ -103,6 +105,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 new AgentWallet
                 {
+                    Id = defaultWalletId,
                     Agent = agent,
                     Balance = 0,
                     CurrencyCode = brand.Currencies.First().CurrencyCode,
@@ -131,7 +134,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
-            return _transactionManager.ExecuteTransactionAsync(() => _repository,
+            return _transactionManager.ExecuteTransactionAsync(_repository,
                 IsolationLevel.ReadCommitted, id,
                 async _ =>
                 {
@@ -151,7 +154,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                             agent.RealName = request.RealName;
                             agent.ParentAgentId = parentAgent?.Id;
                             agent.Status = request.Status;
-                            agent.LevelType = request.ParentUsername.IsNotNullOrEmpty()
+                            agent.LevelType = request.ParentUsername.IsNullOrEmpty()
                                 ? AgentLevelType.Chief
                                 : AgentLevelType.Agent;
                             agent.Type = request.Type;
@@ -174,10 +177,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                             agent.VirtualSportsRebatePercentage = operation == AgentOperation.Agent
                                 ? -1
                                 : request.VirtualSportsRebatePercentage;
-                            agent.AgentStatus = request.LiveDealerRebatePercentage == 0 && request.BonusPercentage == 0
-                                && request.SlotRebatePercentage == 0 && request.LotteryRebatePercentage == 0 &&
-                                request.CardGameRebatePercentage == 0
-                                && request.SportsRebatePercentage == 0 && request.VirtualSportsRebatePercentage == 0
+                            agent.AgentStatus = operation == AgentOperation.Agent
                                     ? AgentConfigStatus.WaitForConfigurePercentage
                                     : AgentConfigStatus.DoneForConfigurePercentage;
                             break;
@@ -193,7 +193,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                             agent.Salt = salt;
                             break;
                     }
-
+                    
                     agent.UpdatedByUsername = request.EditorUsername;
                     agent.UpdatedOn = DateTimeOffset.Now;
                     agent.Remarks = request.Remarks;

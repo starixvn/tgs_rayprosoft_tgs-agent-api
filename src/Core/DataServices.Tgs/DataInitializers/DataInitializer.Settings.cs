@@ -155,7 +155,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("PlayerManagement")
@@ -165,7 +166,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new MenuSetting("PlayerList")
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
-                        }
+                        },
+                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("AgentManagement")
@@ -220,6 +222,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     SubMenus = new[]
                     {
                         new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("Update")}},
+                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("System")

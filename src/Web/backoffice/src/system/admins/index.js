@@ -8,7 +8,8 @@ import dateTimeColumn from "../../table/column/dateTime"
 import { AdminStatusLabel } from "./AdminStatus"
 import {
     useIsDisplayMenuByRoute,
-    useHasSubMenuByRoute
+    useHasSubMenuByRoute,
+    useUserId
 } from "../../user/context"
 import { Code } from "./menu"
 import { useAdminList } from "./client"
@@ -34,6 +35,7 @@ export const Content = () => {
 export const CodeContentPair = [Code, Content]
 
 const Body = () => {
+    let userId = useUserId()
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         username: ""
     })
@@ -43,7 +45,9 @@ const Body = () => {
     let { isLoading, data, error, mutate, deleteCache } = useAdminList(
         toApiParams(state)
     )
-    let columns = useColumns({ mutate, items: data?.items })
+
+    let items = data?.items?.filter((item) => item.id != userId)
+    let columns = useColumns({ mutate, items })
 
     return (
         <PageContent
@@ -70,7 +74,7 @@ const Body = () => {
             <Table
                 controlledState={state}
                 columns={columns}
-                data={data?.items}
+                data={items}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}

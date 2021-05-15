@@ -48,6 +48,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     SecretKey = brand.SecretKey,
                     ApiKey = brand.ApiKey,
                     SettlementIntervalType = brand.SettlementIntervalType,
+                    Domains = brand.Domains.Select(x => x.Url).ToArray(),
                     Currencies = brand.Currencies
                         .Select(x => new BrandCurrencyModel
                         {

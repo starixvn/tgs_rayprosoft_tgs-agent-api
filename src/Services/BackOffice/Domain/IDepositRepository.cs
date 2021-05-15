@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TGS.Services.BackOffice.Domain.Enums;
+using TGS.Services.Payment;
 
 namespace TGS.Services.BackOffice.Domain
 {
@@ -8,6 +8,6 @@ namespace TGS.Services.BackOffice.Domain
     {
         ValueTask<DepositFormDetail> GetDepositFormDetailAsync(Guid formId);
 
-        ValueTask SignOffDepositFormAsync(Guid formId, ReviewStatus reviewStatus);
+        ValueTask SignOffDepositFormAsync(Guid formId, ReviewState reviewStatus, string remark = null);
     }
 }

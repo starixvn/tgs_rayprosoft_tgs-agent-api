@@ -1,4 +1,4 @@
-﻿using TGS.Services.Wallet.Configuration;
+﻿using TGS.Services.WalletService.Configuration;
 using TGS.Wallet.Repositories;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -7,5 +7,8 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static WalletConfiguration AddTgsWalletRepositories(this WalletConfiguration configuration)
             => configuration.AddWalletRepository<WalletRepository>();
+
+        public static WalletConfiguration AddTgsAgentWalletRepositories(this WalletConfiguration configuration)
+            => configuration.AddAgentWalletRepository<AgentWalletRepository>();
     }
 }

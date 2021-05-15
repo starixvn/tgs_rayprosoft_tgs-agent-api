@@ -1,12 +1,14 @@
 ﻿using System;
-using MediatR;
-using TGS.Core.Models.Messages;
+using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public class GetPlayerRoundReportRequest : PageableRequest, IRequest<PagedResponse<PlayerRoundReportModel>>
+    public record GetPlayerRoundReportRequest : PagingRequest
     {
+        [JsonPropertyName("from")]
         public DateTimeOffset From { get; set; }
+
+        [JsonPropertyName("to")]
         public DateTimeOffset To { get; set; }
     }
 }

@@ -94,6 +94,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 services.AddHttpClient<ISBOBETApiClient, SBOBETApiClient>(c =>
                     c.BaseAddress = new(apiUrlSection.GetValue<string>("Tgs-SBO")));
             }
+
             _serviceProvider = services.BuildServiceProvider();
         }
 
@@ -185,7 +186,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var sql = "delete from dbo.player_login_records where player_code = @player_code;";
             await db.ExecuteSqlCommandAsync(sql, CommandType.Text,
-                new Dictionary<string, object> { { "@player_code", playerCode } }).ConfigureAwait(false);
+                new Dictionary<string, object> {{"@player_code", playerCode}}).ConfigureAwait(false);
         }
 
         [When(@"I request the player balance")]
@@ -461,12 +462,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 ExternalBatchId = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString(),
                 Timestamp = DateTimeOffset.Now,
                 Transactions = roundData.GroupBy(r => new
-                {
-                    r.PlayerCode,
-                    r.CurrencyCode,
-                    r.ExternalRoundId,
-                    r.ExternalGameId
-                })
+                    {
+                        r.PlayerCode,
+                        r.CurrencyCode,
+                        r.ExternalRoundId,
+                        r.ExternalGameId
+                    })
                     .SelectMany(g => g.SelectMany(a => a.GameActions.Select(ga =>
                     {
                         if (!currencies.TryGetValue(g.Key.CurrencyCode, out var curr))
@@ -601,7 +602,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var canceledActionIds = gameActions
                 .Where(ga => ga.Type == GameActionType.CancelTransaction)
-                .SelectMany(ga => new[] { ga.Id, ga.ReferencedGameActionId })
+                .SelectMany(ga => new[] {ga.Id, ga.ReferencedGameActionId})
                 .ToArray();
 
             var allCanceled = gameActions.All(ga => canceledActionIds.Contains(ga.Id));
@@ -781,7 +782,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         private Task<SBOConfiguration> GetConfigurationAsync() =>
-                    GetSettingAsync<SBOConfiguration>(_serviceProvider, SettingConsts.GameProviderConfigurations.SBOBET);
+            GetSettingAsync<SBOConfiguration>(_serviceProvider, SettingConsts.GameProviderConfigurations.SBOBET);
 
         private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null)
         {

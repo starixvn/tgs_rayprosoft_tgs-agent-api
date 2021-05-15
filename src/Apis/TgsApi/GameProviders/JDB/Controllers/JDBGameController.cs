@@ -7,13 +7,14 @@ using TGS.Apis.TgsApi.GameProviders.JDB.Services;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 {
-    [Route("api/jdb")]
+    [Route("api/jdb/entrance")]
     [ApiController]
     [Consumes("application/x-www-form-urlencoded")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -25,17 +26,20 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         private readonly IJDBActionModelMapper _map;
         private readonly IJDBServices _services;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IGameActionQueries _gameActionQueries;
 
         public JDBGameController(
             IGamePlayActions actions,
             IJDBServices services,
             IJDBActionModelMapper map,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IJsonSerializationProvider jsonSerializationProvider,
+            IGameActionQueries gameActionQueries)
         {
             _actions = actions;
             _services = services;
             _map = map;
             _jsonSerializationProvider = jsonSerializationProvider;
+            _gameActionQueries = gameActionQueries;
         }
 
         [HttpPost]
@@ -79,8 +83,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
         {
             var data = await _services.GetGameProviderConfigurationDataAsync();
+            var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdAsync(data.GameProviderId, request.UserId,
+                request.TransferId.ToString());
 
-            var betData = _map.Request(data, request);
+            var betData = _map.Request(data, request, gameActionExternalIds.ExternalRoundId);
             var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return _map.Response(betResult);
         }

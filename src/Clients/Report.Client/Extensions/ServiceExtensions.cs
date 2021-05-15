@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using System.Reflection;
+using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Report.Client.Extensions
+namespace TGS.Clients.Report.Client.Extensions
 {
     public static class ServiceExtensions
     {
@@ -14,6 +17,7 @@ namespace Report.Client.Extensions
         public static IServiceCollection AddReportClientServices(this IServiceCollection services,
             IConfiguration configuration, string configSectionName = "Report")
         {
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Singleton);
             services.Configure<ReportSettings>(configuration.GetSection(configSectionName));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<ReportSettings>>().Value);
             services.AddHttpClient<IReportAggregateClient, ReportAggregateClient>((sp, c) =>
@@ -24,11 +28,8 @@ namespace Report.Client.Extensions
             services.AddHttpClient<IReportClient, ReportClient>((sp, c) =>
             {
                 var settings = sp.GetRequiredService<ReportSettings>();
-                c.BaseAddress = new(settings.Url);
-            });
-            services.AddHttpClient<IPromotionSettlementClient, PromotionSettlementClient>((sp, c) =>
-            {
-                var settings = sp.GetRequiredService<ReportSettings>();
+
+                c.Timeout = TimeSpan.FromHours(1);
                 c.BaseAddress = new(settings.Url);
             });
 

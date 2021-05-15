@@ -53,14 +53,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDatabaseName("ix_player_bank_infos_player_code");
 
             builder.HasOne(c => c.Brand)
-                .WithOne()
+                .WithMany()
                 .HasConstraintName("fk_player_bank_infos_brands_brand_id");
 
             builder.HasIndex(c => c.BrandId)
                 .HasDatabaseName("ix_player_bank_infos_brand_id");
 
             builder.HasOne(c => c.PaymentChannel)
-                .WithOne()
+                .WithMany()
                 .HasConstraintName("fk_player_bank_infos_payment_channels_payment_channel_id");
 
             builder.HasIndex(c => c.PaymentChannelId)
