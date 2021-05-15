@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using TGS.Shared.Game.Models.IMESports.Enums;
 
 namespace TGS.Shared.Game.Models.IMESports.Incoming
 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -9,7 +8,6 @@ namespace TGS.Shared.Game.Models.IMESports
     {
         public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            Debug.Assert(typeToConvert == typeof(DateTimeOffset));
             return DateTimeOffset.Parse(reader.GetString());
         }
 

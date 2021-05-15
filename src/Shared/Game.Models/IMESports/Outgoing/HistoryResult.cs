@@ -75,7 +75,6 @@ namespace TGS.Shared.Game.Models.IMESports.Outgoing
         [JsonPropertyName("Selection")]
         public string BetTypeSelection { get; init; }
 
-        [JsonConverter(typeof(StringToNumberConverter))]
         [JsonPropertyName("Odds")]
         public decimal Odds { get; init; }
 

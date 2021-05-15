@@ -94,7 +94,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             await _cacheManager.SetKeyExpirationInAsync(IMESportsConsts.RedisKey.SessionToken, 
                 playerCode, TimeSpan.FromSeconds(sessionToken.TimeToLeave));
 
-            return _map.Response(betData.Transactions, r);
+            return _map.Response(r);
         }
 
         [HttpPost]
@@ -107,10 +107,10 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             var data = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, request.Transactions)
                 .ConfigureAwait(false);
 
-            var externalIdList = await _services.GetValidGameActionExternalIdsAsync(gameProviderId, request.Transactions);
+            var externalIds = await _services.GetValidGameActionExternalIdsAsync(gameProviderId, request.Transactions);
             
-            var settleBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIdList, isSettle: true);
-            var cancelBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIdList, isSettle: false);
+            var settleBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIds, isSettle: true);
+            var cancelBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIds, isSettle: false);
 
             var results = new List<TransactionResponse>();
             results.AddRange(settleBatchResult);
@@ -130,9 +130,9 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
         }
 
         private async Task<IEnumerable<TransactionResponse>> ExecuteBatchAsync(BetRequest request, Guid gameProviderId, Dictionary<string, Guid> data, 
-            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIdList, bool isSettle)
+            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, bool isSettle)
         {
-            var betData = _map.Request(gameProviderId, data, externalIdList, request, isSettle);
+            var betData = _map.Request(gameProviderId, data, externalIds, request, isSettle);
             
             if (betData.Transactions.Any())
             {
@@ -140,7 +140,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
                     await _actions.SettleBatchAsync(betData).ConfigureAwait(false) : 
                     await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
 
-                return _map.Response(betData.Transactions, result);
+                return _map.Response(result);
             }
 
             return Array.Empty<TransactionResponse>();

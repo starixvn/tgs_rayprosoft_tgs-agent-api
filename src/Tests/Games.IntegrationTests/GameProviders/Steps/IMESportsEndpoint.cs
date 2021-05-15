@@ -141,6 +141,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
             PlaceBetAsync(amount, externalGameId);
 
+        [When(@"I place bet of \$(.*) for game ""(.*)"" with invalid product wallet")]
+        public Task WhenIPlaceBetOfForGameWithInvalidProductWallet(decimal amount, string externalGameId) =>
+            PlaceBetAsync(amount, externalGameId, validProductWallet: false);
+
         [Given(@"players place bets:")]
         public async Task GivenPlayersPlaceBets(Table table)
         {
@@ -282,7 +286,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
-                where r.ExternalRoundId == externalRoundId && act.ExtraData == externalTransactionId
+                where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
                 select act).AsNoTracking().FirstAsync();
 
             Set(SR.GameAction, ga);
@@ -337,7 +341,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task ThenTheRoundWillBeAsync(RoundStatus status) =>
             VerifyRoundStatus(_serviceProvider, status);
 
-        private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null)
+        private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null, bool validProductWallet = true)
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var currency = Get<string>(SR.CurrencyCode);
@@ -349,7 +353,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var request = new BetRequest
             {
-                ProductWallet = GetProductWallet(config),
+                ProductWallet = validProductWallet ? GetProductWallet(config) : "0",
                 SessionToken = SessionToken,
                 Transactions = new[]
                 {

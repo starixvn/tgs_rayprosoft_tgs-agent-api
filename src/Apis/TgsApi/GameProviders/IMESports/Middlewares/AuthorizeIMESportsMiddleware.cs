@@ -34,7 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Middlewares
 
             var request = await context.Request.ReadAsObjectFromJsonAsync<Base>();
 
-            if (!Enum.TryParse(typeof(ProductWalletType), request.ProductWallet, out var productWalletType) &&
+            if (!Enum.TryParse<ProductWalletType>(request.ProductWallet, out var productWalletType) ||
                 (int) productWalletType != configuration.ProductWallet)
             {
                 throw new ArgumentException($"Invalid ProductWallet: {request.ProductWallet}");

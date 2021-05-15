@@ -4,6 +4,7 @@
 using System;
 using System.Net.Http;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
@@ -50,7 +51,11 @@ namespace TGS.Shared.Game.ApiClients.IMESports
         ValueTask<GetRoundHistoryResponse> IIMESportsApiClient.GetRoundHistoryAsync(Uri apiUrl,
             GetRoundHistoryRequest request)
         {
-            var options = new JsonSerializerOptions {Converters = {new NumberToStringConverter()}};
+            var options = new JsonSerializerOptions
+            {
+                Converters = {new NumberToStringConverter()},
+                NumberHandling = JsonNumberHandling.AllowReadingFromString
+            };
 
             var prefix = $"{Consts.GameProvider.IMESports}.RoundHistory";
             return ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(

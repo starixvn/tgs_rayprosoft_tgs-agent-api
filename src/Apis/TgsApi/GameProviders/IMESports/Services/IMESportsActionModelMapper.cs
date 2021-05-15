@@ -23,12 +23,12 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
 
         GetBalanceResponse Response(string playerCode, GetBalanceResult r);
 
-        BetResponse Response(TransactionData[] reqTrans, BetResult r);
+        BetResponse Response(BetResult r);
 
         BatchBetData Request(Guid gameProviderId, Dictionary<string, Guid> playerConfigurationIds, 
-            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIdList, BetRequest request, bool isSettle);
+            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, BetRequest request, bool isSettle);
 
-        IEnumerable<TransactionResponse> Response(BatchTransactionData[] reqTrans, BatchBetResult r);
+        IEnumerable<TransactionResponse> Response(BatchBetResult r);
     }
 
     public sealed class IMESportsActionModelMapper : IIMESportsActionModelMapper
@@ -56,30 +56,27 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 ExternalGameActionGroupId = t.ExternalRoundId,
                 ExternalGameId = t.ExternalGameId,
                 GameActionType = GameActionType.PlaceBet,
-                ExtraData = t.ExternalTransactionId,
                 TimeStamp = t.Timestamp
             }).ToArray();
 
             return GetBetData(data, playerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
         }
 
-        BetResponse IIMESportsActionModelMapper.Response(TransactionData[] reqTrans, BetResult r)
+        BetResponse IIMESportsActionModelMapper.Response(BetResult r)
             => new()
             {
                 Results = (from res in r.Transactions
-                          join req in reqTrans
-                              on res.ExternalTransactionId equals req.ExternalTransactionId
                           select new TransactionResponse
                 {
                     InternalTransactionId = res.InternalTransactionId.Value,
-                    ExternalTransactionId = req.ExtraData,
+                    ExternalTransactionId = res.ExternalTransactionId,
                     Balance = r.Balance
                 }).ToArray()
             };
 
         BatchBetData IIMESportsActionModelMapper.Request(Guid gameProviderId,
             Dictionary<string, Guid> playerConfigurationIds, 
-            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIdList, 
+            IDictionary<string, IEnumerable<GameActionExternalIds>> externalList, 
             BetRequest request, bool isSettle)
         {
             return new()
@@ -93,7 +90,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                                                     Select(t =>
                 {
                     playerConfigurationIds.TryGetValue(t.PlayerCode, out var gameProviderConfigurationid);
-                    var externalIds = externalIdList[t.ExternalRoundId];
+                    var externalIds = externalList[t.ExternalRoundId];
                     var externalId = externalIds.First(e => GetRefGameActionTypes(t.ActionType).Contains(e.GameActionType));
                     
                     return new BatchTransactionData
@@ -109,14 +106,13 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                         GameActionType = GetGameActionType(t.ActionType, t.Amount),
                         RoundClosed = isSettle ? (bool?)null : false,
                         CurrencyCode = t.Currency,
-                        Description = t.ExternalTransactionId,
                         Timestamp = t.Timestamp
                     };
                 }).ToArray()
             };
         }
 
-        IEnumerable<TransactionResponse> IIMESportsActionModelMapper.Response(BatchTransactionData[] reqTrans, BatchBetResult r)
+        IEnumerable<TransactionResponse> IIMESportsActionModelMapper.Response(BatchBetResult r)
         {
             var results = new List<TransactionResponse>();
             
@@ -124,22 +120,18 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 from result in r.Results
                 join balance in r.PlayerBalances
                     on result.PlayerCode equals balance.Key
-                join req in reqTrans
-                    on result.ExternalTransactionId equals req.ExternalTransactionId
                 select new TransactionResponse
                 {
-                    ExternalTransactionId = req.Description,
+                    ExternalTransactionId = result.ExternalTransactionId,
                     InternalTransactionId = result.InternalTransactionId.Value,
                     Balance = balance.Value
                 });
             
             results.AddRange(
                 from error in r.Errors
-                join req in reqTrans
-                    on error.ExternalTransactionId equals req.ExternalTransactionId
                 select new TransactionResponse
                 {
-                    ExternalTransactionId = req.Description,
+                    ExternalTransactionId = error.ExternalTransactionId,
                     ErrorCode = error.Error,
                     ErrorMessage = error.ErrorMessage
                 });

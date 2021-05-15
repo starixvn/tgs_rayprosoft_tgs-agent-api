@@ -10,6 +10,7 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
+using TGS.Services.Operations.CodeMappers;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.IMESports;
 using TGS.Shared.Game.Models.IMESports.Common;
@@ -22,6 +23,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IIMESportsApiClient _client;
+        private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
@@ -30,6 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         public IMESportsGameInitializer(
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
+            IGameProviderCurrencyCodeMapper currencyCodeMapper,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
             IRedisCacheManager cacheManager,
@@ -37,6 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
+            _currencyCodeMapper = currencyCodeMapper;
             _gameProviderOperations = gameProviderOperations;
             _brandGameProviderOperations = brandGameProviderOperations;
             _cacheManager = cacheManager;
@@ -95,7 +99,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 return launchResponse;
             }
 
-            var registerResponse = await RegisterPlayerAsync(config, player);
+            var registerResponse = await RegisterPlayerAsync(config, player, gameProviderId);
             if (registerResponse.ErrorCode != Success && registerResponse.ErrorCode != PlayerAlreadyExist)
             {
                 return (NewLaunchGameResponse)registerResponse;
@@ -105,14 +109,17 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             return launchResponse;
         }
         
-        private ValueTask<BaseResponse> RegisterPlayerAsync(IMESportsConfiguration config, CachedPlayer player)
+        private async ValueTask<BaseResponse> RegisterPlayerAsync(IMESportsConfiguration config, CachedPlayer player, Guid gameProviderId)
         {
-            return _client.RegisterPlayerAsync(config.ApiUrl,
+            var currencyCode =
+                await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
+
+            return await _client.RegisterPlayerAsync(config.ApiUrl,
                 new RegisterPlayerRequest
                 {
                     MerchantCode = config.MerchantCode,
                     PlayerCode = player.PlayerCode,
-                    Currency = player.DefaultWalletCurrencyCode
+                    Currency = currencyCode
                 });
         }
     }
