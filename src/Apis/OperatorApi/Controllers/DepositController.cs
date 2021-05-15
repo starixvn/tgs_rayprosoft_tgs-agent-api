@@ -46,7 +46,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             foreach (var bp in brandPayments)
             {
-                if (bp.TransferType != TransferTypes.Deposit)
+                if (bp.TransferType != TransferType.Deposit)
                     continue;
 
                 var getPaymentQuery = new GetPaymentQuery(bp.PaymentId);
@@ -62,12 +62,15 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Id = bp.Id,
                     ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
+                    ChannelCode = bp.ChannelCode,
                     TransferLimit = new Models.ValueRange<decimal>
                     {
                         From = bp.TransferLimit.From,
                         To = bp.TransferLimit.To
                     },
-                    ExtendedData = JsonDocument.Parse(bp.ExtendedData),
+                    ExtendedData = paymentInfo.Code == "Manual"
+                        ? JsonDocument.Parse(bp.ExtendedData)
+                        : JsonDocument.Parse("{}"),
                     PaymentId = bp.PaymentId,
                     PaymentCode = paymentInfo.Code,
                     MethodId = bp.MethodId,

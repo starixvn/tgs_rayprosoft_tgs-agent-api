@@ -14,6 +14,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public Status Status { get; set; }
         public string Description { get; set; }
         public string OperationalEmail { get; set; }
+        public string[] Domains { get; set; }
         public string ClientId { get; set; }
         public string SecretKey { get; set; }
         public string ApiKey { get; set; }

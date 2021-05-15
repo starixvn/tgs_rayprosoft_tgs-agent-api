@@ -49,7 +49,7 @@ namespace TGS.BackOffice.Repositories
             return query.SingleAsync();
         }
 
-        public async ValueTask SignOffDepositFormAsync(Guid formId, ReviewStatus reviewStatus, string remark)
+        public async ValueTask SignOffDepositFormAsync(Guid formId, ReviewState reviewStatus, string remark)
         {
             var formData = await _tgsRepository.DepositForms
                 .FindAsync(formId)
@@ -57,8 +57,8 @@ namespace TGS.BackOffice.Repositories
 
             formData.Status = reviewStatus switch
             {
-                ReviewStatus.Approve => 8000,
-                ReviewStatus.Reject => 7000,
+                ReviewState.Approve => 8000,
+                ReviewState.Reject => 7000,
                 _ => formData.Status
             };
             formData.Remark = remark;

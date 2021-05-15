@@ -8,6 +8,6 @@ namespace TGS.Services.BackOffice.Domain
     {
         ValueTask<DepositFormDetail> GetDepositFormDetailAsync(Guid formId);
 
-        ValueTask SignOffDepositFormAsync(Guid formId, ReviewStatus reviewStatus, string remark = null);
+        ValueTask SignOffDepositFormAsync(Guid formId, ReviewState reviewStatus, string remark = null);
     }
 }

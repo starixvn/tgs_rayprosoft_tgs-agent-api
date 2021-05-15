@@ -39,8 +39,8 @@ FROM
 					FROM DBO.TRANSACTIONS
 					WHERE RECORDED_ON >= _from
 									AND RECORDED_ON < _to
-									AND (_transaction_type IS NULL
-														OR "type" = _transaction_type)
+									AND ((_transaction_type IS NULL
+														OR "type" = _transaction_type) AND _game_action_type IS NULL)
 									AND PLAYER_CODE = _player_code
 					UNION ALL SELECT NULL AS TRANSACTION_ID,
 						ID AS GAME_ACTION_ID,
@@ -52,8 +52,8 @@ FROM
 					FROM BET.GAME_ACTIONS
 					WHERE RECORDED_ON >= _from
 									AND RECORDED_ON < _to
-									AND (_game_action_type IS NULL
-														OR "type" = _game_action_type)
+									AND ((_game_action_type IS NULL
+														OR "type" = _game_action_type) AND _transaction_type IS NULL)
 									AND PLAYER_CODE = _player_code) AS A
 ORDER BY A.RECORDED_ON DESC
 OFFSET (_page_number-1) * _page_size

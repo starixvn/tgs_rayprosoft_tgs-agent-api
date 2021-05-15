@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
@@ -34,9 +35,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task IPlayerBankService.UpdatePlayerBankAsync(
             PlayerBankInfo playerBank, UpdatePlayerBankRequest request)
         {
-            //playerBank.RealName = request.RealName;
-            //playerBank.BankName = request.BankName;
-            //playerBank.BankAccount = request.BankAccount;
+            playerBank.PaymentChannelId = request.PaymentChannelId;
+            playerBank.BankType = request.BankType;
+            playerBank.Detail = JsonSerializer.Serialize(request.Detail);
             playerBank.UpdatedByUsername = request.EditorUsername;
             playerBank.UpdatedOn = DateTimeOffset.Now;
 
@@ -47,10 +48,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var bank = new PlayerBankInfo
             {
+                BrandId = request.BrandId,
                 PlayerCode = request.PlayerCode,
-                //RealName = request.RealName,
-                //BankAccount = request.BankAccount,
-                //BankName = request.BankName,
+                PaymentChannelId = request.PaymentChannelId,
+                BankType = request.BankType,
+                Detail = JsonSerializer.Serialize(request.Detail),
                 CreatedByUsername = request.EditorUsername,
                 UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,

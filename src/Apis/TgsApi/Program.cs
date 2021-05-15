@@ -15,6 +15,7 @@ namespace TGS.Apis.TgsApi
     {
         public static Task Main(string[] args)
         {
+            Console.WriteLine($"GameProvider: {Environment.GetEnvironmentVariable("GameProviderCode")}");
             PrometheusService.StartCollecting();
 
             return CreateHostBuilder(args).Build().RunAsync();

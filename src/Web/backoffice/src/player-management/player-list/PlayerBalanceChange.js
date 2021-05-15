@@ -17,6 +17,7 @@ import subHours from "date-fns/subHours"
 import endOfToday from "date-fns/endOfToday"
 import { numberDecimalColumn } from "../../table/column/numberColumn"
 import { Select } from "../../select/Select"
+import AlertDialog from "../../dialog/Alert"
 
 export const Key = "BalanceChange"
 
@@ -42,7 +43,13 @@ export const PlayerBalanceChangePanel = ({ brandId, playerCode, ...props }) => {
     })
 
     let { pageSize, accountChangeType, from, to } = state
-    let { data, isLoading, mutate } = usePlayerBalanceChanges(
+    let {
+        isLoading,
+        data,
+        error,
+        mutate,
+        deleteCache
+    } = usePlayerBalanceChanges(
         isActive
             ? toApiParams({
                   ...state,
@@ -63,6 +70,7 @@ export const PlayerBalanceChangePanel = ({ brandId, playerCode, ...props }) => {
                     end={to}
                     search={({ accountChangeType, start, end }) => {
                         setState({
+                            pageIndex: 0,
                             accountChangeType,
                             from: start,
                             to: end
@@ -81,6 +89,15 @@ export const PlayerBalanceChangePanel = ({ brandId, playerCode, ...props }) => {
                     isLoading={isLoading}
                 />
             </Stack>
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </TabPanel>
     )
 }

@@ -142,8 +142,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 reviewResponse.BrandPaymentId,
                 reviewResponse.ReviewResponse switch
                 {
-                    ReviewResponses.Approve => ReviewStatus.Approve,
-                    _ => ReviewStatus.Reject
+                    ReviewResponses.Approve => ReviewState.Approve,
+                    _ => ReviewState.Reject
                 },
                 reviewResponse.Remark);
 

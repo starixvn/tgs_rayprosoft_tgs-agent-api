@@ -9,10 +9,13 @@ import {
     Code,
     Card,
     FieldStack,
-    FieldWrapper
+    FieldWrapper,
+    Box
 } from "bumbag"
 import { useTrans } from "../i18n"
 import { DetailDisclosure } from "../dialog/Disclosure"
+import { JsonEditor } from "../text/editor/JsonEditor"
+import { tryStringifyJSON } from "../text/json"
 
 export const LogDetailDialogDisclosure = ({ record, ...props }) => {
     let dialog = useModalState()
@@ -30,13 +33,28 @@ const DetailDialog = ({ record = {}, dialog, ...props }) => {
         zh: "详情",
         en: "Detail"
     })
+
+    let [isRequestJson, requestContent = ""] = tryStringifyJSON(
+        record.requestContent
+    )
+
+    let [isResponseJson, responseContent = ""] = tryStringifyJSON(
+        record.responseContent
+    )
     return (
         <Dialog.Modal
             title={title}
             showActionButtons={false}
             hideOnClickOutside={false}
             showCloseButton
-            maxWidth="70vw"
+            width="80vw"
+            maxWidth="80vw"
+            maxHeight="90vh"
+            css={css`
+                & .bb-DialogContent {
+                    max-height: 90vh;
+                }
+            `}
             {...dialog}
         >
             <FieldStack orientation="vertical">
@@ -46,7 +64,20 @@ const DetailDialog = ({ record = {}, dialog, ...props }) => {
                             <Code isBlock>{record.requestHeaders}</Code>
                         </FieldWrapper>
                         <FieldWrapper label="Content">
-                            <Code isBlock>{record.requestContent}</Code>
+                            <Box>
+                                {isRequestJson && (
+                                    <JsonEditor
+                                        height="30vh"
+                                        value={requestContent}
+                                        disabled
+                                    />
+                                )}
+                                {!isRequestJson && (
+                                    <Code isBlock wordBreak="break-word">
+                                        {requestContent}
+                                    </Code>
+                                )}
+                            </Box>
                         </FieldWrapper>
                     </FieldStack>
                 </Card>
@@ -57,7 +88,20 @@ const DetailDialog = ({ record = {}, dialog, ...props }) => {
                             <Code isBlock>{record.responseHeaders}</Code>
                         </FieldWrapper>
                         <FieldWrapper label="Content">
-                            <Code isBlock>{record.responseContent}</Code>
+                            <Box>
+                                {isResponseJson && (
+                                    <JsonEditor
+                                        height="30vh"
+                                        value={responseContent}
+                                        disabled
+                                    />
+                                )}
+                                {!isResponseJson && (
+                                    <Code isBlock wordBreak="break-word">
+                                        {responseContent}
+                                    </Code>
+                                )}
+                            </Box>
                         </FieldWrapper>
                     </FieldStack>
                 </Card>

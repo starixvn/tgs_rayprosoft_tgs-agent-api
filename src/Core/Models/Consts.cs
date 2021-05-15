@@ -10,7 +10,7 @@ namespace TGS.Core.Models
         public const string DefaultCultureCode = "en-US";
         public const string Default = "default";
 
-        public static readonly GameType[] Sports = { GameType.Sportsbook, GameType.VirtualSports, GameType.ESports };
+        public static readonly GameType[] Sports = {GameType.Sportsbook, GameType.VirtualSports, GameType.ESports};
 
         public static readonly GamePlatformType[] AllGamePlatformTypes =
         {
@@ -24,6 +24,9 @@ namespace TGS.Core.Models
                 {HealthStatus.Unhealthy, StatusCodes.Status503ServiceUnavailable},
                 {HealthStatus.Degraded, StatusCodes.Status500InternalServerError}
             };
+
+        public static GameType[] SportsGroup = {GameType.Sportsbook, GameType.ESports};
+        public static GameType[] SlotGroup = {GameType.Fishing, GameType.Arcade, GameType.Slot, GameType.TableGame};
 
         public static class CachePrefix
         {

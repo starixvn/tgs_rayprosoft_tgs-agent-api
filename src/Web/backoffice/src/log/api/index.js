@@ -160,11 +160,11 @@ const SearchBar = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
                     <DateTimeRangeInput />
-                    {/* <InputField
+                    <InputField
                         name="trackingId"
                         showEmptyFieldValueAddonAfter
                         placeholder="Tracking Id"
-                    /> */}
+                    />
                     <InputField
                         name="ip"
                         showEmptyFieldValueAddonAfter
@@ -196,12 +196,12 @@ const useColumns = ({ items = [] } = {}) => {
                 disableSortBy: true,
                 Cell: ({ value = "" }) => value
             }),
-            // textColumn({
-            //     accessor: "trackingId",
-            //     Header: <Trans zh="Tracking Id" en="Tracking Id" />,
-            //     disableSortBy: true,
-            //     Cell: ({ value }) => value
-            // }),
+            textColumn({
+                accessor: "trackingId",
+                Header: <Trans zh="Tracking Id" en="Tracking Id" />,
+                disableSortBy: true,
+                Cell: ({ value = "" }) => value
+            }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
@@ -212,6 +212,8 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "path",
                 Header: <Trans zh="Path" en="Path" />,
                 disableSortBy: true,
+                wordBreak: "break-word",
+                textAlign: "left",
                 Cell: ({ value = "" }) => value
             }),
             textColumn({

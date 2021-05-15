@@ -33,8 +33,8 @@ export const Select = ({
         selectRef = ref
     }
 
-    let loadingOptions = props.isLoading && (!options || options.length === 0)
-    if (autoRegisterFormField && loadingOptions) {
+    // let loadingOptions = props.isLoading && (!options || options.length === 0)
+    if (autoRegisterFormField && props.isLoading) {
         return (
             <Controller
                 name={name}

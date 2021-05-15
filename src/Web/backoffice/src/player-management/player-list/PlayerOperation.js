@@ -13,10 +13,11 @@ import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import isSameDate from "date-fns/isEqual"
 import textColumn from "../../table/column/textColumn"
 import { Descending } from "../../table/order"
+import AlertDialog from "../../dialog/Alert"
 
 export const Key = "operation"
 
-export const Tab = ({ ...props }) => {
+export const PlayerOperationTab = ({ ...props }) => {
     return (
         <_Tab tabId={Key} {...props}>
             <Trans zh="操作记录" en="Operating records" />
@@ -24,7 +25,7 @@ export const Tab = ({ ...props }) => {
     )
 }
 
-export const Panel = ({ playerCode, ...props }) => {
+export const PlayerOperationPanel = ({ playerCode, ...props }) => {
     let { selectedId } = props
     let isActive = selectedId === Key
 
@@ -35,13 +36,12 @@ export const Panel = ({ playerCode, ...props }) => {
     })
 
     let { pageSize, from, to } = state
-    let { data, isLoading, mutate } = useOperations(
+    let { isLoading, data, error, mutate, deleteCache } = useOperations(
         isActive ? playerCode : undefined,
         toApiParams({ ...state, sortby: "createdOn", orderby: Descending })
     )
 
     let columns = useColumns({ items: data?.items })
-
     return (
         <TabPanel tabId={Key} {...props}>
             <Stack spacing="major-2">
@@ -69,6 +69,15 @@ export const Panel = ({ playerCode, ...props }) => {
                     isLoading={isLoading}
                 />
             </Stack>
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </TabPanel>
     )
 }
