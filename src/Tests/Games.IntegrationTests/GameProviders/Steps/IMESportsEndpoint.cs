@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TechTalk.SpecFlow;
+using TGS.Apis.TgsApi.GameProviders.IMESports;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -18,6 +20,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Shared.Game.Models.IMESports.Common;
 using TGS.Shared.Game.Models.IMESports.Enums;
 using TGS.Shared.Game.Models.IMESports.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
@@ -33,6 +36,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     {
         private readonly IIMESportsApiClient _client;
         private readonly ServiceProvider _serviceProvider;
+        private const string SessionToken = "asdfgqwer0987";
+        private const string Valid = "valid";
 
         public IMESportsEndpoint(ScenarioContext scenarioContext)
             : base(scenarioContext)
@@ -110,6 +115,27 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.PlayerCode, playerCode);
         }
 
+        [Given(@"add (.*) session token in redis")]
+        public Task GivenAddSessionTokenInRedisAsync(string isValid)
+        {
+            var playerCode = Get<string>(SR.PlayerCode);
+            var timeToLeave = 180;
+            var cacheManager = _serviceProvider.GetRequiredService<IRedisCacheManager>();
+
+            if (isValid.IgnoreCaseNotEquals(Valid))
+            {
+                return cacheManager.ClearCacheAsync(IMESportsConsts.RedisKey.SessionToken, playerCode);
+            }
+
+            return cacheManager.SafeCacheAsync(IMESportsConsts.RedisKey.SessionToken,
+                playerCode,
+                TimeSpan.FromSeconds(timeToLeave), new IMSessionToken
+                {
+                    SessionToken = SessionToken,
+                    TimeToLeave = timeToLeave
+                });
+        }
+
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         [When(@"I place bet of \$(.*) for game ""(.*)""")]
         public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
@@ -125,9 +151,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 await GivenPlayerOfBrandLoginViaAsync(p.Username, p.Brand, p.CurrencyCode, p.Platform);
                 await GivenPlayerHavingBalanceOfAsync(p.Balance);
-                await WhenIPlaceBetOfForGameAsync(p.Amount, p.GameId);
 
                 p.PlayerCode = Get<string>(SR.PlayerCode);
+                await GivenAddSessionTokenInRedisAsync(Valid);
+
+                await WhenIPlaceBetOfForGameAsync(p.Amount, p.GameId);
+
                 var request = Get<BetRequest>(SR.Request);
                 betRequests.Add(request);
             }
@@ -321,6 +350,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var request = new BetRequest
             {
                 ProductWallet = GetProductWallet(config),
+                SessionToken = SessionToken,
                 Transactions = new[]
                 {
                     new TransactionRequest
