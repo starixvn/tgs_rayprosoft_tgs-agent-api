@@ -62,6 +62,13 @@ Scenario: 02.f - Player cannot place bet with invalid product wallet
 	When I place bet of $-10 for game "imesports" with invalid product wallet
 	Then I will receive bet response of error "InvalidArguments"
 	
+Scenario: 02.g - Player cannot place bet with invalid prefix
+	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
+		And player having balance of $100
+		And add valid session token in redis for game "imesports"
+	When I place bet of $-10 for game "imesports" with invalid prefix
+	Then I will receive bet response of error "InvalidArguments"
+	
 Scenario: 03.a - Win bet
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100

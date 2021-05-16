@@ -25,8 +25,9 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
 
         BetResponse Response(BetResult r);
 
-        BatchBetData Request(Guid gameProviderId, Dictionary<string, Guid> playerConfigurationIds, 
-            string prefix, IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, 
+        BatchBetData Request(Guid gameProviderId, 
+            Dictionary<string, (Guid GameProviderConfigurationId, string PlayerCode)> playerConfigurationIds, 
+            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, 
             BetRequest request, bool isSettle);
 
         IEnumerable<TransactionResponse> Response(BatchBetResult r);
@@ -82,7 +83,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             };
 
         BatchBetData IIMESportsActionModelMapper.Request(Guid gameProviderId,
-            Dictionary<string, Guid> playerConfigurationIds, string prefix,
+            Dictionary<string, (Guid GameProviderConfigurationId, string PlayerCode)> playerConfigurationIds,
             IDictionary<string, IEnumerable<GameActionExternalIds>> externalList, 
             BetRequest request, bool isSettle)
         {
@@ -96,14 +97,14 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 Transactions = request.Transactions.Where(t => GetGameActionType(t.ActionType, t.Amount).IsSettleBet() == isSettle).
                                                     Select(t =>
                 {
-                    playerConfigurationIds.TryGetValue(t.PlayerCode, out var gameProviderConfigurationid);
+                    playerConfigurationIds.TryGetValue(t.PlayerCode, out var playerGameProviderConfigurationId);
                     var externalIds = externalList[t.ExternalRoundId];
                     var externalId = externalIds.First(e => GetRefGameActionTypes(t.ActionType).Contains(e.GameActionType));
                     
                     return new BatchTransactionData
                     {
-                        PlayerCode = _services.GetPlayerCode(t.PlayerCode, prefix),
-                        GameProviderConfigurationId = gameProviderConfigurationid,
+                        PlayerCode = playerGameProviderConfigurationId.PlayerCode,
+                        GameProviderConfigurationId = playerGameProviderConfigurationId.GameProviderConfigurationId,
                         Amount = Math.Abs(t.Amount),
                         ExternalRoundId = t.ExternalRoundId,
                         ExternalBetId = t.ExternalRoundId,

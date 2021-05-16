@@ -147,6 +147,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task WhenIPlaceBetOfForGameWithInvalidProductWallet(decimal amount, string externalGameId) =>
             PlaceBetAsync(amount, externalGameId, validProductWallet: false);
 
+        [When(@"I place bet of \$(.*) for game ""(.*)"" with invalid prefix")]
+        public Task WhenIPlaceBetOfForGameWithInvalidPrefix(decimal amount, string externalGameId) =>
+            PlaceBetAsync(amount, externalGameId, validPrefix: false);
+
         [Given(@"players place bets:")]
         public async Task GivenPlayersPlaceBets(Table table)
         {
@@ -343,7 +347,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task ThenTheRoundWillBeAsync(RoundStatus status) =>
             VerifyRoundStatus(_serviceProvider, status);
 
-        private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null, bool validProductWallet = true)
+        private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null, 
+            bool validProductWallet = true, bool validPrefix = true)
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var currency = Get<string>(SR.CurrencyCode);
@@ -361,7 +366,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 {
                     new TransactionRequest
                     {
-                        PlayerCode = $"{Prefix}_{playerCode}",
+                        PlayerCode = $"{(validPrefix ? Prefix : "prefix")}_{playerCode}",
                         ActionType = ActionType.PlaceBet,
                         Amount = amount,
                         Currency = currency,

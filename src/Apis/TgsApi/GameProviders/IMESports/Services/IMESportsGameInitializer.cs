@@ -80,17 +80,18 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             var config =
                 await _settingOperations.GetValueFromJsonByKeyAsync<IMESportsConfiguration>(SettingConsts
                     .GameProviderConfigurations.IMESports);
+            var merchant = await _services.GetBrandMerchantAsync(player.PlayerCode, config);
             
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, player.BrandId,
                 request.Language);
             
-            var apiUrl = config.ApiUrl;
+            var apiUrl = merchant.ApiUrl;
             var platformType = request.Token.PlatformType;
             
             var launchRequest = new NewLaunchGameRequest
             {
-                MerchantCode = config.MerchantCode,
-                PlayerCode = $"{config.Prefix}_{player.PlayerCode}",
+                MerchantCode = merchant.MerchantCode,
+                PlayerCode = $"{merchant.Prefix}_{player.PlayerCode}",
                 GameId = externalGameId,
                 Language = cultureCode,
                 ProductWallet = config.ProductWallet,
@@ -103,7 +104,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 return launchResponse;
             }
 
-            var registerResponse = await RegisterPlayerAsync(config, player, gameProviderId);
+            var registerResponse = await RegisterPlayerAsync(merchant, player, gameProviderId);
             if (registerResponse.ErrorCode != Success && registerResponse.ErrorCode != PlayerAlreadyExist)
             {
                 return (NewLaunchGameResponse)registerResponse;
@@ -113,16 +114,16 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             return launchResponse;
         }
         
-        private async ValueTask<BaseResponse> RegisterPlayerAsync(IMESportsConfiguration config, CachedPlayer player, Guid gameProviderId)
+        private async ValueTask<BaseResponse> RegisterPlayerAsync(IMESportsBrandMerchant merchant, CachedPlayer player, Guid gameProviderId)
         {
             var currencyCode =
                 await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
 
-            return await _client.RegisterPlayerAsync(config.ApiUrl,
+            return await _client.RegisterPlayerAsync(merchant.ApiUrl,
                 new RegisterPlayerRequest
                 {
-                    MerchantCode = config.MerchantCode,
-                    PlayerCode = player.PlayerCode,
+                    MerchantCode = merchant.MerchantCode,
+                    PlayerCode = $"{merchant.Prefix}_{player.PlayerCode}",
                     Currency = currencyCode
                 });
         }

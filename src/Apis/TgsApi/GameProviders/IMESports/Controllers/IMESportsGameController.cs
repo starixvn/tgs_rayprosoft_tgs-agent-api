@@ -64,7 +64,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
         [Route("GetBalance")]
         public async ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request)
         {
-            var playerCode = await GetPlayerCodeAsync(request.PlayerCode);
+            var playerCode = await _services.GetPlayerCodeAsync(request.PlayerCode);
             var r = await _actions.GetBalanceAsync(GameProviderConst.IMESports, playerCode)
                 .ConfigureAwait(false);
 
@@ -79,7 +79,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
 
             var transaction = request.Transactions.First();
-            var playerCode = await GetPlayerCodeAsync(transaction.PlayerCode);
+            var playerCode = await _services.GetPlayerCodeAsync(transaction.PlayerCode);
 
             var redisKey = _services.GetRedisCacheKey(playerCode, transaction.ExternalGameId);
             var sessionToken = await ValidateSessionTokenAsync(redisKey, request.SessionToken);
@@ -110,16 +110,16 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             
-            var data = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, request.Transactions)
-                .ConfigureAwait(false);
-            
-            var configuration =
+            var config =
                 await _settingOperations.GetValueFromJsonByKeyAsync<IMESportsConfiguration>(SettingConsts
                     .GameProviderConfigurations.IMESports);
-            var externalIds = await _services.GetValidGameActionExternalIdsAsync(gameProviderId, configuration.Prefix, request.Transactions);
+            var data = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, config, request.Transactions)
+                .ConfigureAwait(false);
             
-            var settleBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, configuration.Prefix, externalIds, isSettle: true);
-            var cancelBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, configuration.Prefix, externalIds, isSettle: false);
+            var externalIds = await _services.GetValidGameActionExternalIdsAsync(gameProviderId, request.Transactions);
+            
+            var settleBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIds, isSettle: true);
+            var cancelBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIds, isSettle: false);
 
             var results = new List<TransactionResponse>();
             results.AddRange(settleBatchResult);
@@ -138,10 +138,11 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             return new (new BaseResponse());
         }
 
-        private async Task<IEnumerable<TransactionResponse>> ExecuteBatchAsync(BetRequest request, Guid gameProviderId, Dictionary<string, Guid> data, 
-            string prefix, IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, bool isSettle)
+        private async Task<IEnumerable<TransactionResponse>> ExecuteBatchAsync(BetRequest request, Guid gameProviderId, 
+            Dictionary<string, (Guid, string)> data, 
+            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, bool isSettle)
         {
-            var betData = _map.Request(gameProviderId, data, prefix, externalIds, request, isSettle);
+            var betData = _map.Request(gameProviderId, data, externalIds, request, isSettle);
             
             if (betData.Transactions.Any())
             {
@@ -155,10 +156,10 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             return Array.Empty<TransactionResponse>();
         }
         
-        private async Task<Dictionary<string, Guid>> GetPlayerGameProviderConfigurationIdsAsync(Guid gameProviderId,
-            TransactionRequest[] transactions)
+        private async Task<Dictionary<string, (Guid, string)>> GetPlayerGameProviderConfigurationIdsAsync(Guid gameProviderId, 
+            IMESportsConfiguration config, TransactionRequest[] transactions)
         {
-            var map = new Dictionary<string, Guid>();
+            var map = new Dictionary<string, (Guid, string)>();
 
             foreach (var imPlayerCode in transactions.GroupBy(t => t.PlayerCode).Select(g => g.Key))
             {
@@ -167,7 +168,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
                     continue;
                 }
 
-                var playerCode = await GetPlayerCodeAsync(imPlayerCode);
+                var playerCode = await _services.GetPlayerCodeAsync(imPlayerCode, config);
                 var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode)
                     .ConfigureAwait(false);
 
@@ -175,7 +176,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
                     await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId)
                         .ConfigureAwait(false);
 
-                map.Add(imPlayerCode, gameProviderConfigurationId);
+                map.Add(imPlayerCode, (gameProviderConfigurationId, playerCode));
             }
 
             return map;
@@ -197,15 +198,6 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             }
 
             return sessionTokenInRedis;
-        }
-
-        private async Task<string> GetPlayerCodeAsync(string imPlayerCode)
-        {
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<IMESportsConfiguration>(SettingConsts
-                    .GameProviderConfigurations.IMESports);
-
-            return _services.GetPlayerCode(imPlayerCode, configuration.Prefix);
         }
     }
 }

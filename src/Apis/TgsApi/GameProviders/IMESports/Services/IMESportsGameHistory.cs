@@ -29,6 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         private readonly IJsonSerializationProvider _json;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
+        private readonly IIMESportsServices _services;
 
         public IMESportsGameHistory(
             IRoundQueries roundQueries,
@@ -38,27 +39,30 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             IBrandGameProviderOperations brandGameProviderOperations,
             ILocalizationOperations localizationOperations,
             IJsonSerializationProvider json,
-            IIMESportsApiClient client) : base(roundQueries, gameProviderOperations, localizationOperations)
+            IIMESportsApiClient client,
+            IIMESportsServices services) : base(roundQueries, gameProviderOperations, localizationOperations)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
             _brandGameProviderOperations = brandGameProviderOperations;
             _json = json;
             _client = client;
+            _services = services;
         }
 
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
-            var configuration =
+            var config =
                 await _settingOperations.GetValueFromJsonByKeyAsync<IMESportsConfiguration>(SettingConsts
                     .GameProviderConfigurations.IMESports);
+            var merchant = await _services.GetBrandMerchantAsync(playerCode, config);
 
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode).ConfigureAwait(false);
             var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId, language)
                 .ConfigureAwait(false);
 
-            var result = await GetHistoryResultAsync(configuration, round.ExternalCreatedOn.Value, culture, round.ExternalRoundId);
+            var result = await GetHistoryResultAsync(config, merchant, round.ExternalCreatedOn.Value, culture, round.ExternalRoundId);
                 
             if (result == null)
             {
@@ -77,15 +81,15 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             };
         }
 
-        private async Task<HistoryResult> GetHistoryResultAsync(IMESportsConfiguration configuration, DateTimeOffset externalCreatedOn, string culture, string transactionId)
+        private async Task<HistoryResult> GetHistoryResultAsync(IMESportsConfiguration config, IMESportsBrandMerchant merchant, DateTimeOffset externalCreatedOn, string culture, string transactionId)
         {
             var startDate = externalCreatedOn.AddMinutes(-1).ToDateTimeFormat();
             var endDate = externalCreatedOn.AddMinutes(1).ToDateTimeFormat();
             int currentPage = 1, totalPage = 0;
-            var response = await _client.GetRoundHistoryAsync(configuration.ApiUrl, new()
+            var response = await _client.GetRoundHistoryAsync(merchant.ApiUrl, new()
             {
-                MerchantCode = configuration.MerchantCode,
-                ProductWallet = configuration.ProductWallet,
+                MerchantCode = merchant.MerchantCode,
+                ProductWallet = config.ProductWallet,
                 StartDate = startDate,
                 EndDate = endDate,
                 Page = currentPage,
@@ -108,10 +112,10 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             currentPage++;
             while (result is not null || currentPage > totalPage)
             {
-                response = await _client.GetRoundHistoryAsync(configuration.ApiUrl, new()
+                response = await _client.GetRoundHistoryAsync(merchant.ApiUrl, new()
                 {
-                    MerchantCode = configuration.MerchantCode,
-                    ProductWallet = configuration.ProductWallet,
+                    MerchantCode = merchant.MerchantCode,
+                    ProductWallet = config.ProductWallet,
                     StartDate = startDate,
                     EndDate = endDate,
                     Page = currentPage,

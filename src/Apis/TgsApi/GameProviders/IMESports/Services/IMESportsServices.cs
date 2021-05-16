@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
@@ -20,12 +22,14 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
     {
         string GetRedisCacheKey(string playerCode, string externalGameId);
         
-        string GetPlayerCode(string imPlayerCode, string prefix);
+        ValueTask<string> GetPlayerCodeAsync(string imPlayerCode, IMESportsConfiguration config = null);
+
+        ValueTask<IMESportsBrandMerchant> GetBrandMerchantAsync(string playerCode, IMESportsConfiguration config = null);
         
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
             Guid gameProviderConfigurationId, PlatformType platformType);
         
-        ValueTask<IDictionary<string, IEnumerable<GameActionExternalIds>>> GetValidGameActionExternalIdsAsync(Guid gameProviderId, string prefix,
+        ValueTask<IDictionary<string, IEnumerable<GameActionExternalIds>>> GetValidGameActionExternalIdsAsync(Guid gameProviderId,
             TransactionRequest[] transactionRequests);
     }
 
@@ -34,14 +38,20 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         private readonly IIMESportsServices _inferface;
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly ISettingOperations _settingOperations;
 
         public IMESportsServices(
             IGameActionQueries gameActionQueries,
-            IGameProviderOperations gameProviderOperations)
+            IGameProviderOperations gameProviderOperations,
+            IPlayerOperations playerOperations,
+            ISettingOperations settingOperations)
         {
             _inferface = this;
             _gameActionQueries = gameActionQueries;
             _gameProviderOperations = gameProviderOperations;
+            _playerOperations = playerOperations;
+            _settingOperations = settingOperations;
         }
 
         string IIMESportsServices.GetRedisCacheKey(string playerCode, string externalGameId)
@@ -49,18 +59,31 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             return $"{playerCode}_{externalGameId}";
         }
         
-        string IIMESportsServices.GetPlayerCode(string imPlayerCode, string prefix)
+        async ValueTask<string> IIMESportsServices.GetPlayerCodeAsync(string imPlayerCode, IMESportsConfiguration config)
         {
             var strArrays = imPlayerCode.SplitByUnderscore();
             
-            if (strArrays[0].IgnoreCaseNotEquals(prefix))
+            var playerCode = strArrays[1];
+            var merchant = await _inferface.GetBrandMerchantAsync(playerCode, config);
+            
+            if (strArrays[0].IgnoreCaseNotEquals(merchant.Prefix))
             {
-                throw new ArgumentException($"Invalid prefix {strArrays[0]}, should be {prefix}");
+                throw new ArgumentException($"Invalid prefix {strArrays[0]}, should be {merchant.Prefix}");
             }
 
-            return strArrays[1];
+            return playerCode;
         }
 
+        async ValueTask<IMESportsBrandMerchant> IIMESportsServices.GetBrandMerchantAsync(string playerCode, IMESportsConfiguration config)
+        {
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
+            config ??=
+                await _settingOperations.GetValueFromJsonByKeyAsync<IMESportsConfiguration>(SettingConsts
+                    .GameProviderConfigurations.IMESports);
+            var merchant = config.BrandMerchants.FirstOrDefault(b => b.BrandCode.IgnoreCaseEquals(player.BrandCode));
+            return merchant ?? config.BrandMerchants.FirstOrDefault(b => b.BrandCode.IgnoreCaseEquals("Default"));
+        }
+        
         async ValueTask<GameProviderConfigurationData> IIMESportsServices.GetGameProviderConfigurationDataAsync(
             Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {
@@ -77,7 +100,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         }
         
         async ValueTask<IDictionary<string, IEnumerable<GameActionExternalIds>>> IIMESportsServices.GetValidGameActionExternalIdsAsync(
-            Guid gameProviderId, string prefix, TransactionRequest[] transactionRequests)
+            Guid gameProviderId, TransactionRequest[] transactionRequests)
 
         {
             if (!transactionRequests.Any())
@@ -88,13 +111,17 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             var actionTypes = new[] {PlaceBet, WinBet, LoseBet, CancelTransaction};
             var externalGameId = transactionRequests[0].ExternalGameId;
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId);
-
+            var config =
+                await _settingOperations.GetValueFromJsonByKeyAsync<IMESportsConfiguration>(SettingConsts
+                    .GameProviderConfigurations.IMESports);
+            
             var results = new Dictionary<string, IEnumerable<GameActionExternalIds>>();
             foreach (var tran in transactionRequests)
             {
+                var playerCode = await _inferface.GetPlayerCodeAsync(tran.PlayerCode, config);
                 var externalIds = await _gameActionQueries
                     .GetGameActionExternalIdsAsync(gameProviderId,
-                        _inferface.GetPlayerCode(tran.PlayerCode, prefix), tran.ExternalRoundId, cachedGames[0].Id, actionTypes).ConfigureAwait(false);
+                        playerCode, tran.ExternalRoundId, cachedGames[0].Id, actionTypes).ConfigureAwait(false);
                 results.Add(tran.ExternalRoundId, GetValidGameActions(externalIds));
             }
             
