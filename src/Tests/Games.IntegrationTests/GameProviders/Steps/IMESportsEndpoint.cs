@@ -38,6 +38,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         private readonly ServiceProvider _serviceProvider;
         private const string SessionToken = "asdfgqwer0987";
         private const string Valid = "valid";
+        private const string Prefix = "tgs";
 
         public IMESportsEndpoint(ScenarioContext scenarioContext)
             : base(scenarioContext)
@@ -186,7 +187,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var transactions = new List<TransactionRequest>();
             foreach (var player in players)
             {
-                var playerCode = betPlayers[player.Username].PlayerCode;
+                var playerCode = $"{Prefix}_{betPlayers[player.Username].PlayerCode}";
                 player.PlayerCode = playerCode;
                 var betTransaction = betTransactions.First(t => t.PlayerCode == playerCode);
                 transactions.Add(GetTransactionRequest(player, betTransaction.ExternalRoundId, Guid.NewGuid().ToString()));
@@ -214,7 +215,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var response = await _client.GetPlayerBalanceAsync(new()
             {
                 ProductWallet = GetProductWallet(config),
-                PlayerCode = playerCode,
+                PlayerCode = $"{Prefix}_{playerCode}",
                 Currency = currency
             });
 
@@ -360,7 +361,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 {
                     new TransactionRequest
                     {
-                        PlayerCode = playerCode,
+                        PlayerCode = $"{Prefix}_{playerCode}",
                         ActionType = ActionType.PlaceBet,
                         Amount = amount,
                         Currency = currency,
@@ -399,7 +400,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 {
                     GetTransactionRequest(new PlayerData
                     {
-                        PlayerCode = playerCode,
+                        PlayerCode = $"{Prefix}_{playerCode}",
                         Platform = platformType,
                         ActionType = type,
                         Amount = amount,

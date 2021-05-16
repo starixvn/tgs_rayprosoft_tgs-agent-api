@@ -90,7 +90,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             var launchRequest = new NewLaunchGameRequest
             {
                 MerchantCode = config.MerchantCode,
-                PlayerCode = player.PlayerCode,
+                PlayerCode = $"{config.Prefix}_{player.PlayerCode}",
                 GameId = externalGameId,
                 Language = cultureCode,
                 ProductWallet = config.ProductWallet,

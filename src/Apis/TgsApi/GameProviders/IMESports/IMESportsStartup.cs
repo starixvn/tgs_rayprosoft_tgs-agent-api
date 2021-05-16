@@ -39,7 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports
             services.AddScoped<HandleIMESportsExceptionMiddleware>();
 
             services.AddScoped<IIMESportsServices, IMESportsServices>();
-            services.AddSingleton<IIMESportsActionModelMapper, IMESportsActionModelMapper>();
+            services.AddScoped<IIMESportsActionModelMapper, IMESportsActionModelMapper>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(IMESportsGameInitializer)}, (provider, _) =>
                 provider.GetRequiredService<IMESportsGameInitializer>());

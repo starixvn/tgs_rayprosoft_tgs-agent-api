@@ -71,6 +71,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-imesports") : new Uri("http://localhost:62330"),
                     MerchantCode = "A33F1A3F3BC8485BA242F9EE61321E90",
+                    Prefix = "tgs",
                     ProductWallet = 401,
                     ApiUrl = new("https://ex-api-demo-yy.568win.com"),
                     SupportHttps = false

@@ -26,16 +26,23 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         BetResponse Response(BetResult r);
 
         BatchBetData Request(Guid gameProviderId, Dictionary<string, Guid> playerConfigurationIds, 
-            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, BetRequest request, bool isSettle);
+            string prefix, IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, 
+            BetRequest request, bool isSettle);
 
         IEnumerable<TransactionResponse> Response(BatchBetResult r);
     }
 
     public sealed class IMESportsActionModelMapper : IIMESportsActionModelMapper
     {
+        private readonly IIMESportsServices _services;
         private const string GameProviderCode = Consts.GameProvider.IMESports;
         private const bool HasCurrencyFromGameProvider = false;
 
+        public IMESportsActionModelMapper(IIMESportsServices services)
+        {
+            _services = services;
+        }
+        
         GetBalanceResponse IIMESportsActionModelMapper.Response(string playerCode, GetBalanceResult r) =>
             new()
             {
@@ -75,7 +82,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             };
 
         BatchBetData IIMESportsActionModelMapper.Request(Guid gameProviderId,
-            Dictionary<string, Guid> playerConfigurationIds, 
+            Dictionary<string, Guid> playerConfigurationIds, string prefix,
             IDictionary<string, IEnumerable<GameActionExternalIds>> externalList, 
             BetRequest request, bool isSettle)
         {
@@ -95,7 +102,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                     
                     return new BatchTransactionData
                     {
-                        PlayerCode = t.PlayerCode,
+                        PlayerCode = _services.GetPlayerCode(t.PlayerCode, prefix),
                         GameProviderConfigurationId = gameProviderConfigurationid,
                         Amount = Math.Abs(t.Amount),
                         ExternalRoundId = t.ExternalRoundId,

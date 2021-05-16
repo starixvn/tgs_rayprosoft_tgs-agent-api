@@ -17,18 +17,21 @@ using static TGS.Core.Models.Enums.GameActionType;
 namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
 {
     public interface IIMESportsServices
-    { 
+    {
         string GetRedisCacheKey(string playerCode, string externalGameId);
+        
+        string GetPlayerCode(string imPlayerCode, string prefix);
         
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
             Guid gameProviderConfigurationId, PlatformType platformType);
         
-        ValueTask<IDictionary<string, IEnumerable<GameActionExternalIds>>> GetValidGameActionExternalIdsAsync(Guid gameProviderId,
+        ValueTask<IDictionary<string, IEnumerable<GameActionExternalIds>>> GetValidGameActionExternalIdsAsync(Guid gameProviderId, string prefix,
             TransactionRequest[] transactionRequests);
     }
 
     public sealed class IMESportsServices : IIMESportsServices
     {
+        private readonly IIMESportsServices _inferface;
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
 
@@ -36,6 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             IGameActionQueries gameActionQueries,
             IGameProviderOperations gameProviderOperations)
         {
+            _inferface = this;
             _gameActionQueries = gameActionQueries;
             _gameProviderOperations = gameProviderOperations;
         }
@@ -45,6 +49,18 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             return $"{playerCode}_{externalGameId}";
         }
         
+        string IIMESportsServices.GetPlayerCode(string imPlayerCode, string prefix)
+        {
+            var strArrays = imPlayerCode.SplitByUnderscore();
+            
+            if (strArrays[0].IgnoreCaseNotEquals(prefix))
+            {
+                throw new ArgumentException($"Invalid prefix {strArrays[0]}, should be {prefix}");
+            }
+
+            return strArrays[1];
+        }
+
         async ValueTask<GameProviderConfigurationData> IIMESportsServices.GetGameProviderConfigurationDataAsync(
             Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {
@@ -61,7 +77,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
         }
         
         async ValueTask<IDictionary<string, IEnumerable<GameActionExternalIds>>> IIMESportsServices.GetValidGameActionExternalIdsAsync(
-            Guid gameProviderId, TransactionRequest[] transactionRequests)
+            Guid gameProviderId, string prefix, TransactionRequest[] transactionRequests)
 
         {
             if (!transactionRequests.Any())
@@ -78,7 +94,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             {
                 var externalIds = await _gameActionQueries
                     .GetGameActionExternalIdsAsync(gameProviderId,
-                        tran.PlayerCode, tran.ExternalRoundId, cachedGames[0].Id, actionTypes).ConfigureAwait(false);
+                        _inferface.GetPlayerCode(tran.PlayerCode, prefix), tran.ExternalRoundId, cachedGames[0].Id, actionTypes).ConfigureAwait(false);
                 results.Add(tran.ExternalRoundId, GetValidGameActions(externalIds));
             }
             
