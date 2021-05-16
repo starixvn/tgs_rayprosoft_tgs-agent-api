@@ -8,7 +8,6 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Json.JsonConverters;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Shared.Game.Models.IMESports.Outgoing;
@@ -53,7 +52,6 @@ namespace TGS.Shared.Game.ApiClients.IMESports
         {
             var options = new JsonSerializerOptions
             {
-                Converters = {new NumberToStringConverter()},
                 NumberHandling = JsonNumberHandling.AllowReadingFromString
             };
 

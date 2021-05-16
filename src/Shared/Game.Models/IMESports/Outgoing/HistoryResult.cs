@@ -113,7 +113,7 @@ namespace TGS.Shared.Game.Models.IMESports.Outgoing
     public class FullTimeScore
     {
         [JsonPropertyName("OUScore")]
-        public string OUScore { get; init; }
+        public int OUScore { get; init; }
 
         [JsonPropertyName("Option")]
         public string Option { get; init; }
