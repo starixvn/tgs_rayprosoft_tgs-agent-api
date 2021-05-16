@@ -115,20 +115,21 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.PlayerCode, playerCode);
         }
 
-        [Given(@"add (.*) session token in redis")]
-        public Task GivenAddSessionTokenInRedisAsync(string isValid)
+        [Given(@"add (.*) session token in redis for game ""(.*)""")]
+        public Task GivenAddValidSessionTokenInRedisForGameAsync(string isValid, string gameId)
         {
             var playerCode = Get<string>(SR.PlayerCode);
             var timeToLeave = 180;
             var cacheManager = _serviceProvider.GetRequiredService<IRedisCacheManager>();
+            var redisKey = $"{playerCode}_{gameId}";
 
             if (isValid.IgnoreCaseNotEquals(Valid))
             {
-                return cacheManager.ClearCacheAsync(IMESportsConsts.RedisKey.SessionToken, playerCode);
+                return cacheManager.ClearCacheAsync(IMESportsConsts.RedisKey.SessionToken, redisKey);
             }
 
             return cacheManager.SafeCacheAsync(IMESportsConsts.RedisKey.SessionToken,
-                playerCode,
+                redisKey,
                 TimeSpan.FromSeconds(timeToLeave), new IMSessionToken
                 {
                     SessionToken = SessionToken,
@@ -157,7 +158,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 await GivenPlayerHavingBalanceOfAsync(p.Balance);
 
                 p.PlayerCode = Get<string>(SR.PlayerCode);
-                await GivenAddSessionTokenInRedisAsync(Valid);
+                await GivenAddValidSessionTokenInRedisForGameAsync(Valid, p.GameId);
 
                 await WhenIPlaceBetOfForGameAsync(p.Amount, p.GameId);
 

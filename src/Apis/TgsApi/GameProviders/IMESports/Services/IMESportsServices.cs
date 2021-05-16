@@ -17,7 +17,9 @@ using static TGS.Core.Models.Enums.GameActionType;
 namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
 {
     public interface IIMESportsServices
-    {
+    { 
+        string GetRedisCacheKey(string playerCode, string externalGameId);
+        
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
             Guid gameProviderConfigurationId, PlatformType platformType);
         
@@ -38,6 +40,11 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             _gameProviderOperations = gameProviderOperations;
         }
 
+        string IIMESportsServices.GetRedisCacheKey(string playerCode, string externalGameId)
+        {
+            return $"{playerCode}_{externalGameId}";
+        }
+        
         async ValueTask<GameProviderConfigurationData> IIMESportsServices.GetGameProviderConfigurationDataAsync(
             Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {

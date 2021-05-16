@@ -19,7 +19,7 @@ Scenario: 01.b - Get player balance without login
 Scenario: 02.a - Place desktop bet
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	When I place bet of $-10 for game "imesports"
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
@@ -28,7 +28,7 @@ Scenario: 02.a - Place desktop bet
 Scenario: 02.b - Place mobile bet
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Mobile"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	When I place bet of $-10 for game "imesports"
 	Then I will receive bet response of no error and balance of $90
 		And player wallet database record will be for $90
@@ -37,35 +37,35 @@ Scenario: 02.b - Place mobile bet
 Scenario: 02.c - Player cannot place bet without login
 	Given player "TP01cny" of brand "GPI" without login
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	When I place bet of $-10 for game "imesports"
 	Then I will receive bet response of error "InvalidToken"
 	
 Scenario: 02.d - Player cannot place bet with unknown game
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "1_0"
 	When I place bet of $-10 for game "1_0"
 	Then I will receive bet response of error "SystemError"
 	
 Scenario: 02.e - Player cannot place bet with invalid session token
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add invalid session token in redis
+		And add invalid session token in redis for game "imesports"
 	When I place bet of $-10 for game "imesports"
 	Then I will receive bet response of error "InvalidToken"
 	
 Scenario: 02.f - Player cannot place bet with invalid product wallet
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	When I place bet of $-10 for game "imesports" with invalid product wallet
 	Then I will receive bet response of error "InvalidArguments"
 	
 Scenario: 03.a - Win bet
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	When I use action SettleFT to bet for $15
@@ -77,7 +77,7 @@ Scenario: 03.a - Win bet
 Scenario: 03.b - Lose bet
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	When I use action SettleFT to bet for $0
@@ -89,7 +89,7 @@ Scenario: 03.b - Lose bet
 Scenario: 03.c - Can win bet without player login
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	Given player logout
@@ -102,7 +102,7 @@ Scenario: 03.c - Can win bet without player login
 Scenario: 03.d - Resend win bet
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	Given I use action SettleFT to bet for $15
@@ -113,7 +113,7 @@ Scenario: 03.d - Resend win bet
 Scenario: 04.a - Cancel bet
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	When I use action PlaceBetRefund to bet for $10
@@ -125,7 +125,7 @@ Scenario: 04.a - Cancel bet
 Scenario: 04.b - Can cancel bet without player login
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	Given player logout
@@ -138,7 +138,7 @@ Scenario: 04.b - Can cancel bet without player login
 Scenario: 04.c - Cancel settle
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	Given I use action SettleFT to bet for $15
@@ -152,7 +152,7 @@ Scenario: 04.c - Cancel settle
 Scenario: 04.d - Cancel cancel
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	Given I use action CancelSingleWager to bet for $10
@@ -166,7 +166,7 @@ Scenario: 04.d - Cancel cancel
 Scenario: 05.a - Resettle
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	Given I use action SettleFT to bet for $10
@@ -182,7 +182,7 @@ Scenario: 05.a - Resettle
 Scenario: 05.b - Settle after cancel cancel
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100
-		And add valid session token in redis
+		And add valid session token in redis for game "imesports"
 	Given I place bet of $-10 for game "imesports"
 		And balance now being $90
 	Given I use action CancelSingleWager to bet for $10

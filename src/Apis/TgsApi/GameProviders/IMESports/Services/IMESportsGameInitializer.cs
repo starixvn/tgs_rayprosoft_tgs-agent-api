@@ -23,6 +23,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IIMESportsApiClient _client;
+        private readonly IIMESportsServices _services;
         private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
@@ -36,7 +37,8 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
             IRedisCacheManager cacheManager,
-            IIMESportsApiClient client)
+            IIMESportsApiClient client,
+            IIMESportsServices services)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
@@ -45,19 +47,23 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             _brandGameProviderOperations = brandGameProviderOperations;
             _cacheManager = cacheManager;
             _client = client;
+            _services = services;
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
-            var response = await NewLaunchGameAsync(request);
-
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
+            var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId);
+            var response = await NewLaunchGameAsync(request, gameProviderId, game.ExternalId);
+            
             if (response.ErrorCode != Success)
             {
                 throw new GameProviderApiErrorException(response.Message);
             }
 
+            var redisKey = _services.GetRedisCacheKey(request.Token.PlayerCode, game.ExternalId);
             await _cacheManager.SafeCacheAsync(IMESportsConsts.RedisKey.SessionToken, 
-                request.Token.PlayerCode,
+                redisKey,
                 TimeSpan.FromSeconds(response.TimeToLeave), new IMSessionToken
                 {
                     SessionToken = response.SessionToken,
@@ -67,7 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             return new() {Url = response.GameUrl};
         }
 
-        private async Task<NewLaunchGameResponse> NewLaunchGameAsync(GetGameUrlRequest request)
+        private async Task<NewLaunchGameResponse> NewLaunchGameAsync(GetGameUrlRequest request, Guid gameProviderId, string externalGameId)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
             
@@ -75,11 +81,9 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 await _settingOperations.GetValueFromJsonByKeyAsync<IMESportsConfiguration>(SettingConsts
                     .GameProviderConfigurations.IMESports);
             
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, player.BrandId,
                 request.Language);
-            var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId);
-
+            
             var apiUrl = config.ApiUrl;
             var platformType = request.Token.PlatformType;
             
@@ -87,7 +91,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             {
                 MerchantCode = config.MerchantCode,
                 PlayerCode = player.PlayerCode,
-                GameId = game.ExternalId,
+                GameId = externalGameId,
                 Language = cultureCode,
                 ProductWallet = config.ProductWallet,
                 Http = config.SupportHttps ? 1 : 0

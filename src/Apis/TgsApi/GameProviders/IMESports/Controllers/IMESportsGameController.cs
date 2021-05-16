@@ -76,7 +76,8 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             var transaction = request.Transactions.First();
             var playerCode = transaction.PlayerCode;
 
-            var sessionToken = await ValidateSessionTokenAsync(playerCode, request.SessionToken);
+            var redisKey = _services.GetRedisCacheKey(playerCode, transaction.ExternalGameId);
+            var sessionToken = await ValidateSessionTokenAsync(redisKey, request.SessionToken);
             
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
@@ -92,7 +93,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
             
             await _cacheManager.SetKeyExpirationInAsync(IMESportsConsts.RedisKey.SessionToken, 
-                playerCode, TimeSpan.FromSeconds(sessionToken.TimeToLeave));
+                redisKey, TimeSpan.FromSeconds(sessionToken.TimeToLeave));
 
             return _map.Response(r);
         }
@@ -171,10 +172,10 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
             return map;
         }
 
-        private async Task<IMSessionToken> ValidateSessionTokenAsync(string playerCode, string sessionToken)
+        private async Task<IMSessionToken> ValidateSessionTokenAsync(string redisKey, string sessionToken)
         {
             var sessionTokenInRedis = await _cacheManager.SafeGetAsync(IMESportsConsts.RedisKey.SessionToken, 
-                playerCode, () => Task.FromResult(default(IMSessionToken)));
+                redisKey, () => Task.FromResult(default(IMSessionToken)));
 
             if (sessionTokenInRedis?.SessionToken == null)
             {
