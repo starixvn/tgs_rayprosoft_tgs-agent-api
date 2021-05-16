@@ -9,7 +9,6 @@ namespace TGS.Shared.Game.Models.IMESports.Enums
         Success = 0,
         PlayerAlreadyExist = 503,
         PlayerDoesNotExist = 504,
-        InvalidArguments = 505,
         InvalidPlayerId = 506,
         InvalidCurrency = 507,
         InsufficientAmount = 510,
@@ -19,6 +18,7 @@ namespace TGS.Shared.Game.Models.IMESports.Enums
         TransactionIdNotFound = 545,
         GameNotExist = 577,
         ConcurrentRequestDetected = 579,
-        SystemError = 998,
+        InvalidArguments = 612,
+        SystemError = 999,
     }
 }
