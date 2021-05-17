@@ -226,17 +226,18 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                 />
             )}
             {depositInfo && depositInfoDialog.visible && (
-                <Modal.Dialog
+                <Dialog.Modal
                     title="Deposit Url"
                     showCloseButton
                     hideOnClickOutside={false}
                     {...depositInfoDialog}
                 >
-                    {JSON.stringify(depositInfo ?? "")}
-                    {/* <_Link href={depositInfo.paymenturl} target="_blank">
-                        {depositInfo?.paymenturl ?? ""}
-                    </_Link> */}
-                </Modal.Dialog>
+                    {depositInfo.paymenturl && (
+                        <_Link href={depositInfo.paymenturl} target="_blank">
+                            {depositInfo.paymenturl}
+                        </_Link>
+                    )}
+                </Dialog.Modal>
             )}
             {withdrawDialog.visible && (
                 <WithdrawDialog
