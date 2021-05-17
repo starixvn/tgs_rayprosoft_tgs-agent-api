@@ -1,6 +1,6 @@
 import { toDataOrError } from "./response"
 import useSWR, { cache } from "swr"
-import { getAcceptLang } from "../i18n"
+import { getAcceptLang, getAcceptLangCulture } from "../i18n"
 
 export const urlWith = (searchParams = {}, url) => {
     let urlSearchParams = Object.entries(searchParams).reduce(
@@ -35,7 +35,7 @@ export const get = (
 ) => {
     url = urlWith(searchParams, url)
     if (!headers["Accept-Language"]) {
-        headers["Accept-Language"] = getAcceptLang()
+        headers["Accept-Language"] = getAcceptLangCulture()
     }
     return fetch(url, { headers, ...options }).then(toDataOrError)
 }
@@ -50,7 +50,7 @@ const fetchApi = (
     { headers = {}, body, data, ...options } = {}
 ) => {
     if (!headers["Accept-Language"]) {
-        headers["Accept-Language"] = getAcceptLang()
+        headers["Accept-Language"] = getAcceptLangCulture()
     }
 
     headers = data
