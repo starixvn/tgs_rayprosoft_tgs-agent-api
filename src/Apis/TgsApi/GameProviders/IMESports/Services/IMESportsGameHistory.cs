@@ -110,7 +110,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             }
             
             currentPage++;
-            while (result is not null || currentPage > totalPage)
+            while (result is null && currentPage <= totalPage)
             {
                 response = await _client.GetRoundHistoryAsync(merchant.ApiUrl, new()
                 {
