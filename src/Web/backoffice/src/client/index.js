@@ -34,11 +34,9 @@ export const get = (
     { searchParams = {}, headers = {}, ...options } = {}
 ) => {
     url = urlWith(searchParams, url)
-    /*
     if (!headers["Accept-Language"]) {
         headers["Accept-Language"] = getAcceptLang()
     }
-    */
     return fetch(url, { headers, ...options }).then(toDataOrError)
 }
 
@@ -51,11 +49,9 @@ const fetchApi = (
     url,
     { headers = {}, body, data, ...options } = {}
 ) => {
-    /*
     if (!headers["Accept-Language"]) {
         headers["Accept-Language"] = getAcceptLang()
     }
-    */
 
     headers = data
         ? {
