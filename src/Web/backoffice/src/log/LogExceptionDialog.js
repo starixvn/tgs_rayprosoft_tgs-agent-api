@@ -44,7 +44,7 @@ const ExceptionDialog = ({ value = "", dialog, ...props }) => {
             showActionButtons={false}
             hideOnClickOutside={false}
             showCloseButton
-            width="60vw"
+            width="80vw"
             maxWidth="80vw"
             maxHeight="90vh"
             css={css`
