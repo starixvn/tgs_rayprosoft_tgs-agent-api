@@ -1,17 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Tgs.Payment.LeePay;
+using Tgs.Payment.PrimePay;
 using TGS.Services.Payment;
 
 namespace TGS.Services.BackOffice.Domain
 {
-    class PrimePayProcessor : IWithdrawProcessor
+    public class PrimePayProcessor : IWithdrawProcessor
     {
+        private readonly PrimePaySerializer _primePaySerializer;
+
         public string Subject => "tgs.payment.leepay.withdraw";
+
+        public PrimePayProcessor(PrimePaySerializer primePaySerializer)
+        {
+            _primePaySerializer = primePaySerializer ?? throw new ArgumentNullException(nameof(primePaySerializer));
+        }
 
         public string MakeWithdrawSettings(
             Guid formId,
@@ -19,22 +22,22 @@ namespace TGS.Services.BackOffice.Domain
             string bankInfo,
             BrandPaymentInfo brandPayment)
         {
-            var withdrawBankInfo = _jsonSerializationProvider
-                            .DeserializeFromString<WithdrawBankInfo<LeePayBankInfo>>(bankInfo, _jsonSerializerOptions);
-            var destinationAddress = withdrawBankInfo.Detail.Address;
+            var withdrawBankInfo = _primePaySerializer.Deserialize<WithdrawBankInfo<PrimePayBankInfo>>(bankInfo);
 
-            var brandPaymentExtendedData = _jsonSerializationProvider
-                .DeserializeFromString<JsonDocument>(brandPayment.ExtendedData);
+            var brandPaymentExtendedData = _primePaySerializer.Deserialize<JsonDocument>(brandPayment.ExtendedData);
 
-            var settings = new LeePayWithdrawSettings(
-                brandPaymentExtendedData.RootElement.GetProperty("systemId").GetString(),
-                brandPaymentExtendedData.RootElement.GetProperty("systemKey").GetString(),
+            var settings = new PrimePayWithdrawSettings(
+                brandPaymentExtendedData.RootElement.GetProperty("merchantId").GetString(),
+                brandPaymentExtendedData.RootElement.GetProperty("key").GetString(),
+                brandPaymentExtendedData.RootElement.GetProperty("iv").GetString(),
                 formId,
-                destinationAddress,
-                brandPaymentExtendedData.RootElement.GetProperty("channelCurrency").GetString(),
-                brandPaymentExtendedData.RootElement.GetProperty("channel").GetString());
+                brandPaymentExtendedData.RootElement.GetProperty("currency").GetString(),
+                withdrawBankInfo.Detail.BankAccount,
+                withdrawBankInfo.Detail.BankName,
+                withdrawBankInfo.Detail.BankBranch,
+                withdrawBankInfo.Detail.BankName);
 
-            return _leePaySerializer.Serialize(settings);
+            return _primePaySerializer.Serialize(settings);
         }
     }
 }
