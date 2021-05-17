@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs.Models;
@@ -12,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
     public partial class DataInitializer
     {
-        private static readonly Dictionary<string, Guid> PaymentChannels = new()
+        private static readonly Dictionary<string, Guid> _PaymentChannels = new()
         {
             ["上海浦东发展银行"] = new Guid("E761A2D3-5705-417F-8D97-43CB7AEA0142"),
             ["中信银行"] = new Guid("DC642A94-C2A3-4E89-A71D-891E69D2E3CA"),
@@ -40,13 +41,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             ["TRON"] = new Guid("9D76809A-4611-457D-8F49-D341D3A464EA")
         };
 
-        private static readonly Dictionary<string, (Guid Id, string BankType)> PaymentMethods = new()
+        private static readonly Dictionary<string, (Guid Id, string BankType)> _PaymentMethods = new()
         {
             ["BankTransfer"] = (new Guid("67252F3A-6826-45CE-8BBC-C53E2CA7CDCB"), "Bank"),
             ["Crypto"] = (new Guid("798D21C6-9CF5-4FC0-BD09-8D67D2C9E7E1"), "Crypto")
         };
 
-        private static readonly Dictionary<string, (Guid Id, string ExtendedData)> Payments = new()
+        private static readonly Dictionary<string, (Guid Id, string ExtendedData)> _Payments = new()
         {
             ["Manual"] = (
                 new Guid("30CB4D17-2506-4D72-8470-65063B80F9C9"),
@@ -88,6 +89,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     }))
         };
 
+        private static readonly Guid _CustomChannelId = new Guid("3E3CC1EB-1A4E-413F-926C-1AD48707BC66");
+
         private async Task GenerateBrandPaymentsAsync()
         {
             await GenerateDepositBrandPaymentsAsync();
@@ -103,9 +106,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var manualDepositBrandPayments = from brand in allBrands
                                              from pmc in allPaymentMethodChannels
-                                             where pmc.PaymentId == Payments["Manual"].Id
+                                             where pmc.PaymentId == _Payments["Manual"].Id
                                              let brandPaymentId = GuidExtensions.NewSequentialGuid()
-                                             let payment = Payments.Where(p => p.Value.Id == pmc.PaymentId).First()
                                              select new BrandPayment
                                              {
                                                  Id = brandPaymentId,
@@ -113,9 +115,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                                  BrandId = brand.Id,
                                                  PaymentMethodChannelId = pmc.Id,
                                                  TransferType = PaymentTransferType.Deposit,
-                                                 ChannelName = $"{Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
-                                                     $"{PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                                     $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
+                                                 ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                                     $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                                     $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).FirstOrDefault().Key ?? "Custom" }",
                                                  PaymentStatus = SwitchStatus.Enabled,
                                                  TransferLimitFrom = 10,
                                                  TransferLimitTo = 100000,
@@ -169,9 +171,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var leepayBrandPayments = from brand in allBrands
                                       from pmc in allPaymentMethodChannels
-                                      where pmc.PaymentId == Payments["LeePay"].Id
+                                      where pmc.PaymentId == _Payments["LeePay"].Id
                                       let brandPaymentId = GuidExtensions.NewSequentialGuid()
-                                      let payment = Payments.Where(p => p.Value.Id == pmc.PaymentId).First()
                                       select new BrandPayment
                                       {
                                           Id = brandPaymentId,
@@ -179,9 +180,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           BrandId = brand.Id,
                                           PaymentMethodChannelId = pmc.Id,
                                           TransferType = PaymentTransferType.Deposit,
-                                          ChannelName = $"{Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
-                                              $"{PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                              $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
+                                          ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                              $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                              $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
                                           PaymentStatus = SwitchStatus.Enabled,
                                           TransferLimitFrom = 10,
                                           TransferLimitTo = 100000,
@@ -237,9 +238,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var primepayBrandPayments = from brand in allBrands
                                         from pmc in allPaymentMethodChannels
-                                        where pmc.PaymentId == Payments["PrimePay"].Id
+                                        where pmc.PaymentId == _Payments["PrimePay"].Id
                                         let brandPaymentId = GuidExtensions.NewSequentialGuid()
-                                        let payment = Payments.Where(p => p.Value.Id == pmc.PaymentId).First()
                                         select new BrandPayment
                                         {
                                             Id = brandPaymentId,
@@ -247,9 +247,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             BrandId = brand.Id,
                                             PaymentMethodChannelId = pmc.Id,
                                             TransferType = PaymentTransferType.Deposit,
-                                            ChannelName = $"{Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
-                                                $"{PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                                $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
+                                            ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                                $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                                $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).FirstOrDefault().Key ?? "Custom"}",
                                             PaymentStatus = SwitchStatus.Enabled,
                                             TransferLimitFrom = 10,
                                             TransferLimitTo = 100000,
@@ -305,6 +305,150 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             await _repository.BrandPayments.AddRangeAsync(
                 manualDepositBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments));
+
+            await _repository.SaveChangesAsync();
+        }
+
+        private async Task GeneratePaymentAsync()
+        {
+            await GeneratePaymentsAsync();
+            await GeneratePaymentMethodsAsync();
+            await GeneratePaymentChannelsAsync();
+            await GeneratePaymentMethodChannelsAsync();
+            await GenerateBrandPaymentsAsync();
+        }
+
+        private async Task GeneratePaymentChannelsAsync()
+        {
+            var paymentVendors = _PaymentChannels.Select(p => new PaymentChannel
+            {
+                Id = p.Value,
+                Code = p.Key,
+                Description = "online payment channel",
+            }).ToArray();
+
+            await _repository.PaymentChannels.AddRangeAsync(paymentVendors);
+            await _repository.PaymentChannels.AddAsync(new PaymentChannel
+            {
+                Id = _CustomChannelId,
+                Code = "CustomBank",
+                Description = "online payment channel"
+            });
+
+            await _repository.SaveChangesAsync();
+        }
+
+        private async Task GeneratePaymentMethodChannelsAsync()
+        {
+            var manualList = from channel in _PaymentChannels
+                             where !(new[] { "ETHEREUM", "TRON" }.Contains(channel.Key))
+                             select new PaymentMethodChannel
+                             {
+                                 Id = GuidExtensions.NewSequentialGuid(),
+                                 PaymentId = _Payments["Manual"].Id,
+                                 MethodId = _PaymentMethods["BankTransfer"].Id,
+                                 ChannelId = channel.Value,
+                                 CreatedByUsername = AdminUsername,
+                                 CreatedOn = DateTimeOffset.Now,
+                                 UpdatedByUsername = AdminUsername,
+                                 UpdatedOn = DateTimeOffset.Now
+                             };
+
+            var leepayList = new[] {
+                new PaymentMethodChannel
+                {
+                    Id = GuidExtensions.NewSequentialGuid(),
+                    PaymentId = _Payments["LeePay"].Id,
+                    MethodId = _PaymentMethods["Crypto"].Id,
+                    ChannelId = _PaymentChannels["ETHEREUM"],
+                    CreatedByUsername = AdminUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedByUsername = AdminUsername,
+                    UpdatedOn = DateTimeOffset.Now
+                },
+                new PaymentMethodChannel
+                {
+                    Id = GuidExtensions.NewSequentialGuid(),
+                    PaymentId = _Payments["LeePay"].Id,
+                    MethodId = _PaymentMethods["Crypto"].Id,
+                    ChannelId = _PaymentChannels["TRON"],
+                    CreatedByUsername = AdminUsername,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedByUsername = AdminUsername,
+                    UpdatedOn = DateTimeOffset.Now
+                },
+            };
+
+            var primepayList = from channel in _PaymentChannels
+                               where !(new[] { "ETHEREUM", "TRON" }.Contains(channel.Key))
+                               select new PaymentMethodChannel
+                               {
+                                   Id = GuidExtensions.NewSequentialGuid(),
+                                   PaymentId = _Payments["PrimePay"].Id,
+                                   MethodId = _PaymentMethods["BankTransfer"].Id,
+                                   ChannelId = channel.Value,
+                                   CreatedByUsername = AdminUsername,
+                                   CreatedOn = DateTimeOffset.Now,
+                                   UpdatedByUsername = AdminUsername,
+                                   UpdatedOn = DateTimeOffset.Now
+                               };
+
+            await _repository.PaymentMethodChannels.AddRangeAsync(manualList.Concat(leepayList).Concat(primepayList));
+            await _repository.PaymentMethodChannels.AddAsync(new PaymentMethodChannel
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                PaymentId = _Payments["Manual"].Id,
+                MethodId = _PaymentMethods["BankTransfer"].Id,
+                ChannelId = _CustomChannelId,
+                CreatedByUsername = AdminUsername,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedByUsername = AdminUsername,
+                UpdatedOn = DateTimeOffset.Now
+            });
+            await _repository.PaymentMethodChannels.AddAsync(new PaymentMethodChannel
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                PaymentId = _Payments["PrimePay"].Id,
+                MethodId = _PaymentMethods["BankTransfer"].Id,
+                ChannelId = _CustomChannelId,
+                CreatedByUsername = AdminUsername,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedByUsername = AdminUsername,
+                UpdatedOn = DateTimeOffset.Now
+            });
+            await _repository.SaveChangesAsync();
+        }
+
+        private async Task GeneratePaymentMethodsAsync()
+        {
+            var paymentMethods = _PaymentMethods.Select(p => new PaymentMethod
+            {
+                Id = p.Value.Id,
+                Code = p.Key,
+                BankType = p.Value.BankType,
+                Description = "online payment method",
+            }).ToArray();
+
+            await _repository.PaymentMethods.AddRangeAsync(paymentMethods);
+            await _repository.SaveChangesAsync();
+        }
+
+        private async Task GeneratePaymentsAsync()
+        {
+            var payments = _Payments.Select(p => new Payment
+            {
+                Id = p.Value.Id,
+                Code = p.Key,
+                Name = p.Key,
+                Description = "online payment platform",
+                CreatedByUsername = AdminUsername,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedByUsername = AdminUsername,
+                UpdatedOn = DateTimeOffset.Now
+            }).ToArray();
+
+            await _repository.Payments.AddRangeAsync(payments);
+            await _repository.SaveChangesAsync();
         }
 
         private async Task GenerateWithdrawBrandPaymentsAsync()
@@ -316,9 +460,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var manualBrandPayments = from brand in allBrands
                                       from pmc in allPaymentMethodChannels
-                                      where pmc.PaymentId == Payments["Manual"].Id
+                                      where pmc.PaymentId == _Payments["Manual"].Id
+                                        && pmc.ChannelId == _CustomChannelId
                                       let brandPaymentId = GuidExtensions.NewSequentialGuid()
-                                      let payment = Payments.Where(p => p.Value.Id == pmc.PaymentId).First()
                                       select new BrandPayment
                                       {
                                           Id = brandPaymentId,
@@ -326,9 +470,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           BrandId = brand.Id,
                                           PaymentMethodChannelId = pmc.Id,
                                           TransferType = PaymentTransferType.Withdrawal,
-                                          ChannelName = $"{Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
-                                              $"{PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                              $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
+                                          ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                              $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                              $"Custom",
                                           PaymentStatus = SwitchStatus.Enabled,
                                           TransferLimitFrom = 10,
                                           TransferLimitTo = 100000,
@@ -372,10 +516,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var leepayBrandPayments = from brand in allBrands
                                       from pmc in allPaymentMethodChannels
-                                      where pmc.PaymentId == Payments["LeePay"].Id
+                                      where pmc.PaymentId == _Payments["LeePay"].Id
                                       let brandPaymentId = GuidExtensions.NewSequentialGuid()
-                                      let payment = Payments.Where(p => p.Value.Id == pmc.PaymentId).First()
-                                      let channelType = pmc.ChannelId == PaymentChannels["ETHEREUM"] ? "ETHEREUM" : "TRON"
+                                      let channelType = pmc.ChannelId == _PaymentChannels["ETHEREUM"] ? "ETHEREUM" : "TRON"
                                       select new BrandPayment
                                       {
                                           Id = brandPaymentId,
@@ -383,9 +526,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           BrandId = brand.Id,
                                           PaymentMethodChannelId = pmc.Id,
                                           TransferType = PaymentTransferType.Withdrawal,
-                                          ChannelName = $"{Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
-                                              $"{PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                              $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
+                                          ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                              $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                              $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
                                           PaymentStatus = SwitchStatus.Enabled,
                                           TransferLimitFrom = 10,
                                           TransferLimitTo = 100000,
@@ -441,9 +584,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var primepayBrandPayments = from brand in allBrands
                                         from pmc in allPaymentMethodChannels
-                                        where pmc.PaymentId == Payments["PrimePay"].Id
+                                        where pmc.PaymentId == _Payments["PrimePay"].Id
+                                            && pmc.ChannelId == _CustomChannelId
                                         let brandPaymentId = GuidExtensions.NewSequentialGuid()
-                                        let payment = Payments.Where(p => p.Value.Id == pmc.PaymentId).First()
                                         select new BrandPayment
                                         {
                                             Id = brandPaymentId,
@@ -451,9 +594,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             BrandId = brand.Id,
                                             PaymentMethodChannelId = pmc.Id,
                                             TransferType = PaymentTransferType.Withdrawal,
-                                            ChannelName = $"{Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
-                                                $"{PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                                $"{PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
+                                            ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                                $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                                $"Custom",
                                             PaymentStatus = SwitchStatus.Enabled,
                                             TransferLimitFrom = 10,
                                             TransferLimitTo = 100000,
@@ -509,117 +652,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             await _repository.BrandPayments.AddRangeAsync(
                 manualBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments));
-        }
-
-        private async Task GeneratePaymentAsync()
-        {
-            await GeneratePaymentsAsync();
-            await GeneratePaymentMethodsAsync();
-            await GeneratePaymentChannelsAsync();
-            await GeneratePaymentMethodChannelsAsync();
-
             await _repository.SaveChangesAsync();
-            await GenerateBrandPaymentsAsync();
-        }
-
-        private Task GeneratePaymentChannelsAsync()
-        {
-            var paymentVendors = PaymentChannels.Select(p => new PaymentChannel
-            {
-                Id = p.Value,
-                Code = p.Key,
-                Description = "online payment channel",
-            }).ToArray();
-
-            return _repository.PaymentChannels.AddRangeAsync(paymentVendors);
-        }
-
-        private Task GeneratePaymentMethodChannelsAsync()
-        {
-            var manualList = from channel in PaymentChannels
-                             where !(new[] { "ETHEREUM", "TRON" }.Contains(channel.Key))
-                             select new PaymentMethodChannel
-                             {
-                                 Id = GuidExtensions.NewSequentialGuid(),
-                                 PaymentId = Payments["Manual"].Id,
-                                 MethodId = PaymentMethods["BankTransfer"].Id,
-                                 ChannelId = channel.Value,
-                                 CreatedByUsername = AdminUsername,
-                                 CreatedOn = DateTimeOffset.Now,
-                                 UpdatedByUsername = AdminUsername,
-                                 UpdatedOn = DateTimeOffset.Now
-                             };
-
-            var leepayList = new[] {
-                new PaymentMethodChannel
-                {
-                    Id = GuidExtensions.NewSequentialGuid(),
-                    PaymentId = Payments["LeePay"].Id,
-                    MethodId = PaymentMethods["Crypto"].Id,
-                    ChannelId = PaymentChannels["ETHEREUM"],
-                    CreatedByUsername = AdminUsername,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedByUsername = AdminUsername,
-                    UpdatedOn = DateTimeOffset.Now
-                },
-                new PaymentMethodChannel
-                {
-                    Id = GuidExtensions.NewSequentialGuid(),
-                    PaymentId = Payments["LeePay"].Id,
-                    MethodId = PaymentMethods["Crypto"].Id,
-                    ChannelId = PaymentChannels["TRON"],
-                    CreatedByUsername = AdminUsername,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedByUsername = AdminUsername,
-                    UpdatedOn = DateTimeOffset.Now
-                },
-            };
-
-            var primepayList = from channel in PaymentChannels
-                               where !(new[] { "ETHEREUM", "TRON" }.Contains(channel.Key))
-                               select new PaymentMethodChannel
-                               {
-                                   Id = GuidExtensions.NewSequentialGuid(),
-                                   PaymentId = Payments["PrimePay"].Id,
-                                   MethodId = PaymentMethods["BankTransfer"].Id,
-                                   ChannelId = channel.Value,
-                                   CreatedByUsername = AdminUsername,
-                                   CreatedOn = DateTimeOffset.Now,
-                                   UpdatedByUsername = AdminUsername,
-                                   UpdatedOn = DateTimeOffset.Now
-                               };
-
-            return _repository.PaymentMethodChannels.AddRangeAsync(manualList.Concat(leepayList).Concat(primepayList));
-        }
-
-        private Task GeneratePaymentMethodsAsync()
-        {
-            var paymentMethods = PaymentMethods.Select(p => new PaymentMethod
-            {
-                Id = p.Value.Id,
-                Code = p.Key,
-                BankType = p.Value.BankType,
-                Description = "online payment method",
-            }).ToArray();
-
-            return _repository.PaymentMethods.AddRangeAsync(paymentMethods);
-        }
-
-        private Task GeneratePaymentsAsync()
-        {
-            var payments = Payments.Select(p => new Payment
-            {
-                Id = p.Value.Id,
-                Code = p.Key,
-                Name = p.Key,
-                Description = "online payment platform",
-                CreatedByUsername = AdminUsername,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = AdminUsername,
-                UpdatedOn = DateTimeOffset.Now
-            }).ToArray();
-
-            return _repository.Payments.AddRangeAsync(payments);
         }
     }
 }

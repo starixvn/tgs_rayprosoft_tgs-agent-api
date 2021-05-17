@@ -33,7 +33,7 @@ namespace TGS.Services.BackOffice.Domain
                 formId,
                 brandPaymentExtendedData.RootElement.GetProperty("currency").GetString(),
                 withdrawBankInfo.Detail.BankAccount,
-                withdrawBankInfo.Detail.BankName,
+                withdrawBankInfo.Detail.Name,
                 withdrawBankInfo.Detail.BankBranch,
                 withdrawBankInfo.Detail.BankName);
 
