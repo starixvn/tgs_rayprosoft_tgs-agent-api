@@ -284,15 +284,16 @@ const PayeeInfo = ({ record }) => {
         return null
     }
 
+    let hasBankName = !!record?.bankInfo?.detail?.bankName
+    let hasBankBranch = !!record?.bankInfo?.detail?.bankBranch
+
     let hasAccountName = !!record?.bankInfo?.detail?.name
-    let hasAccount = !!record?.bankInfo?.detail?.account
-    let isBank = hasAccountName && hasAccount
+    let hasBankAccount = !!record?.bankInfo?.detail?.bankAccount
+    let hasMemo = !!record?.bankInfo?.detail?.memo
+    let isBank = hasAccountName && hasBankAccount
 
     let hasAddress = !!record?.bankInfo?.detail?.address
     let isCrypto = hasAddress
-
-    let hasBankAddress = !!record?.bankInfo?.detail?.bankAccountAddress
-    let hasMemo = !!record?.bankInfo?.detail?.memo
     return (
         <>
             <Heading use="h6">
@@ -308,6 +309,28 @@ const PayeeInfo = ({ record }) => {
                     />
                 </Box>
 
+                {hasBankName && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="银行" en="Bank" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            {record?.bankInfo?.detail?.bankName}
+                        </Box>
+                    </>
+                )}
+
+                {hasBankBranch && (
+                    <>
+                        <NormalLabel>
+                            <Trans zh="银行分行" en="Bank Branch" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            {record?.bankInfo?.detail?.bankBranch}
+                        </Box>
+                    </>
+                )}
+
                 {hasAccountName && (
                     <>
                         <NormalLabel>
@@ -319,24 +342,13 @@ const PayeeInfo = ({ record }) => {
                     </>
                 )}
 
-                {hasAccount && (
+                {hasBankAccount && (
                     <>
                         <NormalLabel>
                             <Trans zh="银行卡帐号" en="Account" />
                         </NormalLabel>
                         <Box alignY="center">
-                            {record?.bankInfo?.detail?.account}
-                        </Box>
-                    </>
-                )}
-
-                {hasBankAddress && (
-                    <>
-                        <NormalLabel>
-                            <Trans zh="开户地址" en="Account Address" />
-                        </NormalLabel>
-                        <Box alignY="center">
-                            {record?.bankInfo?.detail?.bankAccountAddress}
+                            {record?.bankInfo?.detail?.bankAccount}
                         </Box>
                     </>
                 )}

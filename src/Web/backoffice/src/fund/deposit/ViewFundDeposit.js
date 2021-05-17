@@ -195,7 +195,7 @@ const BankInfoBox = ({ record }) => {
             </Heading>
             <FieldValues marginLeft="1.5rem">
                 <NormalLabel>
-                    <Trans zh="充值银行" en="Bank" />
+                    <Trans zh="充值账户" en="Deposit Bank Account" />
                 </NormalLabel>
                 <Box alignY="center">{record?.applyInfo?.sendBankAccount}</Box>
 

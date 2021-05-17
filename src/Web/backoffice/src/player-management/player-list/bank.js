@@ -145,7 +145,21 @@ const Bank = ({
                 {isBank && (
                     <>
                         <Box alignY="center">
-                            <BankLabel />
+                            <BankNameLabel />
+                        </Box>
+                        <Box alignY="center">
+                            {record?.detail?.bankName ?? ""}
+                        </Box>
+
+                        <Box alignY="center">
+                            <BankBranchLabel />
+                        </Box>
+                        <Box alignY="center">
+                            {record?.detail?.bankBranch ?? ""}
+                        </Box>
+
+                        <Box alignY="center">
+                            <AccountName />
                         </Box>
                         <Box alignY="center">{record?.detail?.name ?? ""}</Box>
 
@@ -153,7 +167,7 @@ const Bank = ({
                             <BankAccount />
                         </Box>
                         <Box alignY="center">
-                            {record?.detail?.account ?? ""}
+                            {record?.detail?.bankAccount ?? ""}
                         </Box>
                     </>
                 )}
@@ -217,9 +231,11 @@ const PaymentBankTypeTrans = () => <Trans zh="支付类型" en="Payment Type" />
 
 const PaymentChannelTrans = () => <Trans zh="支付通道" en="Payment Channel" />
 
-const RealnameLabel = () => <Trans zh="真实姓名" en="Real name" />
+const BankNameLabel = () => <Trans zh="银行" en="Bank" />
 
-const BankLabel = () => <Trans zh="帐号名称" en="Account Name" />
+const BankBranchLabel = () => <Trans zh="银行分行" en="Bank Branch" />
+
+const AccountName = () => <Trans zh="帐号名称" en="Account Name" />
 
 const BankAccount = () => <Trans zh="银行卡号" en="Bank Account" />
 
@@ -345,13 +361,22 @@ const EditBody = ({ brandId }) => {
 
             {isBank && (
                 <>
-                    {/* <RealnameLabel />
-                    <Box>
-                        <Input name="realName" />
-                    </Box> */}
+                    <Box alignY="center">
+                        <BankNameLabel />
+                    </Box>
+                    <Box alignY="center">
+                        <Input name="detail.bankName" />
+                    </Box>
 
                     <Box alignY="center">
-                        <BankLabel />
+                        <BankBranchLabel />
+                    </Box>
+                    <Box alignY="center">
+                        <Input name="detail.bankBranch" />
+                    </Box>
+
+                    <Box alignY="center">
+                        <AccountName />
                     </Box>
                     <Box>
                         <Input name="detail.name" />
@@ -361,7 +386,7 @@ const EditBody = ({ brandId }) => {
                         <BankAccount />
                     </Box>
                     <Box>
-                        <Input name="detail.account" />
+                        <Input name="detail.bankAccount" />
                     </Box>
                 </>
             )}

@@ -64,6 +64,10 @@ import { AgentLotteryRebatePercentageInputField } from "../AgentLotteryRebatePer
 import { AgentSportsRebatePercentageInputField } from "../AgentSportsRebatePercentage"
 import { AgentVirtualSportsRebatePercentageInputField } from "../AgentVirtualSportsRebatePercentage"
 import clone from "clone-deep"
+import {
+    AgentBalanceChangePanel,
+    AgentBalanceChangeTab
+} from "./AgentBalanceChange"
 
 export const AddAgentButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -619,6 +623,7 @@ const ViewTabs = ({ brandId, record, tab }) => {
                 <AgentBankInfoTab {...tab} />
                 <AgentOperationListTab {...tab} />
                 <AgentTeamInfoTab {...tab} />
+                <AgentBalanceChangeTab {...tab} />
             </TabList>
 
             <AgentInfoPanel record={record} readonly {...tab} />
@@ -626,6 +631,11 @@ const ViewTabs = ({ brandId, record, tab }) => {
             <AgentBankInfoPanel record={record} readonly {...tab} />
             <AgentOperationListPanel agentId={record?.id} {...tab} />
             <AgentTeamInfoPanel agentId={record?.id} {...tab} />
+            <AgentBalanceChangePanel
+                brandId={brandId}
+                agentId={record?.id}
+                {...tab}
+            />
         </Tabs>
     )
 }

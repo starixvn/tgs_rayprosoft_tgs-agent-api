@@ -47,6 +47,7 @@ export const DepositDialog = ({
     dialog
 }) => {
     let { register, handleSubmit, watch, setError, errors } = useForm()
+    let [payment, setPayment] = useState()
     let [formData, setSubmit] = useState()
     let platformtype = toValue(platform)
 
@@ -55,12 +56,17 @@ export const DepositDialog = ({
         isLoading: isLoadingPaymentList
     } = usePaymentList({ brandCode, currency, username, platformtype })
 
+    let isBank = payment?.banktype?.toLowerCase() === "bank"
+    let isCrypto = payment?.banktype?.toLowerCase() === "crypto"
+
     let { result, error, isLoading, mutate, ...rest } = useApplyDeposit(
-        { brandCode, currency, username, platformtype },
+        { brandCode, currency, username, platformtype, payment },
         formData
     )
 
-    const onSubmit = handleSubmit(setSubmit)
+    const onSubmit = handleSubmit((data) => {
+        setSubmit(data)
+    })
 
     const reset = () => {
         setSubmit(undefined)
@@ -69,8 +75,9 @@ export const DepositDialog = ({
 
     useEffect(() => {
         if (result) {
-            onSubmitted?.(result?.data)
+            onSubmitted?.(payment, result?.data)
             reset()
+            setPayment(undefined)
             dialog.hide()
         }
     }, [result])
@@ -110,20 +117,41 @@ export const DepositDialog = ({
                             isLoading={isLoadingPaymentList}
                             options={paymentOptions}
                             selectRef={register}
+                            onChange={(event) => {
+                                let value = event.target.value
+                                let payment = paymentResult?.data?.find(
+                                    ({ id }) => id === value
+                                )
+                                console.log("payment", payment)
+                                setPayment(payment)
+                            }}
                         />
                     </Group>
-                    <InputField
-                        name="account"
-                        inputRef={register}
-                        label="Account"
-                        defaultValue="default_bank_account"
-                    />
-                    <InputField
-                        name="amount"
-                        type="number"
-                        inputRef={register}
-                        label="Amount"
-                    />
+                    {isBank && (
+                        <>
+                            <InputField
+                                name="account"
+                                inputRef={register}
+                                label="Account"
+                            />
+                            <InputField
+                                name="amount"
+                                type="number"
+                                inputRef={register}
+                                label="Amount"
+                            />
+                        </>
+                    )}
+                    {isCrypto && (
+                        <>
+                            <InputField
+                                name="amount"
+                                type="number"
+                                inputRef={register}
+                                label="Amount"
+                            />
+                        </>
+                    )}
                 </FieldStack>
             </Dialog.Modal>
             {error && (
