@@ -150,8 +150,8 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
     const uploadDepositProofDialog = Modal.useState()
     let showUploadDepositProofMenu = !!depositFormId
 
-    const [depositUrl, setDepositUrl] = useState()
-    const depositUrlDialog = Modal.useState()
+    const [depositInfo, setDepositInfo] = useState()
+    const depositInfoDialog = Modal.useState()
 
     const withdrawDialog = Modal.useState()
 
@@ -204,10 +204,10 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                                 uploadDepositProofDialog.show()
                             }
                         } else {
-                            setDepositUrl(value)
+                            setDepositInfo(value)
 
                             if (value) {
-                                depositUrlDialog.show()
+                                depositInfoDialog.show()
                             }
                         }
                         console.log("payment", payment, "value", value)
@@ -225,15 +225,15 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                     dialog={uploadDepositProofDialog}
                 />
             )}
-            {depositUrl && depositUrlDialog.visible && (
+            {depositInfo?.paymenturl && depositInfoDialog.visible && (
                 <Modal.Dialog
                     title="Deposit Url"
                     showCloseButton
                     hideOnClickOutside={false}
-                    {...dialog}
+                    {...depositInfoDialog}
                 >
-                    <_Link href={depositUrl} target="_blank">
-                        {depositUrl}
+                    <_Link href={depositInfo.paymenturl} target="_blank">
+                        {depositInfo?.paymenturl ?? ""}
                     </_Link>
                 </Modal.Dialog>
             )}
