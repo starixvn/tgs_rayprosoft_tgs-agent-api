@@ -49,14 +49,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
                 new CNYCurrency("CNY"), new USDCurrency("USD"), new VND1000Currency("VND"),
-                new IDR1000Currency("IDR"), new JPYCurrency("JPY"), new KRWCurrency("KRW"),
-                new THBCurrency("THB"), new MYRCurrency("MYR"), new EURCurrency("EUR")
+                new IDR1000Currency("IDR"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new THBCurrency("THB"),
+                new MYRCurrency("MYR")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("EN"), new CNLanguage("ZH-CN"), new IDLanguage("ID"),
-                new KRLanguage("KO"), new THLanguage("TH"), new VNLanguage("VI"), new TWLanguage("ZH-HK")
+                new USLanguage("EN"), new CNLanguage("ZH-CN"), new IDLanguage("ID"), new KRLanguage("KO"),
+                new THLanguage("TH"), new VNLanguage("VI"), new TWLanguage("ZH-HK")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -69,15 +69,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new IMESportsConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new("http://game-imesports") : new Uri("http://localhost:62330"),
-                    BrandMerchants = new []
+                        _env.IsDocker() ? new("http://game-imes") : new Uri("http://localhost:62330"),
+                    BrandMerchants = new[]
                     {
                         new IMESportsBrandMerchant
                         {
                             BrandCode = "Default",
-                            MerchantCode = "A33F1A3F3BC8485BA242F9EE61321E90",
-                            Prefix = "tgs",
-                            ApiUrl = new("https://ex-api-demo-yy.568win.com")
+                            MerchantCode = "Ogt3HBRFebTqJczcN28CliP3BHqDWIYo",
+                            Prefix = "IM1CP",
+                            ApiUrl = new("http://operatorapi.staging.imaegisapi.com")
                         }
                     },
                     ProductWallet = 401,
