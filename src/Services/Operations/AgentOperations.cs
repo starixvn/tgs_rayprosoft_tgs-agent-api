@@ -10,9 +10,14 @@ namespace TGS.Services.Operations
     public interface IAgentOperations
     {
         Task<Agent> GetAgentAsync(Guid agentId);
+
         Task<AgentLoginRecord> GetAgentLoginRecordAsync(Guid loginRecordId);
+
         Task<Agent> GetAgentByInvitationCodeAsync(string invitationCode);
+
         Task<AgentLoginRecord> AgentLoginAsync(AgentLoginData data);
+
+        Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data);
     }
 
     public sealed class AgentOperations : IAgentOperations
@@ -37,5 +42,11 @@ namespace TGS.Services.Operations
 
         Task<AgentLoginRecord> IAgentOperations.GetAgentLoginRecordAsync(Guid loginRecordId) =>
             _agentQueries.GetAgentLoginRecordAsync(x => x.Id == loginRecordId);
+
+        public async Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data)
+        {
+            await _agentCommands.ChangeAgentPasswordAsync(data);
+            //await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
+        }
     }
 }
