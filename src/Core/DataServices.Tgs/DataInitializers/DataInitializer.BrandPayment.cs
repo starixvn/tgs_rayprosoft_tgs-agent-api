@@ -239,6 +239,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var primepayBrandPayments = from brand in allBrands
                                         from pmc in allPaymentMethodChannels
                                         where pmc.PaymentId == _Payments["PrimePay"].Id
+                                            && pmc.ChannelId == _CustomChannelId
                                         let brandPaymentId = GuidExtensions.NewSequentialGuid()
                                         select new BrandPayment
                                         {

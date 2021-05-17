@@ -9,7 +9,7 @@ namespace TGS.Services.BackOffice.Domain
     {
         private readonly PrimePaySerializer _primePaySerializer;
 
-        public string Subject => "tgs.payment.leepay.withdraw";
+        public string Subject => "tgs.payment.primepay.withdraw";
 
         public PrimePayProcessor(PrimePaySerializer primePaySerializer)
         {

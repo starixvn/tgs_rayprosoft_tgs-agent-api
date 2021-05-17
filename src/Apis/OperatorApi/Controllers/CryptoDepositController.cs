@@ -17,7 +17,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class CryptoDepositController : ControllerBase
     {
         [HttpPut("leepay")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async ValueTask<LeePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,

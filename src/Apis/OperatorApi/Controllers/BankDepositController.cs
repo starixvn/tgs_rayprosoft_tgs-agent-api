@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.PrimePay;
+using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator.Deposit;
@@ -15,11 +16,13 @@ using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/deposit/bank")]
     [ApiController]
     public class BankDepositController : ControllerBase
     {
         [HttpPost("primepay")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
         public async Task<PrimePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
@@ -49,7 +52,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                             brandPaymentInfo.RootElement.GetProperty("iv").GetString(),
                             brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
                             formId,
-                            "http://localhost")));
+                            "https://google.com")));
 
             await createDepositFormService
                 .ExecuteAsync(command)

@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
 using Tgs.Payment.LeePay;
+using Tgs.Payment.PrimePay;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
@@ -169,6 +170,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             services
                 .AddPaymentClient()
                 .AddSingleton<LeePaySerializer>()
+                .AddSingleton<PrimePaySerializer>()
                 .AddNatsMessageQueue(config =>
                 {
                     config.ConfigQueueOptions((options, sp) =>

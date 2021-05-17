@@ -13,6 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
 using Tgs.Payment;
+using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Middlewares;
@@ -128,7 +129,8 @@ namespace TGS.Apis.OperatorApi
                     config.AddTgsWalletRepositories();
                 })
                 .Services
-                .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>();
+                .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>()
+                .AddSingleton<PrimePaySerializer>();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()
