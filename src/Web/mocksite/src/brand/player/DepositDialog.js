@@ -56,8 +56,7 @@ export const DepositDialog = ({
         isLoading: isLoadingPaymentList
     } = usePaymentList({ brandCode, currency, username, platformtype })
 
-    let isBank = payment?.banktype?.toLowerCase() === "bank"
-    let isCrypto = payment?.banktype?.toLowerCase() === "crypto"
+    let isManual = payment?.paymentcode.toLowerCase() === "manual"
 
     let { result, error, isLoading, mutate, ...rest } = useApplyDeposit(
         { brandCode, currency, username, platformtype, payment },
@@ -127,7 +126,7 @@ export const DepositDialog = ({
                             }}
                         />
                     </Group>
-                    {isBank && (
+                    {isManual && (
                         <>
                             <InputField
                                 name="account"
@@ -142,7 +141,7 @@ export const DepositDialog = ({
                             />
                         </>
                     )}
-                    {isCrypto && (
+                    {!isManual && (
                         <>
                             <InputField
                                 name="amount"
