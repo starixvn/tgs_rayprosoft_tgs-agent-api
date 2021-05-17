@@ -13,6 +13,8 @@ namespace TGS.Core.Models.GameProviders.Settings
     {
         public Uri ApiUrl { get; init; }
 
+        public string AgentLoginIdPassword { get; init; }
+
         public string SecretKey { get; init; }
 
         public string SecretCode { get; init; }

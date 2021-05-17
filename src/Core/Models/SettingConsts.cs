@@ -21,6 +21,7 @@ namespace TGS.Core.Models
             public static readonly string Saba = string.Format(Template, Consts.GameProvider.Saba);
             public static readonly string KY = string.Format(Template, Consts.GameProvider.KY);
             public static readonly string VR = string.Format(Template, Consts.GameProvider.VR);
+            public static readonly string BigGaming = string.Format(Template, Consts.GameProvider.BigGaming);
         }
     }
 }

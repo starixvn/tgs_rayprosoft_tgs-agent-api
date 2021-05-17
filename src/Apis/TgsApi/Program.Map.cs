@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TGS.Apis.TgsApi.GameProviders.AsiaGaming;
+using TGS.Apis.TgsApi.GameProviders.BigGaming;
 using TGS.Apis.TgsApi.GameProviders.Habanero;
 using TGS.Apis.TgsApi.GameProviders.KY;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
@@ -23,7 +24,8 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.AsiaGaming, typeof(AsiaGamingStartup)},
             {Consts.GameProvider.Saba, typeof(SabaStartup)},
             {Consts.GameProvider.KY, typeof(KYStartup)},
-            {Consts.GameProvider.VR, typeof(VRStartup)}
+            {Consts.GameProvider.VR, typeof(VRStartup)},
+            {Consts.GameProvider.BigGaming, typeof(BigGamingStartup)}
 
         };
 
@@ -36,6 +38,7 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.Saba, "Saba/saba.json"},
             {Consts.GameProvider.KY, "KY/ky.json"},
             {Consts.GameProvider.VR, "VR/vr.json"},
+            {Consts.GameProvider.BigGaming, "BigGaming/biggaming.json"},
         };
     }
 }

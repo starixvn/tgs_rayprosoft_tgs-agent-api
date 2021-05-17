@@ -68,9 +68,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 ServiceEndpointUrl =
                     _env.IsDocker() ? new Uri("http://game-bg") : new("http://localhost:62330"),
-                ApiUrl = new("https://api.prerelease-env.biz"),
-                SecretCode = "tgs_tgs",
-                SecretKey = "testKey"
+                ApiUrl = new("http://openapi-uat.bytechn.com/open-cloud/api/"),
+                AgentLoginIdPassword = "TgsP@ssw0rd",
+                SecretCode = "jk06",
+                SecretKey = "8153503006031672EF300005E5EF6AEF"
             };
         }
 
