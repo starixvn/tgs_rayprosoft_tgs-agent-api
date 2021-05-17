@@ -52,7 +52,7 @@ const MessageDialog = ({ value = "", dialog, ...props }) => {
             `}
             {...dialog}
         >
-            <Code isBlock wordBreak="break-word">
+            <Code isBlock wordBreak="break-word" overflowWrap="break-word">
                 {value}
             </Code>
         </Dialog.Modal>

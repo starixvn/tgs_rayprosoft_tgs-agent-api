@@ -11,7 +11,7 @@ import {
 const API = "/api/AgentReport"
 
 export const useAgentContributionList = (searchParams) => {
-    let url = searchParams ? urlWith(searchParams, `${API}/contribution`) : ""
+    let url = searchParams ? urlWith(searchParams, `${API}/contributions`) : ""
     return useGet(url)
 }
 
