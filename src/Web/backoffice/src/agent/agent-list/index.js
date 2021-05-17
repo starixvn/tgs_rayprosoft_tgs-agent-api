@@ -44,7 +44,7 @@ import {
     isAgentConfigRequired,
     isAgentConfigDone
 } from "../AgentConfigStatus"
-import AgentCommissionPercentage from "../AgentCommissionPercentage"
+import AgentDividendPercentage from "../AgentDividendPercentage"
 import AgentLiveDealerRebatePercentage from "../AgentLiveDealerRebatePercentage"
 import AgentEgameRebatePercentage from "../AgentEgameRebatePercentage"
 import AgentCardGameRebatePercentage from "../AgentCardGameRebatePercentage"
@@ -223,9 +223,9 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Cell: ({ value }) => <AgentStatusLabel value={value} />
             }),
             textColumn({
-                id: AgentCommissionPercentage.Name,
+                id: AgentDividendPercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="分红比例" en="Commission Percentage" />,
+                Header: <Trans zh="分红比例" en="Dividend Percentage" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -237,7 +237,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
 
                     return (
                         <FormattedNumberDecimal
-                            value={value?.commissionPercentage}
+                            value={value?.dividendPercentage}
                             postfix="%"
                         />
                     )
