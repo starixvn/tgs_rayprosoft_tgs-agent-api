@@ -17,5 +17,6 @@ namespace TGS.Services.Payment
         bool AuthenticatePhone,
         ValueRange<decimal> DepositedAmountLimit,
         ConditionMatchTypes ConditionMatchType,
-        TransferType TransferType);
+        TransferType TransferType,
+        bool Enabled);
 }
