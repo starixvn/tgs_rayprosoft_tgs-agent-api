@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
+using PlayerBucket.Repositories;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -15,6 +16,7 @@ using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Payment;
+using TGS.Services.PlayerBucket.Core;
 using TGS.Services.WalletService;
 
 namespace TGS.Tests.BackendOffice.UnitTests
@@ -47,11 +49,13 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var moqDepositRepository = new Mock<IDepositRepository>();
             var moqWalletRepository = new Mock<IWalletRepository>();
             var moqPlayerService = new Mock<IPlayerService>();
+            var moqPlayerBucketRepository = new Mock<IPlayerBucketRepository>();
 
             var sut = new ReviewDepositFormCommandService(
                 moqDepositRepository.Object,
                 moqWalletRepository.Object,
-                moqPlayerService.Object);
+                moqPlayerService.Object,
+                moqPlayerBucketRepository.Object);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();

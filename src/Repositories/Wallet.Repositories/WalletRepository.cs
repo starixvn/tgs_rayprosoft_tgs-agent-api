@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
@@ -15,12 +16,10 @@ namespace TGS.Wallet.Repositories
     internal class WalletRepository : IWalletRepository
     {
         private readonly ITgsRepository _tgsRepository;
-        private readonly SystemTransactionManager _transactionManager;
 
-        public WalletRepository(ITgsRepository tgsRepository, SystemTransactionManager transactionManager)
+        public WalletRepository(ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-            _transactionManager = transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
         }
 
         public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(Guid brandId,
@@ -34,55 +33,48 @@ namespace TGS.Wallet.Repositories
             var updatedOn = DateTimeOffset.UtcNow;
             var transactionId = GuidExtensions.NewSequentialGuid();
 
-            var postBalance = await _transactionManager
-                .ExecuteTransactionAsync(
-                    _tgsRepository,
-                    IsolationLevel.ReadCommitted,
-                    transactionId.ToString(),
-                    async ctx =>
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            var postBalance = await _tgsRepository.SqlQuerySingleAsync<decimal>(
+                sql,
+                parameters: new Dictionary<string, object>
+                {
+                    {":player_code", playerCode},
+                    {":wallet_id", walletId},
+                    {":amount", amount},
+                    {":updated_on", updatedOn}
+                }).ConfigureAwait(false);
+
+            await _tgsRepository.Transactions
+                .AddAsync(new()
+                {
+                    Id = transactionId,
+                    PlayerCode = playerCode,
+                    WalletId = walletId,
+                    BrandId = brandId,
+                    Amount = amount,
+                    Balance = postBalance,
+                    Type = transactionType switch
                     {
-                        var postBalance = await _tgsRepository.SqlQuerySingleAsync<decimal>(
-                            sql,
-                            parameters: new Dictionary<string, object>
-                            {
-                                {":player_code", playerCode},
-                                {":wallet_id", walletId},
-                                {":amount", amount},
-                                {":updated_on", updatedOn}
-                            }).ConfigureAwait(false);
-
-                        await _tgsRepository.Transactions
-                            .AddAsync(new()
-                            {
-                                Id = transactionId,
-                                PlayerCode = playerCode,
-                                WalletId = walletId,
-                                BrandId = brandId,
-                                Amount = amount,
-                                Balance = postBalance,
-                                Type = transactionType switch
-                                {
-                                    TransactionTypes.Deposit    => TransactionType.Deposit,
-                                    TransactionTypes.Withdrawal => TransactionType.Withdrawal,
-                                    TransactionTypes.Adjust     => TransactionType.Adjust,
-                                    TransactionTypes.Bonus      => TransactionType.Bonus,
-                                    TransactionTypes.Rebate     => TransactionType.Rebate,
-                                    TransactionTypes.Dividend   => TransactionType.Dividend,
-                                    TransactionTypes.Promotion  => TransactionType.Promotion,
-                                    TransactionTypes.GameProviderFundIn => TransactionType.GameProviderFundIn,
-                                    TransactionTypes.GameProviderFundOut => TransactionType.GameProviderFundOut,
-                                    _                           => TransactionType.Other
-                                },
-                                Description = description,
-                                RecordedOn = DateTimeOffset.Now
-                            })
-                            .ConfigureAwait(false);
-
-                        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-
-                        return postBalance;
-                    })
+                        TransactionTypes.Deposit => TransactionType.Deposit,
+                        TransactionTypes.Withdrawal => TransactionType.Withdrawal,
+                        TransactionTypes.Adjust => TransactionType.Adjust,
+                        TransactionTypes.Bonus => TransactionType.Bonus,
+                        TransactionTypes.Rebate => TransactionType.Rebate,
+                        TransactionTypes.Dividend => TransactionType.Dividend,
+                        TransactionTypes.Promotion => TransactionType.Promotion,
+                        TransactionTypes.GameProviderFundIn => TransactionType.GameProviderFundIn,
+                        TransactionTypes.GameProviderFundOut => TransactionType.GameProviderFundOut,
+                        _ => TransactionType.Other
+                    },
+                    Description = description,
+                    RecordedOn = DateTimeOffset.Now
+                })
                 .ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+
+            scope.Complete();
 
             return (transactionId, postBalance);
         }
