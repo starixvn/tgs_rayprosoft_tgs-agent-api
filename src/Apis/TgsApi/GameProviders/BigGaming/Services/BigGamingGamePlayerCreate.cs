@@ -68,13 +68,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private async Task<bool> CreateAgentAsync(BigGamingConfiguration configuration, CachedPlayer player)
         {
             var random = GuidExtensions.NewSequentialGuid().ToString();
-            var sign = _hashProvider.Hash($"{random }{configuration.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(configuration.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
+            var sign = _hashProvider.Hash($"{random }{configuration.SecretCode}{player.BrandCode}{configuration.SecretKey}", HashAlgorithmKind.Md5);
             var createAgentRequest = new BGCreateAgentRequest()
             {
+                Random = random,
                 Sign = sign,
                 Sn = configuration.SecretCode,
-                loginId = player.BrandCode,
-                password = configuration.AgentLoginIdPassword
+                LoginId = player.BrandCode,
+                Password = configuration.AgentLoginIdPassword
             };
             var responseCreateAgent = await _client.CreateAgentAsync(configuration.ApiUrl, createAgentRequest).ConfigureAwait(false);
             if (responseCreateAgent.Error != null)
@@ -90,7 +91,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private async Task<BGBaseResponse> CreatePlayerAsync(BigGamingConfiguration configuration, CachedPlayer player)
         {
             var random = GuidExtensions.NewSequentialGuid().ToString();
-            var digest = _hashProvider.Hash($"{random }{configuration.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(configuration.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
+            var digest = _hashProvider.Hash($"{random }{configuration.SecretCode}{BigGamingUtility.GetSecretCode(configuration.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
             var createPlayerRequest = new BGCreatePlayerRequest()
             {
                 Random = random,

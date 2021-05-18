@@ -31,7 +31,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            app.UseBGMethodMiddleware();
+            //app.UseBGMethodMiddleware();
         }
 
     }

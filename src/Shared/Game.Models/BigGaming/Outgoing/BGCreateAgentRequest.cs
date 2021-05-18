@@ -11,11 +11,11 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
     public record BGCreateAgentRequest : BGSignParamsRequest
     {
         [JsonPropertyName("loginId")]
-        public string loginId { get; init; }
+        public string LoginId { get; init; }
         [JsonPropertyName("password")]
-        public string password { get; init; }
+        public string Password { get; init; }
         [JsonPropertyName("fromIp")]
-        public string fromIp { get; init; }
+        public string FromIp { get; init; }
 
     }
 }

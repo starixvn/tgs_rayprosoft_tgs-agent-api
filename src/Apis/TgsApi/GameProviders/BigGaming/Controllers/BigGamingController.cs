@@ -51,7 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             BGBaseRequest baseRequest)
         {
-            /*
+
             return baseRequest.Method.ToLower() switch
             {
                 "open.operator.user.balance" => await BalanceAsync(jsonOptionsAccessor, baseRequest),
@@ -65,15 +65,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                     Jsonrpc = baseRequest.Jsonrpc
                 }
             };
-            */
 
-            return new BGBaseResponse()
-            {
-                Id = baseRequest.Id,
-                Result = null,
-                Error = null,
-                Jsonrpc = baseRequest.Jsonrpc
-            };
+
+            //return new BGBaseResponse()
+            //{
+            //    Id = baseRequest.Id,
+            //    Result = null,
+            //    Error = null,
+            //    Jsonrpc = baseRequest.Jsonrpc
+            //};
 
         }
 
