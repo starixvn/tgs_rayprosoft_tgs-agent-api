@@ -12,6 +12,7 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.JDB;
+using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 using JDBGameType = TGS.Shared.Game.Models.JDB.Enums.GameType;
 
@@ -23,6 +24,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         private readonly IJDBApiClient _jdbApiClient;
         private readonly JDBGameTypeMapper _jdbGameTypeMapper;
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IJDBServices _jdbServices;
 
         public JDBBetHistory(
             IRoundQueries roundQueries,
@@ -31,20 +34,27 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             ISettingOperations settingOperations,
             IJDBApiClient jdbApiClient,
             JDBGameTypeMapper jdbGameTypeMapper,
-            IBrandGameProviderOperations brandGameProviderOperations) :
+            IBrandGameProviderOperations brandGameProviderOperations,
+            IPlayerOperations playerOperations,
+            IJDBServices jdbServices) :
             base(roundQueries, gameProviderOperations, localizationOperations)
         {
             _settingOperations = settingOperations;
             _jdbApiClient = jdbApiClient;
             _jdbGameTypeMapper = jdbGameTypeMapper;
             _brandGameProviderOperations = brandGameProviderOperations;
+            _playerOperations = playerOperations;
+            _jdbServices = jdbServices;
         }
 
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB);
+            var brandMerchant = _jdbServices.GetBrandMerchant(configuration, player.BrandCode);
+            var agentMapper = _jdbServices.GetAgentMapper(brandMerchant, player.DefaultWalletCurrencyCode);
             
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, round.BrandId,
                 language);
@@ -58,7 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             var value = new BetHistoryRequest
             {
                 Timestamp = DateTime.Now.Ticks,
-                Parent = configuration.MerchantCode,
+                Parent = agentMapper.AgentId,
                 UserId = playerCode,
                 Language = cultureCode,
                 GameType = (int)jdbGameType,
@@ -67,9 +77,9 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 
             var response = await
                 _jdbApiClient.GetBetHistoryUrlAsync(configuration.ApiUrl, configuration.ClientDomain,
-                    value);
+                    brandMerchant.AESIV, brandMerchant.AESKEY, value);
             var url = string.Empty;
-            if (response.Status == "0000")
+            if (response.Status.IgnoreCaseEquals(GameApiStatus.Succeed.Description()))
             {
                 url = response.Data.FirstOrDefault()?.Path;
             }

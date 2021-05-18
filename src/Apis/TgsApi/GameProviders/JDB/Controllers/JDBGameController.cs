@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.GameProviders.JDB.Services;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
@@ -58,7 +60,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
                     return CancelTransactionAsync(
                         _jsonSerializationProvider.DeserializeFromString<CancelTransactionRequest>(x));
                 default:
-                    return Task.FromResult(new BaseActionResponse {Status = "0000", ErrorMessage = "Invalid action"});
+                    return Task.FromResult(new BaseActionResponse {Status = GameApiStatus.Succeed.Description(), ErrorMessage = "Invalid action"});
             }
         }
 
@@ -72,9 +74,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 
         private async Task<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request)
         {
-            var data = await _services.GetGameProviderConfigurationDataAsync()
+            var platformType = "Web".IgnoreCaseEquals(request.ClientType) ? PlatformType.Desktop : PlatformType.Mobile;
+            var data = await _services.GetGameProviderConfigurationDataAsync(platformType)
                 .ConfigureAwait(false);
-            var betData = _map.Request(data, request);
+            var betData = _map.Request(data, request, platformType);
 
             var betResult = await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
             return _map.Response(betResult);
@@ -82,7 +85,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 
         private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
         {
-            var data = await _services.GetGameProviderConfigurationDataAsync();
+            var data = await _services.GetGameProviderConfigurationDataAsync(PlatformType.Desktop);
             var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdAsync(data.GameProviderId, request.UserId,
                 request.TransferId.ToString());
 

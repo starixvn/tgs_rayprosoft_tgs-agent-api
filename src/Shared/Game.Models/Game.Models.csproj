@@ -6,4 +6,8 @@
     <RootNamespace>TGS.Shared.Game.Models</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -8,6 +8,8 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.JDB;
+using TGS.Core.Models.GameProviders.Settings.KY;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -77,7 +79,41 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new Uri("http://game-jdb") : new("http://localhost:62330"),
                     ApiUrl = new("https://ws-test.insvr.com/jsonapi"),
                     ClientDomain = "tgs",
-                    MerchantCode = "tgs"
+                    BrandMerchants = new[]
+                    {
+                        new JDBBrandMerchant
+                        {
+                            BrandCode = "Default",
+                            AESIV = "F02D8DE4435459BB",
+                            AESKEY = "56CD18A50BC963BD",
+                            Status = true,
+                            AgentMappers = new JDBAgentMapper[]
+                            {
+                                new()
+                                {
+                                    CurrencyCode = "CNY",
+                                    AgentId = "jdb",
+                                    Status = true
+                                }
+                            }
+                        },
+                        new JDBBrandMerchant
+                        {
+                            BrandCode = "TGS",
+                            AESIV = "C536813E03853FC0",
+                            AESKEY = "3E9C1714D1BD1AE8",
+                            Status = false,
+                            AgentMappers = new JDBAgentMapper[]
+                            {
+                                new()
+                                {
+                                    CurrencyCode = "CNY",
+                                    AgentId = "tgs",
+                                    Status = false
+                                }
+                            }
+                        }
+                    }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

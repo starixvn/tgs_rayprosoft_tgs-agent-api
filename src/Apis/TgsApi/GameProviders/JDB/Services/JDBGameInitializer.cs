@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.JDB;
+using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
@@ -18,6 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         private readonly ISettingOperations _settingOperations;
         private readonly IJDBApiClient _jdbApiClient;
         private readonly JDBGameTypeMapper _jdbGameTypeMapper;
+        private readonly IJDBServices _jdbServices;
 
         public JDBGameInitializer(
             ISettingOperations settingOperations,
@@ -25,7 +28,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
             IJDBApiClient jdbApiClient,
-            JDBGameTypeMapper jdbGameTypeMapper)
+            JDBGameTypeMapper jdbGameTypeMapper,
+            IJDBServices jdbServices)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
@@ -33,6 +37,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             _brandGameProviderOperations = brandGameProviderOperations;
             _jdbApiClient = jdbApiClient;
             _jdbGameTypeMapper = jdbGameTypeMapper;
+            _jdbServices = jdbServices;
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
@@ -49,10 +54,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB);
 
+            var brandMerchant = _jdbServices.GetBrandMerchant(configuration, player.BrandCode);
+            var agentMapper = _jdbServices.GetAgentMapper(brandMerchant, player.DefaultWalletCurrencyCode);
+
             var getTokenRequest = new GetTokenRequest
             {
                 Timestamp = DateTime.Now.Ticks,
-                Parent = configuration.MerchantCode,
+                Parent = agentMapper.AgentId,
                 UserId = player.PlayerCode,
                 Language = cultureCode,
                 GameType = ((int)_jdbGameTypeMapper.Get(game.Type)).ToString(),
@@ -61,9 +69,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             };
 
             var response = await
-                _jdbApiClient.GetTokenAsync(configuration.ApiUrl, configuration.ClientDomain, getTokenRequest);
+                _jdbApiClient.GetTokenAsync(configuration.ApiUrl, configuration.ClientDomain, 
+                    brandMerchant.AESIV, brandMerchant.AESKEY, getTokenRequest);
 
-            if (response.Status == "0000")
+            if (response.Status.IgnoreCaseEquals(GameApiStatus.Succeed.Description()))
             {
                 return new() {Url = response.Path};
             }

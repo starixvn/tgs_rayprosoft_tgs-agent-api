@@ -9,7 +9,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
     public class JDBGameTypeMapper
     {
-        private static readonly Dictionary<GameType, Shared.Game.Models.JDB.Enums.GameType> _gameTypeMapper = new Dictionary<GameType, Shared.Game.Models.JDB.Enums.GameType>()
+        private static readonly Dictionary<GameType, JDBGameType> _gameTypeMapper = new Dictionary<GameType, JDBGameType>()
         {
             {GameType.Slot, JDBGameType.Slot},
             {GameType.Fishing, JDBGameType.Fish},

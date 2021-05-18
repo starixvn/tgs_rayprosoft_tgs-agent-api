@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
-using TGS.Shared.Game.Models.Habanero.Enums;
+using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
 using TGS.Shared.Game.Models.JDB.Outgoing;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -13,7 +14,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public interface IJDBActionModelMapper
     {
         PlayerValidationData Request(string playerCode, PlatformType platformType);
-        BetData Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request);
+        BetData Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request, PlatformType platformType);
         BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request, string externalRoundId);
         BaseActionResponse Response(GetBalanceResult result);
         BaseActionResponse Response(BetResult result);
@@ -34,11 +35,11 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         BaseActionResponse IJDBActionModelMapper.Response(GetBalanceResult result) =>
             new BaseActionResponse
             {
-                Status = "0000",
+                Status = GameApiStatus.Succeed.Description(),
                 Balance = result.Balance
             };
         
-        BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request)
+        BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request, PlatformType platformType)
         {
             var transactions = new List<TransactionData>(2);
             var externalTransactionId = request.TransferId.ToString();
@@ -72,8 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 TimeStamp = DateTimeOffset.Parse(request.LastModifyTime),
                 RoundClosed = true
             });
-
-            var platformType = GetPlatformType(request.ClientType);
+            
             return GetBetData(request.UserId, request.Currency, data, transactions.ToArray(), platformType);
         }
         
@@ -113,7 +113,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         BaseActionResponse IJDBActionModelMapper.Response(BetResult result) =>
             new BaseActionResponse
             {
-                Status = SuccessCode,
+                Status = GameApiStatus.Succeed.Description(),
                 Balance = result.Balance
             };
 
@@ -132,15 +132,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             CurrencyCode = currencyCode,
             Transactions = transactions
         };
-        
-        private static string SuccessCode => ((int)GameApiError.Success).ToString().PadLeft(4, '0');
-
-        private static PlatformType GetPlatformType(string platform)
-        {
-            return "WEB".Equals(platform, StringComparison.OrdinalIgnoreCase)
-                ? PlatformType.Desktop
-                : PlatformType.Mobile;
-        }
 
         #endregion
     }

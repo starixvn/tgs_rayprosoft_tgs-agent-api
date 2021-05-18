@@ -6,14 +6,14 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
 using TGS.Shared.Game.Models.JDB.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
-using static TGS.Shared.Game.Models.JDB.Enums.GameApiError;
+using static TGS.Shared.Game.Models.JDB.Enums.GameApiStatus;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
     public sealed class JDBErrorMapper : IErrorMapper
     {
-        private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
-            new Dictionary<Type, GameApiError>
+        private static readonly IReadOnlyDictionary<Type, GameApiStatus> ApiErrorByException =
+            new Dictionary<Type, GameApiStatus>
             {
                 {typeof(BrandUnderMaintenanceException), SystemIsMaintained},
                 {typeof(GameProviderUnderMaintenanceException), SystemIsMaintained},
@@ -25,9 +25,9 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 {typeof(ArgumentException), InvalidParameters}
             };
 
-        private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
+        private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiStatus>
             ApiErrorByInvalidGameActionErrorCode =
-                new Dictionary<InvalidGameActionErrorCode, GameApiError>
+                new Dictionary<InvalidGameActionErrorCode, GameApiStatus>
                 {
                     {Cancelled, Succeed},
                     {Settled, Succeed},

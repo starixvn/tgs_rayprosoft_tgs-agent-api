@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.GameProviders.Settings.JDB;
 
 namespace TGS.Core.Models.GameProviders.Settings
 {
@@ -6,7 +7,7 @@ namespace TGS.Core.Models.GameProviders.Settings
     {
         public Uri ApiUrl { get; init; }
         public string ClientDomain { get; init; }
-        public string MerchantCode { get; set; }
+        public JDBBrandMerchant[] BrandMerchants { get; set; }
         public bool MoreGame { get; set; }
     }
 }

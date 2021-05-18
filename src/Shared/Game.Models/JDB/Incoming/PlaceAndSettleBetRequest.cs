@@ -1,6 +1,7 @@
 ﻿// unset
 
 using System.Text.Json.Serialization;
+using TGS.Core.Models.Enums;
 using JDBGameType = TGS.Shared.Game.Models.JDB.Enums.GameType;
 
 namespace TGS.Shared.Game.Models.JDB.Incoming
@@ -49,6 +50,5 @@ namespace TGS.Shared.Game.Models.JDB.Incoming
         public int? HasGamble { get; set; }
         [JsonPropertyName("roomType")]
         public int? RoomType { get; set; }
-
     }
 }
