@@ -16,16 +16,13 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
         private readonly IDepositRepository _depositRepository;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerService _playerService;
-        private readonly IWalletRepository _walletRepository;
 
         public ReviewDepositFormCommandService(
             IDepositRepository depositRepository,
-            IWalletRepository walletRepository,
             IPlayerService playerService,
             IPlayerBucketRepository playerBucketRepository)
         {
             _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
         }

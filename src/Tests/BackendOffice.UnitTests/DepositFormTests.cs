@@ -17,6 +17,7 @@ using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Payment;
 using TGS.Services.PlayerBucket.Core;
+using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.WalletService;
 
 namespace TGS.Tests.BackendOffice.UnitTests
@@ -47,13 +48,11 @@ namespace TGS.Tests.BackendOffice.UnitTests
         public async Task Manager_Can_Review_DepositForm()
         {
             var moqDepositRepository = new Mock<IDepositRepository>();
-            var moqWalletRepository = new Mock<IWalletRepository>();
             var moqPlayerService = new Mock<IPlayerService>();
             var moqPlayerBucketRepository = new Mock<IPlayerBucketRepository>();
 
             var sut = new ReviewDepositFormCommandService(
                 moqDepositRepository.Object,
-                moqWalletRepository.Object,
                 moqPlayerService.Object,
                 moqPlayerBucketRepository.Object);
 
@@ -98,14 +97,13 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.IsAny<string>()),
                 Times.Exactly(1));
 
-            moqWalletRepository.Verify(
-                fake => fake.ExchangeAsync(
-                    It.Is<Guid>(x => x == brandId),
-                    It.Is<Guid>(x => x == walletId),
-                    It.Is<string>(x => x == "ThisIsPlayerCode"),
-                    It.Is<TransactionTypes>(x => x == TransactionTypes.Deposit),
-                    It.Is<decimal>(x => x == 1000M),
-                    It.IsAny<string>()),
+            moqPlayerBucketRepository.Verify(
+                fake => fake.CreatePlayerBucketWithDepositAsync(
+                    It.Is<CreatePlayerBucketWithDepositRequest>(
+                        x => x.BrandId == brandId
+                            && x.DefaultWalletId == walletId
+                            && x.DepositAmount == 1000M
+                            && x.PlayerCode == "ThisIsPlayerCode")),
                 Times.Exactly(1));
         }
 

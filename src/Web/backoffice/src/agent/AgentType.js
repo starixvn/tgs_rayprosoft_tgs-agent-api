@@ -27,11 +27,13 @@ export const AgentTypeSelect = ({ placeholder, ...props }) => {
         {
             label: useTrans(CashTrans),
             value: Cash
-        },
+        }
+        /*
         {
             label: useTrans(CreditTrans),
             value: Credit
         }
+        */
     ]
 
     return <Select placeholder={placeholder} options={options} {...props} />

@@ -2,16 +2,12 @@ import React, { useRef, useEffect } from "react"
 import { css } from "@emotion/react"
 import { Menu as _Menu, findlLabel } from "../menu"
 import {
-  Code as GameProviderCode,
-  codeLabelPair as gameProviderPair
-} from "./providers/menu"
-import {
-  Code as BrandGameProviderCode,
-  codeLabelPair as brandGameProviderPair
+    Code as BrandGameProviderCode,
+    codeLabelPair as brandGameProviderPair
 } from "./brandproviders/menu"
 import {
-  Code as BrandGameCode,
-  codeLabelPair as brandGamePair
+    Code as BrandGameCode,
+    codeLabelPair as brandGamePair
 } from "./brandgames/menu"
 import { getTrans, useTrans } from "../i18n"
 
@@ -24,64 +20,56 @@ export const DefaultCodePath = [Code]
 export const Name = ({}) => useTrans(nameMessages)
 
 export const nameMessages = {
-  zh: "游戏管理",
-  en: "Game Management"
+    zh: "游戏管理",
+    en: "Game Management"
 }
 
 export const Menu = ({
-  title = <Name />,
-  url = DefaultUrl,
-  codes,
-  codePaths = DefaultCodePath,
-  ...props
+    title = <Name />,
+    url = DefaultUrl,
+    codes,
+    codePaths = DefaultCodePath,
+    ...props
 }) => (
-  <_Menu
-    title={title}
-    url={url}
-    codes={codes}
-    codePaths={codePaths}
-    itemLabel={label}
-  />
+    <_Menu
+        title={title}
+        url={url}
+        codes={codes}
+        codePaths={codePaths}
+        itemLabel={label}
+    />
 )
 
 const label = ({ locale, code }) => {
-  switch (code) {
-    case GameProviderCode:
-      return getTrans(
-        {
-          zh: "游戏商管理",
-          en: "Game Provider Management"
-        },
-        locale
-      )
-    case BrandGameProviderCode:
-      return getTrans(
-        {
-          zh: "厂商列表",
-          en: "Game Provider List"
-        },
-        locale
-      )
-    case BrandGameCode:
-      return getTrans(
-        {
-          zh: "游戏列表",
-          en: "Game List"
-        },
-        locale
-      )
-    default:
-      return ""
-  }
+    switch (code) {
+        case BrandGameProviderCode:
+            return getTrans(
+                {
+                    zh: "厂商列表",
+                    en: "Game Provider List"
+                },
+                locale
+            )
+        case BrandGameCode:
+            return getTrans(
+                {
+                    zh: "游戏列表",
+                    en: "Game List"
+                },
+                locale
+            )
+        default:
+            return ""
+    }
 }
 
 export const codeLabelPair = [
-  Code,
-  ({ locale, codes }) =>
-    findlLabel({
-      locale,
-      codes,
-      label,
-      subLabelPairs: [gameProviderPair, brandGameProviderPair, brandGamePair]
-    })
+    Code,
+    ({ locale, codes }) =>
+        findlLabel({
+            locale,
+            codes,
+            label,
+            subLabelPairs: [brandGameProviderPair, brandGamePair]
+        })
 ]

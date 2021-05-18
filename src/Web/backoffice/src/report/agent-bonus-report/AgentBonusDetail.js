@@ -39,6 +39,7 @@ import Separator from "../../layout/Separator"
 
 export const AgentBonusDetailDialogDisclosure = ({
     brandId,
+    agentId,
     username,
     start,
     end,
@@ -55,6 +56,7 @@ export const AgentBonusDetailDialogDisclosure = ({
             {dialog.visible && (
                 <ReportDialog
                     brandId={brandId}
+                    agentId={agentId}
                     username={username}
                     bonusAmount={value}
                     start={start}
@@ -68,6 +70,7 @@ export const AgentBonusDetailDialogDisclosure = ({
 
 const ReportDialog = ({
     brandId,
+    agentId,
     username,
     bonusAmount,
     start,
@@ -76,7 +79,7 @@ const ReportDialog = ({
 }) => {
     let { state, setPageIndex, setSortOrder } = useTable({
         brandId,
-        username,
+        agentId,
         from: start,
         to: end,
         showAll: true

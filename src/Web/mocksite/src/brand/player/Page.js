@@ -16,7 +16,8 @@ import {
     Modal,
     Text,
     FieldWrapper,
-    InputField
+    InputField,
+    Link as _Link
 } from "bumbag"
 import {
     Switch,
@@ -145,8 +146,12 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
     const depositDialog = Modal.useState()
 
     const [depositFormId, setDepositFormId] = useState()
+
     const uploadDepositProofDialog = Modal.useState()
     let showUploadDepositProofMenu = !!depositFormId
+
+    const [depositInfo, setDepositInfo] = useState()
+    const depositInfoDialog = Modal.useState()
 
     const withdrawDialog = Modal.useState()
 
@@ -191,12 +196,21 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                     currency={currency}
                     username={username}
                     platform={platform}
-                    onSubmitted={(value) => {
-                        setDepositFormId(value)
+                    onSubmitted={(payment, value) => {
+                        if (payment.paymentcode.toLowerCase() === "manual") {
+                            setDepositFormId(value)
 
-                        if (value) {
-                            uploadDepositProofDialog.show()
+                            if (value) {
+                                uploadDepositProofDialog.show()
+                            }
+                        } else {
+                            setDepositInfo(value)
+
+                            if (value) {
+                                depositInfoDialog.show()
+                            }
                         }
+                        console.log("payment", payment, "value", value)
                     }}
                     dialog={depositDialog}
                 />
@@ -210,6 +224,20 @@ const PlayerDropdownMenu = ({ brandCode, currency, username, platform }) => {
                     depositFormId={depositFormId}
                     dialog={uploadDepositProofDialog}
                 />
+            )}
+            {depositInfo && depositInfoDialog.visible && (
+                <Dialog.Modal
+                    title="Deposit Url"
+                    showCloseButton
+                    hideOnClickOutside={false}
+                    {...depositInfoDialog}
+                >
+                    {depositInfo.paymenturl && (
+                        <_Link href={depositInfo.paymenturl} target="_blank">
+                            {depositInfo.paymenturl}
+                        </_Link>
+                    )}
+                </Dialog.Modal>
             )}
             {withdrawDialog.visible && (
                 <WithdrawDialog

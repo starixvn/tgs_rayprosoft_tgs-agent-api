@@ -15,7 +15,7 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public Guid BrandId { get; init; }
         public AgentStatus Status { get; init; }
         public decimal CommissionPercentage { get; init; } //佔成
-        public decimal BonusPercentage { get; init; }
+        public decimal DividendPercentage { get; init; }
         public decimal LiveDealerRebatePercentage { get; init; }
         public decimal SlotRebatePercentage { get; init; }
         public decimal LotteryRebatePercentage { get; init; }

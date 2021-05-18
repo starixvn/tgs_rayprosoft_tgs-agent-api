@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SqlScripts\Indexes\agents_email.sql" />
+    <None Remove="SqlScripts\Functions\log_get_admin_log.sql" />
+    <None Remove="SqlScripts\Functions\log_get_admin_logs.sql" />
+    <None Remove="SqlScripts\Functions\log_get_api_log.sql" />
+    <None Remove="SqlScripts\Functions\log_get_api_logs.sql" />
+    <None Remove="SqlScripts\Functions\log_get_log_records.sql" />
+    <None Remove="SqlScripts\Indexes\admin_logs.sql" />
+    <None Remove="SqlScripts\Indexes\api_logs.sql" />
+    <None Remove="SqlScripts\Indexes\log_records.sql" />
     <None Remove="SqlScripts\Indexes\players_email.sql" />
   </ItemGroup>
 
@@ -33,14 +42,23 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_round_id.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_action_external_ids.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_valid_game_action_external_ids.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_admin_log.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_admin_logs.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_api_log.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_api_logs.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\log_get_log_records.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_account_change_records.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_round_aggregates.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\agent_wallet_update_wallet_balance.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\admin_logs.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\api_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\brands.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\log_records.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\payments.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\licensees.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\games.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\agents_email.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\users.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\roles.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\resellers.sql" />

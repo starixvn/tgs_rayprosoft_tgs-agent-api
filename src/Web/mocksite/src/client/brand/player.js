@@ -511,8 +511,22 @@ export const usePaymentList = ({
     }
 }
 
+const toPaymentUrl = (payment) => {
+    if (!payment) {
+        return ""
+    }
+
+    let { paymentcode = "", methodcode = "" } = payment
+    paymentcode = paymentcode.toLowerCase()
+    if (paymentcode == "manual") {
+        return `/api/deposit/manual`
+    }
+
+    return `/api/deposit/${methodcode}/${paymentcode}`
+}
+
 export const useApplyDeposit = (
-    { brandCode, currency, username, platformtype } = {},
+    { brandCode, currency, username, platformtype, payment } = {},
     formData
 ) => {
     let { token: brandToken, ...brandTokenHook } = useBrandToken({
@@ -526,16 +540,10 @@ export const useApplyDeposit = (
         platformtype
     })
 
+    let url = toPaymentUrl(payment)
     let keys =
-        brandToken && playerToken && formData
-            ? [
-                  `/api/deposit/manual`,
-                  formData,
-                  brandCode,
-                  currency,
-                  username,
-                  platformtype
-              ]
+        brandToken && playerToken && url && formData
+            ? [url, formData, brandCode, currency, username, platformtype]
             : undefined
 
     let { data: result, error, ...rest } = useSWR(keys, (url, formData) => {

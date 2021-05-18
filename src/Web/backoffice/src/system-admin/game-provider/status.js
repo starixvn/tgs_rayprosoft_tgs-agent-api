@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
 import { Stack, Heading, Box, Button, DropdownMenu } from "bumbag"
 import { useForm, useFormContext, Controller } from "react-hook-form"
-import { useChangeGameProviderStatus } from "./client"
+import { useChangeGameProviderStatus } from "../../game/providers/client"
 import Alert from "../../dialog/Alert"
 import { useTrans, Trans } from "../../i18n"
 

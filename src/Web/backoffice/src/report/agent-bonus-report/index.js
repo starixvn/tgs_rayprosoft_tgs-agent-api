@@ -39,6 +39,7 @@ import VipLevelSelect from "../../vip-levels/VipLevelSelect"
 import { useAgentDividendList } from "./client"
 import { AgentWinLossDialogDisclosure } from "./AgentWinLoss"
 import { AgentBonusDetailDialogDisclosure } from "./AgentBonusDetail"
+import { AgentTypeSelect } from "../../agent/AgentType"
 
 export { Code }
 
@@ -76,7 +77,7 @@ const ReportContent = ({ brandId }) => {
         brandId,
         pageSize: QueryMaxRangeDays,
         username: "",
-        level: undefined,
+        type: "",
         from: dateRange.start,
         to: dateRange.end
     })
@@ -114,18 +115,18 @@ const ReportContent = ({ brandId }) => {
                 <SearchBar
                     brandId={brandId}
                     username={state?.username}
-                    level={state?.level}
+                    type={state?.type}
                     start={from}
                     end={to}
                     minDate={minDate}
                     maxDate={maxDate}
                     maxRangeDays={QueryMaxRangeDays}
                     isLoading={isLoading}
-                    search={({ username, level, start, end }) => {
+                    search={({ username, type, start, end }) => {
                         let newState = {
                             pageIndex: 0,
                             username,
-                            level,
+                            type,
                             from: start,
                             to: end
                         }
@@ -134,7 +135,7 @@ const ReportContent = ({ brandId }) => {
                             equals(newState, {
                                 pageIndex,
                                 username: state?.username,
-                                level: state?.level,
+                                type: state?.type,
                                 from: state?.from,
                                 to: state?.to
                             })
@@ -175,7 +176,7 @@ const ReportContent = ({ brandId }) => {
 const SearchBar = ({
     brandId,
     username,
-    level,
+    type,
     start,
     end,
     minDate,
@@ -188,7 +189,7 @@ const SearchBar = ({
     let formMethods = useForm({
         defaultValues: {
             username,
-            level,
+            type,
             start,
             end
         }
@@ -213,11 +214,7 @@ const SearchBar = ({
                         required
                         autoFocus
                     />
-                    <VipLevelSelect
-                        name="level"
-                        brandId={brandId}
-                        optionValue={({ level }) => level}
-                    />
+                    <AgentTypeSelect name="type" />
                     <DateInputRange
                         minDate={minDate}
                         maxDate={maxDate}
@@ -291,6 +288,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                     return (
                         <AgentWinLossDialogDisclosure
                             brandId={brandId}
+                            agentId={value?.agentId}
                             start={start}
                             end={end}
                             username={value?.username}
@@ -317,6 +315,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                     return (
                         <AgentBonusDetailDialogDisclosure
                             brandId={brandId}
+                            agentId={value?.agentId}
                             start={start}
                             end={end}
                             username={value?.username}

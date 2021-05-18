@@ -45,6 +45,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 SortBy = request.SortBy,
                 ShowAll = request.ShowAll
             };
+
             var response = await _client.GetPromotionsAsync(promotionsRequest);
 
             return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};

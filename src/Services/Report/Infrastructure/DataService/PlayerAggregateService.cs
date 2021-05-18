@@ -3,9 +3,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
-using TGS.Core.DataServices.Report;
-using TGS.Core.DataServices.Report.Models;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Services.Report.Application.Models.Player;
 
@@ -13,7 +12,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
 {
     public interface IPlayerAggregateService
     {
-        IReportRepository Repository { get; }
+        ITgsRepository Repository { get; }
 
         IQueryable<PlayerAggregate> GetPlayerAggregateQueries(
             Func<IQueryable<PlayerAggregate>, IQueryable<PlayerAggregate>> preQuery = null,
@@ -24,16 +23,16 @@ namespace TGS.Services.Report.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<PlayerAggregate, bool>> predicate);
     }
 
-    public class PlayerAggregateService : BaseRepositoryOperations<IReportRepository>, IPlayerAggregateService
+    public class PlayerAggregateService : BaseRepositoryOperations<ITgsRepository>, IPlayerAggregateService
     {
-        private readonly IReportRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public PlayerAggregateService(IReportRepository repository, ITgsRepository tgsRepository) : base(repository)
+        public PlayerAggregateService(ITgsRepository repository, ITgsRepository tgsRepository) : base(repository)
         {
             _repository = repository;
         }
 
-        IReportRepository IPlayerAggregateService.Repository => _repository;
+        ITgsRepository IPlayerAggregateService.Repository => _repository;
 
         Task IPlayerAggregateService.CreatePlayerAggregatesAsync(PlayerAggregateModel[] models) =>
             CreateEntitiesAsync(models.Select(model => new PlayerAggregate
