@@ -61,6 +61,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 "open.operator.order.transfer" => await BetAsync(jsonOptionsAccessor, baseRequest),
                 "open.operator.calc.transfer" => await SettleAsync(jsonOptionsAccessor, baseRequest),
                 "open.operator.order.status" => await OrderStatusAsync(jsonOptionsAccessor, baseRequest),
+                "open.operator.ping" => Ping(jsonOptionsAccessor, baseRequest),
                 _ => new BGBaseResponse()
                 {
                     Id = baseRequest.Id,
@@ -189,6 +190,21 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
+                Error = null,
+                Jsonrpc = baseRequest.Jsonrpc
+            };
+        }
+
+        [HttpPost("ping")]
+        public BGBaseResponse Ping(
+              [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+              BGBaseRequest baseRequest)
+        {
+
+            return new BGBaseResponse()
+            {
+                Id = baseRequest.Id,
+                Result = JsonDocument.Parse(JsonSerializer.Serialize($"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}")),
                 Error = null,
                 Jsonrpc = baseRequest.Jsonrpc
             };

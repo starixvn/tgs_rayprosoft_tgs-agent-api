@@ -25,7 +25,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
-        private readonly string[] _method;
         public AuthorizeBigGamingMiddleware(
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
@@ -38,13 +37,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
-            _method = new string[] {
-                "open.operator.user.balance",
-                "open.operator.order.transfer",
-                "open.operator.calc.transfer",
-                "open.operator.user.transfer",
-                "open.operator.order.status"
-            };
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -62,6 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 "open.operator.order.transfer" => await CheckingSignBetAsync(configuration, JsonSerializer.Deserialize<BGBetRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
                 "open.operator.calc.transfer" => await CheckingSignSettleAsync(configuration, JsonSerializer.Deserialize<BGSettleRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
                 "open.operator.order.status" => CheckingSignOrderStatusAsync(configuration, JsonSerializer.Deserialize<BGOrderStatusRequest>(JsonSerializer.Serialize(response.Params))),
+                "open.operator.ping" => new(true, null),
                 _ => new(false, null)
             };
 
