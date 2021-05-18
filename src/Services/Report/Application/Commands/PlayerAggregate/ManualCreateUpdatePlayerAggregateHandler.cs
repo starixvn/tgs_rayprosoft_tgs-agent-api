@@ -3,10 +3,10 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Aggregate;
 using TGS.Services.Report.Infrastructure.DataService;
@@ -20,18 +20,16 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
         private readonly IPlayerAggregateService _playerAggregateService;
         private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
         private readonly IRoundAggregateService _roundAggregateService;
-        private readonly SystemTransactionManager _transactionManager;
 
-        public ManualCreateUpdatePlayerAggregateHandler(IPlayerAggregateService playerAggregateService,
+        public ManualCreateUpdatePlayerAggregateHandler(
+            IPlayerAggregateService playerAggregateService,
             IPlayerGameTypeAggregateService playerGameTypeAggregateService,
             IRoundAggregateService roundAggregateService,
-            SystemTransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _playerAggregateService = playerAggregateService;
             _playerGameTypeAggregateService = playerGameTypeAggregateService;
             _roundAggregateService = roundAggregateService;
-            _transactionManager = transactionManager;
         }
 
         public override async Task<MessageResponse> Handle(ManualCreateUpdatePlayerAggregateModel request,
@@ -72,58 +70,48 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 var end = new DateTimeOffset(result.Year, result.Month, result.Day, doHour,
                     0, 0, result.Offset).AddHours(1);
 
-                var response = await _transactionManager.ExecuteTransactionAsync(
-                    _playerAggregateService.Repository,
-                    IsolationLevel.ReadCommitted, id,
-                    async _ =>
-                    {
-                        var playerAggregates = await _playerAggregateService.GetPlayerAggregateQueries()
-                            .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
-                            .ToArrayAsync(cancellationToken);
+                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                        await _playerAggregateService.DeletePlayerAggregatesAsync(playerAggregates);
+                var playerAggregates = await _playerAggregateService.GetPlayerAggregateQueries()
+                    .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
+                    .ToArrayAsync(cancellationToken);
 
-                        var playerGameTypeAggregates = await _playerGameTypeAggregateService
-                            .GetPlayerGameTypeAggregateQueries()
-                            .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
-                            .ToArrayAsync(cancellationToken);
+                await _playerAggregateService.DeletePlayerAggregatesAsync(playerAggregates);
 
-                        await _playerGameTypeAggregateService.DeletePlayerGameTypeAggregatesAsync(
-                            playerGameTypeAggregates);
+                var playerGameTypeAggregates = await _playerGameTypeAggregateService
+                    .GetPlayerGameTypeAggregateQueries()
+                    .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
+                    .ToArrayAsync(cancellationToken);
 
-                        if (await _playerAggregateService.ExistsAsync(x =>
-                            x.ReportDate == reportDate && x.Hour == start.Hour))
-                        {
-                            return new TgsResponse
-                            {
-                                ErrorMessage = $"{reportDate.Date} {start.Hour} is already existed."
-                            };
-                        }
+                await _playerGameTypeAggregateService.DeletePlayerGameTypeAggregatesAsync(
+                    playerGameTypeAggregates);
 
-                        var (aggregates, aggregatesByGameType) =
-                            await _roundAggregateService.GetPlayerAggregatesAsync(start, end);
-
-                        if (aggregates.Length > 0)
-                        {
-                            await _playerAggregateService.CreatePlayerAggregatesAsync(aggregates);
-                        }
-
-                        if (aggregatesByGameType.Length > 0)
-                        {
-                            await _playerGameTypeAggregateService.CreatePlayerGameTypeAggregatesAsync(
-                                aggregatesByGameType);
-                        }
-
-                        return new();
-                    });
-
-                if (response.ErrorMessage.IsNotNullOrEmpty())
+                if (await _playerAggregateService.ExistsAsync(x =>
+                    x.ReportDate == reportDate && x.Hour == start.Hour))
                 {
-                    return CreateInvalidResponse<MessageResponse>(response.ErrorMessage);
+                    scope.Complete();
+
+                    return CreateInvalidResponse<MessageResponse>($"{reportDate.Date} {start.Hour} is already existed.");
                 }
+
+                var (aggregates, aggregatesByGameType) =
+                    await _roundAggregateService.GetPlayerAggregatesAsync(start, end);
+
+                if (aggregates.Length > 0)
+                {
+                    await _playerAggregateService.CreatePlayerAggregatesAsync(aggregates);
+                }
+
+                if (aggregatesByGameType.Length > 0)
+                {
+                    await _playerGameTypeAggregateService.CreatePlayerGameTypeAggregatesAsync(
+                        aggregatesByGameType);
+                }
+
+                scope.Complete();
             }
 
-            return new() {Valid = true};
+            return new() { Valid = true };
         }
     }
 }

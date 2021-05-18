@@ -22,14 +22,12 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerService _playerService;
         private readonly ITgsRepository _repository;
-        private readonly SystemTransactionManager _transactionManager;
         private readonly IWalletRepository _walletRepository;
 
 
         public AdjustAgentAmountHandler(IAgentService agentService,
             IAgentWalletRepository agentWalletRepository,
             IWalletRepository walletRepository,
-            SystemTransactionManager transactionManager,
             IPlayerService playerService,
             ITgsRepository repository,
             IJsonSerializationProvider jsonSerializationProvider,
@@ -38,7 +36,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             _agentService = agentService;
             _agentWalletRepository = agentWalletRepository;
             _walletRepository = walletRepository;
-            _transactionManager = transactionManager;
             _playerService = playerService;
             _repository = repository;
             _jsonSerializationProvider = jsonSerializationProvider;

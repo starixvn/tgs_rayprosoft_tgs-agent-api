@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Services.Wallet;
 using TGS.Services.WalletService;
@@ -16,12 +16,10 @@ namespace TGS.Wallet.Repositories
     internal class AgentWalletRepository : IAgentWalletRepository
     {
         private readonly ITgsRepository _tgsRepository;
-        private readonly SystemTransactionManager _transactionManager;
 
-        public AgentWalletRepository(ITgsRepository tgsRepository, SystemTransactionManager transactionManager)
+        public AgentWalletRepository(ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-            _transactionManager = transactionManager ?? throw new ArgumentNullException(nameof(transactionManager));
         }
 
         public async ValueTask<Guid> ExchangeAsync(Guid brandId, Guid walletId, Guid agentId,
@@ -31,52 +29,47 @@ namespace TGS.Wallet.Repositories
             var updatedOn = DateTimeOffset.UtcNow;
             var transactionId = GuidExtensions.NewSequentialGuid();
 
-            return await _transactionManager
-                .ExecuteTransactionAsync(
-                    _tgsRepository,
-                    IsolationLevel.ReadCommitted,
-                    transactionId.ToString(),
-                    async ctx =>
-                    {
-                        var postBalance = await _tgsRepository.SqlQuerySingleAsync<decimal>(
-                            sql,
-                            parameters: new Dictionary<string, object>
-                            {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            var postBalance = await _tgsRepository.SqlQuerySingleAsync<decimal>(
+                sql,
+                parameters: new Dictionary<string, object>
+                {
                                 {":agent_id", agentId},
                                 {":wallet_id", walletId},
                                 {":amount", amount},
                                 {":updated_on", updatedOn}
-                            }).ConfigureAwait(false);
+                }).ConfigureAwait(false);
 
-                        await _tgsRepository.AgentTransactions
-                            .AddAsync(new()
-                            {
-                                Id = transactionId,
-                                WalletId = walletId,
-                                BrandId = brandId,
-                                Amount = amount,
-                                Balance = postBalance,
-                                Type = transactionType switch
-                                {
-                                    TransactionTypes.Deposit    => TransactionType.Deposit,
-                                    TransactionTypes.Withdrawal => TransactionType.Withdrawal,
-                                    TransactionTypes.Adjust     => TransactionType.Adjust,
-                                    TransactionTypes.Bonus      => TransactionType.Bonus,
-                                    TransactionTypes.Rebate     => TransactionType.Rebate,
-                                    TransactionTypes.Dividend   => TransactionType.Dividend,
-                                    TransactionTypes.Promotion  => TransactionType.Promotion,
-                                    _                           => TransactionType.Other
-                                },
-                                Description = description,
-                                RecordedOn = DateTimeOffset.Now
-                            })
-                            .ConfigureAwait(false);
-
-                        await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-
-                        return transactionId;
-                    })
+            await _tgsRepository.AgentTransactions
+                .AddAsync(new()
+                {
+                    Id = transactionId,
+                    WalletId = walletId,
+                    BrandId = brandId,
+                    Amount = amount,
+                    Balance = postBalance,
+                    Type = transactionType switch
+                    {
+                        TransactionTypes.Deposit => TransactionType.Deposit,
+                        TransactionTypes.Withdrawal => TransactionType.Withdrawal,
+                        TransactionTypes.Adjust => TransactionType.Adjust,
+                        TransactionTypes.Bonus => TransactionType.Bonus,
+                        TransactionTypes.Rebate => TransactionType.Rebate,
+                        TransactionTypes.Dividend => TransactionType.Dividend,
+                        TransactionTypes.Promotion => TransactionType.Promotion,
+                        _ => TransactionType.Other
+                    },
+                    Description = description,
+                    RecordedOn = DateTimeOffset.Now
+                })
                 .ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+
+            scope.Complete();
+
+            return transactionId;
         }
 
         public async ValueTask<decimal> GetBalanceAsync(Guid walletId, string playerCode)

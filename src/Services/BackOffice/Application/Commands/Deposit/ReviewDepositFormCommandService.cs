@@ -3,8 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Operations;
 using TGS.Services.Payment;
+using TGS.Services.PlayerBucket.Core;
+using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
 
@@ -13,17 +14,17 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
     internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFormCommand>
     {
         private readonly IDepositRepository _depositRepository;
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerService _playerService;
 
         public ReviewDepositFormCommandService(
             IDepositRepository depositRepository,
-            IWalletRepository walletRepository,
-            IPlayerService playerService)
+            IPlayerService playerService,
+            IPlayerBucketRepository playerBucketRepository)
         {
             _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+            _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
         }
 
         public async ValueTask ExecuteAsync(ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
@@ -42,13 +43,13 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                     .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
                     .ConfigureAwait(false);
 
-                await _walletRepository
-                    .ExchangeAsync(
+                await _playerBucketRepository
+                    .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
                         command.BrandId,
-                        player.DefaultWalletId,
+                        null,
                         player.PlayerCode,
-                        TransactionTypes.Deposit,
-                        form.Amount)
+                        player.DefaultWalletId,
+                        form.Amount))
                     .ConfigureAwait(false);
             }
         }

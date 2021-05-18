@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using System.Transactions;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Player;
 
@@ -17,19 +16,20 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IPlayerService
     {
-        Task<Player> GetPlayerAsync(Expression<Func<Player, bool>> predicate,
-            Func<IQueryable<Player>, IQueryable<Player>> preQuery = null);
+        Task<bool> ExistsAsync(Expression<Func<Player, bool>> predicate);
 
-        IQueryable<Player> GetPlayerQueries(
-            Func<IQueryable<Player>, IQueryable<Player>> preQuery = null,
-            bool tracking = false);
+        Task<Player> GetPlayerAsync(Expression<Func<Player, bool>> predicate,
+                    Func<IQueryable<Player>, IQueryable<Player>> preQuery = null);
 
         IQueryable<PlayerAuditLog> GetPlayerOperationQueries(
             Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery = null,
             bool tracking = false);
 
+        IQueryable<Player> GetPlayerQueries(
+                    Func<IQueryable<Player>, IQueryable<Player>> preQuery = null,
+            bool tracking = false);
+
         Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
-        Task<bool> ExistsAsync(Expression<Func<Player, bool>> predicate);
     }
 
     public class PlayerService : BaseRepositoryOperations<ITgsRepository>, IPlayerService
@@ -37,13 +37,13 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private readonly IRedisCacheManager _cacheManager;
         private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _repository;
-        private readonly SystemTransactionManager _transactionManager;
 
-        public PlayerService(ITgsRepository tgsRepository, SystemTransactionManager transactionManager,
-            IPasswordHandler passwordHandler, IRedisCacheManager cacheManager) : base(
+        public PlayerService(
+            ITgsRepository tgsRepository,
+            IPasswordHandler passwordHandler,
+            IRedisCacheManager cacheManager) : base(
             tgsRepository)
         {
-            _transactionManager = transactionManager;
             _repository = tgsRepository;
             _passwordHandler = passwordHandler;
             _cacheManager = cacheManager;
@@ -58,60 +58,61 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        Task IPlayerService.UpdatePlayerAsync(
+        async Task IPlayerService.UpdatePlayerAsync(
             Player player, UpdatePlayerRequest request)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
-            return _transactionManager.ExecuteTransactionAsync(_repository,
-                IsolationLevel.ReadCommitted, id,
-                async _ =>
-                {
-                    var updatePlayerType = new[] {"info", "contact", "password"};
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                    if (request.Type == updatePlayerType[0])
-                    {
-                        player.RealName = request.RealName;
-                        player.VipId = request.VipId;
-                        player.Status = request.Status;
-                    }
+            var updatePlayerType = new[] { "info", "contact", "password" };
 
-                    if (request.Type == updatePlayerType[1])
-                    {
-                        player.Phone = request.Phone;
-                        player.Email = request.Email;
-                        player.QQ = request.QQ;
-                        player.Wechat = request.Wechat;
-                    }
+            if (request.Type == updatePlayerType[0])
+            {
+                player.RealName = request.RealName;
+                player.VipId = request.VipId;
+                player.Status = request.Status;
+            }
 
-                    if (request.Type == updatePlayerType[2])
-                    {
-                        var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
-                        player.Password = pwd;
-                        player.Salt = salt;
+            if (request.Type == updatePlayerType[1])
+            {
+                player.Phone = request.Phone;
+                player.Email = request.Email;
+                player.QQ = request.QQ;
+                player.Wechat = request.Wechat;
+            }
 
-                        await _cacheManager.ClearCacheAsync(RedisCacheType.Player, request.PlayerCode);
-                    }
+            if (request.Type == updatePlayerType[2])
+            {
+                var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
+                player.Password = pwd;
+                player.Salt = salt;
 
-                    player.UpdatedByUsername = request.EditorUsername;
-                    player.UpdatedOn = DateTimeOffset.Now;
+                await _cacheManager
+                    .ClearCacheAsync(RedisCacheType.Player, request.PlayerCode)
+                    .ConfigureAwait(false);
+            }
 
-                    var auditLog = new PlayerAuditLog
-                    {
-                        Id = GuidExtensions.NewSequentialGuid(),
-                        ModuleName = "Player",
-                        CreatedByUsername = request.EditorUsername,
-                        CreatedOn = DateTimeOffset.Now,
-                        Operation = $"Update Player {request.Type}",
-                        Username = request.PlayerCode
-                    };
+            player.UpdatedByUsername = request.EditorUsername;
+            player.UpdatedOn = DateTimeOffset.Now;
 
-                    await _cacheManager.ClearCacheAsync(RedisCacheType.Player, request.PlayerCode);
+            var auditLog = new PlayerAuditLog
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                ModuleName = "Player",
+                CreatedByUsername = request.EditorUsername,
+                CreatedOn = DateTimeOffset.Now,
+                Operation = $"Update Player {request.Type}",
+                Username = request.PlayerCode
+            };
 
-                    await UpdateEntityAsync(player);
-                    await CreateEntityAsync(auditLog);
+            await _cacheManager
+                .ClearCacheAsync(RedisCacheType.Player, request.PlayerCode)
+                .ConfigureAwait(false);
 
-                    return Task.CompletedTask;
-                });
+            await UpdateEntityAsync(player).ConfigureAwait(false);
+            await CreateEntityAsync(auditLog).ConfigureAwait(false);
+
+            scope.Complete();
         }
 
         Task<bool> IPlayerService.ExistsAsync(Expression<Func<Player, bool>> predicate) =>
