@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.AgentAdjust;
 
@@ -21,46 +20,40 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
     {
         private readonly IPasswordHandler _passwordHandler;
         private readonly ITgsRepository _repository;
-        private readonly SystemTransactionManager _transactionManager;
 
-        public AgentTransactionService(ITgsRepository repository, IPasswordHandler passwordHandler,
-            SystemTransactionManager transactionManager) : base(repository)
+        public AgentTransactionService(ITgsRepository repository, IPasswordHandler passwordHandler) : base(repository)
         {
             _passwordHandler = passwordHandler;
             _repository = repository;
-            _transactionManager = transactionManager;
         }
 
-        Task IAgentTransactionService.CreateAgentTransactionAsync(Agent agent, CreateAgentAdjustmentRequest request)
+        async Task IAgentTransactionService.CreateAgentTransactionAsync(Agent agent, CreateAgentAdjustmentRequest request)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
 
-            return _transactionManager.ExecuteTransactionAsync(_repository,
-                IsolationLevel.ReadCommitted, id,
-                async _ =>
-                {
-                    var wallet = agent.Wallets.First(x => x.Id == agent.DefaultWalletId);
-                    var amount = request.AdjustmentType == AdjustmentType.Add
-                        ? wallet.Balance + request.Amount
-                        : wallet.Balance - request.Amount;
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                    wallet.Balance = amount;
+            var wallet = agent.Wallets.First(x => x.Id == agent.DefaultWalletId);
+            var amount = request.AdjustmentType == AdjustmentType.Add
+                ? wallet.Balance + request.Amount
+                : wallet.Balance - request.Amount;
 
-                    var agentTransaction = new AgentTransaction
-                    {
-                        WalletId = agent.DefaultWalletId,
-                        BrandId = agent.BrandId,
-                        Type = TransactionType.Adjust,
-                        Amount = request.Amount,
-                        Balance = amount,
-                        RecordedOn = DateTimeOffset.Now
-                    };
+            wallet.Balance = amount;
 
-                    await CreateEntityAsync(agentTransaction);
-                    await UpdateEntityAsync(wallet);
+            var agentTransaction = new AgentTransaction
+            {
+                WalletId = agent.DefaultWalletId,
+                BrandId = agent.BrandId,
+                Type = TransactionType.Adjust,
+                Amount = request.Amount,
+                Balance = amount,
+                RecordedOn = DateTimeOffset.Now
+            };
 
-                    return Task.CompletedTask;
-                });
+            await CreateEntityAsync(agentTransaction).ConfigureAwait(false);
+            await UpdateEntityAsync(wallet).ConfigureAwait(false);
+
+            scope.Complete();
         }
     }
 }

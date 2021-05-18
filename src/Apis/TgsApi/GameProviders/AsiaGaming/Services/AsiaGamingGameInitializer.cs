@@ -189,6 +189,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             return parameters;
         }
 
-        private string GenerateSequenceNumber() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+        private static string GenerateSequenceNumber() =>
+            DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
     }
 }

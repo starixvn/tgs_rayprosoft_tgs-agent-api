@@ -60,6 +60,17 @@ namespace TGS.Apis.AgentApi
                 .AddReportClientServices(_configuration)
                 .AddTransactions();
 
+            services
+                .AddAgentApiCore()
+                .ConfigureAgentOptions<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("Agent").Bind(options);
+                })
+                .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("EmailSetting").Bind(options);
+                });
+
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
@@ -84,7 +95,7 @@ namespace TGS.Apis.AgentApi
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new() {Title = "TGS Agent API", Version = "v1"});
+                    c.SwaggerDoc("v1", new() { Title = "TGS Agent API", Version = "v1" });
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -96,7 +107,8 @@ namespace TGS.Apis.AgentApi
                         Scheme = "bearer",
                         Reference = new()
                         {
-                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
+                            Id = JwtBearerDefaults.AuthenticationScheme,
+                            Type = ReferenceType.SecurityScheme
                         }
                     };
 

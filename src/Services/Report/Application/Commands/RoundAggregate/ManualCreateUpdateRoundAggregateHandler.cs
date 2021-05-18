@@ -3,10 +3,10 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Aggregate;
 using TGS.Services.Report.Infrastructure.DataService;
@@ -19,16 +19,13 @@ namespace TGS.Services.Report.Application.Commands.RoundAggregate
     {
         private readonly IRoundAggregateService _roundAggregateService;
         private readonly ITgsRoundService _roundService;
-        private readonly SystemTransactionManager _transactionManager;
 
         public ManualCreateUpdateRoundAggregateHandler(ITgsRoundService roundService,
             IRoundAggregateService roundAggregateService,
-            SystemTransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _roundService = roundService;
             _roundAggregateService = roundAggregateService;
-            _transactionManager = transactionManager;
         }
 
         public override async Task<MessageResponse> Handle(ManualCreateUpdateRoundAggregateModel request,
@@ -69,50 +66,39 @@ namespace TGS.Services.Report.Application.Commands.RoundAggregate
                 var end = new DateTimeOffset(result.Year, result.Month, result.Day, doHour,
                     0, 0, result.Offset).AddHours(1);
 
-                var response = await _transactionManager.ExecuteTransactionAsync(
-                    _roundAggregateService.Repository,
-                    IsolationLevel.ReadCommitted, id,
-                    async _ =>
-                    {
-                        var playerAggregates = await _roundAggregateService.GetRoundAggregateQueries()
-                            .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
-                            .ToArrayAsync(cancellationToken);
+                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                        await _roundAggregateService.DeleteRoundAggregatesAsync(playerAggregates);
+                var playerAggregates = await _roundAggregateService.GetRoundAggregateQueries()
+                    .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
+                    .ToArrayAsync(cancellationToken);
 
-                        var playerGameTypeAggregates = await _roundAggregateService
-                            .GetRoundAggregateQueries()
-                            .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
-                            .ToArrayAsync(cancellationToken);
+                await _roundAggregateService.DeleteRoundAggregatesAsync(playerAggregates);
 
-                        await _roundAggregateService.DeleteRoundAggregatesAsync(playerGameTypeAggregates);
+                var playerGameTypeAggregates = await _roundAggregateService
+                    .GetRoundAggregateQueries()
+                    .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
+                    .ToArrayAsync(cancellationToken);
 
-                        if (await _roundAggregateService.ExistsAsync(x =>
-                            x.ReportDate == reportDate && x.Hour == start.Hour))
-                        {
-                            return new TgsResponse
-                            {
-                                ErrorMessage = $"{reportDate.Date} {start.Hour} is already existed."
-                            };
-                        }
+                await _roundAggregateService.DeleteRoundAggregatesAsync(playerGameTypeAggregates);
 
-                        var models = await _roundService.GetRoundsAsync(start, end);
-
-                        if (models.Length > 0)
-                        {
-                            await _roundAggregateService.CreateRoundAggregateAsync(models);
-                        }
-
-                        return new();
-                    });
-
-                if (response.ErrorMessage.IsNotNullOrEmpty())
+                if (await _roundAggregateService.ExistsAsync(x =>
+                    x.ReportDate == reportDate && x.Hour == start.Hour))
                 {
-                    return CreateInvalidResponse<MessageResponse>(response.ErrorMessage);
+                    scope.Complete();
+                    return CreateInvalidResponse<MessageResponse>($"{reportDate.Date} {start.Hour} is already existed.");
                 }
+
+                var models = await _roundService.GetRoundsAsync(start, end);
+
+                if (models.Length > 0)
+                {
+                    await _roundAggregateService.CreateRoundAggregateAsync(models);
+                }
+
+                scope.Complete();
             }
 
-            return new() {Valid = true};
+            return new() { Valid = true };
         }
     }
 }

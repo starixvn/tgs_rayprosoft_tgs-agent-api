@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using TGS.Apis.AgentApi.Attributes;
-using TGS.Apis.AgentApi.Resources;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
@@ -48,7 +47,7 @@ namespace TGS.Apis.AgentApi.Middlewares
             {
                 if (!attribute.AllowNullOrEmpty)
                 {
-                    throw new MissingTokenException(Agent.MissingAgentToken);
+                    throw new MissingTokenException(Resources.Agent.MissingAgentToken);
                 }
 
                 await _next(context);
@@ -60,7 +59,7 @@ namespace TGS.Apis.AgentApi.Middlewares
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
             if (sub.IsNullOrEmpty())
             {
-                throw new MissingTokenException(Agent.MissingAgentToken);
+                throw new MissingTokenException(Resources.Agent.MissingAgentToken);
             }
 
             var data = await tokenProvider.DecryptAsync<AgentTokenData>(sub);

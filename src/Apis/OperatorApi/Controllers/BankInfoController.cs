@@ -20,7 +20,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class BankInfoController : ControllerBase
     {
         [HttpPost]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task CreateBankInfoAsync(
             [FromServices] ICommandService<CreateBankInfoCommand> createService,
@@ -42,7 +42,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpDelete("{bankInfoId}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task DeleteBankInfoAsync(
             [FromServices] ICommandService<DeleteBankInfoCommand> deleteService,
@@ -58,7 +58,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpGet]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public IAsyncEnumerable<BankInfoResponse> GetPlayerBankInfosAsync(
             [FromServices] IQueryService<GetPlayerBankInfosQuery, BankInfo> queryService)

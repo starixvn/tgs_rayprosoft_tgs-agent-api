@@ -171,6 +171,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgentApi", "src\Apis\AgentA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameProviders.Repositories", "src\Repositories\GameProviders.Repositories\GameProviders.Repositories.csproj", "{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agent.Core", "Agent.Core\Agent.Core.csproj", "{52946017-F36A-464F-AFAF-42343A9FC8DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -409,6 +411,10 @@ Global
 		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52946017-F36A-464F-AFAF-42343A9FC8DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52946017-F36A-464F-AFAF-42343A9FC8DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52946017-F36A-464F-AFAF-42343A9FC8DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52946017-F36A-464F-AFAF-42343A9FC8DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -476,6 +482,7 @@ Global
 		{F2D3B83D-620B-48D7-8A0C-7F2DA02435D1} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 		{BBA34B1C-4325-49E4-AC68-7CB3A96A4412} = {C330CA2B-48D4-4571-8D65-2434B8DD8DB9}
 		{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
+		{52946017-F36A-464F-AFAF-42343A9FC8DB} = {2D13A664-6549-483A-9659-22362B2C1DE9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}

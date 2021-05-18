@@ -308,10 +308,13 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private static HashSet<BrandGroupGame> GenerateWithUpdateBrandGroupGames(Brand brand, BrandGroup brandGroup,
             IEnumerable<int> brandGameIds)
         {
-            var brandGroupGames = brandGameIds.Select(brandGameId => new BrandGroupGame
-            {
-                BrandGroup = brandGroup, BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
-            });
+            var brandGamePoolIds = brand.Games.Select(x => x.GameId).ToArray();
+            var brandGroupGames = brandGameIds
+                .Where(brandGameId => brandGamePoolIds.Contains(brandGameId)).Select(brandGameId =>
+                    new BrandGroupGame
+                    {
+                        BrandGroup = brandGroup, BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
+                    });
             return new(brandGroupGames);
         }
 

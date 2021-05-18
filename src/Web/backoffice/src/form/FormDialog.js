@@ -16,6 +16,7 @@ export const FormDialog = ({
     defaultValues,
     onSubmit,
     onClickSubmit,
+    onClickCancel,
     isLoading,
     result,
     error,
@@ -72,7 +73,7 @@ export const FormDialog = ({
                 actionButtonsProps={{
                     isLoading: isLoading,
                     onClickSubmit,
-                    onClickCancel: formMethods.reset,
+                    onClickCancel,
                     cancelText,
                     submitText,
                     addonButtons:

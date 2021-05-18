@@ -6,8 +6,7 @@
     <RootNamespace>TGS.Core.DataServices.Tgs</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-  </ItemGroup>
+  <ItemGroup>  </ItemGroup>
 
   <ItemGroup>
     <Content Include="appsettings.json">
@@ -18,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\IMES.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\BG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\PP.csv" />
@@ -49,6 +49,7 @@
     <EmbeddedResource Include="SqlScripts\Indexes\payments.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\licensees.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\games.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\agents_email.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\users.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\roles.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\resellers.sql" />

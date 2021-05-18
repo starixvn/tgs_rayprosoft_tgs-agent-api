@@ -11,7 +11,6 @@ namespace TGS.Core.Infrastructures.Transactions
         public static IServiceCollection AddTransactions(this IServiceCollection services)
         {
             services.AddTransient<ITransactionManager, TransactionManager>();
-            services.AddTransient<SystemTransactionManager>();
 
             return services;
         }
