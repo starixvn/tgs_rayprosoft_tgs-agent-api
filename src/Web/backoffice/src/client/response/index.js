@@ -1,15 +1,17 @@
 import { getAcceptLang } from "../../i18n"
 
-const UnauthorizedStatus = 401
-const UnauthorizedStatusTrans = {
+const Unauthorized = 401
+const UnauthorizedDefaultMessage = "Unauthorized"
+const UnauthorizedTrans = {
     zh: "未经授权",
-    en: "Unauthorized"
+    en: UnauthorizedDefaultMessage
 }
 
 export const toDataOrError = (response) => {
     if (!response?.ok) {
-        if (response.status === UnauthorizedStatus) {
+        if (response.status === Unauthorized) {
             location.href = "/login"
+            return Promise.reject({ title: errorTitle(response) })
         } else {
             return response
                 .json()
@@ -43,49 +45,98 @@ export const toDataOrError = (response) => {
 }
 
 const BadRequest = 400
+const BadRequestDefaultMessage = "Bad Request"
 const BadRequestTrans = {
     zh: "错误请求",
-    en: "Bad Request"
+    en: BadRequestDefaultMessage
 }
 
 const Forbidden = 403
+const ForbiddenDefaultMessage = "Forbidden"
 const ForbiddenTrans = {
     zh: "禁止",
-    en: "Forbidden"
+    en: ForbiddenDefaultMessage
 }
 
 const NotFound = 404
+const NotFoundDefaultMessage = "Not Found"
+const NotFoundTrans = {
+    zh: "未找到",
+    en: NotFoundDefaultMessage
+}
+
 const MethodNotAllowed = 405
+const MethodNotAllowedDefaultMessage = "Method Not Allowed"
+const MethodNotAllowedTrans = {
+    zh: "方法不允许",
+    en: MethodNotAllowedDefaultMessage
+}
+
 const RequestTimeout = 408
+const RequestTimeoutDefaultMessage = "Request Timeout"
+const RequestTimeoutTrans = {
+    zh: "请求超时",
+    en: RequestTimeoutDefaultMessage
+}
+
 const InternalServerError = 500
+const InternalServerErrorDefaultMessage = "Server Error"
+const InternalServerErrorTrans = {
+    zh: "服务器错误",
+    en: InternalServerErrorDefaultMessage
+}
+
 const NotImplemented = 501
+
 const BadGateway = 502
+const BadGatewayDefaultMessage = "Bad Gateway"
+const BadGatewayTrans = {
+    zh: "错误的网关",
+    en: BadGatewayDefaultMessage
+}
+
 const ServiceUnavailable = 503
+const ServiceUnavailableDefaultMessage = "Service Unavailable"
+const ServiceUnavailableTrans = {
+    zh: "服务不可用",
+    en: ServiceUnavailableDefaultMessage
+}
+
 const GatewayTimeout = 504
 const errorTitle = (response) => {
     let locale = getAcceptLang()
-    console.log("locale", locale)
     switch (response.status) {
         case BadRequest:
-            return "Bad Request"
+            return BadRequestTrans?.[locale] ?? BadRequestDefaultMessage
+        case Unauthorized:
+            return UnauthorizedTrans?.[locale] ?? UnauthorizedDefaultMessage
         case Forbidden:
-            return "Forbidden"
+            return ForbiddenTrans?.[locale] ?? ForbiddenDefaultMessage
         case NotFound:
-            return "Not Found"
+            return NotFoundTrans?.[locale] ?? NotFoundDefaultMessage
         case MethodNotAllowed:
-            return "Method Not Allowed"
+            return (
+                MethodNotAllowedTrans?.[locale] ??
+                MethodNotAllowedDefaultMessage
+            )
         case RequestTimeout:
-            return "Request Timeout"
+            return RequestTimeoutTrans?.[locale] ?? RequestTimeoutDefaultMessage
         case InternalServerError:
         case NotImplemented:
-            return "Server Error"
+            return (
+                InternalServerErrorTrans?.[locale] ??
+                InternalServerErrorDefaultMessage
+            )
         case BadGateway:
-            return "Bad Gateway"
+            return BadGatewayTrans?.[locale] ?? BadGatewayDefaultMessage
         case ServiceUnavailable:
-            return "Service Unavailable"
+            return ServiceUnavailableTrans?.[locale] ?? ServiceUnavailableTrans
         case GatewayTimeout:
-            return "Gateway Timeout"
+            return BadGatewayTrans?.[locale] ?? BadGatewayDefaultMessage
+        default:
+            return (
+                InternalServerErrorTrans?.[locale] ??
+                InternalServerErrorDefaultMessage
+            )
     }
-
-    return response.statusText ?? `Error ${response.status}`
 }

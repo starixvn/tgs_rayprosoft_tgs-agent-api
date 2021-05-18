@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
 using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Clients.Report.Client.Extensions;
-using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Hangfire;
@@ -46,7 +45,6 @@ namespace TGS.Workers.Schedulers
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs")
-                .AddReportRepository(_configuration, "Report")
                 .AddWebApiServices()
                 .AddNats(_configuration)
                 .AddTgsLog()
@@ -92,7 +90,7 @@ namespace TGS.Workers.Schedulers
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseHangfireScheduler(new[] { Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report });
+            app.UseHangfireScheduler(new[] {Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report});
 
             app.UseRouting();
 
@@ -110,11 +108,11 @@ namespace TGS.Workers.Schedulers
                 endpoints.MapMetrics();
 
                 endpoints.MapHangfireDashboard("/hangfire",
-                    new() { Authorization = new[] { new IgnoreHangfireAuthorizationFilter() } });
+                    new() {Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}});
             });
         }
 
         private static Type[] GetModuleTypes() =>
-            new[] { typeof(JobManagement), typeof(PromotionJobManagement) };
+            new[] {typeof(JobManagement), typeof(PromotionJobManagement)};
     }
 }

@@ -2,24 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TGS.Apis.LogApi.Clients;
 using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Services;
-using TGS.Core.DataServices.Log;
-using TGS.Core.DataServices.Log.Models;
+using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log.Events;
-using TGS.Core.Models.Services.Games;
-using TGS.NotifyApi.Messages;
 
 namespace TGS.Apis.LogApi.Loggers
 {
     public sealed class AdminLogWriter : ILoggerWriter
     {
-        private readonly Func<ILogRepository> _repoFactory;
+        private readonly Func<ITgsRepository> _repoFactory;
         private readonly IGetNotifyTaskService _service;
 
-        public AdminLogWriter(Func<ILogRepository> repoFactory, IGetNotifyTaskService service)
+        public AdminLogWriter(Func<ITgsRepository> repoFactory, IGetNotifyTaskService service)
         {
             _repoFactory = repoFactory;
             _service = service;
@@ -32,7 +29,8 @@ namespace TGS.Apis.LogApi.Loggers
                 .ToArray();
 
             await using var repo = _repoFactory();
-            await repo.AddAdminLogsAsync(logs);
+            await repo.AdminLogs.AddRangeAsync(logs);
+            await repo.SaveChangesAsync();
 
             await logs.Where(p => p.ResponseCode != 200)
                 .Select(log => _service.GetNotifyTaskAsync(log))
@@ -43,10 +41,13 @@ namespace TGS.Apis.LogApi.Loggers
         {
             var log = Convert(@event);
             await using var repo = _repoFactory();
-            await repo.AddAdminLogAsync(log);
+            await repo.AdminLogs.AddAsync(log);
+            await repo.SaveChangesAsync();
 
             if (log.ResponseCode != 200)
+            {
                 await _service.GetNotifyTaskAsync(log);
+            }
         }
 
         private static AdminLog Convert(LogBusEvent ent) => (AdminLog)ent;
