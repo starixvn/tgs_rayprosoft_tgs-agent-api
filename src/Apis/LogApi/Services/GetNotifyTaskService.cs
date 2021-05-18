@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using TGS.Apis.LogApi.Clients;
-using TGS.Core.DataServices.Log.Models;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.NotifyApi.Messages;
 
 namespace TGS.Apis.LogApi.Services
@@ -10,6 +10,7 @@ namespace TGS.Apis.LogApi.Services
         ValueTask<NotifyResponse> GetNotifyTaskAsync(AdminLog log);
         ValueTask<NotifyResponse> GetNotifyTaskAsync(ApiLog log);
     }
+
     public class GetNotifyTaskService : IGetNotifyTaskService
     {
         private readonly INotifyClient _alertClient;
@@ -18,6 +19,7 @@ namespace TGS.Apis.LogApi.Services
         {
             _alertClient = alertClient;
         }
+
         ValueTask<NotifyResponse> IGetNotifyTaskService.GetNotifyTaskAsync(AdminLog log)
         {
             var request = new NotifyLogRequest
@@ -31,11 +33,12 @@ namespace TGS.Apis.LogApi.Services
                 Stacktrace = log.StackTrace,
                 ServerName = log.ServerName,
                 ResponseCode = log.ResponseCode,
-                RecordedOn = log.RecordedOn,
+                RecordedOn = log.RecordedOn
             };
 
             return _alertClient.SendAsync(request);
         }
+
         ValueTask<NotifyResponse> IGetNotifyTaskService.GetNotifyTaskAsync(ApiLog log)
         {
             var request = new NotifyLogRequest
@@ -47,7 +50,7 @@ namespace TGS.Apis.LogApi.Services
                 Prefix = log.Method,
                 ServerName = log.ServerName,
                 ResponseCode = log.ResponseCode,
-                RecordedOn = log.RecordedOn,
+                RecordedOn = log.RecordedOn
             };
 
             return _alertClient.SendAsync(request);

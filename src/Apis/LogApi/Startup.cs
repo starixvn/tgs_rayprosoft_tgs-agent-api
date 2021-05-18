@@ -17,7 +17,7 @@ using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Loggers;
 using TGS.Apis.LogApi.Services;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Log;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
@@ -41,7 +41,7 @@ namespace TGS.Apis.LogApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<LoggerServiceConfig>(_configuration.GetSection("LoggerServiceConfig"));
-            services.AddRepository<ILogRepository, LogRepository>(_configuration, "Log");
+            services.AddRepository<ITgsRepository, TgsRepository>(_configuration, "Tgs");
 
             services.AddRedis()
                 .AddNats(_configuration)
@@ -96,10 +96,11 @@ namespace TGS.Apis.LogApi
                 });
 
             services.AddHealthChecks()
-                .AddPostgres(_configuration, "Log", name: "log-db")
+                .AddPostgres(_configuration, "Tgs", "tgs-db")
                 .AddRedis(_configuration)
                 .AddNats()
-                .ForwardToPrometheus(); ;
+                .ForwardToPrometheus();
+            ;
         }
 
         private static void OnApplicationStarted(IServiceProvider serviceProvider)

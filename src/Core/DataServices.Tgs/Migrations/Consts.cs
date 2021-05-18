@@ -1,10 +1,10 @@
-﻿using System;
-
-namespace TGS.Core.DataServices.Tgs.Migrations
+﻿namespace TGS.Core.DataServices.Tgs.Migrations
 {
     internal static class Consts
     {
         internal const string BetSchema = "bet";
+        internal const string ReportSchema = "report";
+        internal const string LogSchema = "log";
 
         private const string Namespace = "TGS.Core.DataServices.Tgs.SqlScripts";
 
