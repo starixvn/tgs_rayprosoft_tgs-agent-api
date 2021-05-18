@@ -57,7 +57,7 @@ namespace ReportApi
                 .AddTgsAgentWalletRepositories();
 
             services.AddHealthChecks()
-                .AddPostgres(_configuration, "Report", "report-db");
+                .AddPostgres(_configuration, "Tgs", "tgs-db");
 
             services.AddHttpContextAccessor();
             services.AddControllers();
