@@ -215,7 +215,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     GameType = gameType,
                     TableCode = "va21",
                     TransactionType = TransactionType.BET,
-                    TransactionCode = "BCB"
+                    TransactionCode = "BCB",
+                    PlayType = gameType.IgnoreCaseEquals("ROU") ? "0" : "1"
                 }
             };
 
@@ -297,7 +298,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     TransactionType = transactionType,
                     GameResult = "P;HK;DQ;HJ:B;H5;CK;DA",
                     TransactionCode = "BCB",
-                    RoundFinish = finish ?? "true"
+                    RoundFinish = finish ?? "true",
+                    PlayType = "1"
                 }
             };
 
