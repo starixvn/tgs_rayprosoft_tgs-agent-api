@@ -33,7 +33,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     [Scope(Tag = "AsiaGaming")]
     public sealed class AsiaGamingEndpoint : BaseGameEndpoint
     {
-        private const string AgentCode = "JH2_AGIN";
+        private const string AgentCode = "JH2";
         private static readonly string GameProviderCode = Consts.GameProvider.AsiaGaming;
         private readonly IAsiaGamingApiClient _client;
         private readonly ServiceProvider _serviceProvider;
