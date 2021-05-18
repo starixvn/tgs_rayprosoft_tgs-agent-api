@@ -37,20 +37,21 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
         {
             var value = await context.Request.ReadAsStringAsync();
             var elements = GetElements(value);
-            
+
             var betResponse = GetElementValue(elements, "betResponse").IgnoreCaseEquals("OK");
             var agentCode = await GetAgentCodeAsync(elements, betResponse);
-            
+
             // playername={agentCode}{playerCode}
             var playerCode = GetPlayerCode(agentCode, GetElementValue(elements, "playname"));
 
             var transactionType = GetTransactionType(elements, betResponse);
-            
+
             var tokenId = GetElementValue(elements, "sessionToken");
             var loginRecord = await DecryptTokenAsync(tokenId, transactionType);
 
             var platformType = loginRecord.PlatformType;
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.AsiaGaming);
+            var gameProviderId =
+                await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.AsiaGaming);
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
 
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
@@ -70,30 +71,31 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             {
                 throw new MissingTokenException("empty token");
             }
-            
+
             var loginRecordId = Guid.Parse(tokenId);
             var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
             var isPlaceBet = transactionType == TransactionType.BET;
-            
+
             if (isPlaceBet && loginRecord == null)
             {
                 throw new PlayerLoginExpiredException();
             }
-            
+
             return loginRecord;
         }
 
         private async Task<string> GetAgentCodeAsync(IReadOnlyDictionary<string, string> elements, bool betResponse)
         {
-            if (betResponse)
+            if (!betResponse)
             {
-                var configuration =
-                    await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
-                        SettingConsts.GameProviderConfigurations.AsiaGaming);
-                return configuration.AgentCode;
+                return GetElementValue(elements, "agentCode");
             }
 
-            return GetElementValue(elements, "agentCode");
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                    SettingConsts.GameProviderConfigurations.AsiaGaming);
+
+            return configuration.ProductionId;
         }
 
         private TransactionType GetTransactionType(IReadOnlyDictionary<string, string> elements, bool betResponse)
@@ -102,38 +104,31 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             {
                 return TransactionType.BET;
             }
-            
-            Enum.TryParse<TransactionType>(GetElementValue(elements, "transactionType"), ignoreCase: true, out var transactionType);
+
+            Enum.TryParse<TransactionType>(GetElementValue(elements, "transactionType"), true, out var transactionType);
             return transactionType;
         }
-        
-        private IReadOnlyDictionary<string, string> GetElements(string xml)
+
+        private static IReadOnlyDictionary<string, string> GetElements(string xml)
         {
             var xDoc = XDocument.Parse(xml);
 
-            if (xDoc.Root?.Elements().Any(e => e.Name.LocalName.Contains("betResponse")) ?? false)
+            if (xDoc.Root != null && xDoc.Root.Elements().Any(e => e.Name.LocalName.Contains("betResponse")))
             {
-                return xDoc.Root?.Elements().Where(e => !e.Name.LocalName.Contains("record"))
-                           .ToDictionary(a => a.Name.LocalName, a => a.Value) ??
-                       new Dictionary<string, string>();
+                return xDoc.Root.Elements().Where(e => !e.Name.LocalName.Contains("record"))
+                    .ToDictionary(a => a.Name.LocalName, a => a.Value);
             }
 
             return xDoc.Root?.Elements().First(e => e.Name.LocalName.Contains("Record"))
-                       .Elements()
-                       .ToDictionary(a => a.Name.LocalName, a => a.Value) ??
-                   new Dictionary<string, string>();
+                    .Elements()
+                    .ToDictionary(a => a.Name.LocalName, a => a.Value) ??
+                new Dictionary<string, string>();
         }
-        
-        private string GetElementValue(IReadOnlyDictionary<string, string> elements, string name)
-        {
-            return elements.TryGetValue(name, out var value) ? value : string.Empty;
-        }
-        
-        private string GetPlayerCode(string agentCode, string playerName)
-        {
-            return playerName.IsNullOrEmpty() ?
-                playerName :
-                playerName.Replace(agentCode, "");
-        }
+
+        private static string GetElementValue(IReadOnlyDictionary<string, string> elements, string name) =>
+            elements.TryGetValue(name, out var value) ? value : string.Empty;
+
+        private static string GetPlayerCode(string agentCode, string playerName) =>
+            playerName.IsNullOrEmpty() ? playerName : playerName.Replace(agentCode, "");
     }
 }
