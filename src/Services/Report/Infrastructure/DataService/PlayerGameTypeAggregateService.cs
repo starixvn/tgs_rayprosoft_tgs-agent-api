@@ -3,9 +3,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
-using TGS.Core.DataServices.Report;
-using TGS.Core.DataServices.Report.Models;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Services.Report.Application.Models.Player;
 
@@ -13,7 +12,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
 {
     public interface IPlayerGameTypeAggregateService
     {
-        IReportRepository Repository { get; }
+        ITgsRepository Repository { get; }
 
         IQueryable<PlayerGameTypeAggregate> GetPlayerGameTypeAggregateQueries(
             Func<IQueryable<PlayerGameTypeAggregate>, IQueryable<PlayerGameTypeAggregate>> preQuery = null,
@@ -24,18 +23,18 @@ namespace TGS.Services.Report.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<PlayerGameTypeAggregate, bool>> predicate);
     }
 
-    public class PlayerGameTypeAggregateService : BaseRepositoryOperations<IReportRepository>,
+    public class PlayerGameTypeAggregateService : BaseRepositoryOperations<ITgsRepository>,
         IPlayerGameTypeAggregateService
     {
-        private readonly IReportRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public PlayerGameTypeAggregateService(IReportRepository repository, ITgsRepository tgsRepository) :
+        public PlayerGameTypeAggregateService(ITgsRepository repository, ITgsRepository tgsRepository) :
             base(repository)
         {
             _repository = repository;
         }
 
-        IReportRepository IPlayerGameTypeAggregateService.Repository => _repository;
+        ITgsRepository IPlayerGameTypeAggregateService.Repository => _repository;
 
         Task IPlayerGameTypeAggregateService.CreatePlayerGameTypeAggregatesAsync(
             PlayerGameTypeAggregateModel[] models) =>

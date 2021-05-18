@@ -15,7 +15,6 @@ using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Filters.Swaggers;
 using TGS.Apis.AgentApi.Models;
 using TGS.Clients.Report.Client.Extensions;
-using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -47,7 +46,6 @@ namespace TGS.Apis.AgentApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs");
-            services.AddReportRepository(_configuration, "Report");
 
             services.AddNats(_configuration)
                 .AddWebApiServices()
