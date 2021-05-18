@@ -31,6 +31,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.BrandPaymentId)
                 .IsRequired();
 
+            builder.Property(c => c.PromotionId);
+
             builder.Property(c => c.Status)
                 .IsRequired()
                 .HasDefaultValue(0);
