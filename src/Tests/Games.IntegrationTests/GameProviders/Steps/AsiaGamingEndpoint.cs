@@ -453,6 +453,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             gatype.Count().Should().Be(count);
         }
 
+        [Then(@"the round will be closed")]
+        public Task ThenTheRoundWillBeClosedAsync() =>
+            VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
+
         private Task<GameAction[]> GetGameActionsByRoundId()
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);

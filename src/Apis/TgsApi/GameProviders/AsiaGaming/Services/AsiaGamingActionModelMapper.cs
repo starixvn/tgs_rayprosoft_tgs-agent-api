@@ -50,8 +50,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var isPlaceBetOrCancel = isPlaceBet || transactionType == TransactionType.REFUND;
             var gameActionType = GetGameActionType(transactionType);
             var currencyCode = r.Record.Currency;
-            var roundClosed = isPlaceBetOrCancel                    ? (bool?)false :
+            var roundClosed = isPlaceBetOrCancel                    ? (bool?)null :
                 bool.TryParse(r.Record.RoundFinish, out var finish) ? finish : null;
+
             var transactionId = GetTransactionId(transactionType, r.Record.TransactionId);
             var timestamp = isPlaceBetOrCancel ? r.Record.BetTime : r.Record.SettleTime;
             var amount = isPlaceBetOrCancel ? Math.Abs(r.Record.Amount) : r.Record.BetAmount + r.Record.WinAmount;

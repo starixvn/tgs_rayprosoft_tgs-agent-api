@@ -191,6 +191,7 @@ Scenario: 05.a - Cancel transaction
     Then I will receive bet response of OK and balance of $100
         And player wallet database record will be for $100
         And game action will be recorded in the database of type "CancelTransaction" for $10
+        And the round will be closed
         
 Scenario: 05.b - Cancel transaction after player logout
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -202,6 +203,7 @@ Scenario: 05.b - Cancel transaction after player logout
     Then I will receive bet response of OK and balance of $100
         And player wallet database record will be for $100
         And game action will be recorded in the database of type "CancelTransaction" for $10
+        And the round will be closed
 
 Scenario: 05.c - Cancel non-existent transaction
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
