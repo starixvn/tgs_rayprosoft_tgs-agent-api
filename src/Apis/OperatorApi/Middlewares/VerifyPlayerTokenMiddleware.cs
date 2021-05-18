@@ -82,15 +82,15 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var signature = $"{payload}:{secretKey}";
 
             handler.ValidateToken(token, new()
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = Consts.Site,
-                    ValidateAudience = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                },
+            {
+                ValidateIssuer = true,
+                ValidIssuer = Consts.Site,
+                ValidateAudience = false,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            },
                 exception => throw new InvalidCredentialsException(exception.Message),
                 _ => throw new PlayerLoginExpiredException(playerCode));
 

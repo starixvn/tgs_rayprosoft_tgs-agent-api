@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SqlScripts\Indexes\agents_email.sql" />
     <None Remove="SqlScripts\Functions\log_get_admin_log.sql" />
     <None Remove="SqlScripts\Functions\log_get_admin_logs.sql" />
     <None Remove="SqlScripts\Functions\log_get_api_log.sql" />
@@ -57,6 +58,7 @@
     <EmbeddedResource Include="SqlScripts\Indexes\payments.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\licensees.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\games.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\agents_email.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\users.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\roles.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\resellers.sql" />
