@@ -97,7 +97,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         To = decimal.MaxValue
                     },
                     ConditionMatchTypes.MatchOne,
-                    TransferType.Withdraw)));
+                    TransferType.Withdraw,
+                    true)));
 
             moqPaymentRepository
                 .Setup(fake => fake.GetPaymentAsync(It.IsAny<Guid>()))

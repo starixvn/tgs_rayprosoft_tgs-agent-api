@@ -56,6 +56,9 @@ namespace TGS.Services.Operator.Deposit
 
             foreach (var bp in brandPayments)
             {
+                if (!bp.Enabled)
+                    continue;
+
                 var depositedAmountCondition = new DepositedAmountCondition(bp.DepositedAmountLimit);
                 var identityCondition = new IdentityCondition(bp.AuthenticateIdentity);
                 var phoneCondition = new PhoneCondition(bp.AuthenticatePhone);
