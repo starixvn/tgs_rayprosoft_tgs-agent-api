@@ -80,7 +80,7 @@ namespace PromotionApi
             services.AddControllers();
 
             services.AddHealthChecks()
-                .AddPostgres(_configuration, "Report", "report-db");
+                .AddPostgres(_configuration, "Tgs", "tgs-db");
 
             services.AddSwaggerGen(c =>
             {
