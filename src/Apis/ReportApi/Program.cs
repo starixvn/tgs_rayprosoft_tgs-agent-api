@@ -1,9 +1,6 @@
-using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TGS.Core.DataServices.Report;
 
 namespace ReportApi
 {
@@ -12,7 +9,6 @@ namespace ReportApi
         public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-            await ExecuteMigrationsAsync(host.Services);
             await host.RunAsync();
         }
 
@@ -22,15 +18,5 @@ namespace ReportApi
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-
-        private static async Task ExecuteMigrationsAsync(IServiceProvider services)
-        {
-            using var scope = services.CreateScope();
-            var sp = scope.ServiceProvider;
-            var env = sp.GetRequiredService<IWebHostEnvironment>();
-
-            await using var reportRepo = sp.GetRequiredService<IReportRepository>();
-            await reportRepo.ExecuteMigrationAndSeedingAsync(env);
-        }
     }
 }

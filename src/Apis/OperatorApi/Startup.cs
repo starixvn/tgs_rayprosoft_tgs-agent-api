@@ -6,20 +6,17 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
-using Tgs.Payment;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Clients.Report.Client.Extensions;
-using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -30,6 +27,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
+using Tgs.Payment;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
@@ -56,7 +54,7 @@ namespace TGS.Apis.OperatorApi
 
             app.UseRequestLocalization(options =>
             {
-                options.DefaultRequestCulture = new RequestCulture("en-US");
+                options.DefaultRequestCulture = new("en-US");
                 options.ApplyCurrentCultureToResponseHeaders = true;
             });
 
@@ -92,7 +90,6 @@ namespace TGS.Apis.OperatorApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs");
-            services.AddReportRepository(_configuration, "Report");
 
             services.AddNats(_configuration)
                 .AddWebApiServices()
@@ -165,7 +162,7 @@ namespace TGS.Apis.OperatorApi
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new() { Title = "TGS Operator API", Version = "v1" });
+                    c.SwaggerDoc("v1", new() {Title = "TGS Operator API", Version = "v1"});
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -177,8 +174,7 @@ namespace TGS.Apis.OperatorApi
                         Scheme = "bearer",
                         Reference = new()
                         {
-                            Id = JwtBearerDefaults.AuthenticationScheme,
-                            Type = ReferenceType.SecurityScheme
+                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
                         }
                     };
 

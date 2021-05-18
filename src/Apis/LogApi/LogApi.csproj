@@ -40,6 +40,7 @@
     </Compile>
     <ProjectReference Include="..\..\Core\DataServices.Base\DataServices.Base.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Log\DataServices.Log.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
   </ItemGroup>
 

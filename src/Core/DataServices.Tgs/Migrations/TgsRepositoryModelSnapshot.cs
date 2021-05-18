@@ -21,6 +21,101 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Exception")
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("exception");
+
+                    b.Property<int>("ExecutionTimeMs")
+                        .HasColumnType("integer")
+                        .HasColumnName("execution_time_ms");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ip");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("method");
+
+                    b.Property<string>("Path")
+                        .HasMaxLength(256)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("path");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
+
+                    b.Property<string>("RequestContent")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("request_content");
+
+                    b.Property<string>("RequestHeaders")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("request_headers");
+
+                    b.Property<short>("ResponseCode")
+                        .HasColumnType("smallint")
+                        .HasColumnName("response_code");
+
+                    b.Property<string>("ResponseContent")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("response_content");
+
+                    b.Property<string>("ResponseHeaders")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("response_headers");
+
+                    b.Property<string>("ServerName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("server_name");
+
+                    b.Property<string>("StackTrace")
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("stack_trace");
+
+                    b.Property<Guid>("TrackingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tracking_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_admin_logs");
+
+                    b.ToTable("admin_logs", "log");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -647,6 +742,94 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_announcements_brand_id");
 
                     b.ToTable("announcements");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.ApiLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("ExecutionTimeMs")
+                        .HasColumnType("integer")
+                        .HasColumnName("execution_time_ms");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("ip");
+
+                    b.Property<string>("Method")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("method");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("path");
+
+                    b.Property<string>("Prefix")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("prefix");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
+
+                    b.Property<string>("RequestContent")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("request_content");
+
+                    b.Property<string>("RequestHeaders")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("request_headers");
+
+                    b.Property<short>("ResponseCode")
+                        .HasColumnType("smallint")
+                        .HasColumnName("response_code");
+
+                    b.Property<string>("ResponseContent")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("response_content");
+
+                    b.Property<string>("ResponseHeaders")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("response_headers");
+
+                    b.Property<string>("ServerName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("server_name");
+
+                    b.Property<Guid>("TrackingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tracking_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_api_logs");
+
+                    b.ToTable("api_logs", "log");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BetLimit", b =>
@@ -2562,6 +2745,55 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("localized_strings");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.LogRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Exception")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("exception");
+
+                    b.Property<int>("Level")
+                        .IsUnicode(true)
+                        .HasColumnType("integer")
+                        .HasColumnName("level");
+
+                    b.Property<string>("Logger")
+                        .HasColumnType("text")
+                        .HasColumnName("logger");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("message");
+
+                    b.Property<DateTimeOffset>("RecordedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("recorded_on");
+
+                    b.Property<string>("ServerName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .IsUnicode(true)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("server_name");
+
+                    b.Property<Guid>("TrackingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tracking_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_log_records");
+
+                    b.ToTable("log_records", "log");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.MarketType", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2926,6 +3158,107 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("players");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerAggregate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal>("AdjustmentAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("adjustment_amount");
+
+                    b.Property<Guid?>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<decimal>("BetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bet_amount");
+
+                    b.Property<decimal>("BonusAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bonus_amount");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<decimal>("DepositAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("deposit_amount");
+
+                    b.Property<int>("FirstFundInCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("first_fund_in_count");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
+                    b.Property<int>("Minute")
+                        .HasColumnType("integer")
+                        .HasColumnName("minute");
+
+                    b.Property<decimal>("NetProfit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("net_profit");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<int>("RegisteredCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("registered_count");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<decimal>("Turnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("turnover");
+
+                    b.Property<decimal>("WinLossAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("win_loss_amount");
+
+                    b.Property<decimal>("WithdrawalAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("withdrawal_amount");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_aggregates_id");
+
+                    b.HasIndex("BrandId", "ReportDate")
+                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date");
+
+                    b.HasIndex("BrandId", "ReportDate", "AgentId")
+                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date_agent_id");
+
+                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
+                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date_player_code");
+
+                    b.ToTable("player_aggregates", "report");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerAuditLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3073,6 +3406,121 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_buckets_player_code1");
 
                     b.ToTable("player_buckets");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameTypeAggregate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal>("AgentDividendPercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("agent_dividend_percentage");
+
+                    b.Property<Guid?>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
+
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
+                    b.Property<int>("Minute")
+                        .HasColumnType("integer")
+                        .HasColumnName("minute");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<decimal>("Turnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("turnover");
+
+                    b.Property<decimal>("VipCardGameRebatePercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("vip_card_game_rebate_percentage");
+
+                    b.Property<int?>("VipLevel")
+                        .HasColumnType("integer")
+                        .HasColumnName("vip_level");
+
+                    b.Property<decimal>("VipLiveDealerRebatePercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("vip_live_dealer_rebate_percentage");
+
+                    b.Property<decimal>("VipLotteryRebatePercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("vip_lottery_rebate_percentage");
+
+                    b.Property<decimal>("VipRebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("vip_rebate_amount");
+
+                    b.Property<decimal>("VipSlotRebatePercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("vip_slot_rebate_percentage");
+
+                    b.Property<decimal>("VipSportsRebatePercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("vip_sports_rebate_percentage");
+
+                    b.Property<decimal>("VipVirtualSportsRebatePercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("vip_virtual_sports_rebate_percentage");
+
+                    b.Property<decimal>("WinLoss")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("win_loss");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_game_type_rebate_aggregates_id");
+
+                    b.HasIndex("BrandId", "ReportDate")
+                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date");
+
+                    b.HasIndex("BrandId", "ReportDate", "AgentId")
+                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_agent_id");
+
+                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
+                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_player_code");
+
+                    b.ToTable("player_game_type_rebate_aggregates", "report");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
@@ -3939,6 +4387,83 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IncludeProperties(new[] { "GameProviderConfigurationId", "WalletId" });
 
                     b.ToTable("rounds", "bet");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundAggregate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<Guid?>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<decimal>("BetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("bet_amount");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
+
+                    b.Property<short>("GameType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("game_type");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
+                    b.Property<int>("Minute")
+                        .HasColumnType("integer")
+                        .HasColumnName("minute");
+
+                    b.Property<string>("PlayerCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("ReportDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("report_date");
+
+                    b.Property<decimal>("Turnover")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("turnover");
+
+                    b.Property<decimal>("ValidBetAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("valid_bet_amount");
+
+                    b.Property<decimal>("WinLoss")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("win_loss");
+
+                    b.HasKey("Id")
+                        .HasName("pk_round_aggregate_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_round_aggregate_player_code");
+
+                    b.HasIndex("ReportDate", "Hour", "Minute")
+                        .HasDatabaseName("ix_round_aggregate_multiple_keys");
+
+                    b.ToTable("round_aggregates", "report");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.RoundDetail", b =>

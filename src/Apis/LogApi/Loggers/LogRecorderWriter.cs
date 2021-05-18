@@ -5,18 +5,19 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Services;
-using TGS.Core.DataServices.Log;
-using TGS.Core.DataServices.Log.Models;
+using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Log.Events;
 
 namespace TGS.Apis.LogApi.Loggers
 {
     public sealed class LogRecordWriter : ILoggerWriter
     {
-        private readonly Func<ILogRepository> _repoFactory;
         private readonly IOptions<LoggerServiceConfig> _loggerServiceConfig;
+        private readonly Func<ITgsRepository> _repoFactory;
+
         public LogRecordWriter(
-            Func<ILogRepository> repoFactory,
+            Func<ITgsRepository> repoFactory,
             IOptions<LoggerServiceConfig> loggerServiceConfig)
         {
             _repoFactory = repoFactory;
@@ -30,18 +31,20 @@ namespace TGS.Apis.LogApi.Loggers
             var logs = events
                 .Select(Convert)
                 .Where(r => r.Level >= config.LogLevel ||
-                            config.UnrestrictedLoggers.Contains(r.Logger))
+                    config.UnrestrictedLoggers.Contains(r.Logger))
                 .ToArray();
 
             await using var repo = _repoFactory();
-            await repo.AddLogRecordsAsync(logs);
+            await repo.LogRecords.AddRangeAsync(logs);
+            await repo.SaveChangesAsync();
         }
 
         async Task ILoggerWriter.SaveLogAsync(LogBusEvent @event)
         {
             var log = Convert(@event);
             await using var repo = _repoFactory();
-            await repo.AddLogRecordAsync(log);
+            await repo.LogRecords.AddAsync(log);
+            await repo.SaveChangesAsync();
         }
 
         private static LogRecord Convert(LogBusEvent ent) => (LogRecord)ent;

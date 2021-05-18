@@ -4,9 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Report;
 
-namespace TGS.Core.DataServices.Tgs.Migrations
+namespace TGS.Core.DataServices.Report.Migrations
 {
     public class ReportContextFactory : IDesignTimeDbContextFactory<ReportRepository>
     {
