@@ -59,6 +59,8 @@ namespace PlayerBucket.Repositories
             await _repository.PlayerBuckets
                 .AddAsync(bucket).ConfigureAwait(false);
 
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
             await _walletRepository.ExchangeAsync(request.BrandId, request.DefaultWalletId,
                 request.PlayerCode, TransactionTypes.Deposit, request.DepositAmount);
 
