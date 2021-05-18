@@ -11,6 +11,8 @@ namespace TGS.Services.Operations.Commands
     public interface IAgentCommands
     {
         Task<AgentLoginRecord> AgentLoginAsync(AgentLoginData data);
+
+        Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data);
     }
 
     public sealed class AgentCommands : IAgentCommands
@@ -44,6 +46,17 @@ namespace TGS.Services.Operations.Commands
             await _repository.SaveChangesAsync();
 
             return loginRecord;
+        }
+
+        public async Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data)
+        {
+            var agent = await _repository.Agents.FindAsync(data.Id).ConfigureAwait(false);
+
+            agent.Salt = data.Salt;
+            agent.Password = data.Password;
+            agent.UpdatedOn = data.UpdatedOn;
+
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
