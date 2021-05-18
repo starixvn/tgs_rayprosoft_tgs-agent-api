@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -22,13 +23,15 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
         public override async Task<MessageResponse> Handle(CreateAgentRequest request,
             CancellationToken cancellationToken)
         {
-            if (await _service.ExistsAsync(x => x.Username == request.Username))
+            if (await _service.ExistsAsync(x =>
+                x.BrandId == request.BrandId && EF.Functions.ILike(x.Username, $"%{request.Username}%")))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.NameExisted);
             }
 
             if (request.ParentUsername.IsNotNullOrEmpty() &&
                 !await _service.ExistsAsync(x =>
+                    x.BrandId == request.BrandId &&
                     x.Username == request.ParentUsername && x.LevelType == AgentLevelType.Chief))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -108,7 +109,12 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(result));
             }
 
-            _tgsLog.LogAdmin(adminLogEvent);
+            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
+
+            if (adminLogEvent.path is null || !defaultBypassRouting.Any(x => adminLogEvent.path.Contains(x)))
+            {
+                _tgsLog.LogAdmin(adminLogEvent);
+            }
         }
 
         private static string CutOffResponseContent(string responseContent) =>

@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
@@ -29,7 +30,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
         public override async Task<MessageResponse> Handle(CreatePromotionRequest request,
             CancellationToken cancellationToken)
         {
-            if (await _service.ExistsAsync(x => x.Name == request.Name))
+            if (await _service.ExistsAsync(x =>
+                x.BrandId == request.BrandId && EF.Functions.ILike(x.Name, $"%{request.Name}%")))
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Promotion.NameExisted);
             }

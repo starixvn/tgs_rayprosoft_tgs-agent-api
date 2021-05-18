@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Clients.Report.Client;
+using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Models.AgentAdjust;
@@ -13,11 +15,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
     [ApiController]
     public partial class AgentController : BaseContextController
     {
+        private readonly IReportClient _client;
         private readonly IMediator _mediator;
 
-        public AgentController(IMediator mediator)
+        public AgentController(IMediator mediator, IReportClient client)
         {
             _mediator = mediator;
+            _client = client;
         }
 
         [HttpGet]
@@ -53,5 +57,11 @@ namespace TGS.Apis.BackendOffice.Controllers.Agent
             request.AgentId = id;
             return _mediator.Send(request);
         }
+
+        [HttpGet("accountChanges")]
+        [Description("Get agent account changes")]
+        public Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
+            [FromQuery] GetAgentAccountChangesRequest request) =>
+            _client.GetAgentAccountChangesAsync(request);
     }
 }
