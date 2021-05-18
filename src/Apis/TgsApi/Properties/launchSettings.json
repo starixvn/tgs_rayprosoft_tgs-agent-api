@@ -71,6 +71,16 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
+    "TgsApi-IMESports": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "IMES",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
     "TgsApi-VR": {
       "commandName": "Project",
       "launchBrowser": true,
@@ -142,6 +152,17 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
         "GameProviderCode": "VR",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
+    },
+    "Docker-IMESports": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "GameProviderCode": "IMES",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,

@@ -222,7 +222,7 @@ namespace TGS.Services.GameOperations.Calculators
                 foreach (var bet in oppositeBets)
                 {
                     var betAmount = bet.Amount.Negate();
-                    var tieBet = allActions.FirstOrDefault(a => a.Reference.Id == bet.Id && a.Type == TieBet);
+                    var tieBet = allActions.FirstOrDefault(a => a.ReferenceId == bet.Id && a.Type == TieBet);
                     var adjustment = hasTurnoverOnTieBet || tieBet == null ? 0 : tieBet.Amount;
                     var actualBetAmount = betAmount - adjustment;
 
