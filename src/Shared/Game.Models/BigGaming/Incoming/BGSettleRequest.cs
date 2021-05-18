@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Enums;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
@@ -12,14 +13,14 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
         [JsonPropertyName("amount")]
         public string Amount { get; set; }
         [JsonPropertyName("moduleId")]
-        public int ModuleId { get; set; }
+        public BGModuleId ModuleId { get; set; }
         [JsonPropertyName("tranId")]
         public string TranId { get; set; }
-        [JsonPropertyName("recalc")]
-        public string Recalc { get; set; }
         [JsonPropertyName("gameResult")]
         public string GameResult { get; set; }
+        [JsonPropertyName("recalc")]
+        public string Recalc { get; set; }
         [JsonPropertyName("orders")]
-        public BGSettleOrderRequest[] orders { get; set; }
+        public BGSettleOrderRequest[] Orders { get; set; }
     }
 }

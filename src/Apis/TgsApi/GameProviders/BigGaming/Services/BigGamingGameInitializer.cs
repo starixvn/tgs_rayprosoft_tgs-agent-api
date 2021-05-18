@@ -70,6 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
             var random = GuidExtensions.NewSequentialGuid().ToString();
             var digest = _hashProvider.Hash($"{random }{configuration.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(configuration.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
+
             var data = new BGGetGameUrlRequest()
             {
                 Random = random,
@@ -83,10 +84,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 FromIp = string.Empty,
 
             };
+
             var url = default(string);
             var responseGameUrl = await _client.GetGameUrlAsync(configuration.ApiUrl, data).ConfigureAwait(false);
             if (responseGameUrl.Error != null)
             {
+
                 if (responseGameUrl.Error.Code == "2213")
                 {
                     await _bigGamingGamePlayerCreate.CreatePlayerAsync(player);
@@ -116,6 +119,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         throw new GameProviderApiErrorException(responseGameUrl.Error.Message);
                     }
                 }
+
             }
             else
             {

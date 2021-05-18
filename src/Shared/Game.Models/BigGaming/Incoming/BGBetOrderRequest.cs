@@ -9,13 +9,19 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
     public record BGBetOrderRequest
     {
-        [JsonPropertyName("gameId")]
-        public int GameId { get; set; }
         [JsonPropertyName("orderId")]
         public int OrderId { get; set; }
+        [JsonPropertyName("gameId")]
+        public int ExternalGameId { get; set; }
+        [JsonPropertyName("amount")]
+        public decimal Amount { get; set; }
+        [JsonPropertyName("issueId")]
+        public string IssueId { get; set; }
+        [JsonPropertyName("playId")]
+        public string PlayId { get; set; }
         [JsonPropertyName("orderFrom")]
         public int OrderFrom { get; set; }
-        [JsonPropertyName("amount")]
-        public int Amount { get; set; }
+        [JsonPropertyName("fromIp")]
+        public string FromIp { get; set; }
     }
 }

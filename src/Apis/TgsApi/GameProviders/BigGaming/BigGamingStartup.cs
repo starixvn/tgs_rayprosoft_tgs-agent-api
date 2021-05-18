@@ -24,6 +24,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers();
+            services.AddScoped<AuthorizeBigGamingMiddleware>();
+            services.AddScoped<IBigGamingServices, BigGamingServices>();
+            services.AddScoped<IBigGamingModelActionMapper, BigGamingModelActionMapper>();
             services.AddTransient<IBigGamingGamePlayerCreate, BigGamingGamePlayerCreate>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(BigGamingGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<BigGamingGameInitializer>());
@@ -31,7 +34,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            //app.UseBGMethodMiddleware();
+            const string Route = "/api/bg";
+
+            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+                builder =>
+                {
+                    builder.UseMiddleware<AuthorizeBigGamingMiddleware>();
+                });
         }
 
     }

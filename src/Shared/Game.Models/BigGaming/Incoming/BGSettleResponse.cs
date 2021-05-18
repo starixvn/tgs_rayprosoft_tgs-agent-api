@@ -14,7 +14,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
         [JsonPropertyName("sn")]
         public string Sn { get; set; }
         [JsonPropertyName("availableAmount")]
-        public int AvailableAmount { get; set; }
+        public decimal AvailableAmount { get; set; }
         [JsonPropertyName("orderResult")]
         public string OrderResult { get; set; }
         [JsonPropertyName("tranId")]

@@ -21,6 +21,7 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
         Task<BGInfoPlayerResponse> InfoPlayerAsync(Uri apiUrl, BGInfoPlayerRequest request, string secretCode);
         Task<string> KickPlayerAsync(Uri apiUrl, BGKickPlayerRequest request, string secretCode);
         Task<BGBaseResponse> GetGameUrlAsync(Uri apiUrl, BGGetGameUrlRequest request);
+        Task<BGBaseResponse> GetTrialGameUrlAsync(Uri apiUrl, BGGetTrialGameUrlRequest request);
     }
 
     public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
@@ -74,8 +75,14 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
 
         async Task<BGBaseResponse> IBigGamingApiClient.GetGameUrlAsync(Uri apiUrl, BGGetGameUrlRequest request)
         {
-            var prefix = $"{_gameProvider}.GameUrl";
+            var prefix = $"{_gameProvider}.GetGameUrl";
             return await GetAPIAsync(apiUrl, request, "open.video.game.url", prefix).ConfigureAwait(false);
+        }
+
+        async Task<BGBaseResponse> IBigGamingApiClient.GetTrialGameUrlAsync(Uri apiUrl, BGGetTrialGameUrlRequest request)
+        {
+            var prefix = $"{_gameProvider}.GetTrialGameUrl";
+            return await GetAPIAsync(apiUrl, request, "open.video.trial.game.url", prefix).ConfigureAwait(false);
         }
 
         private ValueTask<BGBaseResponse> GetAPIAsync<TSource>(Uri apiUrl, TSource source, string method, string prefix)
