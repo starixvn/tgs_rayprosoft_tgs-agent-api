@@ -79,11 +79,13 @@ namespace ReportApi
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
             app.UseGlobalExceptionHandler();
 
             app.UseRouting();
 
             app.UseHttpMetrics();
+            app.UseApiLogger(bypassRouting: defaultBypassRouting);
 
             app.UseEndpoints(endpoints =>
             {

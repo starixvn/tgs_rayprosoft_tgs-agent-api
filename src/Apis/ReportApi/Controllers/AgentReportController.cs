@@ -54,5 +54,11 @@ namespace ReportApi.Controllers
         public Task<MessageResponse> CreateAgentDividendsAsync(
             [FromQuery] CreateAgentDividendsRequest request) =>
             _mediator.Send(request);
+
+        [HttpGet("accountChanges")]
+        [Description("Get agent account changes")]
+        public Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
+            [FromQuery] GetAgentAccountChangesRequest request) =>
+            _mediator.Send(request);
     }
 }

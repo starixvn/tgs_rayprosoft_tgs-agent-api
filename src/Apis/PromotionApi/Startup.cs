@@ -100,11 +100,13 @@ namespace PromotionApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
             app.UseGlobalExceptionHandler();
 
             app.UseRouting();
 
             app.UseHttpMetrics();
+            app.UseApiLogger(bypassRouting: defaultBypassRouting);
 
             app.UseEndpoints(endpoints =>
             {

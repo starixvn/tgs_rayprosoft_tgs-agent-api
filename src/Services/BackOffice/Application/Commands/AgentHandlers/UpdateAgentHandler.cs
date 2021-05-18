@@ -30,7 +30,9 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             }
 
             if (request.ParentUsername.IsNotNullOrEmpty() &&
-                !await _service.ExistsAsync(x => x.Username == request.ParentUsername && x.LevelType == AgentLevelType.Chief))
+                !await _service.ExistsAsync(x =>
+                    x.BrandId == request.BrandId && x.Username == request.ParentUsername &&
+                    x.LevelType == AgentLevelType.Chief))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
             }
