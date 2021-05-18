@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using Tgs.Payment.LeePay;
+using Tgs.Payment.PrimePay;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
@@ -24,10 +24,7 @@ using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Clients.Report.Client.Extensions;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Log;
-using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
@@ -38,6 +35,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
+using Tgs.Payment.LeePay;
 using TGS.Services.BackOffice.Application.Extensions;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.Operations.Extensions;
@@ -50,9 +48,7 @@ namespace TGS.Apis.BackendOffice.Extensions
         public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services,
             IConfiguration configuration)
         {
-            services.AddRepository<ILogRepository, LogRepository>(configuration, "Log");
             services.AddTgsRepository(configuration, "Tgs");
-            services.AddReportRepository(configuration, "Report");
 
             services.AddScoped<IUploadService, UploadService>();
             services.AddScoped<ExceptionMiddleware>();
@@ -114,7 +110,6 @@ namespace TGS.Apis.BackendOffice.Extensions
 
             services.AddHealthChecks()
                 .AddPostgres(configuration, "Tgs", "tgs-db")
-                .AddPostgres(configuration, "Log", "log-db")
                 .AddNats()
                 .ForwardToPrometheus();
 
@@ -143,7 +138,7 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[] {new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture)};
+                var supportedCultures = new[] { new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture) };
 
                 options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
@@ -163,11 +158,13 @@ namespace TGS.Apis.BackendOffice.Extensions
             services
                 .AddPayment()
                 .UseTgsPaymentRepository()
-                .RegisterWithdrawProcessor<LeePayProcessor>("LeePay");
+                .RegisterWithdrawProcessor<LeePayProcessor>("LeePay")
+                .RegisterWithdrawProcessor<PrimePayProcessor>("PrimePay");
 
             services
                 .AddPaymentClient()
                 .AddSingleton<LeePaySerializer>()
+                .AddSingleton<PrimePaySerializer>()
                 .AddNatsMessageQueue(config =>
                 {
                     config.ConfigQueueOptions((options, sp) =>

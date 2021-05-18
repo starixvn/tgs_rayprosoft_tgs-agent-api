@@ -21,7 +21,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class WithdrawController : ControllerBase
     {
         [HttpPost]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task<Guid> CreateWithdrawRequestAsync(
             [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
@@ -58,7 +58,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpGet]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
             [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
@@ -96,6 +96,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Id = bp.Id,
                     ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
+                    ChannelCode = bp.ChannelCode,
                     TransferLimit = new Models.ValueRange<decimal>
                     {
                         From = bp.TransferLimit.From,

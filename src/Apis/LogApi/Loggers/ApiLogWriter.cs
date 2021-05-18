@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.LogApi.Interfaces;
 using TGS.Apis.LogApi.Services;
-using TGS.Core.DataServices.Log;
-using TGS.Core.DataServices.Log.Models;
+using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log.Events;
 
@@ -13,9 +13,10 @@ namespace TGS.Apis.LogApi.Loggers
 {
     public sealed class ApiLogWriter : ILoggerWriter
     {
-        private readonly Func<ILogRepository> _repoFactory;
+        private readonly Func<ITgsRepository> _repoFactory;
         private readonly IGetNotifyTaskService _service;
-        public ApiLogWriter(Func<ILogRepository> repoFactory, IGetNotifyTaskService service)
+
+        public ApiLogWriter(Func<ITgsRepository> repoFactory, IGetNotifyTaskService service)
         {
             _repoFactory = repoFactory;
             _service = service;
@@ -28,7 +29,8 @@ namespace TGS.Apis.LogApi.Loggers
                 .ToArray();
 
             await using var repo = _repoFactory();
-            await repo.AddApiLogsAsync(logs);
+            await repo.ApiLogs.AddRangeAsync(logs);
+            await repo.SaveChangesAsync();
 
             await logs.Where(p => p.ResponseCode != 200)
                 .Select(log => _service.GetNotifyTaskAsync(log))
@@ -40,10 +42,13 @@ namespace TGS.Apis.LogApi.Loggers
             var log = Convert(@event);
 
             await using var repo = _repoFactory();
-            await repo.AddApiLogAsync(log);
+            await repo.ApiLogs.AddAsync(log);
+            await repo.SaveChangesAsync();
 
             if (log.ResponseCode != 200)
+            {
                 await _service.GetNotifyTaskAsync(log);
+            }
         }
 
         private static ApiLog Convert(LogBusEvent ent) => (ApiLog)ent;

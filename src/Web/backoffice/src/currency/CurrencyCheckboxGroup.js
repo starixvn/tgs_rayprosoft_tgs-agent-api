@@ -99,8 +99,6 @@ export const CurrencyCheckboxGroupTableRow = ({
     checkedFieldName = toCheckedFieldName,
     addonAfter
 }) => {
-    let formContext = useFormContext()
-
     return useMemo(() => {
         return (
             <Table.Row>
@@ -114,7 +112,6 @@ export const CurrencyCheckboxGroupTableRow = ({
                         <Checkbox
                             key={field._id}
                             name={checkedFieldName(name, field, index)}
-                            checkboxRef={formContext?.register?.()}
                             defaultChecked={field.checked}
                             disabled={disabled}
                         />

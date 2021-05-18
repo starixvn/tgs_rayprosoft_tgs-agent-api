@@ -56,8 +56,7 @@ import AgentLevel, {
 import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
 import Textarea from "../../textarea"
 import AgentUpdateType from "./AgentUpdateType"
-import { PercentageNumberInputField } from "../../input/NumberInput"
-import { AgentCommissionPercentageInputField } from "../AgentCommissionPercentage"
+import { AgentDividendPercentageInputField } from "../AgentDividendPercentage"
 import { AgentLiveDealerRebatePercentageInputField } from "../AgentLiveDealerRebatePercentage"
 import { AgentEgameRebatePercentageInputField } from "../AgentEgameRebatePercentage"
 import { AgentCardGameRebatePercentageInputField } from "../AgentCardGameRebatePercentage"
@@ -65,6 +64,10 @@ import { AgentLotteryRebatePercentageInputField } from "../AgentLotteryRebatePer
 import { AgentSportsRebatePercentageInputField } from "../AgentSportsRebatePercentage"
 import { AgentVirtualSportsRebatePercentageInputField } from "../AgentVirtualSportsRebatePercentage"
 import clone from "clone-deep"
+import {
+    AgentBalanceChangePanel,
+    AgentBalanceChangeTab
+} from "./AgentBalanceChange"
 
 export const AddAgentButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -217,7 +220,7 @@ const FormBody = ({}) => {
                     <NormalLabel required>
                         <Trans zh="代理分红" en="Bonus" />
                     </NormalLabel>
-                    <AgentCommissionPercentageInputField />
+                    <AgentDividendPercentageInputField />
 
                     <NormalLabel required>
                         <Trans zh="真人返佣" en="Live Dealer Rebate" />
@@ -341,7 +344,7 @@ const ConfigFormBody = ({ record }) => {
                     <NormalLabel required>
                         <Trans zh="分红比例" en="Bonus" />
                     </NormalLabel>
-                    <AgentCommissionPercentageInputField />
+                    <AgentDividendPercentageInputField />
 
                     <NormalLabel required>
                         <Trans zh="真人返佣" en="Live Dealer Rebate" />
@@ -496,7 +499,7 @@ const ConfigDialog = ({ brandId, agentId, onSubmitted, dialog }) => {
         <FormDialog
             defaultValues={{
                 ...clone(agent),
-                commissionPercentage: "",
+                dividendPercentage: "",
                 liveDealerRebatePercentage: "",
                 slotRebatePercentage: "",
                 cardGameRebatePercentage: "",
@@ -620,6 +623,7 @@ const ViewTabs = ({ brandId, record, tab }) => {
                 <AgentBankInfoTab {...tab} />
                 <AgentOperationListTab {...tab} />
                 <AgentTeamInfoTab {...tab} />
+                <AgentBalanceChangeTab {...tab} />
             </TabList>
 
             <AgentInfoPanel record={record} readonly {...tab} />
@@ -627,6 +631,11 @@ const ViewTabs = ({ brandId, record, tab }) => {
             <AgentBankInfoPanel record={record} readonly {...tab} />
             <AgentOperationListPanel agentId={record?.id} {...tab} />
             <AgentTeamInfoPanel agentId={record?.id} {...tab} />
+            <AgentBalanceChangePanel
+                brandId={brandId}
+                agentId={record?.id}
+                {...tab}
+            />
         </Tabs>
     )
 }

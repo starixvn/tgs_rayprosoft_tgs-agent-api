@@ -40,6 +40,8 @@ import { today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useLogList } from "./client"
 import LogLevel, { LogLevelSelect } from "./LogLevel"
+import { LogMessageDialogDisclosure } from "../LogMessageDialog"
+import { LogExceptionDialogDisclosure } from "../LogExceptionDialog"
 
 export { Code }
 
@@ -210,13 +212,17 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "message",
                 Header: <Trans zh="Message" en="Message" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => (
+                    <LogMessageDialogDisclosure value={value} />
+                )
             }),
             textColumn({
                 accessor: "exception",
                 Header: <Trans zh="Exception" en="Exception" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => (
+                    <LogExceptionDialogDisclosure value={value} />
+                )
             }),
             dateTimeColumn({
                 accessor: "recordedOn",

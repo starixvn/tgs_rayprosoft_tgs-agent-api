@@ -288,6 +288,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                     return (
                         <AgentWinLossDialogDisclosure
                             brandId={brandId}
+                            agentId={value?.agentId}
                             start={start}
                             end={end}
                             username={value?.username}
@@ -314,6 +315,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                     return (
                         <AgentBonusDetailDialogDisclosure
                             brandId={brandId}
+                            agentId={value?.agentId}
                             start={start}
                             end={end}
                             username={value?.username}

@@ -3,9 +3,9 @@ import { css, Global } from "@emotion/react"
 import { useTrans, Trans } from "../i18n"
 import { PercentageNumberInputField } from "../input/NumberInput"
 
-export const Name = "commissionPercentage"
+export const Name = "dividendPercentage"
 
-export const AgentCommissionPercentageInputField = ({
+export const AgentDividendPercentageInputField = ({
     name = Name,
     required = true,
     ...props

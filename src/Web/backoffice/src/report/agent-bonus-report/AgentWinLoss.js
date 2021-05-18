@@ -33,6 +33,7 @@ import Separator from "../../layout/Separator"
 
 export const AgentWinLossDialogDisclosure = ({
     brandId,
+    agentId,
     username,
     start,
     end,
@@ -49,6 +50,7 @@ export const AgentWinLossDialogDisclosure = ({
             {dialog.visible && (
                 <ReportDialog
                     brandId={brandId}
+                    agentId={agentId}
                     username={username}
                     winLossAmount={value}
                     start={start}
@@ -62,6 +64,7 @@ export const AgentWinLossDialogDisclosure = ({
 
 const ReportDialog = ({
     brandId,
+    agentId,
     username,
     winLossAmount,
     start,
@@ -70,14 +73,14 @@ const ReportDialog = ({
 }) => {
     let { state, setPageIndex, setSortOrder } = useTable({
         brandId,
-        username,
+        agentId,
         from: start,
         to: end,
         showAll: true
     })
 
     let { data, isLoading, error, mutate, deleteCache } = useAgentWinLossList(
-        username,
+        agentId,
         toApiParams(state)
     )
 

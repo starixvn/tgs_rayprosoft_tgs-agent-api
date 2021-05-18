@@ -15,7 +15,6 @@ using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Filters.Swaggers;
 using TGS.Apis.AgentApi.Models;
 using TGS.Clients.Report.Client.Extensions;
-using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -47,7 +46,6 @@ namespace TGS.Apis.AgentApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs");
-            services.AddReportRepository(_configuration, "Report");
 
             services.AddNats(_configuration)
                 .AddWebApiServices()
@@ -61,6 +59,17 @@ namespace TGS.Apis.AgentApi
                 .AddPluggableServices()
                 .AddReportClientServices(_configuration)
                 .AddTransactions();
+
+            services
+                .AddAgentApiCore()
+                .ConfigureAgentOptions<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("Agent").Bind(options);
+                })
+                .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("EmailSetting").Bind(options);
+                });
 
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
@@ -86,7 +95,7 @@ namespace TGS.Apis.AgentApi
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new() {Title = "TGS Agent API", Version = "v1"});
+                    c.SwaggerDoc("v1", new() { Title = "TGS Agent API", Version = "v1" });
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -98,7 +107,8 @@ namespace TGS.Apis.AgentApi
                         Scheme = "bearer",
                         Reference = new()
                         {
-                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
+                            Id = JwtBearerDefaults.AuthenticationScheme,
+                            Type = ReferenceType.SecurityScheme
                         }
                     };
 

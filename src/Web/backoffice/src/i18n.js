@@ -51,6 +51,16 @@ export const getAcceptLang = () => {
     return lang ?? Locales.en
 }
 
+export const getAcceptLangCulture = () => {
+    let lang = getAcceptLang()
+    switch (lang) {
+        case Locales.zh:
+            return "zh-CN"
+        default:
+            return "en-US"
+    }
+}
+
 export const Provider = ({ value = getAcceptLang(), children }) => {
     let [locale, set] = useState(value)
     setDefaultLocale(locale)

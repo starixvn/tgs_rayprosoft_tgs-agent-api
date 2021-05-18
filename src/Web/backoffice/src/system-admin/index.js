@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react"
+import { CodeContentPair as GameProviderPair } from "./game-provider"
 import { CodeContentPair as LanguagePair } from "./language"
 import { CodeContentPair as CurrencyPair } from "./currency"
 import { CodeContentPair as BetLimitPair } from "./betlimit"
@@ -8,7 +9,13 @@ import { Code, DefaultCodePath, Menu } from "./menu"
 
 export { Code } from "./menu"
 
-const pairs = () => [LanguagePair, CurrencyPair, BetLimitPair, SettingsPair]
+const pairs = () => [
+    GameProviderPair,
+    LanguagePair,
+    CurrencyPair,
+    BetLimitPair,
+    SettingsPair
+]
 
 export const Content = ({ codes, path = DefaultCodePath, ...props }) => (
     <Switch path={path} pairs={pairs()} />

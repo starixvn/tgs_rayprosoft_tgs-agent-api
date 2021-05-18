@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages.Log;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Log;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Log.Enums;
 
 namespace TGS.Apis.BackendOffice.DataService.Repositories
 {
     public class LogQueries : ILogQueries
     {
-        private readonly ILogRepository _repository;
+        private readonly ITgsRepository _repository;
 
-        public LogQueries(ILogRepository repository)
+        public LogQueries(ITgsRepository repository)
         {
             _repository = repository;
         }
@@ -34,7 +34,7 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
 
         async Task<(IEnumerable<AdminLogModel>, int)> ILogQueries.GetAdminLogsAsync(AdminLogRequest request)
         {
-            const string spName = "dbo.log_get_admin_logs";
+            const string spName = "log.log_get_admin_logs";
             var results = await _repository.SqlQueryMultipleAsync<AdminLogModel>(spName,
                 parameters: new Dictionary<string, object>
                 {
@@ -54,7 +54,7 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
 
         async Task<(IEnumerable<ApiLogModel>, int)> ILogQueries.GetApiLogsAsync(ApiLogRequest request)
         {
-            const string spName = "dbo.log_get_api_logs";
+            const string spName = "log.log_get_api_logs";
             var results = await _repository.SqlQueryMultipleAsync<ApiLogModel>(spName,
                 parameters: new Dictionary<string, object>
                 {
@@ -74,21 +74,21 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
 
         Task<LogDetailModel> ILogQueries.GetAdminLogAsync(Guid trackingId)
         {
-            const string spName = "dbo.log_get_admin_log";
+            const string spName = "log.log_get_admin_log";
             return _repository.SqlQuerySingleAsync<LogDetailModel>(spName,
                 parameters: new Dictionary<string, object> {{"_tracking_id", trackingId}});
         }
 
         Task<LogDetailModel> ILogQueries.GetApiLogAsync(Guid trackingId)
         {
-            const string spName = "dbo.log_get_api_log";
+            const string spName = "log.log_get_api_log";
             return _repository.SqlQuerySingleAsync<LogDetailModel>(spName,
                 parameters: new Dictionary<string, object> {{"_tracking_id", trackingId}});
         }
 
         async Task<(IEnumerable<LogRecordModel>, int)> ILogQueries.GetLogRecordsAsync(LogRecordRequest request)
         {
-            const string spName = "dbo.log_get_log_records";
+            const string spName = "log.log_get_log_records";
             var results = await _repository.SqlQueryMultipleAsync<LogRecordModel>(spName,
                 parameters: new Dictionary<string, object>
                 {

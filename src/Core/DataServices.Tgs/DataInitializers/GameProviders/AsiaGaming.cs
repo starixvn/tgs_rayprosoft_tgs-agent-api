@@ -148,7 +148,103 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         }
                     },
                     LoginApiUrl = new("http://gi.aggdemo.com:81"),
-                    ApiUrl = new("https://swapi.etwlt.com")
+                    ApiUrl = new("https://swapi.etwlt.com"),
+                    OppositeBets = new OppositeBetSetting[]
+                    {
+                        new()
+                        {
+                            Games = new[]
+                            {
+                                "AGIN_AGQ_BAC", "AGIN_AGQ_LBAC", "AGIN_AGQ_CBAC", "AGIN_DSP_BAC",
+                                "AGIN_DSP_LBAC", "AGIN_DSP_CBAC", "AGIN_EMA_BAC", "AGIN_EMA_LBAC",
+                                "AGIN_EMA_CBAC", "AGIN_LED_BAC", "AGIN_LED_LBAC", "AGIN_LED_CBAC",
+                                "AGIN_VIP_BAC", "AGIN_VIP_LBAC", "AGIN_VIP_CBAC", "AGIN_AGNW_BAC",
+                                "AGIN_AGNW_LBAC", "AGIN_AGNW_CBAC"
+                            },
+                            Patterns = new OppositeBetSetting.Pattern[]
+                            {
+                                new("1", 1), new("2", 1), new("6", 2), new("7", 2)
+                            }
+                        },
+                        new()
+                        {
+                            Games = new[]
+                            {
+                                "AGIN_AGQ_DT", "AGIN_DSP_DT", "AGIN_EMA_DT", "AGIN_LED_DT", "AGIN_VIP_DT",
+                                "AGIN_AGNW_DT"
+                            },
+                            Patterns = new OppositeBetSetting.Pattern[]
+                            {
+                                new("21", 1), new("22", 1), new("130", 2), new("132", 2), new("131", 3),
+                                new("133", 3), new("134", 4), new("136", 4), new("135", 5), new("137", 5)
+                            }
+                        },
+                        new()
+                        {
+                            Games = new[]
+                            {
+                                "AGIN_AGQ_SHB", "AGIN_DSP_SHB", "AGIN_EMA_SHB", "AGIN_LED_SHB",
+                                "AGIN_VIP_SHB", "AGIN_AGNW_SHB"
+                            },
+                            Patterns = new OppositeBetSetting.Pattern[]
+                            {
+                                new("41", 1), new("42", 1), new("43", 2), new("44", 2)
+                            }
+                        },
+                        new()
+                        {
+                            Games = new[]
+                            {
+                                "AGIN_AGQ_ROU", "AGIN_DSP_ROU", "AGIN_EMA_ROU", "AGIN_LED_ROU",
+                                "AGIN_VIP_ROU", "AGIN_AGNW_ROU"
+                            },
+                            Patterns = new OppositeBetSetting.Pattern[]
+                            {
+                                new("114", 1), new("115", 1), new("116", 2), new("117", 2), new("118", 2),
+                                new("119", 2)
+                            }
+                        },
+                        new()
+                        {
+                            Games = new[]
+                            {
+                                "AGIN_DSP_ZJH", "AGIN_LED_ZJH", "AGIN_VIP_ZJH", "AGIN_AGQ_ZJH",
+                                "AGIN_AGNW_ZJH", "AGIN_EMA_ZJH"
+                            },
+                            Patterns = new OppositeBetSetting.Pattern[] {new("260", 1), new("261", 1)}
+                        },
+                        new()
+                        {
+                            Games = new[]
+                            {
+                                "AGIN_DSP_ZJH", "AGIN_LED_ZJH", "AGIN_VIP_ZJH", "AGIN_AGQ_ZJH",
+                                "AGIN_AGNW_ZJH", "AGIN_EMA_ZJH"
+                            },
+                            Patterns = new OppositeBetSetting.Pattern[] {new("260", 1), new("261", 1)}
+                        },
+                        new()
+                        {
+                            Games = new[]
+                            {
+                                "AGIN_DSP_BF", "AGIN_AGQ_BF", "AGIN_LED_BF", "AGIN_VIP_BF", "AGIN_EMA_BF",
+                                "AGIN_AGNW_BF"
+                            },
+                            Patterns = new OppositeBetSetting.Pattern[] {new("270", 1), new("271", 1)}
+                        },
+                        new()
+                        {
+                            Games = new[]
+                            {
+                                "AGIN_DSP_SG", "AGIN_AGQ_SG", "AGIN_LED_SG", "AGIN_VIP_SG", "AGIN_EMA_SG",
+                                "AGIN_AGNW_SG"
+                            },
+                            Patterns = new OppositeBetSetting.Pattern[]
+                            {
+                                new("320", 1), new("321", 1), new("323", 2), new("324", 2), new("326", 3),
+                                new("327", 3)
+                            }
+                        }
+                    }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

@@ -12,12 +12,10 @@ import {
 } from "bumbag"
 import { useModalState } from "../../dialog/Modal"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Update as UpdateMenu } from "../providers/menu"
+import { Update as UpdateMenu } from "./menu"
 import { Disclosure } from "../../dialog/Disclosure"
 import { ConfirmButtonFooter } from "../../form/ConfirmButtonFooter"
 import { Trans, useTrans } from "../../i18n"
-import { FieldValues } from "../../layout/Grid"
-import Label from "../../form/Label"
 import {
     useUpdateBrandGameProviderPresetMaintenance,
     useBrandGameProviderPresetMaintenanceList

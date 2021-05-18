@@ -166,15 +166,24 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<BrandDomain> BrandDomains { get; set; }
         DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
         DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
+        DbSet<RoundAggregate> RoundAggregates { get; set; }
+        DbSet<PlayerAggregate> PlayerAggregates { get; set; }
+        DbSet<PlayerGameTypeAggregate> PlayerGameTypeAggregates { get; set; }
+        DbSet<ApiLog> ApiLogs { get; set; }
+
+        DbSet<LogRecord> LogRecords { get; set; }
+
+        DbSet<AdminLog> AdminLogs { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
     {
+        public DbSet<AgentLoginRecord> AgentLoginRecord { get; set; }
+
         public TgsRepository(DbContextOptions<TgsRepository> options) : base(options)
         {
         }
 
-        public DbSet<AgentLoginRecord> AgentLoginRecord { get; set; }
         public DbSet<Reseller> Resellers { get; set; }
 
         public DbSet<Game> Games { get; set; }
@@ -323,6 +332,14 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<GameProviderFundTransferTransaction> GameProviderFundTransferTransactions { get; set; }
 
         public DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
+        public DbSet<RoundAggregate> RoundAggregates { get; set; }
+        public DbSet<PlayerAggregate> PlayerAggregates { get; set; }
+        public DbSet<PlayerGameTypeAggregate> PlayerGameTypeAggregates { get; set; }
+        public DbSet<ApiLog> ApiLogs { get; set; }
+
+        public DbSet<LogRecord> LogRecords { get; set; }
+
+        public DbSet<AdminLog> AdminLogs { get; set; }
 
         public IDbContextTransaction CurrentTransaction =>
             Database.CurrentTransaction;

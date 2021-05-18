@@ -185,7 +185,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Providers") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("BrandProviders") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("BrandGames") {SubMenus = new[] {new MenuSetting("Update")}}
                     }
@@ -259,6 +258,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
+                        new MenuSetting("GameProviders") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("Language") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("Currency") {SubMenus = new[] {new MenuSetting("Update")}},
                         new MenuSetting("BetLimit") {SubMenus = new[] {new MenuSetting("Update")}},

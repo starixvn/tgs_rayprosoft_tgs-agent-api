@@ -319,12 +319,22 @@ const FormBody = ({
                 {isBank && (
                     <>
                         <InputField
+                            name="detail.bankName"
+                            inputRef={register}
+                            label="Bank Name"
+                        />
+                        <InputField
+                            name="detail.bankBranch"
+                            inputRef={register}
+                            label="Bank Branch"
+                        />
+                        <InputField
                             name="detail.name"
                             inputRef={register}
                             label="Account Name"
                         />
                         <InputField
-                            name="detail.account"
+                            name="detail.bankAccount"
                             inputRef={register}
                             label="Account"
                         />

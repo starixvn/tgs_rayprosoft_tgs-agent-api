@@ -3,14 +3,12 @@ import { css, Global } from "@emotion/react"
 import { Spinner, Stack, Flex, Box, Card, Set } from "bumbag"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import dateTimeColumn from "../../table/column/dateTime"
-import { useOperations, usePlayerBalanceChanges } from "./client"
+import { usePlayerBalanceChanges } from "./client"
 import { Trans, useTrans } from "../../i18n"
-import { pastWeek } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import SearchButton from "../../button/SearchButton"
 import { Tab as _Tab, TabPanel } from "../../tab"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
-import isSameDate from "date-fns/isEqual"
 import textColumn from "../../table/column/textColumn"
 import { Descending } from "../../table/order"
 import subHours from "date-fns/subHours"
@@ -112,6 +110,7 @@ const SearchBar = ({
 }) => {
     let formMethods = useForm({
         defaultValues: {
+            accountChangeType,
             start,
             end
         }

@@ -5,8 +5,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
-using TGS.Core.DataServices.Report;
-using TGS.Core.DataServices.Report.Models;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
@@ -17,7 +15,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
 {
     public interface IRoundAggregateService
     {
-        IReportRepository Repository { get; }
+        ITgsRepository Repository { get; }
 
         IQueryable<RoundAggregate> GetRoundAggregateQueries(
             Func<IQueryable<RoundAggregate>, IQueryable<RoundAggregate>> preQuery = null,
@@ -32,19 +30,17 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 DateTimeOffset end);
     }
 
-    public class RoundAggregateService : BaseRepositoryOperations<IReportRepository>, IRoundAggregateService
+    public class RoundAggregateService : BaseRepositoryOperations<ITgsRepository>, IRoundAggregateService
     {
-        public readonly IReportRepository _reportRepository;
         public readonly ITgsRepository _tgsRepository;
 
-        public RoundAggregateService(IReportRepository reportRepository, ITgsRepository tgsRepository) : base(
-            reportRepository)
+        public RoundAggregateService(ITgsRepository tgsRepository) : base(
+            tgsRepository)
         {
             _tgsRepository = tgsRepository;
-            _reportRepository = reportRepository;
         }
 
-        IReportRepository IRoundAggregateService.Repository => _reportRepository;
+        ITgsRepository IRoundAggregateService.Repository => _tgsRepository;
 
         Task IRoundAggregateService.CreateRoundAggregateAsync(RoundAggregateModel[] models) =>
             CreateEntitiesAsync(models.Select(model => new RoundAggregate

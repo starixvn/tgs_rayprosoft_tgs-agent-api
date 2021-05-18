@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
-using TGS.Core.DataServices.Report.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -39,7 +38,6 @@ namespace PromotionApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddReportRepository(_configuration, "Report");
             services.AddTgsRepository(_configuration, "Tgs");
 
             services.AddNats(_configuration)
@@ -82,7 +80,7 @@ namespace PromotionApi
             services.AddControllers();
 
             services.AddHealthChecks()
-                .AddPostgres(_configuration, "Report", "report-db");
+                .AddPostgres(_configuration, "Tgs", "tgs-db");
 
             services.AddSwaggerGen(c =>
             {
@@ -102,11 +100,13 @@ namespace PromotionApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
             app.UseGlobalExceptionHandler();
 
             app.UseRouting();
 
             app.UseHttpMetrics();
+            app.UseApiLogger(bypassRouting: defaultBypassRouting);
 
             app.UseEndpoints(endpoints =>
             {

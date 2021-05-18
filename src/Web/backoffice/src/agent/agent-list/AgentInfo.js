@@ -34,8 +34,7 @@ import { AgentLevelLabel, AgentLevelSelect, isAgentHead } from "../AgentLevel"
 import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
 import clone from "clone-deep"
 import Select from "../../select/Select"
-import { PercentageNumberInputField } from "../../input/NumberInput"
-import { AgentCommissionPercentageInputField } from "../AgentCommissionPercentage"
+import { AgentDividendPercentageInputField } from "../AgentDividendPercentage"
 import { AgentLiveDealerRebatePercentageInputField } from "../AgentLiveDealerRebatePercentage"
 import { AgentEgameRebatePercentageInputField } from "../AgentEgameRebatePercentage"
 import { AgentCardGameRebatePercentageInputField } from "../AgentCardGameRebatePercentage"
@@ -194,7 +193,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
 
                             {!changeParent && (
                                 <BounsBox>
-                                    <AgentCommissionPercentageInputField />
+                                    <AgentDividendPercentageInputField />
                                 </BounsBox>
                             )}
 
@@ -318,7 +317,7 @@ const ViewPanel = ({ record, ...props }) => {
 
                 <AgentTypeBox value={record?.type} />
 
-                <BounsBox value={record?.commissionPercentage} />
+                <BounsBox value={record?.dividendPercentage} />
 
                 <RebateBox
                     label={<Trans zh="真人返佣" en="Live Dealer Rebate" />}

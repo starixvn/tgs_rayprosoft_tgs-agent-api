@@ -159,7 +159,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         PlayerCode = p.PlayerCode,
                         PromotionId = promotionId
-                    }).ToHashSet()
+                    }).ToHashSet(),
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedOn = DateTimeOffset.Now
                 };
             });
 

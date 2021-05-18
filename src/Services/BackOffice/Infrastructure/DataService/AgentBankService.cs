@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using System.Transactions;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Agent;
 
@@ -15,28 +14,29 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IAgentBankService
     {
+        Task CreateAgentBankAsync(CreateAgentBankRequest request);
+
+        Task DeleteAgentBankAsync(AgentBank agentBank);
+
+        Task<bool> ExistsAsync(Expression<Func<AgentBank, bool>> predicate);
+
         Task<AgentBank> GetAgentBankAsync(Expression<Func<AgentBank, bool>> predicate,
-            Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery = null);
+                                    Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery = null);
 
         IQueryable<AgentBank> GetAgentBanks(Func<IQueryable<AgentBank>, IQueryable<AgentBank>> preQuery = null,
             bool tracking = false);
 
-        Task CreateAgentBankAsync(CreateAgentBankRequest request);
         Task UpdateAgentBankAsync(AgentBank agentBank, UpdateAgentBankRequest request);
-        Task DeleteAgentBankAsync(AgentBank agentBank);
-        Task<bool> ExistsAsync(Expression<Func<AgentBank, bool>> predicate);
     }
 
     public class AgentBankService : BaseRepositoryOperations<ITgsRepository>, IAgentBankService
     {
         private readonly ITgsRepository _repository;
-        private readonly SystemTransactionManager _transactionManager;
 
-        public AgentBankService(ITgsRepository repository, SystemTransactionManager transactionManager) : base(
-            repository)
+        public AgentBankService(ITgsRepository repository)
+            : base(repository)
         {
             _repository = repository;
-            _transactionManager = transactionManager;
         }
 
         async Task IAgentBankService.CreateAgentBankAsync(CreateAgentBankRequest request)
@@ -65,34 +65,29 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        Task IAgentBankService.UpdateAgentBankAsync(AgentBank agentBank, UpdateAgentBankRequest request)
+        async Task IAgentBankService.UpdateAgentBankAsync(AgentBank agentBank, UpdateAgentBankRequest request)
         {
-            var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            return _transactionManager.ExecuteTransactionAsync(_repository,
-                IsolationLevel.ReadCommitted, id,
-                async _ =>
-                {
-                    agentBank.RealName = request.RealName;
-                    agentBank.BankName = request.BankName;
-                    agentBank.BankAccount = request.BankAccount;
-                    agentBank.UpdatedByUsername = request.EditorUsername;
-                    agentBank.UpdatedOn = DateTimeOffset.Now;
+            agentBank.RealName = request.RealName;
+            agentBank.BankName = request.BankName;
+            agentBank.BankAccount = request.BankAccount;
+            agentBank.UpdatedByUsername = request.EditorUsername;
+            agentBank.UpdatedOn = DateTimeOffset.Now;
 
-                    var auditLog = new AgentAuditLog
-                    {
-                        Id = GuidExtensions.NewSequentialGuid(),
-                        AgentId = agentBank.AgentId,
-                        CreatedByUsername = request.EditorUsername,
-                        CreatedOn = DateTimeOffset.Now,
-                        Operation = AgentOperation.Bank
-                    };
+            var auditLog = new AgentAuditLog
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                AgentId = agentBank.AgentId,
+                CreatedByUsername = request.EditorUsername,
+                CreatedOn = DateTimeOffset.Now,
+                Operation = AgentOperation.Bank
+            };
 
-                    await UpdateEntityAsync(agentBank);
-                    await CreateEntityAsync(auditLog);
+            await UpdateEntityAsync(agentBank).ConfigureAwait(false);
+            await CreateEntityAsync(auditLog).ConfigureAwait(false);
 
-                    return Task.CompletedTask;
-                });
+            scope.Complete();
         }
     }
 }

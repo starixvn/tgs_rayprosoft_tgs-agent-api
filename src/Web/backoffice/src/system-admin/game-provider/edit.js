@@ -13,11 +13,14 @@ import {
     useModalState
 } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Update as UpdateMenu } from "../providers/menu"
+import { Update as UpdateMenu } from "./menu"
 import { EditDisclosure } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { Trans, useTrans } from "../../i18n"
-import { useGameProvider, useUpdateGameProvider } from "./client"
+import {
+    useGameProvider,
+    useUpdateGameProvider
+} from "../../game/providers/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import { FieldValues } from "../../layout/Grid"
@@ -27,8 +30,8 @@ import { Textarea } from "../../textarea"
 import { GameProviderStatusSelect } from "./status"
 import { useLanguageList } from "../../language/client"
 import { useCurrencyList } from "../../currency/client"
-import { GameProviderCurrencyCheckboxGroupTable } from "./GameProviderCurrencyCheckboxGroup"
-import { GameProviderLanguageCheckboxGroupTable } from "./GameProviderLanguageCheckboxGroup"
+import { GameProviderCurrencyCheckboxGroupTable } from "../../game/providers/GameProviderCurrencyCheckboxGroup"
+import { GameProviderLanguageCheckboxGroupTable } from "../../game/providers/GameProviderLanguageCheckboxGroup"
 import {
     mapCheckedByCode,
     mapCheckedByCultureCode

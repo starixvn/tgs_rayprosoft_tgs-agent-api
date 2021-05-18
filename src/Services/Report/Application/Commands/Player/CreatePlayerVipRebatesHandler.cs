@@ -109,8 +109,7 @@ namespace TGS.Services.Report.Application.Commands.Player
                         CardGameRebateAmount =
                             x.VipCardGameRebatePercentage *
                             list.Where(l => l.GameType == GameType.CardGame).Sum(a => a.Turnover) / 100M,
-                        SlotTurnover = list.Where(l =>
-                            Consts.SlotGroup.Contains(l.GameType)).Sum(a => a.Turnover),
+                        SlotTurnover = list.Where(l => Consts.SlotGroup.Contains(l.GameType)).Sum(a => a.Turnover),
                         SlotRebateAmount =
                             x.VipSlotRebatePercentage * list.Where(l =>
                                 Consts.SlotGroup.Contains(l.GameType)).Sum(a => a.Turnover) /
