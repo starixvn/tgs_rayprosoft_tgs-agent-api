@@ -25,6 +25,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(c => c.ActualAmount)
+                .HasPrecision(18, 6);
+
             builder.Property(c => c.BrandPaymentId)
                 .IsRequired();
 
