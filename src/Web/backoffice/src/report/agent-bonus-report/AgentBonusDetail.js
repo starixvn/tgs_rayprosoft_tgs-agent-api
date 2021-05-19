@@ -36,6 +36,7 @@ import { formatDateTime } from "../../date/format"
 import { FieldValues } from "../../layout/Grid"
 import { formatNumberDecimal } from "../../number/format"
 import Separator from "../../layout/Separator"
+import { startOfNextDay } from "../../date/startOfNextDay"
 
 export const AgentBonusDetailDialogDisclosure = ({
     brandId,
@@ -80,12 +81,16 @@ const ReportDialog = ({
     let { state, setPageIndex, setSortOrder } = useTable({
         brandId,
         agentId,
-        from: start,
-        to: end,
         showAll: true
     })
+
     let { data, isLoading, error, mutate, deleteCache } =
-        useAgentDividendDetailList(toApiParams(state))
+        useAgentDividendDetailList({
+            ...toApiParams(state),
+            sortby: "username",
+            from: start,
+            to: startOfNextDay(end)
+        })
 
     let { pageIndex, pageSize } = state
     let columns = useAgentBonusColumns({ username, items: data?.items })
