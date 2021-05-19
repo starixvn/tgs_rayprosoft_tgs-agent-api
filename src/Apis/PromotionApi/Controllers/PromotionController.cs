@@ -7,7 +7,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Core.Models.Promotion;
 
-namespace PromotionApi.Controllers
+namespace TGS.Apis.PromotionApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

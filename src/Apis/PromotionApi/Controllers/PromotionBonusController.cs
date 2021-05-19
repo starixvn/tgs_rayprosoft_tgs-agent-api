@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Core.Models.PromotionBonus;
 
-namespace PromotionApi.Controllers
+namespace TGS.Apis.PromotionApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

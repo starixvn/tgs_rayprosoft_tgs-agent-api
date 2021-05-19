@@ -7,7 +7,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.PluggableServices.Models;
 using TGS.Services.Report.Application.Models.Round;
 
-namespace ReportApi.Controllers
+namespace TGS.Apis.ReportApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

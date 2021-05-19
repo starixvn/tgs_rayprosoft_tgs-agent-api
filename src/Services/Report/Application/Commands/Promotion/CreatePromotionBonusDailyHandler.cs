@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
@@ -145,17 +145,13 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                         });
                 }).ToArray();
 
-            await using var promotionTransaction =
-                await _promotionService.TgsRepository.BeginTransactionAsync(IsolationLevel.ReadCommitted)
-                    .ConfigureAwait(false);
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
             await _promotionService.UpdatePromotionsAsync(promotions).ConfigureAwait(false);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus).ConfigureAwait(false);
             await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
                 new CreatePlayerBucketRequest(x.BrandId, x.PlayerCode, x.DefaultWalletId, x.BucketType,
                     x.BucketAmount)).ToArray()).ConfigureAwait(false);
-
-            await promotionTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
             var transactionPromotions = new List<TransactionPromotion>();
             foreach (var createPlayerBucketRequest in playerBuckets)
@@ -174,6 +170,8 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             }
 
             await _transactionRepository.CreateTransactionPromotionsAsync(transactionPromotions.ToArray());
+
+            scope.Complete();
 
             return CreateValidResponse<MessageResponse>();
         }
