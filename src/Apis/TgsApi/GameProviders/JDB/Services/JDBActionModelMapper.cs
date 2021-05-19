@@ -13,7 +13,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
     public interface IJDBActionModelMapper
     {
-        PlayerValidationData Request(string playerCode, PlatformType platformType);
         BetData Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request, PlatformType platformType);
         BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request, string externalRoundId);
         BaseActionResponse Response(GetBalanceResult result);
@@ -23,14 +22,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public sealed class JDBActionModelMapper : IJDBActionModelMapper
     {
         private static readonly string GameProviderCode = Consts.GameProvider.JDB;
-
-        PlayerValidationData IJDBActionModelMapper.Request(string playerCode, PlatformType platformType) =>
-            new()
-            {
-                GameProviderCode = GameProviderCode,
-                PlayerCode = playerCode,
-                PlatformType = platformType
-            };
 
         BaseActionResponse IJDBActionModelMapper.Response(GetBalanceResult result) =>
             new BaseActionResponse

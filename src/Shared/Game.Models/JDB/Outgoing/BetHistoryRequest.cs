@@ -10,18 +10,18 @@ namespace TGS.Shared.Game.Models.JDB.Outgoing
         [JsonPropertyName("action")]
         public int Action => (int)ActionType.BetHistory;
         [JsonPropertyName("ts")]
-        public long Timestamp { get; set; }
+        public long Timestamp { get; init; }
         [JsonPropertyName("parent")]
-        public string Parent { get; set; }
+        public string Parent { get; init; }
         [JsonPropertyName("uid")]
-        public string UserId { get; set; }
+        public string UserId { get; init; }
 
         [JsonPropertyName("lang")]
-        public string Language { get; set; }
+        public string Language { get; init; }
         
         [JsonPropertyName("gType")]
-        public int GameType { get; set; }
+        public int GameType { get; init; }
         [JsonPropertyName("seqNo")]
-        public long SequenceNo { get; set; }
+        public long SequenceNo { get; init; }
     }
 }

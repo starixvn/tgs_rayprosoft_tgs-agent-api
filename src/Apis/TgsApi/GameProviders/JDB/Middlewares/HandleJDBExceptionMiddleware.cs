@@ -30,7 +30,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
                 ErrorMessage = ErrorMapper.GetMessageByException(exception)
             };
             context.Response.StatusCode = statusCode;
-            await context.Response.WriteAsJsonAsync(response, response.GetType());
+            await context.Response.WriteAsJsonAsync(response);
             
         }
     }

@@ -53,8 +53,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB);
-            var brandMerchant = _jdbServices.GetBrandMerchant(configuration, player.BrandCode);
-            var agentMapper = _jdbServices.GetAgentMapper(brandMerchant, player.DefaultWalletCurrencyCode);
+            var agent = _jdbServices.GetAgent(configuration, player.DefaultWalletCurrencyCode);
             
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, round.BrandId,
                 language);
@@ -65,19 +64,17 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 throw new ArgumentException("Invalid external round id");
             }
 
-            var value = new BetHistoryRequest
+            var request = new BetHistoryRequest
             {
                 Timestamp = DateTime.Now.Ticks,
-                Parent = agentMapper.AgentId,
+                Parent = agent.Id,
                 UserId = playerCode,
                 Language = cultureCode,
                 GameType = (int)jdbGameType,
                 SequenceNo = externalRoundId
             };
 
-            var response = await
-                _jdbApiClient.GetBetHistoryUrlAsync(configuration.ApiUrl, configuration.ClientDomain,
-                    brandMerchant.AESIV, brandMerchant.AESKEY, value);
+            var response = await _jdbApiClient.GetBetHistoryUrlAsync(request);
             var url = string.Empty;
             if (response.Status.IgnoreCaseEquals(GameApiStatus.Succeed.Description()))
             {

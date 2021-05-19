@@ -6,9 +6,13 @@ using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.GameProviders.JDB.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Security;
+using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
@@ -29,38 +33,52 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         private readonly IJDBServices _services;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IGameActionQueries _gameActionQueries;
+        private readonly ISymmetricCryptoProvider _cryptoProvider;
+        private readonly ISettingOperations _settingOperations;
 
         public JDBGameController(
             IGamePlayActions actions,
             IJDBServices services,
             IJDBActionModelMapper map,
             IJsonSerializationProvider jsonSerializationProvider,
-            IGameActionQueries gameActionQueries)
+            IGameActionQueries gameActionQueries,
+            ISymmetricCryptoProviderFactory cryptoProviderFactory,
+            ISettingOperations settingOperations)
         {
             _actions = actions;
             _services = services;
             _map = map;
             _jsonSerializationProvider = jsonSerializationProvider;
             _gameActionQueries = gameActionQueries;
+            _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
+            _settingOperations = settingOperations;
         }
 
         [HttpPost]
-        public Task<BaseActionResponse> TransferFundsAsync([FromForm] string x)
+        public async Task<BaseActionResponse> TransferFundsAsync([FromForm] string x)
         {
-            var baseRequest = _jsonSerializationProvider.DeserializeFromString<BaseActionRequest>(x);
+    #if DEBUG
+            var jsonString = x;
+    #endif
+    #if RELEASE
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB);
+            var jsonString = await _cryptoProvider.DecryptStringAsync(x, configuration.AESIV, configuration.AESKEY);
+    #endif
+            var baseRequest = _jsonSerializationProvider.DeserializeFromString<BaseActionRequest>(jsonString);
 
             switch (baseRequest.ActionType)
             {
                 case ActionType.GetBalance:
-                    return GetBalanceAsync(_jsonSerializationProvider.DeserializeFromString<GetBalanceRequest>(x));
+                    return await GetBalanceAsync(_jsonSerializationProvider.DeserializeFromString<GetBalanceRequest>(jsonString));
                 case ActionType.PlaceAndSettleBet:
-                    return PlaceAndSettleBetAsync(
-                        _jsonSerializationProvider.DeserializeFromString<PlaceAndSettleBetRequest>(x));
+                    return await PlaceAndSettleBetAsync(
+                        _jsonSerializationProvider.DeserializeFromString<PlaceAndSettleBetRequest>(jsonString));
                 case ActionType.CancelTransaction:
-                    return CancelTransactionAsync(
-                        _jsonSerializationProvider.DeserializeFromString<CancelTransactionRequest>(x));
+                    return await CancelTransactionAsync(
+                        _jsonSerializationProvider.DeserializeFromString<CancelTransactionRequest>(jsonString));
                 default:
-                    return Task.FromResult(new BaseActionResponse {Status = GameApiStatus.Succeed.Description(), ErrorMessage = "Invalid action"});
+                    return new BaseActionResponse {Status = GameApiStatus.InvalidParameters.Description(), ErrorMessage = "Invalid action"};
             }
         }
 

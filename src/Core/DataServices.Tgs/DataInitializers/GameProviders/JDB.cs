@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.JDB;
-using TGS.Core.Models.GameProviders.Settings.KY;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -54,8 +53,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("RB"), new USDCurrency("US"), new VNDCurrency("VN"), new IDRCurrency("RP"), new JPYCurrency("JP"), 
-                new KRWCurrency("KW"), new MYRCurrency("RM"), new THBCurrency("TB"), new GBPCurrency("GB")
+                new CNYCurrency("RB"), new USDCurrency("US"), new VNDCurrency("VN"), new IDRCurrency("RP"),
+                new JPYCurrency("JP"), new KRWCurrency("KW"), new MYRCurrency("RM"), new THBCurrency("TB"),
+                new GBPCurrency("GB")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
@@ -78,41 +78,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-jdb") : new("http://localhost:62330"),
                     ApiUrl = new("https://ws-test.insvr.com/jsonapi"),
-                    ClientDomain = "tgs",
-                    BrandMerchants = new[]
+                    MoreGame = true,
+                    AESIV = "F02D8DE4435459BB",
+                    AESKEY = "56CD18A50BC963BD",
+                    ClientDomain = "jdb",
+                    Agents = new JDBAgent[]
                     {
-                        new JDBBrandMerchant
-                        {
-                            BrandCode = "Default",
-                            AESIV = "F02D8DE4435459BB",
-                            AESKEY = "56CD18A50BC963BD",
-                            Status = true,
-                            AgentMappers = new JDBAgentMapper[]
-                            {
-                                new()
-                                {
-                                    CurrencyCode = "CNY",
-                                    AgentId = "jdb",
-                                    Status = true
-                                }
-                            }
-                        },
-                        new JDBBrandMerchant
-                        {
-                            BrandCode = "TGS",
-                            AESIV = "C536813E03853FC0",
-                            AESKEY = "3E9C1714D1BD1AE8",
-                            Status = false,
-                            AgentMappers = new JDBAgentMapper[]
-                            {
-                                new()
-                                {
-                                    CurrencyCode = "CNY",
-                                    AgentId = "tgs",
-                                    Status = false
-                                }
-                            }
-                        }
+                        new() {CurrencyCode = "CNY", Id = "jdb"}
                     }
                 };
 

@@ -16,8 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public interface IJDBServices
     {
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(PlatformType platformType);
-        JDBBrandMerchant GetBrandMerchant(JDBConfiguration configuration, string brandCode);
-        JDBAgentMapper GetAgentMapper(JDBBrandMerchant brandMerchant, string currencyCode);
+        JDBAgent GetAgent(JDBConfiguration configuration, string currencyCode);
     }
 
     public sealed class JDBServices : IJDBServices
@@ -53,25 +52,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             };
         }
 
-        JDBBrandMerchant IJDBServices.GetBrandMerchant(JDBConfiguration configuration, string brandCode)
+        JDBAgent IJDBServices.GetAgent(JDBConfiguration configuration, string currencyCode)
         {
-            var brandMerchant = configuration?.BrandMerchants?
-                .Where(x => x.BrandCode.IgnoreCaseEquals(brandCode) && x.Status)
-                .FirstOrDefault();
-            if (brandMerchant == null)
-            {
-                brandMerchant = configuration?.BrandMerchants?
-                    .Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status)
-                    .FirstOrDefault();
-            }
-
-            return brandMerchant;
-        }
-
-        JDBAgentMapper IJDBServices.GetAgentMapper(JDBBrandMerchant brandMerchant, string currencyCode)
-        {
-            return brandMerchant?.AgentMappers?
-                .Where(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode) && x.Status)
+            return configuration.Agents?
+                .Where(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode))
                 .FirstOrDefault();
         }
     }

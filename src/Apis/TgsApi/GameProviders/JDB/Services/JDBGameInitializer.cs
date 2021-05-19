@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
@@ -53,32 +54,26 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB);
+            
+            var agent = _jdbServices.GetAgent(configuration, player.DefaultWalletCurrencyCode);
 
-            var brandMerchant = _jdbServices.GetBrandMerchant(configuration, player.BrandCode);
-            var agentMapper = _jdbServices.GetAgentMapper(brandMerchant, player.DefaultWalletCurrencyCode);
-
-            var getTokenRequest = new GetTokenRequest
+            var response = await _jdbApiClient.GetTokenAsync(new GetTokenRequest
             {
                 Timestamp = DateTime.Now.Ticks,
-                Parent = agentMapper.AgentId,
+                Parent = agent.Id,
                 UserId = player.PlayerCode,
                 Language = cultureCode,
                 GameType = ((int)_jdbGameTypeMapper.Get(game.Type)).ToString(),
                 MachineType = game.ExternalId,
                 MoreGame = configuration.MoreGame ? 1 : 0
-            };
+            });
 
-            var response = await
-                _jdbApiClient.GetTokenAsync(configuration.ApiUrl, configuration.ClientDomain, 
-                    brandMerchant.AESIV, brandMerchant.AESKEY, getTokenRequest);
-
-            if (response.Status.IgnoreCaseEquals(GameApiStatus.Succeed.Description()))
+            if (response.Status.NotEquals(GameApiStatus.Succeed.Description()))
             {
-                return new() {Url = response.Path};
+                throw new GameProviderApiErrorException(response.ErrorMessage);
             }
-
-            //TODO log error message from jdb
-            return new() {Url = string.Empty};
+            
+            return new() {Url = response.Path};
         }
     }
 }

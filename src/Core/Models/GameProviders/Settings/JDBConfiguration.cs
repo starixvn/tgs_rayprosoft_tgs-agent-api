@@ -6,8 +6,14 @@ namespace TGS.Core.Models.GameProviders.Settings
     public record JDBConfiguration : PluggableConfigurationBase
     {
         public Uri ApiUrl { get; init; }
+        public bool MoreGame { get; init; }
+        
+        public string AESIV { get; init; }
+
+        public string AESKEY { get; init; }
+
         public string ClientDomain { get; init; }
-        public JDBBrandMerchant[] BrandMerchants { get; set; }
-        public bool MoreGame { get; set; }
+        
+        public JDBAgent[] Agents { get; init; }
     }
 }
