@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using System.Transactions;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -13,24 +14,6 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Promotion
 {
-    public interface IPlayerService
-    {
-        Task<bool> ExistsAsync(Expression<Func<Player, bool>> predicate);
-
-        Task<Player> GetPlayerAsync(Expression<Func<Player, bool>> predicate,
-                    Func<IQueryable<Player>, IQueryable<Player>> preQuery = null);
-
-        IQueryable<PlayerAuditLog> GetPlayerOperationQueries(
-            Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery = null,
-            bool tracking = false);
-
-        IQueryable<Player> GetPlayerQueries(
-                    Func<IQueryable<Player>, IQueryable<Player>> preQuery = null,
-            bool tracking = false);
-
-        Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
-    }
-
     public class PlayerService : BaseRepositoryOperations<ITgsRepository>, IPlayerService
     {
         private readonly IRedisCacheManager _cacheManager;
@@ -48,23 +31,29 @@ namespace TGS.Services.Promotion
             _cacheManager = cacheManager;
         }
 
-        Task<bool> IPlayerService.ExistsAsync(Expression<Func<Player, bool>> predicate) =>
+        public Task<bool> ExistsAsync(Expression<Func<Player, bool>> predicate) =>
             ExistsAsync(predicate);
 
-        Task<Player> IPlayerService.GetPlayerAsync(Expression<Func<Player, bool>> predicate,
-                    Func<IQueryable<Player>, IQueryable<Player>> preQuery) =>
+        public Task<Player> GetPlayerAsync(
+            Expression<Func<Player, bool>> predicate,
+            Func<IQueryable<Player>, IQueryable<Player>> preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
-        IQueryable<PlayerAuditLog> IPlayerService.GetPlayerOperationQueries(
+        public Task<Player?> GetPlayerByPlayerCodeAsync(string playerCode)
+            => _repository.Players
+                .Where(player => player.PlayerCode == playerCode)
+                .FirstOrDefaultAsync();
+
+        public IQueryable<PlayerAuditLog> GetPlayerOperationQueries(
             Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery, bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        IQueryable<Player> IPlayerService.GetPlayerQueries(
+        public IQueryable<Player> GetPlayerQueries(
                     Func<IQueryable<Player>, IQueryable<Player>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        async Task IPlayerService.UpdatePlayerAsync(
+        public async Task UpdatePlayerAsync(
             Player player, UpdatePlayerRequest request)
         {
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();

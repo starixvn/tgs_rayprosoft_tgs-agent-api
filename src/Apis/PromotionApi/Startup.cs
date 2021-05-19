@@ -73,9 +73,14 @@ namespace PromotionApi
                 .AddPlayerBucketRepositoriesServices();
 
             services
-                .AddWallet()
-                .AddTgsWalletRepositories()
-                .AddTgsAgentWalletRepositories();
+                .AddPromotionCore()
+                .ConfigureWallet(config =>
+                {
+                    config
+                        .AddTgsWalletRepositories()
+                        .AddTgsAgentWalletRepositories();
+                })
+                .AddTgsPromotionRepositories();
 
             services
                 .AddHttpContextAccessor()

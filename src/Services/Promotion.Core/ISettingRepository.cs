@@ -8,7 +8,8 @@ namespace TGS.Services.Promotion
 {
     public interface ISettingRepository
     {
-        Task<Setting> GetSettingAsync(Expression<Func<Setting, bool>> predicate,
-            Func<IQueryable<Setting>, IQueryable<Setting>> preQuery = null);
+        Task<Setting> GetSettingAsync(
+            Expression<Func<Setting, bool>> predicate,
+            Func<IQueryable<Setting>, IQueryable<Setting>>? preQuery = null);
     }
 }

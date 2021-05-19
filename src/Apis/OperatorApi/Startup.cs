@@ -11,12 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
+using Tgs.Payment;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
-using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -28,7 +28,6 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
-using Tgs.Payment;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
@@ -103,7 +102,12 @@ namespace TGS.Apis.OperatorApi
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddReportClientServices(_configuration)
-                .AddPromotionClientServices(_configuration)
+                .AddPromotionClientServices((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    config.GetSection("Promotion").Bind(options);
+                })
                 .AddTransactions();
 
             services

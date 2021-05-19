@@ -12,8 +12,7 @@ using TGS.Services.Promotion.Models.PromotionDispatch;
 
 namespace TGS.Services.Promotion.Handlers
 {
-    internal class
-        GetPromotionDispatchQueryHandler : Handler<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>
+    internal class GetPromotionDispatchQueryHandler : Handler<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPromotionBonusRepository _promotionBonusService;

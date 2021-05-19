@@ -16,13 +16,13 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
+using Tgs.Payment.LeePay;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -35,7 +35,6 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
-using Tgs.Payment.LeePay;
 using TGS.Services.BackOffice.Application.Extensions;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.Operations.Extensions;
@@ -77,7 +76,12 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddTransactions()
                 .AddBackOfficeApplicationServices()
                 .AddReportClientServices(configuration)
-                .AddPromotionClientServices(configuration)
+                .AddPromotionClientServices((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    config.GetSection("Promotion").Bind(options);
+                })
                 .AddPlayerBucketRepositoriesServices();
 
             services.AddWallet()

@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Models.Promotion;
+using TGS.Services.Promotion.Services;
+using TGS.ServiceUtility;
 
 namespace PromotionApi.Controllers
 {
@@ -31,12 +33,20 @@ namespace PromotionApi.Controllers
             _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
 
         [HttpGet("{promotionId}/check/{brandId}/{playerCode}")]
-        public bool CheckCanJoinPromotion(
+        public async Task<bool> CheckCanJoinPromotionAsync(
+            [FromServices] IGetService<CheckCanJoinPromotionQuery, bool> checkService,
             Guid promotionId,
             Guid brandId,
             string playerCode)
         {
-            return true;
+            var query = new CheckCanJoinPromotionQuery(
+                brandId,
+                playerCode,
+                promotionId);
+
+            var result = await checkService.GetAsync(query).ConfigureAwait(false);
+
+            return result;
         }
 
         [HttpPost]

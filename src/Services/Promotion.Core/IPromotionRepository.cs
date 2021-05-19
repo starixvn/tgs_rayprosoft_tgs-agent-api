@@ -16,13 +16,13 @@ namespace TGS.Services.Promotion
         Task<bool> ExistsAsync(Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate);
 
         Task<TGS.Core.DataServices.Tgs.Models.Promotion> GetPromotionAsync(
-                                    Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate,
-            Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>> preQuery = null);
+            Expression<Func<Core.DataServices.Tgs.Models.Promotion, bool>> predicate,
+            Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>, IQueryable<Core.DataServices.Tgs.Models.Promotion>> preQuery = null);
+
+        Task<Core.DataServices.Tgs.Models.Promotion> GetPromotionByIdAsync(Guid promotionId);
 
         IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion> GetPromotionQueries(
-            Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>> preQuery = null,
+                    Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>, IQueryable<Core.DataServices.Tgs.Models.Promotion>> preQuery = null,
             bool tracking = false);
 
         Task UpdatePromotionAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion, UpdatePromotionRequest request);

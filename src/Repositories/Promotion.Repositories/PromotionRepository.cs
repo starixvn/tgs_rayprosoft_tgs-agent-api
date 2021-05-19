@@ -9,11 +9,11 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
-using PromotionType = TGS.Core.Models.Settings.PromotionType;
-using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion;
+using TGS.Services.Promotion.Models.Promotion;
+using PromotionType = TGS.Core.Models.Settings.PromotionType;
 
-namespace Promotion.Repositories
+namespace TGS.Promotion.Repositories
 {
     public class PromotionRepository : BaseRepositoryOperations<ITgsRepository>, IPromotionRepository
     {
@@ -25,57 +25,10 @@ namespace Promotion.Repositories
             _repository = tgsRepository;
         }
 
-        Task<TGS.Core.DataServices.Tgs.Models.Promotion> IPromotionRepository.GetPromotionAsync(
-            Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate,
-            Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>> preQuery) =>
-            GetEntityFirstOrDefaultAsync(predicate, preQuery);
+        public Task ChangePromotionStatusAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion) =>
+            UpdateEntityAsync(promotion);
 
-        Task<bool> IPromotionRepository.ExistsAsync(
-            Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate) => ExistsAsync(predicate);
-
-        IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion> IPromotionRepository.GetPromotionQueries(
-            Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
-                IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>> preQuery,
-            bool tracking) =>
-            GetQueriesAsync(preQuery, tracking);
-
-        async Task IPromotionRepository.UpdatePromotionAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion,
-            UpdatePromotionRequest request)
-        {
-            var vips = await _repository.VipLevels.AsQueryable()
-                .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).ToArrayAsync();
-
-            await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            await DeleteEntitiesAsync(promotion.PromotionGameProviders);
-            await DeleteEntitiesAsync(promotion.PromotionVipLevels);
-
-            promotion.Name = request.Name;
-            promotion.From = request.From;
-            promotion.To = request.To;
-            promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
-            promotion.PromotionType = request.PromotionType;
-            promotion.BonusAmountLimit = request.BonusAmountLimit;
-            promotion.Unlimited = request.Unlimited;
-            promotion.GameType = request.GameType;
-            promotion.Percentage = request.Percentage;
-            promotion.TotalAmountLimit = request.TotalAmountLimit;
-            promotion.TurnoverMultiple = request.TurnoverMultiple;
-            promotion.PromotionGameProviders =
-                request.GameProviderIds
-                    .Select(id => new PromotionGameProvider {GameProviderId = id, PromotionId = promotion.Id})
-                    .ToHashSet();
-            promotion.PromotionVipLevels =
-                vips.Select(x => new PromotionVipLevel {VipLevelId = x.Id, Level = x.Level, PromotionId = promotion.Id})
-                    .ToHashSet();
-            promotion.UpdatedByUsername = request.EditorUsername;
-            promotion.UpdatedOn = DateTimeOffset.Now;
-
-            await UpdateEntityAsync(promotion);
-            await tran.CommitAsync();
-        }
-
-        async Task IPromotionRepository.CreatePromotionAsync(CreatePromotionRequest request,
+        public async Task CreatePromotionAsync(CreatePromotionRequest request,
             PromotionType promotionTypeModel)
         {
             var promotion = new TGS.Core.DataServices.Tgs.Models.Promotion
@@ -108,8 +61,58 @@ namespace Promotion.Repositories
             await CreateEntityAsync(promotion);
         }
 
-        Task IPromotionRepository.ChangePromotionStatusAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion) =>
-            UpdateEntityAsync(promotion);
+        public Task<bool> ExistsAsync(
+            Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate) => ExistsAsync(predicate);
+
+        public Task<TGS.Core.DataServices.Tgs.Models.Promotion> GetPromotionAsync(
+            Expression<Func<TGS.Core.DataServices.Tgs.Models.Promotion, bool>> predicate,
+            Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
+                IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>> preQuery) =>
+            GetEntityFirstOrDefaultAsync(predicate, preQuery);
+
+        public async Task<TGS.Core.DataServices.Tgs.Models.Promotion> GetPromotionByIdAsync(Guid promotionId)
+            => await _repository.Promotions.FindAsync(promotionId).ConfigureAwait(false);
+
+        public IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion> GetPromotionQueries(
+                    Func<IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>,
+                IQueryable<TGS.Core.DataServices.Tgs.Models.Promotion>> preQuery,
+            bool tracking) =>
+            GetQueriesAsync(preQuery, tracking);
+
+        public async Task UpdatePromotionAsync(TGS.Core.DataServices.Tgs.Models.Promotion promotion,
+            UpdatePromotionRequest request)
+        {
+            var vips = await _repository.VipLevels.AsQueryable()
+                .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).ToArrayAsync();
+
+            await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            await DeleteEntitiesAsync(promotion.PromotionGameProviders);
+            await DeleteEntitiesAsync(promotion.PromotionVipLevels);
+
+            promotion.Name = request.Name;
+            promotion.From = request.From;
+            promotion.To = request.To;
+            promotion.AutoSentPlayerBonus = request.AutoSentPlayerBonus;
+            promotion.PromotionType = request.PromotionType;
+            promotion.BonusAmountLimit = request.BonusAmountLimit;
+            promotion.Unlimited = request.Unlimited;
+            promotion.GameType = request.GameType;
+            promotion.Percentage = request.Percentage;
+            promotion.TotalAmountLimit = request.TotalAmountLimit;
+            promotion.TurnoverMultiple = request.TurnoverMultiple;
+            promotion.PromotionGameProviders =
+                request.GameProviderIds
+                    .Select(id => new PromotionGameProvider { GameProviderId = id, PromotionId = promotion.Id })
+                    .ToHashSet();
+            promotion.PromotionVipLevels =
+                vips.Select(x => new PromotionVipLevel { VipLevelId = x.Id, Level = x.Level, PromotionId = promotion.Id })
+                    .ToHashSet();
+            promotion.UpdatedByUsername = request.EditorUsername;
+            promotion.UpdatedOn = DateTimeOffset.Now;
+
+            await UpdateEntityAsync(promotion);
+            await tran.CommitAsync();
+        }
 
         private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
             TGS.Core.DataServices.Tgs.Models.Promotion promotion,
@@ -117,7 +120,7 @@ namespace Promotion.Repositories
         {
             var promotionGameProviders = _repository.GameProviders.AsQueryable()
                 .Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
-                    new PromotionGameProvider {PromotionId = promotion.Id, GameProviderId = x.Id});
+                    new PromotionGameProvider { PromotionId = promotion.Id, GameProviderId = x.Id });
             return new(promotionGameProviders);
         }
 
@@ -127,7 +130,7 @@ namespace Promotion.Repositories
         {
             var promotionVipLevels = _repository.VipLevels.AsQueryable()
                 .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).Select(x =>
-                    new PromotionVipLevel {PromotionId = promotion.Id, VipLevelId = x.Id, Level = x.Level});
+                    new PromotionVipLevel { PromotionId = promotion.Id, VipLevelId = x.Id, Level = x.Level });
             return new(promotionVipLevels);
         }
     }
