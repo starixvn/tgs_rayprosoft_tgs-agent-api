@@ -84,13 +84,8 @@ const ReportDialog = ({
         to: end,
         showAll: true
     })
-    let {
-        data,
-        isLoading,
-        error,
-        mutate,
-        deleteCache
-    } = useAgentDividendDetailList(toApiParams(state))
+    let { data, isLoading, error, mutate, deleteCache } =
+        useAgentDividendDetailList(toApiParams(state))
 
     let { pageIndex, pageSize } = state
     let columns = useAgentBonusColumns({ username, items: data?.items })
@@ -155,7 +150,7 @@ const useAgentBonusColumns = ({ username = "", items = [] }) => {
                 Cell: ({ value }) => value ?? username
             }),
             dateTimeColumn({
-                accessor: "reportDate",
+                accessor: "settlementDate",
                 dateFormat: "dd/MM/yyyy",
                 timeFormat: false,
                 Header: <Trans zh="结算日期" en="Date" />,
@@ -172,80 +167,83 @@ const useAgentBonusColumns = ({ username = "", items = [] }) => {
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let format = "dd/MM/yyyy"
-                    let start = formatDateTime(format, value?.from)
-                    let end = formatDateTime(format, value?.to)
+                    let start = formatDateTime(
+                        format,
+                        value?.settlementDateFrom
+                    )
+                    let end = formatDateTime(format, value?.settlementDateTo)
                     return <Text.Block>{`${start} - ${end}`}</Text.Block>
                 }
             }),
 
             numberDecimalColumn({
-                accessor: "liveDealerWinLossAmount",
+                accessor: "liveDealerWinLoss",
                 Header: (
                     <Trans
                         zh="真人输赢总金额"
                         en="Live Dealer Win Loss Amount"
                     />
                 ),
-                sumColumn: "liveDealerWinLossAmount",
+                sumColumn: "liveDealerWinLoss",
                 disableSortBy: true
             }),
 
             numberDecimalColumn({
-                accessor: "sportsWinLossAmount",
+                accessor: "sportsWinLoss",
                 Header: (
                     <Trans zh="体育输赢总金额" en="Sports Win Loss Amount" />
                 ),
-                sumColumn: "sportsWinLossAmount",
+                sumColumn: "sportsWinLoss",
                 disableSortBy: true
             }),
 
             numberDecimalColumn({
-                accessor: "slotWinLossAmount",
+                accessor: "slotWinLoss",
                 Header: <Trans zh="电子输赢总金额" en="Slot Win Loss Amount" />,
-                sumColumn: "slotWinLossAmount",
+                sumColumn: "slotWinLoss",
                 disableSortBy: true
             }),
 
             numberDecimalColumn({
-                accessor: "cardGameWinLossAmount",
+                accessor: "cardGameWinLoss",
                 Header: (
                     <Trans zh="棋牌输赢总金额" en="Card Game Win Loss Amount" />
                 ),
-                sumColumn: "cardGameWinLossAmount",
+                sumColumn: "cardGameWinLoss",
                 disableSortBy: true
             }),
 
             numberDecimalColumn({
-                accessor: "virtualSportsWinLossAmount",
+                accessor: "virtualSportsWinLoss",
                 Header: (
                     <Trans
                         zh="虚拟体育输赢总金额"
                         en="Virtual Sports Win Loss Amount"
                     />
                 ),
-                sumColumn: "virtualSportsWinLossAmount",
+                sumColumn: "virtualSportsWinLoss",
                 disableSortBy: true
             }),
 
             numberDecimalColumn({
-                accessor: "lotteryWinLossAmount",
+                accessor: "lotteryWinLoss",
                 Header: (
                     <Trans zh="彩票输赢总金额" en="Lottery Win Loss Amount" />
                 ),
-                sumColumn: "lotteryWinLossAmount",
+                sumColumn: "lotteryWinLoss",
                 disableSortBy: true
             }),
 
             numberDecimalPercentageColumn({
-                accessor: "bonusPercentage",
-                Header: <Trans zh="分红比例" en="Bonus Percentaget" />,
+                accessor: "agentDividendPercentage",
+                Header: <Trans zh="分红比例" en="Dividend Percentaget" />,
                 disableSortBy: true
             }),
 
             numberDecimalColumn({
-                accessor: "bonusAmount",
-                Header: <Trans zh="分红金额" en="Bonus Amount" />,
-                sumColumn: "bonusAmount",
+                accessor: "agentDividendAmount",
+                Header: <Trans zh="分红金额" en="Dividend Amount" />,
+                sumColumn: "agentDividendAmount",
                 disableSortBy: true
             })
         ],
