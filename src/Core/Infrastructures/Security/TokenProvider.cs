@@ -26,7 +26,7 @@ namespace TGS.Core.Infrastructures.Security
             IJsonSerializationProvider json)
         {
             _json = json;
-            _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
+            _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AESBase62);
 
             _options = new() {WriteIndented = false};
         }
