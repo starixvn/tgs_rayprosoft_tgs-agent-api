@@ -273,7 +273,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             {
                 PlayerCode = playerCode,
                 Currency = result.GameProviderCurrencyCode,
-                Balance = result.Balance,
+                Balance = ToTruncateDecimal(result.Balance),
                 Bonus = 0,
                 Token = token
             };
@@ -282,7 +282,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             new()
             {
                 Currency = result.GameProviderCurrencyCode,
-                Balance = result.Balance,
+                Balance = ToTruncateDecimal(result.Balance),
                 Bonus = 0
             };
 
@@ -296,7 +296,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
                 TransactionId = transaction?.InternalTransactionId?.ToString(),
                 Currency = result.GameProviderCurrencyCode,
-                Balance = result.Balance,
+                Balance = ToTruncateDecimal(result.Balance),
                 Bonus = 0,
                 UsedPromo = 0
             };
@@ -312,7 +312,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
                 TransactionId = transaction?.InternalTransactionId?.ToString(),
                 Currency = result.GameProviderCurrencyCode,
-                Balance = result.Balance,
+                Balance = ToTruncateDecimal(result.Balance),
                 Bonus = 0
             };
         }
@@ -320,7 +320,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
         EndRoundResponse IPragmaticPlayActionModelMapper.EndRoundResponse(decimal balance) =>
             new()
             {
-                Balance = balance,
+                Balance = ToTruncateDecimal(balance),
                 Bonus = 0
             };
 
@@ -346,7 +346,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
                 TransactionId = transaction?.InternalTransactionId?.ToString(),
                 Currency = result.GameProviderCurrencyCode,
-                Balance = result.Balance,
+                Balance = ToTruncateDecimal(result.Balance),
                 Bonus = 0
             };
         }
@@ -357,7 +357,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             {
                 TransactionId = request.Reference,
                 Currency = result.GameProviderCurrencyCode,
-                Balance = result.Balance,
+                Balance = ToTruncateDecimal(result.Balance),
                 Bonus = 0
             };
 
@@ -371,7 +371,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 Description = GetTransactionResponseDescription(transaction?.IsDuplicate),
                 TransactionId = transaction?.InternalTransactionId?.ToString(),
                 Currency = result.GameProviderCurrencyCode,
-                Balance = result.Balance,
+                Balance = ToTruncateDecimal(result.Balance),
                 Bonus = 0
             };
         }
@@ -411,6 +411,9 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
         private string AddCustomDescription(Dictionary<string, object> items) =>
             items == null || items.Count == 0 ? null : _json.SerializeToString(items, new() {WriteIndented = false});
+
+        private static decimal ToTruncateDecimal(decimal value) =>
+            value.Truncate(2);
 
         #endregion
     }
