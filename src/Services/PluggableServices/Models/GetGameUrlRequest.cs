@@ -1,5 +1,6 @@
 ﻿// ReSharper disable IdentifierTypo
 
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using TGS.Core.Models.Tokens;
 
@@ -18,5 +19,8 @@ namespace TGS.Services.PluggableServices.Models
 
         [JsonPropertyName("language")]
         public string Language { get; init; }
+
+        [JsonPropertyName("extends")]
+        public JsonDocument ExtendedData { get; set; }
     }
 }

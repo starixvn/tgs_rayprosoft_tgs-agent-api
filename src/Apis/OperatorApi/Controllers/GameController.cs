@@ -24,7 +24,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         /// <remarks>
         /// language填 languages表的culture_code ex:zh-TW
-        /// 
+        ///
         /// currency填 currencies表的code ex:CNY
         /// </remarks>
         [HttpGet]
@@ -36,19 +36,17 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         ///     get game launch url via game id
         /// </summary>
-        [HttpGet]
-        [Route("geturl")]
+        [HttpPost("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<GetGameUrlResponse> GetGameUrlAsync([FromQuery] GetGameUrlRequest request) =>
+        public Task<GetGameUrlResponse> GetGameUrlAsync([FromBody] GetGameUrlRequest request) =>
             _mediator.Send(request);
 
         /// <summary>
         ///     get game launch url for lobby type game.
         /// </summary>
-        [HttpGet]
-        [Route("lobby/geturl")]
+        [HttpPost("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<GetGameUrlResponse> GetLobbyGameUrlAsync([FromQuery] GetLobbyGameUrlRequest request) =>
+        public Task<GetGameUrlResponse> GetLobbyGameUrlAsync([FromBody] GetLobbyGameUrlRequest request) =>
             _mediator.Send(request);
     }
 }

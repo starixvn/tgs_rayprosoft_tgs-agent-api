@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
@@ -8,15 +9,17 @@ namespace TGS.Apis.OperatorApi.Models.Messages
     public record GetLobbyGameUrlRequest : IRequest<GetGameUrlResponse>
     {
         [Required]
-        [BindProperty(Name = "gpcode", SupportsGet = true)]
+        [JsonPropertyName("gpcode")]
         public string GameProviderCode { get; init; }
 
         [Required]
-        [BindProperty(Name = "gtype", SupportsGet = true)]
+        [JsonPropertyName("gtype")]
         public GameType GameType { get; init; }
 
         [Required]
-        [BindProperty(Name = "language", SupportsGet = true)]
+        [JsonPropertyName("language")]
         public string LanguageCode { get; init; }
+
+        public JsonDocument Extends { get; set; }
     }
 }
