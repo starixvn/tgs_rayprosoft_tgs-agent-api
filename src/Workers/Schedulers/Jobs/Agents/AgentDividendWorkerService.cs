@@ -26,9 +26,9 @@ namespace TGS.Workers.Schedulers.Jobs.Agents
             return new() {ErrorMessage = response.Message};
         }
 
-        async Task<TgsResponse> IAgentDividendWorkerService.ManualExecutionAsync(string date)
+        async Task<TgsResponse> IAgentDividendWorkerService.ManualExecutionAsync(string brandCode)
         {
-            var response = await _client.CreateAgentDividendAsync(new(date));
+            var response = await _client.CreateAgentDividendAsync(new(brandCode));
             return new() {ErrorMessage = response.Message};
         }
     }

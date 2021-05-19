@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
+using TGS.Apis.PromotionApi.Middlewares;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -24,7 +25,7 @@ using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 using TGS.Services.Report.Application.Extensions;
 
-namespace PromotionApi
+namespace TGS.Apis.PromotionApi
 {
     public class Startup
     {
@@ -101,7 +102,7 @@ namespace PromotionApi
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
-            app.UseGlobalExceptionHandler();
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
 
