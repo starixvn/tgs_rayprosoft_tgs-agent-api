@@ -74,11 +74,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 _ => new(false, null)
             };
 
-            if (!checkingSign.Success)
-            {
-                throw new MissingTokenException("empty token");
-            }
-
             if (checkingSign.Success && checkingSign.Player != null)
             {
                 var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(checkingSign.Player.PlayerCode);
@@ -99,7 +94,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             if (_hashProvider.Hash($"{request.Random }{configuration.SecretCode}{request.LoginId}{configuration.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
             {
-                throw new MissingTokenException("empty token");
+                throw new MissingTokenException("Sign Error");
             }
             var player = await GetPlayerAsync(request.LoginId);
             return new(player != null, player);
@@ -109,7 +104,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         {
             if (_hashProvider.Hash($"{request.Random }{configuration.SecretCode}{request.LoginId}{request.Amount}{configuration.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
             {
-                throw new MissingTokenException("empty token");
+                throw new MissingTokenException("Sign Error");
             }
             var player = await GetPlayerAsync(request.LoginId);
             return new(player != null, player);
@@ -118,7 +113,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         {
             if (_hashProvider.Hash($"{request.Random }{configuration.SecretCode}{request.LoginId}{request.Amount}{configuration.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
             {
-                throw new MissingTokenException("empty token");
+                throw new MissingTokenException("Sign Error");
             }
 
             var player = await GetPlayerAsync(request.LoginId);
@@ -129,7 +124,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         {
             if (_hashProvider.Hash($"{request.Random }{configuration.SecretCode}{configuration.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
             {
-                throw new MissingTokenException("empty token");
+                throw new MissingTokenException("Sign Error");
             }
 
             return new(true, null);
