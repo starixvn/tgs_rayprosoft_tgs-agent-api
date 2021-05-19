@@ -74,16 +74,17 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 _ => new(false, null)
             };
 
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProvider.BigGaming);
+            context.Items.Add(ContextItems.GameProviderId, gameProviderId);
+
             if (checkingSign.Success && checkingSign.Player != null)
             {
                 var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(checkingSign.Player.PlayerCode);
-                var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProvider.BigGaming);
                 var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
                 var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(checkingSign.Player.PlayerCode);
                 context.Items.Add(ContextItems.PlayerCode, checkingSign.Player.PlayerCode);
                 context.Items.Add(ContextItems.PlatformType, loginRecord.PlatformType);
                 context.Items.Add(ContextItems.BrandId, brandId);
-                context.Items.Add(ContextItems.GameProviderId, gameProviderId);
                 context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
             }
             await next(context);

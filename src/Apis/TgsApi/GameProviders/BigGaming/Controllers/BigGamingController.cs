@@ -179,9 +179,23 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                BGBaseRequest baseRequest)
         {
             var data = JsonSerializer.Deserialize<BGOrderStatusRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
+            var items = HttpContext.Items;
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var orderStatusResultResponse = new List<BGOrderStatusResultResponse>();
+
+            foreach (var order in data.OrderMap)
+            {
+                orderStatusResultResponse.Add(new BGOrderStatusResultResponse
+                {
+                    OrderId = order.OrderId,
+                    Status = (int)await _map.GetOrderStatus(gameProviderId, order.LoginId, order.OrderId.ToString()).ConfigureAwait(false)
+                });
+            }
+
+
             var result = new BGOrderStatusResponse()
             {
-                Result = null
+                Result = orderStatusResultResponse.ToArray()
             };
 
             return new BGBaseResponse()
