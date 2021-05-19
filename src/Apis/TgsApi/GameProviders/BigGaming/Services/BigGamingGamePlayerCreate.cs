@@ -71,17 +71,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private async Task<bool> CreateAgentAsync(BigGamingConfiguration configuration, CachedPlayer player)
         {
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
-            var random = GuidExtensions.NewSequentialGuid().ToString();
-            var sign = _hashProvider.Hash($"{random }{brandMerchant.SecretCode}{player.BrandCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
             var createAgentRequest = new BigGamingCreateAgentRequest()
             {
-                Random = random,
-                Sign = sign,
+                Random = GuidExtensions.NewSequentialGuid().ToString(),
                 Sn = brandMerchant.SecretCode,
                 LoginId = player.BrandCode,
                 Password = brandMerchant.AgentLoginIdPassword
             };
-            var responseCreateAgent = await _client.CreateAgentAsync(brandMerchant.ApiUrl, createAgentRequest).ConfigureAwait(false);
+            var responseCreateAgent = await _client.CreateAgentAsync(brandMerchant, createAgentRequest).ConfigureAwait(false);
             if (responseCreateAgent.Error != null)
             {
                 throw new PlayerNotFoundException(player.PlayerCode);
@@ -95,19 +92,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private async Task<BigGamingBaseResponse> CreatePlayerAsync(BigGamingConfiguration configuration, CachedPlayer player)
         {
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
-            var random = GuidExtensions.NewSequentialGuid().ToString();
-            var digest = _hashProvider.Hash($"{random }{brandMerchant.SecretCode}{BigGamingUtility.GetSecretCode(brandMerchant.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
             var createPlayerRequest = new BigGamingCreatePlayerRequest()
             {
-                Random = random,
-                Digest = digest,
+                Random = GuidExtensions.NewSequentialGuid().ToString(),
                 Sn = brandMerchant.SecretCode,
                 LoginId = player.PlayerCode,
                 Nickname = player.PlayerCode,
                 AgentLoginId = player.BrandCode
             };
 
-            return await _client.CreatePlayerAsync(brandMerchant.ApiUrl, createPlayerRequest).ConfigureAwait(false);
+            return await _client.CreatePlayerAsync(brandMerchant, createPlayerRequest).ConfigureAwait(false);
         }
     }
 }

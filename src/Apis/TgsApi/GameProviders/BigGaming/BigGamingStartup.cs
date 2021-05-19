@@ -38,6 +38,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
             services.AddTransient<IBigGamingGamePlayerCreate, BigGamingGamePlayerCreate>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(BigGamingGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<BigGamingGameInitializer>());
+            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(BigGamingGameHistory) }, (provider, _) =>
+            provider.GetRequiredService<BigGamingGameHistory>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

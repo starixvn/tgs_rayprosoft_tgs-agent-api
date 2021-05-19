@@ -56,15 +56,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var gameProviderId = await _bigGamingServices.GetGameProviderId().ConfigureAwait(false);
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
             var brandId = player.BrandId;
-
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
-            var random = GuidExtensions.NewSequentialGuid().ToString();
-            var digest = _hashProvider.Hash($"{random }{brandMerchant.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(brandMerchant.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
 
             var data = new BigGamingGetGameUrlRequest()
             {
-                Random = random,
-                Digest = digest,
+                Random = GuidExtensions.NewSequentialGuid().ToString(),
                 Sn = brandMerchant.SecretCode,
                 LoginId = player.PlayerCode,
                 Locale = cultureCode,
@@ -76,19 +72,17 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             };
 
             var url = default(string);
-            var responseGameUrl = await _client.GetGameUrlAsync(brandMerchant.ApiUrl, data).ConfigureAwait(false);
+            var responseGameUrl = await _client.GetGameUrlAsync(brandMerchant, data).ConfigureAwait(false);
             if (responseGameUrl.Error != null)
             {
 
                 if (responseGameUrl.Error.Code == "2213")
                 {
                     await _bigGamingGamePlayerCreate.CreatePlayerAsync(player);
-                    random = GuidExtensions.NewSequentialGuid().ToString();
-                    digest = _hashProvider.Hash($"{random }{brandMerchant.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(brandMerchant.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
+
                     data = new BigGamingGetGameUrlRequest()
                     {
-                        Random = random,
-                        Digest = digest,
+                        Random = GuidExtensions.NewSequentialGuid().ToString(),
                         Sn = brandMerchant.SecretCode,
                         LoginId = player.PlayerCode,
                         Locale = cultureCode,
@@ -99,7 +93,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
                     };
 
-                    responseGameUrl = await _client.GetGameUrlAsync(brandMerchant.ApiUrl, data).ConfigureAwait(false);
+                    responseGameUrl = await _client.GetGameUrlAsync(brandMerchant, data).ConfigureAwait(false);
                     if (responseGameUrl.Result != null)
                     {
                         url = JsonSerializer.Deserialize<string>(JsonSerializer.Serialize(responseGameUrl.Result));
