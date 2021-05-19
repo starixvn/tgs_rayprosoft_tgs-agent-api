@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
@@ -11,6 +12,7 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
@@ -29,24 +31,26 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
     public sealed class BigGamingController : ControllerBase
     {
         private readonly IGamePlayActions _actions;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IBigGamingModelActionMapper _map;
         private readonly IBigGamingServices _services;
+        private readonly IReadOnlyDictionary<string, Func<IOptions<JsonOptions>, BGBaseRequest, Task<BGBaseResponse>>> _methodMapper;
         public BigGamingController(
-            ISettingOperations settingOperations,
-            IPlayerOperations playerOperations,
             IBigGamingModelActionMapper map,
             IGamePlayActions actions,
             IBigGamingServices services
-
             )
         {
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            _methodMapper = new Dictionary<string, Func<IOptions<JsonOptions>, BGBaseRequest, Task<BGBaseResponse>>>
+            {
+                {"open.operator.user.balance", BalanceAsync},
+                {"open.operator.order.transfer", BetAsync},
+                {"open.operator.calc.transfer",SettleAsync},
+                {"open.operator.order.status", OrderStatusAsync},
+                {"open.operator.ping" ,PingAsync}
+            };
         }
 
         [HttpPost("entrance")]
@@ -54,33 +58,27 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             BGBaseRequest baseRequest)
         {
-
-            return baseRequest.Method.ToLower() switch
+            if (!_methodMapper.TryGetValue(baseRequest.Method.ToLower(), out var execute))
             {
-                "open.operator.user.balance" => await BalanceAsync(baseRequest),
-                "open.operator.order.transfer" => await BetAsync(jsonOptionsAccessor, baseRequest),
-                "open.operator.calc.transfer" => await SettleAsync(jsonOptionsAccessor, baseRequest),
-                "open.operator.order.status" => await OrderStatusAsync(jsonOptionsAccessor, baseRequest),
-                "open.operator.ping" => Ping(jsonOptionsAccessor, baseRequest),
-                _ => new BGBaseResponse()
+                return new BGBaseResponse()
                 {
                     Id = baseRequest.Id,
-                    Result = null,
-                    Error = null,
                     Jsonrpc = baseRequest.Jsonrpc
-                }
-            };
+                };
+            }
+            return await execute(jsonOptionsAccessor, baseRequest).ConfigureAwait(false);
         }
 
         [HttpPost("balance")]
-        public async Task<BGBaseResponse> BalanceAsync(BGBaseRequest baseRequest)
+        public async Task<BGBaseResponse> BalanceAsync(
+            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+            BGBaseRequest baseRequest)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var balance = await _services
              .GetPlayerBalanceAsync(playerCode)
              .ConfigureAwait(false);
-
             return new BGBaseResponse()
             {
                 Id = baseRequest.Id,
@@ -196,7 +194,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("ping")]
-        public BGBaseResponse Ping(
+        public async Task<BGBaseResponse> PingAsync(
               [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
               BGBaseRequest baseRequest)
         {

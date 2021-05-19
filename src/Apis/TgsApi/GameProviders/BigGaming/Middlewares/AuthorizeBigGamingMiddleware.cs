@@ -48,6 +48,22 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             var value = await context.Request.ReadAsStringAsync();
             var response = JsonSerializer.Deserialize<BGBaseRequest>(value);
 
+            /*
+            if (context.Request.Path.Value.Contains("/api/bg/entrance", StringComparison.InvariantCultureIgnoreCase))
+            {
+                context.Request.Path = response.Method.ToLower() switch
+                {
+                    "open.operator.user.balance" => "/api/bg/balance",
+                    "open.operator.order.transfer" => "/api/bg/bet",
+                    "open.operator.calc.transfer" => "/api/bg/settle",
+                    "open.operator.order.status" => "/api/bg/orderstatus",
+                    "open.operator.ping" => "/api/bg/ping",
+                    _ => context.Request.Path.Value
+                };
+
+            }
+            */
+
             var checkingSign = response.Method.ToLower() switch
             {
                 "open.operator.user.balance" => await CheckingSignBalanceAsync(configuration, JsonSerializer.Deserialize<BGBalanceRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),

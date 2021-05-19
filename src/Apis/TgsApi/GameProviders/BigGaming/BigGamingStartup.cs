@@ -9,7 +9,7 @@ using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
-
+using static TGS.Core.Models.Consts;
 namespace TGS.Apis.TgsApi.GameProviders.BigGaming
 {
     public sealed class BigGamingStartup : BaseStartup
@@ -23,8 +23,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
-            services.AddErrorMappers();
+            services.AddErrorMappers(
+              new[] { typeof(BigGamingErrorMapper) },
+              (provider, key) => key switch
+              {
+                  GameProvider.BigGaming => provider.GetRequiredService<BigGamingErrorMapper>(),
+                  _ => provider.GetRequiredService<TgsErrorMapper>()
+              });
+
             services.AddScoped<AuthorizeBigGamingMiddleware>();
+            services.AddScoped<HandleBigGamingExceptionMiddleware>();
             services.AddScoped<IBigGamingServices, BigGamingServices>();
             services.AddScoped<IBigGamingModelActionMapper, BigGamingModelActionMapper>();
             services.AddTransient<IBigGamingGamePlayerCreate, BigGamingGamePlayerCreate>();
@@ -40,6 +48,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
                 builder =>
                 {
                     builder.UseMiddleware<AuthorizeBigGamingMiddleware>();
+                    builder.UseMiddleware<HandleBigGamingExceptionMiddleware>();
                 });
         }
 
