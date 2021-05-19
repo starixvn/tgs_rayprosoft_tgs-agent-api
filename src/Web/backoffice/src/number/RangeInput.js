@@ -22,8 +22,13 @@ export const NumberRangeInputGroup = ({
             {names.map((name, index) => {
                 let hasNext = index + 1 < names.length
 
-                let isRequiredList = Array.isArray(required)
                 let isDisabledList = Array.isArray(disabled)
+                let isDisabled = isDisabledList ? disabled[index] : disabled
+
+                let isRequiredList = Array.isArray(required)
+                let isRequired =
+                    !isDisabled && (isRequiredList ? required[index] : required)
+
                 let isMinList = Array.isArray(min)
                 let isMaxList = Array.isArray(max)
 
@@ -32,8 +37,8 @@ export const NumberRangeInputGroup = ({
                         key={name}
                         name={name}
                         type={type}
-                        required={isRequiredList ? required[index] : required}
-                        disabled={isDisabledList ? disabled[index] : disabled}
+                        disabled={isDisabled}
+                        required={isRequired}
                         min={isMinList ? min[index] : min}
                         max={isMaxList ? max[index] : max}
                         size={size}

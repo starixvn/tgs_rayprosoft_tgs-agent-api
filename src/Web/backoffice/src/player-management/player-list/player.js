@@ -118,7 +118,7 @@ const EditForm = ({
 
                 <RealNameLabel />
                 <Box>
-                    <Input name="realName" required />
+                    <Input name="realName" />
                 </Box>
 
                 <VIPLevelLabel />
@@ -128,7 +128,6 @@ const EditForm = ({
                         defaultValue={player?.vipId}
                         required
                         brandId={brandId}
-                        placeholderDisabled={true}
                     />
                 </Box>
 

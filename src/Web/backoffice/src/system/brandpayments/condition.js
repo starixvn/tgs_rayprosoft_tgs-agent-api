@@ -86,8 +86,14 @@ export const Detail = ({ record, whiteSpace = "nowrap", ...props }) => {
     )
 }
 
+export const PlayerListCondition = {
+    MatchAll,
+    MatchOne
+}
+
 export const PlayerListConditionRadioGroup = ({
     name = "playerListCondition",
+    orientation = "horizontal",
     ...props
 }) => {
     let options = [
@@ -95,7 +101,14 @@ export const PlayerListConditionRadioGroup = ({
         { label: useTrans(MatchOneTrans), value: MatchOne }
     ]
 
-    return <RadioGroup name={name} options={options} {...props} />
+    return (
+        <RadioGroup
+            name={name}
+            orientation={orientation}
+            options={options}
+            {...props}
+        />
+    )
 }
 
 export const AllPlayerText = () => <Trans {...AllPlayerTrans} />

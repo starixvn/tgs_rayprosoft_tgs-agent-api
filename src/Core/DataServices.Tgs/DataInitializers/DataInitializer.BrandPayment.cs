@@ -107,6 +107,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             var manualDepositBrandPayments = from brand in allBrands
                                              from pmc in allPaymentMethodChannels
                                              where pmc.PaymentId == _Payments["Manual"].Id
+                                                && pmc.ChannelId != _CustomChannelId
                                              let brandPaymentId = GuidExtensions.NewSequentialGuid()
                                              select new BrandPayment
                                              {
