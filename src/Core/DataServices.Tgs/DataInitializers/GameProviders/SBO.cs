@@ -91,7 +91,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-sbo") : new Uri("http://localhost:62330"),
-                    CompanyKey = "A33F1A3F3BC8485BA242F9EE61321E90",
+                    CompanyKey = "34B2C4ED616F4E7B965EAE0861A3F92E",
+                    AgentPrefix = "PGSTG01",
                     ApiUrl = new("https://ex-api-demo-yy.568win.com"),
                     EnableCancelFailedTransactionsJob = false,
                     DelaySecondsForPlaceBet = 0,
