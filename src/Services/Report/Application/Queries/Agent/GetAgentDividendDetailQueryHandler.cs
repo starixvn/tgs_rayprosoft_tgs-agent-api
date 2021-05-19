@@ -31,7 +31,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
         {
             var agentDividends = await _service.GetAgentDividendQueries(q =>
                     q.Where(x => x.AgentId == request.AgentId).Where(x => x.CreatedOn >= request.From)
-                        .Where(x => x.CreatedOn <= request.To))
+                        .Where(x => x.CreatedOn < request.To))
                 .GroupBy(x => new
                     {
                         x.AgentId,

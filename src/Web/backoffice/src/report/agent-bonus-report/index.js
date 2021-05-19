@@ -308,8 +308,8 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 id: "agentDividendAmount",
                 accessor: (row) => row,
                 sumColumn: "agentDividendAmount",
-                toValue: (row) => row?.agentBonusAmount,
-                Header: <Trans zh="分红金额" en="Bonus Amount" />,
+                toValue: (row) => row?.agentDividendAmount,
+                Header: <Trans zh="分红金额" en="Dividend Amount" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     return (
