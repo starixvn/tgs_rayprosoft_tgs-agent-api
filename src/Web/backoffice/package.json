@@ -54,7 +54,7 @@
     "numeral": "^2.0.6",
     "prettier": "^2.3.0",
     "react-datepicker": "^3.8.0",
-    "react-hook-form": "^7.6.0",
+    "react-hook-form": "^7.6.2",
     "react-infinite-scroll-component": "^6.1.0",
     "react-intersection-observer": "^8.32.0",
     "react-router-dom": "^5.2.0",

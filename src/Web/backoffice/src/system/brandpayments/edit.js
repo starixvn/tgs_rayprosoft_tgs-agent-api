@@ -46,7 +46,8 @@ import {
     IdentityAuthenticationText,
     PhoneAuthenticationText,
     VipLevelsText,
-    PlayerListConditionRadioGroup
+    PlayerListConditionRadioGroup,
+    PlayerListCondition
 } from "./condition"
 import { VipLevelCheckboxGroup } from "../../vip-levels/CheckboxGroup"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
@@ -251,14 +252,13 @@ const useManualBankTransferPayment = () => {
         ({ code }) => code === "BankTransfer"
     )
 
-    let bankTransferPaymentMethodChannels = paymentMethodChannelList?.allData?.filter(
-        (item) => {
+    let bankTransferPaymentMethodChannels =
+        paymentMethodChannelList?.allData?.filter((item) => {
             return (
                 item.methodId === bankTransferPaymentMethod.id &&
                 item.paymentId === manualPayment.id
             )
-        }
-    )
+        })
 
     return {
         isLoading:
@@ -291,9 +291,8 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     })
 
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate, deleteCache } = useAddBrandPayment(
-        formData
-    )
+    let { result, isLoading, error, mutate, deleteCache } =
+        useAddBrandPayment(formData)
 
     if (isLoadingPayment) {
         return <LoadingBackdrop {...dialog} />
@@ -317,6 +316,9 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
         <FormDialog
             defaultValues={{
                 paymentStatus: BrandPaymentStatus.Enabled,
+                playerListCondition: PlayerListCondition.MatchOne,
+                allPlayers: true,
+                depositedAmountMin: "0",
                 extendedData: {}
             }}
             onSubmit={onSubmit}
@@ -578,7 +580,7 @@ const EditBody = ({
                             />
                         </Box>
 
-                        <Label name="allPlayer">
+                        <Label name="allPlayers">
                             <AllPlayerText />
                         </Label>
                         <Box alignY="center">
@@ -635,7 +637,7 @@ const AccumulatedDepositGroup = () => {
     let depositedAmountMin = watch("depositedAmountMin")
     let depositedAmountMax = watch("depositedAmountMax")
     let disabledDepositedAmountMax = watch("depositedAmountUnlimited")
-
+    console.log("disabledDepositedAmountMax", disabledDepositedAmountMax)
     return (
         <Stack orientation="horizontal" alignY="center">
             <NumberRangeInputGroup
@@ -675,13 +677,8 @@ const UploadListColumn = ({ name = "", title, fileName = "" }) => {
 
     let uploadFileInputRef = useRef()
     let [formData, setFormData] = useState()
-    let {
-        result,
-        isLoading,
-        error,
-        clearCache,
-        deleteCache
-    } = useBrandPaymentUpload(formData)
+    let { result, isLoading, error, clearCache, deleteCache } =
+        useBrandPaymentUpload(formData)
 
     const resetFormData = () => {
         if (uploadFileInputRef?.current) {

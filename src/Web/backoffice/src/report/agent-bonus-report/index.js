@@ -288,7 +288,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                     return (
                         <AgentWinLossDialogDisclosure
                             brandId={brandId}
-                            agentId={value?.agentId}
+                            agentId={value?.id}
                             start={start}
                             end={end}
                             username={value?.username}
@@ -305,9 +305,9 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 disableSortBy: true
             }),
             numberDecimalColumn({
-                id: "agentBonusAmount",
+                id: "agentDividendAmount",
                 accessor: (row) => row,
-                sumColumn: "agentBonusAmount",
+                sumColumn: "agentDividendAmount",
                 toValue: (row) => row?.agentBonusAmount,
                 Header: <Trans zh="分红金额" en="Bonus Amount" />,
                 disableSortBy: true,
@@ -315,11 +315,11 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                     return (
                         <AgentBonusDetailDialogDisclosure
                             brandId={brandId}
-                            agentId={value?.agentId}
+                            agentId={value?.id}
                             start={start}
                             end={end}
                             username={value?.username}
-                            value={value?.bonusAmount}
+                            value={value?.agentDividendAmount}
                             use={Link}
                         />
                     )
