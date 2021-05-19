@@ -49,8 +49,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
                 {
-                    builder.UseMiddleware<AuthorizeBigGamingMiddleware>();
                     builder.UseMiddleware<HandleBigGamingExceptionMiddleware>();
+                    builder.UseMiddleware<AuthorizeBigGamingMiddleware>();
+
                 });
         }
 

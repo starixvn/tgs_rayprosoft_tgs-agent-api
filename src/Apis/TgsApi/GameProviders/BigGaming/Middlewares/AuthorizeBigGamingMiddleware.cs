@@ -86,7 +86,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(checkingSign.Player.PlayerCode);
                 var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
                 var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(checkingSign.Player.PlayerCode);
-                context.Items.Add(ContextItems.PlayerCode, checkingSign.Player.PlayerCode);
+                context.Items.Add(ContextItems.PlayerCode, loginRecord.PlayerCode);
                 context.Items.Add(ContextItems.PlatformType, loginRecord.PlatformType);
                 context.Items.Add(ContextItems.BrandId, brandId);
                 context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
