@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Services.Agent
 {
     public class AgentOptions
     {

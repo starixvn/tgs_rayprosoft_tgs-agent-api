@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Services.Agent;
-using TGS.Services.Operator;
-using TGS.Services.Operator.Configuration;
+using TGS.Services.Agent.Configuration;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace TGS.Services.Agent.Microsoft.Extensions.DependencyInjection
 {
     public static class AgentServiceCollectionExtensions
     {

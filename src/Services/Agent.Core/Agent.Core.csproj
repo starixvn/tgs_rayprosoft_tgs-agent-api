@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>TGS.Services.Agent</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
-    <ProjectReference Include="..\src\Services\Operations\Operations.csproj" />
+    <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
+    <ProjectReference Include="..\Operations\Operations.csproj" />
   </ItemGroup>
 
   <ItemGroup>

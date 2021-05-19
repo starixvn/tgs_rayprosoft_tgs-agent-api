@@ -28,6 +28,7 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
+using TGS.Services.Agent.Microsoft.Extensions.DependencyInjection;
 
 namespace TGS.Apis.AgentApi
 {

@@ -2,8 +2,8 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Agent.Core.Properties;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Services.Agent.Properties;
 
 namespace TGS.Services.Agent
 {
