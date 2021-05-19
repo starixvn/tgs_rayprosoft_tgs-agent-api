@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using TGS.Clients.Report.Client.Models.Player;
 
-namespace ReportApi.Validations.Player
+namespace TGS.Apis.ReportApi.Validations.Player
 {
     public class GetPlayerAccountChangesRequestValidator : AbstractValidator<GetPlayerAccountChangesRequest>
     {

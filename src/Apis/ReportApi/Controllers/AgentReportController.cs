@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
 
-namespace ReportApi.Controllers
+namespace TGS.Apis.ReportApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -52,7 +52,7 @@ namespace ReportApi.Controllers
         [HttpPost("dividends")]
         [Description("Create agent dividends")]
         public Task<MessageResponse> CreateAgentDividendsAsync(
-            [FromQuery] CreateAgentDividendsRequest request) =>
+            CreateAgentDividendsRequest request) =>
             _mediator.Send(request);
 
         [HttpGet("accountChanges")]

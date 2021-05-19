@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
@@ -51,7 +51,10 @@ namespace TGS.Services.Report.Application.Commands.Agent
         {
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
             var queryDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, new(8, 0, 0));
-            var brands = await _brandService.GetBrandQueries(q => q.Where(x => queryDate > x.CurrentSettlementTo))
+
+            var brands = await _brandService.GetBrandQueries(q =>
+                    q.Where(request.BrandCode is not null, x => x.Code == request.BrandCode)
+                        .Where(request.BrandCode is null, x => queryDate > x.CurrentSettlementTo))
                 .ToArrayAsync(cancellationToken);
             var createModels = new List<CreateAgentDividendModel>();
             var createAutoSendModels = new List<CreateAgentDividendModel>();
@@ -218,10 +221,16 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                             g => new
                                             {
                                                 g.AgentId,
+                                                g.BrandId,
                                                 g.playerGameTypeAggregate.AgentDividendPercentage,
                                                 g.WinLossAmount,
                                                 g.BonusAmount,
-                                                g.AdjustmentAmount
+                                                g.AdjustmentAmount,
+                                                g.DepositAmount,
+                                                g.WithdrawalAmount,
+                                                g.BetAmount,
+                                                g.Turnover,
+                                                g.NetProfit
                                             },
                                             (agent, childAgents) => new
                                             {
@@ -234,10 +243,10 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                                     c.playerGameTypeAggregate.VipRebateAmount)
                                             }).ToArray();
 
-                                    return Math.Max(childAgentPlayers.Sum(c =>
-                                            c.WinLossAmount - c.BonusAmount - c.AdjustmentAmount - c.RebateAmount) *
-                                        (x.AgentDividendPercentage -
-                                            childAgentPlayers.FirstOrDefault().AgentDividendPercentage) / 100M, 0M);
+                                    var amount = childAgentPlayers.Sum(c =>
+                                        Math.Abs(x.AgentDividendPercentage - c.AgentDividendPercentage) *
+                                        (c.WinLossAmount - c.BonusAmount - c.AdjustmentAmount - c.RebateAmount) / 100M);
+                                    return amount;
                                 }),
                             CreatedOn = DateTimeOffset.Now
                         }).ToList();
@@ -262,20 +271,15 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 brand.NextSettlementTo = nextToDate;
             }
 
-            await _transactionManager.ExecuteTransactionAsync(() => _agentDividendService.Repository,
-                IsolationLevel.ReadCommitted,
-                GuidExtensions.NewSequentialGuid().ToString(),
-                async repo =>
-                {
-                    await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray(), null);
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                    await _agentDividendService.CreateAgentDividendsAsync(createAutoSendModels.ToArray(),
-                        DateTimeOffset.Now);
+            await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray(), null);
 
-                    await _brandService.UpdateBrandsAsync(brands);
+            await _agentDividendService.CreateAgentDividendsAsync(
+                createAutoSendModels.ToArray(),
+                DateTimeOffset.Now);
 
-                    return Task.CompletedTask;
-                });
+            await _brandService.UpdateBrandsAsync(brands);
 
             var createdAgentIds = createAutoSendModels.Select(x => x.AgentId).ToArray();
             var createdAgents = await _agentService.GetAgentQueries().Where(x => createdAgentIds.Contains(x.Id))
@@ -287,6 +291,8 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 await _walletRepository.ExchangeAsync(models.BrandId, agent.DefaultWalletId, agent.Id,
                     TransactionTypes.Dividend, models.AgentDividendAmount);
             }
+
+            scope.Complete();
 
             return CreateValidResponse<MessageResponse>();
         }

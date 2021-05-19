@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
@@ -145,17 +145,10 @@ namespace TGS.Services.Report.Application.Commands.Player
                 .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
                 .ToArrayAsync(cancellationToken);
 
-            await _transactionManager.ExecuteTransactionAsync(() => _playerRebateService.Repository,
-                IsolationLevel.ReadCommitted,
-                GuidExtensions.NewSequentialGuid().ToString(),
-                async repo =>
-                {
-                    await _playerRebateService.CreatePlayerRebatesAsync(playerBonuses, DateTimeOffset.Now);
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            await _playerRebateService.CreatePlayerRebatesAsync(playerBonuses, DateTimeOffset.Now);
 
-                    await _playerRebateService.CreatePlayerRebatesAsync(playerBonusesNotSend, null);
-
-                    return Task.CompletedTask;
-                });
+            await _playerRebateService.CreatePlayerRebatesAsync(playerBonusesNotSend, null);
 
             foreach (var playerBonus in playerBonuses.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
                 (pb, p) => new {pb, p}))
@@ -165,6 +158,7 @@ namespace TGS.Services.Report.Application.Commands.Player
                     playerBonus.pb.RebateAmount);
             }
 
+            scope.Complete();
             return CreateValidResponse<MessageResponse>();
         }
     }
