@@ -6,7 +6,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Player;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 
-namespace ReportApi.Controllers
+namespace TGS.Apis.ReportApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

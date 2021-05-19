@@ -171,7 +171,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgentApi", "src\Apis\AgentA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameProviders.Repositories", "src\Repositories\GameProviders.Repositories\GameProviders.Repositories.csproj", "{45E5506F-E1F0-42EA-B4B4-B84DD6EC9437}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agent.Core", "Agent.Core\Agent.Core.csproj", "{52946017-F36A-464F-AFAF-42343A9FC8DB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agent.Core", "Agent.Core\Agent.Core.csproj", "{52946017-F36A-464F-AFAF-42343A9FC8DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

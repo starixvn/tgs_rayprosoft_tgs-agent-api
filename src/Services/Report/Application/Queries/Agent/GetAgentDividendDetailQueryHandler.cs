@@ -48,10 +48,11 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         x.CreatedOn,
                         x.AgentDividendPercentage,
                         LiveDealerWinLoss = list.Sum(l => l.LiveDealerWinLoss),
-                        SlotWinLoss = list.Sum(l => l.SlotWinLoss),
+                        SlotWinLoss =
+                            list.Sum(l => l.SlotWinLoss + l.FishingWinLoss + l.ArcadeWinLoss + l.TableGameWinLoss),
                         LotteryWinLoss = list.Sum(l => l.LotteryWinLoss),
                         CardGameWinLoss = list.Sum(l => l.CardGameWinLoss),
-                        SportsWinLoss = list.Sum(l => l.SportsWinLoss),
+                        SportsWinLoss = list.Sum(l => l.SportsWinLoss + l.ESportsWinLoss),
                         VirtualSportsWinLoss = list.Sum(l => l.VirtualSportsWinLoss),
                         WinLossAmount = list.Sum(l => l.WinLossAmount),
                         AgentDividendAmount = list.Sum(l => l.AgentDividendAmount)
