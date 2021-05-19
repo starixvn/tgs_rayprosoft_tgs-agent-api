@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.PlayerBucket.Core.Models
+namespace TGS.Services.PlayerBucket.Models
 {
     public record CreatePlayerBucketWithDepositRequest(Guid BrandId, Guid? PromotionId, string PlayerCode,
         Guid DefaultWalletId,

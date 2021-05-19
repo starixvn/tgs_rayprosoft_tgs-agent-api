@@ -141,7 +141,8 @@ namespace TGS.Apis.OperatorApi
             services.AddIdentityVerifiers();
 
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
+            services
+                .AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
                 {
@@ -164,7 +165,7 @@ namespace TGS.Apis.OperatorApi
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new() {Title = "TGS Operator API", Version = "v1"});
+                    c.SwaggerDoc("v1", new() { Title = "TGS Operator API", Version = "v1" });
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -176,7 +177,8 @@ namespace TGS.Apis.OperatorApi
                         Scheme = "bearer",
                         Reference = new()
                         {
-                            Id = JwtBearerDefaults.AuthenticationScheme, Type = ReferenceType.SecurityScheme
+                            Id = JwtBearerDefaults.AuthenticationScheme,
+                            Type = ReferenceType.SecurityScheme
                         }
                     };
 

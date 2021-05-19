@@ -64,7 +64,8 @@ namespace TGS.Apis.BackendOffice.Extensions
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
             services.AddSingleton<IFilterFactory, AutoValidateAntiforgeryTokenAttribute>();
 
-            services.AddNats(configuration)
+            services
+                .AddNats(configuration)
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddWebApiServices()
@@ -77,7 +78,6 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddBackOfficeApplicationServices()
                 .AddReportClientServices(configuration)
                 .AddPromotionClientServices(configuration)
-                .AddPromotionRepositoriesServices()
                 .AddPlayerBucketRepositoriesServices();
 
             services.AddWallet()
@@ -86,7 +86,9 @@ namespace TGS.Apis.BackendOffice.Extensions
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-            services.AddHttpContextAccessor();
+            services
+                .AddHttpContextAccessor()
+                .AddRouting(options => options.LowercaseUrls = true);
             services
                 .AddControllers(options =>
                 {

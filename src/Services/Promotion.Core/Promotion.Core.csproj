@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Promotion.Core</AssemblyName>
-    <RootNamespace>TGS.Services.Promotion.Core</RootNamespace>
+    <RootNamespace>TGS.Services.Promotion</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +13,33 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+    <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
+    <ProjectReference Include="..\TgsTransaction.Core\TgsTransaction.Core.csproj" />
+    <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Player.Designer.cs">
+      <DependentUpon>Player.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\Promotion.Designer.cs">
+      <DependentUpon>Promotion.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Player.resx">
+      <LastGenOutput>Player.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Promotion.resx">
+      <LastGenOutput>Promotion.Designer.cs</LastGenOutput>
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

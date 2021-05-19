@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
-using TGS.Services.Promotion.Core.Models.PromotionDispatch;
+using TGS.Services.Promotion.Models.PromotionDispatch;
 
 namespace PromotionApi.Controllers
 {

@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Core.Infrastructures.ApiClient;
@@ -8,15 +9,6 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Clients.Promotion.Client
 {
-    public interface IPromotionClient
-    {
-        Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request);
-        Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request);
-        Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);
-        Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request);
-        Task<MessageResponse> JoinAsync(JoinPromotionRequest request);
-    }
-
     public class PromotionClient : BaseApiClient, IPromotionClient
     {
         public PromotionClient(HttpClient client, IApiClientLogger logger,
@@ -25,46 +17,55 @@ namespace TGS.Clients.Promotion.Client
         {
         }
 
-        async Task<MessageResponse> IPromotionClient.CreatePromotionAsync(CreatePromotionRequest request)
+        public async Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request)
+        {
+            var prefix = $"Promotion.PromotionId.{request.PromotionId}.ChangeStatus";
+            return await ExecuteJsonRequestAsync<UpdatePromotionStatusRequest, MessageResponse>(HttpMethod.Put,
+                $"/api/promotion/{request.PromotionId}/{request.Status}", request, logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode,
+            Guid promotionId)
+        {
+            var prefix = $"Promotion.PromotionId.{promotionId}.CheckCanJoinDepositPromotion";
+            return await ExecuteJsonRequestAsync<JoinPromotionRequest, bool>(HttpMethod.Get,
+                $"/api/promotion/{promotionId}/check/{brandId}/{playerCode}", null, logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request)
         {
             var prefix = $"Promotion.BrandId.{request.BrandId}.CreatePromotion";
             return await ExecuteJsonRequestAsync<CreatePromotionRequest, MessageResponse>(HttpMethod.Post,
                 "/api/promotion", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<PromotionModel>> IPromotionClient.GetPromotionsAsync(GetPromotionsRequest request)
+        public async Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request)
         {
             var prefix = $"Promotion.BrandId.{request.BrandId}.GetPromotions";
             var path = ClientPath.AppendWithProperties("/api/promotion?", request);
 
             return await ExecuteJsonRequestAsync<GetPromotionsRequest, PagedResponse<PromotionModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<MessageResponse> IPromotionClient.UpdatePromotionAsync(UpdatePromotionRequest request)
-        {
-            var prefix = $"Promotion.PromotionId.{request.Id}.UpdatePromotion";
-            return await ExecuteJsonRequestAsync<UpdatePromotionRequest, MessageResponse>(HttpMethod.Post,
-                "/api/promotion", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
-        }
-
-        async Task<MessageResponse> IPromotionClient.ChangePromotionStatusAsync(UpdatePromotionStatusRequest request)
-        {
-            var prefix = $"Promotion.PromotionId.{request.PromotionId}.ChangeStatus";
-            return await ExecuteJsonRequestAsync<UpdatePromotionStatusRequest, MessageResponse>(HttpMethod.Put,
-                $"/api/promotion/{request.PromotionId}/{request.Status}", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
-        }
-
-        async Task<MessageResponse> IPromotionClient.JoinAsync(JoinPromotionRequest request)
+        public async Task<MessageResponse> JoinAsync(JoinPromotionRequest request)
         {
             var prefix = $"Promotion.PromotionId.{request.PromotionId}.JoinPromotion";
             return await ExecuteJsonRequestAsync<JoinPromotionRequest, MessageResponse>(HttpMethod.Post,
                 $"/api/promotion/{request.PromotionId}/addPlayer/{request.PlayerCode}", request, logPrefix: prefix,
-                options: new() {PropertyNameCaseInsensitive = true});
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request)
+        {
+            var prefix = $"Promotion.PromotionId.{request.Id}.UpdatePromotion";
+            return await ExecuteJsonRequestAsync<UpdatePromotionRequest, MessageResponse>(HttpMethod.Post,
+                "/api/promotion", request, logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
         }
     }
 }

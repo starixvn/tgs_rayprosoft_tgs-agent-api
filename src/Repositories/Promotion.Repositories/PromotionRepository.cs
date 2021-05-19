@@ -9,9 +9,9 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.Promotion.Core;
-using TGS.Services.Promotion.Core.Models.Promotion;
 using PromotionType = TGS.Core.Models.Settings.PromotionType;
+using TGS.Services.Promotion.Models.Promotion;
+using TGS.Services.Promotion;
 
 namespace Promotion.Repositories
 {

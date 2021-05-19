@@ -8,12 +8,9 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Settings;
-using TGS.Services.BackOffice.Domain;
-using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Promotion.Core;
-using TGS.Services.Promotion.Core.Models.PromotionDispatch;
+using TGS.Services.Promotion.Models.PromotionDispatch;
 
-namespace TGS.Services.BackOffice.Application.Queries.PromotionHandlers
+namespace TGS.Services.Promotion.Handlers
 {
     internal class
         GetPromotionDispatchQueryHandler : Handler<GetPromotionDispatchesRequest, PagedResponse<PromotionDispatchModel>>

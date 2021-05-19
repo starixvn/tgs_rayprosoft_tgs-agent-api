@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Payment;
-using TGS.Services.PlayerBucket.Core;
-using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.PlayerBucket;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {
