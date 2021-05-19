@@ -19,7 +19,7 @@ COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServi
 COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
 COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
 COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
-COPY ["src/Core/DataServices.Report/DataServices.Report.csproj", "src/Core/DataServices.Report/"]
+COPY ["src/Services/Agent.Core/Agent.Core.csproj", "src/Services/Agent.Core/"]
 RUN dotnet restore "src/Apis/AgentApi/AgentApi.csproj"
 COPY . .
 WORKDIR "/src/src/Apis/AgentApi"
