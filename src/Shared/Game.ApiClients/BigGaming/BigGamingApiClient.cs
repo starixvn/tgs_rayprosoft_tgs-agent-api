@@ -67,12 +67,14 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
 
         async Task<BigGamingBaseResponse> IBigGamingApiClient.GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlRequest request)
         {
+            request.Digest = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{request.LoginId}{BigGamingUtility.GetSecretCode(brandMerchant.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
             var prefix = $"{_gameProvider}.GetGameUrl";
             return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.video.game.url", prefix).ConfigureAwait(false);
         }
 
         async Task<BigGamingBaseResponse> IBigGamingApiClient.GetTrialGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetTrialGameUrlRequest request)
         {
+            request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
             var prefix = $"{_gameProvider}.GetTrialGameUrl";
             return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.video.trial.game.url", prefix).ConfigureAwait(false);
         }
