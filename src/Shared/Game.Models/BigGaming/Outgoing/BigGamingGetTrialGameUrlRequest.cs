@@ -8,7 +8,7 @@ using TGS.Shared.Game.Models.BigGaming.Common;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BGGetTrialGameUrlRequest : BGSignParamsRequest
+    public record BigGamingGetTrialGameUrlRequest : BigGamingSignParamsRequest
     {
         [JsonPropertyName("locale")]
         public string Locale { get; init; }

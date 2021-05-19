@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BGOrderStatusOrderMapRequest
+    public record BigGamingOrderStatusOrderMapRequest
     {
         [JsonPropertyName("orderId")]
         public long OrderId { get; set; }

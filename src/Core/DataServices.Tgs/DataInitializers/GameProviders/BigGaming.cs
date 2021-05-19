@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.BigGaming;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -68,10 +69,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 ServiceEndpointUrl =
                     _env.IsDocker() ? new Uri("http://game-bg") : new("http://localhost:62330"),
-                ApiUrl = new("http://openapi-uat.bytechn.com/open-cloud/api/"),
-                AgentLoginIdPassword = "TgsP@ssw0rd",
-                SecretCode = "jk06",
-                SecretKey = "8153503006031672EF300005E5EF6AEF"
+                BrandMerchants = new BigGamingBrandMerchant[]{
+                    new BigGamingBrandMerchant{
+                        ApiUrl = new("http://openapi-uat.bytechn.com/open-cloud/api/"),
+                        Status=true,
+                        CurrencyCode = "CNY",
+                        AgentLoginIdPassword = "TgsP@ssw0rd",
+                        SecretCode = "jk06",
+                        SecretKey = "8153503006031672EF300005E5EF6AEF"
+                    }
+                }
+
             };
         }
 

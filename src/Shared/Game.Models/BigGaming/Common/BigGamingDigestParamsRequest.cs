@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.BigGaming.Common
 {
-    public record BGDigestParamsRequest
+    public record BigGamingDigestParamsRequest
     {
         /// <summary>
         /// 随机字符串，建议使用UUID.

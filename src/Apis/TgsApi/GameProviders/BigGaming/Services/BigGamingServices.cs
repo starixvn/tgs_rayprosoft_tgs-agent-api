@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.BigGaming;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
@@ -14,20 +19,25 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         ValueTask<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<decimal> GetPlayerBalanceAsync(string playerCode);
+        ValueTask<BigGamingBrandMerchant> GetBrandMerchant(string currencyCode);
+        ValueTask<Guid> GetGameProviderId();
     }
     internal sealed class BigGamingServices : IBigGamingServices
     {
+        private readonly ISettingOperations _settingOperations;
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IRoundQueries _roundQueries;
 
         public BigGamingServices(
+            ISettingOperations settingOperations,
             IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries,
             IRoundQueries roundQueries,
             IPlayerOperations playerOperations)
         {
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;
             _roundQueries = roundQueries;
@@ -40,7 +50,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         async ValueTask<GameActionData> IBigGamingServices.GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
             => await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId).ConfigureAwait(false);
-
 
         async ValueTask<decimal> IBigGamingServices.GetPlayerBalanceAsync(string playerCode)
         {
@@ -62,6 +71,20 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 AutoCloseRound = autoCloseRound,
                 PlatformType = platformType
             };
+        }
+
+        async ValueTask<BigGamingBrandMerchant> IBigGamingServices.GetBrandMerchant(string currencyCode)
+        {
+            var configuration =
+              await _settingOperations.GetValueFromJsonByKeyAsync<BigGamingConfiguration>(SettingConsts
+                  .GameProviderConfigurations.BigGaming);
+
+            return configuration.BrandMerchants.Where(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode) && x.Status).First();
+        }
+
+        async ValueTask<Guid> IBigGamingServices.GetGameProviderId()
+        {
+            return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.BigGaming).ConfigureAwait(false);
         }
     }
 }

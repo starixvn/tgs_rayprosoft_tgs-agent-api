@@ -9,15 +9,15 @@ using TGS.Shared.Game.Models.BigGaming.Enums;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BGOrderStatusRequest : BGSignParamsRequest
+    public record BigGamingOrderStatusRequest : BigGamingSignParamsRequest
     {
         [JsonPropertyName("moduleId")]
-        public BGModuleId ModuleId { get; set; }
+        public BigGamingModuleId ModuleId { get; set; }
         [JsonPropertyName("tranId")]
         public string TranId { get; set; }
         [JsonPropertyName("orderIds")]
         public long[] OrderIds { get; set; }
         [JsonPropertyName("orderMap")]
-        public BGOrderStatusOrderMapRequest[] OrderMap { get; set; }
+        public BigGamingOrderStatusOrderMapRequest[] OrderMap { get; set; }
     }
 }

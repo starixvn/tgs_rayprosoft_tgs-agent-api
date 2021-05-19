@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BGOrderStatusResponse
+    public record BigGamingOrderStatusResponse
     {
         [JsonPropertyName("result")]
-        public BGOrderStatusResultResponse[] Result { get; set; }
+        public BigGamingOrderStatusResultResponse[] Result { get; set; }
     }
 }

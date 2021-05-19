@@ -3,7 +3,7 @@ using TGS.Shared.Game.Models.BigGaming.Common;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BGInfoPlayerRequest : BGDigestParamsRequest
+    public record BigGamingInfoPlayerRequest : BigGamingDigestParamsRequest
     {
         /// <summary>
         /// 登录ID.

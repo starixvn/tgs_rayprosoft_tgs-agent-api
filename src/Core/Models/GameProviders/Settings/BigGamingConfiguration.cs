@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TGS.Core.Models.GameProviders.Settings.BigGaming;
 
 namespace TGS.Core.Models.GameProviders.Settings
 {
@@ -11,12 +12,6 @@ namespace TGS.Core.Models.GameProviders.Settings
     /// </summary>
     public record BigGamingConfiguration : PluggableConfigurationBase
     {
-        public Uri ApiUrl { get; init; }
-
-        public string AgentLoginIdPassword { get; init; }
-
-        public string SecretKey { get; init; }
-
-        public string SecretCode { get; init; }
+        public BigGamingBrandMerchant[] BrandMerchants { get; set; }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BGCreatePlayerResponse
+    public record BigGamingCreatePlayerResponse
     {
         [JsonPropertyName("success")]
         public bool Success { get; init; }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
@@ -25,18 +26,21 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
+        private readonly IBigGamingServices _bigGamingServices;
         public AuthorizeBigGamingMiddleware(
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
-            IHashProvider hashProvider)
+            IHashProvider hashProvider,
+            IBigGamingServices bigGamingServices)
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
+            _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -46,7 +50,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                  .GameProviderConfigurations.BigGaming);
 
             var value = await context.Request.ReadAsStringAsync();
-            var response = JsonSerializer.Deserialize<BGBaseRequest>(value);
+            var response = JsonSerializer.Deserialize<BigGamingBaseRequest>(value);
 
             /*
             if (context.Request.Path.Value.Contains("/api/bg/entrance", StringComparison.InvariantCultureIgnoreCase))
@@ -66,10 +70,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var checkingSign = response.Method.ToLower() switch
             {
-                "open.operator.user.balance" => await CheckingSignBalanceAsync(configuration, JsonSerializer.Deserialize<BGBalanceRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
-                "open.operator.order.transfer" => await CheckingSignBetAsync(configuration, JsonSerializer.Deserialize<BGBetRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
-                "open.operator.calc.transfer" => await CheckingSignSettleAsync(configuration, JsonSerializer.Deserialize<BGSettleRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
-                "open.operator.order.status" => CheckingSignOrderStatusAsync(configuration, JsonSerializer.Deserialize<BGOrderStatusRequest>(JsonSerializer.Serialize(response.Params))),
+                "open.operator.user.balance" => await CheckingSignBalanceAsync(configuration, JsonSerializer.Deserialize<BigGamingBalanceRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
+                "open.operator.order.transfer" => await CheckingSignBetAsync(configuration, JsonSerializer.Deserialize<BigGamingBetRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
+                "open.operator.calc.transfer" => await CheckingSignSettleAsync(configuration, JsonSerializer.Deserialize<BigGamingSettleRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
+                "open.operator.order.status" => await CheckingSignOrderStatusAsync(configuration, JsonSerializer.Deserialize<BigGamingOrderStatusRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
                 "open.operator.ping" => new(true, null),
                 _ => new(false, null)
             };
@@ -90,40 +94,72 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             await next(context);
         }
 
-        private async Task<(bool Success, CachedPlayer Player)> CheckingSignBalanceAsync(BigGamingConfiguration configuration, BGBalanceRequest request)
+        private async Task<(bool Success, CachedPlayer Player)> CheckingSignBalanceAsync(BigGamingConfiguration configuration, BigGamingBalanceRequest request)
         {
-
-            if (_hashProvider.Hash($"{request.Random }{configuration.SecretCode}{request.LoginId}{configuration.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException("Sign Error");
-            }
             var player = await GetPlayerAsync(request.LoginId);
-            return new(player != null, player);
-        }
-
-        private async Task<(bool Success, CachedPlayer Player)> CheckingSignBetAsync(BigGamingConfiguration configuration, BGBetRequest request)
-        {
-            if (_hashProvider.Hash($"{request.Random }{configuration.SecretCode}{request.LoginId}{request.Amount}{configuration.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
+            if (player == null)
             {
-                throw new MissingTokenException("Sign Error");
+                throw new PlayerNotFoundException($"{request.LoginId }");
             }
-            var player = await GetPlayerAsync(request.LoginId);
-            return new(player != null, player);
-        }
-        private async Task<(bool Success, CachedPlayer Player)> CheckingSignSettleAsync(BigGamingConfiguration configuration, BGSettleRequest request)
-        {
-            if (_hashProvider.Hash($"{request.Random }{configuration.SecretCode}{request.LoginId}{request.Amount}{configuration.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
+
+            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+
+            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
             {
                 throw new MissingTokenException("Sign Error");
             }
 
-            var player = await GetPlayerAsync(request.LoginId);
             return new(player != null, player);
         }
 
-        private (bool Success, CachedPlayer Player) CheckingSignOrderStatusAsync(BigGamingConfiguration configuration, BGOrderStatusRequest request)
+        private async Task<(bool Success, CachedPlayer Player)> CheckingSignBetAsync(BigGamingConfiguration configuration, BigGamingBetRequest request)
         {
-            if (_hashProvider.Hash($"{request.Random }{configuration.SecretCode}{configuration.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
+            var player = await GetPlayerAsync(request.LoginId);
+            if (player == null)
+            {
+                throw new PlayerNotFoundException($"{request.LoginId }");
+            }
+
+            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+
+            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
+            {
+                throw new MissingTokenException("Sign Error");
+            }
+
+            return new(player != null, player);
+        }
+        private async Task<(bool Success, CachedPlayer Player)> CheckingSignSettleAsync(BigGamingConfiguration configuration, BigGamingSettleRequest request)
+        {
+            var player = await GetPlayerAsync(request.LoginId);
+            if (player == null)
+            {
+                throw new PlayerNotFoundException($"{request.LoginId }");
+            }
+
+            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+
+            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
+            {
+                throw new MissingTokenException("Sign Error");
+            }
+
+            return new(player != null, player);
+        }
+
+        private async Task<(bool Success, CachedPlayer Player)> CheckingSignOrderStatusAsync(BigGamingConfiguration configuration, BigGamingOrderStatusRequest request)
+        {
+            var loginId = request.OrderMap.Last().LoginId;
+
+            var player = await GetPlayerAsync(loginId);
+            if (player == null)
+            {
+                throw new MissingTokenException("Sign Error");
+            }
+
+            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+
+            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
             {
                 throw new MissingTokenException("Sign Error");
             }

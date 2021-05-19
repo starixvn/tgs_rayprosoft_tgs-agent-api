@@ -1,9 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Enums;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BGBetRequest : BGSignParamsRequest
+    public record BigGamingSettleRequest : BigGamingSignParamsRequest
     {
         [JsonPropertyName("userId")]
         public int UserId { get; set; }
@@ -12,10 +13,14 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
         [JsonPropertyName("amount")]
         public string Amount { get; set; }
         [JsonPropertyName("moduleId")]
-        public int ModuleId { get; set; }
+        public BigGamingModuleId ModuleId { get; set; }
         [JsonPropertyName("tranId")]
         public string TranId { get; set; }
+        [JsonPropertyName("gameResult")]
+        public string GameResult { get; set; }
+        [JsonPropertyName("recalc")]
+        public string Recalc { get; set; }
         [JsonPropertyName("orders")]
-        public BGBetOrderRequest[] Orders { get; set; }
+        public BigGamingSettleOrderRequest[] Orders { get; set; }
     }
 }

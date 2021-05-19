@@ -3,14 +3,14 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Shared.Game.Models.BigGaming.Common
 {
-    public record BGBaseResponse
+    public record BigGamingBaseRequest
     {
         [JsonPropertyName("id")]
         public string Id { get; set; }
-        [JsonPropertyName("result")]
-        public JsonDocument Result { get; set; }
-        [JsonPropertyName("error")]
-        public BGBaseErrorResponse Error { get; set; }
+        [JsonPropertyName("method")]
+        public string Method { get; set; }
+        [JsonPropertyName("params")]
+        public JsonDocument Params { get; set; }
         [JsonPropertyName("jsonrpc")]
         public string Jsonrpc { get; set; }
     }

@@ -27,6 +27,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IHashProvider _hashProvider;
         private readonly IBigGamingGamePlayerCreate _bigGamingGamePlayerCreate;
+        private readonly IBigGamingServices _bigGamingServices;
 
         public BigGamingGameInitializer(
             IBigGamingApiClient client,
@@ -35,7 +36,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             IBrandGameProviderOperations brandGameProviderOperations,
             IGameProviderOperations gameProviderOperations,
             IHashProvider _hashProvider,
-            IBigGamingGamePlayerCreate bigGamingGamePlayerCreate
+            IBigGamingGamePlayerCreate bigGamingGamePlayerCreate,
+            IBigGamingServices bigGamingServices
             )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
@@ -45,37 +47,25 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             this._hashProvider = _hashProvider ?? throw new ArgumentNullException(nameof(_hashProvider));
             _bigGamingGamePlayerCreate = bigGamingGamePlayerCreate ?? throw new ArgumentNullException(nameof(bigGamingGamePlayerCreate));
+            _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
-
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<BigGamingConfiguration>(SettingConsts
-                    .GameProviderConfigurations.BigGaming);
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode).ConfigureAwait(false);
+            var gameProviderId = await _bigGamingServices.GetGameProviderId().ConfigureAwait(false);
+            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
             var brandId = player.BrandId;
-
-            var externalID = 0;
-            if (request.GameId > 0)
-            {
-                var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
-                if (cachedGame != null)
-                {
-                    externalID = Convert.ToInt32(cachedGame.ExternalId);
-                }
-            }
 
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
             var random = GuidExtensions.NewSequentialGuid().ToString();
-            var digest = _hashProvider.Hash($"{random }{configuration.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(configuration.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
+            var digest = _hashProvider.Hash($"{random }{brandMerchant.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(brandMerchant.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
 
-            var data = new BGGetGameUrlRequest()
+            var data = new BigGamingGetGameUrlRequest()
             {
                 Random = random,
                 Digest = digest,
-                Sn = configuration.SecretCode,
+                Sn = brandMerchant.SecretCode,
                 LoginId = player.PlayerCode,
                 Locale = cultureCode,
                 IsMobileUrl = 0,
@@ -86,7 +76,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             };
 
             var url = default(string);
-            var responseGameUrl = await _client.GetGameUrlAsync(configuration.ApiUrl, data).ConfigureAwait(false);
+            var responseGameUrl = await _client.GetGameUrlAsync(brandMerchant.ApiUrl, data).ConfigureAwait(false);
             if (responseGameUrl.Error != null)
             {
 
@@ -94,12 +84,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 {
                     await _bigGamingGamePlayerCreate.CreatePlayerAsync(player);
                     random = GuidExtensions.NewSequentialGuid().ToString();
-                    digest = _hashProvider.Hash($"{random }{configuration.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(configuration.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
-                    data = new BGGetGameUrlRequest()
+                    digest = _hashProvider.Hash($"{random }{brandMerchant.SecretCode}{player.PlayerCode}{BigGamingUtility.GetSecretCode(brandMerchant.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
+                    data = new BigGamingGetGameUrlRequest()
                     {
                         Random = random,
                         Digest = digest,
-                        Sn = configuration.SecretCode,
+                        Sn = brandMerchant.SecretCode,
                         LoginId = player.PlayerCode,
                         Locale = cultureCode,
                         IsMobileUrl = 0,
@@ -109,7 +99,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
                     };
 
-                    responseGameUrl = await _client.GetGameUrlAsync(configuration.ApiUrl, data).ConfigureAwait(false);
+                    responseGameUrl = await _client.GetGameUrlAsync(brandMerchant.ApiUrl, data).ConfigureAwait(false);
                     if (responseGameUrl.Result != null)
                     {
                         url = JsonSerializer.Deserialize<string>(JsonSerializer.Serialize(responseGameUrl.Result));

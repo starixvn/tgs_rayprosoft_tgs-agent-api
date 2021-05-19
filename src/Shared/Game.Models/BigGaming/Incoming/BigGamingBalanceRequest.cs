@@ -3,7 +3,7 @@ using TGS.Shared.Game.Models.BigGaming.Common;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BGBalanceRequest : BGSignParamsRequest
+    public record BigGamingBalanceRequest : BigGamingSignParamsRequest
     {
         [JsonPropertyName("loginId")]
         public string LoginId { get; set; }

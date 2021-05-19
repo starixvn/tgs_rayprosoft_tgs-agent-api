@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         private readonly IGamePlayActions _actions;
         private readonly IBigGamingModelActionMapper _map;
         private readonly IBigGamingServices _services;
-        private readonly IReadOnlyDictionary<string, Func<IOptions<JsonOptions>, BGBaseRequest, Task<BGBaseResponse>>> _methodMapper;
+        private readonly IReadOnlyDictionary<string, Func<IOptions<JsonOptions>, BigGamingBaseRequest, Task<BigGamingBaseResponse>>> _methodMapper;
         public BigGamingController(
             IBigGamingModelActionMapper map,
             IGamePlayActions actions,
@@ -43,7 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _services = services ?? throw new ArgumentNullException(nameof(services));
-            _methodMapper = new Dictionary<string, Func<IOptions<JsonOptions>, BGBaseRequest, Task<BGBaseResponse>>>
+            _methodMapper = new Dictionary<string, Func<IOptions<JsonOptions>, BigGamingBaseRequest, Task<BigGamingBaseResponse>>>
             {
                 {"open.operator.user.balance", BalanceAsync},
                 {"open.operator.order.transfer", BetAsync},
@@ -54,13 +54,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("entrance")]
-        public async Task<BGBaseResponse> EntranceAsync(
+        public async Task<BigGamingBaseResponse> EntranceAsync(
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-            BGBaseRequest baseRequest)
+            BigGamingBaseRequest baseRequest)
         {
             if (!_methodMapper.TryGetValue(baseRequest.Method.ToLower(), out var execute))
             {
-                return new BGBaseResponse()
+                return new BigGamingBaseResponse()
                 {
                     Id = baseRequest.Id,
                     Jsonrpc = baseRequest.Jsonrpc
@@ -70,16 +70,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("balance")]
-        public async Task<BGBaseResponse> BalanceAsync(
+        public async Task<BigGamingBaseResponse> BalanceAsync(
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-            BGBaseRequest baseRequest)
+            BigGamingBaseRequest baseRequest)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var balance = await _services
              .GetPlayerBalanceAsync(playerCode)
              .ConfigureAwait(false);
-            return new BGBaseResponse()
+            return new BigGamingBaseResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(balance)),
@@ -89,11 +89,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("bet")]
-        public async Task<BGBaseResponse> BetAsync(
+        public async Task<BigGamingBaseResponse> BetAsync(
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-            BGBaseRequest baseRequest)
+            BigGamingBaseRequest baseRequest)
         {
-            var data = JsonSerializer.Deserialize<BGBetRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
+            var data = JsonSerializer.Deserialize<BigGamingBetRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -109,7 +109,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
 
-            var result = new BGBetResponse()
+            var result = new BigGamingBetResponse()
             {
                 UserId = data.UserId,
                 Sn = data.Sn,
@@ -118,7 +118,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 TranId = data.TranId
             };
 
-            return new BGBaseResponse()
+            return new BigGamingBaseResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
@@ -128,11 +128,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("settle")]
-        public async Task<BGBaseResponse> SettleAsync(
+        public async Task<BigGamingBaseResponse> SettleAsync(
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-            BGBaseRequest baseRequest)
+            BigGamingBaseRequest baseRequest)
         {
-            var data = JsonSerializer.Deserialize<BGSettleRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
+            var data = JsonSerializer.Deserialize<BigGamingSettleRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -155,7 +155,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
 
             }
 
-            var result = new BGSettleResponse()
+            var result = new BigGamingSettleResponse()
             {
                 UserId = data.UserId,
                 Sn = data.Sn,
@@ -164,7 +164,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 TranId = data.TranId
             };
 
-            return new BGBaseResponse()
+            return new BigGamingBaseResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
@@ -174,18 +174,18 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("orderstatus")]
-        public async Task<BGBaseResponse> OrderStatusAsync(
+        public async Task<BigGamingBaseResponse> OrderStatusAsync(
                [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-               BGBaseRequest baseRequest)
+               BigGamingBaseRequest baseRequest)
         {
-            var data = JsonSerializer.Deserialize<BGOrderStatusRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
+            var data = JsonSerializer.Deserialize<BigGamingOrderStatusRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var orderStatusResultResponse = new List<BGOrderStatusResultResponse>();
+            var orderStatusResultResponse = new List<BigGamingOrderStatusResultResponse>();
 
             foreach (var order in data.OrderMap)
             {
-                orderStatusResultResponse.Add(new BGOrderStatusResultResponse
+                orderStatusResultResponse.Add(new BigGamingOrderStatusResultResponse
                 {
                     OrderId = order.OrderId,
                     Status = (int)await _map.GetOrderStatus(gameProviderId, order.LoginId, order.OrderId.ToString()).ConfigureAwait(false)
@@ -193,12 +193,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             }
 
 
-            var result = new BGOrderStatusResponse()
+            var result = new BigGamingOrderStatusResponse()
             {
                 Result = orderStatusResultResponse.ToArray()
             };
 
-            return new BGBaseResponse()
+            return new BigGamingBaseResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
@@ -208,12 +208,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("ping")]
-        public async Task<BGBaseResponse> PingAsync(
+        public async Task<BigGamingBaseResponse> PingAsync(
               [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
-              BGBaseRequest baseRequest)
+              BigGamingBaseRequest baseRequest)
         {
 
-            return new BGBaseResponse()
+            return new BigGamingBaseResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize($"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}")),

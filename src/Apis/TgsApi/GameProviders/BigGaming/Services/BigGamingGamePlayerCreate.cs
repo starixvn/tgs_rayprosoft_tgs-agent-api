@@ -25,16 +25,19 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IBigGamingApiClient _client;
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
+        private readonly IBigGamingServices _bigGamingServices;
 
         public BigGamingGamePlayerCreate(
             IBigGamingApiClient client,
             ISettingOperations settingOperations,
-            IHashProvider _hashProvider
+            IHashProvider _hashProvider,
+            IBigGamingServices bigGamingServices
             )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            this._hashProvider = _hashProvider ?? throw new ArgumentNullException(nameof(_hashProvider));
+            _hashProvider = _hashProvider ?? throw new ArgumentNullException(nameof(_hashProvider));
+            _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
         }
 
         public async ValueTask<bool> CreatePlayerAsync(CachedPlayer player)
@@ -67,17 +70,18 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         private async Task<bool> CreateAgentAsync(BigGamingConfiguration configuration, CachedPlayer player)
         {
+            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
             var random = GuidExtensions.NewSequentialGuid().ToString();
-            var sign = _hashProvider.Hash($"{random }{configuration.SecretCode}{player.BrandCode}{configuration.SecretKey}", HashAlgorithmKind.Md5);
-            var createAgentRequest = new BGCreateAgentRequest()
+            var sign = _hashProvider.Hash($"{random }{brandMerchant.SecretCode}{player.BrandCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
+            var createAgentRequest = new BigGamingCreateAgentRequest()
             {
                 Random = random,
                 Sign = sign,
-                Sn = configuration.SecretCode,
+                Sn = brandMerchant.SecretCode,
                 LoginId = player.BrandCode,
-                Password = configuration.AgentLoginIdPassword
+                Password = brandMerchant.AgentLoginIdPassword
             };
-            var responseCreateAgent = await _client.CreateAgentAsync(configuration.ApiUrl, createAgentRequest).ConfigureAwait(false);
+            var responseCreateAgent = await _client.CreateAgentAsync(brandMerchant.ApiUrl, createAgentRequest).ConfigureAwait(false);
             if (responseCreateAgent.Error != null)
             {
                 throw new PlayerNotFoundException(player.PlayerCode);
@@ -88,21 +92,22 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             }
         }
 
-        private async Task<BGBaseResponse> CreatePlayerAsync(BigGamingConfiguration configuration, CachedPlayer player)
+        private async Task<BigGamingBaseResponse> CreatePlayerAsync(BigGamingConfiguration configuration, CachedPlayer player)
         {
+            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
             var random = GuidExtensions.NewSequentialGuid().ToString();
-            var digest = _hashProvider.Hash($"{random }{configuration.SecretCode}{BigGamingUtility.GetSecretCode(configuration.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
-            var createPlayerRequest = new BGCreatePlayerRequest()
+            var digest = _hashProvider.Hash($"{random }{brandMerchant.SecretCode}{BigGamingUtility.GetSecretCode(brandMerchant.AgentLoginIdPassword)}", HashAlgorithmKind.Md5);
+            var createPlayerRequest = new BigGamingCreatePlayerRequest()
             {
                 Random = random,
                 Digest = digest,
-                Sn = configuration.SecretCode,
+                Sn = brandMerchant.SecretCode,
                 LoginId = player.PlayerCode,
                 Nickname = player.PlayerCode,
                 AgentLoginId = player.BrandCode
             };
 
-            return await _client.CreatePlayerAsync(configuration.ApiUrl, createPlayerRequest).ConfigureAwait(false);
+            return await _client.CreatePlayerAsync(brandMerchant.ApiUrl, createPlayerRequest).ConfigureAwait(false);
         }
     }
 }

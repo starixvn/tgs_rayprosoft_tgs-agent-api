@@ -15,10 +15,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 {
     public interface IBigGamingModelActionMapper
     {
-        BetData Request(GameProviderConfigurationData data, BGBetRequest request);
-        Task<decimal> SettleAsync(GameProviderConfigurationData data, BGSettleRequest request, string playerCode);
-        Task<decimal> ResettleAsync(GameProviderConfigurationData data, BGSettleRequest request, string playerCode);
-        Task<BGOrderStatus> GetOrderStatus(Guid gameProviderId, string playerCode, string orderId);
+        BetData Request(GameProviderConfigurationData data, BigGamingBetRequest request);
+        Task<decimal> SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
+        Task<decimal> ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
+        Task<BigGamingOrderStatus> GetOrderStatus(Guid gameProviderId, string playerCode, string orderId);
     }
     public class BigGamingModelActionMapper : IBigGamingModelActionMapper
     {
@@ -37,7 +37,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
-        BetData IBigGamingModelActionMapper.Request(GameProviderConfigurationData data, BGBetRequest request)
+        BetData IBigGamingModelActionMapper.Request(GameProviderConfigurationData data, BigGamingBetRequest request)
         {
             var transactions = (from Order in request.Orders
                                 select new TransactionData
@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return GetBetData(data, request.LoginId, transactions);
         }
 
-        async Task<decimal> IBigGamingModelActionMapper.SettleAsync(GameProviderConfigurationData data, BGSettleRequest request, string playerCode)
+        async Task<decimal> IBigGamingModelActionMapper.SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode)
         {
             var balance = default(decimal);
             foreach (var order in request.Orders)
@@ -95,7 +95,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return balance;
         }
 
-        async Task<decimal> IBigGamingModelActionMapper.ResettleAsync(GameProviderConfigurationData data, BGSettleRequest request, string playerCode)
+        async Task<decimal> IBigGamingModelActionMapper.ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode)
         {
             var balance = default(decimal);
             foreach (var order in request.Orders)
@@ -156,12 +156,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return balance;
         }
 
-        async Task<BGOrderStatus> IBigGamingModelActionMapper.GetOrderStatus(Guid gameProviderId, string playerCode, string orderId)
+        async Task<BigGamingOrderStatus> IBigGamingModelActionMapper.GetOrderStatus(Guid gameProviderId, string playerCode, string orderId)
         {
             var gameActionExternal = await _services.GetGameActionExternalIdAsync(gameProviderId, playerCode, orderId).ConfigureAwait(false);
             if (gameActionExternal == null)
             {
-                return BGOrderStatus.BET_SLIP_DOES_NOT_EXIST;
+                return BigGamingOrderStatus.BET_SLIP_DOES_NOT_EXIST;
             }
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gameActionExternal.ExternalGameId).ConfigureAwait(false);
 
@@ -177,21 +177,21 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         #region Private Methods
 
-        private GameActionType GetGameAction(BGOrderStatus betStatus) => betStatus switch
+        private GameActionType GetGameAction(BigGamingOrderStatus betStatus) => betStatus switch
         {
-            BGOrderStatus.RUNNING => GameActionType.PlaceBet,
-            BGOrderStatus.WIN => GameActionType.WinBet,
-            BGOrderStatus.TIE => GameActionType.TieBet,
-            BGOrderStatus.LOSE => GameActionType.LoseBet,
+            BigGamingOrderStatus.RUNNING => GameActionType.PlaceBet,
+            BigGamingOrderStatus.WIN => GameActionType.WinBet,
+            BigGamingOrderStatus.TIE => GameActionType.TieBet,
+            BigGamingOrderStatus.LOSE => GameActionType.LoseBet,
             _ => GameActionType.CancelTransaction,
         };
-        private BGOrderStatus GetBGOrderStatus(GameActionType gameActionType) => gameActionType switch
+        private BigGamingOrderStatus GetBGOrderStatus(GameActionType gameActionType) => gameActionType switch
         {
-            GameActionType.PlaceBet => BGOrderStatus.RUNNING,
-            GameActionType.WinBet => BGOrderStatus.WIN,
-            GameActionType.TieBet => BGOrderStatus.TIE,
-            GameActionType.LoseBet => BGOrderStatus.LOSE,
-            _ => BGOrderStatus.CANCEL,
+            GameActionType.PlaceBet => BigGamingOrderStatus.RUNNING,
+            GameActionType.WinBet => BigGamingOrderStatus.WIN,
+            GameActionType.TieBet => BigGamingOrderStatus.TIE,
+            GameActionType.LoseBet => BigGamingOrderStatus.LOSE,
+            _ => BigGamingOrderStatus.CANCEL,
         };
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
             TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false) =>

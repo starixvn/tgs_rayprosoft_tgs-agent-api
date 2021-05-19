@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BGBalanceResponse
+    public record BigGamingOrderStatusResultResponse
     {
-        [JsonPropertyName("result")]
-        public decimal Balance { get; set; }
+        [JsonPropertyName("orderId")]
+        public long OrderId { get; set; }
+        [JsonPropertyName("status")]
+        public int Status { get; set; }
     }
 }

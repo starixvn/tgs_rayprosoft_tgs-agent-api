@@ -16,12 +16,12 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
 {
     public interface IBigGamingApiClient
     {
-        Task<BGBaseResponse> CreateAgentAsync(Uri apiUrl, BGCreateAgentRequest request);
-        Task<BGBaseResponse> CreatePlayerAsync(Uri apiUrl, BGCreatePlayerRequest request);
-        Task<BGInfoPlayerResponse> InfoPlayerAsync(Uri apiUrl, BGInfoPlayerRequest request, string secretCode);
-        Task<string> KickPlayerAsync(Uri apiUrl, BGKickPlayerRequest request, string secretCode);
-        Task<BGBaseResponse> GetGameUrlAsync(Uri apiUrl, BGGetGameUrlRequest request);
-        Task<BGBaseResponse> GetTrialGameUrlAsync(Uri apiUrl, BGGetTrialGameUrlRequest request);
+        Task<BigGamingBaseResponse> CreateAgentAsync(Uri apiUrl, BigGamingCreateAgentRequest request);
+        Task<BigGamingBaseResponse> CreatePlayerAsync(Uri apiUrl, BigGamingCreatePlayerRequest request);
+        Task<BigGamingInfoPlayerResponse> InfoPlayerAsync(Uri apiUrl, BigGamingInfoPlayerRequest request, string secretCode);
+        Task<string> KickPlayerAsync(Uri apiUrl, BigGamingKickPlayerRequest request, string secretCode);
+        Task<BigGamingBaseResponse> GetGameUrlAsync(Uri apiUrl, BigGamingGetGameUrlRequest request);
+        Task<BigGamingBaseResponse> GetTrialGameUrlAsync(Uri apiUrl, BigGamingGetTrialGameUrlRequest request);
     }
 
     public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
@@ -35,19 +35,19 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
         }
 
-        async Task<BGBaseResponse> IBigGamingApiClient.CreateAgentAsync(Uri apiUrl, BGCreateAgentRequest request)
+        async Task<BigGamingBaseResponse> IBigGamingApiClient.CreateAgentAsync(Uri apiUrl, BigGamingCreateAgentRequest request)
         {
             var prefix = $"{_gameProvider}.CreateAgent";
             return await GetAPIAsync(apiUrl, request, "open.agent.create", prefix).ConfigureAwait(false);
         }
 
-        async Task<BGBaseResponse> IBigGamingApiClient.CreatePlayerAsync(Uri apiUrl, BGCreatePlayerRequest request)
+        async Task<BigGamingBaseResponse> IBigGamingApiClient.CreatePlayerAsync(Uri apiUrl, BigGamingCreatePlayerRequest request)
         {
             var prefix = $"{_gameProvider}.CreatePlayer";
             return await GetAPIAsync(apiUrl, request, "open.user.create", prefix).ConfigureAwait(false);
         }
 
-        async Task<BGInfoPlayerResponse> IBigGamingApiClient.InfoPlayerAsync(Uri apiUrl, BGInfoPlayerRequest request, string secretCode)
+        async Task<BigGamingInfoPlayerResponse> IBigGamingApiClient.InfoPlayerAsync(Uri apiUrl, BigGamingInfoPlayerRequest request, string secretCode)
         {
             var digest = _hashProvider.Hash($"{request.Random }{request.Sn}{request.LoginId}{secretCode}", HashAlgorithmKind.Md5);
             request.Digest = digest;
@@ -55,12 +55,12 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             var reslut = await GetAPIAsync(apiUrl, request, "open.user.create", prefix).ConfigureAwait(false);
             if (reslut.Error == null)
             {
-                return JsonSerializer.Deserialize<BGInfoPlayerResponse>(JsonSerializer.Serialize(reslut.Result));
+                return JsonSerializer.Deserialize<BigGamingInfoPlayerResponse>(JsonSerializer.Serialize(reslut.Result));
             }
             return null;
         }
 
-        async Task<string> IBigGamingApiClient.KickPlayerAsync(Uri apiUrl, BGKickPlayerRequest request, string secretCode)
+        async Task<string> IBigGamingApiClient.KickPlayerAsync(Uri apiUrl, BigGamingKickPlayerRequest request, string secretCode)
         {
             var digest = _hashProvider.Hash($"{request.Random }{request.Sn}{request.LoginId}{secretCode}", HashAlgorithmKind.Md5);
             request.Digest = digest;
@@ -73,29 +73,29 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return null;
         }
 
-        async Task<BGBaseResponse> IBigGamingApiClient.GetGameUrlAsync(Uri apiUrl, BGGetGameUrlRequest request)
+        async Task<BigGamingBaseResponse> IBigGamingApiClient.GetGameUrlAsync(Uri apiUrl, BigGamingGetGameUrlRequest request)
         {
             var prefix = $"{_gameProvider}.GetGameUrl";
             return await GetAPIAsync(apiUrl, request, "open.video.game.url", prefix).ConfigureAwait(false);
         }
 
-        async Task<BGBaseResponse> IBigGamingApiClient.GetTrialGameUrlAsync(Uri apiUrl, BGGetTrialGameUrlRequest request)
+        async Task<BigGamingBaseResponse> IBigGamingApiClient.GetTrialGameUrlAsync(Uri apiUrl, BigGamingGetTrialGameUrlRequest request)
         {
             var prefix = $"{_gameProvider}.GetTrialGameUrl";
             return await GetAPIAsync(apiUrl, request, "open.video.trial.game.url", prefix).ConfigureAwait(false);
         }
 
-        private ValueTask<BGBaseResponse> GetAPIAsync<TSource>(Uri apiUrl, TSource source, string method, string prefix)
+        private ValueTask<BigGamingBaseResponse> GetAPIAsync<TSource>(Uri apiUrl, TSource source, string method, string prefix)
         {
 
-            var request = new BGBaseRequest()
+            var request = new BigGamingBaseRequest()
             {
                 Id = GuidExtensions.NewSequentialGuid().ToString(),
                 Method = method,
                 Params = JsonDocument.Parse(JsonSerializer.Serialize(source)),
                 Jsonrpc = "2.0"
             };
-            return ExecuteJsonRequestAsync<BGBaseRequest, BGBaseResponse>(HttpMethod.Post, apiUrl, string.Empty, request, logPrefix: prefix);
+            return ExecuteJsonRequestAsync<BigGamingBaseRequest, BigGamingBaseResponse>(HttpMethod.Post, apiUrl, string.Empty, request, logPrefix: prefix);
 
         }
 

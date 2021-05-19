@@ -3,7 +3,7 @@ using TGS.Shared.Game.Models.BigGaming.Enums;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BGSettleOrderRequest
+    public record BigGamingSettleOrderRequest
     {
         [JsonPropertyName("gameId")]
         public int ExternalGameId { get; set; }
@@ -14,7 +14,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
         [JsonPropertyName("amount")]
         public int Amount { get; set; }
         [JsonPropertyName("orderStatus")]
-        public BGOrderStatus OrderStatus { get; set; }
+        public BigGamingOrderStatus OrderStatus { get; set; }
         [JsonPropertyName("validAmount")]
         public int ValidAmount { get; set; }
         [JsonPropertyName("orderFrom")]

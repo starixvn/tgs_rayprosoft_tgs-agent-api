@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.BigGaming.Enums
 {
-    public enum BGOrderStatus
+    public enum BigGamingOrderStatus
     {
         /// <summary>
         /// 注单不存在 - 仅对免转模式有效

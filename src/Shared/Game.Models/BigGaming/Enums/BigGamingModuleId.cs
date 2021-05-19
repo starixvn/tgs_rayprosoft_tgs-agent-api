@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.BigGaming.Enums
 {
-    public enum BGModuleId
+    public enum BigGamingModuleId
     {
         [Description("平台")]
         Lobby = 0,
