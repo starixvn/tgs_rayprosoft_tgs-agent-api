@@ -17,6 +17,8 @@ namespace TGS.Clients.Promotion.Client
 
         Task<MessageResponse> JoinAsync(JoinPromotionRequest request);
 
+        Task TagPlayerDepositAsync(string playerCode);
+
         Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);
     }
 }

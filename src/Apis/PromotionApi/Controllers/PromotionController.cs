@@ -54,6 +54,17 @@ namespace PromotionApi.Controllers
         public Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request) =>
             _mediator.Send(request);
 
+        [HttpPut("deposit/{playerCode}")]
+        [Description("Tag player deposit")]
+        public async Task DepositAsync(
+            [FromServices] ICommandService<TagPlayerDepositCommand> tagService,
+            string playerCode)
+        {
+            var command = new TagPlayerDepositCommand(playerCode);
+
+            await tagService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
         [HttpGet]
         [Description("Get promotions")]
         public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request) =>

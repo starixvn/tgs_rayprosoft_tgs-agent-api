@@ -54,25 +54,6 @@ namespace Promotion.UnitTests
         }
 
         [Test]
-        public async Task Player_FirstDeposit_Checker()
-        {
-            var fakePlayerService = Substitute.For<IPlayerService>();
-
-            var sut = new FirstDepositChecker(fakePlayerService);
-
-            fakePlayerService
-                .GetPlayerByPlayerCodeAsync(Arg.Any<string>())
-                .Returns(new Player
-                {
-                    FirstDepositOn = null
-                });
-
-            var actual = await sut.CheckAsync("ThisIsPlayerCode");
-
-            Assert.IsTrue(actual);
-        }
-
-        [Test]
         public async Task Player_DailyFirstDeposit_Checker()
         {
             var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
@@ -102,6 +83,41 @@ namespace Promotion.UnitTests
             var actual = await sut.CheckAsync("ThisIsPlayerCode");
 
             Assert.IsTrue(actual);
+        }
+
+        [Test]
+        public async Task Player_FirstDeposit_Checker()
+        {
+            var fakePlayerService = Substitute.For<IPlayerService>();
+
+            var sut = new FirstDepositChecker(fakePlayerService);
+
+            fakePlayerService
+                .GetPlayerByPlayerCodeAsync(Arg.Any<string>())
+                .Returns(new Player
+                {
+                    FirstDepositOn = null
+                });
+
+            var actual = await sut.CheckAsync("ThisIsPlayerCode");
+
+            Assert.IsTrue(actual);
+        }
+
+        [Test]
+        public async Task Tag_Player_DepositAsync()
+        {
+            var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
+
+            var sut = new TagPlayerDepositCommandService(fakePlayerDataService);
+
+            var command = new TagPlayerDepositCommand("ThisIsPlayerCode");
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakePlayerDataService
+                .Received(1)
+                .SetPlayerDepositAsync(command.PlayerCode);
         }
     }
 }

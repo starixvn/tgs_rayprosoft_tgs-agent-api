@@ -9,6 +9,7 @@ using NUnit.Framework;
 using Tgs.Payment;
 using Tgs.Payment.LeePay;
 using TGS.Apis.FileService.Clients;
+using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
@@ -49,8 +50,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
+            var moqPromotionClient = new Mock<IPromotionClient>();
 
-            var sut = new CreateDepositFormCommandService(moqPaymentRepository.Object, moqPaymentClient.Object);
+            var sut = new CreateDepositFormCommandService(
+                moqPaymentRepository.Object,
+                moqPaymentClient.Object,
+                moqPromotionClient.Object);
 
             var command = new CreateDepositFormCommand(
                 "ThisIsPlayerCode",
@@ -98,8 +103,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new LeePaySerializer(new JsonSerializationProvider());
+            var moqPromotionClient = new Mock<IPromotionClient>();
 
-            var sut = new CreateDepositFormCommandService(moqPaymentRepository.Object, moqPaymentClient.Object);
+            var sut = new CreateDepositFormCommandService(
+                moqPaymentRepository.Object,
+                moqPaymentClient.Object,
+                moqPromotionClient.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(

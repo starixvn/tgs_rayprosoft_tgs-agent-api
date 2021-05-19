@@ -60,6 +60,18 @@ namespace TGS.Clients.Promotion.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
+        public async Task TagPlayerDepositAsync(string playerCode)
+        {
+            var prefix = $"Promotion.Deposit.{playerCode}";
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Put,
+                $"/api/promotion/deposit/{playerCode}");
+            var response = await SendAsync(request, prefix).ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+        }
+
         public async Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request)
         {
             var prefix = $"Promotion.PromotionId.{request.Id}.UpdatePromotion";
