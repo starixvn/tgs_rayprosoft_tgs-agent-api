@@ -2,13 +2,13 @@
 
 namespace TGS.Shared.Game.Models.JDB.Incoming
 {
-    public class BetHistoryResponse : BaseResponse
+    public record BetHistoryResponse : BaseResponse
     {
-        public BetHistoryPageUrl[] Data { get; set; }
+        public BetHistoryPageUrl[] Data { get; init; }
     }
-    
-    public class BetHistoryPageUrl 
+
+    public record BetHistoryPageUrl
     {
-        public string Path { get; set; }
+        public string Path { get; init; }
     }
 }

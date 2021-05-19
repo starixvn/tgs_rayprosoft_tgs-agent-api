@@ -5,6 +5,6 @@ namespace TGS.Shared.Game.Models.JDB.Incoming
     public record GetBalanceRequest : BaseActionRequest
     {
         [JsonPropertyName("currency")]
-        public string Currency { get; set; }
+        public string Currency { get; init; }
     }
 }

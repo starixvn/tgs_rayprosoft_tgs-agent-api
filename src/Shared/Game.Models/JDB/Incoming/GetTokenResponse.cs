@@ -1,9 +1,12 @@
 ﻿// unset
 
+using System.Text.Json.Serialization;
+
 namespace TGS.Shared.Game.Models.JDB.Incoming
 {
-    public class GetTokenResponse : BaseResponse
+    public record GetTokenResponse : BaseResponse
     {
-        public string Path { get; set; }
+        [JsonPropertyName("path")]
+        public string Path { get; init; }
     }
 }

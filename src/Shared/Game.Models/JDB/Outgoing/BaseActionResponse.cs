@@ -2,9 +2,9 @@
 
 namespace TGS.Shared.Game.Models.JDB.Outgoing
 {
-    public class BaseActionResponse : BaseResponse
+    public record BaseActionResponse : BaseResponse
     {
         [JsonPropertyName("balance")]
-        public decimal Balance { get; set; }
+        public decimal Balance { get; init; }
     }
 }

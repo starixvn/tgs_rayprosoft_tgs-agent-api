@@ -2,11 +2,12 @@
 
 namespace TGS.Shared.Game.Models.JDB
 {
-    public abstract class BaseResponse
+    public abstract record BaseResponse
     {
         [JsonPropertyName("status")]
-        public string Status { get; set; }
+        public string Status { get; init; }
+
         [JsonPropertyName("err_text")]
-        public string ErrorMessage { get; set; }
+        public string ErrorMessage { get; init; }
     }
 }

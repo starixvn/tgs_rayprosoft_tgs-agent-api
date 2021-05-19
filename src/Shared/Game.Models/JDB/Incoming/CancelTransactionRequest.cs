@@ -7,6 +7,6 @@ namespace TGS.Shared.Game.Models.JDB.Incoming
     public record CancelTransactionRequest : BaseActionRequest
     {
         [JsonPropertyName("transferId")]
-        public long TransferId { get; set; }
+        public long TransferId { get; init; }
     }
 }
