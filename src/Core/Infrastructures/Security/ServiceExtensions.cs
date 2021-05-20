@@ -2,11 +2,11 @@
 
 namespace TGS.Core.Infrastructures.Security
 {
-    public static class ServiceExtensions 
+    public static class ServiceExtensions
     {
         /// <summary>
-        /// Dependency Injection of Infrastructures.Security, needs to add the following dependencies beforehand:
-        /// 1. AddJson() in Infrastructures.Json
+        ///     Dependency Injection of Infrastructures.Security, needs to add the following dependencies beforehand:
+        ///     1. AddJson() in Infrastructures.Json
         /// </summary>
         public static IServiceCollection AddSecurity(this IServiceCollection services)
         {
@@ -15,6 +15,7 @@ namespace TGS.Core.Infrastructures.Security
 
             services.AddSingleton<DESCryptoProvider>();
             services.AddSingleton<AESCryptoProvider>();
+            services.AddSingleton<AESBase62CryptoProvider>();
 
             services.AddSingleton<ISymmetricCryptoProviderFactory, SymmetricCryptoProviderFactory>();
             services.AddSingleton<ITokenProvider, TokenProvider>();

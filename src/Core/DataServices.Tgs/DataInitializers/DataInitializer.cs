@@ -79,7 +79,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SabaGameProvider(env),
                 new KYGameProvider(env),
                 new VRGameProvider(env),
-                new IMESportsGameProvider(env)
+                new IMESportsGameProvider(env),
+                new JDBGameProvider(env)
             };
         }
 
