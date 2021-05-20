@@ -11,6 +11,7 @@
         Promotion = 6,
         GameProviderFundOut = 7,
         GameProviderFundIn = 8,
+        CancelWithdrawal = 9,
         Other = 99
     }
 }

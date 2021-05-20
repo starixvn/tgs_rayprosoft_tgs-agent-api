@@ -40,7 +40,7 @@ namespace TGS.Services.Payment
 
         ValueTask SignOffWithdrawFormAsync(
             Guid formId,
-            Guid brandPaymentId,
+            Guid? brandPaymentId,
             string? applyInfo,
             ReviewState reviewStatus,
             string? remark = null);

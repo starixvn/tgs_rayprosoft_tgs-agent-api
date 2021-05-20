@@ -30,6 +30,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             bool tracking = false);
 
         Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
+
+        Task TopUpAccumulatedDepositAsync(string playerCode, decimal amount);
     }
 
     public class PlayerService : BaseRepositoryOperations<ITgsRepository>, IPlayerService
@@ -121,5 +123,37 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         IQueryable<PlayerAuditLog> IPlayerService.GetPlayerOperationQueries(
             Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery, bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
+
+        public async Task TopUpAccumulatedDepositAsync(string playerCode, decimal amount)
+        {
+            var player = await _repository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            player.AccumulatedDeposit += amount;
+
+            player.UpdatedByUsername = playerCode;
+            player.UpdatedOn = DateTimeOffset.Now;
+
+            var auditLog = new PlayerAuditLog
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                ModuleName = "Player",
+                CreatedByUsername = playerCode,
+                CreatedOn = DateTimeOffset.Now,
+                Operation = $"Update Player AccumulatedDeposit",
+                Username = playerCode
+            };
+
+            await _repository.PlayerAuditLogs
+                .AddAsync(auditLog)
+                .ConfigureAwait(false);
+
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            await _cacheManager
+                .ClearCacheAsync(RedisCacheType.Player, playerCode)
+                .ConfigureAwait(false);
+        }
     }
 }
