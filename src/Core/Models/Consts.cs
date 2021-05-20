@@ -66,6 +66,7 @@ namespace TGS.Core.Models
             public const string Habanero = "HABA";
             public const string PragmaticPlay = "PP";
             public const string KY = "KY";
+            public const string JDB = "JDB";
             public const string AsiaGaming = "AG";
             public const string Saba = "SABA";
             public const string VR = "VR";
