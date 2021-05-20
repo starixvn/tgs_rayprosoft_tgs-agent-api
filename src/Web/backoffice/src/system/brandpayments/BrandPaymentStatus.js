@@ -66,6 +66,7 @@ export const BrandPaymentStatusButton = ({ name = "paymentStatus" }) => {
         <Controller
             control={control}
             name={name}
+            shouldUnregister={true}
             render={({
                 field: { onChange, onBlur, value, name, ref },
                 fieldState: { invalid, isTouched, isDirty }
@@ -117,13 +118,8 @@ export const BrandPaymentStatusToggleButton = ({
 }) => {
     let { id, paymentStatus } = record
     let [newStatus, setSubmit] = useState()
-    let {
-        result,
-        isLoading,
-        error,
-        deleteCache,
-        mutate
-    } = useChangeBrandPaymentStatus(id, newStatus)
+    let { result, isLoading, error, deleteCache, mutate } =
+        useChangeBrandPaymentStatus(id, newStatus)
 
     const reset = () => {
         deleteCache()

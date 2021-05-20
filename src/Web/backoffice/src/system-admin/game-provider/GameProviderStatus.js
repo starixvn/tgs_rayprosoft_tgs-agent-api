@@ -24,6 +24,12 @@ const MaintenanceTrans = {
     en: Maintenance
 }
 
+export default {
+    Active,
+    Inactive,
+    Maintenance
+}
+
 export const GameProviderStatusLabel = ({ value = "" }) => {
     switch (value) {
         case Active:
@@ -60,13 +66,8 @@ export const GameProviderStatusMenu = ({
 }) => {
     let { id, status } = record
     let [newState, setSubmit] = useState()
-    let {
-        result,
-        isLoading,
-        error,
-        deleteCache,
-        mutate
-    } = useChangeGameProviderStatus(id, newState)
+    let { result, isLoading, error, deleteCache, mutate } =
+        useChangeGameProviderStatus(id, newState)
 
     const reset = () => {
         deleteCache()
@@ -147,11 +148,15 @@ export const GameProviderStatusSelect = ({ name = "status", ...props }) => {
   return <Select name={name} options={options} state={state} {...props} />
   */
 
-    let { control, setValue } = useFormContext()
+    let { control, setValue, watch } = useFormContext()
+    let defaultValue = watch(name)
+
     return (
         <Controller
             name={name}
             control={control}
+            shouldUnregister={true}
+            defaultValue={watch(name)}
             render={({
                 field: { onChange, onBlur, value, name, ref },
                 fieldState: { invalid, isTouched, isDirty }

@@ -39,6 +39,7 @@ export const Select = ({
             <Controller
                 name={name}
                 control={formContext.control}
+                defaultValue={props?.defaultValue}
                 render={() => {
                     return <Select isLoading options={[]} />
                 }}
@@ -104,8 +105,8 @@ export const SelectField = ({
         selectRef = ref
     }
 
-    let loadingOptions = props.isLoading && (!options || options.length === 0)
-    if (autoRegisterFormField && loadingOptions) {
+    // let loadingOptions = props.isLoading && (!options || options.length === 0)
+    if (autoRegisterFormField && props.isLoading) {
         return (
             <Controller
                 name={name}

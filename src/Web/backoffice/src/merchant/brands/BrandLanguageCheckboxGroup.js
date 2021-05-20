@@ -72,6 +72,7 @@ export const BrandLanguageCheckboxGroupTable = ({
                                                     defaultValue={
                                                         field.brandCultureCode
                                                     }
+                                                    shouldUnregister={true}
                                                     render={({
                                                         field: {
                                                             onChange,
@@ -86,7 +87,8 @@ export const BrandLanguageCheckboxGroupTable = ({
                                                             isDirty
                                                         }
                                                     }) => {
-                                                        let dialog = useModalState()
+                                                        let dialog =
+                                                            useModalState()
                                                         return (
                                                             <Box>
                                                                 <Input

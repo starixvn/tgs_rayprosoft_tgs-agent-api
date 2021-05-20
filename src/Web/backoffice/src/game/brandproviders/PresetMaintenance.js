@@ -95,12 +95,8 @@ const EditDialog = ({ record, dialog, ...props }) => {
     }, [items])
 
     let [submitData, setSubmit] = useState()
-    let {
-        result,
-        isLoading,
-        error,
-        mutate
-    } = useUpdateBrandGameProviderPresetMaintenance(record?.id, submitData)
+    let { result, isLoading, error, mutate } =
+        useUpdateBrandGameProviderPresetMaintenance(record?.id, submitData)
 
     const onSubmit = (formData) => {
         setSubmit({ defaultTimes, scheduleStatus: formData.scheduleStatus })
@@ -345,6 +341,7 @@ const ScheduleStatusDropdownMenu = ({
         <Controller
             control={control}
             name={name}
+            shouldUnregister={true}
             render={({
                 field: { onChange, onBlur, value, name, ref },
                 fieldState: { invalid, isTouched, isDirty }

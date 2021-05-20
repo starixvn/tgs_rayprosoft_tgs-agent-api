@@ -15,9 +15,9 @@ export const CheckboxGroup = ({
         <Controller
             control={control}
             name={name}
-            shouldUnregister={true}
             defaultValue={defaultValue}
             rules={{ required }}
+            shouldUnregister={true}
             render={({
                 field: { onChange, onBlur, value, name, ref },
                 fieldState: { invalid, isTouched, isDirty }

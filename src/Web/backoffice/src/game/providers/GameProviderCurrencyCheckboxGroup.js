@@ -71,6 +71,7 @@ export const GameProviderCurrencyCheckboxGroupTable = ({
                                                     name,
                                                     field
                                                 )}
+                                                shouldUnregister={true}
                                                 render={({
                                                     field: {
                                                         onChange,

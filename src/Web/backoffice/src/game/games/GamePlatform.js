@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { useTrans, Trans } from "../../i18n"
+import { SelectField } from "../../select/Select"
 
 const Desktop = "Desktop"
 const DesktopTrans = {
@@ -33,4 +34,31 @@ export const GamePlatformLabel = ({ value }) => {
         default:
             return value ?? null
     }
+}
+
+export const GamePlatformTypeSelectField = ({ placeholder, ...props }) => {
+    let defaultPlaceholder = useTrans({
+        zh: "支持设备",
+        en: "Platform"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
+
+    let options = [
+        {
+            label: useTrans(DesktopTrans),
+            value: Desktop
+        },
+        {
+            label: useTrans(MobileTrans),
+            value: Mobile
+        },
+        {
+            label: useTrans(DesktopAndMobileTrans),
+            value: DesktopAndMobile
+        }
+    ]
+
+    return (
+        <SelectField placeholder={placeholder} options={options} {...props} />
+    )
 }

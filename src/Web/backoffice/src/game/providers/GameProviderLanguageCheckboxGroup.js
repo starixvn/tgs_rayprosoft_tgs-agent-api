@@ -16,21 +16,17 @@ import { ConfirmText } from "../../button/ActionButtons"
 import { faLanguage } from "@fortawesome/free-solid-svg-icons"
 
 export const GameProviderLanguageCheckboxGroupTable = ({
-    name = "gameProviderLanguages",
-    fieldArrayName = "languages",
+    name = "languages",
+    fieldArrayContext,
     width = "100%",
     disabled = false,
     ...props
 }) => {
     let { control, setValue, watch, register } = useFormContext()
-    let languages = watch(fieldArrayName)
-    const { fields } = useFieldArray({
-        control,
-        name: fieldArrayName,
-        keyName: "_id"
-    })
 
-    let selection = watch(name) ?? {}
+    const { fields } = fieldArrayContext
+
+    let selection = watch(name)
     let allChecked = isAllPropChecked(selection)
 
     return useMemo(() => {
@@ -71,6 +67,7 @@ export const GameProviderLanguageCheckboxGroupTable = ({
                                                     name,
                                                     field
                                                 )}
+                                                shouldUnregister={true}
                                                 render={({
                                                     field: {
                                                         onChange,
@@ -157,10 +154,9 @@ const CodeDialog = ({ value, dialog, onChange }) => {
     )
 }
 
-const checkedFieldName = (name, checkboxField) =>
-    `${name}.${checkboxField.cultureCode}.checked`
+const checkedFieldName = (name, field, index) => `${name}.${index}.checked`
 
-const cultureCodeFieldName = (name, checkboxField) => {
-    let result = `${name}.${checkboxField.cultureCode}.gameProviderCultureCode`
+const cultureCodeFieldName = (name, field, index) => {
+    let result = `${name}.${index}.brandCultureCode`
     return result
 }

@@ -73,6 +73,7 @@ const Body = ({
                         return errorMarkers.length ? false : true
                     }
                 }}
+                shouldUnregister={true}
                 render={({
                     field: { onBlur, value, name, ref },
                     fieldState: { invalid, isTouched, isDirty, error }

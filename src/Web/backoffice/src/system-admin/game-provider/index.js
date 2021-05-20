@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
-import { Heading, Stack, Button, Set, Text, Box } from "bumbag"
+import { Heading, Stack, Button, Set, Text, Box, Level } from "bumbag"
 import PageContent from "../../page/Content"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -16,8 +16,10 @@ import equals from "fast-deep-equal"
 import { FormProvider, useForm } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import { useGameProviderList } from "../../game/providers/client"
-import { EditButton } from "./edit"
-import { GameProviderStatusMenu } from "./status"
+import { AddGameProviderButton, EditButton } from "./edit"
+import { GameProviderStatusMenu } from "./GameProviderStatus"
+import textColumn from "../../table/column/textColumn"
+import { GameProviderGameListDisclosure } from "./GameProviderGameList"
 
 export { Code }
 
@@ -56,6 +58,7 @@ const Body = () => {
                         })
                         mutate()
                     }}
+                    mutate={mutate}
                 />
             }
         >
@@ -71,7 +74,14 @@ const Body = () => {
     )
 }
 
-const SearchBar = ({ code = "", name = "", search, isLoading, ...props }) => {
+const SearchBar = ({
+    code = "",
+    name = "",
+    search,
+    isLoading,
+    mutate,
+    ...props
+}) => {
     let formMethods = useForm({
         defaultValues: {
             code,
@@ -89,23 +99,29 @@ const SearchBar = ({ code = "", name = "", search, isLoading, ...props }) => {
         en: "game provider name"
     })
     return (
-        <FormProvider {...formMethods}>
-            <form onSubmit={formMethods.handleSubmit(search)}>
-                <Set>
-                    <InputField
-                        name="code"
-                        showEmptyFieldValueAddonAfter
-                        placeholder={codePlaceHolder}
-                    />
-                    <InputField
-                        name="name"
-                        showEmptyFieldValueAddonAfter
-                        placeholder={namePlaceHolder}
-                    />
-                    <SearchButton isLoading={isLoading} disabled={isLoading} />
-                </Set>
-            </form>
-        </FormProvider>
+        <Level>
+            <FormProvider {...formMethods}>
+                <form onSubmit={formMethods.handleSubmit(search)}>
+                    <Set>
+                        <InputField
+                            name="code"
+                            showEmptyFieldValueAddonAfter
+                            placeholder={codePlaceHolder}
+                        />
+                        <InputField
+                            name="name"
+                            showEmptyFieldValueAddonAfter
+                            placeholder={namePlaceHolder}
+                        />
+                        <SearchButton
+                            isLoading={isLoading}
+                            disabled={isLoading}
+                        />
+                    </Set>
+                </form>
+            </FormProvider>
+            <AddGameProviderButton onSubmitted={mutate} />
+        </Level>
     )
 }
 
@@ -114,50 +130,26 @@ const useColumns = ({ items = [], mutate }) => {
 
     return useMemo(() => {
         let columns = [
-            {
+            textColumn({
                 accessor: "code",
                 Header: <Trans zh="游戏商代码" en="Code" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 accessor: "name",
                 Header: <Trans zh="游戏商名称" en="Name" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 accessor: "description",
                 Header: <Trans zh="简介" en="Description" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 id: "status",
                 accessor: (row) => row,
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                },
                 Cell: ({ value }) => {
                     return (
                         <Box alignX="center">
@@ -165,45 +157,41 @@ const useColumns = ({ items = [], mutate }) => {
                         </Box>
                     )
                 }
-            },
+            }),
             dateTimeColumn({
                 accessor: "updatedOn",
                 Header: <Trans zh="最新更新" en="Updated On" />,
                 disableSortBy: true
             }),
-            {
+            textColumn({
                 accessor: "updatedByUsername",
                 Header: <Trans zh="更改者" en="Updated By" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                }
-            }
+                disableSortBy: true
+            })
         ]
 
         if (hasAnyMenu) {
-            columns.push({
-                id: "actions",
-                accessor: (row) => row,
-                disableSortBy: true,
-                Header: <Trans zh="操作" en="Actions" />,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                },
-                Cell: ({ value }) => {
-                    return (
-                        <Set orientation="vertical" alignX="center">
-                            <EditButton record={value} onSubmitted={mutate} />
-                        </Set>
-                    )
-                }
-            })
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Header: <Trans zh="操作" en="Actions" />,
+                    Cell: ({ value }) => {
+                        return (
+                            <Set orientation="vertical" alignX="center">
+                                <EditButton
+                                    record={value}
+                                    onSubmitted={mutate}
+                                />
+                                <GameProviderGameListDisclosure
+                                    gameProviderId={value?.id}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
         }
         return columns
     }, [JSON.stringify(items)])

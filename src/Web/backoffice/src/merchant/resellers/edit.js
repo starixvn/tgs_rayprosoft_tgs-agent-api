@@ -105,9 +105,8 @@ const AddDialog = ({ onSubmitted, dialog }) => {
         deleteGameProviderCache
     } = useResellerData()
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate, deleteCache } = useAddReseller(
-        formData
-    )
+    let { result, isLoading, error, mutate, deleteCache } =
+        useAddReseller(formData)
 
     const onSubmit = (data) => {
         let formData = normalizeFormData(data)

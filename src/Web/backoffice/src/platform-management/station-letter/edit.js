@@ -129,13 +129,8 @@ const DialogCss = css`
 `
 
 const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
-    let {
-        setValue,
-        control,
-        watch,
-        formState,
-        ...formMethods
-    } = useFormContext()
+    let { setValue, control, watch, formState, ...formMethods } =
+        useFormContext()
     let target = watch("target")
     let playerUsernames = watch("playerUsernames")
 
@@ -147,9 +142,8 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
     let uploadInputRef = useRef()
 
     let [formData, setFormData] = useState()
-    let { result, isLoading, error, deleteCache } = useStationLetterUpload(
-        formData
-    )
+    let { result, isLoading, error, deleteCache } =
+        useStationLetterUpload(formData)
 
     const resetFormData = () => {
         if (uploadInputRef?.current) {
@@ -227,6 +221,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                     <Controller
                         control={control}
                         name="playerUsernames"
+                        shouldUnregister={true}
                         render={({
                             field: { onChange, onBlur, value, name, ref },
                             fieldState: { invalid, isTouched, isDirty }
@@ -323,6 +318,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                 control={control}
                 name="content"
                 rules={{ required }}
+                shouldUnregister={true}
                 render={({
                     field: { onChange, onBlur, value, ref, ...props },
                     fieldState: { invalid, isTouched, isDirty }
