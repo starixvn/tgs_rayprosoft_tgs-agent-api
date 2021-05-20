@@ -110,6 +110,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IGameProviderService.CreateGameProviderAsync(CreateGameProviderRequest request)
         {
+            var maxUniqueId = _repository.GameProviders.Max(x => x.UniqueId);
+
             var gameProvider = new GameProvider
             {
                 Code = request.Code,
@@ -120,7 +122,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 AllowKickPlayer = request.AllowKickPlayer,
                 PlaceBetTimeout = request.PlaceBetTimeout,
                 SettleBetTimeout = request.SettleBetTimeout,
-                UniqueId = request.UniqueId,
+                UniqueId = (ushort)(maxUniqueId + 1),
                 Description = request.Description,
                 CreatedByUsername = request.EditorUsername,
                 UpdatedByUsername = request.EditorUsername,

@@ -67,7 +67,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.AllowKickPlayer => false;
 
-            short IGameProvider.UniqueId => UniqueId;
+            ushort IGameProvider.UniqueId => UniqueId;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 

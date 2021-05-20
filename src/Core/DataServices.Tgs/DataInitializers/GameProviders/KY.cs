@@ -66,7 +66,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.TransferWallet => true;
 
-            short IGameProvider.UniqueId => 10;
+            ushort IGameProvider.UniqueId => 10;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
@@ -89,12 +89,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             Status = true,
                             AgentMappers = new KYAgentMapper[]
                             {
-                                new()
-                                {
-                                    CurrencyCode = "CNY",
-                                    AgentId = "72412",
-                                    Status = true
-                                }
+                                new() {CurrencyCode = "CNY", AgentId = "72412", Status = true}
                             }
                         },
                         new KYBrandMerchant
@@ -107,12 +102,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             Status = false,
                             AgentMappers = new KYAgentMapper[]
                             {
-                                new()
-                                {
-                                    CurrencyCode = "CNY",
-                                    AgentId = "72412",
-                                    Status = false
-                                }
+                                new() {CurrencyCode = "CNY", AgentId = "72412", Status = false}
                             }
                         }
                     }
