@@ -3,11 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Promotion.Core;
-using TGS.Services.Promotion.Core.Models.Promotion;
+using TGS.Services.Promotion.Models.Promotion;
 
-namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
+namespace TGS.Services.Promotion.Handlers
 {
     public class ChangePromotionStatusHandler : Handler<ChangePromotionStatusRequest, MessageResponse>
     {
@@ -30,7 +28,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 
             if (promotion == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Promotion.NotFound);
+                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.NotFound);
             }
 
             promotion.Status = request.Status;

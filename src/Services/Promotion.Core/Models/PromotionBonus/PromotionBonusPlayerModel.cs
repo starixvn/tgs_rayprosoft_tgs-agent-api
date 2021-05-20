@@ -1,13 +1,17 @@
 ﻿using System;
 
-namespace TGS.Services.Promotion.Core.Models.PromotionBonus
+namespace TGS.Services.Promotion.Models.PromotionBonus
 {
     public class PromotionBonusPlayerModel
     {
-        public int Id { get; set; }
-        public string PlayerCode { get; set; }
-        public string PromotionType { get; set; }
-        public Guid PromotionBonusId { get; set; }
         public decimal BonusAmount { get; set; }
+
+        public int Id { get; set; }
+
+        public string PlayerCode { get; set; }
+
+        public Guid PromotionBonusId { get; set; }
+
+        public string PromotionType { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         private async Task GenerateSettingsAsync()
         {
-            var options = new JsonSerializerOptions {WriteIndented = false};
+            var options = new JsonSerializerOptions { WriteIndented = false };
 
             var commonSettings = new[]
             {
@@ -67,11 +67,19 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             Name = "FirstDeposit",
                             SettlementIntervalType = "Instantly",
-                            Trans = new() {Zh = "每日首充", En = "First Deposit"}
+                            Trans = new() {Zh = "帳號首充", En = "First Deposit"}
                         },
                         new PromotionType
                         {
-                            Name = "SecondDeposit", Trans = new() {Zh = "每日再充", En = "Second Deposit"}
+                            Name = "DailyFirstDeposit",
+                            SettlementIntervalType = "Instantly",
+                            Trans = new() {Zh = "每日首充", En = "Daily First Deposit"}
+                        },
+                        new PromotionType
+                        {
+                            Name = "DailySecondDeposit",
+                            SettlementIntervalType = "Instantly",
+                            Trans = new() {Zh = "每日再充", En = "Daily Second Deposit"}
                         }
                     }
                 },

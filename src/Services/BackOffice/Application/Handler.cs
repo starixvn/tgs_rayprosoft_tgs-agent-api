@@ -58,7 +58,7 @@ namespace TGS.Services.BackOffice.Application
         private Guid? GetIdByKey(string key) =>
             !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||
             !Guid.TryParse(value, out var id)
-                ? (Guid?) null
+                ? (Guid?)null
                 : id;
     }
 }

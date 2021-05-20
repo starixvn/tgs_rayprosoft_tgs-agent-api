@@ -2,10 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
-using TGS.Services.Promotion.Core;
-using TGS.Services.Promotion.Core.Models.Promotion;
+using TGS.Services.Promotion.Models.Promotion;
 
-namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
+namespace TGS.Services.Promotion.Handlers
 {
     public class CreatePromotionParticipantHandler : Handler<CreatePromotionParticipantRequest, MessageResponse>
     {
@@ -23,7 +22,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
             if (await _promotionParticipantService.ExistsAsync(x =>
                 x.PromotionId == request.PromotionId && x.PlayerCode == request.PlayerCode))
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Promotion.PromotionJoinedAlready);
+                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.PromotionJoinedAlready);
             }
 
             await _promotionParticipantService.CreatePromotionParticipantAsync(request.PromotionId, request.PlayerCode);

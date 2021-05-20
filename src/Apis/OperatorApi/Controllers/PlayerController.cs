@@ -27,8 +27,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// </summary>
         [HttpGet]
         [Route("checkUsername")]
-        public Task<CheckUsernameResponse> CheckUsernameAsync([FromQuery] CheckUsernameRequest request) =>
-            _mediator.Send(request);
+        public Task<CheckUsernameResponse> CheckUsernameAsync([FromQuery] CheckUsernameRequest request) 
+            => _mediator.Send(request);
 
         /// <summary>
         /// Create a player

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>TGS.Services.PlayerBucket.Core</AssemblyName>
-    <RootNamespace>TGS.Services.PlayerBucket.Core</RootNamespace>
+    <RootNamespace>TGS.Services.PlayerBucket</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

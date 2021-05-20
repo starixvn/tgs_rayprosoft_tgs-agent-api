@@ -28,7 +28,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] PrimePaySerializer serializer,
-            [FromBody] SubmitBankDepositRequest request)
+            [FromBody] SubmitDepositRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
@@ -45,6 +45,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.BrandPaymentId,
                 request.Amount,
                 "tgs.payment.primepay.deposit",
+                request.PromotionId,
                 formId => serializer.Serialize(
                     new PrimePayDepositSettings(
                             brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),

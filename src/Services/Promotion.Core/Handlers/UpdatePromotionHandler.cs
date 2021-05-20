@@ -2,24 +2,21 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Settings;
-using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Promotion.Core;
-using TGS.Services.Promotion.Core.Models.Promotion;
+using TGS.Services.Promotion.Models.Promotion;
 
-namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
+namespace TGS.Services.Promotion.Handlers
 {
-    public class CreatePromotionHandler : Handler<CreatePromotionRequest, MessageResponse>
+    public class UpdatePromotionHandler : Handler<UpdatePromotionRequest, MessageResponse>
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPromotionRepository _service;
         private readonly ISettingsService _settingsService;
 
-        public CreatePromotionHandler(IPromotionRepository service, ISettingsService settingsService,
+        public UpdatePromotionHandler(IPromotionRepository service, ISettingsService settingsService,
             IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
@@ -27,13 +24,19 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
             _jsonSerializationProvider = jsonSerializationProvider;
         }
 
-        public override async Task<MessageResponse> Handle(CreatePromotionRequest request,
+        public override async Task<MessageResponse> Handle(UpdatePromotionRequest request,
             CancellationToken cancellationToken)
         {
-            if (await _service.ExistsAsync(x =>
-                x.BrandId == request.BrandId && EF.Functions.ILike(x.Name, $"%{request.Name}%")))
+            var promotion = await _service.GetPromotionAsync(q => q.Id == request.Id);
+
+            if (promotion == null)
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Promotion.NameExisted);
+                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.NotFound);
+            }
+
+            if (await _service.ExistsAsync(x => request.Id != x.Id && x.Name == request.Name))
+            {
+                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.NameExisted);
             }
 
             var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
@@ -42,13 +45,15 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
 
             if (promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {
-                return CreateInvalidResponse<MessageResponse>(Resources.Promotion.PromotionTypeNotFound);
+                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.PromotionTypeNotFound);
             }
 
             var promotionType = promotionTypeGroups.SelectMany(x => x.Types)
                 .First(x => x.Name == request.PromotionType);
 
-            await _service.CreatePromotionAsync(request, promotionType);
+            promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
+
+            await _service.UpdatePromotionAsync(promotion, request);
 
             return CreateValidResponse<MessageResponse>();
         }

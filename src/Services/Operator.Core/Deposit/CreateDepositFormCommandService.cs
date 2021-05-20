@@ -1,29 +1,43 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Json;
+using Tgs.Payment;
+using TGS.Clients.Promotion.Client;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Deposit;
-using Tgs.Payment;
 
 namespace TGS.Services.Operator.Deposit
 {
     internal class CreateDepositFormCommandService : ICommandService<CreateDepositFormCommand>
     {
-        private readonly IPaymentRepository _paymentRepository;
         private readonly IPaymentClient _paymentClient;
+        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPromotionClient _promotionClient;
 
         public CreateDepositFormCommandService(
             IPaymentRepository paymentRepository,
-            IPaymentClient paymentClient)
+            IPaymentClient paymentClient,
+            IPromotionClient promotionClient)
         {
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
+            _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
         }
 
-        public async ValueTask ExecuteAsync(CreateDepositFormCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(
+            CreateDepositFormCommand command,
+            CancellationToken cancellationToken = default)
         {
+            if (command.PromotionId != null)
+            {
+                var canJoin = await _promotionClient.CheckCanJoinDepositPromotionAsync(
+                    command.BrandId,
+                    command.PlayerCode,
+                    command.PromotionId.Value).ConfigureAwait(false);
+
+                if (!canJoin)
+                    throw new CannotJoinPromotionException();
+            }
             var createFormId = Guid.NewGuid();
 
             var settings = command.CreatePaymentSettings(createFormId);
@@ -42,8 +56,11 @@ namespace TGS.Services.Operator.Deposit
                .CreateDepositFormAsync(createFormId, form)
                .ConfigureAwait(false);
 
-            command.ReturnFormIdSource.SetResult(createFormId);
+            await _promotionClient
+                .TagPlayerDepositAsync(command.PlayerCode)
+                .ConfigureAwait(false);
 
+            command.ReturnFormIdSource.SetResult(createFormId);
         }
     }
 }
