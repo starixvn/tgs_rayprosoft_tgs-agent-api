@@ -163,8 +163,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("PlayerManagement")
@@ -175,7 +175,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("AgentManagement")
@@ -186,15 +186,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Game")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("BrandProviders") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("BrandGames") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("BrandProviders") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("BrandGames") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Report")
@@ -219,17 +219,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("FundManagement")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("System")

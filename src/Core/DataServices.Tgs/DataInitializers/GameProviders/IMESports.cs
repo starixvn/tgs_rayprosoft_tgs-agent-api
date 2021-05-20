@@ -93,7 +93,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProviderConfiguration.Name => "Configuration IMESports";
 
-            string IGameProviderConfiguration.ClientId => "IMESports";
+            string IGameProviderConfiguration.ClientId => "IMESports-PG";
 
             string IGameProviderConfiguration.SecretKey => "VNFFu2kqkWz6PcZcjfkwdZQxnuWdyqn5NDB7gL7skw8Y";
 

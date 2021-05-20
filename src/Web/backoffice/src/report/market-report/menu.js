@@ -15,8 +15,8 @@ export const label = (codes = [], locale = Locales.zh) => {
         case View:
             return getTrans(
                 {
-                    zh: "查看报表",
-                    en: "View report"
+                    zh: "查看",
+                    en: "View"
                 },
                 locale
             )

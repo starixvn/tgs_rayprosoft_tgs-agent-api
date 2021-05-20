@@ -21,8 +21,10 @@ namespace TGS.Core.Infrastructures.Security
         public ISymmetricCryptoProvider GetProvider(SymmetricAlgorithmKind algorithm) =>
             algorithm switch
             {
-                SymmetricAlgorithmKind.DES => _serviceProvider.GetRequiredService<DESCryptoProvider>(),
-                _                          => _serviceProvider.GetRequiredService<AESCryptoProvider>()
+                SymmetricAlgorithmKind.DES       => _serviceProvider.GetRequiredService<DESCryptoProvider>(),
+                SymmetricAlgorithmKind.AESBase62 => _serviceProvider.GetRequiredService<AESBase62CryptoProvider>(),
+                SymmetricAlgorithmKind.AES       => _serviceProvider.GetRequiredService<AESCryptoProvider>(),
+                _                                => throw new NotImplementedException(nameof(algorithm))
             };
     }
 }

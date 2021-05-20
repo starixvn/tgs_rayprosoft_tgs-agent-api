@@ -19,12 +19,8 @@ import {
     useTrans
 } from "../../i18n"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Update, View } from "./menu"
-import {
-    Disclosure,
-    VerifyDisclosure,
-    ViewDisclosure
-} from "../../dialog/Disclosure"
+import { View } from "./menu"
+import { ViewDisclosure } from "../../dialog/Disclosure"
 import { FormDialog } from "../../form/FormDialog"
 import { useFundDepositForm } from "./client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
@@ -42,12 +38,10 @@ import Input from "../../input/Input"
 export const ViewFundDepositDisclosure = ({ brandId, formId, ...props }) => {
     let dialog = useModalState()
 
-    /*
     let isDisplay = useIsDisplayMenuByRoute([View])
     if (!isDisplay) {
         return null
     }
-    */
 
     return (
         <>

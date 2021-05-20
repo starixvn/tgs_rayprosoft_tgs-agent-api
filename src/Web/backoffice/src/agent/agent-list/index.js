@@ -94,7 +94,13 @@ const BodyContent = ({ brandId = "" }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, status, levelType, type, username } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = useAgentList(
+    let {
+        data = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = useAgentList(
         brandId
             ? {
                   ...toApiParams(state),
@@ -114,28 +120,11 @@ const BodyContent = ({ brandId = "" }) => {
                     <SearchBar
                         brandId={brandId}
                         search={(data) => {
-                            let newState = {
-                                pageIndex: 0,
-                                status: data.status,
-                                levelType: data.levelType,
-                                type: data.type,
-                                username: data.username
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex,
-                                    status,
-                                    levelType,
-                                    type,
-                                    username
-                                })
-                            ) {
-                                mutate()
-                            }
                             setState({
                                 pageIndex: 0,
                                 ...data
                             })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />

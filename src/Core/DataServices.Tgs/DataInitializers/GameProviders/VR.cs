@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ReSharper disable CheckNamespace
+// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
@@ -12,7 +16,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record VRGameProvider : IGameProvider
         {
-            //private static readonly string EndpointPath = "?playerName={PLAYERNAME}&loginTime={LOGINTIME}&channelId={CHANNELID}&departureUrl={DEPARTUREURL}&isCreateUser={ISCREATEUSER}&channelType={CHANNELTYPE}";
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -26,7 +29,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with { EndpointPath = string.Empty };
+                        return (Game)g with {EndpointPath = string.Empty};
                     })
                     .ToArray();
 
@@ -40,11 +43,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string IGameProvider.Name => "VR";
 
             IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations =>
-                new IGameProviderConfiguration[] { new VRGameProviderConfiguration() };
+                new IGameProviderConfiguration[] {new VRGameProviderConfiguration()};
 
-            ICurrency[] IGameProvider.Currencies => new ICurrency[] { new CNYCurrency("CNY") };
+            ICurrency[] IGameProvider.Currencies => new ICurrency[] {new CNYCurrency("CNY")};
 
-            ILanguage[] IGameProvider.Languages => new ILanguage[] { new CNLanguage("zh") };
+            ILanguage[] IGameProvider.Languages => new ILanguage[] {new CNLanguage("zh")};
 
             IGame[] IGameProvider.Games => _games;
 
@@ -61,17 +64,19 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new VRConfiguration
             {
                 ServiceEndpointUrl =
-                _env.IsDocker() ? new Uri("http://game-vr") : new("http://localhost:62330"),
+                    _env.IsDocker() ? new Uri("http://game-vr") : new("http://localhost:62330"),
                 AmountMaximum = 3000000m,
                 AmountFormat = "10,3",
-                BrandMerchants = new VRBrandMerchant[] {
-                    new VRBrandMerchant(){
-                        BrandCode="Default",
+                BrandMerchants = new VRBrandMerchant[]
+                {
+                    new()
+                    {
+                        BrandCode = "Default",
                         ApiUrl = new("https://pmws.vrbetapi.com/"),
-                        Version= "1.0",
-                        Merchantid="WGWG",
+                        Version = "1.0",
+                        Merchantid = "WGWG",
                         Deskey = "PLFNNVZ68DF4V88XZ8B0688660Z2LBP2",
-                        Status=true
+                        Status = true
                     }
                 }
             };
@@ -85,7 +90,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProviderConfiguration.Name => "Configuration VR";
 
-            string IGameProviderConfiguration.ClientId => "VR-WG";
+            string IGameProviderConfiguration.ClientId => "VR-PG";
 
             string IGameProviderConfiguration.SecretKey => "ewe7jRlkXKwcGLaPOyculQIObOuqPxy7";
 
