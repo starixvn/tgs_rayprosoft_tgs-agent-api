@@ -21,9 +21,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
-    <PackageReference Include="Tgs.Payment" Version="0.0.4-alpha" />
-    <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.7-alpha" />
-    <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.2-alpha" />
+    <PackageReference Include="Tgs.Payment" Version="0.0.5" />
+    <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.8" />
+    <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.4" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
