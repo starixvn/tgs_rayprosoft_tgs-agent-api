@@ -54,7 +54,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             _pluggableOperations = pluggableOperations;
         }
 
-        async Task<GetGameUrlResponse> IRequestHandler<GetGameUrlRequest, GetGameUrlResponse>.Handle(
+        public async Task<GetGameUrlResponse> Handle(
             GetGameUrlRequest request, CancellationToken cancellationToken)
         {
             var playerTokenData = _httpContext.Items.GetPlayerTokenData();
@@ -97,7 +97,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 Token = playerTokenData,
                 GameProviderCode = gameProviderCode,
                 GameId = gameId,
-                Language = language
+                Language = language,
+                ExtendedData = request.ExtendedData
             });
 
             return new()

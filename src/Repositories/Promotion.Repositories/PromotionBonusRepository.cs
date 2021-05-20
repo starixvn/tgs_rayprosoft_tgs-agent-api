@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Services.Promotion.Core;
-using TGS.Services.Promotion.Core.Models.PromotionBonus;
+using TGS.Services.Promotion.Models.PromotionBonus;
+using TGS.Services.Promotion;
 
-namespace Promotion.Repositories
+namespace TGS.Promotion.Repositories
 {
     public class PromotionBonusRepository : BaseRepositoryOperations<ITgsRepository>, IPromotionBonusRepository
     {

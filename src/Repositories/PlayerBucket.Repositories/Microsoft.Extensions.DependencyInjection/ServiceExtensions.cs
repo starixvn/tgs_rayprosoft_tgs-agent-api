@@ -1,5 +1,5 @@
 ﻿using PlayerBucket.Repositories;
-using TGS.Services.PlayerBucket.Core;
+using TGS.Services.PlayerBucket;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

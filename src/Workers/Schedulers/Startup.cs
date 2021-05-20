@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using TGS.Clients.Promotion.Client.Extensions;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
@@ -42,6 +41,32 @@ namespace TGS.Workers.Schedulers
             _env = env;
         }
 
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseGlobalExceptionHandler();
+
+            app.UseHangfireScheduler(new[] { Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report });
+
+            app.UseRouting();
+
+            app.UseHttpMetrics();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health", new()
+                {
+                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) =>
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                });
+
+                endpoints.MapMetrics();
+
+                endpoints.MapHangfireDashboard("/hangfire",
+                    new() { Authorization = new[] { new IgnoreHangfireAuthorizationFilter() } });
+            });
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddTgsRepository(_configuration, "Tgs")
@@ -55,7 +80,12 @@ namespace TGS.Workers.Schedulers
                 .AddGameApiClients()
                 .AddOperations()
                 .AddReportClientServices(_configuration)
-                .AddPromotionClientServices(_configuration)
+                .AddPromotionClientServices((options, sp) =>
+                {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    config.GetSection("Promotion").Bind(options);
+                })
                 .AddHangfireScheduler(_configuration, jobProvider: new JobProvider(),
                     typesToUseManagementPage: GetModuleTypes());
 
@@ -86,33 +116,7 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
         }
 
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseGlobalExceptionHandler();
-
-            app.UseHangfireScheduler(new[] {Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report});
-
-            app.UseRouting();
-
-            app.UseHttpMetrics();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                });
-
-                endpoints.MapMetrics();
-
-                endpoints.MapHangfireDashboard("/hangfire",
-                    new() {Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}});
-            });
-        }
-
         private static Type[] GetModuleTypes() =>
-            new[] {typeof(JobManagement), typeof(PromotionJobManagement)};
+            new[] { typeof(JobManagement), typeof(PromotionJobManagement) };
     }
 }

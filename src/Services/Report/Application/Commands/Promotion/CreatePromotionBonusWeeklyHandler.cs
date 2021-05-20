@@ -11,13 +11,13 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.PlayerBucket.Core;
-using TGS.Services.PlayerBucket.Core.Models;
-using TGS.Services.Promotion.Core;
-using TGS.Services.Promotion.Core.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
 using TGS.Services.TgsTransaction.Core;
 using TGS.Services.WalletService;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.PlayerBucket;
+using TGS.Services.Promotion.Models.PromotionBonus;
+using TGS.Services.Promotion;
 
 namespace TGS.Services.Report.Application.Commands.Promotion
 {

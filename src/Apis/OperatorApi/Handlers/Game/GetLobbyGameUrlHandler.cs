@@ -26,7 +26,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             _mediator = mediator;
         }
 
-        async Task<GetGameUrlResponse> IRequestHandler<GetLobbyGameUrlRequest, GetGameUrlResponse>.Handle(
+        public async Task<GetGameUrlResponse> Handle(
             GetLobbyGameUrlRequest request, CancellationToken cancellationToken)
         {
             var playerTokenData = _httpContext.Items.GetPlayerTokenData();
@@ -34,6 +34,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
             var gameProviderCode = request.GameProviderCode;
             var gameType = request.GameType;
+
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
 
             var gamePlatformTypes = platformType.ToGamePlatformTypes();
@@ -49,7 +50,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             {
                 GameProviderCode = gameProviderCode,
                 GameId = gameId,
-                LanguageCode = request.LanguageCode
+                LanguageCode = request.LanguageCode,
+                ExtendedData = request.Extends
             };
 
             return await _mediator.Send(r, cancellationToken);

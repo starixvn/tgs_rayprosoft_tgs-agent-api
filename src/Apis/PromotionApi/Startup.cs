@@ -9,21 +9,13 @@ using Prometheus;
 using TGS.Apis.PromotionApi.Middlewares;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
-using Tgs.Payment.LeePay;
-using TGS.Services.BackOffice.Application.Extensions;
-using TGS.Services.BackOffice.Domain;
-using TGS.Services.Operations.Extensions;
-using TGS.Services.PluggableServices.Extensions;
-using TGS.Services.Report.Application.Extensions;
 
 namespace TGS.Apis.PromotionApi
 {
@@ -36,73 +28,11 @@ namespace TGS.Apis.PromotionApi
             _configuration = configuration;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddTgsRepository(_configuration, "Tgs");
-
-            services.AddNats(_configuration)
-                .AddSystemJsonSerializer()
-                .AddSecurity()
-                .AddWebApiServices()
-                .AddTgsLog()
-                .AddRedis()
-                .AddOperations()
-                .AddErrorMappers()
-                .AddApiClient()
-                .AddPluggableServices()
-                .AddReportServices()
-                .AddTransactions()
-                .AddBackOfficeApplicationServices()
-                .AddPromotionRepositoriesServices()
-                .AddPlayerBucketRepositoriesServices()
-                .AddBackendOfficeRepositories();
-
-            services.AddWallet().AddTgsWalletRepositories().AddTgsAgentWalletRepositories();
-            services
-                .AddPayment()
-                .UseTgsPaymentRepository()
-                .RegisterWithdrawProcessor<LeePayProcessor>("LeePay");
-
-            services
-                .AddPaymentClient()
-                .AddSingleton<LeePaySerializer>()
-                .AddNatsMessageQueue(config =>
-                {
-                    config.ConfigQueueOptions((options, sp) =>
-                    {
-                        var configuration = sp.GetRequiredService<IConfiguration>();
-
-                        options.Url = configuration.GetValue<string>("NatsSetting:Urls");
-                    });
-                });
-
-            services.AddHttpContextAccessor();
-            services.AddControllers();
-
-            services.AddHealthChecks()
-                .AddPostgres(_configuration, "Tgs", "tgs-db");
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new() {Title = "TGS Promotion API", Version = "v1"});
-
-                c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
-
-                var xml = "TGS.Apis.Promotion.xml";
-                var path = Path.Combine(AppContext.BaseDirectory, xml);
-                if (File.Exists(path))
-                {
-                    c.IncludeXmlComments(path);
-                }
-            });
-        }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
-            app.UseMiddleware<ExceptionMiddleware>();
+            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
+            app.UseGlobalExceptionHandler();
 
             app.UseRouting();
 
@@ -127,6 +57,51 @@ namespace TGS.Apis.PromotionApi
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Promotion API"));
             }
+        }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddTgsRepository(_configuration, "Tgs");
+
+            services.AddNats(_configuration)
+                .AddSystemJsonSerializer()
+                .AddSecurity()
+                .AddWebApiServices()
+                .AddTgsLog()
+                .AddRedis()
+                .AddApiClient()
+                .AddPlayerBucketRepositoriesServices();
+
+            services
+                .AddPromotionCore()
+                .ConfigureWallet(config =>
+                {
+                    config
+                        .AddTgsWalletRepositories()
+                        .AddTgsAgentWalletRepositories();
+                })
+                .AddTgsPromotionRepositories();
+
+            services
+                .AddHttpContextAccessor()
+                .AddRouting(options => options.LowercaseUrls = true);
+            services.AddControllers();
+
+            services.AddHealthChecks()
+                .AddPostgres(_configuration, "Tgs", "tgs-db");
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "TGS Promotion API", Version = "v1" });
+
+                var xml = "TGS.Apis.Promotion.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, xml);
+                if (File.Exists(path))
+                {
+                    c.IncludeXmlComments(path);
+                }
+            });
         }
     }
 }

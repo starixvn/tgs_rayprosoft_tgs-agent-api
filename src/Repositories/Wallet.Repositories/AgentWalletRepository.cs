@@ -35,17 +35,17 @@ namespace TGS.Wallet.Repositories
                 sql,
                 parameters: new Dictionary<string, object>
                 {
-                                {":agent_id", agentId},
-                                {":wallet_id", walletId},
-                                {":amount", amount},
-                                {":updated_on", updatedOn}
+                    {":agent_id", agentId},
+                    {":wallet_id", walletId},
+                    {":amount", amount},
+                    {":updated_on", updatedOn}
                 }).ConfigureAwait(false);
 
             await _tgsRepository.AgentTransactions
                 .AddAsync(new()
                 {
                     Id = transactionId,
-                                AgentId = agentId,
+                    AgentId = agentId,
                     WalletId = walletId,
                     BrandId = brandId,
                     Amount = amount,
@@ -59,6 +59,7 @@ namespace TGS.Wallet.Repositories
                         TransactionTypes.Rebate => TransactionType.Rebate,
                         TransactionTypes.Dividend => TransactionType.Dividend,
                         TransactionTypes.Promotion => TransactionType.Promotion,
+                        TransactionTypes.CancelWithdrawal => TransactionType.CancelWithdrawal,
                         _ => TransactionType.Other
                     },
                     Description = description,

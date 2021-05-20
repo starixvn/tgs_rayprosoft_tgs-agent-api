@@ -13,5 +13,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("paymentid")]
         public Guid BrandPaymentId { get; init; }
+
+        [JsonPropertyName("promotionid")]
+        public Guid? PromotionId { get; init; }
     }
 }
