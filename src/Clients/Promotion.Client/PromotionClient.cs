@@ -71,8 +71,8 @@ namespace TGS.Clients.Promotion.Client
             request.Headers.Remove("Accept");
             request.Headers.Add("Accept", "application/json");
 
-            request.Content.Headers.Remove("Content-Type");
-            request.Content.Headers.Add("Content-Type", "application/json");
+            request.Headers.Remove("Content-Type");
+            request.Headers.Add("Content-Type", "application/json");
 
             var response = await SendAsync(request, prefix).ConfigureAwait(false);
 
