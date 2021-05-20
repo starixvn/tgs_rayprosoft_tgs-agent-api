@@ -124,7 +124,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProviderConfiguration.Name => "Configuration SBO";
 
-            string IGameProviderConfiguration.ClientId => "SBO-WG";
+            string IGameProviderConfiguration.ClientId => "SBO-PG";
 
             string IGameProviderConfiguration.SecretKey => "JFYif2fxc6jtOo3fA3JuaItNQ6SAlZAtNYGhgVmZGzm";
 

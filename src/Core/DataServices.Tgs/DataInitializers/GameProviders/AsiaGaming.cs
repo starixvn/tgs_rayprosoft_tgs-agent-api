@@ -260,7 +260,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProviderConfiguration.Name => "Configuration AsiaGaming";
 
-            string IGameProviderConfiguration.ClientId => "AsiaGaming";
+            string IGameProviderConfiguration.ClientId => "AsiaGaming-PG";
 
             string IGameProviderConfiguration.SecretKey => "fr5q3kaguhyxjEU7bX4Y8P6pTa4PMp4jmBn5sV39";
 
