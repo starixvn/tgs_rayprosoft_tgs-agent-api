@@ -48,7 +48,7 @@
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="4.1.1" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
-    <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.2-alpha" />
+    <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.4" />
   </ItemGroup>
 
   <ItemGroup>
