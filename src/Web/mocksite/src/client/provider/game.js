@@ -34,12 +34,18 @@ export const useGameUrl = (
 
     let { data: result, ...rest } = useSWR(keys, (url) => {
         return fetch(url, {
-            method: "GET",
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${brandToken}`,
                 Token: playerToken
-            }
+            },
+            body: JSON.stringify({
+                gpcode: data?.gameProviderCode,
+                gid: data?.gameId,
+                language: data?.language,
+                extends: { lobbyurl: location.host }
+            })
         })
             .then(toDataOrError)
             .then((data) => {
