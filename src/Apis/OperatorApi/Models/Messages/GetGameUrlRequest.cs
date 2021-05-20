@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,15 +9,22 @@ namespace TGS.Apis.OperatorApi.Models.Messages
     public record GetGameUrlRequest : IRequest<GetGameUrlResponse>
     {
         [Required]
-        [BindProperty(Name = "gpcode", SupportsGet = true)]
+        [JsonPropertyName("gpcode")]
+        [BindProperty(Name = "gpcode")]
         public string GameProviderCode { get; init; }
 
         [Required]
-        [BindProperty(Name = "gid", SupportsGet = true)]
+        [JsonPropertyName("gid")]
+        [BindProperty(Name = "gid")]
         public int GameId { get; init; }
 
         [Required]
-        [BindProperty(Name = "language", SupportsGet = true)]
+        [JsonPropertyName("language")]
+        [BindProperty(Name = "language")]
         public string LanguageCode { get; init; }
+
+        [JsonPropertyName("extends")]
+        [BindProperty(SupportsGet = false)]
+        public JsonDocument ExtendedData { get; set; }
     }
 }

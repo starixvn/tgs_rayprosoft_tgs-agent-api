@@ -1740,6 +1740,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<decimal?>("ActualAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("actual_amount");
+
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
@@ -1772,6 +1777,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
+
+                    b.Property<Guid?>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
 
                     b.Property<string>("Remark")
                         .HasColumnType("text")
@@ -5113,8 +5122,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<decimal?>("ActualAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("actual_amount");
+
                     b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
                         .HasColumnName("amount");
 
                     b.Property<string>("ApplyInfo")

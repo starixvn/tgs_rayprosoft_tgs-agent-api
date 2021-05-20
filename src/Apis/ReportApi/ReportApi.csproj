@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\Repositories\Promotion.Repositories\Promotion.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
+    <ProjectReference Include="..\..\Services\Promotion.Core\Promotion.Core.csproj" />
     <ProjectReference Include="..\..\Services\Report\Report.csproj" />
   </ItemGroup>
 

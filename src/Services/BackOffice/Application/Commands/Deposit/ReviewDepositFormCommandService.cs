@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Payment;
-using TGS.Services.PlayerBucket.Core;
-using TGS.Services.PlayerBucket.Core.Models;
-using TGS.Services.WalletService;
+using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
@@ -43,13 +42,17 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                     .GetPlayerAsync(x => x.PlayerCode == form.PlayerCode)
                     .ConfigureAwait(false);
 
-                await _playerBucketRepository
+                var actualAmount = await _playerBucketRepository
                     .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
                         command.BrandId,
                         null,
                         player.PlayerCode,
                         player.DefaultWalletId,
                         form.Amount))
+                    .ConfigureAwait(false);
+
+                await _playerService
+                    .TopUpAccumulatedDepositAsync(form.PlayerCode, form.Amount)
                     .ConfigureAwait(false);
             }
         }

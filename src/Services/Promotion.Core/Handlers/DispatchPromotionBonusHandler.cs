@@ -6,14 +6,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.PlayerBucket.Core;
-using TGS.Services.PlayerBucket.Core.Models;
-using TGS.Services.Promotion.Core;
-using TGS.Services.Promotion.Core.Models.PromotionDispatch;
+using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.Promotion.Models.PromotionDispatch;
 using TGS.Services.TgsTransaction.Core;
 using TGS.Services.WalletService;
 
-namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
+namespace TGS.Services.Promotion.Handlers
 {
     public class DispatchPromotionBonusHandler : Handler<DispatchPromotionBonusRequest, MessageResponse>
     {
@@ -52,14 +51,14 @@ namespace TGS.Services.BackOffice.Application.Commands.PromotionHandlers
                 .ToArray();
 
             var playerBuckets = players.Select(x => new
-                {
-                    x.Player.BrandId,
-                    x.PlayerCode,
-                    x.Player.DefaultWalletId,
-                    BucketAmount = x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
-                    x.BonusAmount,
-                    BucketType = BucketType.Promotion
-                })
+            {
+                x.Player.BrandId,
+                x.PlayerCode,
+                x.Player.DefaultWalletId,
+                BucketAmount = x.BonusAmount * x.PromotionBonus.TurnoverMultiple,
+                x.BonusAmount,
+                BucketType = BucketType.Promotion
+            })
                 .ToArray();
 
             foreach (var promotionPlayer in players)
