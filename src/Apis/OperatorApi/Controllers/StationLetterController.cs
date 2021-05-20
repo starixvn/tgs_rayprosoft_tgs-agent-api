@@ -63,6 +63,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         CreateOn = letter.CreateOn,
                         IsRead = letter.IsRead
                     })
+                    .OrderByDescending(x => x.CreateOn)
                     .ToEnumerable()
             };
         }
