@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Services\Promotion.Core\Promotion.Core.csproj" />
+    <ProjectReference Include="..\..\Services\Promotion.Core\Promotion.Core.csproj" />
   </ItemGroup>
 
 </Project>
