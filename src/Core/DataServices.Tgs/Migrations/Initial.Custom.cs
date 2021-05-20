@@ -106,6 +106,33 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.FunctionSqlFormat, "report_get_round_aggregates"));
 
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "agent_wallet_update_wallet_balance"));
+
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "report_get_player_account_change_records"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "log_get_admin_log"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "log_get_admin_logs"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "log_get_api_log"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "log_get_api_logs"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "log_get_log_records"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.IndexSqlFormat, "admin_logs"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.IndexSqlFormat, "api_logs"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.IndexSqlFormat, "log_records"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.IndexSqlFormat, "agents_email"));
+
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.FunctionSqlFormat, "report_get_round_aggregates"));
+
             #endregion Functions
 
             #region Views
@@ -136,6 +163,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 string.Format(Consts.IndexSqlFormat, "games"));
             migrationBuilder.SqlResource(assembly,
                 string.Format(Consts.IndexSqlFormat, "gameProviders"));
+            migrationBuilder.SqlResource(assembly,
+                string.Format(Consts.IndexSqlFormat, "players_email"));
 
             #endregion
         }

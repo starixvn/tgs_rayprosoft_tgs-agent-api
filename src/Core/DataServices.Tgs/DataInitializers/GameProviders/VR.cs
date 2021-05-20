@@ -51,7 +51,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             IGame[] IGameProvider.Games => _games;
 
-            short IGameProvider.UniqueId => 11;
+            ushort IGameProvider.UniqueId => 11;
 
             bool IGameProvider.AllowKickPlayer => false;
 
