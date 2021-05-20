@@ -53,28 +53,29 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var roundClosed = isPlaceBetOrCancel                    ? (bool?)null :
                 bool.TryParse(r.Record.RoundFinish, out var finish) ? finish : null;
 
-            var transactionId = GetTransactionId(transactionType, r.Record.TransactionId);
             var timestamp = isPlaceBetOrCancel ? r.Record.BetTime : r.Record.SettleTime;
             var amount = isPlaceBetOrCancel ? Math.Abs(r.Record.Amount) : r.Record.BetAmount + r.Record.WinAmount;
 
-            var transactions = new TransactionData[]
+            var count = r.Record.TransactionIds.Length;
+            var transactions = r.Record.TransactionIds.Select((tId, index) =>
             {
-                new()
+                var transactionId = GetTransactionId(transactionType, tId);
+                return new TransactionData
                 {
                     Amount = amount,
                     ExternalTransactionId = transactionId,
                     ExternalTransactionReferenceId =
-                        isPlaceBet ? string.Empty : GetTransactionReferenceId(r.Record, isLockGame),
+                        isPlaceBet ? string.Empty : GetTransactionReferenceId(r.Record, isLockGame, tId),
                     ExternalRoundId = r.Record.RoundId,
                     ExternalBetId = transactionId,
                     ExternalGameId = GetGameId(r),
                     GameActionType = gameActionType,
                     TimeStamp = GetTimestamp(timestamp),
-                    RoundClosed = roundClosed,
+                    RoundClosed = index == count - 1 ? roundClosed : false,
                     RoundDetail = GetRoundHistory(roundClosed, r.Record.GameResult),
                     BetType = r.Record.PlayType
-                }
-            };
+                };
+            }).ToArray();
 
             return GetBetData(playerCode, data, transactions, currencyCode,
                 oppositeBetSettings: oppositeBetSettings);
@@ -178,8 +179,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         private static string GetTransactionId(TransactionType transactionType, string transactionId) =>
             transactionType == TransactionType.BET ? transactionId : $"{transactionId}_{transactionType}";
 
-        private static string GetTransactionReferenceId(TransferRecord record, bool isLockGame) =>
-            isLockGame ? $"{record.TransactionId}_{record.BillNo}" : record.TransactionId;
+        private static string GetTransactionReferenceId(TransferRecord record, bool isLockGame, string transactionId) =>
+            isLockGame ? $"{transactionId}_{record.BillNo}" : transactionId;
 
         private static string GetGameId(PostTransferRequest r) =>
             $"{r.Record.GamePlatformType}_{r.Record.GameRound}_{r.Record.GameType}";
