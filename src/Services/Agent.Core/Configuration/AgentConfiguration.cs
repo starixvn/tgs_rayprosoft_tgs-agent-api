@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Infrastructures.Mail;
 
-namespace TGS.Services.Operator.Configuration
+namespace TGS.Services.Agent.Configuration
 {
     public class AgentConfiguration
     {
