@@ -32,7 +32,7 @@ namespace TGS.Apis.BackendOffice
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() {Title = "TGS FileService API", Version = "v1"});
+                c.SwaggerDoc("v1", new() {Title = "TGS BackOffice API", Version = "v1"});
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 

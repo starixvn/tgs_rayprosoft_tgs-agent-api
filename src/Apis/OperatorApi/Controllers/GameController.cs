@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -22,11 +23,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         ///     get game list of specific game provider
         /// </summary>
-        /// <remarks>
-        /// language填 languages表的culture_code ex:zh-TW
-        /// 
-        /// currency填 currencies表的code ex:CNY
-        /// </remarks>
         [HttpGet]
         [Route("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
@@ -36,19 +32,50 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         ///     get game launch url via game id
         /// </summary>
-        [HttpGet]
-        [Route("geturl")]
+        [HttpGet("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<GetGameUrlResponse> GetGameUrlAsync([FromQuery] GetGameUrlRequest request) =>
+        public Task<GetGameUrlResponse> GetGameUrlForGetAsync(
+            [FromQuery(Name = "gpcode")] string gpCode,
+            [FromQuery(Name = "gid")] int gameId,
+            [FromQuery(Name = "language")] string languageCode
+            ) =>
+            _mediator.Send(new GetGameUrlRequest()
+            {
+                GameId = gameId,
+                LanguageCode = languageCode,
+                GameProviderCode = gpCode
+            });
+
+        /// <summary>
+        ///     get game launch url via game id
+        /// </summary>
+        [HttpPost("geturl")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public Task<GetGameUrlResponse> GetGameUrlForPostAsync([FromBody] GetGameUrlRequest request) =>
             _mediator.Send(request);
 
         /// <summary>
         ///     get game launch url for lobby type game.
         /// </summary>
-        [HttpGet]
-        [Route("lobby/geturl")]
+        [HttpGet("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<GetGameUrlResponse> GetLobbyGameUrlAsync([FromQuery] GetLobbyGameUrlRequest request) =>
+        public Task<GetGameUrlResponse> GetLobbyGameUrlForGetAsync(
+            [FromQuery(Name = "gpcode")] string gpCode,
+            [FromQuery(Name = "gtype")] GameType gameType,
+            [FromQuery(Name = "language")] string languageCode) =>
+            _mediator.Send(new GetLobbyGameUrlRequest
+            {
+                GameProviderCode = gpCode,
+                GameType = gameType,
+                LanguageCode = languageCode
+            });
+
+        /// <summary>
+        ///     get game launch url for lobby type game.
+        /// </summary>
+        [HttpPost("lobby/geturl")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public Task<GetGameUrlResponse> GetLobbyGameUrlForPostAsync([FromBody] GetLobbyGameUrlRequest request) =>
             _mediator.Send(request);
     }
 }
