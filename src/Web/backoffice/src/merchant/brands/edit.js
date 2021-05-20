@@ -12,7 +12,7 @@ import {
 import { useIsDisplayMenuByRoute, useUserLicenseeId } from "../../user/context"
 import Disclosure, { AddDisclosure } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
-import { Update as UpdateMenu } from "./menu"
+import { Update as UpdateMenu, View as ViewMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
@@ -98,9 +98,8 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     }, [licensee])
 
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate, deleteCache } = useAddBrand(
-        formData
-    )
+    let { result, isLoading, error, mutate, deleteCache } =
+        useAddBrand(formData)
 
     const onSubmit = (data) => {
         let formData = normalizeFormData(data)
@@ -167,12 +166,11 @@ const AddDialog = ({ onSubmitted, dialog }) => {
 export const ViewButton = ({ record, ...props }) => {
     let dialog = useModalState()
 
-    /* TODO: view auth?
-  let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
-  if (!isDisplay) {
-    return null
-  }
-  */
+    let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
+    if (!isDisplay) {
+        return null
+    }
+
     return (
         <>
             <Disclosure {...dialog} {...props}>

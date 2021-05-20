@@ -14,7 +14,7 @@ import {
 import { useIsDisplayMenuByRoute, useUserResellerId } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
-import { Update as UpdateMenu } from "./menu"
+import { Update as UpdateMenu, View as ViewMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import { useFormContext, useFieldArray, useForm } from "react-hook-form"
 import { FieldValues } from "../../layout/Grid"
@@ -103,9 +103,8 @@ const AddDialog = ({ onSubmitted, dialog }) => {
     }, [reseller])
 
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate, deleteCache } = useAddLicensee(
-        formData
-    )
+    let { result, isLoading, error, mutate, deleteCache } =
+        useAddLicensee(formData)
 
     const onSubmit = (data) => {
         let formData = normalizeFormData(data)
@@ -164,12 +163,11 @@ const AddDialog = ({ onSubmitted, dialog }) => {
 export const ViewButton = ({ record, ...props }) => {
     let dialog = useModalState()
 
-    /* TODO: view auth?
-  let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
-  if (!isDisplay) {
-    return null
-  }
-  */
+    let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
+    if (!isDisplay) {
+        return null
+    }
+
     return (
         <>
             <Disclosure {...dialog} {...props}>

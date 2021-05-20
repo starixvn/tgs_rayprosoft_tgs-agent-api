@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
 import { Box, Button, Set, Text, useModalState, FieldStack } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Update } from "./menu"
+import { Update, View } from "./menu"
 import Disclosure, { ViewDisclosure } from "../../dialog/Disclosure"
 import {
     FormattedDateTime,
@@ -52,12 +52,10 @@ export const PromotionManualPayoutDisclosure = ({
 export const ViewPromotionManualPayoutDisclosure = ({ brandId, record }) => {
     let dialog = useModalState()
 
-    /*
-        let isDisplay = useIsDisplayMenuByRoute([View])
-        if (!isDisplay) {
-            return null
-        }
-        */
+    let isDisplay = useIsDisplayMenuByRoute([View])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>
@@ -80,13 +78,8 @@ const ManualPayoutDialog = ({ brandId, record, onSubmitted, dialog }) => {
     })
 
     let [formData, setSubmit] = useState()
-    let {
-        isLoading,
-        result,
-        error,
-        mutate,
-        deleteCache
-    } = useSendPromotionPayout(formData)
+    let { isLoading, result, error, mutate, deleteCache } =
+        useSendPromotionPayout(formData)
 
     const onSubmit = () => {
         let players = [record]

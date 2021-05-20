@@ -61,12 +61,10 @@ import Input from "../../input/Input"
 export const ViewFundWithdrawDisclosure = ({ brandId, formId, ...props }) => {
     let dialog = useModalState()
 
-    /*
     let isDisplay = useIsDisplayMenuByRoute([View])
     if (!isDisplay) {
         return null
     }
-    */
 
     return (
         <>
@@ -202,7 +200,11 @@ const PayerInfo = ({ brandId, record, disabled }) => {
     let underReview = isFundUnderReview(record?.status)
     let isApproved = isFundApproved(record?.status)
 
-    let { isLoading, data: brandPayment, error } = useBrandPayment(
+    let {
+        isLoading,
+        data: brandPayment,
+        error
+    } = useBrandPayment(
         record?.brandPaymentId,
         isApproved
             ? {
