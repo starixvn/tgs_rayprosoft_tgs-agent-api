@@ -59,7 +59,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     .GameProviderConfigurations.SBOBET);
 
             var response =
-                await PlayerLoginAsync(configuration.ApiUrl, configuration.CompanyKey, player, gameType.Value);
+                await PlayerLoginAsync(configuration.ApiUrl, configuration.CompanyKey,
+                    configuration.AgentPrefix, player, gameType.Value);
 
             if (response.Error.Code != None)
             {
@@ -84,8 +85,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return new() {Url = url};
         }
 
-        private async Task<BaseResponse> PlayerLoginAsync(Uri apiUrl, string companyKey, CachedPlayer player,
-            GameType gameType)
+        private async Task<BaseResponse> PlayerLoginAsync(Uri apiUrl, string companyKey, string agentPrefix,
+            CachedPlayer player, GameType gameType)
         {
             var portfolio = Utility.GetPortfolio(gameType);
 
@@ -103,7 +104,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             }
 
             var registerResponse = await _client.RegisterPlayerAsync(apiUrl,
-                new(player.BrandCode, player.DefaultWalletCurrencyCode)
+                new(agentPrefix, player.BrandCode, player.DefaultWalletCurrencyCode)
                 {
                     CompanyKey = companyKey,
                     PlayerCode = player.PlayerCode
