@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Prometheus;
+using TGS.Apis.PromotionApi.Middlewares;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.HealthChecks;
@@ -16,7 +17,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 
-namespace PromotionApi
+namespace TGS.Apis.PromotionApi
 {
     public class Startup
     {

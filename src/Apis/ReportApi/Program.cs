@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace ReportApi
+namespace TGS.Apis.ReportApi
 {
     public class Program
     {

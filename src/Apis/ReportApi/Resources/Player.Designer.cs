@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ReportApi.Resources {
+namespace TGS.Apis.ReportApi.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ReportApi.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ReportApi.Resources.Player", typeof(Player).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("TGS.Apis.ReportApi.Resources.Player", typeof(Player).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

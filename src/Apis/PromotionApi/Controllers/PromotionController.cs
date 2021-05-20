@@ -9,7 +9,7 @@ using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
 using TGS.ServiceUtility;
 
-namespace PromotionApi.Controllers
+namespace TGS.Apis.PromotionApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

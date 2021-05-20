@@ -9,6 +9,7 @@
     <GlobalNugetConfig Condition="'$(UserProfile)'==''">~/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
     <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
     <DockerfileTag Condition="$(DockerfileTag) == ''">report-api</DockerfileTag>
+    <RootNamespace>TGS.Apis.PromotionApi</RootNamespace>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 

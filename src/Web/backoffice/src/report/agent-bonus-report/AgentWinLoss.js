@@ -30,6 +30,7 @@ import AlertDialog from "../../dialog/Alert"
 import { FieldValues } from "../../layout/Grid"
 import { formatNumberDecimal } from "../../number/format"
 import Separator from "../../layout/Separator"
+import { startOfNextDay } from "../../date/startOfNextDay"
 
 export const AgentWinLossDialogDisclosure = ({
     brandId,
@@ -74,14 +75,17 @@ const ReportDialog = ({
     let { state, setPageIndex, setSortOrder } = useTable({
         brandId,
         agentId,
-        from: start,
-        to: end,
         showAll: true
     })
 
     let { data, isLoading, error, mutate, deleteCache } = useAgentWinLossList(
         agentId,
-        toApiParams(state)
+        {
+            ...toApiParams(state),
+            sortby: "username",
+            from: start,
+            to: startOfNextDay(end)
+        }
     )
 
     let columns = useAgentPlayerWinLossColumns({ items: data?.items })
