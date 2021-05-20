@@ -1,19 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
+using TGS.Apis.OperatorApi.Controllers;
+using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Core.Models.Tokens;
 using TGS.Operator.Repositories;
 using TGS.Paging;
 using TGS.Services.Operator;
 using TGS.Services.Operator.StationLetters;
+using TGS.ServiceUtility;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -153,6 +162,84 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actual = await sut.QueryStationLettersAsync(playerCode, new Paging<Services.Operator.StationLetter>() { Page = 0, RowCount = 50 }).ToListAsync();
 
             Assert.AreEqual(1, actual.Count);
+        }
+
+        [Test]
+        public async Task Player_Station_Letters_Should_Order_Desc_By_CreateOn()
+        {
+            // arrange
+            var fakeGetStationLetterService = Substitute.For<IQueryService<GetStationLettersQuery, Services.Operator.StationLetter>>();
+            var fakeCountStationLetterService = Substitute.For<IGetService<GetStationLettersQuery, int>>();
+            var request = new PagingRequest()
+            {
+                Page = 1,
+                Rows = 10,
+                IsDesc = true,
+                SortBy = string.Empty,
+                ShowAll = false
+            };
+
+            var playerCode = "playerCode";
+            var fakeHttpContext = new DefaultHttpContext();
+            var brandId = Guid.NewGuid();
+            fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData
+            {
+                PlayerCode = playerCode
+            });
+            var subject = "Test subject";
+            var content = "Test content";
+
+            var stationLetters = new List<Services.Operator.StationLetter>
+            {
+                new Services.Operator.StationLetter(
+                    Guid.NewGuid(),
+                    subject,
+                    content,
+                    CreateOn: new DateTimeOffset(new DateTime(2021,4,19)),
+                    false)
+                ,
+                new Services.Operator.StationLetter(
+                    Guid.NewGuid(),
+                    subject,
+                    content,
+                    CreateOn: new DateTimeOffset(new DateTime(2021,5,10)),
+                    false)
+                ,
+                new Services.Operator.StationLetter(
+                    Guid.NewGuid(),
+                    subject,
+                    content,
+                    CreateOn: new DateTimeOffset(new DateTime(2021,5,19)),
+                    false)
+            };
+
+            var paging = new PageableRequest();
+            if (request.ShowAll)
+                paging.ShowAll = true;
+            else
+            {
+                paging.Page = request.Page;
+                paging.Rows = request.Rows;
+                paging.OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending;
+                paging.SortBy = request.SortBy;
+            }
+
+            fakeGetStationLetterService
+                .QueryAsync(Arg.Any<GetStationLettersQuery>())
+                .Returns(stationLetters.ToAsyncEnumerable());
+
+            var sut = new StationLetterController();
+            sut.ControllerContext = new ControllerContext()
+            {
+                HttpContext = fakeHttpContext
+            };
+
+            // act
+            var r = await sut.GetLettersAsync(fakeGetStationLetterService, fakeCountStationLetterService, request);
+
+            // assert
+            Assert.That(r.Items, Is.Ordered.Descending.By("CreateOn"));
         }
     }
 }
