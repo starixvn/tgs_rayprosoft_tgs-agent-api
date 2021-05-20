@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -132,6 +133,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task WhenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
             PlaceBetAsync(amount, externalGameId);
 
+        [Given(@"I place bet of \$(.*) for game ""(.*)"" for the same round")]
+        public Task GivenIPlaceBetOfForGameForTheSameRoundAsync(decimal amount, string externalGameId)
+        {
+            var betRequest = Get<PostTransferRequest>(SR.PlaceBetRequest);
+            return PlaceBetAsync(amount, externalGameId, betRequest.Record.RoundId);
+        }
+
         [Given(@"I send bet response")]
         [When(@"I send bet response")]
         public Task WhenISendBetResponse(Table table)
@@ -160,6 +168,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 var record = records.ElementAt(i);
                 await SettleBetAsync(record.WinAmount, betResponseRequest.Records.ElementAt(i).Amount,
+                    isLockGame: true,
                     billNo: GetBillNo(transactionId, record.PlayType), finish: record.RoundFinish);
             }
         }
@@ -208,7 +217,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = GetAsiaGamingPlayerCode(),
                     AgentCode = AgentCode,
                     BetTime = GetTimestamp(),
-                    TransactionId = externalTransactionId,
+                    TransactionIds = new []{ externalTransactionId },
                     RoundId = externalRoundId,
                     GamePlatformType = gamePlatformType,
                     GameRound = gameRound,
@@ -222,8 +231,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await _client.PostTransferAsync(request);
 
+            var transactionIds = Get<List<string>>(SR.ExternalTransactionId) ?? new List<string>();
+            transactionIds.Add(externalTransactionId);
             Set(SR.GameProviderCurrencyCode, gameProviderCurrencyCode);
-            Set(SR.ExternalTransactionId, externalTransactionId);
+            Set(SR.ExternalTransactionId, transactionIds);
             Set(SR.ExternalRoundId, externalRoundId);
             Set(SR.ExternalGameId, externalGameId);
             Set(SR.PlaceBetRequest, request);
@@ -255,13 +266,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await _client.BetResponseAsync(request);
 
-            Set(SR.ExternalTransactionId, transactionId);
+            Set(SR.ExternalTransactionId, new List<string> { transactionId });
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
 
         private async Task SettleBetAsync(decimal winAmount, decimal? betAmount = null, bool isRetry = false,
-            TransactionType? type = null, string billNo = null, string finish = null)
+            bool isLockGame = false, TransactionType? type = null, string billNo = null, string finish = null)
         {
             var transactionType = type ?? (winAmount > 0 ? TransactionType.WIN : TransactionType.LOSE);
 
@@ -270,7 +281,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var gameProviderCurrencyCode = await GetGameProviderCurrencyCodeAsync();
 
             var betRequest = Get<PostTransferRequest>(SR.PlaceBetRequest);
-            var transactionId = betRequest.Record.TransactionId;
+            var transactionIds = isLockGame ? 
+                new List<string> { betRequest.Record.TransactionId } : 
+                Get<List<string>>(SR.ExternalTransactionId);
             var gamePlatformType = betRequest.Record.GamePlatformType;
             var gameRound = betRequest.Record.GameRound;
             var gameType = betRequest.Record.GameType;
@@ -288,7 +301,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     AgentCode = AgentCode,
                     BetTime = betRequest.Record.BetTime,
                     SettleTime = GetTimestamp(),
-                    TransactionId = transactionId,
+                    TransactionIds = transactionIds.ToArray(),
                     BillNo = billNo,
                     RoundId = betRequest.Record.RoundId,
                     GamePlatformType = gamePlatformType,
@@ -305,7 +318,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await _client.PostTransferAsync(settleRequest);
 
-            Set(SR.ExternalTransactionId, $"{transactionId}_{transactionType}");
+            Set(SR.ExternalTransactionId, transactionIds.Select(t => $"{t}_{transactionType}").ToList());
             Set(SR.Request, settleRequest);
             Set(SR.Response, response);
         }
@@ -354,7 +367,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = GetAsiaGamingPlayerCode(),
                     AgentCode = AgentCode,
                     BetTime = GetTimestamp(),
-                    TransactionId = transactionId,
+                    TransactionIds = new []{ transactionId },
                     RoundId = roundId,
                     GamePlatformType = gamePlatformType,
                     GameRound = gameRound,
@@ -367,7 +380,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await _client.PostTransferAsync(cancelRequest);
 
-            Set(SR.ExternalTransactionId, $"{transactionId}_{TransactionType.REFUND}");
+            Set(SR.ExternalTransactionId, new List<string> { $"{transactionId}_{TransactionType.REFUND}" });
             Set(SR.Request, cancelRequest);
             Set(SR.Response, response);
         }
@@ -408,18 +421,41 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             ga.Amount.Should().Be(amount);
         }
 
-        [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
-        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeFor(GameActionType type, decimal amount)
+        [Then(@"(.*) game actions will be recorded in the database of type ""(.*)"" for \$(.*)")]
+        public async Task ThenGameActionsWillBeRecordedInTheDatabaseOfTypeForAsync(int count, GameActionType type, decimal amount)
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var externalTransactionId = Get<string>(SR.ExternalTransactionId);
+            var externalTransactionIds = Get<List<string>>(SR.ExternalTransactionId);
+
+            var db = GetDb<ITgsRepository>(_serviceProvider);
+            var gas = await(
+                from act in db.GameActions.AsQueryable()
+                join r in db.Rounds on act.RoundId equals r.Id
+                where r.ExternalRoundId == externalRoundId &&
+                    externalTransactionIds.Contains(act.ExternalTransactionId)
+                select act).AsNoTracking().ToArrayAsync();
+
+            gas.Should().NotBeNull();
+            gas.Length.Should().Be(count);
+            foreach (var ga in gas)
+            {
+                ga.Type.Should().Be(type);
+                ga.Amount.Should().Be(amount);
+            }
+        }
+
+        [Then(@"game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
+        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeForAsync(GameActionType type, decimal amount)
+        {
+            var externalRoundId = Get<string>(SR.ExternalRoundId);
+            var externalTransactionIds = Get<List<string>>(SR.ExternalTransactionId);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId &&
-                    act.ExternalTransactionId == externalTransactionId
+                    externalTransactionIds.Contains(act.ExternalTransactionId)
                 select act).AsNoTracking().FirstAsync();
 
             Set(SR.GameAction, ga);
