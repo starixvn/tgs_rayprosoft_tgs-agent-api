@@ -64,13 +64,8 @@ const toPalette = (value) => {
 export const StatusMenu = ({ record = {}, onSubmitted, ...props }) => {
     let { id, status } = record
     let [newState, setSubmit] = useState()
-    let {
-        result,
-        isLoading,
-        error,
-        deleteCache,
-        mutate
-    } = useChangeBrandGameProviderScheduleStatus(id, newState)
+    let { result, isLoading, error, deleteCache, mutate } =
+        useChangeBrandGameProviderScheduleStatus(id, newState)
 
     const reset = () => {
         deleteCache()
@@ -133,6 +128,7 @@ export const StatusMenuField = ({ name, size, ...props }) => {
         <Controller
             name={name}
             control={control}
+            shouldUnregister={true}
             render={({
                 field: { onChange, onBlur, value, name, ref },
                 fieldState: { invalid, isTouched, isDirty }

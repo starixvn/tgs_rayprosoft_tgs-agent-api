@@ -13,7 +13,7 @@ import {
     Heading,
     FieldStack
 } from "bumbag"
-import { Update as UpdateMenu } from "./menu"
+import { Update as UpdateMenu, View as ViewMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import {
     AddDisclosure,
@@ -83,9 +83,8 @@ export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
 const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     let [formData, setSubmit] = useState()
 
-    let { result, isLoading, error, mutate, deleteCache } = useAddPromotion(
-        formData
-    )
+    let { result, isLoading, error, mutate, deleteCache } =
+        useAddPromotion(formData)
 
     let title = useTrans({
         zh: "新增活动",
@@ -288,10 +287,10 @@ export const ViewPromotionDisclosure = ({
 }) => {
     let dialog = useModalState()
 
-    // let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
-    // if (!isDisplay) {
-    //     return null
-    // }
+    let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>

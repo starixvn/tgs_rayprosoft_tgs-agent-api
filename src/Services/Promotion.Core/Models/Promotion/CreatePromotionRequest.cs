@@ -3,24 +3,38 @@ using MediatR;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
-namespace TGS.Services.Promotion.Core.Models.Promotion
+namespace TGS.Services.Promotion.Models.Promotion
 {
     public class CreatePromotionRequest : IRequest<MessageResponse>
     {
-        public Guid BrandId { get; set; }
-        public string Name { get; set; }
-        public DateTimeOffset From { get; set; }
-        public DateTimeOffset To { get; set; }
         public bool AutoSentPlayerBonus { get; set; }
-        public string PromotionType { get; set; }
+
         public decimal BonusAmountLimit { get; set; }
-        public bool Unlimited { get; set; }
-        public GameType? GameType { get; set; }
-        public decimal Percentage { get; set; }
-        public decimal TotalAmountLimit { get; set; }
-        public decimal TurnoverMultiple { get; set; }
-        public Guid[] GameProviderIds { get; set; }
-        public int[] VipLevels { get; set; }
+
+        public Guid BrandId { get; set; }
+
         public string EditorUsername { get; set; }
+
+        public DateTimeOffset From { get; set; }
+
+        public Guid[] GameProviderIds { get; set; }
+
+        public GameType? GameType { get; set; }
+
+        public string Name { get; set; }
+
+        public decimal Percentage { get; set; }
+
+        public string PromotionType { get; set; }
+
+        public DateTimeOffset To { get; set; }
+
+        public decimal TotalAmountLimit { get; set; }
+
+        public decimal TurnoverMultiple { get; set; }
+
+        public bool Unlimited { get; set; }
+
+        public int[] VipLevels { get; set; }
     }
 }

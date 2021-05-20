@@ -1,0 +1,54 @@
+﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using TGS.Core.Infrastructures.Json;
+using TGS.Core.Models;
+using TGS.Core.Models.Messages;
+using TGS.Core.Models.Settings;
+using TGS.Services.Promotion.Models.Promotion;
+
+namespace TGS.Services.Promotion.Handlers
+{
+    public class CreatePromotionHandler : Handler<CreatePromotionRequest, MessageResponse>
+    {
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IPromotionRepository _service;
+        private readonly ISettingsService _settingsService;
+
+        public CreatePromotionHandler(IPromotionRepository service, ISettingsService settingsService,
+            IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
+        {
+            _service = service;
+            _settingsService = settingsService;
+            _jsonSerializationProvider = jsonSerializationProvider;
+        }
+
+        public override async Task<MessageResponse> Handle(CreatePromotionRequest request,
+            CancellationToken cancellationToken)
+        {
+            if (await _service.ExistsAsync(x =>
+                x.BrandId == request.BrandId && EF.Functions.ILike(x.Name, $"%{request.Name}%")))
+            {
+                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.NameExisted);
+            }
+
+            var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
+            var promotionTypeGroups =
+                _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
+
+            if (promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
+            {
+                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.PromotionTypeNotFound);
+            }
+
+            var promotionType = promotionTypeGroups.SelectMany(x => x.Types)
+                .First(x => x.Name == request.PromotionType);
+
+            await _service.CreatePromotionAsync(request, promotionType);
+
+            return CreateValidResponse<MessageResponse>();
+        }
+    }
+}

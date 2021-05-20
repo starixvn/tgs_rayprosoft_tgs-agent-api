@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { Locales, Trans, useLocale, useTrans } from "../i18n"
-import { Select } from "../select/Select"
+import { Select, SelectField } from "../select/Select"
 import { useGameTypeGroupList } from "./client"
 import { mapOmit } from "../list/map"
 
@@ -319,14 +319,6 @@ export const useGameTypeGroupValueOf = (gameType = "") => {
 
     return group?.name ?? ""
 }
-/*
-export const GameTypeGroupLabel = ({ value }) => {
-    let locale = useLocale()
-    let trans = findGroupTrans(value)
-
-    return trans?.[locale] ?? value
-}
-*/
 
 export const GameTypeGroupSelect = ({ placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
@@ -407,6 +399,51 @@ export const GameTypeSelect = ({ placeholder, group, ...props }) => {
     )
 }
 
+export const GameTypeSelectField = ({
+    placeholder,
+    group,
+    /*dropLobbyGame = false,*/ ...props
+}) => {
+    let defaultPlaceholder = useTrans({
+        zh: "游戏类型",
+        en: "Game Type"
+    })
+    placeholder = placeholder ?? defaultPlaceholder
+
+    let locale = useLocale()
+    let { isLoading, data: groups, error } = useGameTypeGroupList()
+
+    let options = groups
+        ?.filter(({ name }) => {
+            if (group) {
+                return group === name
+            }
+            return true
+        })
+        .reduce((list, { items, ...group }) => {
+            let groupItems = findGroup(group.name)?.items ?? []
+
+            let options = items.map((name) => {
+                let trans = findTrans(name, groupItems)
+                return {
+                    label: trans?.[locale],
+                    value: name
+                }
+            })
+
+            return [...list, ...options]
+        }, [])
+
+    return (
+        <SelectField
+            placeholder={placeholder}
+            isLoading={isLoading}
+            options={options}
+            {...props}
+        />
+    )
+}
+
 // Game Type List include Lobby Type
 export const AllGameTypeSelect = ({ placeholder, group, ...props }) => {
     let defaultPlaceholder = useTrans({
@@ -426,7 +463,10 @@ export const AllGameTypeSelect = ({ placeholder, group, ...props }) => {
             return true
         })
         .reduce((list, { items, ...group }) => {
-            let options = items.map(({ name, trans }) => {
+            let groupItems = findGroup(group.name)?.items ?? []
+
+            let options = items.map((name) => {
+                let trans = findTrans(name, groupItems)
                 return {
                     label: trans?.[locale],
                     value: name

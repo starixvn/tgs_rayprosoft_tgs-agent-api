@@ -119,7 +119,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
 
             var registerResponse = await _client.RegisterPlayerAsync(apiUrl,
-                new(player.BrandCode, player.DefaultWalletCurrencyCode)
+                new(configuration.AgentPrefix, player.BrandCode, player.DefaultWalletCurrencyCode)
                 {
                     CompanyKey = companyKey,
                     PlayerCode = playerCode

@@ -145,6 +145,7 @@ const Row = ({ name, disabled, field, index }) => {
                         control={control}
                         name={configFieldName(name, field, index)}
                         defaultValue={field.configurationId}
+                        shouldUnregister={true}
                         rules={{
                             validate: (value) => {
                                 let isChecked = getValues(
@@ -196,6 +197,7 @@ const Row = ({ name, disabled, field, index }) => {
                         control={control}
                         name={langFieldName(name, field, index)}
                         defaultValue={field.defaultLanguageCode ?? ""}
+                        shouldUnregister={true}
                         render={({
                             field: {
                                 onChange,
@@ -238,6 +240,7 @@ const Row = ({ name, disabled, field, index }) => {
                             QueryStringType.Desktop
                         )}
                         defaultValue={field.desktopQueryString ?? ""}
+                        shouldUnregister={true}
                         render={({
                             field: {
                                 onChange,
@@ -280,6 +283,7 @@ const Row = ({ name, disabled, field, index }) => {
                             QueryStringType.Mobile
                         )}
                         defaultValue={field.mobileQueryString ?? ""}
+                        shouldUnregister={true}
                         render={({
                             field: {
                                 onChange,

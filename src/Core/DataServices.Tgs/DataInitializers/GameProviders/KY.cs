@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ReSharper disable CheckNamespace
+// ReSharper disable IdentifierTypo
+// ReSharper disable InconsistentNaming
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
@@ -13,7 +17,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record KYGameProvider : IGameProvider
         {
-            //private static readonly string EndpointPath = "?agent={AGENT}&timestamp={TIMESTAMP}&param={PARAM}";
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -26,7 +29,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             return g;
                         }
-                        return (Game)g with { EndpointPath = string.Empty };
+
+                        return (Game)g with {EndpointPath = string.Empty};
                     })
                     .ToArray();
 
@@ -127,7 +131,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProviderConfiguration.Name => "Configuration KY";
 
-            string IGameProviderConfiguration.ClientId => "KY-WG";
+            string IGameProviderConfiguration.ClientId => "KY-PG";
 
             string IGameProviderConfiguration.SecretKey => "WCRhqTigjceMmr65e4P0mz1NaIyCkTWs";
 

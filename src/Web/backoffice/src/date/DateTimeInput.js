@@ -37,6 +37,7 @@ export const DateTimeInput = ({
             name={name}
             defaultValue={props?.defaultValue}
             rules={{ required, validate }}
+            shouldUnregister={true}
             render={({
                 field: { onChange, onBlur, value, ref },
                 fieldState: { invalid, isTouched, isDirty }

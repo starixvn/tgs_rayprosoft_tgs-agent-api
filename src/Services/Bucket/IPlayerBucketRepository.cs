@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using TGS.Services.PlayerBucket.Core.Models;
+using TGS.Services.PlayerBucket.Models;
 
-namespace TGS.Services.PlayerBucket.Core
+namespace TGS.Services.PlayerBucket
 {
     public interface IPlayerBucketRepository
     {

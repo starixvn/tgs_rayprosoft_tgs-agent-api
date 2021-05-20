@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using TGS.Shared.Game.ApiClients.AsiaGaming;
 using TGS.Shared.Game.ApiClients.IMESports;
-using TGS.Shared.Game.ApiClients.BigGaming;using TGS.Shared.Game.ApiClients.KY;
+using TGS.Shared.Game.ApiClients.BigGaming;
+using TGS.Shared.Game.ApiClients.KY;
+using TGS.Shared.Game.ApiClients.JDB;
 using TGS.Shared.Game.ApiClients.PragmaticPlay;
 using TGS.Shared.Game.ApiClients.Saba;
 using TGS.Shared.Game.ApiClients.SBOBET;
@@ -20,6 +22,7 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<ISBOApiClient, SBOApiClient>();
             services.AddHttpClient<IPragmaticPlayApiClient, PragmaticPlayApiClient>();
             services.AddHttpClient<IKYApiClient, KYApiClient>();
+            services.AddHttpClient<IJDBApiClient, JDBApiClient>();
             services.AddHttpClient<IAsiaGamingApiClient, AsiaGamingApiClient>();
             services.AddHttpClient<ISabaApiClient, SabaApiClient>();
             services.AddHttpClient<IVRApiClient, VRApiClient>();

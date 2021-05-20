@@ -12,7 +12,7 @@ export const label = ({ codes, locale }) => {
     switch (code) {
         case Update:
             return getTrans({
-                zh: "修改",
+                zh: "编辑",
                 en: "Edit"
             })
         default:

@@ -12,7 +12,9 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
+using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Payment;
+using TGS.Services.WalletService;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -44,11 +46,15 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqWithdrawProcessorFactory = new Mock<IWithdrawProcessorFactory>();
             var moqPaymentClient = new Mock<IPaymentClient>();
+            var moqWalletRepository = new Mock<IWalletRepository>();
+            var moqPlayerService = new Mock<IPlayerService>();
 
             var sut = new ReviewWithdrawFormCommandService(
                 moqPaymentRepository.Object,
                 moqWithdrawProcessorFactory.Object,
-                moqPaymentClient.Object);
+                moqPaymentClient.Object,
+                moqWalletRepository.Object,
+                moqPlayerService.Object);
 
             var formId = Guid.NewGuid();
             var brandPaymentId = Guid.NewGuid();

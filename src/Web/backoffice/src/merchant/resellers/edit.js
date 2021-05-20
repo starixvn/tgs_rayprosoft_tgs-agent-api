@@ -12,7 +12,7 @@ import {
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
-import { Update as UpdateMenu } from "./menu"
+import { Update as UpdateMenu, View as ViewMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import {
     CloseButtonFooter,
@@ -105,9 +105,8 @@ const AddDialog = ({ onSubmitted, dialog }) => {
         deleteGameProviderCache
     } = useResellerData()
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate, deleteCache } = useAddReseller(
-        formData
-    )
+    let { result, isLoading, error, mutate, deleteCache } =
+        useAddReseller(formData)
 
     const onSubmit = (data) => {
         let formData = normalizeFormData(data)
@@ -294,12 +293,11 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
 export const ViewButton = ({ record, ...props }) => {
     let dialog = useModalState()
 
-    /* TODO: view auth?
-  let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
-  if (!isDisplay) {
-    return null
-  }
-  */
+    let isDisplay = useIsDisplayMenuByRoute([ViewMenu])
+    if (!isDisplay) {
+        return null
+    }
+
     return (
         <>
             <Disclosure {...dialog} {...props}>

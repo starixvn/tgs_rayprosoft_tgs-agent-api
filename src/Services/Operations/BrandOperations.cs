@@ -190,7 +190,7 @@ namespace TGS.Services.Operations
                 brand => brand?.SecretKey);
 
         Task<CachedBrandGameProvider[]> IBrandOperations.GetBrandGameProvidersAsync(Guid brandId) =>
-            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.BrandGameProviders, brandId.ToString(),
+            _cacheManager.SafeGetAndCacheAsync(RedisCacheType.BrandGameProviders, brandId,
                 TimeSpan.FromHours(2),
                 () => _brandQueries.GetBrandGameProvidersAsync(brandId));
 

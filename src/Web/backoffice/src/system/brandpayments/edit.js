@@ -700,6 +700,7 @@ const UploadListColumn = ({ name = "", title, fileName = "" }) => {
         <Controller
             control={control}
             name={name}
+            shouldUnregister={true}
             render={({
                 field: { onChange, onBlur, value, name, ref },
                 fieldState: { invalid, isTouched, isDirty }

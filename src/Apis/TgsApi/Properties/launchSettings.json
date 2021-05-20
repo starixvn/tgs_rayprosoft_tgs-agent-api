@@ -101,6 +101,16 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
+    "TgsApi-JDB": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "JDB",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
@@ -184,6 +194,17 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
         "GameProviderCode": "BG",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
+    },
+    "Docker-JDB": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "GameProviderCode": "JDB",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,

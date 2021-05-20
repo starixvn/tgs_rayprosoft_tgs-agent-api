@@ -16,9 +16,9 @@ using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.Payment;
-using TGS.Services.PlayerBucket.Core;
-using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.WalletService;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.PlayerBucket;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {

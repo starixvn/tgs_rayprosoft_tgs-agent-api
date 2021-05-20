@@ -456,6 +456,7 @@ const GroupCard = ({
                     control={control}
                     name={`${name}[${groupIndex}].brandGames`}
                     defaultValue={groupField.brandGames}
+                    shouldUnregister={true}
                     render={({
                         field: { onChange, onBlur, value, name, ref },
                         fieldState: { invalid, isTouched, isDirty }
@@ -600,6 +601,7 @@ const BetLimitRow = ({
                     name={name}
                     control={control}
                     defaultValue={gameProviderBetLimitPairs}
+                    shouldUnregister={true}
                     render={({
                         field: { onChange, onBlur, value, name, ref },
                         fieldState: { invalid, isTouched, isDirty }
@@ -786,9 +788,10 @@ const GameProviderRow = ({ gameProvider, readonly = false }) => {
             <Table.Cell textAlign="center">{gameProvider.name}</Table.Cell>
             <Table.Cell>
                 <Controller
+                    control={control}
                     name={`${gameProvider.gameProviderId}`}
                     defaultValue={gameProvider.games}
-                    control={control}
+                    shouldUnregister={true}
                     render={({
                         field: { onChange, onBlur, value, name, ref },
                         fieldState: { invalid, isTouched, isDirty }
@@ -829,9 +832,11 @@ const GameProviderGameListDialog = ({
     readonly = false,
     onChange
 }) => {
-    let { data: gameProvider, isLoading, error } = useGameProvider(
-        gameProviderId
-    )
+    let {
+        data: gameProvider,
+        isLoading,
+        error
+    } = useGameProvider(gameProviderId)
 
     if (isLoading) {
         return <LoadingBackdrop {...dialog} />
@@ -974,7 +979,11 @@ const BetLimitDialog = ({
     let gameProviderIds = gameProviders.map(
         ({ gameProviderId }) => gameProviderId
     )
-    let { items = [], isLoading, error } = useGameProviderBetLimitList({
+    let {
+        items = [],
+        isLoading,
+        error
+    } = useGameProviderBetLimitList({
         betLimitId: betLimit.id,
         gameProviderIds,
         isSports: group.isSports,

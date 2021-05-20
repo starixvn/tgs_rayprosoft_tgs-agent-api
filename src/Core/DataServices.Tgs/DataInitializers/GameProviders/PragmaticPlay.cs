@@ -87,7 +87,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProviderConfiguration.Name => "Configuration PragmaticPlay";
 
-            string IGameProviderConfiguration.ClientId => "PP-WG";
+            string IGameProviderConfiguration.ClientId => "PP-PG";
 
             string IGameProviderConfiguration.SecretKey => "1ofNpUR2B9UzkODEZCU2ugqBfk2mtdNu";
 

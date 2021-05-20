@@ -5,14 +5,14 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Base62;
 using TGS.Core.Infrastructures.Extensions;
 
 namespace TGS.Core.Infrastructures.Security
 {
     internal sealed class AESCryptoProvider : ISymmetricCryptoProvider
     {
-        async Task<string> ISymmetricCryptoProvider.DecryptStringAsync(string encrypted, string iv, string key, CipherMode mode,
+        async Task<string> ISymmetricCryptoProvider.DecryptStringAsync(string encrypted, string iv, string key,
+            CipherMode mode,
             PaddingMode padding, Encoding encoding)
         {
             if (encrypted.IsNullOrEmpty())
@@ -36,15 +36,15 @@ namespace TGS.Core.Infrastructures.Security
             await using var ms = new MemoryStream();
             await using var cs = new CryptoStream(ms, ct, CryptoStreamMode.Write);
 
-            var bytes = encrypted.FromBase62();
+            var bytes = Convert.FromBase64String(encrypted);
             await cs.WriteAsync(bytes.AsMemory(0, bytes.Length));
             await cs.FlushFinalBlockAsync();
 
             return encoding.GetString(ms.ToArray());
         }
 
-        async Task<string> ISymmetricCryptoProvider.EncryptStringAsync(string original, string iv, string key, CipherMode mode,
-            PaddingMode padding, Encoding encoding)
+        async Task<string> ISymmetricCryptoProvider.EncryptStringAsync(string original, string iv, string key,
+            CipherMode mode, PaddingMode padding, Encoding encoding)
         {
             if (original.IsNullOrEmpty())
             {
@@ -71,7 +71,7 @@ namespace TGS.Core.Infrastructures.Security
             await cs.WriteAsync(bytes.AsMemory(0, bytes.Length));
             await cs.FlushFinalBlockAsync();
 
-            return ms.ToArray().ToBase62();
+            return Convert.ToBase64String(ms.ToArray());
         }
 
         private static void ValidateIVAndKey(string iv, string key)

@@ -22,7 +22,7 @@ export const label = ({ codes, locale }) => {
             )
         case Update:
             return getTrans({
-                zh: "修改",
+                zh: "编辑",
                 en: "Edit"
             })
         default:

@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         private async Task GenerateSettingsAsync()
         {
-            var options = new JsonSerializerOptions {WriteIndented = false};
+            var options = new JsonSerializerOptions { WriteIndented = false };
 
             var commonSettings = new[]
             {
@@ -67,11 +67,19 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             Name = "FirstDeposit",
                             SettlementIntervalType = "Instantly",
-                            Trans = new() {Zh = "每日首充", En = "First Deposit"}
+                            Trans = new() {Zh = "帳號首充", En = "First Deposit"}
                         },
                         new PromotionType
                         {
-                            Name = "SecondDeposit", Trans = new() {Zh = "每日再充", En = "Second Deposit"}
+                            Name = "DailyFirstDeposit",
+                            SettlementIntervalType = "Instantly",
+                            Trans = new() {Zh = "每日首充", En = "Daily First Deposit"}
+                        },
+                        new PromotionType
+                        {
+                            Name = "DailySecondDeposit",
+                            SettlementIntervalType = "Instantly",
+                            Trans = new() {Zh = "每日再充", En = "Daily Second Deposit"}
                         }
                     }
                 },
@@ -155,8 +163,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("PlayerManagement")
@@ -167,7 +175,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("AgentManagement")
@@ -178,15 +186,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Game")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("BrandProviders") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("BrandGames") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("BrandProviders") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("BrandGames") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("Report")
@@ -211,17 +219,17 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("FundManagement")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
+                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
                     }
                 },
                 new MenuSetting("System")

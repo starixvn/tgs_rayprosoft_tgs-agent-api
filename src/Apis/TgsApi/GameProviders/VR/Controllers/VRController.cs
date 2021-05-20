@@ -243,7 +243,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                                 ValidBetAmount = (recordBet.State == 1) ? 0 : recordBet.Cost,
                                 PlayerWinLoss = (recordBet.State == 1) ? 0 : (GetRoundStatus(recordBet.State) == RoundStatus.Closed) ? recordBet.PlayerPrize - recordBet.Cost : null,
                                 Commission = 0,
-                                Turnover = 0,
+                                Turnover = (recordBet.State == 1) ? 0 : recordBet.Cost,
                                 SettleAmount = recordBet.PlayerPrize,
                                 TieBetAdjustment = null,
                                 ClientStatus = GetClientRound(recordBet.State),

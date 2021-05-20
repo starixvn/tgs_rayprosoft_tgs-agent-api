@@ -11,6 +11,7 @@ export const RadioGroup = ({ name, defaultValue, ...props }) => {
             control={control}
             name={name}
             defaultValue={defaultValue}
+            shouldUnregister={true}
             render={({
                 field: { ref, ...formProps },
                 fieldState: { invalid, isTouched, isDirty }

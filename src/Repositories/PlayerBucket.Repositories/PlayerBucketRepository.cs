@@ -6,9 +6,9 @@ using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
-using TGS.Services.PlayerBucket.Core;
-using TGS.Services.PlayerBucket.Core.Models;
 using TGS.Services.WalletService;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.PlayerBucket;
 
 namespace PlayerBucket.Repositories
 {
