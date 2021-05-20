@@ -64,7 +64,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.AllowKickPlayer => true;
 
-            short IGameProvider.UniqueId => 1;
+            ushort IGameProvider.UniqueId => 1;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => new GameProviderBetLimit[]
             {
@@ -110,10 +110,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             Dictionary<string, string> IGameProvider.MarketTypes => new()
             {
-                {"ALL", "0"},
-                {"Handicap", "1"},
-                {"Odd_Even", "2"},
-                {"Over_Under", "3"}
+                {"ALL", "0"}, {"Handicap", "1"}, {"Odd_Even", "2"}, {"Over_Under", "3"}
             };
         }
 

@@ -67,7 +67,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.AllowKickPlayer => false;
 
-            short IGameProvider.UniqueId => UniqueId;
+            ushort IGameProvider.UniqueId => UniqueId;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
@@ -81,72 +81,63 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     LockGameTypes = new[] {"ROU"},
                     DesKey = "jh2hnM6K",
                     Md5Key = "jh2bKFbpLZuW",
-                    GameHistoryTypes = new[]
-                    {
-                        new AsiaGamingGameHistoryType
+                    GameHistoryTypes =
+                        new[]
                         {
-                            GameTypes = new[] {"BAC", "LBAC", "CBAC"},
-                            Descriptions = new Dictionary<string, string>
+                            new AsiaGamingGameHistoryType
                             {
-                                {"P", "Player"},
-                                {"B", "Banker"}
+                                GameTypes = new[] {"BAC", "LBAC", "CBAC"},
+                                Descriptions = new Dictionary<string, string> {{"P", "Player"}, {"B", "Banker"}}
+                            },
+                            new AsiaGamingGameHistoryType
+                            {
+                                GameTypes = new[] {"DT"},
+                                Descriptions = new Dictionary<string, string> {{"D", "Dragon"}, {"T", "Tiger"}}
+                            },
+                            new AsiaGamingGameHistoryType
+                            {
+                                GameTypes = new[] {"NN"},
+                                Descriptions = new Dictionary<string, string>
+                                {
+                                    {"F", "First"},
+                                    {"P1", "Player1"},
+                                    {"P2", "Player2"},
+                                    {"P3", "Player3"},
+                                    {"B", "Banker"}
+                                }
+                            },
+                            new AsiaGamingGameHistoryType
+                            {
+                                GameTypes = new[] {"ZJH"},
+                                Descriptions = new Dictionary<string, string>
+                                {
+                                    {"D", "Dragon"}, {"P", "Phoenix"}
+                                }
+                            },
+                            new AsiaGamingGameHistoryType
+                            {
+                                GameTypes = new[] {"BF"},
+                                Descriptions = new Dictionary<string, string>
+                                {
+                                    {"B", "BlackBull"}, {"R", "RedBull"}
+                                }
+                            },
+                            new AsiaGamingGameHistoryType
+                            {
+                                GameTypes = new[] {"BJ", "SG"},
+                                Descriptions = new Dictionary<string, string>
+                                {
+                                    {"B", "Banker"},
+                                    {"P1", "Player1"},
+                                    {"P2", "Player2"},
+                                    {"P3", "Player3"},
+                                    {"P4", "Player4"},
+                                    {"P5", "Player5"},
+                                    {"P6", "Player6"},
+                                    {"P7", "Player7"}
+                                }
                             }
                         },
-                        new AsiaGamingGameHistoryType
-                        {
-                            GameTypes = new[] {"DT"},
-                            Descriptions = new Dictionary<string, string>
-                            {
-                                {"D", "Dragon"},
-                                {"T", "Tiger"}
-                            }
-                        },
-                        new AsiaGamingGameHistoryType
-                        {
-                            GameTypes = new[] {"NN"},
-                            Descriptions = new Dictionary<string, string>
-                            {
-                                {"F", "First"},
-                                {"P1", "Player1"},
-                                {"P2", "Player2"},
-                                {"P3", "Player3"},
-                                {"B", "Banker"}
-                            }
-                        },
-                        new AsiaGamingGameHistoryType
-                        {
-                            GameTypes = new[] {"ZJH"},
-                            Descriptions = new Dictionary<string, string>
-                            {
-                                {"D", "Dragon"},
-                                {"P", "Phoenix"}
-                            }
-                        },
-                        new AsiaGamingGameHistoryType
-                        {
-                            GameTypes = new[] {"BF"},
-                            Descriptions = new Dictionary<string, string>
-                            {
-                                {"B", "BlackBull"},
-                                {"R", "RedBull"}
-                            }
-                        },
-                        new AsiaGamingGameHistoryType
-                        {
-                            GameTypes = new[] {"BJ", "SG"},
-                            Descriptions = new Dictionary<string, string>
-                            {
-                                {"B", "Banker"},
-                                {"P1", "Player1"},
-                                {"P2", "Player2"},
-                                {"P3", "Player3"},
-                                {"P4", "Player4"},
-                                {"P5", "Player5"},
-                                {"P6", "Player6"},
-                                {"P7", "Player7"}
-                            }
-                        }
-                    },
                     LoginApiUrl = new("http://gi.aggdemo.com:81"),
                     ApiUrl = new("https://swapi.etwlt.com"),
                     OppositeBets = new OppositeBetSetting[]

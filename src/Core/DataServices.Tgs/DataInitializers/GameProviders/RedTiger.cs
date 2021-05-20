@@ -31,7 +31,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game) g with {EndpointPath = $"{EndpointPath}{QueryString}"};
+                        return (Game)g with {EndpointPath = $"{EndpointPath}{QueryString}"};
                     })
                     .ToArray();
 
@@ -54,10 +54,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new CNYCurrency(), new VNDCurrency(), new VND1000Currency()
             };
 
-            ILanguage[] IGameProvider.Languages => new ILanguage[]
-            {
-                new USLanguage(), new CNLanguage()
-            };
+            ILanguage[] IGameProvider.Languages => new ILanguage[] {new USLanguage(), new CNLanguage()};
 
             IGame[] IGameProvider.Games => _games;
 
@@ -65,7 +62,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.SupportTestPlayer => true;
 
-            short IGameProvider.UniqueId => 999;
+            ushort IGameProvider.UniqueId => 999;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => new GameProviderBetLimit[]
             {
@@ -88,7 +85,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new RedTigerConfiguration
             {
-                ServiceEndpointUrl = new Uri("https://localhost:62330")
+                ServiceEndpointUrl = new("https://localhost:62330")
             };
         }
 

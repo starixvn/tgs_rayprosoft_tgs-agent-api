@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public bool AllowKickPlayer { get; set; }
         public int PlaceBetTimeout { get; set; }
         public int SettleBetTimeout { get; set; }
-        public short UniqueId { get; set; }
+        public ushort UniqueId { get; set; }
         public bool TransferWallet { get; set; }
         public virtual ICollection<Game> Games { get; set; }
         public virtual ICollection<ResellerGameProvider> Resellers { get; set; }
