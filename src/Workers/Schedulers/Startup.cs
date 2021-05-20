@@ -1,15 +1,19 @@
 using System;
 using Hangfire;
+using Hangfire.Console;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Prometheus;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Filters;
+using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -86,7 +90,9 @@ namespace TGS.Workers.Schedulers
 
                     config.GetSection("Promotion").Bind(options);
                 })
-                .AddHangfireScheduler(_configuration, jobProvider: new JobProvider(),
+                .AddHangfireScheduler(
+                    _configuration,
+                    jobProvider: new JobProvider(),
                     typesToUseManagementPage: GetModuleTypes());
 
             services.AddControllers();
@@ -97,7 +103,8 @@ namespace TGS.Workers.Schedulers
                 options.MongoConnectionString = config.GetValue<string>("GameProviders:ConnectionString");
             });
 
-            services.AddHealthChecks()
+            services
+                .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")
                 .AddRedis(_configuration)
                 .AddMongoDb(_configuration, "Hangfire", "hangfire-mongodb")
