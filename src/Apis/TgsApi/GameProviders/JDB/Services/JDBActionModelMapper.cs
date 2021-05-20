@@ -35,6 +35,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             var transactions = new List<TransactionData>(2);
             var externalTransactionId = request.TransferId.ToString();
             var externalRoundId = request.GameSequenceNo.ToString();
+            var externalGameId = $"{(int)request.GameType}_{request.MachineType}";
 
             //place bet
             transactions.Add(new TransactionData
@@ -44,7 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalBetId = externalTransactionId,
                 ExternalRoundId = externalRoundId,
-                ExternalGameId = request.MachineType.ToString(),
+                ExternalGameId = externalGameId,
                 GameActionType = PlaceBet,
                 TimeStamp = DateTimeOffset.Parse(request.GameDate),
                 RoundClosed = false
@@ -59,7 +60,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalBetId = externalTransactionId,
                 ExternalRoundId = externalRoundId,
-                ExternalGameId = request.GameSequenceNo.ToString(),
+                ExternalGameId = externalGameId,
                 GameActionType = request.Win > 0 ? WinBet : LoseBet,
                 TimeStamp = DateTimeOffset.Parse(request.LastModifyTime),
                 RoundClosed = true
