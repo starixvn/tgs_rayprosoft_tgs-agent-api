@@ -32,15 +32,15 @@ namespace TGS.Services.Report.Application.Queries.Round
                 .GroupJoin(
                     _service.TgsRepository.Players,
                     round => round.PlayerCode, player => player.PlayerCode,
-                    (round, player) => new {round, player})
-                .SelectMany(x => x.player.DefaultIfEmpty(), (x, player) => new {x.round, player})
+                    (round, player) => new { round, player })
+                .SelectMany(x => x.player.DefaultIfEmpty(), (x, player) => new { x.round, player })
                 .GroupJoin(_service.TgsRepository.Games,
                     combine => combine.round.GameId, game => game.Id,
-                    (combine, game) => new {combine.round, combine.player, game})
-                .SelectMany(x => x.game.DefaultIfEmpty(), (x, game) => new {x.round, x.player, game})
+                    (combine, game) => new { combine.round, combine.player, game })
+                .SelectMany(x => x.game.DefaultIfEmpty(), (x, game) => new { x.round, x.player, game })
                 .GroupJoin(_service.TgsRepository.RoundDetails, c => c.round.Id, detail => detail.RoundId,
-                    (combine, detail) => new {combine.round, combine.player, combine.game, detail})
-                .SelectMany(x => x.detail.DefaultIfEmpty(), (x, detail) => new {x.round, x.player, x.game, detail})
+                    (combine, detail) => new { combine.round, combine.player, combine.game, detail })
+                .SelectMany(x => x.detail.DefaultIfEmpty(), (x, detail) => new { x.round, x.player, x.game, detail })
                 .Where(request.Username, x => request.Username == x.player.Username)
                 .Where(request.GameType, x => x.game.Type == request.GameType)
                 .GroupJoin(_service.TgsRepository.GameProviders, combine => combine.round.GameProviderId,
@@ -86,6 +86,7 @@ namespace TGS.Services.Report.Application.Queries.Round
                     WinLoss = -combine.round.WinLoss,
                     AdditionalData = combine.detail.AdditionalData
                 })
+                .OrderByDescending(x => x.CreatedOn)
                 .CreatePagedResponseAsync(request);
     }
 }
