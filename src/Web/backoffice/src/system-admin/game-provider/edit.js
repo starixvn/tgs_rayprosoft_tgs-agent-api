@@ -33,9 +33,6 @@ import GameProviderStatus, {
 } from "./GameProviderStatus"
 import { useLanguageList } from "../../language/client"
 import { useCurrencyList } from "../../currency/client"
-//TODO: rm
-// import { GameProviderCurrencyCheckboxGroupTable } from "../../game/providers/GameProviderCurrencyCheckboxGroup"
-// import { GameProviderLanguageCheckboxGroupTable } from "../../game/providers/GameProviderLanguageCheckboxGroup"
 import { GameProviderLanguageCheckboxGroupTable } from "./GameProviderLanguageCheckboxGroup"
 import {
     mapCheckedByCode,
@@ -318,10 +315,6 @@ const EditBody = ({ readonly, isAdd = false }) => {
                 <LanguageFieldsBox />
 
                 <GameProviderCurrencyBetLimitFieldsBox disabled={readonly} />
-                {/* <NormalLabel>
-                    <Trans zh="支持币种" en="Currencies" />
-                </NormalLabel>
-                <GameProviderCurrencyCheckboxGroupTable disabled={readonly} /> */}
             </FieldValues>
         </Stack>
     )

@@ -70,7 +70,7 @@ export const GameProviderLanguageCheckboxGroupTable = ({
                                                         index
                                                     )}
                                                     defaultValue={
-                                                        field.brandCultureCode
+                                                        field.gameProviderCultureCode
                                                     }
                                                     shouldUnregister={true}
                                                     render={({
@@ -93,7 +93,7 @@ export const GameProviderLanguageCheckboxGroupTable = ({
                                                             <Box>
                                                                 <Input
                                                                     type="hidden"
-                                                                    name={`${name}[${index}].cultureCode`}
+                                                                    name={`${name}.${index}.cultureCode`}
                                                                     value={
                                                                         field.cultureCode
                                                                     }
