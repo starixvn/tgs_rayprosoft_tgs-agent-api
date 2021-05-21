@@ -69,7 +69,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                     Error = new BigGamingErrorResponse()
                     {
                         Code = error.ToString(),
-                        Message = GameApiError.Account_Does_Not_Exist.Description()
+                        Message = GameApiError.AccountDoesNotExist.Description()
                     },
                     Jsonrpc = baseRequest.Jsonrpc
                 };
@@ -92,8 +92,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 Id = baseRequest.Id,
                 Error = new BigGamingErrorResponse()
                 {
-                    Code = GameApiError.Account_Does_Not_Exist.ToString(),
-                    Message = GameApiError.Account_Does_Not_Exist.Description()
+                    Code = GameApiError.AccountDoesNotExist.ToString(),
+                    Message = GameApiError.AccountDoesNotExist.Description()
                 },
                 Jsonrpc = baseRequest.Jsonrpc
             }));
@@ -117,9 +117,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
                 Error = new BigGamingErrorResponse()
                 {
-                    Code = GameApiError.Handle_Exceptions_Submitted_By_Users_For_Batch_Betting.ToString(),
+                    Code = GameApiError.HandleExceptionsSubmittedByUsersForBatchBetting.ToString(),
                     Sn = data.Sn,
-                    Message = GameApiError.Handle_Exceptions_Submitted_By_Users_For_Batch_Betting.Description()
+                    Message = GameApiError.HandleExceptionsSubmittedByUsersForBatchBetting.Description()
                 },
                 Jsonrpc = baseRequest.Jsonrpc
             }));
@@ -143,9 +143,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
                 Error = new BigGamingErrorResponse()
                 {
-                    Code = GameApiError.Exception_Of_Batch_Settlement_Submitted_By_Users.ToString(),
+                    Code = GameApiError.ExceptionOfBatchSettlementSubmittedByUsers.ToString(),
                     Sn = data.Sn,
-                    Message = GameApiError.Exception_Of_Batch_Settlement_Submitted_By_Users.Description()
+                    Message = GameApiError.ExceptionOfBatchSettlementSubmittedByUsers.Description()
                 },
                 Jsonrpc = baseRequest.Jsonrpc
             }));
@@ -165,9 +165,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
                 Error = new BigGamingErrorResponse()
                 {
-                    Code = GameApiError.Bet_Slip_Does_Not_Exist.ToString(),
+                    Code = GameApiError.BetSlipDoesNotExist.ToString(),
                     Sn = data.Sn,
-                    Message = GameApiError.Bet_Slip_Does_Not_Exist.Description()
+                    Message = GameApiError.BetSlipDoesNotExist.Description()
                 },
                 Jsonrpc = baseRequest.Jsonrpc
             }));
@@ -181,8 +181,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 Result = null,
                 Error = new BigGamingErrorResponse()
                 {
-                    Code = GameApiError.Unknown_Exception_At_The_Application_Layer.ToString(),
-                    Message = GameApiError.Unknown_Exception_At_The_Application_Layer.Description()
+                    Code = GameApiError.UnknownExceptionAtTheApplicationLayer.ToString(),
+                    Message = GameApiError.UnknownExceptionAtTheApplicationLayer.Description()
                 },
                 Jsonrpc = baseRequest.Jsonrpc
             }));

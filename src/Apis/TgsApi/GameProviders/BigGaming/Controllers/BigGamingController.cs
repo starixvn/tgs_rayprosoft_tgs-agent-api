@@ -79,8 +79,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                     Id = baseRequest.Id,
                     Error = new BigGamingErrorResponse()
                     {
-                        Code = GameApiError.Target_Not_Found.ToString(),
-                        Message = GameApiError.Target_Not_Found.Description(),
+                        Code = GameApiError.TargetNotFound.ToString(),
+                        Message = GameApiError.TargetNotFound.Description(),
                         Action = baseRequest.Method.ToLower()
                     },
                     Jsonrpc = baseRequest.Jsonrpc
