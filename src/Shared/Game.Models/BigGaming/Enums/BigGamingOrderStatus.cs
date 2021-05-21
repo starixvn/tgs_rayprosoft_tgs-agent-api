@@ -13,7 +13,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Enums
         /// 注单不存在 - 仅对免转模式有效
         /// </summary>
         [Description("注单不存在")]
-        Bet_Slip_Does_Not_Exist = 0,
+        BetSlipDoesNotExist = 0,
         /// <summary>
         /// 未结算
         /// </summary>

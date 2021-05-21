@@ -77,7 +77,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var gameActionExternal = await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, orderId).ConfigureAwait(false);
             if (gameActionExternal == null)
             {
-                return BigGamingOrderStatus.Bet_Slip_Does_Not_Exist;
+                return BigGamingOrderStatus.BetSlipDoesNotExist;
             }
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gameActionExternal.ExternalGameId).ConfigureAwait(false);
 
@@ -113,7 +113,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             GameActionType.TieBet => BigGamingOrderStatus.Tie,
             GameActionType.LoseBet => BigGamingOrderStatus.Lose,
             GameActionType.CancelTransaction => BigGamingOrderStatus.Cancel,
-            _ => BigGamingOrderStatus.Bet_Slip_Does_Not_Exist,
+            _ => BigGamingOrderStatus.BetSlipDoesNotExist,
         };
     }
 }
