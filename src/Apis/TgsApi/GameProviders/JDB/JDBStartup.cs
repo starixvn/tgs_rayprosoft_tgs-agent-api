@@ -29,7 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
                 (provider, key) => key switch
                 {
                     GameProvider.JDB => provider.GetRequiredService<JDBErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
+                    _                => provider.GetRequiredService<TgsErrorMapper>()
                 }
             );
 
@@ -38,7 +38,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
 
             services.AddScoped<IJDBServices, JDBServices>();
             services.AddSingleton<IJDBActionModelMapper, JDBActionModelMapper>();
-            services.AddSingleton<JDBGameTypeMapper>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(JDBGameInitializer)}, (provider, _) =>
                 provider.GetRequiredService<JDBGameInitializer>());

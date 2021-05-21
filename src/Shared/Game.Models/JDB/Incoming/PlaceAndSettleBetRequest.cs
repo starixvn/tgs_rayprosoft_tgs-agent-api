@@ -1,7 +1,6 @@
 ﻿// unset
 
 using System.Text.Json.Serialization;
-using JDBGameType = TGS.Shared.Game.Models.JDB.Enums.GameType;
 
 namespace TGS.Shared.Game.Models.JDB.Incoming
 {
@@ -14,7 +13,7 @@ namespace TGS.Shared.Game.Models.JDB.Incoming
         public long GameSequenceNo { get; init; }
 
         [JsonPropertyName("gType")]
-        public JDBGameType GameType { get; init; }
+        public int GameType { get; init; }
 
         [JsonPropertyName("mType")]
         public int MachineType { get; init; }
