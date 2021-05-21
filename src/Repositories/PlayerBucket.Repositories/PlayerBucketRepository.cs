@@ -97,7 +97,7 @@ namespace PlayerBucket.Repositories
             return bucketAmount;
         }
 
-        async ValueTask<bool> IPlayerBucketRepository.IsBucketFull(string playerCode) =>
+        async ValueTask<bool> IPlayerBucketRepository.IsBucketFullAsync(string playerCode) =>
             await _repository.PlayerBuckets.AllAsync(x => x.PlayerCode == playerCode && x.IsFull);
     }
 }

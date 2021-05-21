@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operations;
 using TGS.Services.Payment;
+using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
 
@@ -17,6 +18,7 @@ namespace TGS.Services.Operator.Withdraw
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IPaymentRepository _paymentRepository;
+        private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerOperations _playerOperations;
         private readonly IWalletRepository _walletRepository;
 
@@ -24,21 +26,31 @@ namespace TGS.Services.Operator.Withdraw
             IWalletRepository walletRepository,
             IPaymentRepository paymentRepository,
             IPlayerOperations playerOperations,
+            IPlayerBucketRepository playerBucketRepository,
             IJsonSerializationProvider jsonSerializationProvider,
             IOptions<JsonOptions> jsonOptionsAccessor)
         {
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _jsonSerializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
         }
 
         public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command, CancellationToken cancellationToken = default)
         {
+            var isBucketFull = await _playerBucketRepository
+                .IsBucketFullAsync(command.PlayerCode)
+                .ConfigureAwait(false);
+
+            if (!isBucketFull)
+                throw new InsufficientBucketException();
+
             var playerData = await _playerOperations
                 .GetCachedPlayerAsync(command.PlayerCode)
                 .ConfigureAwait(false);
+
             var balance = await _walletRepository
                 .GetBalanceAsync(playerData.DefaultWalletId, command.PlayerCode)
                 .ConfigureAwait(false);
