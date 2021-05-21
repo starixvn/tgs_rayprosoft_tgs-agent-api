@@ -53,7 +53,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                     .GameProviderConfigurations.JDB);
 
             var agent = _jdbServices.GetAgent(configuration, player.DefaultWalletCurrencyCode);
-            var items = game.ExternalId.Split('_');
+            var items = game.ExternalId.Split("_");
 
             if (items.Length != 2)
             {

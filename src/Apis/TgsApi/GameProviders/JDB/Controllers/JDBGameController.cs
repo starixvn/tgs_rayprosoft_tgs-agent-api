@@ -45,11 +45,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         }
 
         [HttpPost]
-        public async Task<BaseActionResponse> TransferFundsAsync([FromForm(Name = "x")] string json)
-        {
-            var baseRequest = _jsonSerializationProvider.DeserializeFromString<BaseActionRequest>(json);
-
-            return baseRequest.ActionType switch
+        public async Task<BaseActionResponse> TransferFundsAsync(
+            [FromForm(Name = "action")] ActionType actionType,
+            [FromForm(Name = "value")] string json) =>
+            actionType switch
             {
                 ActionType.GetBalance => await GetBalanceAsync(_jsonSerializationProvider
                     .DeserializeFromString<GetBalanceRequest>(json)),
@@ -66,7 +65,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
                     ErrorMessage = "Invalid action"
                 }
             };
-        }
 
         private async Task<BaseActionResponse> GetBalanceAsync(GetBalanceRequest request)
         {
