@@ -68,6 +68,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 
         private async Task<BaseActionResponse> GetBalanceAsync(GetBalanceRequest request)
         {
+            Request.Path = new($"{Request.Path}/getbalance");
+
             var result = await _actions.GetBalanceAsync(Consts.GameProvider.JDB, request.UserId)
                 .ConfigureAwait(false);
 
@@ -76,6 +78,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 
         private async Task<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request)
         {
+            Request.Path = new($"{Request.Path}/betandsettle");
+
             var platformType = "Web".IgnoreCaseEquals(request.ClientType) ? PlatformType.Desktop : PlatformType.Mobile;
             var data = await _services.GetGameProviderConfigurationDataAsync(platformType)
                 .ConfigureAwait(false);
@@ -87,6 +91,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 
         private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
         {
+            Request.Path = new($"{Request.Path}/cancel");
+
             var data = await _services.GetGameProviderConfigurationDataAsync(PlatformType.Desktop);
             var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdAsync(data.GameProviderId,
                 request.UserId,
