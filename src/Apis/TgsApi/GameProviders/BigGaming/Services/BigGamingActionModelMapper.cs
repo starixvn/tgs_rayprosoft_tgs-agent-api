@@ -96,7 +96,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         ExternalGameId = order.ExternalGameId.ToString(),
                         GameActionType = GameActionType.CancelTransaction,
                         TimeStamp = DateTimeOffset.UtcNow,
-                        ExternalTransactionReferenceId = gameActionExternalIds.ExternalTransactionId
+                        ExternalTransactionReferenceId = gameActionExternalIds.ExternalTransactionId,
+                        RoundClosed = false
                     });
                 }
 
