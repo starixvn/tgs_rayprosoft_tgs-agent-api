@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
@@ -27,13 +28,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private readonly ISettingOperations _settingOperations;
         private readonly IHashProvider _hashProvider;
         private readonly IBigGamingServices _bigGamingServices;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         public AuthorizeBigGamingMiddleware(
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
             IHashProvider hashProvider,
-            IBigGamingServices bigGamingServices)
+            IBigGamingServices bigGamingServices,
+            IJsonSerializationProvider jsonSerializationProvider)
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -41,6 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
             _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -50,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                  .GameProviderConfigurations.BigGaming);
 
             var value = await context.Request.ReadAsStringAsync();
-            var response = JsonSerializer.Deserialize<BigGamingBaseRequest>(value);
+            var request = JsonSerializer.Deserialize<BigGamingBaseRequest>(value);
 
             /*
             if (context.Request.Path.Value.Contains("/api/bg/entrance", StringComparison.InvariantCultureIgnoreCase))
@@ -68,12 +72,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             }
             */
 
-            var checkingSign = response.Method.ToLower() switch
+            var checkingSign = request.Method.ToLower() switch
             {
-                "open.operator.user.balance" => await CheckingSignBalanceAsync(configuration, JsonSerializer.Deserialize<BigGamingBalanceRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
-                "open.operator.order.transfer" => await CheckingSignBetAsync(configuration, JsonSerializer.Deserialize<BigGamingBetRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
-                "open.operator.calc.transfer" => await CheckingSignSettleAsync(configuration, JsonSerializer.Deserialize<BigGamingSettleRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
-                "open.operator.order.status" => await CheckingSignOrderStatusAsync(configuration, JsonSerializer.Deserialize<BigGamingOrderStatusRequest>(JsonSerializer.Serialize(response.Params))).ConfigureAwait(false),
+                "open.operator.user.balance" => await CheckingSignBalanceAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingBalanceRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
+                "open.operator.order.transfer" => await CheckingSignBetAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingBetRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
+                "open.operator.calc.transfer" => await CheckingSignSettleAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingSettleRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
+                "open.operator.order.status" => await CheckingSignOrderStatusAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingOrderStatusRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
                 "open.operator.ping" => new(true, null),
                 _ => new(false, null)
             };
@@ -94,7 +98,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             await next(context);
         }
 
-        private async Task<(bool Success, CachedPlayer Player)> CheckingSignBalanceAsync(BigGamingConfiguration configuration, BigGamingBalanceRequest request)
+        private async Task<(bool Success, CachedPlayer Player)> CheckingSignBalanceAsync(BigGamingBalanceRequest request)
         {
             var player = await GetPlayerAsync(request.LoginId);
             if (player == null)
@@ -109,10 +113,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 throw new MissingTokenException("Sign Error");
             }
 
-            return new(player != null, player);
+            return new(true, player);
         }
 
-        private async Task<(bool Success, CachedPlayer Player)> CheckingSignBetAsync(BigGamingConfiguration configuration, BigGamingBetRequest request)
+        private async Task<(bool Success, CachedPlayer Player)> CheckingSignBetAsync(BigGamingBetRequest request)
         {
             var player = await GetPlayerAsync(request.LoginId);
             if (player == null)
@@ -127,9 +131,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 throw new MissingTokenException("Sign Error");
             }
 
-            return new(player != null, player);
+            return new(true, player);
         }
-        private async Task<(bool Success, CachedPlayer Player)> CheckingSignSettleAsync(BigGamingConfiguration configuration, BigGamingSettleRequest request)
+        private async Task<(bool Success, CachedPlayer Player)> CheckingSignSettleAsync(BigGamingSettleRequest request)
         {
             var player = await GetPlayerAsync(request.LoginId);
             if (player == null)
@@ -144,10 +148,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 throw new MissingTokenException("Sign Error");
             }
 
-            return new(player != null, player);
+            return new(true, player);
         }
 
-        private async Task<(bool Success, CachedPlayer Player)> CheckingSignOrderStatusAsync(BigGamingConfiguration configuration, BigGamingOrderStatusRequest request)
+        private async Task<(bool Success, CachedPlayer Player)> CheckingSignOrderStatusAsync(BigGamingOrderStatusRequest request)
         {
             var loginId = request.OrderMap.Last().LoginId;
 

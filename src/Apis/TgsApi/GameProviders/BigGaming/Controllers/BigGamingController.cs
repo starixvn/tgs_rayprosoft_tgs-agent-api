@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -33,16 +35,20 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         private readonly IGamePlayActions _actions;
         private readonly IBigGamingModelActionMapper _map;
         private readonly IBigGamingServices _services;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IReadOnlyDictionary<string, Func<IOptions<JsonOptions>, BigGamingBaseRequest, Task<BigGamingBaseResponse>>> _methodMapper;
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
         public BigGamingController(
             IBigGamingModelActionMapper map,
             IGamePlayActions actions,
-            IBigGamingServices services
+            IBigGamingServices services,
+            IJsonSerializationProvider jsonSerializationProvider
             )
         {
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _methodMapper = new Dictionary<string, Func<IOptions<JsonOptions>, BigGamingBaseRequest, Task<BigGamingBaseResponse>>>
             {
                 {"open.operator.user.balance", BalanceAsync},
@@ -50,6 +56,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 {"open.operator.calc.transfer",SettleAsync},
                 {"open.operator.order.status", OrderStatusAsync},
                 {"open.operator.ping" ,PingAsync}
+            };
+            _jsonSerializerOptions = new JsonSerializerOptions()
+            {
+                IgnoreReadOnlyProperties = true,
+                WriteIndented = true,
+                //略過所有預設值屬性
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
             };
         }
 
@@ -90,12 +103,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
 
         [HttpPost("bet")]
         public async Task<BigGamingBaseResponse> BetAsync(
-            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             BigGamingBaseRequest baseRequest)
         {
-            var data = JsonSerializer.Deserialize<BigGamingBetRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
+            var data = _jsonSerializationProvider.DeserializeFromString<BigGamingBetRequest>(_jsonSerializationProvider.SerializeToString(baseRequest.Params), _jsonSerializerOptions);
             var items = HttpContext.Items;
-            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
@@ -132,7 +143,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
             BigGamingBaseRequest baseRequest)
         {
-            var data = JsonSerializer.Deserialize<BigGamingSettleRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
+            var data = _jsonSerializationProvider.DeserializeFromString<BigGamingSettleRequest>(_jsonSerializationProvider.SerializeToString(baseRequest.Params), _jsonSerializerOptions);
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -178,7 +189,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
                BigGamingBaseRequest baseRequest)
         {
-            var data = JsonSerializer.Deserialize<BigGamingOrderStatusRequest>(JsonSerializer.Serialize(baseRequest.Params), jsonOptionsAccessor.Value.JsonSerializerOptions);
+            var data = _jsonSerializationProvider.DeserializeFromString<BigGamingOrderStatusRequest>(_jsonSerializationProvider.SerializeToString(baseRequest.Params), _jsonSerializerOptions);
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var orderStatusResultResponse = new List<BigGamingOrderStatusResultResponse>();
