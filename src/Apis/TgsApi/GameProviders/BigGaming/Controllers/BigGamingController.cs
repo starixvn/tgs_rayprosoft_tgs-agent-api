@@ -159,16 +159,33 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
            .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
            .ConfigureAwait(false);
 
-
             decimal balance;
             if (data.Recalc == "1")
             {
-                balance = await _map.ResettleAsync(gameProviderConfigurationData, data, playerCode).ConfigureAwait(false);
+                var resettleResponse = await _map.ResettleAsync(gameProviderConfigurationData, data, playerCode).ConfigureAwait(false);
+                var betDataResult = await _actions.CancelTransactionAsync(resettleResponse.BeforeCancel).ConfigureAwait(false);
+                balance = betDataResult.Balance;
+                if (resettleResponse.SettleBetData.Transactions.Length > 0)
+                {
+                    betDataResult = await _actions.SettleBetAsync(resettleResponse.SettleBetData).ConfigureAwait(false);
+                    balance = betDataResult.Balance;
+                }
+                if (resettleResponse.CancelBetData.Transactions.Length > 0)
+                {
+                    betDataResult = await _actions.CancelTransactionAsync(resettleResponse.CancelBetData).ConfigureAwait(false);
+                    balance = betDataResult.Balance;
+                }
             }
             else
             {
-                balance = await _map.SettleAsync(gameProviderConfigurationData, data, playerCode).ConfigureAwait(false);
-
+                var settleResponse = await _map.SettleAsync(gameProviderConfigurationData, data, playerCode).ConfigureAwait(false);
+                var betDataResult = await _actions.SettleBetAsync(settleResponse.SettleBetData).ConfigureAwait(false);
+                balance = betDataResult.Balance;
+                if (settleResponse.CancelBetData.Transactions.Length > 0)
+                {
+                    betDataResult = await _actions.CancelTransactionAsync(settleResponse.CancelBetData).ConfigureAwait(false);
+                    balance = betDataResult.Balance;
+                }
             }
 
             var result = new BigGamingSettleResponse()

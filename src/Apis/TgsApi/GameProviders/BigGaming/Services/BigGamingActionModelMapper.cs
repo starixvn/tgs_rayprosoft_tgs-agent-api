@@ -16,8 +16,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
     public interface IBigGamingModelActionMapper
     {
         BetData Request(GameProviderConfigurationData data, BigGamingBetRequest request);
-        Task<decimal> SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
-        Task<decimal> ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
+        Task<(BetData SettleBetData, BetData CancelBetData)> SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
+        Task<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
     }
     public class BigGamingActionModelMapper : IBigGamingModelActionMapper
     {
@@ -53,50 +53,32 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return GetBetData(data, request.LoginId, transactions);
         }
 
-        async Task<decimal> IBigGamingModelActionMapper.SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode)
+        async Task<(BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode)
         {
-            var balance = default(decimal);
+            var settleTransactionData = new List<TransactionData>();
+            var cancelTransactionData = new List<TransactionData>();
             foreach (var order in request.Orders)
             {
-                var gameActionExternal = (await _services.GetGameActionExternalIdAsync(data.GameProviderId, playerCode, order.OrderId.ToString()).ConfigureAwait(false));
                 var gameActionType = GetGameAction(order.OrderStatus);
-                var mark = (gameActionType != GameActionType.CancelTransaction) ? "settle" : "cancel";
-                var transactions = new TransactionData[]
-                {
-                new TransactionData{
-                Amount = Math.Abs(order.Amount),
-                ExternalTransactionId = $"{order.OrderId}_{mark}",
-                ExternalRoundId = gameActionExternal.ExternalRoundId,
-                ExternalBetId = order.OrderId.ToString(),
-                ExternalGameActionGroupId = order.OrderId.ToString(),
-                ExternalGameId = order.ExternalGameId.ToString(),
-                GameActionType =gameActionType,
-                TimeStamp = DateTimeOffset.UtcNow,
-                ExternalTransactionReferenceId= order.OrderId.ToString(),
-                }
-                };
 
-                var betData = GetBetData(data, playerCode, transactions);
-
-                var betResult = default(BetResult);
                 if (gameActionType != GameActionType.CancelTransaction)
                 {
-                    betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+                    settleTransactionData.Add(await GetTransactionDataAsync(data.GameProviderId, playerCode, order).ConfigureAwait(false));
                 }
                 else
                 {
-                    betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+                    cancelTransactionData.Add(await GetTransactionDataAsync(data.GameProviderId, playerCode, order).ConfigureAwait(false));
                 }
-
-                balance = betResult.Balance;
             }
 
-            return balance;
+            return new(GetBetData(data, playerCode, settleTransactionData.ToArray()), GetBetData(data, playerCode, cancelTransactionData.ToArray()));
         }
 
-        async Task<decimal> IBigGamingModelActionMapper.ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode)
+        async Task<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode)
         {
-            var balance = default(decimal);
+            var beforeCancelTransactionData = new List<TransactionData>();
+            var settleTransactionData = new List<TransactionData>();
+            var cancelTransactionData = new List<TransactionData>();
             foreach (var order in request.Orders)
             {
 
@@ -104,60 +86,78 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
                 if (gameActionExternalIds != null)
                 {
-                    var transactionsCancel = new TransactionData[]
+                    beforeCancelTransactionData.Add(new TransactionData
                     {
-                        new TransactionData{
-                            Amount = Math.Abs(gameActionExternalIds.Amount),
-                            ExternalTransactionId = $"{gameActionExternalIds.ExternalTransactionId}_cancel",
-                            ExternalRoundId = gameActionExternalIds.ExternalRoundId,
-                            ExternalBetId = order.OrderId.ToString(),
-                            ExternalGameActionGroupId = order.OrderId.ToString(),
-                            ExternalGameId = order.ExternalGameId.ToString(),
-                            GameActionType =GameActionType.CancelTransaction,
-                            TimeStamp = DateTimeOffset.UtcNow,
-                            ExternalTransactionReferenceId=gameActionExternalIds.ExternalTransactionId
-                        }
-                    };
-                    var betDataCancel = GetBetData(data, playerCode, transactionsCancel);
-                    var betResultBetData = await _actions.CancelTransactionAsync(betDataCancel).ConfigureAwait(false);
-                }
-
-                var externalRoundId = (await _services.GetGameActionExternalIdAsync(data.GameProviderId, playerCode, order.OrderId.ToString()).ConfigureAwait(false)).ExternalRoundId;
-                var gameActionType = GetGameAction(order.OrderStatus);
-
-                var transactions = new TransactionData[]
-                {
-                    new TransactionData{
-                        Amount = Math.Abs(order.Amount),
-                        ExternalTransactionId = $"{order.OrderId}_resettle",
-                        ExternalRoundId = externalRoundId,
+                        Amount = Math.Abs(gameActionExternalIds.Amount),
+                        ExternalTransactionId = $"{gameActionExternalIds.ExternalTransactionId}_cancel",
+                        ExternalRoundId = gameActionExternalIds.ExternalRoundId,
                         ExternalBetId = order.OrderId.ToString(),
                         ExternalGameActionGroupId = order.OrderId.ToString(),
                         ExternalGameId = order.ExternalGameId.ToString(),
-                        GameActionType =gameActionType,
-                        TimeStamp = DateTimeOffset.UtcNow
-                    }
-                };
+                        GameActionType = GameActionType.CancelTransaction,
+                        TimeStamp = DateTimeOffset.UtcNow,
+                        ExternalTransactionReferenceId = gameActionExternalIds.ExternalTransactionId
+                    });
+                }
 
-                var betData = GetBetData(data, playerCode, transactions);
-                var betResult = default(BetResult);
+                var gameActionType = GetGameAction(order.OrderStatus);
+
                 if (gameActionType != GameActionType.CancelTransaction)
                 {
-                    betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+                    settleTransactionData.Add(await GetTransactionDataAsync(data.GameProviderId, playerCode, order, true).ConfigureAwait(false));
                 }
                 else
                 {
-                    betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+                    cancelTransactionData.Add(await GetTransactionDataAsync(data.GameProviderId, playerCode, order, true).ConfigureAwait(false));
                 }
-
-                balance = betResult.Balance;
             }
-            return balance;
+            return new(
+                GetBetData(data, playerCode, beforeCancelTransactionData.ToArray()),
+                GetBetData(data, playerCode, cancelTransactionData.ToArray()),
+                GetBetData(data, playerCode, settleTransactionData.ToArray())
+                );
         }
 
-
-
         #region Private Methods
+
+        private async Task<TransactionData> GetTransactionDataAsync(Guid gameProviderId, string playerCode, BigGamingSettleOrderRequest order, bool Resettle = false)
+        {
+            var gameActionExternal = (await _services.GetGameActionExternalIdAsync(gameProviderId, playerCode, order.OrderId.ToString()).ConfigureAwait(false));
+            var gameActionType = GetGameAction(order.OrderStatus);
+
+            var mark = (!Resettle) ? (gameActionType != GameActionType.CancelTransaction) ? "settle" : "cancel" : "resettle";
+
+            if (gameActionType != GameActionType.CancelTransaction)
+            {
+                return new TransactionData
+                {
+                    Amount = Math.Abs(order.Amount),
+                    ExternalTransactionId = $"{order.OrderId}_{mark}",
+                    ExternalRoundId = gameActionExternal.ExternalRoundId,
+                    ExternalBetId = order.OrderId.ToString(),
+                    ExternalGameActionGroupId = order.OrderId.ToString(),
+                    ExternalGameId = order.ExternalGameId.ToString(),
+                    GameActionType = gameActionType,
+                    TimeStamp = DateTimeOffset.UtcNow,
+                    ExternalTransactionReferenceId = order.OrderId.ToString()
+                };
+            }
+            else
+            {
+                return new TransactionData
+                {
+                    Amount = Math.Abs(order.Amount),
+                    ExternalTransactionId = $"{order.OrderId}_{mark}",
+                    ExternalRoundId = gameActionExternal.ExternalRoundId,
+                    ExternalBetId = order.OrderId.ToString(),
+                    ExternalGameActionGroupId = order.OrderId.ToString(),
+                    ExternalGameId = order.ExternalGameId.ToString(),
+                    GameActionType = gameActionType,
+                    TimeStamp = DateTimeOffset.UtcNow,
+                    ExternalTransactionReferenceId = order.OrderId.ToString()
+                };
+            }
+        }
 
         private GameActionType GetGameAction(BigGamingOrderStatus betStatus) => betStatus switch
         {
