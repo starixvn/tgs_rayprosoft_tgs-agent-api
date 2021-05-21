@@ -17,7 +17,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJDBApiClient _jdbApiClient;
-        private readonly JDBGameTypeMapper _jdbGameTypeMapper;
         private readonly IJDBServices _jdbServices;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
@@ -28,7 +27,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
             IJDBApiClient jdbApiClient,
-            JDBGameTypeMapper jdbGameTypeMapper,
             IJDBServices jdbServices)
         {
             _settingOperations = settingOperations;
@@ -36,7 +34,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             _gameProviderOperations = gameProviderOperations;
             _brandGameProviderOperations = brandGameProviderOperations;
             _jdbApiClient = jdbApiClient;
-            _jdbGameTypeMapper = jdbGameTypeMapper;
             _jdbServices = jdbServices;
         }
 

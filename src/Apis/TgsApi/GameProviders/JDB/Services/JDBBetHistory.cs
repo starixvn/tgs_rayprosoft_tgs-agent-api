@@ -14,18 +14,16 @@ using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.JDB;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Outgoing;
-using JDBGameType = TGS.Shared.Game.Models.JDB.Enums.GameType;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
     public sealed class JDBBetHistory : BaseBetHistory
     {
-        private readonly ISettingOperations _settingOperations;
-        private readonly IJDBApiClient _jdbApiClient;
-        private readonly JDBGameTypeMapper _jdbGameTypeMapper;
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-        private readonly IPlayerOperations _playerOperations;
+        private readonly IJDBApiClient _jdbApiClient;
         private readonly IJDBServices _jdbServices;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly ISettingOperations _settingOperations;
 
         public JDBBetHistory(
             IRoundQueries roundQueries,
@@ -33,7 +31,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             ILocalizationOperations localizationOperations,
             ISettingOperations settingOperations,
             IJDBApiClient jdbApiClient,
-            JDBGameTypeMapper jdbGameTypeMapper,
             IBrandGameProviderOperations brandGameProviderOperations,
             IPlayerOperations playerOperations,
             IJDBServices jdbServices) :
@@ -41,7 +38,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         {
             _settingOperations = settingOperations;
             _jdbApiClient = jdbApiClient;
-            _jdbGameTypeMapper = jdbGameTypeMapper;
             _brandGameProviderOperations = brandGameProviderOperations;
             _playerOperations = playerOperations;
             _jdbServices = jdbServices;
@@ -52,25 +48,31 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         {
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode);
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts.GameProviderConfigurations.JDB);
+                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
+                    .GameProviderConfigurations.JDB);
             var agent = _jdbServices.GetAgent(configuration, player.DefaultWalletCurrencyCode);
-            
+
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, round.BrandId,
                 language);
 
-            var jdbGameType = _jdbGameTypeMapper.Get(cachedGame.Type);
             if (!long.TryParse(round.ExternalRoundId, out var externalRoundId))
             {
                 throw new ArgumentException("Invalid external round id");
             }
 
+            var items = cachedGame.ExternalId.Split("_");
+            if (items.Length != 2 || !int.TryParse(items[0], out var gtype))
+            {
+                throw new ArgumentException($"Invalid external game id '{cachedGame.ExternalId}'");
+            }
+
             var request = new BetHistoryRequest
             {
-                Timestamp = DateTime.Now.Ticks,
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 Parent = agent.Id,
                 UserId = playerCode,
                 Language = cultureCode,
-                GameType = (int)jdbGameType,
+                GameType = gtype,
                 SequenceNo = externalRoundId
             };
 
