@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _methodMapper = new Dictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>>
             {
-                {"open.operator.user.balance", BalanceAsync},
+                {"open.operator.user.balance", GetBalanceAsync},
                 {"open.operator.order.transfer", BetAsync},
                 {"open.operator.calc.transfer", SettleAsync},
                 {"open.operator.order.status", OrderStatusAsync},
@@ -92,7 +92,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("balance")]
-        public async Task<BigGamingResponse> BalanceAsync(
+        public async Task<BigGamingResponse> GetBalanceAsync(
             BigGamingRequest baseRequest)
         {
             var items = HttpContext.Items;
@@ -249,7 +249,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             }
 
 
-            var result = new BigGamingOrderStatusResponse {Result = orderStatusResultResponse.ToArray()};
+            var result = new BigGamingOrderStatusResponse { Result = orderStatusResultResponse.ToArray() };
 
             return new()
             {
