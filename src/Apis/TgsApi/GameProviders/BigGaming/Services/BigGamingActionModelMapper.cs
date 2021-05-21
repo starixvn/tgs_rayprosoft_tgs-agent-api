@@ -161,7 +161,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var gameActionExternal = await _services.GetGameActionExternalIdAsync(gameProviderId, playerCode, orderId).ConfigureAwait(false);
             if (gameActionExternal == null)
             {
-                return BigGamingOrderStatus.BET_SLIP_DOES_NOT_EXIST;
+                return BigGamingOrderStatus.Bet_Slip_Does_Not_Exist;
             }
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gameActionExternal.ExternalGameId).ConfigureAwait(false);
 
@@ -179,19 +179,20 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         private GameActionType GetGameAction(BigGamingOrderStatus betStatus) => betStatus switch
         {
-            BigGamingOrderStatus.RUNNING => GameActionType.PlaceBet,
-            BigGamingOrderStatus.WIN => GameActionType.WinBet,
-            BigGamingOrderStatus.TIE => GameActionType.TieBet,
-            BigGamingOrderStatus.LOSE => GameActionType.LoseBet,
+            BigGamingOrderStatus.Running => GameActionType.PlaceBet,
+            BigGamingOrderStatus.Win => GameActionType.WinBet,
+            BigGamingOrderStatus.Tie => GameActionType.TieBet,
+            BigGamingOrderStatus.Lose => GameActionType.LoseBet,
             _ => GameActionType.CancelTransaction,
         };
         private BigGamingOrderStatus GetBGOrderStatus(GameActionType gameActionType) => gameActionType switch
         {
-            GameActionType.PlaceBet => BigGamingOrderStatus.RUNNING,
-            GameActionType.WinBet => BigGamingOrderStatus.WIN,
-            GameActionType.TieBet => BigGamingOrderStatus.TIE,
-            GameActionType.LoseBet => BigGamingOrderStatus.LOSE,
-            _ => BigGamingOrderStatus.CANCEL,
+            GameActionType.PlaceBet => BigGamingOrderStatus.Running,
+            GameActionType.WinBet => BigGamingOrderStatus.Win,
+            GameActionType.TieBet => BigGamingOrderStatus.Tie,
+            GameActionType.LoseBet => BigGamingOrderStatus.Lose,
+            GameActionType.CancelTransaction => BigGamingOrderStatus.Cancel,
+            _ => BigGamingOrderStatus.Bet_Slip_Does_Not_Exist,
         };
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
             TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false) =>

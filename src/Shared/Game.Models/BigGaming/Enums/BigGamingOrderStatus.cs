@@ -13,41 +13,41 @@ namespace TGS.Shared.Game.Models.BigGaming.Enums
         /// 注单不存在 - 仅对免转模式有效
         /// </summary>
         [Description("注单不存在")]
-        BET_SLIP_DOES_NOT_EXIST = 0,
+        Bet_Slip_Does_Not_Exist = 0,
         /// <summary>
         /// 未结算
         /// </summary>
         [Description("未结算")]
-        RUNNING = 1,
+        Running = 1,
         /// <summary>
         /// 结算赢 - 正常结算
         /// </summary>
         [Description("结算赢")]
-        WIN = 2,
+        Win = 2,
         /// <summary>
         /// 结算和 - 正常结算
         /// </summary>
         [Description("结算和")]
-        TIE = 3,
+        Tie = 3,
         /// <summary>
         /// 结算输 - 正常结算
         /// </summary>
         [Description("结算输")]
-        LOSE = 4,
+        Lose = 4,
         /// <summary>
         /// 取消 - 用户取消
         /// </summary>
         [Description("取消")]
-        CANCEL = 5,
+        Cancel = 5,
         /// <summary>
         /// 过期
         /// </summary>
         [Description("过期")]
-        EXPIRED = 6,
+        Expired = 6,
         /// <summary>
         /// 系统取消
         /// </summary>
         [Description("系统取消")]
-        SYSTEM_CANCEL = 7
+        SystemCancel = 7
     }
 }
