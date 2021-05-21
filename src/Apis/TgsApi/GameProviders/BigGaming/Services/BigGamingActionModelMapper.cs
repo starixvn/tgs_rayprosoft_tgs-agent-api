@@ -18,7 +18,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         BetData Request(GameProviderConfigurationData data, BigGamingBetRequest request);
         Task<decimal> SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
         Task<decimal> ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
-        Task<BigGamingOrderStatus> GetOrderStatus(Guid gameProviderId, string playerCode, string orderId);
     }
     public class BigGamingActionModelMapper : IBigGamingModelActionMapper
     {
@@ -156,24 +155,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return balance;
         }
 
-        async Task<BigGamingOrderStatus> IBigGamingModelActionMapper.GetOrderStatus(Guid gameProviderId, string playerCode, string orderId)
-        {
-            var gameActionExternal = await _services.GetGameActionExternalIdAsync(gameProviderId, playerCode, orderId).ConfigureAwait(false);
-            if (gameActionExternal == null)
-            {
-                return BigGamingOrderStatus.Bet_Slip_Does_Not_Exist;
-            }
-            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gameActionExternal.ExternalGameId).ConfigureAwait(false);
 
-            var gameActionData = await _services.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, gameActionExternal.ExternalRoundId, cachedGames[0].Id).ConfigureAwait(false);
-
-            var gameActionRecordLast = (from gameActionRecord in gameActionData.GameActions
-                                        where gameActionRecord.ExternalBetId == orderId
-                                        orderby gameActionRecord.RecordedOn descending
-                                        select gameActionRecord).First();
-
-            return GetBGOrderStatus(gameActionRecordLast.Type);
-        }
 
         #region Private Methods
 
@@ -185,15 +167,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             BigGamingOrderStatus.Lose => GameActionType.LoseBet,
             _ => GameActionType.CancelTransaction,
         };
-        private BigGamingOrderStatus GetBGOrderStatus(GameActionType gameActionType) => gameActionType switch
-        {
-            GameActionType.PlaceBet => BigGamingOrderStatus.Running,
-            GameActionType.WinBet => BigGamingOrderStatus.Win,
-            GameActionType.TieBet => BigGamingOrderStatus.Tie,
-            GameActionType.LoseBet => BigGamingOrderStatus.Lose,
-            GameActionType.CancelTransaction => BigGamingOrderStatus.Cancel,
-            _ => BigGamingOrderStatus.Bet_Slip_Does_Not_Exist,
-        };
+
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
             TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false) =>
             new()

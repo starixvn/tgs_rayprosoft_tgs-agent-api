@@ -17,29 +17,29 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
             new Dictionary<Type, GameApiError>
             {
-                {typeof(InvalidCredentialsException), Authentication_Sign_Is_Invalid},
-                {typeof(MissingTokenException), Authentication_Sign_Is_Invalid},
-                {typeof(PlayerLoginExpiredException), Authentication_Sign_Is_Invalid},
-                {typeof(PlayerNotFoundException), Account_Does_Not_Exist},
-                {typeof(PlayerDisabledException), Current_User_Has_Been_Banned_And_Login_Failed},
-                {typeof(PlayerHasInsufficientFundsException), Insufficient_Betting_Balance},
-                {typeof(InvalidGameActionException), Unknown_Data_Access_Exception},
-                {typeof(InvalidAmountException), Abnormal_Flow_Of_Bulk_Funds_Into_The_Warehouse},
-                {typeof(ArgumentException), Encryption_And_Decryption_Data_Is_Abnormal},
-                {typeof(ModelBindingException), Parameters_Passed_In_Are_Incorrect},
-                {typeof(InvalidStatusException), Unknown_Exception},
-                {typeof(InvalidOperationException), Unknown_Exception}
+                {typeof(InvalidCredentialsException), AuthenticationSignIsInvalid},
+                {typeof(MissingTokenException), AuthenticationSignIsInvalid},
+                {typeof(PlayerLoginExpiredException), AuthenticationSignIsInvalid},
+                {typeof(PlayerNotFoundException), AccountDoesNotExist},
+                {typeof(PlayerDisabledException), CurrentUserHasBeenBannedAndLoginFailed},
+                {typeof(PlayerHasInsufficientFundsException), InsufficientBettingBalance},
+                {typeof(InvalidGameActionException), UnknownDataAccessException},
+                {typeof(InvalidAmountException), AbnormalFlowOfBulkFundsIntoTheWarehouse},
+                {typeof(ArgumentException), EncryptionAndDecryptionDataIsAbnormal},
+                {typeof(ModelBindingException), ParametersPassedInAreIncorrect},
+                {typeof(InvalidStatusException), UnknownException},
+                {typeof(InvalidOperationException), UnknownException}
             };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
             ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
-                    {TransactionNotFound, Bet_Slip_Does_Not_Exist},
-                    {TransactionBeingCancelledNotFound, Bet_Slip_Does_Not_Exist},
-                    {TransactionBeingReferencedNotFound, Bet_Slip_Does_Not_Exist},
-                    {RoundNotFound, Bet_Slip_Does_Not_Exist},
-                    {GameNotFound, Bet_Slip_Does_Not_Exist}
+                    {TransactionNotFound, BetSlipDoesNotExist},
+                    {TransactionBeingCancelledNotFound, BetSlipDoesNotExist},
+                    {TransactionBeingReferencedNotFound, BetSlipDoesNotExist},
+                    {RoundNotFound, BetSlipDoesNotExist},
+                    {GameNotFound, BetSlipDoesNotExist}
                 };
 
         int IErrorMapper.GetApiErrorByException(Exception exception)
@@ -56,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             }
 
             var type = exception.GetType();
-            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)Unknown_Exception;
+            return ApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)UnknownException;
         }
 
         int IErrorMapper.GetHttpStatusByException(Exception exception) =>

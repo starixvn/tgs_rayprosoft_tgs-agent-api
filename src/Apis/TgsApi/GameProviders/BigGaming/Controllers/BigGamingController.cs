@@ -203,7 +203,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 orderStatusResultResponse.Add(new BigGamingOrderStatusResultResponse
                 {
                     OrderId = order.OrderId,
-                    Status = (int)await _map.GetOrderStatus(gameProviderId, order.LoginId, order.OrderId.ToString()).ConfigureAwait(false)
+                    Status = (int)await _services.GetOrderStatusAsync(gameProviderId, order.LoginId, order.OrderId.ToString()).ConfigureAwait(false)
                 });
             }
 
