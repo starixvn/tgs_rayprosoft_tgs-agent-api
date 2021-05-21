@@ -9,7 +9,7 @@ using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Queries.Round
 {
-    internal class GetRoundsQueryHandler : Handler<GetRoundsRequest, PagedResponse<RoundModel>>
+    public class GetRoundsQueryHandler : Handler<GetRoundsRequest, PagedResponse<RoundModel>>
     {
         private readonly ITgsRoundService _service;
 
