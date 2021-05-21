@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
@@ -15,9 +16,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 {
     public interface IBigGamingModelActionMapper
     {
-        BetData Request(GameProviderConfigurationData data, BigGamingBetRequest request);
-        Task<(BetData SettleBetData, BetData CancelBetData)> SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
-        Task<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
+        BetData Request(GameProviderConfigurationData data, BigGamingBetRequest request, OppositeBetSetting[] oppositeBetSettings);
+        Task<(BetData SettleBetData, BetData CancelBetData)> SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode, OppositeBetSetting[] oppositeBetSettings);
+        Task<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode, OppositeBetSetting[] oppositeBetSettings);
     }
     public class BigGamingActionModelMapper : IBigGamingModelActionMapper
     {
@@ -36,7 +37,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
-        BetData IBigGamingModelActionMapper.Request(GameProviderConfigurationData data, BigGamingBetRequest request)
+        BetData IBigGamingModelActionMapper.Request(GameProviderConfigurationData data, BigGamingBetRequest request, OppositeBetSetting[] oppositeBetSettings)
         {
             var transactions = (from Order in request.Orders
                                 select new TransactionData
@@ -48,12 +49,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                                     ExternalGameActionGroupId = Order.OrderId.ToString(),
                                     ExternalGameId = Order.ExternalGameId.ToString(),
                                     GameActionType = GameActionType.PlaceBet,
-                                    TimeStamp = DateTimeOffset.UtcNow
+                                    TimeStamp = DateTimeOffset.UtcNow,
+                                    BetType = Order.PlayId
                                 }).ToArray();
-            return GetBetData(data, request.LoginId, transactions);
+            return GetBetData(data, request.LoginId, transactions, oppositeBetSettings: oppositeBetSettings);
         }
 
-        async Task<(BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode)
+        async Task<(BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.SettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode, OppositeBetSetting[] oppositeBetSettings)
         {
             var settleTransactionData = new List<TransactionData>();
             var cancelTransactionData = new List<TransactionData>();
@@ -71,10 +73,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }
             }
 
-            return new(GetBetData(data, playerCode, settleTransactionData.ToArray()), GetBetData(data, playerCode, cancelTransactionData.ToArray()));
+            return new(
+                GetBetData(data, playerCode, settleTransactionData.ToArray(), oppositeBetSettings: oppositeBetSettings),
+                GetBetData(data, playerCode, cancelTransactionData.ToArray(), oppositeBetSettings: oppositeBetSettings)
+                );
         }
 
-        async Task<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode)
+        async Task<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode, OppositeBetSetting[] oppositeBetSettings)
         {
             var beforeCancelTransactionData = new List<TransactionData>();
             var settleTransactionData = new List<TransactionData>();
@@ -113,9 +118,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }
             }
             return new(
-                GetBetData(data, playerCode, beforeCancelTransactionData.ToArray()),
-                GetBetData(data, playerCode, cancelTransactionData.ToArray()),
-                GetBetData(data, playerCode, settleTransactionData.ToArray())
+                GetBetData(data, playerCode, beforeCancelTransactionData.ToArray(), oppositeBetSettings: oppositeBetSettings),
+                GetBetData(data, playerCode, cancelTransactionData.ToArray(), oppositeBetSettings: oppositeBetSettings),
+                GetBetData(data, playerCode, settleTransactionData.ToArray(), oppositeBetSettings: oppositeBetSettings)
                 );
         }
 
@@ -140,7 +145,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     ExternalGameId = order.ExternalGameId.ToString(),
                     GameActionType = gameActionType,
                     TimeStamp = DateTimeOffset.UtcNow,
-                    ExternalTransactionReferenceId = order.OrderId.ToString()
+                    ExternalTransactionReferenceId = order.OrderId.ToString(),
                 };
             }
             else
@@ -170,7 +175,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         };
 
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
-            TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false) =>
+            TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false, OppositeBetSetting[] oppositeBetSettings = null) =>
             new()
             {
                 PlayerCode = playerCode,
@@ -182,7 +187,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 AutoCloseRound = data.AutoCloseRound,
                 AllowCancelCancelTransaction = true,
                 AllowPlaceBetWithDifferentPlatformToken = allowPlaceBetWithDifferentPlatformToken,
-                Transactions = transactions
+                Transactions = transactions,
+                OppositeBetRules = oppositeBetSettings?.Select(o => new OppositeBetRule
+                {
+                    ExternalGameIds = o.Games,
+                    Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
+                }).ToArray()
             };
         #endregion
     }

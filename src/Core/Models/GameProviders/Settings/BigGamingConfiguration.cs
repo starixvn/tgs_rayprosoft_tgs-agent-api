@@ -13,5 +13,6 @@ namespace TGS.Core.Models.GameProviders.Settings
     public record BigGamingConfiguration : PluggableConfigurationBase
     {
         public BigGamingBrandMerchant[] BrandMerchants { get; set; }
+        public OppositeBetSetting[] OppositeBets { get; init; }
     }
 }

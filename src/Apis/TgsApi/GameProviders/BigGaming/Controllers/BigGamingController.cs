@@ -38,19 +38,22 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         private readonly IBigGamingModelActionMapper _map;
         private readonly IBigGamingServices _services;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ISettingOperations _settingOperations;
         private readonly IReadOnlyDictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>> _methodMapper;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         public BigGamingController(
             IBigGamingModelActionMapper map,
             IGamePlayActions actions,
             IBigGamingServices services,
-            IJsonSerializationProvider jsonSerializationProvider
+            IJsonSerializationProvider jsonSerializationProvider,
+            ISettingOperations settingOperations
             )
         {
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _services = services ?? throw new ArgumentNullException(nameof(services));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _methodMapper = new Dictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>>
             {
                 {"open.operator.user.balance", BalanceAsync},
@@ -121,8 +124,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
              .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
              .ConfigureAwait(false);
 
+            var configuration =
+              await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                  SettingConsts.GameProviderConfigurations.BigGaming);
 
-            var betData = _map.Request(gameProviderConfigurationData, data);
+            var betData = _map.Request(gameProviderConfigurationData, data, configuration.OppositeBets);
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
 
@@ -159,10 +165,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
            .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
            .ConfigureAwait(false);
 
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                    SettingConsts.GameProviderConfigurations.BigGaming);
+
             decimal balance;
             if (data.Recalc == "1")
             {
-                var resettleResponse = await _map.ResettleAsync(gameProviderConfigurationData, data, playerCode).ConfigureAwait(false);
+                var resettleResponse = await _map.ResettleAsync(gameProviderConfigurationData, data, playerCode, configuration.OppositeBets).ConfigureAwait(false);
                 var betDataResult = await _actions.CancelTransactionAsync(resettleResponse.BeforeCancel).ConfigureAwait(false);
                 balance = betDataResult.Balance;
                 if (resettleResponse.SettleBetData.Transactions.Length > 0)
@@ -178,7 +188,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             }
             else
             {
-                var settleResponse = await _map.SettleAsync(gameProviderConfigurationData, data, playerCode).ConfigureAwait(false);
+                var settleResponse = await _map.SettleAsync(gameProviderConfigurationData, data, playerCode, configuration.OppositeBets).ConfigureAwait(false);
                 var betDataResult = await _actions.SettleBetAsync(settleResponse.SettleBetData).ConfigureAwait(false);
                 balance = betDataResult.Balance;
                 if (settleResponse.CancelBetData.Transactions.Length > 0)
