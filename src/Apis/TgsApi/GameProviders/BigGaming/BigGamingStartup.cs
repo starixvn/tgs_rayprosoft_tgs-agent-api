@@ -34,7 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
             services.AddScoped<AuthorizeBigGamingMiddleware>();
             services.AddScoped<HandleBigGamingExceptionMiddleware>();
             services.AddScoped<IBigGamingServices, BigGamingServices>();
-            services.AddScoped<IBigGamingModelActionMapper, BigGamingModelActionMapper>();
+            services.AddScoped<IBigGamingModelActionMapper, BigGamingActionModelMapper>();
             services.AddTransient<IBigGamingGamePlayerCreate, BigGamingGamePlayerCreate>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(BigGamingGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<BigGamingGameInitializer>());

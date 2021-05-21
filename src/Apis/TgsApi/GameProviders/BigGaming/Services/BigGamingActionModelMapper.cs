@@ -20,13 +20,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         Task<decimal> ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode);
         Task<BigGamingOrderStatus> GetOrderStatus(Guid gameProviderId, string playerCode, string orderId);
     }
-    public class BigGamingModelActionMapper : IBigGamingModelActionMapper
+    public class BigGamingActionModelMapper : IBigGamingModelActionMapper
     {
         private const string GameProviderCode = Consts.GameProvider.BigGaming;
         private readonly IBigGamingServices _services;
         private readonly IGamePlayActions _actions;
         private readonly IGameProviderOperations _gameProviderOperations;
-        public BigGamingModelActionMapper(
+        public BigGamingActionModelMapper(
             IBigGamingServices services,
              IGamePlayActions actions,
             IGameProviderOperations gameProviderOperations
