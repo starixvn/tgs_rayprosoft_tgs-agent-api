@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.BackOffice.Domain;
+using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit

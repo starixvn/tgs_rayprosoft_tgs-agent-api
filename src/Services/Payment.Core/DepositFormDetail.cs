@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
 
-namespace TGS.Services.BackOffice.Domain
+namespace TGS.Services.Payment
 {
     public record DepositFormDetail(
         Guid Id,
@@ -12,10 +12,10 @@ namespace TGS.Services.BackOffice.Domain
         string ChannelName,
         Guid PaymentMethodId,
         decimal Amount,
-        string Remark,
+        string? Remark,
         int Status,
-        JsonDocument ApplyInfo,
-        JsonDocument PaymentReturn,
+        string? ApplyInfo,
+        string? PaymentReturn,
         DateTimeOffset CreatedOn,
         DateTimeOffset UpdatedOn);
 }

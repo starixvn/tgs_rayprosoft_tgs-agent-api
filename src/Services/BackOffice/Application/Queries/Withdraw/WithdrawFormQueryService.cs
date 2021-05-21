@@ -87,7 +87,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 
             if (query.Status != null)
             {
-                var statusList = query.Status.ToArray();
+                var statusList = query.Status.Cast<int>().ToArray();
 
                 if (statusList.Length > 0)
                     dataQuery = dataQuery.Where(form => statusList.Contains(form.Status));

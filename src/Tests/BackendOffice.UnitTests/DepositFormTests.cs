@@ -47,12 +47,12 @@ namespace TGS.Tests.BackendOffice.UnitTests
         [Test]
         public async Task Manager_Can_Review_DepositForm()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqPlayerService = new Mock<IPlayerService>();
             var moqPlayerBucketRepository = new Mock<IPlayerBucketRepository>();
 
             var sut = new ReviewDepositFormCommandService(
-                moqDepositRepository.Object,
+                moqPaymentRepository.Object,
                 moqPlayerService.Object,
                 moqPlayerBucketRepository.Object);
 
@@ -61,17 +61,17 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var walletId = Guid.NewGuid();
             var command = new ReviewDepositFormCommand(brandId, formId, ReviewState.Approve, null);
 
-            moqDepositRepository
-                .Setup(fake => fake.GetDepositFormDetailAsync(It.Is<Guid>(x => x == formId)))
+            moqPaymentRepository
+                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == formId)))
                 .Returns(ValueTask.FromResult(new DepositFormDetail(
-                    formId,
+                    Guid.NewGuid(),
                     "ThisIsPlayerCode",
-                    "UserName",
+                    "PlayerName",
                     brandId,
                     Guid.NewGuid(),
-                    "TestChannel",
+                    "ChannelName",
                     Guid.NewGuid(),
-                    1000,
+                    1000M,
                     null,
                     1000,
                     null,
@@ -90,7 +90,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqDepositRepository.Verify(
+            moqPaymentRepository.Verify(
                 fake => fake.SignOffDepositFormAsync(
                     It.Is<Guid>(x => x == formId),
                     It.Is<ReviewState>(x => x == ReviewState.Approve),

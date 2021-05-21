@@ -38,9 +38,9 @@ namespace TGS.Services.Operator.Deposit
                 .ConfigureAwait(false);
 
             await _paymentRepository
-                .SubmitFormStatusAsync(
+                .SubmitDepositFormStatusAsync(
                     command.FormId,
-                    1000,
+                    PaymentFlowState.WaitApprove,
                     _serializer.Serialize(
                         new ManualDepositPaymentReturn(uploadResult.Id)))
                 .ConfigureAwait(false);

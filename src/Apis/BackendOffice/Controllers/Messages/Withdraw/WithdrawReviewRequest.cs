@@ -8,6 +8,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 
         public string Remark { get; init; }
 
-        public ReviewResponses ReviewResponse { get; init; }
+        public ReviewResponseState ReviewResponse { get; init; }
     }
 }

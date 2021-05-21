@@ -240,17 +240,31 @@ namespace TGS.Payment.Repositories
                 .Select(v => new BrandPaymentVip(v.BrandPaymentId, v.VipLevelId));
         }
 
-        public async ValueTask<DepositFormInfo> GetDepositFormByIdAsync(Guid id)
+        public ValueTask<DepositFormDetail> GetDepositFormByIdAsync(Guid id)
         {
-            var data = await _tgsRepository.DepositForms.FindAsync(id).ConfigureAwait(false);
+            var query = from df in _tgsRepository.DepositForms
+                            .Include(f => f.Player)
+                            .Include(f => f.BrandPayment)
+                            .ThenInclude(bp => bp.PaymentMethodChannel)
+                            .AsAsyncEnumerable()
+                        where df.Id == id
+                        select new DepositFormDetail(
+                            df.Id,
+                            df.PlayerCode,
+                            df.Player.Username,
+                            df.BrandId,
+                            df.BrandPaymentId,
+                            df.BrandPayment.ChannelName,
+                            df.BrandPayment.PaymentMethodChannel.MethodId,
+                            df.Amount,
+                            df.Remark,
+                            df.Status,
+                            df.ApplyInfo,
+                            df.PaymentReturn,
+                            df.CreatedOn,
+                            df.UpdatedOn);
 
-            return new DepositFormInfo(
-                data.PlayerCode,
-                data.BrandId,
-                data.BrandPaymentId,
-                data.Amount,
-                data.ApplyInfo,
-                data.PaymentReturn);
+            return query.SingleAsync();
         }
 
         public async ValueTask<PaymentInfo> GetPaymentAsync(Guid id)
@@ -299,6 +313,19 @@ namespace TGS.Payment.Repositories
             return query.SingleAsync();
         }
 
+        public async ValueTask SignOffDepositFormAsync(Guid formId, ReviewState reviewStatus, string? remark = null)
+        {
+            var formData = await _tgsRepository.DepositForms
+                .FindAsync(formId)
+                .ConfigureAwait(false);
+
+            formData.Status = reviewStatus.ToNumber();
+            formData.Remark = remark;
+            formData.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
         public async ValueTask SignOffWithdrawFormAsync(
             Guid formId,
             Guid? brandPaymentId,
@@ -312,23 +339,18 @@ namespace TGS.Payment.Repositories
 
             formData.BrandPaymentId = brandPaymentId;
             formData.ApplyInfo = applyInfo;
-            formData.Status = reviewStatus switch
-            {
-                ReviewState.Approve => 8000,
-                ReviewState.Reject => 7000,
-                _ => formData.Status
-            };
+            formData.Status = reviewStatus.ToNumber();
             formData.Remark = remark;
             formData.UpdatedOn = DateTimeOffset.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask SubmitFormStatusAsync(Guid formId, int status, string paymentReturn)
+        public async ValueTask SubmitDepositFormStatusAsync(Guid formId, PaymentFlowState status, string? paymentReturn)
         {
             var formData = await _tgsRepository.DepositForms.FindAsync(formId).ConfigureAwait(false);
 
-            formData.Status = status;
+            formData.Status = (int)status;
             formData.PaymentReturn = paymentReturn;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
