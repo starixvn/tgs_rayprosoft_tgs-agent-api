@@ -217,7 +217,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = GetAsiaGamingPlayerCode(),
                     AgentCode = AgentCode,
                     BetTime = GetTimestamp(),
-                    TransactionIds = new []{ externalTransactionId },
+                    TransactionIds = new[] {externalTransactionId},
                     RoundId = externalRoundId,
                     GamePlatformType = gamePlatformType,
                     GameRound = gameRound,
@@ -266,7 +266,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await _client.BetResponseAsync(request);
 
-            Set(SR.ExternalTransactionId, new List<string> { transactionId });
+            Set(SR.ExternalTransactionId, new List<string> {transactionId});
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
@@ -281,9 +281,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var gameProviderCurrencyCode = await GetGameProviderCurrencyCodeAsync();
 
             var betRequest = Get<PostTransferRequest>(SR.PlaceBetRequest);
-            var transactionIds = isLockGame ? 
-                new List<string> { betRequest.Record.TransactionId } : 
-                Get<List<string>>(SR.ExternalTransactionId);
+            var transactionIds = isLockGame
+                ? new() {betRequest.Record.TransactionId}
+                : Get<List<string>>(SR.ExternalTransactionId);
             var gamePlatformType = betRequest.Record.GamePlatformType;
             var gameRound = betRequest.Record.GameRound;
             var gameType = betRequest.Record.GameType;
@@ -367,7 +367,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = GetAsiaGamingPlayerCode(),
                     AgentCode = AgentCode,
                     BetTime = GetTimestamp(),
-                    TransactionIds = new []{ transactionId },
+                    TransactionIds = new[] {transactionId},
                     RoundId = roundId,
                     GamePlatformType = gamePlatformType,
                     GameRound = gameRound,
@@ -380,7 +380,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await _client.PostTransferAsync(cancelRequest);
 
-            Set(SR.ExternalTransactionId, new List<string> { $"{transactionId}_{TransactionType.REFUND}" });
+            Set(SR.ExternalTransactionId, new List<string> {$"{transactionId}_{TransactionType.REFUND}"});
             Set(SR.Request, cancelRequest);
             Set(SR.Response, response);
         }
@@ -422,13 +422,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Then(@"(.*) game actions will be recorded in the database of type ""(.*)"" for \$(.*)")]
-        public async Task ThenGameActionsWillBeRecordedInTheDatabaseOfTypeForAsync(int count, GameActionType type, decimal amount)
+        public async Task ThenGameActionsWillBeRecordedInTheDatabaseOfTypeForAsync(int count, GameActionType type,
+            decimal amount)
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
             var externalTransactionIds = Get<List<string>>(SR.ExternalTransactionId);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
-            var gas = await(
+            var gas = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
                 where r.ExternalRoundId == externalRoundId &&
