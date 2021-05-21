@@ -72,11 +72,6 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 }
             }
 
-            if (await _brandPaymentService.ExistsAsync(p => p.ChannelName == request.ChannelName))
-            {
-                return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NameExists);
-            }
-
             await _brandPaymentService.CreatePaymentAsync(request, Username);
             return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
         }
@@ -252,12 +247,6 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             if (brandPayment == null)
             {
                 return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NotFound);
-            }
-
-            if (await _brandPaymentService.ExistsAsync(p => p.BrandId == brandPayment.BrandId &&
-                p.Id != brandPaymentId && p.ChannelName == request.ChannelName))
-            {
-                return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NameExists);
             }
 
             await _brandPaymentService.UpdatePaymentAsync(brandPayment, request, Username);
