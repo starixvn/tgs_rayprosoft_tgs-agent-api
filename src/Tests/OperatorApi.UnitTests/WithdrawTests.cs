@@ -16,6 +16,7 @@ using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Withdraw;
 using TGS.Services.Payment;
+using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -29,6 +30,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeWalletRepository = Substitute.For<IWalletRepository>();
             var fakePaymentRepository = Substitute.For<IPaymentRepository>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var jsonSerializationProvider = new JsonSerializationProvider();
             var optionsAccessor = new OptionsWrapper<JsonOptions>(
                 new JsonOptions());
@@ -37,6 +39,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeWalletRepository,
                 fakePaymentRepository,
                 fakePlayerOperations,
+                fakePlayerBucketRepository,
                 jsonSerializationProvider,
                 optionsAccessor);
 
@@ -111,6 +114,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeWalletRepository = Substitute.For<IWalletRepository>();
             var fakePaymentRepository = Substitute.For<IPaymentRepository>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var jsonSerializationProvider = new JsonSerializationProvider();
             var optionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
@@ -118,6 +122,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeWalletRepository,
                 fakePaymentRepository,
                 fakePlayerOperations,
+                fakePlayerBucketRepository,
                 jsonSerializationProvider,
                 optionsAccessor);
 
@@ -156,6 +161,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeWalletRepository = Substitute.For<IWalletRepository>();
             var fakePaymentRepository = Substitute.For<IPaymentRepository>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var jsonSerializationProvider = new JsonSerializationProvider();
             var optionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
@@ -163,6 +169,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeWalletRepository,
                 fakePaymentRepository,
                 fakePlayerOperations,
+                fakePlayerBucketRepository,
                 jsonSerializationProvider,
                 optionsAccessor);
 

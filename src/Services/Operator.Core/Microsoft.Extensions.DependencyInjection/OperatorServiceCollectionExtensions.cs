@@ -5,6 +5,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
+using TGS.Services.PlayerBucket;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
