@@ -3,7 +3,7 @@ using TGS.Shared.Game.Models.BigGaming.Common;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BigGamingGetGameUrlRequest : BigGamingDigestParamsRequest
+    public record BigGamingGetGameUrlRequest : BigGamingParamsDigestRequest
     {
         [JsonPropertyName("loginId")]
         public string LoginId { get; init; }

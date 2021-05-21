@@ -24,7 +24,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private readonly IGamePlayActions _action;
         private readonly IBigGamingModelActionMapper _map;
 
-        private readonly IReadOnlyDictionary<string, Func<BigGamingBaseRequest, Task<BigGamingBaseResponse>>> _methodMapper;
+        private readonly IReadOnlyDictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>> _methodMapper;
 
         public HandleBigGamingExceptionMiddleware(
             Func<string, IErrorMapper> mapper,
@@ -38,7 +38,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
 
 
-            _methodMapper = new Dictionary<string, Func<BigGamingBaseRequest, Task<BigGamingBaseResponse>>>
+            _methodMapper = new Dictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>>
             {
                 {"open.operator.user.balance", GetResponseBalanceAsync},
                 {"open.operator.order.transfer", GetResponseBetAsync},
@@ -58,15 +58,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             var requestType = context.Items.Get<Type>(Consts.ContextItems.RequestType, null);
 
             var value = await context.Request.ReadAsStringAsync();
-            var baseRequest = JsonSerializer.Deserialize<BigGamingBaseRequest>(value);
+            var baseRequest = JsonSerializer.Deserialize<BigGamingRequest>(value);
 
-            var response = default(BigGamingBaseResponse);
+            var response = default(BigGamingResponse);
             if (!_methodMapper.TryGetValue(baseRequest.Method.ToLower(), out var execute))
             {
-                response = new BigGamingBaseResponse()
+                response = new BigGamingResponse()
                 {
                     Id = baseRequest.Id,
-                    Error = new BigGamingBaseErrorResponse()
+                    Error = new BigGamingErrorResponse()
                     {
                         Code = error.ToString(),
                         Message = GameApiError.Account_Does_Not_Exist.Description()
@@ -85,12 +85,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
         #region Private Method
 
-        private Task<BigGamingBaseResponse> GetResponseBalanceAsync(BigGamingBaseRequest baseRequest)
+        private Task<BigGamingResponse> GetResponseBalanceAsync(BigGamingRequest baseRequest)
         {
-            return Task.FromResult((new BigGamingBaseResponse()
+            return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
-                Error = new BigGamingBaseErrorResponse()
+                Error = new BigGamingErrorResponse()
                 {
                     Code = GameApiError.Account_Does_Not_Exist.ToString(),
                     Message = GameApiError.Account_Does_Not_Exist.Description()
@@ -99,7 +99,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             }));
         }
 
-        private Task<BigGamingBaseResponse> GetResponseBetAsync(BigGamingBaseRequest baseRequest)
+        private Task<BigGamingResponse> GetResponseBetAsync(BigGamingRequest baseRequest)
         {
             var data = JsonSerializer.Deserialize<BigGamingBetRequest>(JsonSerializer.Serialize(baseRequest.Params));
             var result = new BigGamingBetResponse()
@@ -111,11 +111,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 TranId = data.TranId
             };
 
-            return Task.FromResult((new BigGamingBaseResponse()
+            return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
-                Error = new BigGamingBaseErrorResponse()
+                Error = new BigGamingErrorResponse()
                 {
                     Code = GameApiError.Handle_Exceptions_Submitted_By_Users_For_Batch_Betting.ToString(),
                     Sn = data.Sn,
@@ -125,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             }));
         }
 
-        private Task<BigGamingBaseResponse> GetResponseSettleAsync(BigGamingBaseRequest baseRequest)
+        private Task<BigGamingResponse> GetResponseSettleAsync(BigGamingRequest baseRequest)
         {
             var data = JsonSerializer.Deserialize<BigGamingSettleRequest>(JsonSerializer.Serialize(baseRequest.Params));
             var result = new BigGamingSettleResponse()
@@ -137,11 +137,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 TranId = data.TranId
             };
 
-            return Task.FromResult((new BigGamingBaseResponse()
+            return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
-                Error = new BigGamingBaseErrorResponse()
+                Error = new BigGamingErrorResponse()
                 {
                     Code = GameApiError.Exception_Of_Batch_Settlement_Submitted_By_Users.ToString(),
                     Sn = data.Sn,
@@ -151,7 +151,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             }));
         }
 
-        private Task<BigGamingBaseResponse> GetResponseOrderStatusAsync(BigGamingBaseRequest baseRequest)
+        private Task<BigGamingResponse> GetResponseOrderStatusAsync(BigGamingRequest baseRequest)
         {
             var data = JsonSerializer.Deserialize<BigGamingOrderStatusRequest>(JsonSerializer.Serialize(baseRequest.Params));
             var result = new BigGamingOrderStatusResponse()
@@ -159,11 +159,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 Result = null
             };
 
-            return Task.FromResult((new BigGamingBaseResponse()
+            return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
-                Error = new BigGamingBaseErrorResponse()
+                Error = new BigGamingErrorResponse()
                 {
                     Code = GameApiError.Bet_Slip_Does_Not_Exist.ToString(),
                     Sn = data.Sn,
@@ -173,13 +173,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             }));
         }
 
-        private Task<BigGamingBaseResponse> GetResponsePingAsync(BigGamingBaseRequest baseRequest)
+        private Task<BigGamingResponse> GetResponsePingAsync(BigGamingRequest baseRequest)
         {
-            return Task.FromResult((new BigGamingBaseResponse()
+            return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
                 Result = null,
-                Error = new BigGamingBaseErrorResponse()
+                Error = new BigGamingErrorResponse()
                 {
                     Code = GameApiError.Unknown_Exception_At_The_Application_Layer.ToString(),
                     Message = GameApiError.Unknown_Exception_At_The_Application_Layer.Description()

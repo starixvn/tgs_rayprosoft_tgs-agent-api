@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                  .GameProviderConfigurations.BigGaming);
 
             var value = await context.Request.ReadAsStringAsync();
-            var request = JsonSerializer.Deserialize<BigGamingBaseRequest>(value);
+            var request = JsonSerializer.Deserialize<BigGamingRequest>(value);
 
             /*
             if (context.Request.Path.Value.Contains("/api/bg/entrance", StringComparison.InvariantCultureIgnoreCase))

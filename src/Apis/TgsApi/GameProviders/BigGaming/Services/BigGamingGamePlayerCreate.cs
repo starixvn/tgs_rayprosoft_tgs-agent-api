@@ -89,7 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             }
         }
 
-        private async Task<BigGamingBaseResponse> CreatePlayerAsync(BigGamingConfiguration configuration, CachedPlayer player)
+        private async Task<BigGamingResponse> CreatePlayerAsync(BigGamingConfiguration configuration, CachedPlayer player)
         {
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
             var createPlayerRequest = new BigGamingCreatePlayerRequest()

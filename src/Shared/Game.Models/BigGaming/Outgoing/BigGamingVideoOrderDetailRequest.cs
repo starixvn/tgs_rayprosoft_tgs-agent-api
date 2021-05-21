@@ -8,7 +8,7 @@ using TGS.Shared.Game.Models.BigGaming.Common;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BigGamingVideoOrderDetailRequest : BigGamingSignParamsRequest
+    public record BigGamingVideoOrderDetailRequest : BigGamingParamsSignRequest
     {
         [JsonPropertyName("orderId")]
         public long OrderId { get; set; }

@@ -9,7 +9,7 @@ using TGS.Shared.Game.Models.BigGaming.Enums;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BigGamingOrderStatusRequest : BigGamingSignParamsRequest
+    public record BigGamingOrderStatusRequest : BigGamingParamsSignRequest
     {
         [JsonPropertyName("moduleId")]
         public BigGamingModuleId ModuleId { get; set; }

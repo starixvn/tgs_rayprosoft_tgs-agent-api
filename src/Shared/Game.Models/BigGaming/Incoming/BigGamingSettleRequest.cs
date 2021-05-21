@@ -4,7 +4,7 @@ using TGS.Shared.Game.Models.BigGaming.Enums;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BigGamingSettleRequest : BigGamingSignParamsRequest
+    public record BigGamingSettleRequest : BigGamingParamsSignRequest
     {
         [JsonPropertyName("userId")]
         public int UserId { get; set; }

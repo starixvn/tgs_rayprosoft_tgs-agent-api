@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.BigGaming.Common
 {
-    public record BigGamingBaseErrorResponse
+    public record BigGamingErrorResponse
     {
         [JsonPropertyName("code")]
         public string Code { get; set; }

@@ -3,7 +3,7 @@ using TGS.Shared.Game.Models.BigGaming.Common;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BigGamingBetRequest : BigGamingSignParamsRequest
+    public record BigGamingBetRequest : BigGamingParamsSignRequest
     {
         [JsonPropertyName("userId")]
         public int UserId { get; set; }

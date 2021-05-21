@@ -2,7 +2,7 @@
 
 namespace TGS.Shared.Game.Models.BigGaming.Common
 {
-    public record BigGamingSignParamsRequest
+    public record BigGamingParamsSignRequest
     {
         [JsonPropertyName("random")]
         public string Random { get; set; }
