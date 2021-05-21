@@ -48,6 +48,7 @@ import BrandBar from "../../report/BrandBar"
 import textColumn from "../../table/column/textColumn"
 import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
+import { PaymentChannelLabel } from "../../payment/channel/PaymentChannel"
 
 export { Code }
 
@@ -364,9 +365,10 @@ const useColumns = ({
                 Cell: ({ value }) => <PaymentMethodLabel value={value} />
             }),
             textColumn({
-                accessor: "paymentChannelName",
+                accessor: "paymentChannelId",
                 Header: <Trans zh="支付通道" en="Payment Channel" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => <PaymentChannelLabel value={value} />
             }),
             textColumn({
                 accessor: "channelName",

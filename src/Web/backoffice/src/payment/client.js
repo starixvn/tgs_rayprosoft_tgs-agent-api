@@ -6,8 +6,8 @@ let CodeTranPairs = [
     [
         "Manual",
         {
-            zh: "TGS",
-            en: "TGS"
+            zh: "手动支付",
+            en: "Manual Payment"
         }
     ]
 ]
