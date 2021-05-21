@@ -7,6 +7,6 @@ namespace TGS.Services.PlayerBucket
     {
         ValueTask<decimal> CreatePlayerBucketWithDepositAsync(CreatePlayerBucketWithDepositRequest request);
         Task CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] request);
-        ValueTask<bool> IsBucketFull(string playerCode);
+        ValueTask<bool> IsBucketFullAsync(string playerCode);
     }
 }
