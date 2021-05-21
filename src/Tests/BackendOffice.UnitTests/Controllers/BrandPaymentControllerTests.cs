@@ -184,8 +184,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 VipLevelIds = Array.Empty<Guid>()
             };
 
-            _paymentServiceMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()))
-                        .Returns(Task.FromResult(false));
+            _paymentServiceMock
+                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()))
+                .Returns(Task.FromResult(false));
 
             var response = await _controller.CreateBrandPaymentAsync(request);
             response.Valid.Should().BeTrue();
