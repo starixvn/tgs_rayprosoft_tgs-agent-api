@@ -12,27 +12,27 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {
     internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFormCommand>
     {
-        private readonly IDepositRepository _depositRepository;
+        private readonly IPaymentRepository _paymentRepository;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerService _playerService;
 
         public ReviewDepositFormCommandService(
-            IDepositRepository depositRepository,
+            IPaymentRepository paymentRepository,
             IPlayerService playerService,
             IPlayerBucketRepository playerBucketRepository)
         {
-            _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
+            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
         }
 
         public async ValueTask ExecuteAsync(ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
         {
-            var form = await _depositRepository
-                .GetDepositFormDetailAsync(command.FormId)
+            var form = await _paymentRepository
+                .GetDepositFormByIdAsync(command.FormId)
                 .ConfigureAwait(false);
 
-            await _depositRepository
+            await _paymentRepository
                 .SignOffDepositFormAsync(command.FormId, command.Status, command.remark)
                 .ConfigureAwait(false);
 

@@ -23,7 +23,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 
         public string Remark { get; init; }
 
-        public FlowStatus Status { get; init; }
+        public FlowState Status { get; init; }
 
         public DateTimeOffset UpdatedOn { get; init; }
 
