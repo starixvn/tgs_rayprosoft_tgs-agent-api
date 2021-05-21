@@ -7,6 +7,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
+using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.PluggableServices.Models;
@@ -18,7 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 {
     public sealed class SabaGameInitializer : IGameInitializer
     {
-        private readonly IBrandOperations _brandOperations;
+        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly ISabaApiClient _client;
         private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
@@ -28,14 +29,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         public SabaGameInitializer(
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
-            IBrandOperations brandOperations,
+            IBrandGameProviderOperations brandGameProviderOperations,
             IGameProviderOperations gameProviderOperations,
             IGameProviderCurrencyCodeMapper currencyCodeMapper,
             ISabaApiClient client)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
-            _brandOperations = brandOperations;
+            _brandGameProviderOperations = brandGameProviderOperations;
             _gameProviderOperations = gameProviderOperations;
             _currencyCodeMapper = currencyCodeMapper;
             _client = client;
@@ -53,45 +54,40 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                     .GameProviderConfigurations.Saba);
 
             var response =
-                await PlayerLoginAsync(configuration.ApiUrl, configuration.VendorId, gameProviderId, player);
+                await GetGameUrlAsync(configuration.ApiUrl, configuration.VendorId, gameProviderId, player, token);
 
-            if (response.ErrorCode != LoginApiError.Ok)
+            if (response.Code != GetGameUrlApi.Ok)
             {
                 throw new GameProviderApiErrorException(response.ErrorMessage);
             }
 
-            var brandId = player.BrandId;
-            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
-            var gpc = await _gameProviderOperations.GetCachedGameProviderConfigurationAsync(gameProviderId,
-                bgpc.GameProviderConfigurationId);
+            var culture =
+                await _brandGameProviderOperations.MapCultureAsync(gameProviderId, player.BrandId, request.Language);
 
-            var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId);
-
-            var isMobile = token.PlatformType == PlatformType.Mobile;
-            var domain = isMobile ? gpc.MobileEndpoint : gpc.DesktopEndpoint;
-
-            var url = domain.AppendQueryString(game.EndpointPath)
-                .Replace("{GPTOKEN}", response.Token)
-                .Replace("{TOKENID}", token.LoginRecordId.ToString());
+            var url = response.Url
+                .AppendQueryString($"tsId={token.LoginRecordId}")
+                .AppendQueryString($"lang={culture}");
 
             return new() {Url = url};
         }
 
-        private async ValueTask<LoginResponse> PlayerLoginAsync(Uri apiUrl, string vendorId, Guid gameProviderId,
-            CachedPlayer player)
+        private async ValueTask<GameUrlResponse> GetGameUrlAsync(Uri apiUrl, string vendorId, Guid gameProviderId,
+            CachedPlayer player, PlayerTokenData token)
         {
             var playerCode = player.PlayerCode;
+            var platform = token.PlatformType == PlatformType.Mobile ? "2" : "1";
 
-            var loginRequest = new LoginRequest
+            var gameUrlRequest = new GameUrlRequest
             {
                 VendorId = vendorId,
+                Platform = platform,
                 PlayerCode = playerCode
             };
 
-            var loginResponse = await _client.LoginAsync(apiUrl, loginRequest);
-            if (loginResponse.ErrorCode is LoginApiError.Ok or not LoginApiError.MemberNotExist)
+            var gameUrlResponse = await _client.GetGameUrlAsync(apiUrl, gameUrlRequest);
+            if (gameUrlResponse.Code is GetGameUrlApi.Ok or not GetGameUrlApi.MemberNotExist)
             {
-                return loginResponse;
+                return gameUrlResponse;
             }
 
             var oddsType = GetOddsType(player.DefaultWalletCurrencyCode);
@@ -113,7 +109,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 throw new GameProviderApiErrorException(createMemberResponse.ErrorMessage);
             }
 
-            return await _client.LoginAsync(apiUrl, loginRequest);
+            return await _client.GetGameUrlAsync(apiUrl, gameUrlRequest);
         }
 
         private static string GetOddsType(string playerCurrencyCode)

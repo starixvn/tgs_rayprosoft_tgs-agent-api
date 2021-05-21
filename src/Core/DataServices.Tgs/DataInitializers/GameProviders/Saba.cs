@@ -76,8 +76,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-saba") : new("http://localhost:62330"),
-                    VendorId = "PG",
-                    SecretKey = "XXX",
+                    VendorId = "zzdaa12nu1",
+                    SecretKey = "zzdaa12nu1",
                     ApiUrl = new("http://game-saba")
                 };
 
