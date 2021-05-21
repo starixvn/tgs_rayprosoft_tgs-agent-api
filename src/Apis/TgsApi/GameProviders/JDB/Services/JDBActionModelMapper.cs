@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -17,7 +18,9 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             PlatformType platformType);
 
         BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request, string externalRoundId);
+
         BaseActionResponse Response(GetBalanceResult result);
+
         BaseActionResponse Response(BetResult result);
     }
 
@@ -50,7 +53,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ExternalRoundId = externalRoundId,
                 ExternalGameId = externalGameId,
                 GameActionType = PlaceBet,
-                TimeStamp = DateTimeOffset.Parse(request.GameDate),
+                TimeStamp = GetTimestamp(request.GameDate),
                 RoundClosed = false
             });
 
@@ -65,7 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ExternalRoundId = externalRoundId,
                 ExternalGameId = externalGameId,
                 GameActionType = request.Win > 0 ? WinBet : LoseBet,
-                TimeStamp = DateTimeOffset.Parse(request.LastModifyTime),
+                TimeStamp = GetTimestamp(request.LastModifyTime),
                 RoundClosed = true
             });
 
@@ -128,6 +131,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             CurrencyCode = currencyCode,
             Transactions = transactions
         };
+
+        private static DateTimeOffset GetTimestamp(string timeStamp)
+        {
+            var offset = TimeSpan.FromHours(8);
+            var dateTime = DateTime.ParseExact(timeStamp, "dd-MM-yyyy HH:mm:ss", null, DateTimeStyles.AllowWhiteSpaces);
+            return new(dateTime, offset);
+        }
 
         #endregion
     }
