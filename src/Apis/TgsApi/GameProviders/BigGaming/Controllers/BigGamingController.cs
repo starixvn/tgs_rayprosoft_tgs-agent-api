@@ -97,9 +97,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var balance = await _services
-                .GetPlayerBalanceAsync(playerCode)
-                .ConfigureAwait(false);
+            var balance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
 
             return new()
             {

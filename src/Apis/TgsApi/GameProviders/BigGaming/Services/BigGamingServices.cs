@@ -17,7 +17,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
     public interface IBigGamingServices
     {
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
-        ValueTask<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<decimal> GetPlayerBalanceAsync(string playerCode);
         ValueTask<BigGamingBrandMerchant> GetBrandMerchant(string currencyCode);
@@ -46,9 +45,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         async ValueTask<GameActionExternalIds> IBigGamingServices.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
-
-        async ValueTask<GameActionData> IBigGamingServices.GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
-            => await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId).ConfigureAwait(false);
 
         async ValueTask<decimal> IBigGamingServices.GetPlayerBalanceAsync(string playerCode)
         {

@@ -16,10 +16,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         BetData Request(GameProviderConfigurationData data, BigGamingBetRequest request,
             OppositeBetSetting[] oppositeBetSettings);
 
-        Task<(BetData SettleBetData, BetData CancelBetData)> SettleAsync(GameProviderConfigurationData data,
+        ValueTask<(BetData SettleBetData, BetData CancelBetData)> SettleAsync(GameProviderConfigurationData data,
             BigGamingSettleRequest request, string playerCode, OppositeBetSetting[] oppositeBetSettings);
 
-        Task<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> ResettleAsync(
+        ValueTask<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> ResettleAsync(
             GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode,
             OppositeBetSetting[] oppositeBetSettings);
     }
@@ -56,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return GetBetData(data, request.LoginId, transactions, oppositeBetSettings: oppositeBetSettings);
         }
 
-        async Task<(BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.SettleAsync(
+        async ValueTask<(BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.SettleAsync(
             GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode,
             OppositeBetSetting[] oppositeBetSettings)
         {
@@ -85,7 +85,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     oppositeBetSettings: oppositeBetSettings));
         }
 
-        async Task<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.
+        async ValueTask<(BetData BeforeCancel, BetData SettleBetData, BetData CancelBetData)> IBigGamingModelActionMapper.
             ResettleAsync(GameProviderConfigurationData data, BigGamingSettleRequest request, string playerCode,
                 OppositeBetSetting[] oppositeBetSettings)
         {
@@ -217,6 +217,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
                 }).ToArray()
             };
+
+
 
         #endregion
     }
