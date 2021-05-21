@@ -16,6 +16,7 @@ using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Withdraw;
 using TGS.Services.Payment;
+using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -29,6 +30,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeWalletRepository = Substitute.For<IWalletRepository>();
             var fakePaymentRepository = Substitute.For<IPaymentRepository>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var jsonSerializationProvider = new JsonSerializationProvider();
             var optionsAccessor = new OptionsWrapper<JsonOptions>(
                 new JsonOptions());
@@ -37,6 +39,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeWalletRepository,
                 fakePaymentRepository,
                 fakePlayerOperations,
+                fakePlayerBucketRepository,
                 jsonSerializationProvider,
                 optionsAccessor);
 
@@ -57,6 +60,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.PlayerCode))
                 .Returns(2000M);
+
+
+            fakePlayerBucketRepository
+                .IsBucketFullAsync(Arg.Any<string>())
+                .Returns(true);
 
             var fakeBankInfo = new BankInfo(
                 command.BankInfoId,
@@ -111,6 +119,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeWalletRepository = Substitute.For<IWalletRepository>();
             var fakePaymentRepository = Substitute.For<IPaymentRepository>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var jsonSerializationProvider = new JsonSerializationProvider();
             var optionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
@@ -118,6 +127,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeWalletRepository,
                 fakePaymentRepository,
                 fakePlayerOperations,
+                fakePlayerBucketRepository,
                 jsonSerializationProvider,
                 optionsAccessor);
 
@@ -139,6 +149,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.PlayerCode))
                 .Returns(800M);
 
+            fakePlayerBucketRepository
+                .IsBucketFullAsync(Arg.Any<string>())
+                .Returns(true);
+
             var fakeBankInfo = new BankInfo(
                 command.BankInfoId,
                 command.PlayerCode,
@@ -151,11 +165,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Player_Withdraw_But_Balance_Not_Enough_Will_Throw_Excpetion()
+        public void Player_Bucket_Not_Full_Withdraw_Will_Throw_Exception()
         {
             var fakeWalletRepository = Substitute.For<IWalletRepository>();
             var fakePaymentRepository = Substitute.For<IPaymentRepository>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
             var jsonSerializationProvider = new JsonSerializationProvider();
             var optionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
 
@@ -163,6 +178,58 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeWalletRepository,
                 fakePaymentRepository,
                 fakePlayerOperations,
+                fakePlayerBucketRepository,
+                jsonSerializationProvider,
+                optionsAccessor);
+
+            var command = new CreateWithdrawFormCommand(
+                "ThisIsPlayerCode",
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                1000M);
+
+            fakePlayerOperations
+                .GetCachedPlayerAsync(Arg.Is(command.PlayerCode))
+                .Returns(new CachedPlayer
+                {
+                    PlayerCode = command.PlayerCode,
+                    DefaultWalletId = Guid.NewGuid()
+                });
+
+            fakeWalletRepository
+                .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.PlayerCode))
+                .Returns(800M);
+
+            fakePlayerBucketRepository
+                .IsBucketFullAsync(Arg.Any<string>())
+                .Returns(false);
+
+            var fakeBankInfo = new BankInfo(
+                command.BankInfoId,
+                command.PlayerCode,
+                command.BrandId,
+                Guid.NewGuid(),
+                "Bank",
+                "detail");
+
+            Assert.ThrowsAsync<InsufficientBucketException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
+        public void Player_Withdraw_But_Balance_Not_Enough_Will_Throw_Excpetion()
+        {
+            var fakeWalletRepository = Substitute.For<IWalletRepository>();
+            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+            var jsonSerializationProvider = new JsonSerializationProvider();
+            var optionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+            var sut = new CreateWithdrawFormCommandService(
+                fakeWalletRepository,
+                fakePaymentRepository,
+                fakePlayerOperations,
+                fakePlayerBucketRepository,
                 jsonSerializationProvider,
                 optionsAccessor);
 
@@ -192,6 +259,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Arg.Is(TransactionTypes.Withdrawal),
                     Arg.Any<decimal>())
                 .Returns((Guid.NewGuid(), -200M));
+
+            fakePlayerBucketRepository
+                .IsBucketFullAsync(Arg.Any<string>())
+                .Returns(true);
 
             var fakeBankInfo = new BankInfo(
                 command.BankInfoId,

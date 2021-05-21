@@ -142,7 +142,9 @@ namespace TGS.Apis.OperatorApi
                 .Services
                 .Decorate<IValidateCodeGenerator, ConstValidateCodeGenerator>();
 
-            services.AddIdentityVerifiers();
+            services
+                .AddIdentityVerifiers()
+                .AddPlayerBucketRepositoriesServices();
 
             services.AddRouting(options => options.LowercaseUrls = true);
             services
