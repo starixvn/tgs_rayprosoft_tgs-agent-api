@@ -59,6 +59,7 @@ const Body = ({}) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         from: todayRange.start,
         to: todayRange.end,
+        responseCode: "",
         trackingId: "",
         ip: "",
         path: "",
@@ -66,9 +67,13 @@ const Body = ({}) => {
     })
 
     let { pageIndex, pageSize } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = useApiLogList(
-        toApiParams(state)
-    )
+    let {
+        data = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = useApiLogList(toApiParams(state))
 
     let columns = useColumns({ mutate, items: data?.items })
 
@@ -79,6 +84,7 @@ const Body = ({}) => {
                 <SearchBar
                     start={state?.from}
                     end={state?.to}
+                    responseCode={state?.responseCode}
                     trackingId={state?.trackingId}
                     ip={state?.ip}
                     path={state?.path}
@@ -134,6 +140,7 @@ const Body = ({}) => {
 const SearchBar = ({
     start,
     end,
+    responseCode,
     trackingId,
     ip,
     path,
@@ -146,6 +153,7 @@ const SearchBar = ({
         defaultValues: {
             start,
             end,
+            responseCode,
             trackingId,
             ip,
             path,
@@ -160,6 +168,11 @@ const SearchBar = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
                     <DateTimeRangeInput />
+                    <InputField
+                        name="responseCode"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Response Code"
+                    />
                     <InputField
                         name="trackingId"
                         showEmptyFieldValueAddonAfter
