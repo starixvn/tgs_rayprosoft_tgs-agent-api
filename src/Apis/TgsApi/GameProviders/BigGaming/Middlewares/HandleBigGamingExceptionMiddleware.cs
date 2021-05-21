@@ -69,8 +69,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             if (error is
                 GameApiError.UnknownException or
                 GameApiError.AuthenticationSignIsInvalid or
-                GameApiError.AccountDoesNotExist or
-                GameApiError.AbnormalFlowOfBulkFundsIntoTheWarehouse)
+                GameApiError.AccountDoesNotExist)
             {
                 response = new BigGamingResponse()
                 {
@@ -134,17 +133,23 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 OrderResult = "0",
                 TranId = data.TranId
             };
+            var errorResponse = new BigGamingErrorResponse()
+            {
+                Code = GameApiError.HandleExceptionsSubmittedByUsersForBatchBetting.ToString(),
+                Sn = data.Sn,
+                Message = GameApiError.HandleExceptionsSubmittedByUsersForBatchBetting.Description()
+            };
+            if (error == GameApiError.AbnormalFlowOfBulkFundsIntoTheWarehouse)
+            {
+                errorResponse.Code = GameApiError.BettingIsInconsistentWithTheNumberOfBettingSlips.ToString();
+                errorResponse.Message = GameApiError.BettingIsInconsistentWithTheNumberOfBettingSlips.Description();
+            }
 
             return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
-                Error = new BigGamingErrorResponse()
-                {
-                    Code = GameApiError.HandleExceptionsSubmittedByUsersForBatchBetting.ToString(),
-                    Sn = data.Sn,
-                    Message = GameApiError.HandleExceptionsSubmittedByUsersForBatchBetting.Description()
-                },
+                Error = errorResponse,
                 Jsonrpc = baseRequest.Jsonrpc
             }));
         }
@@ -160,17 +165,24 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 OrderResult = "0",
                 TranId = data.TranId
             };
+            var errorResponse = new BigGamingErrorResponse()
+            {
+                Code = GameApiError.ExceptionOfBatchSettlementSubmittedByUsers.ToString(),
+                Sn = data.Sn,
+                Message = GameApiError.ExceptionOfBatchSettlementSubmittedByUsers.Description()
+            };
+
+            if (error == GameApiError.AbnormalFlowOfBulkFundsIntoTheWarehouse)
+            {
+                errorResponse.Code = GameApiError.SettlementIsInconsistentWithTheNumberOfWarehoused.ToString();
+                errorResponse.Message = GameApiError.SettlementIsInconsistentWithTheNumberOfWarehoused.Description();
+            }
 
             return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
                 Result = JsonDocument.Parse(JsonSerializer.Serialize(result)),
-                Error = new BigGamingErrorResponse()
-                {
-                    Code = GameApiError.ExceptionOfBatchSettlementSubmittedByUsers.ToString(),
-                    Sn = data.Sn,
-                    Message = GameApiError.ExceptionOfBatchSettlementSubmittedByUsers.Description()
-                },
+                Error = errorResponse,
                 Jsonrpc = baseRequest.Jsonrpc
             }));
         }

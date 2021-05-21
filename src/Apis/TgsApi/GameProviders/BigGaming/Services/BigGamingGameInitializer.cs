@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
-using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.BigGaming;
@@ -23,29 +17,20 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IBigGamingApiClient _client;
         private readonly IPlayerOperations _playerOperations;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IHashProvider _hashProvider;
         private readonly IBigGamingGamePlayerCreate _bigGamingGamePlayerCreate;
         private readonly IBigGamingServices _bigGamingServices;
 
         public BigGamingGameInitializer(
             IBigGamingApiClient client,
-            ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
-            IGameProviderOperations gameProviderOperations,
-            IHashProvider _hashProvider,
             IBigGamingGamePlayerCreate bigGamingGamePlayerCreate,
             IBigGamingServices bigGamingServices
             )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            this._hashProvider = _hashProvider ?? throw new ArgumentNullException(nameof(_hashProvider));
             _bigGamingGamePlayerCreate = bigGamingGamePlayerCreate ?? throw new ArgumentNullException(nameof(bigGamingGamePlayerCreate));
             _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
         }

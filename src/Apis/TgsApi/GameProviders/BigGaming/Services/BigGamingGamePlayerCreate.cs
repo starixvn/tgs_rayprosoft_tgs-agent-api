@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
@@ -24,19 +20,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
     {
         private readonly IBigGamingApiClient _client;
         private readonly ISettingOperations _settingOperations;
-        private readonly IHashProvider _hashProvider;
         private readonly IBigGamingServices _bigGamingServices;
 
         public BigGamingGamePlayerCreate(
             IBigGamingApiClient client,
             ISettingOperations settingOperations,
-            IHashProvider _hashProvider,
             IBigGamingServices bigGamingServices
             )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _hashProvider = _hashProvider ?? throw new ArgumentNullException(nameof(_hashProvider));
             _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
         }
 

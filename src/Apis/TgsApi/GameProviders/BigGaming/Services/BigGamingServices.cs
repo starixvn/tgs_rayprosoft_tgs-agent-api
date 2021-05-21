@@ -30,19 +30,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IRoundQueries _roundQueries;
 
         public BigGamingServices(
             ISettingOperations settingOperations,
             IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries,
-            IRoundQueries roundQueries,
             IPlayerOperations playerOperations)
         {
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;
-            _roundQueries = roundQueries;
             _playerOperations = playerOperations;
         }
 

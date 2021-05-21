@@ -6,8 +6,6 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Games;
-using TGS.Services.GameOperations;
-using TGS.Services.Operations;
 using TGS.Shared.Game.Models.BigGaming.Enums;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
 
@@ -29,20 +27,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
     public class BigGamingActionModelMapper : IBigGamingModelActionMapper
     {
         private const string GameProviderCode = Consts.GameProvider.BigGaming;
-        private readonly IGamePlayActions _actions;
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IBigGamingServices _services;
 
         public BigGamingActionModelMapper(
-            IBigGamingServices services,
-            IGamePlayActions actions,
-            IGameProviderOperations gameProviderOperations
+            IBigGamingServices services
         )
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
-            _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-            _gameProviderOperations =
-                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
         BetData IBigGamingModelActionMapper.Request(GameProviderConfigurationData data, BigGamingBetRequest request,
@@ -199,10 +190,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private GameActionType GetGameAction(BigGamingOrderStatus betStatus) => betStatus switch
         {
             BigGamingOrderStatus.Running => GameActionType.PlaceBet,
-            BigGamingOrderStatus.Win     => GameActionType.WinBet,
-            BigGamingOrderStatus.Tie     => GameActionType.TieBet,
-            BigGamingOrderStatus.Lose    => GameActionType.LoseBet,
-            _                            => GameActionType.CancelTransaction
+            BigGamingOrderStatus.Win => GameActionType.WinBet,
+            BigGamingOrderStatus.Tie => GameActionType.TieBet,
+            BigGamingOrderStatus.Lose => GameActionType.LoseBet,
+            _ => GameActionType.CancelTransaction
         };
 
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
