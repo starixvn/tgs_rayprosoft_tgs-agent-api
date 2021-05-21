@@ -24,6 +24,8 @@ export const GameStatus = {
     Inactive
 }
 
+export default GameStatus
+
 export const GameStatusSelectField = ({ placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "Game Status",
