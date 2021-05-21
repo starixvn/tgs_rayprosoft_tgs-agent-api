@@ -1,7 +1,9 @@
 ﻿namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 {
-    public enum FlowStatus
+    public enum FlowState
     {
+        Unkown = 0,
+        WaitingPayment,
         Review,
         Approved,
         Rejected

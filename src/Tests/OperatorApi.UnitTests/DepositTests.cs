@@ -34,12 +34,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             moqPaymentRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
-                .Returns(ValueTask.FromResult(new DepositFormInfo(
-                    "OtherPlayerCode",
+                .Returns(ValueTask.FromResult(new DepositFormDetail(
                     Guid.NewGuid(),
+                    "OtherPlayerCode",
+                    "OtherPlayerName",
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "ChannelName",
                     Guid.NewGuid(),
                     1000M,
-                    string.Empty)));
+                    null,
+                    1000,
+                    null,
+                    null,
+                    DateTimeOffset.Now,
+                    DateTimeOffset.Now)));
 
             Assert.ThrowsAsync<UltraViresException>(async () => await sut.GetAsync(query));
         }
@@ -197,12 +206,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             moqPaymentRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
-                .Returns(ValueTask.FromResult(new DepositFormInfo(
-                    query.PlayerCode,
+                .Returns(ValueTask.FromResult(new DepositFormDetail(
                     Guid.NewGuid(),
+                    query.PlayerCode,
+                    "PlayerName",
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "ChannelName",
                     Guid.NewGuid(),
                     1000M,
-                    string.Empty)));
+                    null,
+                    1000,
+                    null,
+                    null,
+                    DateTimeOffset.Now,
+                    DateTimeOffset.Now)));
 
             var actual = await sut.GetAsync(query);
 
@@ -267,7 +285,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
                 Times.Exactly(1));
             moqPaymentRepository.Verify(
-                fake => fake.SubmitFormStatusAsync(It.IsAny<Guid>(), It.Is<int>(x => x == 1000), It.IsAny<string>()),
+                fake => fake.SubmitDepositFormStatusAsync(
+                    It.IsAny<Guid>(),
+                    It.Is<PaymentFlowState>(x => x == PaymentFlowState.WaitApprove),
+                    It.IsAny<string>()),
                 Times.Exactly(1));
         }
 
@@ -282,12 +303,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             fakePaymentRepository
                 .GetDepositFormByIdAsync(Arg.Is(query.FormId))
-                .Returns(new DepositFormInfo(
-                    query.PlayerCode,
+                .Returns(new DepositFormDetail(
                     Guid.NewGuid(),
+                    query.PlayerCode,
+                    "UserName",
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    "ChannelName",
                     Guid.NewGuid(),
                     1000M,
-                    null));
+                    null,
+                    1000,
+                    null,
+                    null,
+                    DateTimeOffset.Now,
+                    DateTimeOffset.Now));
 
             await sut.GetAsync(query);
 

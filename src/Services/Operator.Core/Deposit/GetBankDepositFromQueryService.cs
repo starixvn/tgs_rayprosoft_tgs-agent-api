@@ -7,7 +7,7 @@ using TGS.Services.Operator.Deposit;
 
 namespace TGS.Services.Operator.Deposit
 {
-    internal class GetBankDepositFromQueryService : IGetService<GetBankDepositFormQuery, DepositFormInfo>
+    internal class GetBankDepositFromQueryService : IGetService<GetBankDepositFormQuery, DepositFormDetail>
     {
         private readonly IPaymentRepository _paymentRepository;
 
@@ -16,7 +16,7 @@ namespace TGS.Services.Operator.Deposit
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
         }
 
-        public async ValueTask<DepositFormInfo> GetAsync(GetBankDepositFormQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<DepositFormDetail> GetAsync(GetBankDepositFormQuery query, CancellationToken cancellationToken = default)
         {
             var form = await _paymentRepository
                 .GetDepositFormByIdAsync(query.FormId)

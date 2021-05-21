@@ -7,7 +7,5 @@ namespace TGS.Services.BackOffice.Domain
     public interface IDepositRepository
     {
         ValueTask<DepositFormDetail> GetDepositFormDetailAsync(Guid formId);
-
-        ValueTask SignOffDepositFormAsync(Guid formId, ReviewState reviewStatus, string remark = null);
     }
 }
