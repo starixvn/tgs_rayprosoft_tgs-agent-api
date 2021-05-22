@@ -684,8 +684,12 @@ namespace TGS.Services.GameOperations.Data
                 s.FreeBetAsSingleRound && current.Type == FreeBet && s.PreviousActions.Count == 0 ||
                 current.Type == WinJackpot;
 
+            var isVoidRound = !gameActionWithSingleRound &&
+                s.PreviousActions.Where(act => act.Type == PlaceBet).All(act => act.IsCancelled);
+
             var clientStatus =
-                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, gameActionWithSingleRound);
+                _roundStatusManager.GetClientRoundStatus(s.NewRoundStatus, s.BetValueResult, gameActionWithSingleRound,
+                    isVoidRound);
 
             round.Status = s.NewRoundStatus;
             round.ClientStatus = clientStatus;
