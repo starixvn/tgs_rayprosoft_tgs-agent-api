@@ -168,8 +168,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             return new(true, null);
         }
 
-        #region Private Methods
-
         private async Task<CachedPlayer> GetPlayerAsync(string playerCode)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
@@ -182,12 +180,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
         private void CheckingSign(string sourceSign, string Sign)
         {
-            if (!sourceSign.Contains(Sign, StringComparison.OrdinalIgnoreCase))
+            if (!sourceSign.IgnoreCaseNotEquals(Sign))
             {
                 throw new MissingTokenException($"Authentication encryption failed({sourceSign})");
             }
         }
-
-        #endregion
     }
 }
