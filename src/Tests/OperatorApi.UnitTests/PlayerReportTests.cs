@@ -19,7 +19,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class PlayerReportTests
     {
         [Test]
-        public async Task Player_Report_Should_Call_Report_API_Success()
+        public async Task Player_Report_Should_Call_Report_Api_Success()
         {
             // arrange
             var fakeReportClient = Substitute.For<IReportClient>();
