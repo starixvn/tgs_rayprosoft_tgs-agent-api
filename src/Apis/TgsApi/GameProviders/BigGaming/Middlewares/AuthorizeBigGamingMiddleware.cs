@@ -107,10 +107,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException("Authentication encryption failed");
-            }
+            CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             return new(true, player);
         }
@@ -125,10 +122,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException(request.Sign);
-            }
+            CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             if (decimal.Parse(request.Amount) != request.Orders.Sum(x => x.Amount))
             {
@@ -147,10 +141,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException(request.Sign);
-            }
+            CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             if (decimal.Parse(request.Amount) != request.Orders.Sum(x => x.Amount))
             {
@@ -172,13 +163,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException(request.Sign);
-            }
+            CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             return new(true, null);
         }
+
+        #region Private Methods
 
         private async Task<CachedPlayer> GetPlayerAsync(string playerCode)
         {
@@ -189,5 +179,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             }
             return player;
         }
+
+        private void CheckingSign(string sourceSign, string Sign)
+        {
+            if (!sourceSign.Contains(Sign, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new MissingTokenException($"Authentication encryption failed({sourceSign})");
+            }
+        }
+
+        #endregion
     }
 }
