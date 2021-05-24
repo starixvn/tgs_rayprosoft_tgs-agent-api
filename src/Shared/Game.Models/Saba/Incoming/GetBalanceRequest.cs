@@ -13,7 +13,7 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
             public string Action { get; init; }
 
             [JsonPropertyName("userId")]
-            public string PlayerCode { get; init; }
+            public string UserId { get; init; }
         }
     }
 }

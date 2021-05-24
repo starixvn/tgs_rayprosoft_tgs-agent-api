@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Extensions;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -25,10 +27,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 
         ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByRoundIdAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId);
+
+        bool IsTestEnvironment(string[] acceptEnvironments);
+
+        string GetPlayerCode(string userId, bool isTestEnv);
     }
 
     public sealed class SabaServices : ISabaServices
     {
+        private readonly IWebHostEnvironment _env;
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly HttpContext _httpContext;
@@ -36,11 +43,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         public SabaServices(
             IHttpContextAccessor httpContextAccessor,
             IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries)
+            IGameActionQueries gameActionQueries,
+            IWebHostEnvironment env)
         {
             _httpContext = httpContextAccessor.HttpContext;
             _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;
+            _env = env;
         }
 
         async ValueTask<GameProviderConfigurationData> ISabaServices.GetGameProviderConfigurationDataAsync()
@@ -112,5 +121,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 .Where(t => t.GameActionType.IsNotAllOf(GameActionType.LockAmount, GameActionType.UnlockAmount))
                 .ToArray();
         }
+
+        bool ISabaServices.IsTestEnvironment(string[] acceptEnvironments) =>
+            acceptEnvironments.IgnoreCaseContains(_env.EnvironmentName);
+
+        string ISabaServices.GetPlayerCode(string userId, bool isTestEnv) =>
+            !isTestEnv ? userId : userId?.Replace("_test", string.Empty, StringComparison.OrdinalIgnoreCase);
     }
 }

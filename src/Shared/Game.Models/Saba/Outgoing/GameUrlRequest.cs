@@ -2,9 +2,12 @@
 
 namespace TGS.Shared.Game.Models.Saba.Outgoing
 {
-    public record LoginRequest : BaseRequest
+    public record GameUrlRequest : BaseRequest
     {
         [JsonPropertyName("vendor_member_id")]
         public string PlayerCode { get; init; }
+
+        [JsonPropertyName("platform")]
+        public string Platform { get; init; }
     }
 }
