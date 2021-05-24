@@ -101,9 +101,7 @@ export const LanguageCheckboxGroupTableRow = ({
     checkedFieldName = defaultCheckedFieldName,
     addonAfter
 }) => {
-    let { register, setValue } = useFormContext()
     let checkboxFieldName = checkedFieldName(name, field, index)
-    let { ref: checkboxRef, ...checkboxFormProps } = register(checkboxFieldName)
 
     let editable = !disabled
     return useMemo(() => {
@@ -119,24 +117,17 @@ export const LanguageCheckboxGroupTableRow = ({
                         {disabled && (
                             <>
                                 <Checkbox
+                                    name={checkboxFieldName}
                                     display="none"
                                     checked={field.checked}
-                                    disabled
-                                    checkboxRef={checkboxRef}
-                                    {...checkboxFormProps}
                                 />
                                 <Checkbox checked={field.checked} disabled />
                             </>
                         )}
                         {editable && (
                             <Checkbox
-                                checkboxRef={checkboxRef}
+                                name={checkboxFieldName}
                                 defaultChecked={field.checked}
-                                {...checkboxFormProps}
-                                onChange={(event) => {
-                                    let checked = event.target.checked
-                                    setValue(checkboxFieldName, checked)
-                                }}
                             />
                         )}
                     </Box>

@@ -77,10 +77,13 @@ export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
         (brandLang, licenseeLang) => {
             return brandLang.cultureCode === licenseeLang.cultureCode
         },
-        (brandLang = { brandCultureCode: "" }, licenseeLang = {}) => {
+        (brandLang = {}, licenseeLang = {}) => {
+            let brandCultureCode =
+                brandLang.brandCultureCode ?? licenseeLang.cultureCode
             return {
                 ...licenseeLang,
-                ...brandLang
+                ...brandLang,
+                brandCultureCode
             }
         },
         brand?.languages ?? [],
