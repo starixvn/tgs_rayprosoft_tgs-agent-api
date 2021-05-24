@@ -180,7 +180,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
         private void CheckingSign(string sourceSign, string Sign)
         {
-            if (!sourceSign.IgnoreCaseNotEquals(Sign))
+            if (sourceSign.IgnoreCaseNotEquals(Sign))
             {
                 throw new MissingTokenException($"Authentication encryption failed({sourceSign})");
             }
