@@ -78,7 +78,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new Uri("http://game-saba") : new("http://localhost:62330"),
                     VendorId = "zzdaa12nu1",
                     SecretKey = "zzdaa12nu1",
-                    ApiUrl = new("http://t829tsa.bw6688.com/api")
+                    ApiUrl = new("http://t829tsa.bw6688.com")
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();
