@@ -183,6 +183,9 @@
   <data name="JackpotContribution" xml:space="preserve">
     <value>JackpotContribution</value>
   </data>
+  <data name="OppositeBetPatterns" xml:space="preserve">
+    <value>OppositeBetPatterns</value>
+  </data>
   <data name="PlaceBetRequest" xml:space="preserve">
     <value>PlaceBetRequest</value>
   </data>
