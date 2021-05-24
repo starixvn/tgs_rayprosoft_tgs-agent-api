@@ -23,28 +23,57 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     [Parallelizable]
     public class BrandPaymentControllerTests : BaseTests
     {
-        [SetUp]
-        public override void Setup()
-        {
-            base.Setup();
-            _controller = new(
-                _playerQueriesMock.Object,
-                _uploadServiceMock.Object,
-                _paymentServiceMock.Object,
-                _auditLogQueriesMock.Object);
-            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
-        }
-
-        private BrandPaymentController _controller;
-        private readonly Mock<IBrandPaymentService> _paymentServiceMock = new();
-
         private readonly Mock<ITgsQueries<BrandPaymentAuditLog>> _auditLogQueriesMock =
             new();
+
+        private readonly Mock<IBrandPaymentService> _paymentServiceMock = new();
 
         private readonly Mock<ITgsQueries<Player>> _playerQueriesMock =
             new();
 
         private readonly Mock<IUploadService> _uploadServiceMock = new();
+
+        private BrandPaymentController _controller;
+
+        [Test]
+        public async Task Can_Create_Payment()
+        {
+            var request = new CreateBrandPaymentRequest
+            {
+                Id = Guid.Empty,
+                PaymentMethodChannelId = Guid.NewGuid(),
+                PaymentStatus = SwitchStatus.Enabled,
+                ChannelName = "Test",
+                ExtendedData = JsonDocument.Parse(JsonSerializer.Serialize(new
+                {
+                    name = "測試者",
+                    bankAccount = "9876543210"
+                })),
+                TransferLimitFrom = 10M,
+                TransferLimitTo = 1000M,
+                PlayerListCondition = PlayerListCondition.MatchAll,
+                AllPlayers = true,
+                IdentityAuthentication = false,
+                PhoneAuthentication = false,
+                DepositedAmountUnlimited = true,
+                DepositedAmountMin = 0M,
+                DepositedAmountMax = 0M,
+                Whitelist = Array.Empty<string>(),
+                Blacklist = Array.Empty<string>(),
+                VipLevelIds = Array.Empty<Guid>()
+            };
+
+            _paymentServiceMock
+                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()))
+                .Returns(Task.FromResult(false));
+
+            var response = await _controller.CreateBrandPaymentAsync(request);
+            response.Valid.Should().BeTrue();
+
+            _paymentServiceMock.Verify(p => p.CreatePaymentAsync(It.Is<CreateBrandPaymentRequest>(r =>
+                    r.ChannelName == request.ChannelName),
+                It.Is<string>(r => r == Username)));
+        }
 
         [TestCase(true)]
         [TestCase(false)]
@@ -84,117 +113,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             }
 
             _paymentServiceMock.Verify(p => p.GetPaymentQueries(false));
-        }
-
-        [Test]
-        public async Task Cannot_Create_Payment_With_Name_Exists()
-        {
-            var request = new CreateBrandPaymentRequest
-            {
-                Id = Guid.Empty,
-                PaymentMethodChannelId = Guid.NewGuid(),
-                PaymentStatus = SwitchStatus.Enabled,
-                ChannelName = "Test",
-                ExtendedData = JsonDocument.Parse(JsonSerializer.Serialize(new
-                {
-                    name = "測試者",
-                    bankAccount = "9876543210"
-                })),
-                TransferLimitFrom = 10M,
-                TransferLimitTo = 1000M,
-                PlayerListCondition = PlayerListCondition.MatchAll,
-                AllPlayers = true,
-                IdentityAuthentication = false,
-                PhoneAuthentication = false,
-                DepositedAmountUnlimited = true,
-                DepositedAmountMin = 0M,
-                DepositedAmountMax = 0M,
-                Whitelist = Array.Empty<string>(),
-                Blacklist = Array.Empty<string>(),
-                VipLevelIds = Array.Empty<Guid>()
-            };
-
-            _paymentServiceMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()))
-                .Returns(Task.FromResult(true));
-
-            var response = await _controller.CreateBrandPaymentAsync(request);
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.BrandPayment.NameExists);
-        }
-
-        [Test]
-        public async Task Cannot_Create_Payment_With_Whitelist_Same_As_Blacklist()
-        {
-            var request = new CreateBrandPaymentRequest
-            {
-                Id = Guid.Empty,
-                PaymentMethodChannelId = Guid.NewGuid(),
-                PaymentStatus = SwitchStatus.Enabled,
-                ChannelName = "Test",
-                ExtendedData = JsonDocument.Parse(JsonSerializer.Serialize(new
-                {
-                    name = "測試者",
-                    bankAccount = "9876543210"
-                })),
-                TransferLimitFrom = 10M,
-                TransferLimitTo = 1000M,
-                PlayerListCondition = PlayerListCondition.MatchAll,
-                AllPlayers = true,
-                IdentityAuthentication = false,
-                PhoneAuthentication = false,
-                DepositedAmountUnlimited = true,
-                DepositedAmountMin = 0M,
-                DepositedAmountMax = 0M,
-                Whitelist = new string[] { "Tester" },
-                Blacklist = new string[] { "Tester" },
-                VipLevelIds = Array.Empty<Guid>()
-            };
-            request.Whitelist[0] = request.Blacklist[0];
-            var response = await _controller.CreateBrandPaymentAsync(request);
-            response.Valid.Should().BeFalse();
-            response.DuplicatePlayers[0].Should().Be(request.Whitelist[0]);
-            response.Message.Should().Be(Apis.BackendOffice.Resources.BrandPayment.WhiteSameAsBlack);
-        }
-
-        [Test]
-        public async Task Can_Create_Payment()
-        {
-            var request = new CreateBrandPaymentRequest
-            {
-                Id = Guid.Empty,
-                PaymentMethodChannelId = Guid.NewGuid(),
-                PaymentStatus = SwitchStatus.Enabled,
-                ChannelName = "Test",
-                ExtendedData = JsonDocument.Parse(JsonSerializer.Serialize(new
-                {
-                    name = "測試者",
-                    bankAccount = "9876543210"
-                })),
-                TransferLimitFrom = 10M,
-                TransferLimitTo = 1000M,
-                PlayerListCondition = PlayerListCondition.MatchAll,
-                AllPlayers = true,
-                IdentityAuthentication = false,
-                PhoneAuthentication = false,
-                DepositedAmountUnlimited = true,
-                DepositedAmountMin = 0M,
-                DepositedAmountMax = 0M,
-                Whitelist = Array.Empty<string>(),
-                Blacklist = Array.Empty<string>(),
-                VipLevelIds = Array.Empty<Guid>()
-            };
-
-            _paymentServiceMock
-                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()))
-                .Returns(Task.FromResult(false));
-
-            var response = await _controller.CreateBrandPaymentAsync(request);
-            response.Valid.Should().BeTrue();
-
-            _paymentServiceMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()));
-            _paymentServiceMock.Verify(p => p.CreatePaymentAsync(It.Is<CreateBrandPaymentRequest>(r =>
-                    r.ChannelName == request.ChannelName),
-                It.Is<string>(r => r == Username)));
         }
 
         [Test]
@@ -242,6 +160,40 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                     r.ChannelName == payment.ChannelName),
                 It.IsAny<UpdateBrandPaymentRequest>(),
                 It.Is<string>(r => r == Username)));
+        }
+
+        [Test]
+        public async Task Cannot_Create_Payment_With_Whitelist_Same_As_Blacklist()
+        {
+            var request = new CreateBrandPaymentRequest
+            {
+                Id = Guid.Empty,
+                PaymentMethodChannelId = Guid.NewGuid(),
+                PaymentStatus = SwitchStatus.Enabled,
+                ChannelName = "Test",
+                ExtendedData = JsonDocument.Parse(JsonSerializer.Serialize(new
+                {
+                    name = "測試者",
+                    bankAccount = "9876543210"
+                })),
+                TransferLimitFrom = 10M,
+                TransferLimitTo = 1000M,
+                PlayerListCondition = PlayerListCondition.MatchAll,
+                AllPlayers = true,
+                IdentityAuthentication = false,
+                PhoneAuthentication = false,
+                DepositedAmountUnlimited = true,
+                DepositedAmountMin = 0M,
+                DepositedAmountMax = 0M,
+                Whitelist = new string[] { "Tester" },
+                Blacklist = new string[] { "Tester" },
+                VipLevelIds = Array.Empty<Guid>()
+            };
+            request.Whitelist[0] = request.Blacklist[0];
+            var response = await _controller.CreateBrandPaymentAsync(request);
+            response.Valid.Should().BeFalse();
+            response.DuplicatePlayers[0].Should().Be(request.Whitelist[0]);
+            response.Message.Should().Be(Apis.BackendOffice.Resources.BrandPayment.WhiteSameAsBlack);
         }
 
         [Test]
@@ -297,57 +249,16 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 It.Is<string>(r => r == Username)), Times.Never);
         }
 
-        [Test]
-        public async Task Cannot_Update_Payment_With_Name_Exists()
+        [SetUp]
+        public override void Setup()
         {
-            var payment = CreatePaymentFixture().Create<BrandPayment>();
-            var request = new UpdateBrandPaymentRequest
-            {
-                Id = Guid.Empty,
-                PaymentMethodChannelId = Guid.NewGuid(),
-                PaymentStatus = SwitchStatus.Enabled,
-                ChannelName = "Test",
-                ExtendedData = JsonDocument.Parse(JsonSerializer.Serialize(new
-                {
-                    name = "測試者",
-                    bankAccount = "9876543210"
-                })),
-                TransferLimitFrom = 10M,
-                TransferLimitTo = 1000M,
-                PlayerListCondition = PlayerListCondition.MatchAll,
-                AllPlayers = true,
-                IdentityAuthentication = false,
-                PhoneAuthentication = false,
-                DepositedAmountUnlimited = true,
-                DepositedAmountMin = 0M,
-                DepositedAmountMax = 0M,
-                Whitelist = Array.Empty<string>(),
-                Blacklist = Array.Empty<string>(),
-                VipLevelIds = Array.Empty<Guid>()
-            };
-            request.ChannelName = payment.ChannelName;
-            _paymentServiceMock.Setup(s => s.GetPaymentAsync(
-                    It.IsAny<Expression<Func<BrandPayment, bool>>>(),
-                    It.IsAny<Func<IQueryable<BrandPayment>,
-                        IQueryable<BrandPayment>>>(), true))
-                .Returns(Task.FromResult(payment));
-
-            _paymentServiceMock.Setup(s =>
-                    s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()))
-                .Returns(Task.FromResult(true));
-
-            var response = await _controller.UpdateBrandPaymentAsync(payment.Id, request);
-
-            response.Valid.Should().BeFalse();
-            response.Message.Should().Be(Apis.BackendOffice.Resources.BrandPayment.NameExists);
-            _paymentServiceMock.Verify(s => s.GetPaymentAsync(
-                It.IsAny<Expression<Func<BrandPayment, bool>>>(),
-                It.IsAny<Func<IQueryable<BrandPayment>,
-                    IQueryable<BrandPayment>>>(), true));
-            _paymentServiceMock.Verify(p => p.UpdatePaymentAsync(It.Is<BrandPayment>(r =>
-                    r.ChannelName == payment.ChannelName),
-                It.IsAny<UpdateBrandPaymentRequest>(),
-                It.Is<string>(r => r == Username)), Times.Never);
+            base.Setup();
+            _controller = new(
+                _playerQueriesMock.Object,
+                _uploadServiceMock.Object,
+                _paymentServiceMock.Object,
+                _auditLogQueriesMock.Object);
+            _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
 
         private Fixture CreatePaymentFixture()

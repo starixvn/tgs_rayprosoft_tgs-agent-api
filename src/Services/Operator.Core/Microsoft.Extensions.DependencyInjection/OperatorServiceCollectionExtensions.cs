@@ -28,6 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     httpClient.BaseAddress = options.ValidateCodeBaseUrl;
                 })
                 .Services
+                .AddTransient<IGameProviderStatusValidator, GameProviderStatusValidator>()
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
                 .AddTransient<IValidateCodeServiceClient>(sp => sp.GetRequiredService<ValidateCodeServiceClient>())
                 .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()

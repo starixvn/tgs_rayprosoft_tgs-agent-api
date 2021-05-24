@@ -401,8 +401,8 @@ const EditBody = ({
     let paymentMethodChannelId = watch(PaymentMethodChannelIdFieldName)
     let isEdit = !isAdd
     let paymentId = isAdd ? manualPayment?.id : record?.paymentId
+    let isManualPayment = paymentId == manualPayment?.id
     let isBankTransferMethod = paymentMethodId === bankTransferPaymentMethod?.id
-
     useEffect(() => {
         if (isBankTransferMethod) {
             let paymentMethodChannel = bankTransferPaymentMethodChannels.find(
@@ -511,7 +511,7 @@ const EditBody = ({
                             </Label>
                             <Input name="channelName" size="small" required />
 
-                            {isBankTransferMethod && (
+                            {isManualPayment && (
                                 <>
                                     <Label required>
                                         <Trans

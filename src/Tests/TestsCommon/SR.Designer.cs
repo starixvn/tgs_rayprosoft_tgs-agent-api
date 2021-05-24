@@ -259,6 +259,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to OppositeBetPatterns.
+        /// </summary>
+        public static string OppositeBetPatterns {
+            get {
+                return ResourceManager.GetString("OppositeBetPatterns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PlaceBetRequest.
         /// </summary>
         public static string PlaceBetRequest {

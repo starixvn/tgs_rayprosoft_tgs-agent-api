@@ -152,8 +152,19 @@ Scenario: 04.d - Lose bet
     Then I will receive bet response of OK and balance of $90
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "LoseBet" for $0
+        
+Scenario: 04.e - Lose bet with 2 transactions
+    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "AGIN_DSP_BAC"
+        And I place bet of $10 for game "AGIN_DSP_BAC" for the same round
+        And balance now being $80
+    When I settle bet for win amount $-20
+    Then I will receive bet response of OK and balance of $80
+        And player wallet database record will be for $80
+        And 2 game actions will be recorded in the database of type "LoseBet" for $0
 
-Scenario: 04.e - Settle bet with duplicate transaction ID
+Scenario: 04.f - Settle bet with duplicate transaction ID
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I place bet of $10 for game "AGIN_DSP_BAC"
@@ -164,7 +175,7 @@ Scenario: 04.e - Settle bet with duplicate transaction ID
         And player wallet database record will be for $115
         And game action will be recorded in the database of type "WinBet" for $25
         
-Scenario: 04.f - Settle bet for ROU game
+Scenario: 04.g - Settle bet for ROU game
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I place bet of $10 for game "AGIN_DSP_ROU"
