@@ -19,7 +19,7 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
         public record Transaction
         {
             [JsonPropertyName("userId")]
-            public string PlayerCode { get; init; }
+            public string UserId { get; init; }
 
             [JsonPropertyName("txId")]
             public long ExternalTransactionId { get; init; }

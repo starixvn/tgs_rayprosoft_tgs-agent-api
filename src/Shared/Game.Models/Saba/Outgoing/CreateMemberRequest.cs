@@ -17,7 +17,7 @@ namespace TGS.Shared.Game.Models.Saba.Outgoing
         public string CurrencyCode { get; init; }
 
         [JsonPropertyName("operatorId")]
-        public string OperatorId => "pg";
+        public string OperatorId { get; init; }
 
         [JsonPropertyName("maxtransfer")]
         public decimal MaxTransfer => 1;

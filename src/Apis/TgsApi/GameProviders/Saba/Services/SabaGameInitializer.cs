@@ -24,6 +24,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
+        private readonly ISabaServices _services;
         private readonly ISettingOperations _settingOperations;
 
         public SabaGameInitializer(
@@ -32,6 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             IBrandGameProviderOperations brandGameProviderOperations,
             IGameProviderOperations gameProviderOperations,
             IGameProviderCurrencyCodeMapper currencyCodeMapper,
+            ISabaServices services,
             ISabaApiClient client)
         {
             _settingOperations = settingOperations;
@@ -39,6 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             _brandGameProviderOperations = brandGameProviderOperations;
             _gameProviderOperations = gameProviderOperations;
             _currencyCodeMapper = currencyCodeMapper;
+            _services = services;
             _client = client;
         }
 
@@ -54,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                     .GameProviderConfigurations.Saba);
 
             var response =
-                await GetGameUrlAsync(configuration.ApiUrl, configuration.VendorId, gameProviderId, player, token);
+                await GetGameUrlAsync(configuration, gameProviderId, player, token);
 
             if (response.Code != GetGameUrlApi.Ok)
             {
@@ -71,11 +74,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             return new() {Url = url};
         }
 
-        private async ValueTask<GameUrlResponse> GetGameUrlAsync(Uri apiUrl, string vendorId, Guid gameProviderId,
+        private async ValueTask<GameUrlResponse> GetGameUrlAsync(SabaConfiguration configuration, Guid gameProviderId,
             CachedPlayer player, PlayerTokenData token)
         {
-            var playerCode = player.PlayerCode;
+            var isTestEnv = _services.IsTestEnvironment(configuration.TestEnvironments);
+
+            var playerCode = isTestEnv ? $"{player.PlayerCode}_test" : player.PlayerCode;
             var platform = token.PlatformType == PlatformType.Mobile ? "2" : "1";
+
+            var apiUrl = configuration.ApiUrl;
+            var vendorId = configuration.VendorId;
 
             var gameUrlRequest = new GameUrlRequest
             {
@@ -91,8 +99,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             }
 
             var oddsType = GetOddsType(player.DefaultWalletCurrencyCode);
-            var currencyCode =
-                await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
+            var currencyCode = isTestEnv
+                ? "20"
+                : await _currencyCodeMapper.InternalToExternalAsync(player.DefaultWalletCurrencyCode, gameProviderId);
 
             var createMemberResponse = await _client.CreateMemberAsync(apiUrl,
                 new()
