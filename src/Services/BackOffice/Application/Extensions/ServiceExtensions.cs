@@ -34,6 +34,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<IPlayerBankService, PlayerBankService>();
             services.AddTransient<ICredentialGenerator, CredentialGenerator>();
             services.AddTransient<ISettingsService, SettingsService>();
+            services.AddTransient<IGameService, GameService>();
 
             services.AddTgsTransactionRepositoriesServices();
 

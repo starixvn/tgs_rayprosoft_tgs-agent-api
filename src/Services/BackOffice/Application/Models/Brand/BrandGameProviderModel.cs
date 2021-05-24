@@ -4,7 +4,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
 {
     public class BrandGameProviderModel
     {
-        public Guid Id { get; set; }
+        public Guid? Id { get; set; }
         public Guid GameProviderId { get; set; }
         public string Name { get; set; }
         public Guid ConfigurationId { get; set; }

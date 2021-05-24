@@ -9,6 +9,7 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models;
@@ -88,7 +89,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
             brand.Currencies = GenerateBrandCurrencies(brand, request);
-            brand.GameProviders = await GenerateBrandGameProvidersAsync(brand, request);
+            brand.GameProviders = await GenerateAddBrandGameProvidersAsync(brand, request);
             brand.BetLimits = await GenerateBetLimitsAsync(brand, request);
             brand.Games = await GenerateWithCreateGamesAsync(brand);
             brand.BrandGroups = GenerateWithCreateGroups(brand, request);
@@ -124,11 +125,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.Currencies = GenerateBrandCurrencies(brand, request);
             brand.BetLimits = await GenerateBetLimitsAsync(brand, request);
             brand.Games = await GenerateWithUpdateGamesAsync(brand, request);
-            brand.GameProviders = await GenerateBrandGameProvidersAsync(brand, request);
+            brand.GameProviders = GenerateBrandGameProvidersAsync(brand, request);
             brand.BrandGroups = GenerateWithUpdateGroups(brand, request);
             brand.Domains = GenerateBrandDomains(brand, request);
 
             await UpdateEntityAsync(brand);
+            await CreateEntitiesAsync(await GenerateAddBrandGameProvidersAsync(brand, request));
 
             await tran.CommitAsync();
 
@@ -328,34 +330,67 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(brandGroupGames);
         }
 
-        private async Task<HashSet<BrandGameProvider>> GenerateBrandGameProvidersAsync(
+        private async Task<HashSet<BrandGameProvider>> GenerateAddBrandGameProvidersAsync(
             Brand brand, BrandRequest request)
         {
+            var gameProviderIds =
+                request.GameProviders.Where(x => x.Id == null).Select(x => x.GameProviderId).ToArray();
+
             var gameProviders = await _repository.GameProviders.AsQueryable()
-                .Where(x => request.GameProviders.Select(g => g.GameProviderId).Contains(x.Id)).ToArrayAsync();
+                .Where(x => gameProviderIds.Contains(x.Id)).ToArrayAsync();
             var brandGameProviders = gameProviders.Select(x =>
                 {
-                    var brandGameProviderId = brand.GameProviders?.FirstOrDefault(g => g.GameProviderId == x.Id)?.Id;
                     var requestBrandGameProvider = request.GameProviders.First(m => m.GameProviderId == x.Id);
+                    var brandGameProviderId = GuidExtensions.NewSequentialGuid();
 
-                    var brandGameProvider = new BrandGameProvider
+                    var newBrandGameProvider = new BrandGameProvider
                     {
+                        Id = brandGameProviderId,
                         BrandId = brand.Id,
                         GameProviderId = x.Id,
                         GameProvider = x,
                         DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode,
                         GameProviderConfigurationId = requestBrandGameProvider.ConfigurationId,
                         DesktopQueryString = requestBrandGameProvider.DesktopQueryString,
-                        MobileQueryString = requestBrandGameProvider.MobileQueryString
+                        MobileQueryString = requestBrandGameProvider.MobileQueryString,
+                        Schedules = new BrandGameProviderSchedule[]
+                        {
+                            new()
+                            {
+                                BrandGameProviderId = brandGameProviderId,
+                                From = DateTimeOffset.Now,
+                                To = DateTimeOffset.Now.AddDays(7),
+                                DayOfWeek = DayOfWeek.Monday,
+                                IsDefault = true
+                            }
+                        }.ToHashSet()
                     };
-                    if (brandGameProviderId.HasValue)
-                    {
-                        brandGameProvider.Id = brandGameProviderId.Value;
-                    }
 
-                    return brandGameProvider;
+                    return newBrandGameProvider;
                 }
             );
+            return new(brandGameProviders);
+        }
+
+        private static HashSet<BrandGameProvider> GenerateBrandGameProvidersAsync(
+            Brand brand, BrandRequest request)
+        {
+            var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId).ToArray();
+            var brandGameProviders = brand.GameProviders.Where(x => gameProviderIds.Contains(x.GameProviderId)).Select(
+                x =>
+                {
+                    var requestBrandGameProvider =
+                        request.GameProviders.First(m => m.GameProviderId == x.GameProviderId);
+
+                    x.DefaultLanguageCode = brand.Languages.FirstOrDefault()?.CultureCode;
+                    x.GameProviderConfigurationId = requestBrandGameProvider.ConfigurationId;
+                    x.DesktopQueryString = requestBrandGameProvider.DesktopQueryString;
+                    x.MobileQueryString = requestBrandGameProvider.MobileQueryString;
+
+                    return x;
+                }
+            );
+
             return new(brandGameProviders);
         }
 
