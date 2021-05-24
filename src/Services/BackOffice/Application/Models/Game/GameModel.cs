@@ -1,9 +1,9 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
 
-namespace TGS.Services.BackOffice.Application.Models.GameProvider
+namespace TGS.Services.BackOffice.Application.Models.Game
 {
-    public class GameProviderGameModel
+    public class GameModel
     {
         public int Id { get; set; }
         public string Code { get; set; }

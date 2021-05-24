@@ -55,6 +55,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
             var brands = await _brandService.GetBrandQueries(q =>
                     q.Where(request.BrandCode is not null, x => x.Code == request.BrandCode)
                         .Where(request.BrandCode is null, x => queryDate > x.CurrentSettlementTo))
+                .Where(x => x.SettlementIntervalType != null)
                 .ToArrayAsync(cancellationToken);
             var createModels = new List<CreateAgentDividendModel>();
             var createAutoSendModels = new List<CreateAgentDividendModel>();
@@ -191,8 +192,8 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         {
                             AgentId = x.AgentId.Value,
                             BrandId = x.BrandId,
-                            From = brand.CurrentSettlementFrom,
-                            To = brand.CurrentSettlementTo,
+                            From = brand.CurrentSettlementFrom.Value,
+                            To = brand.CurrentSettlementTo.Value,
                             AgentDividendPercentage = x.AgentDividendPercentage,
                             DepositAmount = models.Sum(m => m.DepositAmount),
                             WithdrawalAmount = models.Sum(m => m.WithdrawalAmount),

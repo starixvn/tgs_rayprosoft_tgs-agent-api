@@ -5,9 +5,9 @@ namespace TGS.Core.Infrastructures.Utility
 {
     public static class BrandSettlementIntervalGenerator
     {
-        public static (DateTimeOffset BeforeFromDate, DateTimeOffset BeforeToDate, DateTimeOffset AfterFromDate,
-            DateTimeOffset AfterToDate) GetInterval(
-                SettlementIntervalType type)
+        public static (DateTimeOffset? BeforeFromDate, DateTimeOffset? BeforeToDate, DateTimeOffset? AfterFromDate,
+            DateTimeOffset? AfterToDate) GetInterval(
+                SettlementIntervalType? type)
         {
             var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month, DateTimeOffset.Now.Day, 0,
                 0, 0, new(8, 0, 0));
@@ -31,7 +31,7 @@ namespace TGS.Core.Infrastructures.Utility
                         new(nextNextMonth.AddDays(-1).Year, nextNextMonth.AddDays(-1).Month,
                             nextNextMonth.AddDays(-1).Day, 0, 0, 0, new(8, 0, 0)));
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                    return (null, null, null, null);
             }
         }
     }

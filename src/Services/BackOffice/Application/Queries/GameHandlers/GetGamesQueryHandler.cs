@@ -1,0 +1,48 @@
+﻿using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Models.Game;
+using TGS.Services.BackOffice.Infrastructure.DataService;
+
+namespace TGS.Services.BackOffice.Application.Queries.GameHandlers
+{
+    public class GetGamesQueryHandler : Handler<GetGamesRequest, PagedResponse<GameModel>>
+    {
+        private readonly IGameService _service;
+
+        public GetGamesQueryHandler(IGameService service, IHttpContextAccessor accessor) :
+            base(accessor)
+        {
+            _service = service;
+        }
+
+        public override Task<PagedResponse<GameModel>> Handle(GetGamesRequest request,
+            CancellationToken cancellationToken) =>
+            _service.GetGameQueries(q => q
+                    .Where(g => g.GameProviderId == request.GameProviderId))
+                .Select(x => new GameModel
+                {
+                    Id = x.Id,
+                    Name = x.Name,
+                    Code = x.Code,
+                    Status = x.Status,
+                    Description = x.Description,
+                    ExternalId = x.ExternalId,
+                    EndpointPath = x.EndpointPath,
+                    RuleUrl = x.RuleUrl,
+                    Type = x.Type,
+                    PlatformType = x.PlatformType,
+                    SubGame = x.SubGame,
+                    HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
+                    Html5 = x.Html5,
+                    AvailableCurrencies = x.AvailableCurrencies,
+                    CreatedByUsername = x.CreatedByUsername,
+                    UpdatedByUsername = x.UpdatedByUsername,
+                    CreatedOn = x.CreatedOn,
+                    UpdatedOn = x.UpdatedOn
+                }).CreatePagedResponseAsync(request);
+    }
+}

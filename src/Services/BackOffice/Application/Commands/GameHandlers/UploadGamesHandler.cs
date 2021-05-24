@@ -4,12 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Enums;
-using TGS.Services.BackOffice.Application.Models.GameProvider;
+using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.BackOffice.Infrastructure.Services;
 
-namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
+namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 {
     public class UploadGamesHandler : Handler<UploadGamesRequest, UploadGamesResponse>
     {
@@ -34,20 +34,12 @@ namespace TGS.Services.BackOffice.Application.Commands.GameProviderHandlers
             var existedGames = uploadedResult
                 .Where(x => gameProvider?.Games.Any(g =>
                     g.ExternalId == x.ExternalId &&
-                    Enum.Parse(typeof(PlatformType), x.Platform, true).Equals(g.PlatformType)) ?? false).ToArray();
+                    Enum.Parse(typeof(GamePlatformType), x.PlatformType, true).Equals(g.PlatformType)) ?? false)
+                .ToArray();
 
             return existedGames.Length > 0
-                ? new UploadGamesResponse
-                {
-                    Valid = false,
-                    Message = GameProvider.GamesExisted,
-                    Games = existedGames
-                }
-                : new UploadGamesResponse
-                {
-                    Valid = true,
-                    Games = uploadedResult.ToArray()
-                };
+                ? new() {Valid = false, Message = GameProvider.GamesExisted, Games = existedGames}
+                : new UploadGamesResponse {Valid = true, Games = uploadedResult.ToArray()};
         }
     }
 }

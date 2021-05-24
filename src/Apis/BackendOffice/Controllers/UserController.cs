@@ -41,7 +41,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Route("")]
         [HttpGet]
         [Description("Get users")]
-        public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request) => 
+        public Task<PagedResponse<UserModel>> GetListAsync([FromQuery] GetUsersRequest request) =>
             _userQueries.GetQueries()
                 .Where(ResellerId, r => r.Role.ResellerId == ResellerId)
                 .Where(LicenseeId, l => l.Role.LicenseeId == LicenseeId)
@@ -71,14 +71,22 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Create a user")]
         public async Task<MessageResponse> CreateAsync([FromBody] CreateUserRequest request)
         {
-            if (await _userQueries.ExistsAsync(p => p.Username == request.Username))
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.User.UsernameExistedAlready);
-            }
+            var role = await _roleQueries.GetSingleAsync(p => p.Id == request.RoleId);
 
-            if (await _roleQueries.GetSingleAsync(p => p.Id == request.RoleId) == null)
+            if (role == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
+            }
+
+            var usernameExisted = await _userQueries.GetQueries()
+                .Where(role.ResellerId, x => x.Role.ResellerId == role.ResellerId)
+                .Where(role.LicenseeId, x => x.Role.LicenseeId == role.LicenseeId)
+                .Where(role.BrandId, x => x.Role.BrandId == role.BrandId)
+                .AnyAsync(x => x.Username == request.Username);
+
+            if (usernameExisted)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.User.UsernameExistedAlready);
             }
 
             if (await _departmentQueries.GetSingleAsync(p => p.Id == request.DepartmentId) == null)
