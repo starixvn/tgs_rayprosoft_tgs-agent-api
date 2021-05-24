@@ -80,7 +80,7 @@ export const BrandGameProviderCheckboxGroupTable = ({
 
 const Row = ({ name, disabled, field, index }) => {
     let formContext = useFormContext()
-    let { register, setValue, control, getValues } = formContext
+    let { setValue, control, getValues } = formContext
 
     let configDialog = useModalState()
     let defaultLangDialog = useModalState()
