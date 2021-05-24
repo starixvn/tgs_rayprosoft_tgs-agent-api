@@ -150,4 +150,7 @@
   <data name="DuplicateGames" xml:space="preserve">
     <value>游戏重复，请检查游戏列表。</value>
   </data>
+  <data name="ExternalIdExisted" xml:space="preserve">
+    <value>外部的代码已存在</value>
+  </data>
 </root>

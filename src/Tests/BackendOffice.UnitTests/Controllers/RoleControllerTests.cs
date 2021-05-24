@@ -150,6 +150,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Create_Role()
         {
             var request = CreateRoleRequestFixture().Create<CreateRoleRequest>();
+            var roles = CreateRoleFixture().CreateMany<Role>(10).AsQueryable().BuildMock();
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles.Object);
 
             _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
                 .Returns(Task.FromResult(false));
@@ -166,9 +170,19 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Create_User_With_Name_Exists()
         {
             var request = CreateRoleRequestFixture().Create<CreateRoleRequest>();
+            var roles = CreateRoleFixture().CreateMany<Role>(10).AsQueryable().BuildMock().Object;
+            request.Name = "Name";
+            request.ResellerId = null;
+            request.LicenseeId = null;
+            request.BrandId = null;
 
-            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
-                .Returns(Task.FromResult(true));
+            roles.First().Name = "Name";
+            roles.First().ResellerId = null;
+            roles.First().LicenseeId = null;
+            roles.First().BrandId = null;
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
@@ -265,6 +279,20 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var role = CreateRoleFixture().Create<Role>();
             var request = UpdateRoleRequestFixture().Create<UpdateRoleRequest>();
+            var roles = CreateRoleFixture().CreateMany<Role>(10).AsQueryable().BuildMock().Object;
+            request.Name = "Name";
+            role.ResellerId = null;
+            role.LicenseeId = null;
+            role.BrandId = null;
+
+            var firstRole = roles.First();
+            firstRole.Name = "Name";
+            firstRole.ResellerId = null;
+            firstRole.LicenseeId = null;
+            firstRole.BrandId = null;
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
@@ -291,13 +319,14 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var role = CreateRoleFixture().Create<Role>();
             var request = new Fixture().Create<CopyRoleRequest>();
             role.IsRoot = false;
+            var roles = CreateRoleFixture().CreateMany<Role>(10).AsQueryable().BuildMock();
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles.Object);
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
-
-            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
-                .Returns(Task.FromResult(false));
 
             var response = await _controller.CopyAsync(role.Id, request);
 
@@ -340,13 +369,24 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var role = CreateRoleFixture().Create<Role>();
             var request = UpdateRoleRequestFixture().Create<CopyRoleRequest>();
             role.IsRoot = false;
+            var roles = CreateRoleFixture().CreateMany<Role>(10).AsQueryable().BuildMock().Object;
+            request.Name = "Name";
+            role.ResellerId = null;
+            role.LicenseeId = null;
+            role.BrandId = null;
+
+            var firstRole = roles.First();
+            firstRole.Name = "Name";
+            firstRole.ResellerId = null;
+            firstRole.LicenseeId = null;
+            firstRole.BrandId = null;
+
+            _roleQueriesMock.Setup(x => x.GetQueries())
+                .Returns(roles);
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult(role));
-
-            _roleQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()))
-                .Returns(Task.FromResult(true));
 
             var response = await _controller.CopyAsync(role.Id, request);
 
@@ -355,7 +395,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                 It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()));
-            _roleQueriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<Role, bool>>>()));
             _roleCommandsMock.Verify(p => p.UpdateAsync(It.Is<Role>(r =>
                 r.Name == role.Name &&
                 r.DisplayName == role.DisplayName &&

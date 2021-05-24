@@ -1,6 +1,6 @@
 ﻿using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.GameProvider
+namespace TGS.Services.BackOffice.Application.Models.Game
 {
     public class UploadGamesResponse : MessageResponse
     {

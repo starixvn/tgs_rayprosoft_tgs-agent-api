@@ -153,4 +153,7 @@
   <data name="DuplicateGames" xml:space="preserve">
     <value>Duplicate games, please check game list.</value>
   </data>
+  <data name="ExternalIdExisted" xml:space="preserve">
+    <value>External id existed already.</value>
+  </data>
 </root>
