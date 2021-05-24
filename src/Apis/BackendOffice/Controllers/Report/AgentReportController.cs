@@ -27,8 +27,12 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet("{id}/teamInfo")]
         [Description("Get agent team Information")]
-        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id) =>
-            _client.GetAgentTeamInfoAsync(new(id));
+        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id,
+            [FromQuery] GetAgentTeamInfoRequest request)
+        {
+            request.AgentId = id;
+            return _client.GetAgentTeamInfoAsync(request);
+        }
 
         [HttpGet("dividends")]
         [Description("Get agent dividends report")]

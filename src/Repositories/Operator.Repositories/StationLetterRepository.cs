@@ -36,6 +36,7 @@ namespace TGS.Operator.Repositories
             var query = from letterPlayer in _tgsRepository.StationLetterPlayers
                             .Include(letterPlayer => letterPlayer.StationLetter)
                             .AsAsyncEnumerable()
+                            .OrderByDescending(x => x.StationLetter.CreatedOn)
                         where letterPlayer.PlayerCode == playerCode
                             && letterPlayer.StationLetter.Status == StationLetterStatus.Published
                         select new StationLetter(

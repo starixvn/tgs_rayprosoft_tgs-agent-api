@@ -120,7 +120,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Middlewares
             }
 
             return xDoc.Root?.Elements().First(e => e.Name.LocalName.Contains("Record"))
-                    .Elements()
+                    .Elements().Where(e => !e.Name.LocalName.Contains("transactionID"))
                     .ToDictionary(a => a.Name.LocalName, a => a.Value) ??
                 new Dictionary<string, string>();
         }

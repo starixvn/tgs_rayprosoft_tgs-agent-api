@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -53,9 +52,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var response = await _client.GetRoundsAsync(roundsRequest);
 
-            var items = response.Items == null ? Array.Empty<RoundModel>() : response.Items.OrderByDescending(x => x.CreatedOn).ToArray();
-
-            return new PagingResponse<RoundModel>() { TotalCount = response.TotalCount, Items = items };
+            return new PagingResponse<RoundModel>() { TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<RoundModel>() };
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.BrandGame;
 using TGS.Services.BackOffice.Application.Resources;
@@ -10,11 +12,14 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers
 {
     public class UpdateBrandGameStatusHandler : Handler<UpdateBrandGameStatusRequest, MessageResponse>
     {
+        private readonly IRedisCacheManager _cacheManager;
         private readonly IBrandGameService _service;
 
-        public UpdateBrandGameStatusHandler(IBrandGameService service, IHttpContextAccessor accessor) : base(accessor)
+        public UpdateBrandGameStatusHandler(IBrandGameService service, IRedisCacheManager cacheManager,
+            IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
+            _cacheManager = cacheManager;
         }
 
         public override async Task<MessageResponse> Handle(UpdateBrandGameStatusRequest request,
@@ -30,6 +35,7 @@ namespace TGS.Services.BackOffice.Application.Commands.BrandGameHandlers
             brandGame.Status = request.Status;
 
             await _service.UpdateBrandGameAsync(brandGame);
+            await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brandGame.BrandId);
 
             return CreateValidResponse<MessageResponse>();
         }

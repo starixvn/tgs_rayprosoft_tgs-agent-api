@@ -97,12 +97,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var balance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
 
             return new()
             {
                 Id = baseRequest.Id,
-                Result = JsonDocument.Parse(JsonSerializer.Serialize(balance)),
+                Result = JsonDocument.Parse(JsonSerializer.Serialize(getBalance.Balance)),
                 Error = null,
                 Jsonrpc = baseRequest.Jsonrpc
             };

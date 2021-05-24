@@ -71,7 +71,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await DeleteEntitiesAsync(gameProvider.Currencies);
             await DeleteEntitiesAsync(gameProvider.Languages);
 
-            gameProvider.Games = GenerateUpdateGames(gameProvider, request);
             gameProvider.Currencies = await GenerateCurrenciesAsync(gameProvider, request);
             gameProvider.Languages = await GenerateLanguagesAsync(gameProvider, request);
             gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
@@ -89,8 +88,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 new CacheKey {CacheType = RedisCacheType.GameProviderConfiguration, Key = gameProvider.Id},
                 new CacheKey {CacheType = RedisCacheType.GameProviderLanguages, Key = gameProvider.Id},
                 new CacheKey {CacheType = RedisCacheType.GameProviderCurrencies, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.Games, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.SubGames, Key = gameProvider.Id},
                 new CacheKey {CacheType = RedisCacheType.Localization, Key = gameProvider.Id}
             };
 
@@ -130,7 +127,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 UpdatedOn = DateTimeOffset.Now
             };
 
-            gameProvider.Games = GenerateGames(gameProvider, request);
             gameProvider.Currencies = await GenerateCurrenciesAsync(gameProvider, request);
             gameProvider.Languages = await GenerateLanguagesAsync(gameProvider, request);
             gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
@@ -140,67 +136,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         Task<bool> IGameProviderService.ExistsAsync(Expression<Func<GameProvider, bool>> predicate) =>
             ExistsAsync(predicate);
-
-        private static HashSet<Game> GenerateGames(GameProvider gameProvider, GameProviderRequest request)
-        {
-            var games = request.Games.Select((x, count) => new Game
-            {
-                Id = int.Parse($"{gameProvider.UniqueId}{count + 1:00000}"),
-                Code = x.Code,
-                Name = x.Name,
-                Status = x.Status,
-                ExternalId = x.ExternalId,
-                Description = x.Description,
-                EndpointPath = x.EndpointPath,
-                RuleUrl = x.RuleUrl,
-                GameProviderId = gameProvider.Id,
-                Type = x.Type,
-                PlatformType = x.PlatformType,
-                SubGame = x.SubGame,
-                HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
-                Html5 = x.Html5,
-                AvailableCurrencies = x.AvailableCurrencies,
-                CreatedByUsername = request.EditorUsername,
-                UpdatedByUsername = request.EditorUsername,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            });
-            return new(games);
-        }
-
-        private static HashSet<Game> GenerateUpdateGames(GameProvider gameProvider,
-            GameProviderRequest request)
-        {
-            var maxNumberStr = gameProvider.Games.Max(x => x.Id).ToString();
-            var maxNumber = int.Parse(maxNumberStr[^5..]);
-            var games = request.Games.Select(x =>
-            {
-                var originGame = gameProvider.Games.FirstOrDefault(g => g.Id == x.Id);
-                var id = originGame == null ? int.Parse($"{gameProvider.UniqueId}{maxNumber += 1:00000}") : x.Id;
-                return new Game
-                {
-                    Id = id,
-                    GameProviderId = gameProvider.Id,
-                    Code = x.Code,
-                    Name = x.Name,
-                    Status = x.Status,
-                    ExternalId = x.ExternalId,
-                    Description = x.Description,
-                    EndpointPath = x.EndpointPath,
-                    RuleUrl = x.RuleUrl,
-                    SubGame = x.SubGame,
-                    HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
-                    Html5 = x.Html5,
-                    AvailableCurrencies = x.AvailableCurrencies,
-                    CreatedByUsername = originGame == null ? request.EditorUsername : x.CreatedByUsername,
-                    UpdatedByUsername = originGame == null ? request.EditorUsername : x.UpdatedByUsername,
-                    CreatedOn = originGame == null ? DateTimeOffset.Now : x.CreatedOn,
-                    UpdatedOn = originGame == null ? DateTimeOffset.Now : x.UpdatedOn
-                };
-            });
-
-            return new(games);
-        }
 
         private async Task<HashSet<GameProviderCurrency>> GenerateCurrenciesAsync(GameProvider gameProvider,
             GameProviderRequest request)

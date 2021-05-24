@@ -21,6 +21,8 @@ const MonthlyTrans = {
     en: "Monthly"
 }
 
+const Instantly = "Instantly"
+
 export const SettlementIntervalTypeSelect = ({
     placeholder,
     placeholderDisabled = false,
@@ -53,5 +55,6 @@ export const SettlementIntervalTypeSelect = ({
 export default {
     Daily,
     Weekly,
-    Monthly
+    Monthly,
+    Instantly
 }
