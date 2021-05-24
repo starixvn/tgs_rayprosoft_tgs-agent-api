@@ -35,7 +35,7 @@ namespace TGS.Services.Operator
 
             if (gameProviderStatus == null)
             {
-                throw new InvalidStatusException("GameProvider or Game doesn't exist");
+                throw new InvalidStatusException("GameProvider doesn't exist");
             }
 
             var cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
@@ -49,7 +49,7 @@ namespace TGS.Services.Operator
 
             if (brandGameProviderStatus == null)
             {
-                throw new InvalidStatusException("Brand doesn't have the configuration of GameProvider or Game");
+                throw new InvalidStatusException("Brand doesn't have the configuration of GameProvider");
             }
 
             ValidateGameProviderAndGameStatus(statuses, brandGameProviderStatus.Value);
