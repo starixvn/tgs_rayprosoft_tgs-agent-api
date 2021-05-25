@@ -81,7 +81,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var maxNumber = gameProvider.Games.Count > 0 ? gameProvider.Games.Max(x => x.Id) : 0;
             var currentMaxGameNumber = gameProvider.UniqueId * (int)Math.Pow(10, 5) + maxNumber;
-
+            var game = request.Games.First();
             var games = request.Games.Select(x =>
             {
                 var originGame = gameProvider.Games.FirstOrDefault(g => g.Id == x.Id);
@@ -97,6 +97,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     Description = x.Description,
                     EndpointPath = x.EndpointPath,
                     RuleUrl = x.RuleUrl,
+                    Type = x.Type,
+                    PlatformType = x.PlatformType,
                     SubGame = x.SubGame,
                     HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
                     Html5 = x.Html5,

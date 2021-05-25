@@ -21,8 +21,8 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpGet]
         [Description("Get games")]
-        public Task<PagedResponse<GameProviderModel>>
-            GetGameProvidersAsync([FromQuery] GetGameProvidersRequest request) => _mediator.Send(request);
+        public Task<PagedResponse<GameModel>>
+            GetGameProvidersAsync([FromQuery] GetGamesRequest request) => _mediator.Send(request);
 
         [HttpPost]
         [Description("Create games")]
@@ -31,7 +31,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpPut("{id}")]
         [Description("Update a game")]
-        public Task<MessageResponse> UpdateGameAsync(ushort id, UpdateGameRequest request)
+        public Task<MessageResponse> UpdateGameAsync(int id, UpdateGameRequest request)
         {
             request.Id = id;
             return _mediator.Send(request);

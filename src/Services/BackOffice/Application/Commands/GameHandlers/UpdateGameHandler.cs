@@ -28,6 +28,25 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
                 return CreateInvalidResponse<CreateGamesResponse>(GameProvider.GameRequired);
             }
 
+             if (await _gameService.ExistsAsync(x =>
+                x.GameProviderId == game.GameProviderId && x.Code != game.Code && request.ExternalId == x.ExternalId))
+            {
+                return CreateInvalidResponse<CreateGamesResponse>(GameProvider.ExternalIdExisted);
+            }
+
+            game.Name = request.Name;
+            game.Status = request.Status;
+            game.ExternalId = request.ExternalId;
+            game.Description = request.Description;
+            game.EndpointPath = request.EndpointPath;
+            game.RuleUrl = request.RuleUrl;
+            game.Type = request.Type;
+            game.PlatformType = request.PlatformType;
+            game.SubGame = request.SubGame;
+            game.HasTurnoverOnTieBet = request.HasTurnoverOnTieBet;
+            game.Html5 = request.Html5;
+            game.AvailableCurrencies = request.AvailableCurrencies;
+
             await _gameService.UpdateGameAsync(game);
 
             return CreateValidResponse<CreateGamesResponse>();

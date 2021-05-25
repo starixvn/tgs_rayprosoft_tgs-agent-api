@@ -18,6 +18,7 @@ import {
 } from "bumbag"
 import Disclosure, {
     AddDisclosure,
+    ConfigIconDisclosure,
     EditDisclosure
 } from "../../dialog/Disclosure"
 import {
@@ -30,11 +31,9 @@ import FormDialog from "../../form/FormDialog"
 import { Trans, useLocale, useTrans } from "../../i18n"
 import Backdrop from "../../dialog/Backdrop"
 import {
-    useGameProvider,
-    useUpdateGameProvider,
     useUploadGameProviderGames,
     useAddGameProviderGameList
-} from "../../game/providers/client"
+} from "../../game/games/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
@@ -44,12 +43,10 @@ import { InputField, Input } from "../../input/Input"
 import { CheckboxField } from "../../checkbox/Checkbox"
 import GameStatus, { GameStatusSelectField } from "../../game/games/GameStatus"
 import { GameTypeSelectField } from "../../game/GameType"
-import {
-    GamePlatformLabel,
-    GamePlatformTypeSelectField
-} from "../../game/games/GamePlatform"
+import { GamePlatformLabel } from "../../game/games/GamePlatform"
 import { useDropzone } from "react-dropzone"
-import { GameProviderGameDialog } from "./GameProviderGame"
+import { GameProviderGameFormBody } from "./GameProviderGame"
+import { ConfirmText } from "../../button/ActionButtons"
 
 export const BatchAddGameProviderGameListDisclosure = ({
     gameProviderId,
@@ -81,22 +78,30 @@ const BatchAddGameListDialog = ({ gameProviderId, onSubmitted, dialog }) => {
     })
 
     let formMethods = useForm()
-    let { control, setValue } = formMethods
+    let { control, setValue, watch } = formMethods
 
     let { fields, append, remove, ...fieldArray } = useFieldArray({
         control,
         name: GameListFieldName,
-        keyName: "_id"
+        keyName: "_id",
+        shouldUnregister: true
+    })
+    let gameListFieldArray = watch(GameListFieldName)
+    //TODO: merge by keyName or index is fine?
+    let items = fields.map((field, index) => {
+        return {
+            ...field,
+            ...gameListFieldArray[index]
+        }
     })
 
-    let { formData, setSubmit } = useState()
+    let [formData, setSubmit] = useState()
     let { isLoading, result, error, mutate, deleteCache } =
-        useAddGameProviderGameList(gameProviderId, formData)
+        useAddGameProviderGameList(formData)
 
-    let columns = useColumns({ items: fields, formMethods })
-    const onSubmit = ({ games, ...rest }) => {
-        console.log("onSubmit", games)
-        setSubmit(games)
+    let columns = useColumns({ items, formMethods })
+    const onSubmit = ({ games = [], ...rest }) => {
+        setSubmit({ gameProviderId, games })
     }
 
     const reset = () => {
@@ -131,7 +136,7 @@ const BatchAddGameListDialog = ({ gameProviderId, onSubmitted, dialog }) => {
                         }}
                     />
                 )}
-                {fields.length > 0 && <Table columns={columns} data={fields} />}
+                {fields.length > 0 && <Table columns={columns} data={items} />}
             </FormDialog>
         </Backdrop>
     )
@@ -178,7 +183,6 @@ const useColumns = ({ items = [], formMethods }) => {
                             <EditGameDisclosure
                                 record={record}
                                 onChange={(game) => {
-                                    console.log("TODO: need use controller?")
                                     formMethods?.setValue(
                                         `${GameListFieldName}.${index}`,
                                         game
@@ -201,13 +205,45 @@ const EditGameDisclosure = ({ record, onChange }) => {
         <>
             <EditDisclosure {...dialog} />
             {dialog.visible && (
-                <GameProviderGameDialog
+                <EditGameDialog
                     record={record}
+                    submitText={<ConfirmText />}
                     onChange={onChange}
                     dialog={dialog}
                 />
             )}
         </>
+    )
+}
+
+const EditGameDialog = ({ record, onChange, dialog }) => {
+    let title = useTrans({
+        zh: "Edit Game",
+        en: "Edit Game"
+    })
+
+    return (
+        <Backdrop {...dialog}>
+            <FormDialog
+                defaultValues={clone(record)}
+                submitText={<ConfirmText />}
+                title={title}
+                onSubmit={onChange}
+                onSubmitted={dialog.hide}
+                stopPropagation
+                hideBackdrop
+                title={title}
+                dialog={dialog}
+                width="60vw"
+                css={css`
+                    & .bb-DialogContent {
+                        position: relative;
+                    }
+                `}
+            >
+                <GameProviderGameFormBody />
+            </FormDialog>
+        </Backdrop>
     )
 }
 
