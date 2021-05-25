@@ -72,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             if (extendedData != null && extendedData.RootElement.TryGetProperty("lobbyurl", out var prop))
             {
                 var lobbyUrl = prop.GetString();
-                queryString += $"lobbUrl={lobbyUrl}";
+                queryString += $"&lobbyUrl={lobbyUrl}";
             }
 
             var domain = isMobile ? gpc.MobileEndpoint : gpc.DesktopEndpoint;
