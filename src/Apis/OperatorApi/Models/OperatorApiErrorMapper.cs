@@ -14,7 +14,8 @@ namespace TGS.Apis.OperatorApi.Models
             {
                 [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
                 [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
-                [typeof(EmailNotVerifyException)] = TgsApiError.EmailNotVerify
+                [typeof(EmailNotVerifyException)] = TgsApiError.EmailNotVerify,
+                [typeof(InsufficientBucketException)] = TgsApiError.InsufficientBucket
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> HttpCodeByException =
@@ -22,7 +23,8 @@ namespace TGS.Apis.OperatorApi.Models
             {
                 [TgsApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
                 [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
-                [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest
+                [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
+                [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest
             };
 
         public int GetApiErrorByException(Exception exception)
