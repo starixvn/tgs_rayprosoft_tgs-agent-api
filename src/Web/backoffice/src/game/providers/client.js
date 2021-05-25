@@ -35,7 +35,18 @@ export const useAddGameProviderGame = (gameProviderId, data) => {
 
 export const useAddGameProviderGameList = (gameProviderId, data) => {
     console.warn("useAddGameProviderGameList not impl yet")
-    return usePostData(API, data)
+    return {
+        isLoading: false,
+        result: data ? {} : undefined,
+        error: undefined,
+        mutate: () => {
+            console.log("TODO: mutate")
+        },
+        deleteCache: () => {
+            console.log("TODO: deleteCache")
+        }
+    }
+    // return usePostData(API, data)
 }
 
 export const useUpdateGameProvider = (id, data) => {
