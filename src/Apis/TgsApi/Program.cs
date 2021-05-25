@@ -44,11 +44,6 @@ namespace TGS.Apis.TgsApi
 
                     webBuilder.UseStartup(startup)
                         .UseKestrel(options => options.AddServerHeader = false);
-                })
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.SetMinimumLevel(LogLevel.Trace);
                 });
         }
     }
