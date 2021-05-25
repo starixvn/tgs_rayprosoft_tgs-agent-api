@@ -8,7 +8,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
         [JsonPropertyName("gameId")]
         public int ExternalGameId { get; set; }
         [JsonPropertyName("orderId")]
-        public int OrderId { get; set; }
+        public long OrderId { get; set; }
         [JsonPropertyName("orderAmount")]
         public decimal OrderAmount { get; set; }
         [JsonPropertyName("amount")]
