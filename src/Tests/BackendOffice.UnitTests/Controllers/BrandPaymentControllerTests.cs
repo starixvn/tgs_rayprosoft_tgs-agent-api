@@ -267,7 +267,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             fixture.Customize<BrandPayment>(u => u
                 .With(s => s.Brand, new Brand())
                 .With(s => s.BrandPaymentPlayers, new BrandPaymentPlayer[] { })
-                .With(s => s.VipLevels, new BrandPaymentVipLevel[] { }));
+                .With(s => s.VipLevels, new BrandPaymentVipLevel[] { })
+                .With(s => s.ExtendedData, "{}"));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

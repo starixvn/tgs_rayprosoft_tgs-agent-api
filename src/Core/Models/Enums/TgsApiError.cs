@@ -15,6 +15,7 @@
         CurrencyMismatch = 204,
         InsufficientFunds = 205,
         InvalidInvitationCode = 206,
+        InsufficientBucket = 207,
 
         InvalidGameAction = 301,
         TransactionIdNotFound = 302,

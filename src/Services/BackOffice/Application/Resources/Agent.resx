@@ -124,4 +124,7 @@
   <data name="TargetPlayerNotUnderAgent" xml:space="preserve">
     <value>Target player is not under agent.</value>
   </data>
+  <data name="InsufficientBalance" xml:space="preserve">
+    <value>Insufficient balance.</value>
+  </data>
 </root>
