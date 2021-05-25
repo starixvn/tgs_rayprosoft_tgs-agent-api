@@ -12,7 +12,8 @@ import {
     FieldStack,
     useModalState,
     Dialog,
-    Card
+    Card,
+    Level
 } from "bumbag"
 import Disclosure, {
     AddDisclosure,
@@ -22,7 +23,8 @@ import {
     useForm,
     useFormContext,
     useFieldArray,
-    Controller
+    Controller,
+    FormProvider
 } from "react-hook-form"
 import FormDialog from "../../form/FormDialog"
 import { Trans, useLocale, useTrans } from "../../i18n"
@@ -35,7 +37,7 @@ import {
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
-import { Table } from "../../table"
+import { pageCount, Table, toApiParams, useTable } from "../../table"
 import textColumn from "../../table/column/textColumn"
 import { InputField, Input } from "../../input/Input"
 import { CheckboxField } from "../../checkbox/Checkbox"
@@ -51,6 +53,7 @@ import {
     GameProviderGameDisclosure
 } from "./GameProviderGame"
 import { BatchAddGameProviderGameListDisclosure } from "./BatchAddGameProviderGameList"
+import SearchButton from "../../button/SearchButton"
 
 export const GameProviderGameListDisclosure = ({ gameProviderId }) => {
     let dialog = useModalState()
@@ -70,98 +73,101 @@ export const GameProviderGameListDisclosure = ({ gameProviderId }) => {
     )
 }
 
-const GameListDialog = ({ brandId, gameProviderId, dialog, ...props }) => {
+const GameListDialog = ({ gameProviderId, dialog, ...props }) => {
     let title = useTrans({
         zh: "游戏列表",
         en: "Game List"
     })
 
-    let {
-        isLoading: isLoadingGameProvider,
-        data: gameProviderData,
-        error: loadingGameProviderError
-    } = useGameProvider(gameProviderId)
+    let { state, setState, setPageIndex, setSortOrder } = useTable({})
+    //TODO: use get game provider game list API
+    let { isLoading, data, error, mutate, deleteCache } =
+        useGameProvider(gameProviderId)
+    // let { pageIndex, pageSize, name } = state
+    // let { isLoading, data, error, mutate, deleteCache } = useGameProviderGames(
+    //     gameProviderId,
+    //     toApiParams(state)
+    // )
 
-    let [formData, setSubmit] = useState()
-    let { isLoading, result, error, mutate, deleteCache } =
-        useUpdateGameProvider(gameProviderId, formData)
-
-    if (isLoadingGameProvider) {
+    let items = data?.games ?? []
+    let columns = useColumns({ items, mutate })
+    if (isLoading) {
         return <LoadingBackdrop {...dialog} />
     }
 
-    if (loadingGameProviderError) {
-        return (
-            <AlertDialog
-                {...loadingGameProviderError}
-                onClickClose={dialog.hide}
-            />
-        )
-    }
-
-    const onSubmit = (data) => {
-        setSubmit(data)
-    }
-
-    const reset = () => {
-        deleteCache()
-        mutate(false, undefined)
-        setSubmit(undefined)
+    if (error) {
+        return <AlertDialog {...error} onClickClose={dialog.hide} />
     }
 
     return (
-        <FormDialog
-            defaultValues={clone(gameProviderData)}
+        <Dialog.Modal
             title={title}
-            onSubmit={onSubmit}
-            result={result}
-            isLoading={isLoading}
-            error={error}
-            onCloseErrorAlert={reset}
-            onSubmitted={reset}
-            dialog={dialog}
+            {...dialog}
+            showCloseButton
+            hideOnClickOutside={false}
             placement="top"
             width="80vw"
             maxWidth="80vw"
         >
-            <FormBody gameProviderId={gameProviderId} />
-        </FormDialog>
+            <FieldStack>
+                <ActionBar
+                    gameProviderId={gameProviderId}
+                    isLoading={isLoading}
+                    search={(data) => {
+                        setState({
+                            pageIndex: 0,
+                            ...data
+                        })
+                        mutate()
+                    }}
+                />
+                <Table
+                    columns={columns}
+                    data={items}
+                    pageCount={pageCount(state.pageSize, data?.totalCount)}
+                    setPageIndex={setPageIndex}
+                    setSortOrder={setSortOrder}
+                    isLoading={isLoading}
+                />
+            </FieldStack>
+        </Dialog.Modal>
     )
 }
 
-const GamesFieldName = "games"
-const FormBody = ({ gameProviderId }) => {
-    let { watch, setValue } = useFormContext()
-    let games = watch(GamesFieldName)
-    let columns = useColumns({ items: games })
+const ActionBar = ({ gameProviderId, search, mutate, isLoading }) => {
+    let formMethods = useForm({
+        defaultValues: {}
+    })
 
     return (
-        <FieldStack>
-            <Set
-                alignX="right"
-                position="sticky"
-                orientation="horizontal"
-                // top="0"
-                // padding="1rem"
-                // backgroundColor="#f7f7fa"
-                // zIndex="1"
-            >
+        <Level>
+            <FormProvider {...formMethods}>
+                <form onSubmit={formMethods.handleSubmit(search)}>
+                    {/* <Set>
+                        <InputField
+                            name="code"
+                            showEmptyFieldValueAddonAfter
+                            placeholder="Code"
+                        />
+                        <SearchButton
+                            isLoading={isLoading}
+                            disabled={isLoading}
+                        />
+                    </Set> */}
+                </form>
+            </FormProvider>
+            <Set orientation="horizontal">
                 <AddGameProviderGameDisclosure
                     gameProviderId={gameProviderId}
-                    onSubmitted={() => {
-                        console.warn("TODO: mutate game list")
-                    }}
+                    onSubmitted={mutate}
                 />
 
                 <BatchAddGameProviderGameListDisclosure
                     gameProviderId={gameProviderId}
-                    onSubmitted={() => {
-                        console.warn("TODO: mutate game list")
-                    }}
+                    onSubmitted={mutate}
                 />
             </Set>
-            <Table columns={columns} data={games} />
-        </FieldStack>
+        </Level>
     )
 }
 

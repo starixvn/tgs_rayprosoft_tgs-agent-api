@@ -42,17 +42,17 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             Dictionary<string, Guid> playerConfigurationIds, Dictionary<string, string> externalRoundIds,
             SettleTransaction[] transactions);
 
-        GetBalanceResponse Response(string playerCode, GetBalanceResult result);
+        GetBalanceResponse Response(string userId, GetBalanceResult result);
 
-        PlaceBetResponse Response(string playerCode, PlaceBetRequest.Data body, BetResult result);
+        PlaceBetResponse Response(PlaceBetRequest.Data body, BetResult result);
 
-        PlaceBetParlayResponse Response(string playerCode, PlaceBetParlayRequest.Data body, BetResult result);
+        PlaceBetParlayResponse Response(PlaceBetParlayRequest.Data body, BetResult result);
 
-        ConfirmBetResponse Response(string playerCode, ConfirmBetRequest.Data body, BetResult result);
+        ConfirmBetResponse Response(ConfirmBetRequest.Data body, BetResult result);
 
-        ConfirmBetParlayResponse Response(string playerCode, ConfirmBetParlayRequest.Data body, BetResult result);
+        ConfirmBetParlayResponse Response(ConfirmBetParlayRequest.Data body, BetResult result);
 
-        CancelBetResponse Response(string playerCode, CancelBetRequest.Data body, BetResult result);
+        CancelBetResponse Response(CancelBetRequest.Data body, BetResult result);
 
         SettleBetResponse Response(SettleBetRequest request, BatchBetResult[] results);
 
@@ -86,7 +86,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 GameActionType = GameActionType.LockAmount
             };
 
-            return GetBetData(playerCode, body.CurrencyCode, data, new[] {transaction});
+            return GetBetData(playerCode, data, new[] {transaction});
         }
 
         BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
@@ -111,7 +111,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 };
             }).ToArray();
 
-            return GetBetData(playerCode, body.CurrencyCode, data, transactions);
+            return GetBetData(playerCode, data, transactions);
         }
 
         BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
@@ -150,7 +150,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 }
             };
 
-            return GetBetData(playerCode, null, data, transactions);
+            return GetBetData(playerCode, data, transactions);
         }
 
         BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
@@ -193,7 +193,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 };
             }).ToArray();
 
-            return GetBetData(playerCode, null, data, transactions);
+            return GetBetData(playerCode, data, transactions);
         }
 
         BetData ISabaActionModelMapper.Request(string playerCode, GameProviderConfigurationData data,
@@ -217,7 +217,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 };
             }).ToArray();
 
-            return GetBetData(playerCode, null, data, transactions);
+            return GetBetData(playerCode, data, transactions);
         }
 
         BatchBetData ISabaActionModelMapper.SettleBatchRequest(Guid gameProviderId, bool autoCloseRound,
@@ -332,17 +332,17 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             return GetBatchBetData(gameProviderId, autoCloseRound, batchTransactions);
         }
 
-        GetBalanceResponse ISabaActionModelMapper.Response(string playerCode, GetBalanceResult result) =>
+        GetBalanceResponse ISabaActionModelMapper.Response(string userId, GetBalanceResult result) =>
             new()
             {
                 Status = ((int)GameApiError.Success).ToString(),
-                PlayerCode = playerCode,
+                UserId = userId,
                 Balance = result.Balance,
                 Timestamp = DateTimeOffset.Now.ToOffset(TimeSpan).ToIso8601String(true)
             };
 
         PlaceBetResponse ISabaActionModelMapper.
-            Response(string playerCode, PlaceBetRequest.Data body, BetResult result) =>
+            Response(PlaceBetRequest.Data body, BetResult result) =>
             new()
             {
                 Status = ((int)GameApiError.Success).ToString(),
@@ -350,7 +350,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 ReferenceId = body.ReferenceId
             };
 
-        PlaceBetParlayResponse ISabaActionModelMapper.Response(string playerCode, PlaceBetParlayRequest.Data body,
+        PlaceBetParlayResponse ISabaActionModelMapper.Response(PlaceBetParlayRequest.Data body,
             BetResult result) =>
             new()
             {
@@ -363,14 +363,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             };
 
         ConfirmBetResponse ISabaActionModelMapper.
-            Response(string playerCode, ConfirmBetRequest.Data body, BetResult result) =>
+            Response(ConfirmBetRequest.Data body, BetResult result) =>
             new()
             {
                 Status = ((int)GameApiError.Success).ToString(),
                 Balance = result.Balance
             };
 
-        ConfirmBetParlayResponse ISabaActionModelMapper.Response(string playerCode, ConfirmBetParlayRequest.Data body,
+        ConfirmBetParlayResponse ISabaActionModelMapper.Response(ConfirmBetParlayRequest.Data body,
             BetResult result) =>
             new()
             {
@@ -378,7 +378,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 Balance = result.Balance
             };
 
-        CancelBetResponse ISabaActionModelMapper.Response(string playerCode, CancelBetRequest.Data body,
+        CancelBetResponse ISabaActionModelMapper.Response(CancelBetRequest.Data body,
             BetResult result) =>
             new()
             {
@@ -465,7 +465,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 };
         }
 
-        private static BetData GetBetData(string playerCode, int? currency, GameProviderConfigurationData data,
+        private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
             TransactionData[] transactions) =>
             new()
             {
@@ -476,8 +476,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
                 GameProviderConfigurationId = data.GameProviderConfigurationId,
                 AutoCloseRound = data.AutoCloseRound,
                 ForceGetPreviousActions = true,
-                HasCurrencyFromGameProvider = currency.HasValue,
-                CurrencyCode = currency?.ToString(),
+                HasCurrencyFromGameProvider = false,
                 Transactions = transactions
             };
 

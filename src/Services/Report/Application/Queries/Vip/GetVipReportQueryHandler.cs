@@ -48,7 +48,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
 
             var tgsPlayers = request.Level == null
                 ? null
-                : brandPlayers.Where(x => x.Vip.Level == request.Level)
+                : brandPlayers.Where(x => x.Vip?.Level == request.Level)
                     .Select(x => x.PlayerCode).ToArray();
 
             var vips = await _service.GetPlayerAggregateQueries()

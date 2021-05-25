@@ -128,7 +128,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
             }
 
-            if (await _roleQueries.ExistsAsync(p => p.Id != roleId && p.Name == request.Name))
+            var roleNameExisted = await _roleQueries.GetQueries()
+                .Where(role.ResellerId, x => x.ResellerId == role.ResellerId)
+                .Where(role.LicenseeId, x => x.LicenseeId == role.LicenseeId)
+                .Where(role.BrandId, x => x.BrandId == role.BrandId)
+                .AnyAsync(x => x.Name == request.Name);
+
+            if (roleNameExisted)
             {
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
@@ -227,7 +233,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.CannotCopyRootRole);
             }
 
-            if (request.Name == role.Name || await _roleQueries.ExistsAsync(p => p.Name == request.Name))
+            var roleNameExisted = await _roleQueries.GetQueries()
+                .Where(role.ResellerId, x => x.ResellerId == role.ResellerId)
+                .Where(role.LicenseeId, x => x.LicenseeId == role.LicenseeId)
+                .Where(role.BrandId, x => x.BrandId == role.BrandId)
+                .AnyAsync(x => x.Name == request.Name);
+
+            if (roleNameExisted)
             {
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
@@ -243,7 +255,13 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Create a role")]
         public async Task<MessageResponse> CreateAsync([FromBody] CreateRoleRequest request)
         {
-            if (await _roleQueries.ExistsAsync(p => p.Name == request.Name))
+            var roleNameExisted = await _roleQueries.GetQueries()
+                .Where(request.ResellerId, x => x.ResellerId == request.ResellerId)
+                .Where(request.LicenseeId, x => x.LicenseeId == request.LicenseeId)
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
+                .AnyAsync(x => x.Name == request.Name);
+
+            if (roleNameExisted)
             {
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }

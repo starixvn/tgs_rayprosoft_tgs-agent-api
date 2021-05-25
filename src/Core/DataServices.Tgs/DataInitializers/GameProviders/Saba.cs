@@ -76,9 +76,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-saba") : new("http://localhost:62330"),
-                    VendorId = "PG",
-                    SecretKey = "XXX",
-                    ApiUrl = new("http://game-saba")
+                    OperatorId = "ZhiFeng055",
+                    VendorId = "zzdaa12nu1",
+                    SecretKey = "zzdaa12nu1",
+                    ApiUrl = new("http://t829tsa.bw6688.com"),
+                    TestEnvironments = new[] {"development", "staging"}
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

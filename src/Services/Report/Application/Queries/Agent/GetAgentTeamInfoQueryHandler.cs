@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
@@ -23,28 +22,20 @@ namespace TGS.Services.Report.Application.Queries.Agent
             _tgsPlayerService = tgaPlayerService;
         }
 
-        public override async Task<PagedResponse<TeamInfoModel>> Handle(GetAgentTeamInfoRequest request,
-            CancellationToken cancellationToken)
-        {
-            var reportPlayers = await _playerAggregateService
-                .GetPlayerAggregateQueries(q => q.Where(x => x.AgentId == request.AgentId))
-                .ToArrayAsync(cancellationToken);
-
-            var playerCodes = reportPlayers.Select(r => r.PlayerCode).Distinct().ToArray();
-
-            return await reportPlayers.GroupJoin(
-                    _tgsPlayerService.GetPlayerQueries(q => q.Where(x => playerCodes.Contains(x.PlayerCode)))
-                    , p => p.PlayerCode, tgsPlayer => tgsPlayer.PlayerCode,
-                    (player, tgsPlayer) => new {player, tgsPlayer})
-                .SelectMany(x => x.tgsPlayer.DefaultIfEmpty(),
-                    (x, tgsPlayer) => new {x.player, tgsPlayer.Username, tgsPlayer.RegisteredOn})
-                .GroupBy(x => new {x.Username, x.RegisteredOn}, (player, tgsPlayer) =>
+        public override Task<PagedResponse<TeamInfoModel>> Handle(GetAgentTeamInfoRequest request,
+            CancellationToken cancellationToken) =>
+            _tgsPlayerService.GetPlayerQueries().Where(x => x.AgentId == request.AgentId).GroupJoin(
+                    _playerAggregateService
+                        .GetPlayerAggregateQueries(q => q.Where(x => x.AgentId == request.AgentId)), p => p.PlayerCode,
+                    a => a.PlayerCode, (player, playerAggregate) => new {player, playerAggregate})
+                .SelectMany(x => x.playerAggregate.DefaultIfEmpty(),
+                    (x, playerAggregate) => new {x.player.Username, x.player.RegisteredOn, playerAggregate})
+                .GroupBy(x => new {x.Username, x.RegisteredOn}, (player, playerAggregate) =>
                     new TeamInfoModel
                     {
                         Username = player.Username,
                         RegisteredOn = player.RegisteredOn,
-                        Contribution = tgsPlayer.Sum(x => x.player.WinLossAmount)
-                    }).CreatePagedResponseAsync(playerCodes.Length);
-        }
+                        Contribution = playerAggregate.Sum(x => x.playerAggregate.WinLossAmount)
+                    }).CreatePagedResponseAsync(request);
     }
 }
