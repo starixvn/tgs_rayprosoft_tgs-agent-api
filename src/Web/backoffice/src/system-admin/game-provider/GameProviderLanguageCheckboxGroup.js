@@ -66,7 +66,8 @@ export const GameProviderLanguageCheckboxGroupTable = ({
                                                     index
                                                 )}
                                                 defaultValue={
-                                                    field.gameProviderCultureCode
+                                                    field.gameProviderCultureCode ||
+                                                    field.cultureCode
                                                 }
                                                 shouldUnregister={true}
                                                 render={({
