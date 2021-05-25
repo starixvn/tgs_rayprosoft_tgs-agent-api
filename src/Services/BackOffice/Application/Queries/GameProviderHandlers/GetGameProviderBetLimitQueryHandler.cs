@@ -28,13 +28,12 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                 return CreateInvalidResponse<GetGameProviderBetLimitResponse>(GameProviderBetLimit.NotFound);
             }
 
-            return new GetGameProviderBetLimitResponse
+            return new()
             {
                 Valid = true,
-                GameProviderBetLimit = new GameProviderBetLimitModel
+                GameProviderBetLimit = new()
                 {
                     Id = gameProviderBetLimit.Id,
-                    GameProviderId = gameProviderBetLimit.GameProviderId,
                     CurrencyCode = gameProviderBetLimit.CurrencyCode,
                     MinBet = gameProviderBetLimit.MinBet,
                     MaxBet = gameProviderBetLimit.MaxBet,

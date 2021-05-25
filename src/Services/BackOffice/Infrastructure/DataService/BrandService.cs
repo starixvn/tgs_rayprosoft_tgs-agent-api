@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
@@ -16,6 +16,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
 using TGS.Services.BackOffice.Infrastructure.Services;
+using IsolationLevel = System.Data.IsolationLevel;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
@@ -30,6 +31,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task CreateBrandAsync(CreateBrandRequest request);
         Task UpdateBrandAsync(Brand brand, UpdateBrandRequest request);
         Task ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request);
+        Task SyncBrandGamesAsync(Guid brandId);
         Task<bool> ExistsAsync(Expression<Func<Brand, bool>> predicate);
     }
 
@@ -125,7 +127,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.Currencies = GenerateBrandCurrencies(brand, request);
             brand.BetLimits = await GenerateBetLimitsAsync(brand, request);
             brand.Games = await GenerateWithUpdateGamesAsync(brand, request);
-            brand.GameProviders = GenerateBrandGameProvidersAsync(brand, request);
+            brand.GameProviders = GenerateBrandGameProviders(brand, request);
             brand.BrandGroups = GenerateWithUpdateGroups(brand, request);
             brand.Domains = GenerateBrandDomains(brand, request);
 
@@ -151,6 +153,41 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         IQueryable<Brand> IBrandService.GetBrandQueries(Func<IQueryable<Brand>, IQueryable<Brand>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
+
+        async Task IBrandService.SyncBrandGamesAsync(Guid brandId)
+        {
+            var brand = await _repository.Brands.AsQueryable().FirstOrDefaultAsync(x => x.Id == brandId);
+
+            var baseGames = await _repository.Games.AsQueryable()
+                .Where(x => x.AvailableToBrand)
+                .Where(x => brand.GameProviders.Select(g => g.GameProviderId).Contains(x.GameProviderId))
+                .ToArrayAsync();
+
+            var baseGameIds = baseGames.Select(x => x.Id).ToArray();
+
+            var brandGameIds = brand.Games.Select(x => x.GameId).ToArray();
+
+            var addList = baseGameIds.Except(brand.Games.Select(x => x.GameId)).ToArray();
+            var delList = brandGameIds.Except(baseGameIds).ToArray();
+
+            var games = addList.Select((id, index) => new BrandGame
+            {
+                BrandId = brand.Id,
+                GameId = id,
+                DisplayOrder = brand.Games.Count + 1 + index,
+                Rebate = false,
+                EffectiveBettingPercentage = decimal.Zero
+            });
+            var delGroupGames =
+                brand.BrandGroups.SelectMany(x => x.BrandGames.Where(g => delList.Contains(g.BrandGame.GameId)));
+            var delBrandGames = brand.Games.Where(x => delList.Contains(x.GameId));
+
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            await CreateEntitiesAsync(games);
+            await DeleteEntitiesAsync(delGroupGames);
+            await DeleteEntitiesAsync(delBrandGames);
+            scope.Complete();
+        }
 
         private async Task<HashSet<BrandLanguage>> GenerateBrandLanguagesAsync(Brand brand, BrandRequest request)
         {
@@ -372,7 +409,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             return new(brandGameProviders);
         }
 
-        private static HashSet<BrandGameProvider> GenerateBrandGameProvidersAsync(
+        private static HashSet<BrandGameProvider> GenerateBrandGameProviders(
             Brand brand, BrandRequest request)
         {
             var gameProviderIds = request.GameProviders.Select(x => x.GameProviderId).ToArray();
