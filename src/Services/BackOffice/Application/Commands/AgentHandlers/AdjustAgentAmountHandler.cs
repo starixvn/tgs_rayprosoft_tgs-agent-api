@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.AgentAdjust;
@@ -94,7 +93,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 
             if (request.AdjustmentType == AdjustmentType.Subtract && wallet.Balance - request.Amount < 0)
             {
-                return CreateInvalidResponse<MessageResponse>(Agent.BalanceMustGreaterThanZero);
+                return CreateInvalidResponse<MessageResponse>(Agent.InsufficientBalance);
             }
 
             var remark = _jsonSerializationProvider.SerializeToString(new
