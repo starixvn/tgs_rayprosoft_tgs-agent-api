@@ -3,15 +3,15 @@ using TGS.Shared.Game.Models.Saba.Enums;
 
 namespace TGS.Shared.Game.Models.Saba.Outgoing
 {
-    public record LoginResponse
+    public record GameUrlResponse
     {
         [JsonPropertyName("error_code")]
-        public LoginApiError ErrorCode { get; init; }
+        public GetGameUrlApi Code { get; init; }
 
         [JsonPropertyName("message")]
         public string ErrorMessage { get; init; }
 
         [JsonPropertyName("Data")]
-        public string Token { get; init; }
+        public string Url { get; init; }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TGS.Services.BackOffice.Application.Models.GameProvider
+﻿namespace TGS.Services.BackOffice.Application.Models.Game
 {
     public class UploadGameModel
     {
@@ -8,12 +6,13 @@ namespace TGS.Services.BackOffice.Application.Models.GameProvider
         public string Code { get; set; }
         public string RuleUrl { get; set; }
         public string ExternalId { get; set; }
-        public string GameType { get; set; }
-        public string Platform { get; set; }
-        public Boolean? HasTurnoverOnTieBet { get; set; }
+        public string Type { get; set; }
+        public string PlatformType { get; set; }
+        public string HasTurnoverOnTieBet { get; set; }
         public string EndpointPath { get; set; }
         public string Description { get; set; }
-        public Boolean? SubGame { get; set; }
+        public string SubGame { get; set; }
+        public string Html5 { get; set; }
         public string AvailableCurrencies { get; set; }
     }
 }

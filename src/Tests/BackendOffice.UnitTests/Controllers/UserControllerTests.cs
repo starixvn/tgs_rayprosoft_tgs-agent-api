@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
@@ -25,7 +24,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new UserController(
+            _controller = new(
                 _passwordHandlerMock.Object,
                 _userQueriesMock.Object,
                 _departmentQueriesMock.Object,
@@ -37,6 +36,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private UserController _controller;
         private readonly Mock<IPasswordHandler> _passwordHandlerMock = new();
         private readonly Mock<ITgsQueries<User>> _userQueriesMock = new();
+        private readonly Mock<IQueryable<User>> _userQueryableMock = new();
         private readonly Mock<ITgsQueries<Department>> _departmentQueriesMock = new();
         private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new();
         private readonly Mock<ITgsCommands<User>> _userCommandsMock = new();
@@ -138,9 +138,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Create_User()
         {
             var request = new Fixture().Create<CreateUserRequest>();
+            var users = CreateUserFixture().CreateMany<User>(10).AsQueryable().BuildMock();
 
-            _userQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<User, bool>>>()))
-                .Returns(Task.FromResult(false));
+            _userQueriesMock.Setup(x => x.GetQueries()).Returns(users.Object);
 
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
@@ -162,10 +162,25 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Cannot_Create_User_With_Name_Exists()
         {
-            var request = new Fixture().Create<CreateUserRequest>();
+            var role = new Role {Id = Guid.NewGuid()};
 
-            _userQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<User, bool>>>()))
-                .Returns(Task.FromResult(true));
+            var request = new Fixture().Create<CreateUserRequest>();
+            request.RoleId = role.Id;
+
+            var users = CreateUserFixture().CreateMany<User>(10).AsQueryable()
+                .BuildMock().Object;
+            request.Username = "username";
+
+            var firstUser = users.First();
+            firstUser.RoleId = role.Id;
+            firstUser.Username = "username";
+
+            _userQueriesMock.Setup(s => s.GetQueries())
+                .Returns(users);
+
+            _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
+                    It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
+                .Returns(Task.FromResult(role));
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
@@ -310,11 +325,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var user = CreateUserFixture().Create<User>();
             var password = Generator.RandomString(6);
-            var request = new UpdatePasswordRequest
-            {
-                Password = password,
-                ConfirmPassword = password
-            };
+            var request = new UpdatePasswordRequest {Password = password, ConfirmPassword = password};
 
             _userQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(),
                     It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
@@ -334,11 +345,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var user = CreateUserFixture().Create<User>();
             var password = Generator.RandomString(6);
-            var request = new UpdatePasswordRequest
-            {
-                Password = password,
-                ConfirmPassword = password
-            };
+            var request = new UpdatePasswordRequest {Password = password, ConfirmPassword = password};
 
             _userQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(),
                     It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
@@ -357,8 +364,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<User>(u => u
-                .With(s => s.Role, new Role { Name = Generator.RandomString(5) })
-                .With(p => p.Department, new Department { Name = Generator.RandomString(5) }));
+                .With(s => s.Role, new Role {Name = Generator.RandomString(5)})
+                .With(p => p.Department, new Department {Name = Generator.RandomString(5)}));
             return fixture;
         }
     }
