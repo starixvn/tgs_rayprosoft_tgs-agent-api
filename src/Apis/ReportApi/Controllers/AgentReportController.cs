@@ -28,8 +28,12 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet("{id}/teamInfo")]
         [Description("Get agent team Information")]
-        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id) =>
-            _mediator.Send(new GetAgentTeamInfoRequest(id));
+        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id,
+            [FromQuery] GetAgentTeamInfoRequest request)
+        {
+            request.AgentId = id;
+            return _mediator.Send(request);
+        }
 
         [HttpGet("dividends")]
         [Description("Get agent dividends report")]

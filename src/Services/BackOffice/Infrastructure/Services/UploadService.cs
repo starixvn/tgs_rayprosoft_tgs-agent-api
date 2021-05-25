@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
@@ -36,8 +38,14 @@ namespace TGS.Services.BackOffice.Infrastructure.Services
 
             reader.Read();
             var headers = new List<string>();
-            for (var i = 0; i < reader.FieldCount; i++) headers.Add(reader.GetValue(i).ToString());
-            var fieldCount = reader.FieldCount;
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                var header = reader.GetValue(i)?.ToString();
+                if (header != null) {
+                    headers.Add(header);
+                }
+            }
+            var fieldCount = headers.Count;
             while (reader.Read()) //Each row of the file
             {
                 var obj = new ExpandoObject();
@@ -45,11 +53,18 @@ namespace TGS.Services.BackOffice.Infrastructure.Services
                 for (var i = 0; i < fieldCount; i++)
                 {
                     var header = headers[i];
-                    obj.TryAdd(header, reader.GetValue(i));
-                    ((IDictionary<string, object>) obj)[header] = reader.GetValue(i)?.ToString();
+                    var value = reader.GetValue(i);
+                    if (value != null) {
+                        Type fieldType = reader.GetFieldType(i);
+                        if (fieldType == typeof(bool)) {
+                            obj.TryAdd(header, value);
+                        } else {
+                            obj.TryAdd(header, value.ToString());
+                        }
+                    }
                 }
 
-                var json = _jsonSerializationProvider.SerializeToString(obj);
+                var json = _jsonSerializationProvider.SerializeToString(obj, new JsonSerializerOptions { IgnoreNullValues = true });
                 result.Add(_jsonSerializationProvider.DeserializeFromString<T>(json));
             }
 

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using MediatR;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
 
-namespace TGS.Services.BackOffice.Application.Models.GameProvider
+namespace TGS.Services.BackOffice.Application.Models.Game
 {
-    public class GameProviderGameModel
+    public class UpdateGameRequest : BaseRequest, IRequest<MessageResponse>
     {
         public int Id { get; set; }
         public string Code { get; set; }
@@ -19,9 +20,5 @@ namespace TGS.Services.BackOffice.Application.Models.GameProvider
         public bool HasTurnoverOnTieBet { get; set; }
         public bool Html5 { get; set; }
         public string AvailableCurrencies { get; set; }
-        public DateTimeOffset CreatedOn { get; set; }
-        public DateTimeOffset UpdatedOn { get; set; }
-        public string CreatedByUsername { get; set; }
-        public string UpdatedByUsername { get; set; }
     }
 }

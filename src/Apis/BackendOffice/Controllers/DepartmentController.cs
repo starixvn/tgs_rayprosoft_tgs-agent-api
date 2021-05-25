@@ -30,9 +30,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet]
         [Description("Get departments")]
-        public Task<PagedResponse<DepartmentModel>> GetListAsync([FromQuery] GetDepartmentsRequest request)
-        {
-            return _queries.GetQueries()
+        public Task<PagedResponse<DepartmentModel>> GetListAsync([FromQuery] GetDepartmentsRequest request) =>
+            _queries.GetQueries()
                 .Where(request.ResellerId, r => r.ResellerId == request.ResellerId)
                 .Where(request.LicenseeId, l => l.LicenseeId == request.LicenseeId)
                 .Where(request.BrandId, l => l.BrandId == request.BrandId)
@@ -48,7 +47,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Name = d.Name
                 })
                 .CreatePagedResponseAsync(request);
-        }
 
         [HttpPut("{id}")]
         [Description("Update a department")]
@@ -60,7 +58,14 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NotFound);
             }
 
-            if (request.Name != department.Name && await _queries.ExistsAsync(p => p.Name == request.Name))
+            var departmentNameExisted = await _queries.GetQueries()
+                .Where(x => x.Id != department.Id)
+                .Where(department.ResellerId, x => x.ResellerId == department.ResellerId)
+                .Where(department.LicenseeId, x => x.LicenseeId == department.LicenseeId)
+                .Where(department.BrandId, x => x.BrandId == department.BrandId)
+                .AnyAsync(x => x.Name == request.Name);
+
+            if (departmentNameExisted)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NameExists);
             }
@@ -97,7 +102,13 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Create a department")]
         public async Task<MessageResponse> CreateAsync([FromBody] DepartmentRequest request)
         {
-            if (await _queries.ExistsAsync(p => p.Name == request.Name))
+            var departmentNameExisted = await _queries.GetQueries()
+                .Where(request.ResellerId, x => x.ResellerId == request.ResellerId)
+                .Where(request.LicenseeId, x => x.LicenseeId == request.LicenseeId)
+                .Where(request.BrandId, x => x.BrandId == request.BrandId)
+                .AnyAsync(x => x.Name == request.Name);
+
+            if (departmentNameExisted)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Department.NameExists);
             }

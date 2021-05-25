@@ -40,7 +40,9 @@ import { toCheckedFieldName } from "../../currency/CurrencyCheckboxGroup"
 import CurrencyBetLimitFieldsBox, {
     flatCheckedCurrencyBetLimits
 } from "../CurrencyBetLimitFieldsBox"
-import { SettlementIntervalTypeSelect } from "../../date/SettlementIntervalType"
+import SettlementIntervalType, {
+    SettlementIntervalTypeSelect
+} from "../../date/SettlementIntervalType"
 import BusinessType from "../BusinessType"
 import Select from "../../select/Select"
 
@@ -108,14 +110,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
             formData.licenseeId = userLicenseeId
         }
 
-        let gameProviders =
-            formData.gameProviders.map(
-                ({ checked, id, ...gameProvider }) => gameProvider
-            ) ?? []
-        setSubmit({
-            ...formData,
-            gameProviders
-        })
+        setSubmit(formData)
     }
 
     const reset = () => {
@@ -411,7 +406,12 @@ const normalizeFormData = ({
     betLimits,
     ...data
 }) => {
-    languages = languages.filter(({ checked }) => checked)
+    languages = languages
+        .filter(({ checked }) => checked)
+        .map(({ cultureCode, brandCultureCode }) => ({
+            cultureCode,
+            brandCultureCode: brandCultureCode || cultureCode
+        }))
 
     let currencyCodes = toCheckedCurrencyCodes(currencies)
 
@@ -436,7 +436,7 @@ const normalizeFormData = ({
 }
 
 const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
-    let { watch, getValues, register, control } = useFormContext()
+    let { watch, getValues } = useFormContext()
 
     let userLicenseeId = useUserLicenseeId()
 
@@ -582,7 +582,10 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
                     </>
                 )}
 
-                <LanguageFieldsBox readonly={readonly} />
+                <LanguageFieldsBox
+                    readonly={readonly}
+                    brandCultureCodeReadOnly={isB2C}
+                />
 
                 <CurrencyBetLimitFieldsBox
                     readonly={readonly}
@@ -595,7 +598,7 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
     )
 }
 
-const LanguageFieldsBox = ({ readonly }) => {
+const LanguageFieldsBox = ({ readonly, brandCultureCodeReadOnly }) => {
     let { watch, control } = useFormContext()
 
     let fieldsName = "languages"
@@ -618,7 +621,7 @@ const LanguageFieldsBox = ({ readonly }) => {
             <BrandLanguageCheckboxGroupTable
                 fieldArrayContext={fieldArrayContext}
                 disabled={readonly}
-                showBrandCultureCode
+                brandCultureCodeReadOnly={brandCultureCodeReadOnly}
             />
         </>
     )

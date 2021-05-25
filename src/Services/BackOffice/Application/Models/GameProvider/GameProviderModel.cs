@@ -17,7 +17,6 @@ namespace TGS.Services.BackOffice.Application.Models.GameProvider
         public int PlaceBetTimeout { get; set; }
         public int SettleBetTimeout { get; set; }
         public ushort UniqueId { get; set; }
-        public GameProviderGameModel[] Games { get; set; }
         public GameProviderCurrencyModel[] Currencies { get; set; }
         public GameProviderLanguageModel[] Languages { get; set; }
         public GameProviderBetLimitModel[] BetLimits { get; set; }

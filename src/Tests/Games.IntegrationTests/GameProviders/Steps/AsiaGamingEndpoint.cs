@@ -217,7 +217,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = GetAsiaGamingPlayerCode(),
                     AgentCode = AgentCode,
                     BetTime = GetTimestamp(),
-                    TransactionIds = new[] {externalTransactionId},
+                    TransactionIds = new[] { externalTransactionId },
                     RoundId = externalRoundId,
                     GamePlatformType = gamePlatformType,
                     GameRound = gameRound,
@@ -266,7 +266,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await _client.BetResponseAsync(request);
 
-            Set(SR.ExternalTransactionId, new List<string> {transactionId});
+            Set(SR.ExternalTransactionId, new List<string> { transactionId });
             Set(SR.Request, request);
             Set(SR.Response, response);
         }
@@ -282,7 +282,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var betRequest = Get<PostTransferRequest>(SR.PlaceBetRequest);
             var transactionIds = isLockGame
-                ? new() {betRequest.Record.TransactionId}
+                ? new() { betRequest.Record.TransactionId }
                 : Get<List<string>>(SR.ExternalTransactionId);
             var gamePlatformType = betRequest.Record.GamePlatformType;
             var gameRound = betRequest.Record.GameRound;
@@ -367,7 +367,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     PlayerCode = GetAsiaGamingPlayerCode(),
                     AgentCode = AgentCode,
                     BetTime = GetTimestamp(),
-                    TransactionIds = new[] {transactionId},
+                    TransactionIds = new[] { transactionId },
                     RoundId = roundId,
                     GamePlatformType = gamePlatformType,
                     GameRound = gameRound,
@@ -380,7 +380,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var response = await _client.PostTransferAsync(cancelRequest);
 
-            Set(SR.ExternalTransactionId, new List<string> {$"{transactionId}_{TransactionType.REFUND}"});
+            Set(SR.ExternalTransactionId, new List<string> { $"{transactionId}_{TransactionType.REFUND}" });
             Set(SR.Request, cancelRequest);
             Set(SR.Response, response);
         }

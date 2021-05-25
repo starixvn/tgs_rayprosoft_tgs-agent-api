@@ -40,6 +40,7 @@ import { pluckCode } from "../../list/pluck"
 import { sortByNumberProp } from "../../list/sort"
 import { CloseText, ConfirmText } from "../../button/ActionButtons"
 import { GamePlatformLabel } from "../../game/games/GamePlatform"
+import { useGameProviderGameList } from "../../game/games/client"
 
 export const EditBrandBetLimitGameProviderBetLimit = ({
     record,
@@ -833,11 +834,15 @@ const GameProviderGameListDialog = ({
     readonly = false,
     onChange
 }) => {
-    let {
-        data: gameProvider,
-        isLoading,
-        error
-    } = useGameProvider(gameProviderId)
+    let title = useTrans({
+        zh: "游戏清单",
+        en: "Game List"
+    })
+    let { isLoading, data, error } = useGameProviderGameList({
+        gameProviderId,
+        showAll: true,
+        sortby: "id"
+    })
 
     if (isLoading) {
         return <LoadingBackdrop {...dialog} />
@@ -849,8 +854,8 @@ const GameProviderGameListDialog = ({
 
     let games = gameProviderGames.map((gameField) => {
         let record =
-            gameProvider.games.find((game) => game.id === gameField.gameId) ??
-            {}
+            data?.items.find((game) => game.id === gameField.gameId) ?? {}
+
         return {
             ...record,
             ...gameField
@@ -900,7 +905,7 @@ const GameProviderGameListDialog = ({
                     )
                 }}
                 dialog={dialog}
-                title={gameProvider.name}
+                title={title}
                 css={css`
                     & .bb-DialogContent {
                         position: relative;

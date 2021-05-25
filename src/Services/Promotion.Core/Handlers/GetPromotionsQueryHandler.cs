@@ -28,7 +28,8 @@ namespace TGS.Services.Promotion.Handlers
             GetPromotionsRequest request,
             CancellationToken cancellationToken)
         {
-            var player = await _playerService.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode);
+            var player = await _playerService.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode)
+                .ConfigureAwait(false);
 
             if (player is null && request.PlayerCode.IsNotNullOrEmpty())
             {
