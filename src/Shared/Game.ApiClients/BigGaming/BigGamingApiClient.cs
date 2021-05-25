@@ -24,6 +24,7 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
         Task<BigGamingResponse> GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlRequest request);
         Task<BigGamingResponse> GetTrialGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetTrialGameUrlRequest request);
         Task<BigGamingResponse> GetVideoOrderDetailAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderDetailRequest request);
+        Task<BigGamingResponse> GetVideoOrderQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderQueryRequest request);
     }
 
     public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
@@ -86,6 +87,13 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.sn.video.order.detail.url.get", prefix).ConfigureAwait(false);
         }
 
+        public async Task<BigGamingResponse> GetVideoOrderQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderQueryRequest request)
+        {
+            request.Sign = _hashProvider.Hash($"{request.Random }{request.Sn}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
+            var prefix = $"{_gameProvider}.VideoOrderQuery";
+            return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.order.query", prefix).ConfigureAwait(false);
+        }
+
         private ValueTask<BigGamingResponse> GetAPIAsync<TSource>(Uri apiUrl, TSource source, string method, string prefix)
         {
 
@@ -99,6 +107,7 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return ExecuteJsonRequestAsync<BigGamingRequest, BigGamingResponse>(HttpMethod.Post, apiUrl, string.Empty, request, logPrefix: prefix);
 
         }
+
 
     }
 }
