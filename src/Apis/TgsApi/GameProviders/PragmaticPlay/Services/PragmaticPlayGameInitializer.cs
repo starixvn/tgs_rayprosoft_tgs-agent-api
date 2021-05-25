@@ -68,6 +68,13 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 .Replace("{TECHNOLOGY}", "H5")
                 .Replace("{PLATFORM}", isMobile ? "MOBILE" : "WEB");
 
+            var extendedData = request.ExtendedData;
+            if (extendedData != null && extendedData.RootElement.TryGetProperty("lobbyurl", out var prop))
+            {
+                var lobbyUrl = prop.GetString();
+                queryString += $"lobbUrl={lobbyUrl}";
+            }
+
             var domain = isMobile ? gpc.MobileEndpoint : gpc.DesktopEndpoint;
 
             var url = domain.AppendQueryString(game.EndpointPath)
