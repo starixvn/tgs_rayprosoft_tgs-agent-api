@@ -67,6 +67,16 @@ namespace TGS.Clients.Promotion.Client
             var request = new HttpRequestMessage(
                 HttpMethod.Put,
                 $"/api/promotion/deposit/{playerCode}");
+
+            request.Headers.Remove("Accept");
+            request.Headers.Add("Accept", "application/json");
+
+            var content = new StringContent(string.Empty);
+            content.Headers.Remove("Content-Type");
+            content.Headers.Add("Content-Type", "application/json");
+
+            request.Content = content;
+
             var response = await SendAsync(request, prefix).ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();

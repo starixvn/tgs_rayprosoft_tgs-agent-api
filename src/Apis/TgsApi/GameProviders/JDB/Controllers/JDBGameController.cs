@@ -6,13 +6,9 @@ using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.GameProviders.JDB.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.GameOperations;
-using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
@@ -29,44 +25,30 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
     public sealed class JDBGameController : ControllerBase
     {
         private readonly IGamePlayActions _actions;
-        private readonly ISymmetricCryptoProvider _cryptoProvider;
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IJDBActionModelMapper _map;
         private readonly IJDBServices _services;
-        private readonly ISettingOperations _settingOperations;
 
         public JDBGameController(
             IGamePlayActions actions,
             IJDBServices services,
             IJDBActionModelMapper map,
             IJsonSerializationProvider jsonSerializationProvider,
-            IGameActionQueries gameActionQueries,
-            ISymmetricCryptoProviderFactory cryptoProviderFactory,
-            ISettingOperations settingOperations)
+            IGameActionQueries gameActionQueries)
         {
             _actions = actions;
             _services = services;
             _map = map;
             _jsonSerializationProvider = jsonSerializationProvider;
             _gameActionQueries = gameActionQueries;
-            _cryptoProvider = cryptoProviderFactory.GetProvider(SymmetricAlgorithmKind.AES);
-            _settingOperations = settingOperations;
         }
 
         [HttpPost]
-        public async Task<BaseActionResponse> TransferFundsAsync([FromForm(Name = "x")] string jsonEncrypted)
-        {
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
-                    .GameProviderConfigurations.JDB);
-
-            var json = await _cryptoProvider.DecryptStringAsync(jsonEncrypted, configuration.AESIv,
-                configuration.AESKey);
-
-            var baseRequest = _jsonSerializationProvider.DeserializeFromString<BaseActionRequest>(json);
-
-            return baseRequest.ActionType switch
+        public async Task<BaseActionResponse> TransferFundsAsync(
+            [FromForm(Name = "action")] ActionType actionType,
+            [FromForm(Name = "value")] string json) =>
+            actionType switch
             {
                 ActionType.GetBalance => await GetBalanceAsync(_jsonSerializationProvider
                     .DeserializeFromString<GetBalanceRequest>(json)),
@@ -83,10 +65,11 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
                     ErrorMessage = "Invalid action"
                 }
             };
-        }
 
         private async Task<BaseActionResponse> GetBalanceAsync(GetBalanceRequest request)
         {
+            Request.Path = new($"{Request.Path}/getbalance");
+
             var result = await _actions.GetBalanceAsync(Consts.GameProvider.JDB, request.UserId)
                 .ConfigureAwait(false);
 
@@ -95,6 +78,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 
         private async Task<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request)
         {
+            Request.Path = new($"{Request.Path}/betandsettle");
+
             var platformType = "Web".IgnoreCaseEquals(request.ClientType) ? PlatformType.Desktop : PlatformType.Mobile;
             var data = await _services.GetGameProviderConfigurationDataAsync(platformType)
                 .ConfigureAwait(false);
@@ -106,6 +91,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 
         private async Task<BaseActionResponse> CancelTransactionAsync(CancelTransactionRequest request)
         {
+            Request.Path = new($"{Request.Path}/cancel");
+
             var data = await _services.GetGameProviderConfigurationDataAsync(PlatformType.Desktop);
             var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdAsync(data.GameProviderId,
                 request.UserId,

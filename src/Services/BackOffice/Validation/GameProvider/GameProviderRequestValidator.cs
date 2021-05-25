@@ -19,10 +19,6 @@ namespace TGS.Services.BackOffice.Validation.GameProvider
                 .IsInEnum()
                 .WithMessage(Application.Resources.GameProvider.StatusRequired);
 
-            RuleFor(x => x.Games)
-                .NotEmpty()
-                .WithMessage(Application.Resources.GameProvider.GameRequired);
-
             RuleFor(x => x.Currencies)
                 .NotEmpty()
                 .WithMessage(Application.Resources.GameProvider.CurrencyRequired);

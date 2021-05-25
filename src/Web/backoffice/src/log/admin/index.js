@@ -60,6 +60,7 @@ const Body = ({}) => {
     let { state, setState, setPageIndex, setSortOrder } = useTable({
         from: todayRange.start,
         to: todayRange.end,
+        responseCode: "",
         trackingId: "",
         ip: "",
         path: "",
@@ -67,9 +68,13 @@ const Body = ({}) => {
     })
 
     let { pageIndex, pageSize } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = useAdminLogList(
-        toApiParams(state)
-    )
+    let {
+        data = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = useAdminLogList(toApiParams(state))
 
     let columns = useColumns({ mutate, items: data?.items })
 
@@ -80,31 +85,19 @@ const Body = ({}) => {
                 <SearchBar
                     start={state?.from}
                     end={state?.to}
+                    responseCode={state?.responseCode}
                     trackingId={state?.trackingId}
                     ip={state?.ip}
                     path={state?.path}
                     method={state?.method}
                     search={({ start, end, ...data }) => {
-                        let newState = {
+                        setState({
                             pageIndex: 0,
                             from: start,
                             to: end,
                             ...data
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                from: state?.from,
-                                to: state?.to,
-                                trackingId: state?.trackingId,
-                                ip: state?.ip,
-                                path: state?.path,
-                                method: state?.method
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                        })
+                        mutate()
                     }}
                     isLoading={isLoading}
                 />
@@ -135,6 +128,7 @@ const Body = ({}) => {
 const SearchBar = ({
     start,
     end,
+    responseCode,
     trackingId,
     ip,
     path,
@@ -147,6 +141,7 @@ const SearchBar = ({
         defaultValues: {
             start,
             end,
+            responseCode,
             trackingId,
             ip,
             path,
@@ -161,6 +156,11 @@ const SearchBar = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Set>
                     <DateTimeRangeInput />
+                    <InputField
+                        name="responseCode"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Response Code"
+                    />
                     <InputField
                         name="trackingId"
                         showEmptyFieldValueAddonAfter

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
+using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
@@ -48,14 +50,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ChannelName = formDetail.ChannelName,
                     Amount = formDetail.Amount,
                     Remark = formDetail.Remark,
-                    Status = formDetail.Status switch
-                    {
-                        7000 => FlowStatus.Rejected,
-                        8000 => FlowStatus.Approved,
-                        _ => FlowStatus.Review
-                    },
-                    ApplyInfo = formDetail.ApplyInfo,
-                    PaymentReturn = formDetail.PaymentReturn,
+                    Status = formDetail.Status.ToFlowState(),
+                    ApplyInfo = string.IsNullOrWhiteSpace(formDetail.ApplyInfo) ? null : JsonDocument.Parse(formDetail.ApplyInfo),
+                    PaymentReturn = string.IsNullOrWhiteSpace(formDetail.PaymentReturn) ? null : JsonDocument.Parse(formDetail.PaymentReturn),
                     CreatedOn = formDetail.CreatedOn,
                     UpdatedOn = formDetail.UpdatedOn
                 }
@@ -93,13 +90,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 request.UserName,
                 request.ChannelName,
                 request.PaymentMethodId,
-                request.Status switch
-                {
-                    FlowStatus.Review => new[] { 0, 1000 },
-                    FlowStatus.Approved => new[] { 8000 },
-                    FlowStatus.Rejected => new[] { 7000 },
-                    _ => null
-                },
+                request.Status.ToPaymentFlowState(),
                 createOnRange,
                 updateOnRange,
                 paging);
@@ -120,12 +111,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                         BrandPaymentId = form.BrandPaymentId,
                         PaymentMethodId = form.PaymentMethodId,
                         ChannelName = form.ChannelName,
-                        Status = form.Status switch
-                        {
-                            7000 => FlowStatus.Rejected,
-                            8000 => FlowStatus.Approved,
-                            _ => FlowStatus.Review
-                        },
+                        Status = form.Status.ToFlowState(),
                         Amount = form.Amount,
                         Remark = form.Remark,
                         CreatedOn = form.CreateOn,
@@ -153,11 +139,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             var command = new ReviewDepositFormCommand(
                 reviewResponse.BrandId,
                 formId,
-                reviewResponse.ReviewResponse switch
-                {
-                    ReviewResponses.Approve => ReviewState.Approve,
-                    _ => ReviewState.Reject
-                },
+                reviewResponse.ReviewResponse.ToReviewState(),
                 reviewResponse.Remark);
 
             await reviewCommandService

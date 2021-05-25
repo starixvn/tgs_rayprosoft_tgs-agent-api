@@ -36,8 +36,23 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             var actions = table.CreateList(ParseActionShortInfo());
             foreach (var action in actions)
             {
-                AddAction(action.ID, _ => action.Amount, action.Type, action.IsClosingRound, action.ReferencedId);
+                AddAction(action.ID, _ => action.Amount, action.Type, action.BetType,
+                    action.IsClosingRound, action.ReferencedId);
             }
+        }
+
+        [Given(@"with opposite bet patterns")]
+        public void GivenWithOppositeBetPatterns(Table table)
+        {
+            var patterns = table.CreateList<OppositeBetPattern>(row =>
+            {
+                var betType = GetCell(row, "Bet Type");
+                var group = int.TryParse(GetCell(row, "Group"), out var id) ? id : 0;
+
+                return new(betType, group);
+            }).ToList();
+
+            Set(SR.OppositeBetPatterns, patterns);
         }
 
         [When(@"I get the client round status")]
@@ -47,18 +62,23 @@ namespace TGS.UnitTests.Operations.Bets.Steps
                 (IBetValuesCalculator)new TGS.Services.GameOperations.Calculators.BetValuesCalculator();
 
             var hasTurnoverOnTieBet = Get<bool>(SR.HasTurnoverOnTieBet);
+            var oppositeBetPatterns = Get<List<OppositeBetPattern>>(SR.OppositeBetPatterns);
 
             var current = Actions.Last();
             var previousActions = Actions.Except(new[] {current}).ToArray();
-            var betValuesResult = betValuesCalculator.Calculate(hasTurnoverOnTieBet, current, previousActions);
+            var betValuesResult =
+                betValuesCalculator.Calculate(hasTurnoverOnTieBet, current, previousActions, oppositeBetPatterns);
 
             var gameActionWithSingleRound = Actions.Count == 1 &&
                 Actions.Any(a => a.Type is GameActionType.FreeBet or GameActionType.WinJackpot);
 
+            var isVoidRound = !gameActionWithSingleRound && Actions.Where(act => act.Type == GameActionType.PlaceBet)
+                .All(act => act.IsCancelled);
+
             var roundStatus = Get<RoundStatus>(SR.RoundStatus);
             var manager = (IRoundStatusManager)new RoundStatusManager();
             var clientRoundStatus =
-                manager.GetClientRoundStatus(roundStatus, betValuesResult, gameActionWithSingleRound);
+                manager.GetClientRoundStatus(roundStatus, betValuesResult, gameActionWithSingleRound, isVoidRound);
 
             Set(SR.ClientRoundStatus, clientRoundStatus);
         }
@@ -81,18 +101,31 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             Remove(SR.HasTurnoverOnTieBet);
         }
 
+        [After]
+        public void RemoveOppositeBetPatterns()
+        {
+            if (!HasTag("OppositeBets"))
+            {
+                return;
+            }
+
+            Remove(SR.OppositeBetPatterns);
+        }
+
         #region Private Members
 
         private Func<TableRow, ActionShortInfo> ParseActionShortInfo() =>
             row =>
             {
                 var isClosingRound = GetCell(row, "IsClosingRound");
+
                 return new()
                 {
                     ID = int.TryParse(GetCell(row, "ID"), out var id) ? id : NewActionId,
                     Type = AsType(row, "Action Type"),
                     Amount = decimal.TryParse(GetCell(row, "Amount"), out var amount) ? amount : 0,
                     ReferencedId = int.TryParse(GetCell(row, "Referencing Action ID"), out var refId) ? refId : 0,
+                    BetType = GetCell(row, "Bet Type"),
                     IsClosingRound = !string.IsNullOrEmpty(isClosingRound) && isClosingRound == "YES"
                 };
             };
@@ -117,7 +150,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         }
 
         private BetActionData CreateAction(int id, Func<BetActionData, decimal> getAmount, GameActionType type,
-            bool isClosingRound, int refId = 0)
+            string betType, bool isClosingRound, int refId = 0)
         {
             BetActionData refAction = null;
             if (refId > 0 && !ActionsById.TryGetValue(refId, out refAction))
@@ -134,14 +167,15 @@ namespace TGS.UnitTests.Operations.Bets.Steps
                 Type = type,
                 ReferenceId = refAction?.Id,
                 Reference = refAction,
+                BetType = betType,
                 IsClosingRound = isClosingRound
             };
         }
 
-        private void AddAction(int id, Func<BetActionData, decimal> getAmount, GameActionType type, bool isClosingRound,
-            int refId = 0)
+        private void AddAction(int id, Func<BetActionData, decimal> getAmount, GameActionType type,
+            string betType, bool isClosingRound, int refId = 0)
         {
-            var action = CreateAction(id, getAmount, type, isClosingRound, refId);
+            var action = CreateAction(id, getAmount, type, betType, isClosingRound, refId);
             AddAction(id, action);
 
             if (action.Type == GameActionType.CancelTransaction)
@@ -169,6 +203,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             public GameActionType Type { get; set; }
             public decimal Amount { get; set; }
             public int ReferencedId { get; set; }
+            public string BetType { get; set; }
             public bool IsClosingRound { get; set; }
         }
 

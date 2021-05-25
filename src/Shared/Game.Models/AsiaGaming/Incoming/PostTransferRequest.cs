@@ -40,7 +40,10 @@ namespace TGS.Shared.Game.Models.AsiaGaming.Incoming
         public string SettleTime { get; init; }
 
         [XmlElement(ElementName = "transactionID")]
-        public string TransactionId { get; init; }
+        public string[] TransactionIds { get; init; }
+        
+        [XmlIgnore]
+        public string TransactionId => TransactionIds[0];
 
         [XmlElement(ElementName = "billNo")]
         public string BillNo { get; init; }

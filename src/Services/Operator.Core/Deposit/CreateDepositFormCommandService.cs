@@ -38,6 +38,7 @@ namespace TGS.Services.Operator.Deposit
                 if (!canJoin)
                     throw new CannotJoinPromotionException();
             }
+
             var createFormId = Guid.NewGuid();
 
             var settings = command.CreatePaymentSettings(createFormId);
@@ -55,6 +56,10 @@ namespace TGS.Services.Operator.Deposit
             await _paymentRepository
                .CreateDepositFormAsync(createFormId, form)
                .ConfigureAwait(false);
+
+            await _paymentRepository
+                .SubmitDepositFormStatusAsync(createFormId, PaymentFlowState.WaitPayment, null)
+                .ConfigureAwait(false);
 
             await _promotionClient
                 .TagPlayerDepositAsync(command.PlayerCode)

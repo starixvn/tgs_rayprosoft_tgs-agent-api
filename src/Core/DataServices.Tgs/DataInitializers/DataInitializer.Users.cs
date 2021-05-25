@@ -16,7 +16,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Guid roleId,
             Guid departmentId,
             Guid? userId = null,
-            Guid? resellerId = null,
             RoleType roleType = RoleType.Admin)
         {
             var (salt, passwordHash) = _passwordHandler.GenerateCredential(UserPassword);

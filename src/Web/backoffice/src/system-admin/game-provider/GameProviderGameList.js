@@ -11,7 +11,9 @@ import {
     Flex,
     FieldStack,
     useModalState,
-    Dialog
+    Dialog,
+    Card,
+    Level
 } from "bumbag"
 import Disclosure, {
     AddDisclosure,
@@ -21,30 +23,37 @@ import {
     useForm,
     useFormContext,
     useFieldArray,
-    Controller
+    Controller,
+    FormProvider
 } from "react-hook-form"
 import FormDialog from "../../form/FormDialog"
 import { Trans, useLocale, useTrans } from "../../i18n"
 import Backdrop from "../../dialog/Backdrop"
 import {
     useGameProvider,
-    useUpdateGameProvider
+    useUpdateGameProvider,
+    useUploadGameProviderGames
 } from "../../game/providers/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
-import { Table } from "../../table"
+import { pageCount, Table, toApiParams, useTable } from "../../table"
 import textColumn from "../../table/column/textColumn"
-import { CloseText } from "../../button/ActionButtons"
-import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
 import { InputField, Input } from "../../input/Input"
 import { CheckboxField } from "../../checkbox/Checkbox"
-import { GameStatusSelectField } from "../../game/games/GameStatus"
+import GameStatus, { GameStatusSelectField } from "../../game/games/GameStatus"
 import { GameTypeSelectField } from "../../game/GameType"
 import {
     GamePlatformLabel,
     GamePlatformTypeSelectField
 } from "../../game/games/GamePlatform"
+import { useDropzone } from "react-dropzone"
+import {
+    AddGameProviderGameDisclosure,
+    GameProviderGameDisclosure
+} from "./GameProviderGame"
+import { BatchAddGameProviderGameListDisclosure } from "./BatchAddGameProviderGameList"
+import SearchButton from "../../button/SearchButton"
 
 export const GameProviderGameListDisclosure = ({ gameProviderId }) => {
     let dialog = useModalState()
@@ -64,95 +73,105 @@ export const GameProviderGameListDisclosure = ({ gameProviderId }) => {
     )
 }
 
-const GameListDialog = ({ brandId, gameProviderId, dialog, ...props }) => {
+const GameListDialog = ({ gameProviderId, dialog, ...props }) => {
     let title = useTrans({
         zh: "游戏列表",
         en: "Game List"
     })
 
-    let {
-        isLoading: isLoadingGameProvider,
-        data: gameProviderData,
-        error: loadingGameProviderError
-    } = useGameProvider(gameProviderId)
+    let { state, setState, setPageIndex, setSortOrder } = useTable({})
+    //TODO: use get game provider game list API
+    let { isLoading, data, error, mutate, deleteCache } =
+        useGameProvider(gameProviderId)
+    // let { pageIndex, pageSize, name } = state
+    // let { isLoading, data, error, mutate, deleteCache } = useGameProviderGames(
+    //     gameProviderId,
+    //     toApiParams(state)
+    // )
 
-    let [formData, setSubmit] = useState()
-    let { isLoading, result, error, mutate, deleteCache } =
-        useUpdateGameProvider(gameProviderId, formData)
-
-    if (isLoadingGameProvider) {
+    let items = data?.games ?? []
+    let columns = useColumns({ items, mutate })
+    if (isLoading) {
         return <LoadingBackdrop {...dialog} />
     }
 
-    if (loadingGameProviderError) {
-        return (
-            <AlertDialog
-                {...loadingGameProviderError}
-                onClickClose={dialog.hide}
-            />
-        )
-    }
-
-    const onSubmit = (data) => {
-        setSubmit(data)
-    }
-
-    const reset = () => {
-        deleteCache()
-        mutate(false, undefined)
-        setSubmit(undefined)
+    if (error) {
+        return <AlertDialog {...error} onClickClose={dialog.hide} />
     }
 
     return (
-        <FormDialog
-            defaultValues={clone(gameProviderData)}
+        <Dialog.Modal
             title={title}
-            onSubmit={onSubmit}
-            result={result}
-            isLoading={isLoading}
-            error={error}
-            onCloseErrorAlert={reset}
-            onSubmitted={reset}
-            dialog={dialog}
+            {...dialog}
+            showCloseButton
+            hideOnClickOutside={false}
             placement="top"
-            width="60vw"
+            width="80vw"
             maxWidth="80vw"
         >
-            <FormBody />
-        </FormDialog>
-    )
-}
-
-const GamesFieldName = "games"
-const FormBody = () => {
-    let { watch, setValue } = useFormContext()
-    let games = watch(GamesFieldName)
-    let columns = useColumns({ items: games })
-
-    return (
-        <FieldStack>
-            <Box
-                alignX="right"
-                position="sticky"
-                // top="0"
-                // padding="1rem"
-                // backgroundColor="#f7f7fa"
-                // zIndex="1"
-            >
-                <AddGameDisclosure
-                    onChange={({ id, ...data }) => {
-                        let name = `${GamesFieldName}.${games.length}`
-                        setValue(name, data)
+            <FieldStack>
+                <ActionBar
+                    gameProviderId={gameProviderId}
+                    isLoading={isLoading}
+                    search={(data) => {
+                        setState({
+                            pageIndex: 0,
+                            ...data
+                        })
+                        mutate()
                     }}
                 />
-            </Box>
-            <Table columns={columns} data={games} />
-        </FieldStack>
+                <Table
+                    columns={columns}
+                    data={items}
+                    pageCount={pageCount(state.pageSize, data?.totalCount)}
+                    setPageIndex={setPageIndex}
+                    setSortOrder={setSortOrder}
+                    isLoading={isLoading}
+                />
+            </FieldStack>
+        </Dialog.Modal>
     )
 }
 
-const useColumns = ({ items = [], fieldArray = [] }) => {
-    let { control, setValue } = useFormContext()
+const ActionBar = ({ gameProviderId, search, mutate, isLoading }) => {
+    let formMethods = useForm({
+        defaultValues: {}
+    })
+
+    return (
+        <Level>
+            <FormProvider {...formMethods}>
+                <form onSubmit={formMethods.handleSubmit(search)}>
+                    {/* <Set>
+                        <InputField
+                            name="code"
+                            showEmptyFieldValueAddonAfter
+                            placeholder="Code"
+                        />
+                        <SearchButton
+                            isLoading={isLoading}
+                            disabled={isLoading}
+                        />
+                    </Set> */}
+                </form>
+            </FormProvider>
+            <Set orientation="horizontal">
+                <AddGameProviderGameDisclosure
+                    gameProviderId={gameProviderId}
+                    onSubmitted={mutate}
+                />
+
+                <BatchAddGameProviderGameListDisclosure
+                    gameProviderId={gameProviderId}
+                    onSubmitted={mutate}
+                />
+            </Set>
+        </Level>
+    )
+}
+
+const useColumns = ({ items = [], mutate }) => {
     return useMemo(() => {
         let columns = [
             textColumn({
@@ -175,16 +194,12 @@ const useColumns = ({ items = [], fieldArray = [] }) => {
                 accessor: (row) => row,
                 Header: <Trans zh="操作" en="Actions" />,
                 disableSortBy: true,
-                Cell: ({ value: record, row }) => {
-                    let index = row.index
-                    let name = `${GamesFieldName}.${index}`
+                Cell: ({ value: record }) => {
                     return (
-                        <Set orientation="vertical" alignX="center">
-                            <EditGameDisclosure
+                        <Set orientation="horizontal" alignX="center">
+                            <GameProviderGameDisclosure
                                 record={record}
-                                onChange={(data) => {
-                                    setValue(name, data)
-                                }}
+                                onSubmitted={mutate}
                             />
                         </Set>
                     )
@@ -194,116 +209,4 @@ const useColumns = ({ items = [], fieldArray = [] }) => {
 
         return columns
     }, [JSON.stringify(items)])
-}
-
-const AddGameDisclosure = ({ onChange }) => {
-    let dialog = useModalState()
-
-    return (
-        <>
-            <AddDisclosure {...dialog} />
-            {dialog.visible && (
-                <EditGameDialog isAdd onChange={onChange} dialog={dialog} />
-            )}
-        </>
-    )
-}
-
-const EditGameDisclosure = ({ record, onChange }) => {
-    let dialog = useModalState()
-
-    return (
-        <>
-            <EditDisclosure {...dialog} />
-            {dialog.visible && (
-                <EditGameDialog
-                    record={record}
-                    onChange={onChange}
-                    dialog={dialog}
-                />
-            )}
-        </>
-    )
-}
-
-const EditGameDialog = ({
-    title = "Game",
-    record = {},
-    onChange,
-    isAdd,
-    dialog
-}) => {
-    let defaultValue = clone(record)
-    return (
-        <Backdrop {...dialog}>
-            <FormDialog
-                defaultValues={defaultValue}
-                title={title}
-                onSubmit={(data) => {
-                    onChange?.(data)
-                    dialog.hide()
-                }}
-                stopPropagation
-                hideBackdrop
-                title={title}
-                dialog={dialog}
-                width="60vw"
-                css={css`
-                    & .bb-DialogContent {
-                        position: relative;
-                    }
-                `}
-            >
-                <GameFieldBody isAdd={isAdd} />
-            </FormDialog>
-        </Backdrop>
-    )
-}
-
-const GameFieldBody = ({ isAdd = false }) => {
-    let { watch, getValues } = useFormContext()
-    let isEdit = !isAdd
-    return (
-        <FieldStack>
-            <FieldStack orientation="horizontal">
-                {isEdit && (
-                    <InputField
-                        name="id"
-                        value={watch("id")}
-                        readOnly
-                        label="Id"
-                    />
-                )}
-                <InputField name="externalId" required label="External Id" />
-            </FieldStack>
-            <FieldStack orientation="horizontal">
-                <InputField name="code" required label="Code" />
-                <InputField name="name" required label="Name" />
-            </FieldStack>
-            <InputField name="description" label="Description" />
-            <FieldStack orientation="horizontal">
-                <GameStatusSelectField name="status" required label="Status" />
-                <GameTypeSelectField name="type" required label="Type" />
-                <GamePlatformTypeSelectField
-                    name="platformType"
-                    required
-                    label="Platform Type"
-                />
-            </FieldStack>
-            <InputField name="endpointPath" label="Endpoint Path" />
-            <InputField name="ruleUrl" label="Rule Url" />
-            <FieldStack orientation="horizontal">
-                <CheckboxField name="subGame" label="Sub Game" />
-                <CheckboxField
-                    name="hasTurnoverOnTieBet"
-                    label="Turnover On Tie Bet"
-                />
-                <CheckboxField name="html5" label="Html5" />
-            </FieldStack>
-            <InputField
-                name="availableCurrencies"
-                label="Available Currencies"
-            />
-        </FieldStack>
-    )
 }

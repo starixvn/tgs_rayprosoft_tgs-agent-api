@@ -23,7 +23,7 @@ namespace TGS.Core.Infrastructures.Hangfire
             services.AddHangfire((sp, option) =>
             {
                 var settings = sp.GetRequiredService<HangfireSettings>();
-                option.UsePostgreSqlStorage(settings.ConnectionString);
+                option.UseRedisStorage(settings.ConnectionString);
 
                 option.UseSimpleAssemblyNameTypeSerializer()
                     .UseColouredConsoleLogProvider()

@@ -39,6 +39,7 @@ import { filterBySameProp, filterChecked } from "../../list/filter"
 import { pluckCode } from "../../list/pluck"
 import { sortByNumberProp } from "../../list/sort"
 import { CloseText, ConfirmText } from "../../button/ActionButtons"
+import { GamePlatformLabel } from "../../game/games/GamePlatform"
 
 export const EditBrandBetLimitGameProviderBetLimit = ({
     record,
@@ -394,7 +395,7 @@ const EditBody = ({
     )
 }
 
-const AddGroupCard = ({ appendGroup, gameProviderBetLimits = [] }) => {
+const AddGroupCard = ({ appendGroup }) => {
     let [isSports, setSports] = useState(false)
     return (
         <Card variant="bordered" alignY="center">
@@ -435,13 +436,13 @@ const GroupCard = ({
 
     let hasGroupId = !!groupField?.id
 
-    let isSportsFieldName = `${name}[${groupIndex}].isSports`
+    let isSportsFieldName = `${name}.${groupIndex}.isSports`
     let editable = !readonly
     return (
         <Card variant="bordered">
             {hasGroupId && (
                 <Input
-                    name={`${name}[${groupIndex}].id`}
+                    name={`${name}.${groupIndex}.id`}
                     value={groupField.id}
                     type="hidden"
                 />
@@ -449,12 +450,12 @@ const GroupCard = ({
             <Set alignX="right">
                 <SportsSwitch
                     name={isSportsFieldName}
-                    defaultChecked={groupField.isSports}
+                    checked={groupField.isSports}
                     disabled
                 />
                 <Controller
                     control={control}
-                    name={`${name}[${groupIndex}].brandGames`}
+                    name={`${name}.${groupIndex}.brandGames`}
                     defaultValue={groupField.brandGames}
                     shouldUnregister={true}
                     render={({
@@ -506,20 +507,20 @@ const GroupCard = ({
             <FieldStack>
                 <FieldStack orientation="horizontal">
                     <InputField
-                        name={`${name}[${groupIndex}].name`}
+                        name={`${name}.${groupIndex}.name`}
                         label={<Trans zh="名称" en="Name" />}
                         defaultValue={groupField.name}
                         disabled={readonly}
                     />
                 </FieldStack>
                 <TextareaField
-                    name={`${name}[${groupIndex}].description`}
+                    name={`${name}.${groupIndex}.description`}
                     label={<Trans zh="说明" en="Description" />}
                     defaultValue={groupField.description}
                     disabled={readonly}
                 />
                 <BetLimitTable
-                    name={`${name}[${groupIndex}].betLimitGameProviderPairs`}
+                    name={`${name}.${groupIndex}.betLimitGameProviderPairs`}
                     group={groupField}
                     groupIndex={groupIndex}
                     betLimits={betLimits}
@@ -962,7 +963,9 @@ const GameProviderGameRow = ({ gameField, index, readonly = false }) => {
             </Table.Cell>
             <Table.Cell>{gameField.gameId}</Table.Cell>
             <Table.Cell>{gameField.name}</Table.Cell>
-            <Table.Cell>{gameField.platformType}</Table.Cell>
+            <Table.Cell>
+                <GamePlatformLabel value={gameField.platformType} />
+            </Table.Cell>
         </Table.Row>
     )
 }

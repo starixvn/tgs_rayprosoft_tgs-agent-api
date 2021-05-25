@@ -89,7 +89,7 @@ Scenario: 02.g - If I place 1 bet and the bet is cancelled, and the round is clo
 	When I get the client round status
 	Then the client round status should be "Void"
 
-Scenario: 02.e - If I bet, settled and win a free bet, and the round is closed, the client round status should be win
+Scenario: 02.h - If I bet, settled and win a free bet, and the round is closed, the client round status should be win
 	Given the round is "Closed"
 		And a sequence of game actions
 			| Action Type | ID | Referencing Action ID | Amount | IsClosingRound |
@@ -120,5 +120,37 @@ Scenario: 04 - If I win a jackpot, and the round is closed, the client round sta
 		And a sequence of game actions
 			| Action Type | ID | Referencing Action ID | Amount | IsClosingRound |
 			| WinJackpot  | 1  |                       | 100    | YES            |
+	When I get the client round status
+	Then the client round status should be "Win"
+
+@OppositeBets
+Scenario: 05.a - Bet with opposite positions and with results, and turnover is zero
+	Given the round is "Closed"
+		And a sequence of game actions
+			| Action Type | ID | Referencing Action ID | Amount | IsClosingRound | Bet Type |
+			| PlaceBet    | 1  |                       | -10    |                | Banker   |
+			| PlaceBet    | 2  |                       | -10    |                | Player   |
+			| LoseBet     | 3  | 1                     | 0      |                |          |
+			| WinBet      | 4  | 2                     | 40     | YES            |          |
+		And with opposite bet patterns
+			| Bet Type | Group |
+			| Player   | 1     |
+			| Banker   | 1     |
+	When I get the client round status
+	Then the client round status should be "Win"
+
+@OppositeBets
+Scenario: 05.b - Bet with opposite positions and with win results, and turnover is positive
+	Given the round is "Closed"
+		And a sequence of game actions
+			| Action Type | ID | Referencing Action ID | Amount | IsClosingRound | Bet Type |
+			| PlaceBet    | 1  |                       | -10    |                | Banker   |
+			| PlaceBet    | 2  |                       | -20    |                | Player   |
+			| LoseBet     | 3  | 1                     | 0      |                |          |
+			| WinBet      | 4  | 2                     | 40     | YES            |          |
+		And with opposite bet patterns
+			| Bet Type | Group |
+			| Player   | 1     |
+			| Banker   | 1     |
 	When I get the client round status
 	Then the client round status should be "Win"

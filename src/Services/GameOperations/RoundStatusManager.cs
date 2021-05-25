@@ -12,17 +12,23 @@ namespace TGS.Services.GameOperations
         RoundStatus GetStatus(RoundStatusData data);
 
         ClientRoundStatus GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult,
-            bool gameActionWithSingleRound);
+            bool gameActionWithSingleRound, bool isVoidRound);
     }
 
     internal sealed class RoundStatusManager : IRoundStatusManager
     {
         ClientRoundStatus IRoundStatusManager.
-            GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult, bool gameActionWithSingleRound)
+            GetClientRoundStatus(RoundStatus status, BetValuesResult betValuesResult, bool gameActionWithSingleRound,
+                bool isVoidRound)
         {
-            if (status == RoundStatus.New || status == RoundStatus.Open || betValuesResult == null)
+            if (status is RoundStatus.New or RoundStatus.Open || betValuesResult == null)
             {
                 return ClientRoundStatus.Open;
+            }
+
+            if (isVoidRound)
+            {
+                return ClientRoundStatus.Void;
             }
 
             var turnover = betValuesResult.Turnover;
@@ -53,7 +59,17 @@ namespace TGS.Services.GameOperations
                 };
             }
 
-            return ClientRoundStatus.Void;
+            // for opposite bet or promotion, it will has zero turnover and positive settle amount
+            if (betValuesResult.SettleAmount > 0)
+            {
+                return playerWinLoss switch
+                {
+                    > 0 => ClientRoundStatus.Win,
+                    _   => ClientRoundStatus.Loss
+                };
+            }
+
+            return ClientRoundStatus.Loss;
         }
 
         RoundStatus IRoundStatusManager.GetStatus(RoundStatusData data)
@@ -76,8 +92,8 @@ namespace TGS.Services.GameOperations
             }
 
             // Overall:
-            // 1. IF autoCloseRound=false, round must be closed explicitly.
-            // 2. IF autoCloseRound=true, round is closed on any bet - ending action;
+            // 1. If autoCloseRound=false, round must be closed explicitly.
+            // 2. If autoCloseRound=true, round is closed on any bet - ending action;
             //    if RoundClosed is passed, the round sta is determined by RoundClosed.
 
             if (data.AutoCloseRound == false && requestToCloseRound == null)

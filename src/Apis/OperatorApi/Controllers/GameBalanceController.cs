@@ -17,6 +17,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Get transfer wallet balance
         /// </summary>
         /// <param name="getGameBalanceService"></param>
+        /// <param name="gameStatusValidator"></param>
         /// <param name="gpCode"></param>
         /// <returns></returns>
         [HttpGet("{gpCode}")]
@@ -24,9 +25,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async Task<GetGameBalanceResponse> GetGameBalanceAsync(
             [FromServices] IGetService<GetGameBalanceQuery, GameBalanceInfo> getGameBalanceService,
+            [FromServices] IGameProviderStatusValidator gameStatusValidator,
             string gpCode)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, gpCode, brandId);
 
             var query = new GetGameBalanceQuery(playerTokenData.PlayerCode, gpCode);
 
@@ -44,6 +49,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Transfer wallet fund out(Tgs -> Gp)
         /// </summary>
         /// <param name="submitGameBalanceFundOutCommandService"></param>
+        /// <param name="gameStatusValidator"></param>
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPut("fund/out")]
@@ -51,9 +57,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async ValueTask SubmitGameBalanceFundOutRequestAsync(
             [FromServices] ICommandService<SubmitGameBalanceFundOutCommand> submitGameBalanceFundOutCommandService,
+            [FromServices] IGameProviderStatusValidator gameStatusValidator,
             [FromBody] SubmitGameBalanceFundOutRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, request.GameProviderCode, brandId);
 
             var command = new SubmitGameBalanceFundOutCommand
             (
@@ -71,6 +81,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Transfer wallet fund in(GP -> Tgs)
         /// </summary>
         /// <param name="submitGameBalanceFundInCommandService"></param>
+        /// <param name="gameStatusValidator"></param>
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPut("fund/in")]
@@ -78,9 +89,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async ValueTask SubmitGameBalanceFundInRequestAsync(
             [FromServices] ICommandService<SubmitGameBalanceFundInCommand> submitGameBalanceFundInCommandService,
+            [FromServices] IGameProviderStatusValidator gameStatusValidator,
             [FromBody] SubmitGameBalanceFundInRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, request.GameProviderCode, brandId);
 
             var command = new SubmitGameBalanceFundInCommand
             (

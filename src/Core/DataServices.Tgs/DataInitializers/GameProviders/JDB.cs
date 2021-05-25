@@ -67,7 +67,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.AllowKickPlayer => false;
 
-            short IGameProvider.UniqueId => UniqueId;
+            ushort IGameProvider.UniqueId => UniqueId;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
@@ -76,19 +76,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-jdb") : new("http://localhost:62330"),
-                    ApiUrl = new("http://http://api.jdb711.com"),
+                    ApiUrl = new("http://api.jdb711.com"),
                     MoreGame = false,
                     AESIv = "756edb2fc85fe908",
                     AESKey = "4f09f467e6a8fb9f",
                     ClientDomain = "VB3",
-                    Agents = new JDBAgent[]
-                    {
-                        new()
-                        {
-                            CurrencyCode = "CNY",
-                            Id = "wgvb3rmb"
-                        }
-                    }
+                    Agents = new JDBAgent[] {new() {CurrencyCode = "CNY", Id = "wgvb3rmb"}}
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

@@ -5,6 +5,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
+using TGS.Services.PlayerBucket;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -27,6 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     httpClient.BaseAddress = options.ValidateCodeBaseUrl;
                 })
                 .Services
+                .AddTransient<IGameProviderStatusValidator, GameProviderStatusValidator>()
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
                 .AddTransient<IValidateCodeServiceClient>(sp => sp.GetRequiredService<ValidateCodeServiceClient>())
                 .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()

@@ -23,7 +23,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new DepartmentController(
+            _controller = new(
                 _queriesMock.Object,
                 _commandsMock.Object);
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
@@ -75,9 +75,19 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Cannot_Create_Department_With_Name_Exists()
         {
             var request = new Fixture().Create<DepartmentRequest>();
+            var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
+                .BuildMock().Object;
+            request.Name = "Name";
+            request.ResellerId = null;
+            request.LicenseeId = null;
+            request.BrandId = null;
+            departments.First().Name = "Name";
+            departments.First().ResellerId = null;
+            departments.First().LicenseeId = null;
+            departments.First().BrandId = null;
 
-            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
-                .Returns(Task.FromResult(true));
+            _queriesMock.Setup(s => s.GetQueries())
+                .Returns(departments);
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeFalse();
@@ -88,14 +98,15 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Create_Department()
         {
             var request = new Fixture().Create<DepartmentRequest>();
+            var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
+                .BuildMock().Object;
 
-            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
-                .Returns(Task.FromResult(false));
+            _queriesMock.Setup(s => s.GetQueries())
+                .Returns(departments);
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
 
-            _queriesMock.Verify(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()));
             _commandsMock.Verify(p => p.CreateAsync(It.Is<Department>(d => d.Name == request.Name)));
         }
 
@@ -150,12 +161,26 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var department = CreateDepartmentFixture().Create<Department>();
             var request = new Fixture().Create<DepartmentRequest>();
 
+            var departments = CreateDepartmentFixture().CreateMany<Department>(10).AsQueryable()
+                .BuildMock().Object;
+
+            request.Name = "Name";
+            department.ResellerId = null;
+            department.LicenseeId = null;
+            department.BrandId = null;
+
+            var firstDepartment = departments.First();
+            firstDepartment.Name = "Name";
+            firstDepartment.ResellerId = null;
+            firstDepartment.LicenseeId = null;
+            firstDepartment.BrandId = null;
+
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
                     It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
                 .Returns(Task.FromResult(department));
 
-            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Department, bool>>>()))
-                .Returns(Task.FromResult(true));
+            _queriesMock.Setup(s => s.GetQueries())
+                .Returns(departments);
 
             var response = await _controller.UpdateAsync(department.Id, request);
 

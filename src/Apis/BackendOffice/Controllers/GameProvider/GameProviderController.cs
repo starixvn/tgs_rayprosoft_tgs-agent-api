@@ -31,20 +31,15 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpPost]
         [Description("Create a game provider")]
-        public Task<GameProviderResponse> CreateGameProviderAsync(CreateGameProviderRequest request) =>
+        public Task<MessageResponse> CreateGameProviderAsync(CreateGameProviderRequest request) =>
             _mediator.Send(request);
 
         [HttpPut("{id}")]
         [Description("Update a game provider")]
-        public Task<GameProviderResponse> UpdateGameProviderAsync(Guid id, UpdateGameProviderRequest request)
+        public Task<MessageResponse> UpdateGameProviderAsync(Guid id, UpdateGameProviderRequest request)
         {
             request.Id = id;
             return _mediator.Send(request);
         }
-
-        [HttpPost("upload")]
-        [Description("Upload games")]
-        public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request) =>
-            _mediator.Send(request);
     }
 }

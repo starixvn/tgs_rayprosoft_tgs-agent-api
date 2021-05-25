@@ -3,6 +3,12 @@ import { css } from "@emotion/react"
 import { Trans, useTrans } from "../i18n"
 import Select from "../select/Select"
 
+const WaitingPayment = "WaitingPayment"
+const WaitingPaymentTrans = {
+    zh: "等待付款",
+    en: "Waiting Payment"
+}
+
 const Review = "Review"
 const ReviewTrans = {
     zh: "审核中",
@@ -27,6 +33,8 @@ export const isFundApproved = (value) => value === Approved
 
 export const FundReviewStatusLabel = ({ value }) => {
     switch (value) {
+        case WaitingPayment:
+            return <Trans {...WaitingPaymentTrans} />
         case Review:
             return <Trans {...ReviewTrans} />
         case Approved:
@@ -47,6 +55,10 @@ export const FundReviewStatusSelect = ({ placeholder, ...props }) => {
 
     let options = [
         {
+            label: useTrans(WaitingPaymentTrans),
+            value: WaitingPayment
+        },
+        {
             label: useTrans(ReviewTrans),
             value: Review
         },
@@ -64,6 +76,7 @@ export const FundReviewStatusSelect = ({ placeholder, ...props }) => {
 }
 
 export default {
+    WaitingPayment,
     Review,
     Approved,
     Rejected

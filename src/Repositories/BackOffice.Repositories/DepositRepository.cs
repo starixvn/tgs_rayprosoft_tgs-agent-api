@@ -37,34 +37,12 @@ namespace TGS.BackOffice.Repositories
                             df.Amount,
                             df.Remark,
                             df.Status,
-                            string.IsNullOrWhiteSpace(df.ApplyInfo)
-                                ? null
-                                : JsonDocument.Parse(df.ApplyInfo),
-                            string.IsNullOrWhiteSpace(df.PaymentReturn)
-                                ? null
-                                : JsonDocument.Parse(df.PaymentReturn),
+                            df.ApplyInfo,
+                            df.PaymentReturn,
                             df.CreatedOn,
                             df.UpdatedOn);
 
             return query.SingleAsync();
-        }
-
-        public async ValueTask SignOffDepositFormAsync(Guid formId, ReviewState reviewStatus, string remark)
-        {
-            var formData = await _tgsRepository.DepositForms
-                .FindAsync(formId)
-                .ConfigureAwait(false);
-
-            formData.Status = reviewStatus switch
-            {
-                ReviewState.Approve => 8000,
-                ReviewState.Reject => 7000,
-                _ => formData.Status
-            };
-            formData.Remark = remark;
-            formData.UpdatedOn = DateTimeOffset.UtcNow;
-
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

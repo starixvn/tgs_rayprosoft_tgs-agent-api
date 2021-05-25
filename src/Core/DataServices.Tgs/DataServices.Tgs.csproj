@@ -6,18 +6,7 @@
     <RootNamespace>TGS.Core.DataServices.Tgs</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="SqlScripts\Indexes\agents_email.sql" />
-    <None Remove="SqlScripts\Functions\log_get_admin_log.sql" />
-    <None Remove="SqlScripts\Functions\log_get_admin_logs.sql" />
-    <None Remove="SqlScripts\Functions\log_get_api_log.sql" />
-    <None Remove="SqlScripts\Functions\log_get_api_logs.sql" />
-    <None Remove="SqlScripts\Functions\log_get_log_records.sql" />
-    <None Remove="SqlScripts\Indexes\admin_logs.sql" />
-    <None Remove="SqlScripts\Indexes\api_logs.sql" />
-    <None Remove="SqlScripts\Indexes\log_records.sql" />
-    <None Remove="SqlScripts\Indexes\players_email.sql" />
-  </ItemGroup>
+  <ItemGroup>  </ItemGroup>
 
   <ItemGroup>
     <Content Include="appsettings.json">
@@ -30,6 +19,7 @@
   <ItemGroup>
     <EmbeddedResource Include="DataInitializers\Games\IMES.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\BG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\PP.csv" />
     <EmbeddedResource Include="DataInitializers\Games\KY.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SABA.csv" />

@@ -32,7 +32,7 @@ namespace TGS.Apis.LogApi.Loggers
             await repo.ApiLogs.AddRangeAsync(logs);
             await repo.SaveChangesAsync();
 
-            await logs.Where(p => p.ResponseCode != 200)
+            await logs.Where(p => p.ResponseCode == 500)
                 .Select(log => _service.GetNotifyTaskAsync(log))
                 .WhenAll();
         }
@@ -45,7 +45,7 @@ namespace TGS.Apis.LogApi.Loggers
             await repo.ApiLogs.AddAsync(log);
             await repo.SaveChangesAsync();
 
-            if (log.ResponseCode != 200)
+            if (log.ResponseCode == 500)
             {
                 await _service.GetNotifyTaskAsync(log);
             }

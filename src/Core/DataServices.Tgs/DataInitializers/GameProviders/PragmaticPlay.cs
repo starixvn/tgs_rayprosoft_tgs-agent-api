@@ -61,7 +61,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             IGame[] IGameProvider.Games => _games;
 
-            short IGameProvider.UniqueId => 3;
+            ushort IGameProvider.UniqueId => 3;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 

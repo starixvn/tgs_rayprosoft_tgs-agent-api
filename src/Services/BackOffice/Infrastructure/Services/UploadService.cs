@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Text;
@@ -46,7 +47,14 @@ namespace TGS.Services.BackOffice.Infrastructure.Services
                 {
                     var header = headers[i];
                     obj.TryAdd(header, reader.GetValue(i));
-                    ((IDictionary<string, object>) obj)[header] = reader.GetValue(i)?.ToString();
+
+                    Type fieldType = reader.GetFieldType(i);
+                    bool isBool = fieldType == typeof(bool);
+                    if (isBool) {
+                        ((IDictionary<string, object>) obj)[header] = reader.GetBoolean(i);
+                    } else {
+                        ((IDictionary<string, object>) obj)[header] = reader.GetValue(i)?.ToString();
+                    }
                 }
 
                 var json = _jsonSerializationProvider.SerializeToString(obj);

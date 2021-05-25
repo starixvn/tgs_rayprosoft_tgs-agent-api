@@ -17,7 +17,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJDBApiClient _jdbApiClient;
-        private readonly JDBGameTypeMapper _jdbGameTypeMapper;
         private readonly IJDBServices _jdbServices;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
@@ -28,7 +27,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
             IJDBApiClient jdbApiClient,
-            JDBGameTypeMapper jdbGameTypeMapper,
             IJDBServices jdbServices)
         {
             _settingOperations = settingOperations;
@@ -36,7 +34,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             _gameProviderOperations = gameProviderOperations;
             _brandGameProviderOperations = brandGameProviderOperations;
             _jdbApiClient = jdbApiClient;
-            _jdbGameTypeMapper = jdbGameTypeMapper;
             _jdbServices = jdbServices;
         }
 
@@ -56,15 +53,21 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                     .GameProviderConfigurations.JDB);
 
             var agent = _jdbServices.GetAgent(configuration, player.DefaultWalletCurrencyCode);
+            var items = game.ExternalId.Split("_");
+
+            if (items.Length != 2)
+            {
+                throw new ArgumentException($"Invalid game external id: {game.ExternalId}");
+            }
 
             var response = await _jdbApiClient.GetTokenAsync(new()
             {
-                Timestamp = DateTime.Now.Ticks,
+                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 Parent = agent.Id,
                 UserId = player.PlayerCode,
                 Language = cultureCode,
-                GameType = ((int)_jdbGameTypeMapper.Get(game.Type)).ToString(),
-                MachineType = game.ExternalId,
+                GameType = items[0],
+                MachineType = items[1],
                 MoreGame = configuration.MoreGame ? 1 : 0
             });
 

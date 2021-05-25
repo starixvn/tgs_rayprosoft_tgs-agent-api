@@ -120,10 +120,13 @@ export const GameType = {
     TableGame
 }
 
-//TODO
-export const SportGameTypes = [Sportsbook, VirtualSports, ESports]
+export const SportGameTypes = [
+    Sportsbook,
+    VirtualSports,
+    VirtualSportsLobby,
+    ESports
+]
 
-//TODO
 export const isSportGameType = (value = "") => SportGameTypes.includes(value)
 
 const LiveDealerGroupTrans = {

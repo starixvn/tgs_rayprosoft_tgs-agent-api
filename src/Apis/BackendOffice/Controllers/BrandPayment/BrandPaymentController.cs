@@ -72,11 +72,6 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 }
             }
 
-            if (await _brandPaymentService.ExistsAsync(p => p.ChannelName == request.ChannelName))
-            {
-                return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NameExists);
-            }
-
             await _brandPaymentService.CreatePaymentAsync(request, Username);
             return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
         }
@@ -88,20 +83,20 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             [FromServices] IQueryService<PaymentMethodQuery, PaymentMethodInfo> paymentMethodQueryService,
             [FromServices] IQueryService<PaymentChannelQuery, PaymentChannelInfo> paymentChannelQueryService)
         {
-            var allPaymentMethodChannels = queryService.QueryAsync(new AllPaymentMethodChannelQuery());
+            var allPaymentMethodChannels = queryService.QueryAsync(new());
             var allPaymentMethods = await paymentMethodQueryService
-                .QueryAsync(new PaymentMethodQuery())
+                .QueryAsync(new())
                 .ToDictionaryAsync(pm => pm.Id)
                 .ConfigureAwait(false);
             var allPaymentChannels = await paymentChannelQueryService
-                .QueryAsync(new PaymentChannelQuery())
+                .QueryAsync(new())
                 .ToDictionaryAsync(pc => pc.Id)
                 .ConfigureAwait(false);
 
-            return new GenericResponse<AllPaymentMethodChannelsResponse>
+            return new()
             {
                 Valid = true,
-                Data = new AllPaymentMethodChannelsResponse
+                Data = new()
                 {
                     AllData = allPaymentMethodChannels
                         .Select(pmc => new PaymentMethodChannelResponse
@@ -117,8 +112,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                         .SelectAwait(async g => await g.FirstAsync().ConfigureAwait(false))
                         .Select(pmc => new PaymentMethodModel
                         {
-                            Id = pmc.MethodId,
-                            Code = allPaymentMethods[pmc.MethodId].Name
+                            Id = pmc.MethodId, Code = allPaymentMethods[pmc.MethodId].Name
                         })
                         .ToEnumerable(),
                     Channels = allPaymentMethodChannels
@@ -126,10 +120,9 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                         .SelectAwait(async g => await g.FirstAsync().ConfigureAwait(false))
                         .Select(pmc => new PaymentChannelModel
                         {
-                            Id = pmc.ChannelId,
-                            Code = allPaymentChannels[pmc.ChannelId].Name
+                            Id = pmc.ChannelId, Code = allPaymentChannels[pmc.ChannelId].Name
                         })
-                        .ToEnumerable(),
+                        .ToEnumerable()
                 }
             };
         }
@@ -199,7 +192,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     PaymentStatus = x.PaymentStatus,
                     DesignatedUsers = GetDesignatedUsers(x).Any(),
                     PaymentFee =
-                        new() { FeePercentage = x.FeePercentage, HighestFee = x.HighestFee, LowestFee = x.LowestFee },
+                        new() {FeePercentage = x.FeePercentage, HighestFee = x.HighestFee, LowestFee = x.LowestFee},
                     VipLevelIds = x.VipLevels.Select(p => p.VipLevelId).ToArray(),
                     CreatedByUsername = x.CreatedByUsername,
                     UpdatedByUsername = x.UpdatedByUsername,
@@ -225,7 +218,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
             var players = GetDesignatedUsers(brandPayment);
 
-            return new() { Valid = true, Players = players };
+            return new() {Valid = true, Players = players};
         }
 
         [HttpPut("{brandPaymentId:guid}")]
@@ -252,12 +245,6 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             if (brandPayment == null)
             {
                 return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NotFound);
-            }
-
-            if (await _brandPaymentService.ExistsAsync(p => p.BrandId == brandPayment.BrandId &&
-                p.Id != brandPaymentId && p.ChannelName == request.ChannelName))
-            {
-                return CreateInvalidResponse<CreateUpdateBrandPaymentResponse>(Resources.BrandPayment.NameExists);
             }
 
             await _brandPaymentService.UpdatePaymentAsync(brandPayment, request, Username);
@@ -298,8 +285,8 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             var diffUsers = users.Except(allPlayers).ToArray();
 
             return diffUsers.Any()
-                ? new() { Valid = false, Message = Resources.BrandPayment.PlayersNotFound, NotExistsPlayers = diffUsers }
-                : new UploadFileResponse { Valid = true, Players = allPlayers };
+                ? new() {Valid = false, Message = Resources.BrandPayment.PlayersNotFound, NotExistsPlayers = diffUsers}
+                : new UploadFileResponse {Valid = true, Players = allPlayers};
         }
 
         private static string[] GetDesignatedUsers(Core.DataServices.Tgs.Models.BrandPayment brandPayment)
@@ -321,7 +308,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     x => x.Player.PhoneAuthentication)
                 .Where(isAll && brandPayment.VipLevels.Any(),
                     x => x.Player.VipId != null && vipLevelIds.Contains(x.Player.VipId.Value))
-                .Select(x => x.Player.RealName).ToArray();
+                .Select(x => x.Player.Username).ToArray();
         }
     }
 }

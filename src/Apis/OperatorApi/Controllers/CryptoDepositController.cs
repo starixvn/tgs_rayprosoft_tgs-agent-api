@@ -22,7 +22,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async ValueTask<LeePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormDetail> getDepositFormService,
             [FromServices] LeePaySerializer serializer,
             [FromBody] SubmitDepositRequest request)
         {

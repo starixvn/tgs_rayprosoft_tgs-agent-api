@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -13,9 +14,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
     public interface IJDBActionModelMapper
     {
-        BetData Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request, PlatformType platformType);
+        BetData Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request,
+            PlatformType platformType);
+
         BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request, string externalRoundId);
+
         BaseActionResponse Response(GetBalanceResult result);
+
         BaseActionResponse Response(BetResult result);
     }
 
@@ -24,34 +29,36 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         private static readonly string GameProviderCode = Consts.GameProvider.JDB;
 
         BaseActionResponse IJDBActionModelMapper.Response(GetBalanceResult result) =>
-            new BaseActionResponse
+            new()
             {
                 Status = GameApiStatus.Succeed.Description(),
                 Balance = result.Balance
             };
-        
-        BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request, PlatformType platformType)
+
+        BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request,
+            PlatformType platformType)
         {
             var transactions = new List<TransactionData>(2);
             var externalTransactionId = request.TransferId.ToString();
             var externalRoundId = request.GameSequenceNo.ToString();
+            var externalGameId = $"{request.GameType}_{request.MachineType}";
 
             //place bet
-            transactions.Add(new TransactionData
+            transactions.Add(new()
             {
                 Amount = Math.Abs(request.Bet),
                 ExternalTransactionId = externalTransactionId,
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalBetId = externalTransactionId,
                 ExternalRoundId = externalRoundId,
-                ExternalGameId = request.MachineType.ToString(),
+                ExternalGameId = externalGameId,
                 GameActionType = PlaceBet,
-                TimeStamp = DateTimeOffset.Parse(request.GameDate),
+                TimeStamp = GetTimestamp(request.GameDate),
                 RoundClosed = false
             });
-            
+
             //settle bet
-            transactions.Add(new TransactionData
+            transactions.Add(new()
             {
                 Amount = request.Win,
                 ExternalTransactionId = $"{externalTransactionId}_settle",
@@ -59,16 +66,17 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalBetId = externalTransactionId,
                 ExternalRoundId = externalRoundId,
-                ExternalGameId = request.GameSequenceNo.ToString(),
+                ExternalGameId = externalGameId,
                 GameActionType = request.Win > 0 ? WinBet : LoseBet,
-                TimeStamp = DateTimeOffset.Parse(request.LastModifyTime),
+                TimeStamp = GetTimestamp(request.LastModifyTime),
                 RoundClosed = true
             });
-            
+
             return GetBetData(request.UserId, request.Currency, data, transactions.ToArray(), platformType);
         }
-        
-        BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, CancelTransactionRequest request, string externalRoundId)
+
+        BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, CancelTransactionRequest request,
+            string externalRoundId)
         {
             var externalTransactionId = request.TransferId.ToString();
 
@@ -98,11 +106,11 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 }
             };
 
-            return GetBetData(request.UserId, null, data, transactions, null, hasCurrencyFromGameProvider: false);
+            return GetBetData(request.UserId, null, data, transactions, null, false);
         }
-        
+
         BaseActionResponse IJDBActionModelMapper.Response(BetResult result) =>
-            new BaseActionResponse
+            new()
             {
                 Status = GameApiStatus.Succeed.Description(),
                 Balance = result.Balance
@@ -123,6 +131,13 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             CurrencyCode = currencyCode,
             Transactions = transactions
         };
+
+        private static DateTimeOffset GetTimestamp(string timeStamp)
+        {
+            var offset = TimeSpan.FromHours(8);
+            var dateTime = DateTime.ParseExact(timeStamp, "dd-MM-yyyy HH:mm:ss", null, DateTimeStyles.AllowWhiteSpaces);
+            return new(dateTime, offset);
+        }
 
         #endregion
     }

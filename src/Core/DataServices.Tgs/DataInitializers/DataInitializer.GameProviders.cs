@@ -56,7 +56,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             bool AutoClosedRound => true;
             bool SupportTestPlayer => true;
             bool AllowKickPlayer => false;
-            short UniqueId { get; }
+            ushort UniqueId { get; }
             GameProviderBetLimit[] BetLimits { get; }
             Dictionary<string, string> SportTypes => new();
             Dictionary<string, string> MarketTypes => new();

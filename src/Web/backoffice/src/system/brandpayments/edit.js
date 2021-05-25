@@ -111,7 +111,7 @@ const EditDialog = ({
         bankTransferPaymentMethod,
         bankTransferPaymentMethodChannels,
         error: loadingPaymentError
-    } = useManualBankTransferPayment()
+    } = useBankTransferPayment()
 
     let [submitData, setSubmit] = useState()
 
@@ -229,7 +229,7 @@ export const AddBrandPaymentButton = ({ brandId, onSubmitted, ...props }) => {
     )
 }
 
-const useManualBankTransferPayment = () => {
+const useBankTransferPayment = () => {
     let {
         isLoading: isLoadingPaymentList,
         data: paymentListData,
@@ -254,11 +254,18 @@ const useManualBankTransferPayment = () => {
 
     let bankTransferPaymentMethodChannels =
         paymentMethodChannelList?.allData?.filter((item) => {
+            return item.methodId === bankTransferPaymentMethod.id
+        })
+
+    /*
+    let manualBankTransferPaymentMethodChannels =
+        paymentMethodChannelList?.allData?.filter((item) => {
             return (
                 item.methodId === bankTransferPaymentMethod.id &&
                 item.paymentId === manualPayment.id
             )
         })
+    */
 
     return {
         isLoading:
@@ -283,7 +290,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
         bankTransferPaymentMethod,
         bankTransferPaymentMethodChannels,
         error: loadingPaymentError
-    } = useManualBankTransferPayment()
+    } = useBankTransferPayment()
 
     let title = useTrans({
         zh: "新增",
@@ -376,7 +383,7 @@ const EditBody = ({
     brandId,
     isAdd = false,
     record = {},
-    manualPayment,
+    manualPayment = {},
     bankTransferPaymentMethod,
     bankTransferPaymentMethodChannels = [],
     dialog,
@@ -394,16 +401,19 @@ const EditBody = ({
     let paymentMethodChannelId = watch(PaymentMethodChannelIdFieldName)
     let isEdit = !isAdd
     let paymentId = isAdd ? manualPayment?.id : record?.paymentId
+    let isManualPayment = paymentId == manualPayment?.id
     let isBankTransferMethod = paymentMethodId === bankTransferPaymentMethod?.id
-
     useEffect(() => {
         if (isBankTransferMethod) {
             let paymentMethodChannel = bankTransferPaymentMethodChannels.find(
-                (item) =>
-                    item.methodId === paymentMethodId &&
-                    item.channelId === paymentChannelId
+                (item) => {
+                    return (
+                        item.paymentId === paymentId &&
+                        item.methodId === paymentMethodId &&
+                        item.channelId === paymentChannelId
+                    )
+                }
             )
-
             setValue(
                 PaymentMethodChannelIdFieldName,
                 paymentMethodChannel?.id ?? ""
@@ -451,12 +461,6 @@ const EditBody = ({
                                         placeholder={false}
                                         range={[bankTransferPaymentMethod.id]}
                                         value={bankTransferPaymentMethod?.id}
-                                        onChange={(event) => {
-                                            console.log(
-                                                "paymentMethodId onChange",
-                                                event.target.value
-                                            )
-                                        }}
                                     />
                                 )}
                                 {isEdit && isBankTransferMethod && (
@@ -507,7 +511,7 @@ const EditBody = ({
                             </Label>
                             <Input name="channelName" size="small" required />
 
-                            {isBankTransferMethod && (
+                            {isManualPayment && (
                                 <>
                                     <Label required>
                                         <Trans
@@ -637,7 +641,7 @@ const AccumulatedDepositGroup = () => {
     let depositedAmountMin = watch("depositedAmountMin")
     let depositedAmountMax = watch("depositedAmountMax")
     let disabledDepositedAmountMax = watch("depositedAmountUnlimited")
-    console.log("disabledDepositedAmountMax", disabledDepositedAmountMax)
+
     return (
         <Stack orientation="horizontal" alignY="center">
             <NumberRangeInputGroup
