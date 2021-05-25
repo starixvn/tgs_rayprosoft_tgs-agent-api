@@ -6,7 +6,7 @@ namespace TGS.Services.BackOffice.Application.Models.Game
 {
     public class UpdateGameRequest : BaseRequest, IRequest<MessageResponse>
     {
-        public ushort Id { get; set; }
+        public int Id { get; set; }
         public string Code { get; set; }
         public string Name { get; set; }
         public GameStatus Status { get; set; }

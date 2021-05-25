@@ -366,10 +366,13 @@ const useFormDataInit = (gameProviderId) => {
         (gameProviderLang, lang) => {
             return gameProviderLang.cultureCode === lang.cultureCode
         },
-        (gameProviderLang, lang) => ({
-            ...clone(lang),
-            ...clone(gameProviderLang)
-        }),
+        (gameProviderLang, lang) => {
+            return {
+                ...clone(lang),
+                gameProviderCultureCode: lang.cultureCode,
+                ...clone(gameProviderLang)
+            }
+        },
         gameProvider?.languages ?? [],
         languageData?.items ?? []
     )
