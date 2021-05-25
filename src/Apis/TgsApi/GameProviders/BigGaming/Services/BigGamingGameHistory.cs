@@ -19,9 +19,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 {
     public sealed class BigGamingGameHistory : BaseBetHistory
     {
+
         private readonly IBigGamingApiClient _client;
         private readonly IBigGamingServices _bigGamingServices;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
 
         public BigGamingGameHistory(
             IRoundQueries roundQueries,
@@ -29,12 +31,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             ILocalizationOperations localizationOperations,
             IBigGamingApiClient client,
             IBigGamingServices bigGamingServices,
-            IPlayerOperations playerOperations
+            IPlayerOperations playerOperations,
+            IBrandGameProviderOperations brandGameProviderOperations
             ) : base(roundQueries, gameProviderOperations, localizationOperations)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
         }
 
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
@@ -42,11 +46,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         {
             var player = await _playerOperations.GetCachedPlayerAsync(round.PlayerCode);
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(round.GameProviderId, round.BrandId, language);
             var request = new BigGamingVideoOrderDetailRequest()
             {
                 Random = GuidExtensions.NewSequentialGuid().ToString(),
                 Sn = brandMerchant.SecretCode,
-                OrderId = Convert.ToInt64(round.ExternalRoundId)
+                OrderId = 592230624,
+                Locale = cultureCode
             };
             var response = await _client.GetVideoOrderDetailAsync(brandMerchant, request).ConfigureAwait(false);
 
