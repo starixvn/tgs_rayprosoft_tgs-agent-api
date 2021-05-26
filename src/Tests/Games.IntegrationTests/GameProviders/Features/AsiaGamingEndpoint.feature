@@ -221,4 +221,16 @@ Scenario: 05.c - Cancel non-existent transaction
         And player having balance of $100
     When I cancel non-existent transaction for game "AGIN_DSP_BAC"
     Then I will receive bet response of INVALID_TRANSACTION and balance of $100
+
+Scenario: 05.d - Cancel transaction for ROU game
+    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "AGIN_DSP_ROU"
+        And balance now being $90
+        And player logout
+    When I cancel transaction
+    Then I will receive bet response of OK and balance of $100
+        And player wallet database record will be for $100
+        And game action will be recorded in the database of type "CancelTransaction" for $10
+        And the round will be closed
 	
