@@ -59,7 +59,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             var response =
                 await GetGameUrlAsync(configuration, gameProviderId, player, token);
 
-            if (response.Code != GetGameUrlApi.Ok)
+            if (response.Code != GetGameUrlApiError.Ok)
             {
                 throw new GameProviderApiErrorException(response.ErrorMessage);
             }
@@ -93,7 +93,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             };
 
             var gameUrlResponse = await _client.GetGameUrlAsync(apiUrl, gameUrlRequest);
-            if (gameUrlResponse.Code is GetGameUrlApi.Ok or not GetGameUrlApi.MemberNotExist)
+            if (gameUrlResponse.Code is GetGameUrlApiError.Ok or not GetGameUrlApiError.MemberNotExist)
             {
                 return gameUrlResponse;
             }

@@ -6,7 +6,7 @@ namespace TGS.Shared.Game.Models.Saba.Outgoing
     public record GameUrlResponse
     {
         [JsonPropertyName("error_code")]
-        public GetGameUrlApi Code { get; init; }
+        public GetGameUrlApiError Code { get; init; }
 
         [JsonPropertyName("message")]
         public string ErrorMessage { get; init; }
