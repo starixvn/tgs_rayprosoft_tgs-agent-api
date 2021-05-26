@@ -90,7 +90,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             5 => source.Baccarat64,//红黑
             6 => source.Result,//极速骰宝
             8 => source.Result,//色碟
-            11 => string.Join(',', Convert.FromBase64String(source.Baccarat64)),//多彩百家乐
+            11 => GetFullColorBaccaratGameHistory(Convert.FromBase64String(source.Baccarat64)),//多彩百家乐
             13 => GetBullBullGameHistory(Convert.FromBase64String(source.Baccarat64)),//牛牛
             14 => GetWinThreeCardsGameHistory(Convert.FromBase64String(source.Baccarat64)),//炸金花
             15 => source.Result,//赌场战争
@@ -183,6 +183,34 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                                });
         }
 
+        private string GetFullColorBaccaratGameHistory(byte[] values)
+        {
+            var banker = new (string Key, int Value)[3];
+            var bankerIndex = 0;
+            var player = new (string Key, int Value)[3];
+            var playerIndex = 0;
+            for (int i = 0; i < values.Length; i++)
+            {
+                var ColorString = (values[i] == 0) ? "" : GetFullColor(values[i]);
+                var NumberString = (values[i] == 0) ? 0 : (values[i] % 11 == 0) ? 11 : values[i] % 11;
+                if (i is 1 or 3 or 5)
+                {
+                    banker[bankerIndex] = (ColorString, NumberString);
+                    bankerIndex++;
+                }
+                else
+                {
+                    player[playerIndex] = (ColorString, NumberString);
+                    playerIndex++;
+                }
+            }
+
+            return JsonSerializer.Serialize(
+                           new Dictionary<string, string>() {
+                        { "player",string.Join(",", player.Select(kv => kv.Key + ":" + kv.Value).ToArray())},
+                        { "banker",string.Join(",", banker.Select(kv => kv.Key + ":" + kv.Value).ToArray())}
+                           });
+        }
 
         private void InitoPoker()
         {
@@ -209,6 +237,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             3 => "♦",
             _ => "♠"
         };
+
         private string GetNumber(int value) => value switch
         {
             11 => "J",
@@ -216,5 +245,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             13 => "K",
             _ => value.ToString()
         };
+
+        private string GetFullColor(int value)
+        {
+            if (0 < value && value < 12) return "Green";
+            else if (11 < value && value < 23) return "Orange";
+            else if (22 < value && value < 34) return "Purple";
+            else if (33 < value && value < 45) return "Blue";
+            else return "White";
+        }
     }
 }
