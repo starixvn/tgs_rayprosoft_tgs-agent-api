@@ -82,12 +82,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private string GetGameHistory(BigGamingVideoRoundQueryItemResponse source) => source.GameType switch
         {
 
-            2 => Convert.FromBase64String(source.Result)[0].ToString(),
+            2 => source.Result,
             3 => source.Result,
             4 => source.Result,
             5 => source.Baccarat64,
-            6 => Convert.FromBase64String(source.Result)[0].ToString(),
-            8 => Convert.FromBase64String(source.Result)[0].ToString(),
+            6 => source.Result,
+            8 => source.Result,
             11 => string.Join(',', Convert.FromBase64String(source.Baccarat64)),
             13 => string.Join(',', Convert.FromBase64String(source.Baccarat64)),
             14 => string.Join(',', Convert.FromBase64String(source.Baccarat64)),
