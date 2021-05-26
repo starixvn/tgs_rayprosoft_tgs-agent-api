@@ -294,19 +294,14 @@ const ActionBar = ({ brandId, onBrandGameListSynced }) => {
 
     return (
         <Box alignX="right">
-            <Button onClick={() => setSubmit(brandId)} disabled={isLoading}>
+            <Button
+                onClick={() => setSubmit(brandId)}
+                isLoading={isLoading}
+                disabled={isLoading}
+            >
                 <Trans zh="同步游戏列表" en="Sync Games" />
             </Button>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        reset()
-                        //TODO: rm onBrandGameListSynced
-                        onBrandGameListSynced?.()
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={reset} />}
         </Box>
     )
 }
