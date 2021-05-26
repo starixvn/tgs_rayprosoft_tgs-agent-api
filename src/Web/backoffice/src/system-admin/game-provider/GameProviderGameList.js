@@ -29,11 +29,6 @@ import {
 import FormDialog from "../../form/FormDialog"
 import { Trans, useLocale, useTrans } from "../../i18n"
 import Backdrop from "../../dialog/Backdrop"
-import {
-    useGameProvider,
-    useUpdateGameProvider,
-    useUploadGameProviderGames
-} from "../../game/providers/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
@@ -54,6 +49,8 @@ import {
 } from "./GameProviderGame"
 import { BatchAddGameProviderGameListDisclosure } from "./BatchAddGameProviderGameList"
 import SearchButton from "../../button/SearchButton"
+import { useGameProviderGameList } from "../../game/games/client"
+import dateTimeColumn from "../../table/column/dateTime"
 
 export const GameProviderGameListDisclosure = ({ gameProviderId }) => {
     let dialog = useModalState()
@@ -79,21 +76,17 @@ const GameListDialog = ({ gameProviderId, dialog, ...props }) => {
         en: "Game List"
     })
 
-    let { state, setState, setPageIndex, setSortOrder } = useTable({})
-    //TODO: use get game provider game list API
+    let { state, setState, setPageIndex, setSortOrder } = useTable({
+        gameProviderId,
+        code: "",
+        id: ""
+    })
+    let { pageIndex, pageSize, code, id } = state
     let { isLoading, data, error, mutate, deleteCache } =
-        useGameProvider(gameProviderId)
-    // let { pageIndex, pageSize, name } = state
-    // let { isLoading, data, error, mutate, deleteCache } = useGameProviderGames(
-    //     gameProviderId,
-    //     toApiParams(state)
-    // )
+        useGameProviderGameList({ ...toApiParams(state), sortby: "id" })
 
-    let items = data?.games ?? []
+    let items = data?.items ?? []
     let columns = useColumns({ items, mutate })
-    if (isLoading) {
-        return <LoadingBackdrop {...dialog} />
-    }
 
     if (error) {
         return <AlertDialog {...error} onClickClose={dialog.hide} />
@@ -108,10 +101,18 @@ const GameListDialog = ({ gameProviderId, dialog, ...props }) => {
             placement="top"
             width="80vw"
             maxWidth="80vw"
+            maxHeight="90vh"
+            css={css`
+                & .bb-DialogContent {
+                    max-height: 90vh;
+                }
+            `}
         >
             <FieldStack>
                 <ActionBar
                     gameProviderId={gameProviderId}
+                    id={id}
+                    code={code}
                     isLoading={isLoading}
                     search={(data) => {
                         setState({
@@ -134,16 +135,21 @@ const GameListDialog = ({ gameProviderId, dialog, ...props }) => {
     )
 }
 
-const ActionBar = ({ gameProviderId, search, mutate, isLoading }) => {
+const ActionBar = ({ gameProviderId, code, id, search, mutate, isLoading }) => {
     let formMethods = useForm({
-        defaultValues: {}
+        defaultValues: { code, id }
     })
 
     return (
         <Level>
             <FormProvider {...formMethods}>
                 <form onSubmit={formMethods.handleSubmit(search)}>
-                    {/* <Set>
+                    <Set>
+                        {/* <InputField
+                            name="id"
+                            showEmptyFieldValueAddonAfter
+                            placeholder="游戏ID"
+                        /> */}
                         <InputField
                             name="code"
                             showEmptyFieldValueAddonAfter
@@ -153,7 +159,7 @@ const ActionBar = ({ gameProviderId, search, mutate, isLoading }) => {
                             isLoading={isLoading}
                             disabled={isLoading}
                         />
-                    </Set> */}
+                    </Set>
                 </form>
             </FormProvider>
             <Set orientation="horizontal">
@@ -176,7 +182,7 @@ const useColumns = ({ items = [], mutate }) => {
         let columns = [
             textColumn({
                 accessor: "id",
-                Header: <Trans zh="游戏ID" en="ID" />,
+                Header: <Trans zh="游戏ID" en="Game ID" />,
                 disableSortBy: true
             }),
             textColumn({
@@ -187,6 +193,22 @@ const useColumns = ({ items = [], mutate }) => {
             textColumn({
                 accessor: "name",
                 Header: <Trans zh="游戏名称" en="Name" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "status",
+                Header: <Trans zh="状态" en="Status" />,
+                disableSortBy: true,
+                Cell: ({ value = "" }) => value
+            }),
+            dateTimeColumn({
+                accessor: "updatedOn",
+                Header: <Trans zh="最新更新" en="Updated On" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "updatedByUsername",
+                Header: <Trans zh="更改者" en="Updated By" />,
                 disableSortBy: true
             }),
             textColumn({

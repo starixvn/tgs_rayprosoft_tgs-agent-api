@@ -42,7 +42,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IGameService.CreateGamesAsync(GameProvider gameProvider, CreateGamesRequest request)
         {
-            var games = GenerateUpdateGames(gameProvider, request);
+            var games = GenerateCreateGames(gameProvider, request);
 
             await CreateEntitiesAsync(games);
 
@@ -76,16 +76,20 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             GetGameQueries(Func<IQueryable<Game>, IQueryable<Game>> preQuery, bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
 
-        private static HashSet<Game> GenerateUpdateGames(GameProvider gameProvider,
+        private static HashSet<Game> GenerateCreateGames(GameProvider gameProvider,
             CreateGamesRequest request)
         {
-            var maxNumber = gameProvider.Games.Count > 0 ? gameProvider.Games.Max(x => x.Id) : 0;
+            var maxNumberStr = gameProvider.Games.Count > 0
+            ? gameProvider.Games.Max(x => x.Id).ToString()
+            : 0.ToString();
+            var maxNumber = int.Parse(maxNumberStr[^5..]);
+
             var currentMaxGameNumber = gameProvider.UniqueId * (int)Math.Pow(10, 5) + maxNumber;
 
-            var games = request.Games.Select(x =>
+            var games = request.Games.Select((x, index) => 
             {
                 var originGame = gameProvider.Games.FirstOrDefault(g => g.Id == x.Id);
-                var id = originGame == null ? currentMaxGameNumber + 1 : x.Id;
+                var id = originGame == null ? currentMaxGameNumber + 1 + index : x.Id;
                 return new Game
                 {
                     Id = id,
@@ -97,6 +101,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     Description = x.Description,
                     EndpointPath = x.EndpointPath,
                     RuleUrl = x.RuleUrl,
+                    Type = x.Type,
+                    PlatformType = x.PlatformType,
                     SubGame = x.SubGame,
                     HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
                     Html5 = x.Html5,

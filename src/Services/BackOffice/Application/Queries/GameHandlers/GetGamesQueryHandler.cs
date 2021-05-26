@@ -23,6 +23,7 @@ namespace TGS.Services.BackOffice.Application.Queries.GameHandlers
             CancellationToken cancellationToken) =>
             _service.GetGameQueries(q => q
                     .Where(g => g.GameProviderId == request.GameProviderId))
+                    .Where(request.Code, g => g.Code == request.Code)
                 .Select(x => new GameModel
                 {
                     Id = x.Id,

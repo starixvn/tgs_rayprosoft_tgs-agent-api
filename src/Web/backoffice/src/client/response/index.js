@@ -21,13 +21,12 @@ export const toDataOrError = (response) => {
                     })
                 })
                 .then((data) => {
-                    let { title, message, errors = [], ...rest } = data
+                    let { title, message, errors = {}, ...rest } = data
+                    errors = Object.values(errors)
                     return Promise.reject({
                         title: title ?? message ?? errorTitle(response),
                         errors:
-                            errors?.length > 0
-                                ? Object.values(errors)
-                                : [JSON.stringify(rest)]
+                            errors?.length > 0 ? errors : [JSON.stringify(rest)]
                     })
                 })
         }

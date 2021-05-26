@@ -134,6 +134,16 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
             var game = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, urlRequest.GameId);
 
+            var lobbyDomain = default(string);
+
+            var extendedData = urlRequest.ExtendedData;
+            if (extendedData != null &&
+                extendedData.RootElement.TryGetProperty("lobbyurl", out var prop) &&
+                Uri.TryCreate(prop.GetString(), UriKind.RelativeOrAbsolute, out var uri))
+            {
+                lobbyDomain = uri.Host;
+            }
+
             var request = new GameUrlRequest
             {
                 AgentCode = configuration.AgentCode,
@@ -141,6 +151,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 Sid = configuration.AgentCode + GenerateSequenceNumber(),
                 Lang = cultureCode,
                 GameId = game.ExternalId,
+                ReturnUrl = lobbyDomain,
                 Currency = cur
             };
 

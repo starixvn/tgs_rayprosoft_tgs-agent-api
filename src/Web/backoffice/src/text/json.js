@@ -1,11 +1,12 @@
 export const stringifyJSON = (value = "") => {
     try {
         if (typeof value === "string") {
-            let parsed = JSON.parse(value)
+            let parsed = parseJSON(value)
             return JSON.stringify(parsed, null, 4)
         }
-    } catch {
+    } catch (error) {
         //ignore
+        console.log("stringifyJSON error source", value)
     }
 
     return value
@@ -19,7 +20,7 @@ export const tryStringifyJSON = (value) => {
         }
     } catch (error) {
         //ignore
-        console.log("tryStringifyJSON error", error, "source", value)
+        console.log("tryStringifyJSON error source", value)
     }
 
     return [false, value]
@@ -31,8 +32,9 @@ export const parseJSON = (value = "") => {
         if (typeof value === "string") {
             result = JSON.parse(value)
         }
-    } catch {
+    } catch (error) {
         //ignore
+        console.log("parseJSON error source", value)
     }
     return result
 }

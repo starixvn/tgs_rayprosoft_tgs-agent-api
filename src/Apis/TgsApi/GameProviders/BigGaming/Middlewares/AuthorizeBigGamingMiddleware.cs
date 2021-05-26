@@ -123,11 +123,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
             CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
+            /*
+            var sum = request.Orders.Select(x => new { Amount = (x.ExternalGameId == 13) ? x.Amount * 5 : x.Amount }).Sum(x => x.Amount);
 
-            if (decimal.Parse(request.Amount) != request.Orders.Sum(x => x.Amount))
+            if (decimal.Parse(request.Amount) != sum)
             {
                 throw new InvalidAmountException($"The total amount ({decimal.Parse(request.Amount)}) does not match the order amount ({request.Orders.Sum(x => x.Amount)})");
             }
+            */
 
             return new(true, player);
         }
@@ -142,12 +145,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
             CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
-
-            if (decimal.Parse(request.Amount) != request.Orders.Sum(x => x.Amount))
+            /*
+            var sum = request.Orders.Select(x => new { Amount = (x.ExternalGameId == 13) ? x.OrderAmount - x.OrderAmount * 5 + x.Amount : x.Amount }).Sum(x => x.Amount);
+            if (decimal.Parse(request.Amount) != sum)
             {
                 throw new InvalidAmountException($"The total amount ({decimal.Parse(request.Amount)}) does not match the order amount ({request.Orders.Sum(x => x.Amount)})");
             }
-
+            */
             return new(true, player);
         }
 

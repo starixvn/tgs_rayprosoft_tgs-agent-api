@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -19,22 +18,25 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 {
     public sealed class BigGamingGameHistory : BaseBetHistory
     {
+
         private readonly IBigGamingApiClient _client;
         private readonly IBigGamingServices _bigGamingServices;
         private readonly IPlayerOperations _playerOperations;
-
+        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         public BigGamingGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
             ILocalizationOperations localizationOperations,
             IBigGamingApiClient client,
             IBigGamingServices bigGamingServices,
-            IPlayerOperations playerOperations
+            IPlayerOperations playerOperations,
+            IBrandGameProviderOperations brandGameProviderOperations
             ) : base(roundQueries, gameProviderOperations, localizationOperations)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
         }
 
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
@@ -42,18 +44,24 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         {
             var player = await _playerOperations.GetCachedPlayerAsync(round.PlayerCode);
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
-            var request = new BigGamingVideoOrderDetailRequest()
+            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(round.GameProviderId, round.BrandId, language);
+
+            var request = new BigGamingVideoRoundQueryRequest()
             {
                 Random = GuidExtensions.NewSequentialGuid().ToString(),
                 Sn = brandMerchant.SecretCode,
-                OrderId = Convert.ToInt64(round.ExternalRoundId)
+                Round = round.ExternalRoundId
             };
-            var response = await _client.GetVideoOrderDetailAsync(brandMerchant, request).ConfigureAwait(false);
+            var response = await _client.GetVideoRoundQueryAsync(brandMerchant, request).ConfigureAwait(false);
 
-            var url = default(string);
+            var value = default(string);
             if (response.Error == null)
             {
-                url = JsonSerializer.Deserialize<string>(JsonSerializer.Serialize(response.Result));
+                var gamingVideoRoundQueryResponse = JsonSerializer.Deserialize<BigGamingVideoRoundQueryResponse>(JsonSerializer.Serialize(response.Result));
+                if (gamingVideoRoundQueryResponse != null)
+                {
+                    value = gamingVideoRoundQueryResponse.Items.First().BetResult;
+                }
             }
 
             return new RoundResult
@@ -63,9 +71,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 Winloss = round.WinLoss ?? 0,
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
-                {
-                    new  UrlData() {Url = url}
-                }
+               {
+                    new JsonData {Value = value}
+               }
             };
         }
     }

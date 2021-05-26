@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Messages;
+using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
 using TGS.Services.Report.Application.Models.Aggregate;
 using TGS.Services.Report.Infrastructure.DataService;
 
@@ -17,15 +18,18 @@ namespace TGS.Services.Report.Application.Commands.RoundAggregate
         ManualCreateUpdateRoundAggregateHandler : Handler<ManualCreateUpdateRoundAggregateModel,
             MessageResponse>
     {
+        private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IRoundAggregateService _roundAggregateService;
         private readonly ITgsRoundService _roundService;
 
         public ManualCreateUpdateRoundAggregateHandler(ITgsRoundService roundService,
             IRoundAggregateService roundAggregateService,
+            IPlayerBucketRepository playerBucketRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _roundService = roundService;
             _roundAggregateService = roundAggregateService;
+            _playerBucketRepository = playerBucketRepository;
         }
 
         public override async Task<MessageResponse> Handle(ManualCreateUpdateRoundAggregateModel request,
@@ -66,39 +70,36 @@ namespace TGS.Services.Report.Application.Commands.RoundAggregate
                 var end = new DateTimeOffset(result.Year, result.Month, result.Day, doHour,
                     0, 0, result.Offset).AddHours(1);
 
-                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-                var playerAggregates = await _roundAggregateService.GetRoundAggregateQueries()
-                    .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
-                    .ToArrayAsync(cancellationToken);
-
-                await _roundAggregateService.DeleteRoundAggregatesAsync(playerAggregates);
-
-                var playerGameTypeAggregates = await _roundAggregateService
-                    .GetRoundAggregateQueries()
-                    .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
-                    .ToArrayAsync(cancellationToken);
-
-                await _roundAggregateService.DeleteRoundAggregatesAsync(playerGameTypeAggregates);
-
                 if (await _roundAggregateService.ExistsAsync(x =>
                     x.ReportDate == reportDate && x.Hour == start.Hour))
                 {
-                    scope.Complete();
-                    return CreateInvalidResponse<MessageResponse>($"{reportDate.Date} {start.Hour} is already existed.");
+                    return CreateInvalidResponse<MessageResponse>(
+                        $"{reportDate.Date} {start.Hour} is already existed.");
                 }
 
                 var models = await _roundService.GetRoundsAsync(start, end);
 
                 if (models.Length > 0)
                 {
-                    await _roundAggregateService.CreateRoundAggregateAsync(models);
-                }
+                    using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-                scope.Complete();
+                    await _roundAggregateService.CreateRoundAggregateAsync(models);
+
+                    var playerTurnovers = models.GroupBy(x => x.PlayerCode,
+                            (playerCode, list) => new {playerCode, list})
+                        .Select(x => new PlayerTurnoverModel
+                        {
+                            PlayerCode = x.playerCode, Turnover = x.list.Sum(l => l.Turnover)
+                        }).ToArray();
+
+                    await _playerBucketRepository.FillInBucketAsync(
+                        new() {From = start, To = end, PlayerTurnovers = playerTurnovers});
+
+                    scope.Complete();
+                }
             }
 
-            return new() { Valid = true };
+            return new() {Valid = true};
         }
     }
 }

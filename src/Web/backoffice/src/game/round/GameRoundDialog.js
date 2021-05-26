@@ -32,6 +32,7 @@ import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
 import MonacoEditor, { loader } from "@monaco-editor/react"
 import Textarea from "../../textarea"
 import formatXml from "xml-formatter"
+import { stringifyJSON } from "../../text/json"
 
 loader.config({
     paths: { vs: "/monaco-editor@0.24.0/min/vs" }
@@ -45,7 +46,11 @@ export const GameRoundDialog = ({
 }) => {
     let { id } = record
     let language = useLangCode()
-    let { data = {}, isLoading, error } = useGameRound(id, {
+    let {
+        isLoading,
+        data = {},
+        error
+    } = useGameRound(id, {
         gameProviderCode: record.gameProviderCode,
         playerCode: record.playerCode,
         language
@@ -315,9 +320,7 @@ const JsonContent = ({ value = "" }) => {
         return null
     }
 
-    let record = typeof value === "string" ? JSON.parse(value) : value
-    let formattedValue = JSON.stringify(record, null, 4)
-
+    let formattedValue = stringifyJSON(value)
     return (
         <MonacoEditor
             defaultLanguage="JSON"

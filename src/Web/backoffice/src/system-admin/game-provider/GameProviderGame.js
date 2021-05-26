@@ -28,12 +28,9 @@ import FormDialog from "../../form/FormDialog"
 import { Trans, useLocale, useTrans } from "../../i18n"
 import Backdrop from "../../dialog/Backdrop"
 import {
-    useAddGameProviderGame,
-    useGameProvider,
-    useUpdateGameProvider,
-    useUpdateGameProviderGame,
-    useUploadGameProviderGames
-} from "../../game/providers/client"
+    useAddGameProviderGameList,
+    useUpdateGameProviderGame
+} from "../../game/games/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
@@ -97,10 +94,13 @@ const AddGameDialog = ({ gameProviderId, onSubmitted, dialog }) => {
     let [formData, setSubmit] = useState()
 
     let { isLoading, result, error, mutate, deleteCache } =
-        useAddGameProviderGame(gameProviderId, formData)
+        useAddGameProviderGameList(formData)
 
     const onSubmit = (data) => {
-        setSubmit(data)
+        setSubmit({
+            gameProviderId,
+            games: [data]
+        })
     }
 
     const reset = () => {
@@ -130,18 +130,13 @@ const AddGameDialog = ({ gameProviderId, onSubmitted, dialog }) => {
                     }
                 `}
             >
-                <FormBody />
+                <GameProviderGameFormBody />
             </FormDialog>
         </Backdrop>
     )
 }
 
-export const GameProviderGameDialog = ({
-    record,
-    onChange,
-    onSubmitted,
-    dialog
-}) => {
+const GameProviderGameDialog = ({ record, onSubmitted, dialog }) => {
     let title = useTrans({
         zh: "Edit Game",
         en: "Edit Game"
@@ -150,6 +145,10 @@ export const GameProviderGameDialog = ({
 
     let { isLoading, result, error, mutate, deleteCache } =
         useUpdateGameProviderGame(record?.id, formData)
+
+    const onSubmit = (data) => {
+        setSubmit(data)
+    }
 
     const reset = () => {
         deleteCache()
@@ -161,15 +160,7 @@ export const GameProviderGameDialog = ({
             <FormDialog
                 defaultValues={clone(record)}
                 title={title}
-                onSubmit={(data) => {
-                    if (!record?.id && onChange) {
-                        onChange(data)
-                        reset()
-                        dialog.hide()
-                    } else {
-                        setSubmit(data)
-                    }
-                }}
+                onSubmit={onSubmit}
                 onSubmitted={onSubmitted}
                 result={result}
                 isLoading={isLoading}
@@ -186,14 +177,14 @@ export const GameProviderGameDialog = ({
                     }
                 `}
             >
-                <FormBody />
+                <GameProviderGameFormBody />
             </FormDialog>
         </Backdrop>
     )
 }
 
 //TODO: required InputField not work?
-const FormBody = ({}) => {
+export const GameProviderGameFormBody = ({}) => {
     let { watch, getValues } = useFormContext()
     let id = getValues("id")
 
