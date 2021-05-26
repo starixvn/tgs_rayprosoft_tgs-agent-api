@@ -9,7 +9,8 @@ RETURNS TABLE(
      "BrandId" uuid, 
 	 "AgentId" uuid, 
 	 "GameProviderId" uuid,
-	 "PlayerCode" varchar, 
+	 "PlayerCode" varchar,
+	 "GameId" integer,
 	 "GameType" smallint, 
 	 "Username" varchar, 
 	 "Hour" integer, 
@@ -27,7 +28,8 @@ BEGIN
 	p.brand_id "BrandId",
 	p.agent_id "AgentId", 
 	g.game_provider_id "GameProviderId",
-	p.player_code "PlayerCode", 
+	p.player_code "PlayerCode",
+	g.id "GameId",
 	g.type "GameType", 
 	p.username "Username", 
 	_hour "Hour", 
@@ -41,7 +43,7 @@ BEGIN
 	join dbo.games g on r.game_id = g.id
 	join dbo.players p on r.player_code = p.player_code
     where r.closed_on >= _from and r.closed_on < _to and r.reopened_on is null
-	group by p.brand_id, g.game_provider_id, p.player_code, p.agent_id, p.username,g.type;
+	group by p.brand_id, g.game_provider_id, p.player_code, p.agent_id, p.username,g.id,g.type;
 	
 END;
 $$

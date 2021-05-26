@@ -15,11 +15,11 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
             MessageResponse>
     {
         private readonly IPlayerAggregateService _playerAggregateService;
-        private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
+        private readonly IPlayerGameAggregateService _playerGameTypeAggregateService;
         private readonly IRoundAggregateService _roundAggregateService;
 
         public CreateUpdatePlayerAggregateHandler(IPlayerAggregateService playerAggregateService,
-            IPlayerGameTypeAggregateService playerGameTypeAggregateService,
+            IPlayerGameAggregateService playerGameTypeAggregateService,
             IRoundAggregateService roundAggregateService,
             IHttpContextAccessor accessor) : base(accessor)
         {
@@ -72,7 +72,7 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
 
                 if (aggregatesByGameType.Length > 0)
                 {
-                    await _playerGameTypeAggregateService.CreatePlayerGameTypeAggregatesAsync(aggregatesByGameType);
+                    await _playerGameTypeAggregateService.CreatePlayerGameAggregatesAsync(aggregatesByGameType);
                 }
             }
 

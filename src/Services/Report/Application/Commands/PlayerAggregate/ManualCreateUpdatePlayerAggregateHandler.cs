@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,12 +17,12 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
             MessageResponse>
     {
         private readonly IPlayerAggregateService _playerAggregateService;
-        private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
+        private readonly IPlayerGameAggregateService _playerGameTypeAggregateService;
         private readonly IRoundAggregateService _roundAggregateService;
 
         public ManualCreateUpdatePlayerAggregateHandler(
             IPlayerAggregateService playerAggregateService,
-            IPlayerGameTypeAggregateService playerGameTypeAggregateService,
+            IPlayerGameAggregateService playerGameTypeAggregateService,
             IRoundAggregateService roundAggregateService,
             IHttpContextAccessor accessor) : base(accessor)
         {
@@ -79,11 +78,11 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 await _playerAggregateService.DeletePlayerAggregatesAsync(playerAggregates);
 
                 var playerGameTypeAggregates = await _playerGameTypeAggregateService
-                    .GetPlayerGameTypeAggregateQueries()
+                    .GetPlayerGameAggregateQueries()
                     .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
                     .ToArrayAsync(cancellationToken);
 
-                await _playerGameTypeAggregateService.DeletePlayerGameTypeAggregatesAsync(
+                await _playerGameTypeAggregateService.DeletePlayerGameAggregatesAsync(
                     playerGameTypeAggregates);
 
                 if (await _playerAggregateService.ExistsAsync(x =>
@@ -91,7 +90,8 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 {
                     scope.Complete();
 
-                    return CreateInvalidResponse<MessageResponse>($"{reportDate.Date} {start.Hour} is already existed.");
+                    return CreateInvalidResponse<MessageResponse>(
+                        $"{reportDate.Date} {start.Hour} is already existed.");
                 }
 
                 var (aggregates, aggregatesByGameType) =
@@ -104,14 +104,14 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
 
                 if (aggregatesByGameType.Length > 0)
                 {
-                    await _playerGameTypeAggregateService.CreatePlayerGameTypeAggregatesAsync(
+                    await _playerGameTypeAggregateService.CreatePlayerGameAggregatesAsync(
                         aggregatesByGameType);
                 }
 
                 scope.Complete();
             }
 
-            return new() { Valid = true };
+            return new() {Valid = true};
         }
     }
 }

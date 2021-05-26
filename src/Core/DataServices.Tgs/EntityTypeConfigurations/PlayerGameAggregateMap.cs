@@ -6,15 +6,15 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class PlayerGameTypeAggregateMap : IEntityTypeConfiguration<PlayerGameTypeAggregate>
+    internal class PlayerGameTypeAggregateMap : IEntityTypeConfiguration<PlayerGameAggregate>
     {
-        void IEntityTypeConfiguration<PlayerGameTypeAggregate>.Configure(
-            EntityTypeBuilder<PlayerGameTypeAggregate> builder)
+        void IEntityTypeConfiguration<PlayerGameAggregate>.Configure(
+            EntityTypeBuilder<PlayerGameAggregate> builder)
         {
-            builder.ToTable("player_game_type_rebate_aggregates", Consts.ReportSchema);
+            builder.ToTable("player_game_rebate_aggregates", Consts.ReportSchema);
 
             builder.HasKey(b => b.Id)
-                .HasName("pk_player_game_type_rebate_aggregates_id");
+                .HasName("pk_player_game_rebate_aggregates_id");
 
             builder.Property(b => b.Id)
                 .ValueGeneratedOnAdd();
@@ -77,13 +77,13 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.HasIndex(b => new {b.BrandId, b.ReportDate})
-                .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date");
+                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date");
 
             builder.HasIndex(b => new {b.BrandId, b.ReportDate, b.PlayerCode})
-                .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_player_code");
+                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_player_code");
 
             builder.HasIndex(b => new {b.BrandId, b.ReportDate, b.AgentId})
-                .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_agent_id");
+                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_agent_id");
         }
     }
 }
