@@ -6,6 +6,10 @@ import {
     codeLabelPair as gameProviderPair
 } from "./game-provider/menu"
 import {
+    Code as BrandPaymentsCode,
+    codeLabelPair as brandPaymentsPair
+} from "./brand-payment/menu"
+import {
     Code as LanguageCode,
     codeLabelPair as languagePair
 } from "./language/menu"
@@ -59,6 +63,14 @@ const labelOf = ({ locale, code }) => {
                 {
                     zh: "游戏商管理",
                     en: "Game Provider Management"
+                },
+                locale
+            )
+        case BrandPaymentsCode:
+            return getTrans(
+                {
+                    zh: "品牌支付管理",
+                    en: "Brand Payment Management"
                 },
                 locale
             )

@@ -4,7 +4,7 @@ import { getTrans, Trans, useLocale, useTrans } from "../../i18n"
 import Select from "../../select/Select"
 import { usePaymentMethodList } from "./client"
 
-export const PaymentMethodSelect = ({ range = [], placeholder, ...props }) => {
+export const PaymentMethodSelect = ({ range, placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "支付方式",
         en: "Payment Method"
@@ -16,7 +16,7 @@ export const PaymentMethodSelect = ({ range = [], placeholder, ...props }) => {
 
     let options = data
         ?.filter((item) => {
-            if (range?.length > 0) {
+            if (range) {
                 return range.includes(item.id)
             }
             return true
