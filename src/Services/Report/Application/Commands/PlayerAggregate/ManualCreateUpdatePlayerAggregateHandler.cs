@@ -69,33 +69,17 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 var end = new DateTimeOffset(result.Year, result.Month, result.Day, doHour,
                     0, 0, result.Offset).AddHours(1);
 
-                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-                var playerAggregates = await _playerAggregateService.GetPlayerAggregateQueries()
-                    .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
-                    .ToArrayAsync(cancellationToken);
-
-                await _playerAggregateService.DeletePlayerAggregatesAsync(playerAggregates);
-
-                var playerGameTypeAggregates = await _playerGameTypeAggregateService
-                    .GetPlayerGameAggregateQueries()
-                    .Where(x => x.ReportDate == DateTimeOffset.Parse(request.Date) && x.Hour == request.Hour)
-                    .ToArrayAsync(cancellationToken);
-
-                await _playerGameTypeAggregateService.DeletePlayerGameAggregatesAsync(
-                    playerGameTypeAggregates);
-
                 if (await _playerAggregateService.ExistsAsync(x =>
                     x.ReportDate == reportDate && x.Hour == start.Hour))
                 {
-                    scope.Complete();
-
                     return CreateInvalidResponse<MessageResponse>(
                         $"{reportDate.Date} {start.Hour} is already existed.");
                 }
 
                 var (aggregates, aggregatesByGameType) =
                     await _roundAggregateService.GetPlayerAggregatesAsync(start, end);
+
+                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
                 if (aggregates.Length > 0)
                 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -24,7 +23,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IBigGamingServices _bigGamingServices;
         private readonly IPlayerOperations _playerOperations;
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-
         public BigGamingGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
@@ -47,19 +45,23 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var player = await _playerOperations.GetCachedPlayerAsync(round.PlayerCode);
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(round.GameProviderId, round.BrandId, language);
-            var request = new BigGamingVideoOrderDetailRequest()
+
+            var request = new BigGamingVideoRoundQueryRequest()
             {
                 Random = GuidExtensions.NewSequentialGuid().ToString(),
                 Sn = brandMerchant.SecretCode,
-                OrderId = 592230624,
-                Locale = cultureCode
+                Round = round.ExternalRoundId
             };
-            var response = await _client.GetVideoOrderDetailAsync(brandMerchant, request).ConfigureAwait(false);
+            var response = await _client.GetVideoRoundQueryAsync(brandMerchant, request).ConfigureAwait(false);
 
-            var url = default(string);
+            var value = default(string);
             if (response.Error == null)
             {
-                url = JsonSerializer.Deserialize<string>(JsonSerializer.Serialize(response.Result));
+                var gamingVideoRoundQueryResponse = JsonSerializer.Deserialize<BigGamingVideoRoundQueryResponse>(JsonSerializer.Serialize(response.Result));
+                if (gamingVideoRoundQueryResponse != null)
+                {
+                    value = gamingVideoRoundQueryResponse.Items.First().BetResult;
+                }
             }
 
             return new RoundResult
@@ -69,9 +71,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 Winloss = round.WinLoss ?? 0,
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
-                {
-                    new  UrlData() {Url = url}
-                }
+               {
+                    new JsonData {Value = value}
+               }
             };
         }
     }

@@ -168,7 +168,8 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
         DbSet<RoundAggregate> RoundAggregates { get; set; }
         DbSet<PlayerAggregate> PlayerAggregates { get; set; }
-        DbSet<PlayerGameAggregate> PlayerGameTypeAggregates { get; set; }
+        DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
+        DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
         DbSet<ApiLog> ApiLogs { get; set; }
 
         DbSet<LogRecord> LogRecords { get; set; }
@@ -334,7 +335,9 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
         public DbSet<RoundAggregate> RoundAggregates { get; set; }
         public DbSet<PlayerAggregate> PlayerAggregates { get; set; }
-        public DbSet<PlayerGameAggregate> PlayerGameTypeAggregates { get; set; }
+        public DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
+        public DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
+
         public DbSet<ApiLog> ApiLogs { get; set; }
 
         public DbSet<LogRecord> LogRecords { get; set; }

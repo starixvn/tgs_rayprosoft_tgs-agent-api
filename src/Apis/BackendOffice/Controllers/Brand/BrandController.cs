@@ -21,24 +21,16 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
 
         [HttpGet]
         [Description("Get brands: 品牌商列表")]
-        public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request)
-        {
-            return _mediator.Send(request);
-        }
+        public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request) =>
+            _mediator.Send(request);
 
         [HttpGet("{id}")]
         [Description("Get a Brand")]
-        public Task<GetBrandResponse> GetBrandAsync(Guid id)
-        {
-            return _mediator.Send(new GetBrandRequest(id));
-        }
+        public Task<GetBrandResponse> GetBrandAsync(Guid id) => _mediator.Send(new GetBrandRequest(id));
 
         [HttpPost]
         [Description("Create a Brand")]
-        public Task<MessageResponse> CreateBrandAsync(CreateBrandRequest request)
-        {
-            return _mediator.Send(request);
-        }
+        public Task<MessageResponse> CreateBrandAsync(CreateBrandRequest request) => _mediator.Send(request);
 
         [HttpPut("{id}")]
         [Description("Update a Brand")]
@@ -47,5 +39,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
             request.Id = id;
             return _mediator.Send(request);
         }
+
+        [HttpGet("{id}/syncGames")]
+        [Description("sync brand games")]
+        public Task<MessageResponse> SyncBrandGamesAsync(Guid id) => _mediator.Send(new SyncGamesRequest(id));
     }
 }
