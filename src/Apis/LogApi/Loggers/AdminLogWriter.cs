@@ -32,9 +32,9 @@ namespace TGS.Apis.LogApi.Loggers
             await repo.AdminLogs.AddRangeAsync(logs);
             await repo.SaveChangesAsync();
 
-            await logs.Where(p => p.ResponseCode == 500)
-                .Select(log => _service.GetNotifyTaskAsync(log))
-                .WhenAll();
+            //await logs.Where(p => p.ResponseCode == 500)
+            //    .Select(log => _service.GetNotifyTaskAsync(log))
+            //    .WhenAll();
         }
 
         async Task ILoggerWriter.SaveLogAsync(LogBusEvent @event)
@@ -44,10 +44,10 @@ namespace TGS.Apis.LogApi.Loggers
             await repo.AdminLogs.AddAsync(log);
             await repo.SaveChangesAsync();
 
-            if (log.ResponseCode == 500)
-            {
-                await _service.GetNotifyTaskAsync(log);
-            }
+            //if (log.ResponseCode == 500)
+            //{
+            //    await _service.GetNotifyTaskAsync(log);
+            //}
         }
 
         private static AdminLog Convert(LogBusEvent ent) => (AdminLog)ent;
