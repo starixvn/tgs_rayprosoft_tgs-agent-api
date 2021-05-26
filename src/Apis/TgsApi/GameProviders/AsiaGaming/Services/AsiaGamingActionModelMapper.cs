@@ -60,7 +60,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var count = r.Record.TransactionIds.Length;
             var transactions = r.Record.TransactionIds.Select((tId, index) =>
             {
-                var transactionId = GetTransactionId(transactionType, tId);
+                var transactionId = GetTransactionId(r.Record, isLockGame, tId);
                 return new TransactionData
                 {
                     Amount = amount,
@@ -177,8 +177,19 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 _                      => GameActionType.PlaceBet
             };
 
-        private static string GetTransactionId(TransactionType transactionType, string transactionId) =>
-            transactionType == TransactionType.BET ? transactionId : $"{transactionId}_{transactionType}";
+        private static string GetTransactionId(TransferRecord record, bool isLockGame, string transactionId)
+        {
+            var transactionType = record.TransactionType;
+
+            return transactionType switch
+            {
+                TransactionType.BET    => transactionId,
+                TransactionType.REFUND => $"{transactionId}_{transactionType}",
+                _ => isLockGame
+                    ? $"{transactionId}_{record.BillNo}_{transactionType}"
+                    : $"{transactionId}_{transactionType}"
+            };
+        }
 
         private static string GetTransactionReferenceId(TransferRecord record, bool isLockGame, string transactionId)
         {
