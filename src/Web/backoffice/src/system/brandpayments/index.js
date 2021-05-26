@@ -128,15 +128,8 @@ const BodyContent = ({ brandId }) => {
                 <Level>
                     <SearchBar
                         search={(newState) => {
-                            if (
-                                equals(newState, {
-                                    paymentStatus: state.paymentStatus,
-                                    keyword: state.keyword
-                                })
-                            ) {
-                                mutate()
-                            }
                             setState({ pageIndex: 0, ...newState })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
