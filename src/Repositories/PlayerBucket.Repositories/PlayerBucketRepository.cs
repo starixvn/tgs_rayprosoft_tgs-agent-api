@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.WalletService;
-using TGS.Services.PlayerBucket.Models;
 using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.WalletService;
 
 namespace PlayerBucket.Repositories
 {
@@ -40,8 +41,62 @@ namespace PlayerBucket.Repositories
             await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        async Task IPlayerBucketRepository.FillInBucketAsync(FillInPlayerBucketsRequest request)
+        {
+            var playerCodes = request.PlayerTurnovers.Select(x => x.PlayerCode).ToArray();
+            var playerBuckets = await _repository.PlayerBuckets
+                .Where(x => playerCodes.Contains(x.PlayerCode) && !x.IsFull).ToArrayAsync();
+            var playerBucketHistories = new List<PlayerBucketHistory>();
+
+            foreach (var player in request.PlayerTurnovers)
+            {
+                var turnover = player.Turnover;
+                var buckets = playerBuckets.Where(x => x.PlayerCode == player.PlayerCode).ToArray();
+
+                foreach (var playerBucket in buckets)
+                {
+                    if (turnover <= 0)
+                    {
+                        break;
+                    }
+
+                    var amount = 0.0M;
+                    if (turnover - (playerBucket.BucketAmount - playerBucket.CurrentBucketAmount) >= 0.0M)
+                    {
+                        amount = playerBucket.BucketAmount - playerBucket.CurrentBucketAmount;
+                        turnover -= amount;
+                        playerBucket.IsFull = true;
+                        playerBucket.CurrentBucketAmount = playerBucket.BucketAmount;
+                    }
+                    else
+                    {
+                        amount = turnover;
+                        playerBucket.CurrentBucketAmount += turnover;
+                        turnover = 0;
+                    }
+
+                    playerBucketHistories.Add(new()
+                    {
+                        PlayerCode = player.PlayerCode,
+                        Turnover = amount,
+                        From = request.From,
+                        To = request.To,
+                        CreatedOn = DateTimeOffset.Now
+                    });
+                }
+            }
+
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            _repository.PlayerBuckets.UpdateRange(playerBuckets);
+            _repository.PlayerBucketHistories.UpdateRange(playerBucketHistories);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            scope.Complete();
+        }
+
         async ValueTask<decimal> IPlayerBucketRepository.CreatePlayerBucketWithDepositAsync(
-                    CreatePlayerBucketWithDepositRequest request)
+            CreatePlayerBucketWithDepositRequest request)
         {
             var bucketAmount = request.DepositAmount;
 
@@ -98,6 +153,6 @@ namespace PlayerBucket.Repositories
         }
 
         async ValueTask<bool> IPlayerBucketRepository.IsBucketFullAsync(string playerCode) =>
-            await _repository.PlayerBuckets.AllAsync(x => x.PlayerCode == playerCode && x.IsFull);
+            await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode).AllAsync(x => x.IsFull);
     }
 }

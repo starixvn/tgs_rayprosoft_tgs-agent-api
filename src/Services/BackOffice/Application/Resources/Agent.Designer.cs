@@ -70,6 +70,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Insufficient balance..
+        /// </summary>
+        public static string InsufficientBalance {
+            get {
+                return ResourceManager.GetString("InsufficientBalance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Name existed already..
         /// </summary>
         public static string NameExisted {

@@ -144,4 +144,7 @@
   <data name="TargetPlayerNotUnderAgent" xml:space="preserve">
     <value>目标玩家不在代理下</value>
   </data>
+  <data name="InsufficientBalance" xml:space="preserve">
+    <value>余额不足</value>
+  </data>
 </root>

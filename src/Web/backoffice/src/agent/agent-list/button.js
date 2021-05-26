@@ -96,9 +96,8 @@ const AddDialog = ({ brandId, onSubmitted, dialog }) => {
     brandId = brandId ?? userBrandId
 
     let [formData, setSubmit] = useState()
-    let { result, error, mutate, deleteCache, isLoading } = useAddAgent(
-        formData
-    )
+    let { result, error, mutate, deleteCache, isLoading } =
+        useAddAgent(formData)
 
     const onSubmit = (data) => {
         setSubmit({
@@ -551,16 +550,14 @@ const TabsDialog = ({
         en: "Agent Info"
     })
 
-    const { data, isLoading, isError, error, mutate, deleteCache } = useAgent(
-        agentId
-    )
+    const { isLoading, data, error, mutate, deleteCache } = useAgent(agentId)
 
     if (isLoading) {
         return <LoadingBackdrop {...dialog} />
     }
 
     if (error) {
-        return <AlertDialog {...dialog} onClickClose={dialog.hide} />
+        return <AlertDialog {...error} {...dialog} onClickClose={dialog.hide} />
     }
 
     const onSubmitted = () => {

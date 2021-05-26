@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Models.Messages;
@@ -65,6 +66,8 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 var (aggregates, aggregatesByGameType) =
                     await _roundAggregateService.GetPlayerAggregatesAsync(start, end);
 
+                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
                 if (aggregates.Length > 0)
                 {
                     await _playerAggregateService.CreatePlayerAggregatesAsync(aggregates);
@@ -74,6 +77,8 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 {
                     await _playerGameTypeAggregateService.CreatePlayerGameTypeAggregatesAsync(aggregatesByGameType);
                 }
+
+                scope.Complete();
             }
 
             return new() {Valid = true};

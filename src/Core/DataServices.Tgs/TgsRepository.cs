@@ -169,6 +169,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<RoundAggregate> RoundAggregates { get; set; }
         DbSet<PlayerAggregate> PlayerAggregates { get; set; }
         DbSet<PlayerGameTypeAggregate> PlayerGameTypeAggregates { get; set; }
+        DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
         DbSet<MarketAggregate> MarketAggregates { get; set; }
         DbSet<ApiLog> ApiLogs { get; set; }
 
@@ -336,6 +337,7 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<RoundAggregate> RoundAggregates { get; set; }
         public DbSet<PlayerAggregate> PlayerAggregates { get; set; }
         public DbSet<PlayerGameTypeAggregate> PlayerGameTypeAggregates { get; set; }
+        public DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
         public DbSet<MarketAggregate> MarketAggregates { get; set; }
 
         public DbSet<ApiLog> ApiLogs { get; set; }

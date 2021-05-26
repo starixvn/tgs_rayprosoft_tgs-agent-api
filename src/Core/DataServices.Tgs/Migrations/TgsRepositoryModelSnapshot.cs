@@ -771,9 +771,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasMaxLength(256)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(256)")
+                        .HasColumnType("text")
                         .HasColumnName("path");
 
                     b.Property<string>("Prefix")
@@ -3461,33 +3460,80 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bucket_amount");
 
-                    b.Property<int>("BucketType")
-                        .HasColumnType("integer")
+                    b.Property<short>("BucketType")
+                        .HasColumnType("smallint")
                         .HasColumnName("bucket_type");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<decimal>("CurrentBucketAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_bucket_amount");
+
                     b.Property<bool>("IsFull")
                         .HasColumnType("boolean")
                         .HasColumnName("is_full");
 
                     b.Property<string>("PlayerCode")
-                        .HasColumnType("text")
-                        .HasColumnName("player_code");
-
-                    b.Property<string>("PlayerCode1")
+                        .IsRequired()
                         .HasColumnType("character varying(16)")
-                        .HasColumnName("player_code1");
+                        .HasColumnName("player_code");
 
                     b.HasKey("Id")
                         .HasName("pk_player_buckets");
 
-                    b.HasIndex("PlayerCode1")
-                        .HasDatabaseName("ix_player_buckets_player_code1");
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_player_buckets_player_code");
 
                     b.ToTable("player_buckets");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBucketHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<DateTimeOffset>("From")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
+                    b.Property<int>("Minute")
+                        .HasColumnType("integer")
+                        .HasColumnName("minute");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("To")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
+
+                    b.Property<decimal>("Turnover")
+                        .HasColumnType("numeric")
+                        .HasColumnName("turnover");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_bucket_histories");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_player_bucket_histories_player_code");
+
+                    b.ToTable("player_bucket_histories");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameTypeAggregate", b =>
@@ -6096,10 +6142,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBucket", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
                         .WithMany("PlayerBuckets")
-                        .HasForeignKey("PlayerCode1")
-                        .HasConstraintName("fk_player_buckets_players_player_code1");
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_player_buckets_players_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>

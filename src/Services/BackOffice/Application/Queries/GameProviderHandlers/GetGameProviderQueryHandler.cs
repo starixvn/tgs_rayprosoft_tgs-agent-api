@@ -61,7 +61,6 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                     BetLimits = gameProvider.BetLimits.Select(x => new GameProviderBetLimitModel
                     {
                         Id = x.Id,
-                        GameProviderId = x.GameProviderId,
                         CurrencyCode = x.CurrencyCode,
                         MinBet = x.MinBet,
                         MaxBet = x.MaxBet,

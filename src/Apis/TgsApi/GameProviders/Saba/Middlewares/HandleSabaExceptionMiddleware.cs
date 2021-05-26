@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;

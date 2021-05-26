@@ -9,13 +9,14 @@ import {
     Table,
     Button,
     DropdownMenu,
-    Icon
+    Icon,
+    Box
 } from "bumbag"
 import { useIsDisplayMenuByRoute, useUserLicenseeId } from "../../user/context"
 import { Disclosure, ConfigIconDisclosure } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { Update as UpdateMenu } from "./menu"
-import { useUpdateBrand } from "./client"
+import { useSyncBrandGameList, useUpdateBrand } from "./client"
 import { getTrans, Trans, useLocale, useTrans } from "../../i18n"
 import ConfirmButtonFooter, {
     CloseButtonFooter
@@ -31,7 +32,7 @@ import { useGameProviderBetLimitList } from "../../game/providers/betlimits/clie
 import { Select } from "../../select/Select"
 import { useGameProvider } from "../../game/providers/client"
 import { Checkbox } from "../../checkbox"
-import cloneDeep from "clone-deep"
+import clone from "clone-deep"
 import { SportsSwitch } from "./SportsSwitch"
 import { isSportGameType } from "../../game/GameType"
 import { faEllipsisV } from "@fortawesome/free-solid-svg-icons"
@@ -116,8 +117,8 @@ const ViewDialog = ({
     }
 
     const reset = () => {
-        mutateBrand(undefined, false)
         deleteBrandCache()
+        mutateBrand(undefined, false)
     }
 
     betLimits = filterChecked(betLimits)
@@ -171,14 +172,14 @@ const EditDialog = ({
         isLoading: isLoadingBrand,
         error: brandError,
         mutateBrand,
-        deleteBrandCache
+        deleteBrandCache,
+        clearCache
     } = useLicenseeBrand({ brandId, licenseeId })
 
     let [formData, setSubmit] = useState()
-    let { result, isLoading, error, mutate } = useUpdateBrand(brandId, formData)
+    let { isLoading, result, error, mutate } = useUpdateBrand(brandId, formData)
 
     let title = useDialogTitle(brandCode)
-
     if (isLoadingBrand) {
         return <LoadingBackdrop {...dialog} />
     }
@@ -199,8 +200,8 @@ const EditDialog = ({
     }
 
     const reset = () => {
-        mutateBrand(undefined, false)
         deleteBrandCache()
+        mutateBrand(undefined, false)
 
         setSubmit(undefined)
         mutate(undefined, false)
@@ -213,12 +214,13 @@ const EditDialog = ({
         brand?.games
     )
 
+    let defaultValues = {
+        ...brand,
+        brandGroups: toBrandGroupsFormData(brand?.brandGroups)
+    }
     return (
         <FormDialog
-            defaultValues={{
-                ...brand,
-                brandGroups: toBrandGroupsFormData(brand?.brandGroups)
-            }}
+            defaultValues={clone(defaultValues)}
             onSubmit={onSubmit}
             result={result}
             isLoading={isLoading}
@@ -247,12 +249,60 @@ const EditDialog = ({
                 }
             `}
         >
-            <EditBody
-                brand={brand}
-                betLimits={betLimits}
-                gameProviders={gameProviders}
-            />
+            <FieldStack>
+                <ActionBar
+                    brandId={brandId}
+                    record={brand}
+                    onBrandGameListSynced={() => {
+                        reset()
+
+                        //close and re-open dialog for sync form data
+                        dialog.hide()
+                        setTimeout(() => {
+                            dialog.show()
+                        })
+                    }}
+                />
+                <EditBody
+                    brand={brand}
+                    betLimits={betLimits}
+                    gameProviders={gameProviders}
+                />
+            </FieldStack>
         </FormDialog>
+    )
+}
+
+const ActionBar = ({ brandId, onBrandGameListSynced }) => {
+    let [formData, setSubmit] = useState()
+    let { isLoading, data, error, mutate, deleteCache } = useSyncBrandGameList(
+        formData ? brandId : undefined
+    )
+
+    useEffect(() => {
+        if (data) {
+            reset()
+            onBrandGameListSynced?.()
+        }
+    }, [data])
+
+    const reset = () => {
+        deleteCache()
+        mutate(undefined, false)
+        setSubmit(undefined)
+    }
+
+    return (
+        <Box alignX="right">
+            <Button
+                onClick={() => setSubmit(brandId)}
+                isLoading={isLoading}
+                disabled={isLoading}
+            >
+                <Trans zh="同步游戏列表" en="Sync Games" />
+            </Button>
+            {error && <AlertDialog {...error} onClickClose={reset} />}
+        </Box>
     )
 }
 
