@@ -53,7 +53,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                             brandPaymentInfo.RootElement.GetProperty("iv").GetString(),
                             brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
                             formId,
-                            "https://google.com")));
+                            "https://google.com",
+                            brandPaymentInfo.RootElement.GetProperty("paymentMethod").GetString())));
 
             await createDepositFormService
                 .ExecuteAsync(command)
