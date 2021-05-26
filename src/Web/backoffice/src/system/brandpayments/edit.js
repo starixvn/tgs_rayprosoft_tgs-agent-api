@@ -55,7 +55,7 @@ import { NumberRangeInputGroup } from "../../number/RangeInput"
 import FormDialog from "../../form/FormDialog"
 import Textarea from "../../textarea"
 import Input from "../../input/Input"
-import { Checkbox } from "../../checkbox/Checkbox"
+import { Checkbox, CheckboxField } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
 import clone from "clone-deep"
 import { usePaymentList } from "../../payment/client"
@@ -652,7 +652,7 @@ const AccumulatedDepositGroup = () => {
                 disabled={[false, disabledDepositedAmountMax]}
                 width="100%"
             />
-            <Checkbox
+            <CheckboxField
                 name="depositedAmountUnlimited"
                 checkboxLabel={<UnlimitedText />}
                 whiteSpace="nowrap"
