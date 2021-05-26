@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IBigGamingServices _bigGamingServices;
         private readonly IPlayerOperations _playerOperations;
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+
         public BigGamingGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
@@ -60,7 +62,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 var gamingVideoRoundQueryResponse = JsonSerializer.Deserialize<BigGamingVideoRoundQueryResponse>(JsonSerializer.Serialize(response.Result));
                 if (gamingVideoRoundQueryResponse != null)
                 {
-                    value = gamingVideoRoundQueryResponse.Items.First().BetResult;
+                    value = GetGameHistory(gamingVideoRoundQueryResponse.Items.First());
                 }
             }
 
@@ -76,5 +78,76 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                }
             };
         }
+
+        private string GetGameHistory(BigGamingVideoRoundQueryItemResponse source) => source.GameType switch
+        {
+
+            2 => Convert.FromBase64String(source.Result)[0].ToString(),
+            3 => source.Result,
+            4 => source.Result,
+            5 => source.Baccarat64,
+            6 => Convert.FromBase64String(source.Result)[0].ToString(),
+            8 => Convert.FromBase64String(source.Result)[0].ToString(),
+            11 => string.Join(',', Convert.FromBase64String(source.Baccarat64)),
+            13 => string.Join(',', Convert.FromBase64String(source.Baccarat64)),
+            14 => string.Join(',', Convert.FromBase64String(source.Baccarat64)),
+            15 => source.Result,
+            _ => GetBaccaratGameHistory(Convert.FromBase64String(source.Baccarat64))
+        };
+        private string GetBaccaratGameHistory(byte[] result)
+        {
+            string[] banker = new string[3];
+            string[] player = new string[3];
+            int bankerIndex = 0;
+            int playerIndex = 0;
+            for (int i = 0; i < result.Length; i++)
+            {
+                int value = result[i];
+                string card = string.Empty;
+                string number = string.Empty;
+                int cardIndex = (value / 13);
+
+                if (value > 0)
+                {
+                    card = GetCard(cardIndex);
+                    number = GetNumber(value - (13 * (cardIndex == 4 ? cardIndex - 1 : cardIndex)));
+                }
+
+
+                if (i is 0 or 2 or 4)
+                {
+
+                    player[playerIndex] = card + number;
+                    playerIndex++;
+                }
+                else
+                {
+
+                    banker[bankerIndex] = card + number;
+                    bankerIndex++;
+                }
+            }
+            return JsonSerializer.Serialize(
+                           new Dictionary<string, string>() {
+                        { "player",string.Join(',', player)},
+                        { "banker",string.Join(',', banker)}
+                               });
+        }
+
+        private string GetCard(int cardIndex) => cardIndex switch
+        {
+            1 => "♥",
+            2 => "♣",
+            3 => "♦",
+            4 => "♦",
+            _ => "♠"
+        };
+        private string GetNumber(int value) => value switch
+        {
+            11 => "J",
+            12 => "Q",
+            13 => "K",
+            _ => value.ToString()
+        };
     }
 }
