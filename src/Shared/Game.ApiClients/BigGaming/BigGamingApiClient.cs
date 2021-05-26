@@ -9,7 +9,6 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Infrastructures.Extensions;
 using System.Text.Json;
-using System.Collections.Generic;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings.BigGaming;
 
@@ -24,6 +23,8 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
         Task<BigGamingResponse> GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlRequest request);
         Task<BigGamingResponse> GetTrialGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetTrialGameUrlRequest request);
         Task<BigGamingResponse> GetVideoOrderDetailAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderDetailRequest request);
+        Task<BigGamingResponse> GetVideoRoundQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoRoundQueryRequest request);
+        Task<BigGamingResponse> GetVideoOrderQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderQueryRequest request);
     }
 
     public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
@@ -86,6 +87,20 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.sn.video.order.detail.url.get", prefix).ConfigureAwait(false);
         }
 
+        async Task<BigGamingResponse> IBigGamingApiClient.GetVideoRoundQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoRoundQueryRequest request)
+        {
+            request.Sign = _hashProvider.Hash($"{request.Random }{request.Sn}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
+            var prefix = $"{_gameProvider}.VideoRoundQuery";
+            return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.video.round.query", prefix).ConfigureAwait(false);
+        }
+
+        async Task<BigGamingResponse> IBigGamingApiClient.GetVideoOrderQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderQueryRequest request)
+        {
+            request.Sign = _hashProvider.Hash($"{request.Random }{request.Sn}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
+            var prefix = $"{_gameProvider}.VideoOrderQuery";
+            return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.order.query", prefix).ConfigureAwait(false);
+        }
+
         private ValueTask<BigGamingResponse> GetAPIAsync<TSource>(Uri apiUrl, TSource source, string method, string prefix)
         {
 
@@ -99,6 +114,5 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return ExecuteJsonRequestAsync<BigGamingRequest, BigGamingResponse>(HttpMethod.Post, apiUrl, string.Empty, request, logPrefix: prefix);
 
         }
-
     }
 }
