@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BigGamingOrderQueryItemResponse
+    public record BigGamingVideoOrderQueryItemResponse
     {
         [JsonPropertyName("orderId")]
         public long OrderId { get; set; }
