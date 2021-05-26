@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         private async Task GenerateSettingsAsync()
         {
-            var options = new JsonSerializerOptions { WriteIndented = false };
+            var options = new JsonSerializerOptions {WriteIndented = false};
 
             var commonSettings = new[]
             {
@@ -25,7 +25,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     "Super Licensee Codes"),
                 CreateSetting(SettingConsts.PromotionType,
                     _jsonSerializationProvider.SerializeToString(GetPromotionTypes(), options),
-                    "Promotion Types")
+                    "Promotion Types"),
+                CreateSetting(SettingConsts.CurrencyNetProfit,
+                    _jsonSerializationProvider.SerializeToString(GetCurrencyNetProfits(), options),
+                    "Currency NetProfit")
             };
 
             var gameProviderSettings = _gameProviders.Select(gp =>
@@ -52,6 +55,19 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedByUsername = AdminUsername,
                 CreatedOn = Now,
                 UpdatedOn = Now
+            };
+
+        private static CurrencyNetProfit[] GetCurrencyNetProfits() =>
+            new[]
+            {
+                new() {CurrencyCode = "RMB", NetProfit = 100000.00M},
+                new CurrencyNetProfit {CurrencyCode = "IDR", NetProfit = 100000.00M},
+                new CurrencyNetProfit {CurrencyCode = "IDR1000", NetProfit = 100000.00M},
+                new CurrencyNetProfit {CurrencyCode = "MYR", NetProfit = 100000.00M},
+                new CurrencyNetProfit {CurrencyCode = "THB", NetProfit = 100000.00M},
+                new CurrencyNetProfit {CurrencyCode = "VND", NetProfit = 100000.00M},
+                new CurrencyNetProfit {CurrencyCode = "VND1000", NetProfit = 100000.00M},
+                new CurrencyNetProfit {CurrencyCode = "USD", NetProfit = 100000.00M}
             };
 
         private static PromotionTypeGroup[] GetPromotionTypes() =>
@@ -163,8 +179,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("PromotionList")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("PayoutList")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("PlayerManagement")
@@ -175,7 +197,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("BalanceAdjustment")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("AgentManagement")
@@ -186,15 +211,24 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("BalanceAdjustment")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("Game")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("BrandProviders") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("BrandGames") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("BrandProviders")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("BrandGames")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("Report")
@@ -219,17 +253,32 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("Resellers")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Licensees")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Brands")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("FundManagement")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("Deposit")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Withdraw")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("System")

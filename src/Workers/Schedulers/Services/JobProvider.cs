@@ -25,6 +25,8 @@ namespace TGS.Workers.Schedulers.Services
                 new JobDescription(new("500BD4EC-7B4A-4661-A00B-7C7BDC565CB4"), Cron.Minutely(), null,
                     typeof(BrandGameProviderScheduleWorker),
                     TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
+                new JobDescription(new("321E2BEE-7777-4D82-8CA7-BB1F1B83C4E0"), Cron.Daily(0, 20), null,
+                    typeof(MarketAggregateReportWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("321E2BEE-7751-4D82-8CA7-BB1F1B83C4E0"), Cron.Daily(0, 30), null,
                     typeof(AgentDividendWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("123E2BEE-7751-4D82-8CA7-BB1F1B83C4E0"), Cron.Daily(0, 31), null,
