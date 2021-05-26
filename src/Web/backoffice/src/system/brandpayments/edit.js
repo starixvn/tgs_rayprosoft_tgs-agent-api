@@ -35,8 +35,7 @@ import BrandPaymentStatus, {
 import {
     useUpdatePayment,
     useBrandPaymentUpload,
-    useAddBrandPayment,
-    useBrandPaymentMethodChannelList
+    useAddBrandPayment
 } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import {
@@ -58,7 +57,10 @@ import Input from "../../input/Input"
 import { Checkbox, CheckboxField } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
 import clone from "clone-deep"
-import { usePaymentList } from "../../payment/client"
+import {
+    usePaymentList,
+    usePaymentMethodChannelList
+} from "../../payment/client"
 import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import {
     PaymentMethodLabel,
@@ -244,7 +246,7 @@ const useBankTransferPayment = () => {
         error: paymentMethodChannelListError,
         mutate: mutatePaymentMethodChannelList,
         deleteCache: deletePaymentMethodChannelListCache
-    } = useBrandPaymentMethodChannelList()
+    } = usePaymentMethodChannelList()
 
     let manualPayment = paymentListData?.find(({ code }) => code === "Manual")
 
@@ -256,16 +258,6 @@ const useBankTransferPayment = () => {
         paymentMethodChannelList?.allData?.filter((item) => {
             return item.methodId === bankTransferPaymentMethod.id
         })
-
-    /*
-    let manualBankTransferPaymentMethodChannels =
-        paymentMethodChannelList?.allData?.filter((item) => {
-            return (
-                item.methodId === bankTransferPaymentMethod.id &&
-                item.paymentId === manualPayment.id
-            )
-        })
-    */
 
     return {
         isLoading:
