@@ -11,7 +11,6 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
-using TGS.Services.BackOffice.Application.Models.GameProviderBetLimit;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
@@ -76,6 +75,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.BetLimits = GenerateBetLimits(gameProvider, request);
 
             await UpdateEntityAsync(gameProvider);
+            await CreateEntitiesAsync(GenerateNewBetLimits(gameProvider, request));
 
             await tran.CommitAsync();
 
@@ -170,23 +170,28 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         }
 
         private static HashSet<GameProviderBetLimit> GenerateBetLimits(GameProvider gameProvider,
-            GameProviderRequest request)
-        {
-            GameProviderBetLimit Expression(GameProviderBetLimitModel x) =>
-                new()
-                {
-                    Id = x.Id == Guid.Empty ? Guid.NewGuid() : x.Id,
-                    GameProviderId = gameProvider.Id,
-                    CurrencyCode = x.CurrencyCode,
-                    MinBet = x.MinBet,
-                    MaxBet = x.MaxBet,
-                    MaxBetPerMatch = x.MaxBetPerMatch,
-                    ExternalSetting = x.ExternalSetting
-                };
+            GameProviderRequest request) =>
+            request.BetLimits.Where(x => x.Id is not null).Select(x => new GameProviderBetLimit
+            {
+                Id = x.Id.Value,
+                GameProviderId = gameProvider.Id,
+                CurrencyCode = x.CurrencyCode,
+                MinBet = x.MinBet,
+                MaxBet = x.MaxBet,
+                MaxBetPerMatch = x.MaxBetPerMatch,
+                ExternalSetting = x.ExternalSetting
+            }).ToHashSet();
 
-            var betLimits = request.BetLimits.Select(Expression);
-
-            return new(betLimits.ToArray());
-        }
+        private static HashSet<GameProviderBetLimit> GenerateNewBetLimits(GameProvider gameProvider,
+            GameProviderRequest request) =>
+            request.BetLimits.Where(x => x.Id is null).Select(x => new GameProviderBetLimit
+            {
+                GameProviderId = gameProvider.Id,
+                CurrencyCode = x.CurrencyCode,
+                MinBet = x.MinBet,
+                MaxBet = x.MaxBet,
+                MaxBetPerMatch = x.MaxBetPerMatch,
+                ExternalSetting = x.ExternalSetting
+            }).ToHashSet();
     }
 }
