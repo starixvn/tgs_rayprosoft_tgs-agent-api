@@ -100,23 +100,14 @@ const ReportContent = ({ brandId }) => {
                     maxDate={maxDate}
                     maxRangeDays={QueryMaxRangeDays}
                     isLoading={isLoading}
-                    search={({ start, end }) => {
-                        let newState = {
+                    search={({ start, end, ...rest }) => {
+                        setState({
                             pageIndex: 0,
                             from: start,
-                            to: end
-                        }
-
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                from: state?.from,
-                                to: state?.to
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                            to: end,
+                            ...rest
+                        })
+                        mutate()
                     }}
                 />
             }
