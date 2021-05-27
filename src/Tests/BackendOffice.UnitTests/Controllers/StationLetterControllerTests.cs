@@ -108,7 +108,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var request = new Fixture().Create<StationLetterRequest>();
             request.AssignedAllPlayers = false;
             request.PlayerUsernames = players
-                .Where(p => p.Status == PlayerStatus.Enabled)
+                .Where(p => p.Status == PlayerStatus.Enabled && p.BrandId == request.BrandId)
                 .Select(p => p.Username).ToArray();
 
             _playerQueriesMock.Setup(p => p.GetQueries())
@@ -233,7 +233,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .AsQueryable()
                 .BuildMock().Object;
 
-            var playerUsernames = players.Select(p => new UploadPlayerModel {Username = p.Username}).ToList();
+            var playerUsernames = players.Select(p => new UploadPlayerModel { Username = p.Username }).ToList();
             _uploadServiceMock.Setup(p => p.GetUploadedExcelAsync<UploadPlayerModel>(It.IsAny<IFormFile>()))
                 .Returns(Task.FromResult(playerUsernames));
 
@@ -274,13 +274,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var fixture = new Fixture();
             fixture.Customize<Player>(u => u
                 .With(s => s.Agent, new Agent())
-                .With(s => s.Vip, new VipLevel {Id = Guid.NewGuid(), Level = 1})
+                .With(s => s.Vip, new VipLevel { Id = Guid.NewGuid(), Level = 1 })
                 .With(s => s.Brand, new Brand())
                 .With(s => s.BetLimit, new BetLimit())
                 .With(s => s.Banks, Array.Empty<PlayerBankInfo>())
                 .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[] { })
                 .With(s => s.Letters, new StationLetterPlayer[] { })
-                .With(s => s.Wallets, new[] {new Core.DataServices.Tgs.Models.Wallet {Balance = 0}})
+                .With(s => s.Wallets, new[] { new Core.DataServices.Tgs.Models.Wallet { Balance = 0 } })
                 .With(s => s.BrandPaymentPlayers, new BrandPaymentPlayer[] { })
                 .With(s => s.SportsBetLimits, new PlayerSportsBetLimit[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
