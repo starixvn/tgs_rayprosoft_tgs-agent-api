@@ -9,7 +9,7 @@ const PlayerTrans = {
     en: "Player"
 }
 
-export const Player = "Agent"
+export const Agent = "Agent"
 const AgentTrans = {
     zh: "代理",
     en: "Agent"
@@ -38,5 +38,5 @@ export const DeductBalanceTargetSelect = ({ placeholder, ...props }) => {
 
 export default {
     Player,
-    Agent: Player
+    Agent
 }
