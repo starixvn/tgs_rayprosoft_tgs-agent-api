@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
-using TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;
-using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
@@ -17,11 +15,6 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.Queries.BrandPayment;
-using TGS.Services.BackOffice.Application.Queries.PaymentChannel;
-using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
-using TGS.Services.Payment;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -55,26 +48,19 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost]
-        [Description("Create a Payment")]
-        public async Task<CreateUpdateBrandPaymentResponse> CreateBrandPaymentAsync(CreateBrandPaymentRequest request)
+        [HttpPost("deposit")]
+        [HttpPost()]
+        [Description("Create a Deposit Payment")]
+        public async Task<CreateUpdateBrandPaymentResponse> CreateDepositBrandPaymentAsync(CreateBrandPaymentRequest request)
         {
-            if (request.Whitelist != null && request.Blacklist != null)
-            {
-                var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
-                if (duplicatePlayers.Any())
-                {
-                    return new()
-                    {
-                        Valid = false,
-                        Message = Resources.BrandPayment.WhiteSameAsBlack,
-                        DuplicatePlayers = duplicatePlayers
-                    };
-                }
-            }
+            return await CreateBrandPaymentAsync(PaymentTransferType.Deposit, request);
+        }
 
-            await _brandPaymentService.CreatePaymentAsync(request, Username);
-            return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
+        [HttpPost("withdraw")]
+        [Description("Create a Withdraw Payment")]
+        public async Task<CreateUpdateBrandPaymentResponse> CreateWithdrawBrandPaymentAsync(CreateBrandPaymentRequest request)
+        {
+            return await CreateBrandPaymentAsync(PaymentTransferType.Withdrawal, request);
         }
 
         [HttpGet("{id}/handingFee")]
@@ -259,6 +245,28 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                 .Where(isAll && brandPayment.VipLevels.Any(),
                     x => x.Player.VipId != null && vipLevelIds.Contains(x.Player.VipId.Value))
                 .Select(x => x.Player.Username).ToArray();
+        }
+
+        private async Task<CreateUpdateBrandPaymentResponse> CreateBrandPaymentAsync(
+            PaymentTransferType transferType,
+            CreateBrandPaymentRequest request)
+        {
+            if (request.Whitelist != null && request.Blacklist != null)
+            {
+                var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
+                if (duplicatePlayers.Any())
+                {
+                    return new()
+                    {
+                        Valid = false,
+                        Message = Resources.BrandPayment.WhiteSameAsBlack,
+                        DuplicatePlayers = duplicatePlayers
+                    };
+                }
+            }
+
+            await _brandPaymentService.CreatePaymentAsync(request, transferType, Username);
+            return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
         }
     }
 }

@@ -73,12 +73,3 @@ export const useBrandPaymentDesignatedUsers = (id) => {
     let url = id ? `${API}/${id}/designatedUsers` : ""
     return useGet(url)
 }
-
-export const useBrandPaymentMethodChannelList = () => {
-    let { data, ...rest } = useGet(`${API}/pmc`)
-
-    return {
-        data: data?.data,
-        ...rest
-    }
-}

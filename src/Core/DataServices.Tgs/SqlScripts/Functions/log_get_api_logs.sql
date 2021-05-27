@@ -1,3 +1,4 @@
+DROP FUNCTION IF EXISTS log.log_get_api_logs;
 CREATE OR REPLACE FUNCTION log.log_get_api_logs(
 	_from timestamptz, 
 	_to timestamptz, 
@@ -15,7 +16,7 @@ RETURNS TABLE (
 	 "TrackingId" uuid, 
 	 "Id" uuid, 
 	 "Ip" character varying, 
-	 "Path" character varying, 
+	 "Path" text, 
 	 "Method" character varying,
 	 "Prefix" character varying,
 	 "ServerName" character varying,

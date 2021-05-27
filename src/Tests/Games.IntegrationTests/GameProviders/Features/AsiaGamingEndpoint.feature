@@ -192,6 +192,24 @@ Scenario: 04.g - Settle bet for ROU game
         And player wallet database record will be for $102
         And game action id contains 101 will be recorded in the database of type "WinBet" for $12
         And game action id contains 103 will be recorded in the database of type "LoseBet" for $0
+
+Scenario: 04.h - Settle all lose bet for ROU game
+    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "AGIN_DSP_ROU"
+        And balance now being $90
+        And I send bet response
+		| PlayType | Amount | Val |
+		| 101      | 4      | 1   |
+		| 103      | 6      |     |
+    When I settle bet
+		| PlayType | WinAmount | RoundFinish |
+		| 101      | -4        | false       |
+		| 103      | -6        | true        |
+    Then I will receive bet response of OK and balance of $90
+        And player wallet database record will be for $90
+        And game action id contains 101 will be recorded in the database of type "LoseBet" for $0
+        And game action id contains 103 will be recorded in the database of type "LoseBet" for $0
         
 Scenario: 05.a - Cancel transaction
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -221,4 +239,16 @@ Scenario: 05.c - Cancel non-existent transaction
         And player having balance of $100
     When I cancel non-existent transaction for game "AGIN_DSP_BAC"
     Then I will receive bet response of INVALID_TRANSACTION and balance of $100
+
+Scenario: 05.d - Cancel transaction for ROU game
+    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "AGIN_DSP_ROU"
+        And balance now being $90
+        And player logout
+    When I cancel transaction
+    Then I will receive bet response of OK and balance of $100
+        And player wallet database record will be for $100
+        And game action will be recorded in the database of type "CancelTransaction" for $10
+        And the round will be closed
 	

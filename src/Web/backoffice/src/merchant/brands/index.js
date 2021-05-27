@@ -9,7 +9,11 @@ import {
 import { Code, Update as UpdateMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import { Table, toApiParams, useTable, pageCount } from "../../table"
-import { useBrandList, useChangeBrandStatus } from "./client"
+import {
+    useBrandList,
+    useChangeBrandStatus,
+    useSyncBrandGameList
+} from "./client"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { AddButton, EditButton, ViewButton } from "./edit"

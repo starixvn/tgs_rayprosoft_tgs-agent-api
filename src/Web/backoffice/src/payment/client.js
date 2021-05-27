@@ -33,3 +33,12 @@ export const usePaymentList = () => {
         ...rest
     }
 }
+
+export const usePaymentMethodChannelList = () => {
+    let { data, ...rest } = useGet(`/api/pmc`)
+
+    return {
+        data: data?.data,
+        ...rest
+    }
+}
