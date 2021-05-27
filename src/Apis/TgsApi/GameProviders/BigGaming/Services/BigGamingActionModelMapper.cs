@@ -127,6 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     });
                 }
 
+
                 var gameActionType = GetGameAction(order.OrderStatus);
 
                 if (gameActionType != GameActionType.CancelTransaction)
@@ -163,6 +164,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 .ConfigureAwait(false);
 
             var gameActionType = GetGameAction(order.OrderStatus);
+
+            //牛牛特殊案例
+            if (order.Amount > 0 && gameActionExternal.ExternalGameId == "13")
+            {
+                gameActionType = GameActionType.WinBet;
+            }
 
             var mark = !resettle
                 ? gameActionType != GameActionType.CancelTransaction ? "settle" : "cancel"
