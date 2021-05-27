@@ -1,6 +1,6 @@
 import React from "react"
 import { css, Global } from "@emotion/react"
-import { Text } from "bumbag"
+import { Text, Set } from "bumbag"
 
 import { formatDateTime } from "../../date/format"
 import textColumn from "./textColumn"
@@ -15,16 +15,25 @@ export const dateTimeColumn = ({
 }) =>
     textColumn({
         Cell: ({ value = "" } = {}) => {
+            let formattedDate = dateFormat
+                ? formatDateTime(dateFormat, value)
+                : ""
+            let formattedTime = timeFormat
+                ? formatDateTime(timeFormat, value)
+                : ""
             return (
-                <Text.Block
-                    css={css`
-                        white-space: nowrap;
-                    `}
-                >
-                    {`${dateFormat ? formatDateTime(dateFormat, value) : ""} ${
-                        timeFormat ? formatDateTime(timeFormat, value) : ""
-                    }`}
-                </Text.Block>
+                <Set orientation="vertical" alignX="center">
+                    {formattedDate && (
+                        <Text.Block fontSize={{ default: "14px" }}>
+                            {formattedDate}
+                        </Text.Block>
+                    )}
+                    {formattedTime && (
+                        <Text.Block fontSize={{ default: "14px" }}>
+                            {formattedTime}
+                        </Text.Block>
+                    )}
+                </Set>
             )
         },
         ...props

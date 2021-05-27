@@ -43,6 +43,7 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
             game.Type = request.Type;
             game.PlatformType = request.PlatformType;
             game.SubGame = request.SubGame;
+            game.AvailableToBrand = request.AvailableToBrand;
             game.HasTurnoverOnTieBet = request.HasTurnoverOnTieBet;
             game.Html5 = request.Html5;
             game.AvailableCurrencies = request.AvailableCurrencies;

@@ -104,6 +104,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     Type = x.Type,
                     PlatformType = x.PlatformType,
                     SubGame = x.SubGame,
+                    AvailableToBrand = x.AvailableToBrand,
                     HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
                     Html5 = x.Html5,
                     AvailableCurrencies = x.AvailableCurrencies,

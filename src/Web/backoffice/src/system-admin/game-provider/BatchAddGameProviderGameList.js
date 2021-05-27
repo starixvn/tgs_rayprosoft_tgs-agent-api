@@ -54,7 +54,6 @@ export const BatchAddGameProviderGameListDisclosure = ({
     onSubmitted
 }) => {
     let dialog = useModalState()
-
     return (
         <>
             <Disclosure {...dialog}>
@@ -229,14 +228,18 @@ const EditGameDialog = ({ record, onChange, dialog }) => {
         en: "Edit Game"
     })
 
+    const onSubmit = (data) => {
+        onChange?.(data)
+        dialog.hide()
+    }
+
     return (
         <Backdrop {...dialog}>
             <FormDialog
                 defaultValues={clone(record)}
                 submitText={<ConfirmText />}
                 title={title}
-                onSubmit={onChange}
-                onSubmitted={dialog.hide}
+                onSubmit={onSubmit}
                 stopPropagation
                 hideBackdrop
                 title={title}
