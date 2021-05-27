@@ -68,7 +68,9 @@ export const AddBrandPaymentDisclosure = ({ brandId, onSubmitted }) => {
 
     return (
         <>
-            <AddDisclosure {...dialog} />
+            <Disclosure {...dialog}>
+                <Trans zh="新增品牌支付" en="Add Brand Payment" />
+            </Disclosure>
             {dialog.visible && (
                 <AddDialog
                     brandId={brandId}

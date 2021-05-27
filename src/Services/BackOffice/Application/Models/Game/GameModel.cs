@@ -16,6 +16,7 @@ namespace TGS.Services.BackOffice.Application.Models.Game
         public GameType Type { get; set; }
         public GamePlatformType PlatformType { get; set; }
         public bool SubGame { get; set; }
+        public bool AvailableToBrand { get; set; }
         public bool HasTurnoverOnTieBet { get; set; }
         public bool Html5 { get; set; }
         public string AvailableCurrencies { get; set; }
