@@ -6,8 +6,6 @@
     <RootNamespace>TGS.Core.DataServices.Tgs</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>  </ItemGroup>
-
   <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -26,6 +24,7 @@
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\SG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_provider_configuration_for_cache.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_transaction_id.sql" />
@@ -81,6 +80,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Views\vw_valid_game_actions.sql" />
     <None Remove="DataInitializers\Games\JDB.csv" />
+    <None Remove="DataInitializers\Games\SG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\JDB.csv" />
   </ItemGroup>
 

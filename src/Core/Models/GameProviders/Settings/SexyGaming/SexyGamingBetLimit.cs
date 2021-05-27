@@ -9,6 +9,6 @@ namespace TGS.Core.Models.GameProviders.Settings.SexyGaming
 {
     public record SexyGamingBetLimit
     {
-        public Dictionary<int, Guid> SexybcrtMapper { get; set; }
+        public Dictionary<int, string> SexybcrtMapper { get; set; }
     }
 }

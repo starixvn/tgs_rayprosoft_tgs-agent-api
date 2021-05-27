@@ -15,12 +15,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 {
     partial class DataInitializer
     {
-        internal record SexyGamingProvider : IGameProvider
+        internal record SexyGamingGameProvider : IGameProvider
         {
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
-            public SexyGamingProvider(IWebHostEnvironment env)
+            public SexyGamingGameProvider(IWebHostEnvironment env)
             {
                 _games = LoadGamesFromCsv(GameProviderConst.SexyGaming)
                     .Select(g =>
@@ -52,7 +52,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 new CNYCurrency("CNY"), new USDCurrency("USD"), new VND1000Currency("VND"), new VNDCurrency("PTV"),
                 new IDR1000Currency("IDR"), new IDRCurrency("PTI"), new JPYCurrency("JPY"), new KRWCurrency("KRW"),
-                new MYRCurrency("MYR"), new THBCurrency("THB"), new EURCurrency("EUR")
+                new MYRCurrency("MYR"), new THBCurrency("THB"), new EURCurrency("EUR"), new HKDCurrency("HKD")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
@@ -66,7 +66,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.TransferWallet => true;
 
-            ushort IGameProvider.UniqueId => 10;
+            ushort IGameProvider.UniqueId => 5;
 
             Dictionary<int, GameProviderBetLimit> BetLimitMapper = new Dictionary<int, GameProviderBetLimit> {
                 { 280301, new (GuidExtensions.NewSequentialGuid(), "CNY", 5, 500, 500) },
@@ -120,7 +120,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Cert = "OFIHXL0mfK8AcohvyTs",
                     BetLimit = new SexyGamingBetLimit()
                     {
-                        SexybcrtMapper = BetLimitMapper.ToDictionary(o => o.Key, o => o.Value.Id)
+                        SexybcrtMapper = BetLimitMapper.ToDictionary(o => o.Key, o => o.Value.CurrencyCode)
                     }
                 };
 
