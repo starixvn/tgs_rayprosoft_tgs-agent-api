@@ -67,11 +67,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<BrandPayment, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.CreateBrandPaymentAsync(request);
+            var response = await _controller.CreateDepositBrandPaymentAsync(request);
             response.Valid.Should().BeTrue();
 
-            _paymentServiceMock.Verify(p => p.CreatePaymentAsync(It.Is<CreateBrandPaymentRequest>(r =>
-                    r.ChannelName == request.ChannelName),
+            _paymentServiceMock.Verify(p => p.CreatePaymentAsync(
+                It.Is<CreateBrandPaymentRequest>(r => r.ChannelName == request.ChannelName),
+                It.Is<PaymentTransferType>(x => x == PaymentTransferType.Deposit),
                 It.Is<string>(r => r == Username)));
         }
 
@@ -190,7 +191,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 VipLevelIds = Array.Empty<Guid>()
             };
             request.Whitelist[0] = request.Blacklist[0];
-            var response = await _controller.CreateBrandPaymentAsync(request);
+            var response = await _controller.CreateDepositBrandPaymentAsync(request);
             response.Valid.Should().BeFalse();
             response.DuplicatePlayers[0].Should().Be(request.Whitelist[0]);
             response.Message.Should().Be(Apis.BackendOffice.Resources.BrandPayment.WhiteSameAsBlack);
