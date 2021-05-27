@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -36,19 +37,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
             _bullBullOddsMapper = new Dictionary<string, decimal>() {
-                {"D0000001",1 } //下注闲1平倍
-                ,{"D0000002",5 }//下注闲1翻倍
-                ,{"D0000004",1 }//下注闲2平倍
-                ,{"D0000008",5 }//下注闲2翻倍
-                ,{"D0000010",1 }//下注闲3平倍
-                ,{"D0000020",5 }//下注闲3翻倍
-                ,{Convert.ToUInt32("D0000001", 16).ToString(),1 } //下注闲1平倍
-                ,{Convert.ToUInt32("D0000002", 16).ToString(),5 } //下注闲1翻倍
-                ,{Convert.ToUInt32("D0000004", 16).ToString(),1 } //下注闲2平倍
-                ,{Convert.ToUInt32("D0000008", 16).ToString(),5 } //下注闲2翻倍
-                ,{Convert.ToUInt32("D0000010", 16).ToString(),1 } //下注闲3平倍
-                ,{Convert.ToUInt32("D0000020", 16).ToString(),5 } //下注闲3翻倍
-                                                                  };
+                {"0xD0000001",1 } //下注闲1平倍
+                ,{"0xD0000002",5 }//下注闲1翻倍
+                ,{"0xD0000004",1 }//下注闲2平倍
+                ,{"0xD0000008",5 }//下注闲2翻倍
+                ,{"0xD0000010",1 }//下注闲3平倍
+                ,{"0xD0000020",5 }//下注闲3翻倍
+            };
         }
 
 
@@ -58,7 +53,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var transactions = (from order in request.Orders
                                 select new TransactionData
                                 {
-                                    Amount = GetAmount(order.ExternalGameId, Math.Abs(order.Amount)),
+                                    Amount = GetAmount(order.ExternalGameId, GetBetType(order.PlayId), Math.Abs(order.Amount)),
                                     ExternalTransactionId = order.OrderId.ToString(),
                                     ExternalRoundId = order.IssueId,
                                     ExternalBetId = order.OrderId.ToString(),
@@ -66,7 +61,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                                     ExternalGameId = order.ExternalGameId.ToString(),
                                     GameActionType = GameActionType.PlaceBet,
                                     TimeStamp = DateTimeOffset.UtcNow,
-                                    BetType = order.PlayId
+                                    BetType = GetBetType(order.PlayId)
                                 }).ToArray();
 
             return GetBetData(data, request.LoginId, transactions, oppositeBetSettings: oppositeBetSettings);
@@ -234,16 +229,19 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }).ToArray()
             };
 
-        private decimal GetAmount(int externalGameId, decimal amount)
+        private decimal GetAmount(int externalGameId, string playId, decimal amount)
         {
             if (externalGameId == 13)
             {
-                var Odds = _bullBullOddsMapper.Where(x => x.Key == externalGameId.ToString()).First().Value;
+                var Odds = _bullBullOddsMapper.Where(x => x.Key.IgnoreCaseEquals(playId)).First().Value;
                 return amount * Odds;
             }
             return amount;
         }
 
+
+        private string GetBetType(string playId) =>
+            $"0x{Convert.ToString(Convert.ToInt64(playId), 16).ToUpper()}";
         #endregion
     }
 }
