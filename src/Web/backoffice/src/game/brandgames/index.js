@@ -89,21 +89,11 @@ const BodyContent = ({ brandId }) => {
                     gameType={gameType}
                     keyword={keyword}
                     search={(data) => {
-                        let newState = {
+                        setState({
                             pageIndex: 0,
                             ...data
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                keyword,
-                                gameProviderId,
-                                gameType
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                        })
+                        mutate()
                     }}
                 />
             }
