@@ -80,6 +80,7 @@ namespace TGS.Payment.Repositories
                     BankInfo = form.BankInfo,
                     ApplyInfo = form.ApplyInfo,
                     PaymentReturn = form.PaymentReturn,
+                    Status = form.Status,
                     CreatedOn = currentDate,
                     UpdatedOn = currentDate
                 })

@@ -38,3 +38,8 @@ export const useChangeBrandStatus = (id, status) => {
     let url = id && status ? `${API}/${id}/${status}` : ""
     return usePut(url)
 }
+
+export const useSyncBrandGameList = (id) => {
+    let url = id ? `${API}/${id}/syncGames` : undefined
+    return useGet(url)
+}

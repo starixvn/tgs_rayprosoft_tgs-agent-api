@@ -1,6 +1,6 @@
 ﻿namespace TGS.Shared.Game.Models.Saba.Enums
 {
-    public enum GetGameUrlApi
+    public enum GetGameUrlApiError
     {
         Ok = 0,
         Fail = 1,

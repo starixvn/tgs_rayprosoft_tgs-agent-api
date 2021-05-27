@@ -28,13 +28,29 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
     {
         private const string GameProviderCode = Consts.GameProvider.BigGaming;
         private readonly IBigGamingServices _services;
+        private readonly Dictionary<string, decimal> _bullBullOddsMapper;
 
         public BigGamingActionModelMapper(
             IBigGamingServices services
         )
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            _bullBullOddsMapper = new Dictionary<string, decimal>() {
+                {"D0000001",1 } //下注闲1平倍
+                ,{"D0000002",5 }//下注闲1翻倍
+                ,{"D0000004",1 }//下注闲2平倍
+                ,{"D0000008",5 }//下注闲2翻倍
+                ,{"D0000010",1 }//下注闲3平倍
+                ,{"D0000020",5 }//下注闲3翻倍
+                ,{Convert.ToUInt32("D0000001", 16).ToString(),1 } //下注闲1平倍
+                ,{Convert.ToUInt32("D0000002", 16).ToString(),5 } //下注闲1翻倍
+                ,{Convert.ToUInt32("D0000004", 16).ToString(),1 } //下注闲2平倍
+                ,{Convert.ToUInt32("D0000008", 16).ToString(),5 } //下注闲2翻倍
+                ,{Convert.ToUInt32("D0000010", 16).ToString(),1 } //下注闲3平倍
+                ,{Convert.ToUInt32("D0000020", 16).ToString(),5 } //下注闲3翻倍
+                                                                  };
         }
+
 
         BetData IBigGamingModelActionMapper.Request(GameProviderConfigurationData data, BigGamingBetRequest request,
             OppositeBetSetting[] oppositeBetSettings)
@@ -42,7 +58,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var transactions = (from order in request.Orders
                                 select new TransactionData
                                 {
-                                    Amount = Math.Abs(order.Amount),
+                                    Amount = GetAmount(order.ExternalGameId, Math.Abs(order.Amount)),
                                     ExternalTransactionId = order.OrderId.ToString(),
                                     ExternalRoundId = order.IssueId,
                                     ExternalBetId = order.OrderId.ToString(),
@@ -218,7 +234,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }).ToArray()
             };
 
-
+        private decimal GetAmount(int externalGameId, decimal amount)
+        {
+            if (externalGameId == 13)
+            {
+                var Odds = _bullBullOddsMapper.Where(x => x.Key == externalGameId.ToString()).First().Value;
+                return amount * Odds;
+            }
+            return amount;
+        }
 
         #endregion
     }

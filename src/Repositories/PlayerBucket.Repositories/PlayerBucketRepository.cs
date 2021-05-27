@@ -153,6 +153,6 @@ namespace PlayerBucket.Repositories
         }
 
         async ValueTask<bool> IPlayerBucketRepository.IsBucketFullAsync(string playerCode) =>
-            await _repository.PlayerBuckets.AllAsync(x => x.PlayerCode == playerCode && x.IsFull);
+            await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode).AllAsync(x => x.IsFull);
     }
 }

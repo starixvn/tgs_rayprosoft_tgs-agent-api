@@ -16,7 +16,8 @@ export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
         isLoading: isLoadingBrand,
         error: brandError,
         mutate: mutateBrand,
-        deleteCache: deleteBrandCache
+        deleteCache: deleteBrandCache,
+        clearCache
     } = useBrand(brandId)
 
     let {
@@ -105,7 +106,8 @@ export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
         isLoading: isLoadingBrand || isLoadingLicensee,
         error: brandError || licenseeError,
         mutateBrand,
-        deleteBrandCache
+        deleteBrandCache,
+        clearCache
     }
 }
 
