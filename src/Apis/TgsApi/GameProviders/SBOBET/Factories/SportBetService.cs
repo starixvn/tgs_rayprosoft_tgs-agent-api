@@ -38,6 +38,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             _settingOperations = settingOperations;
         }
 
+        public async ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request)
+        {
+            var r = await _actions.GetBalanceAsync(Consts.GameProvider.SBOBET, request.PlayerCode)
+                .ConfigureAwait(false);
+
+            return _map.Response(request.PlayerCode, r);
+        }
+
         public async ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
         {
             var configuration =

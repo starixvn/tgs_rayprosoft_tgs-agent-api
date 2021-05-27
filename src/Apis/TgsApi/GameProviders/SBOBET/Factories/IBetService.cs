@@ -5,6 +5,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 {
     public interface IBetService
     {
+        ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request);
+
         ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request);
 
         ValueTask<SettleBetResponse> SettleBetAsync(SettleBetRequest request);

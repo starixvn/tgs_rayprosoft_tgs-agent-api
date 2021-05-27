@@ -7,8 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Factories;
-using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
-using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
@@ -20,19 +18,16 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     [AllowAnonymous]
     [FeatureGate(GameProviderConst.SBOBET)]
-    public sealed partial class SBOBETGameController : ControllerBase
+    public sealed class SBOBETGameController : ControllerBase
     {
         [HttpPost]
         [Route("GetBalance")]
         public async ValueTask<GetBalanceResponse> GetBalanceAsync(
             GetBalanceRequest request,
-            [FromServices] IGamePlayActions actions,
-            [FromServices] ISBOBETActionModelMapper map)
+            [FromServices] IBetServiceFactory factory)
         {
-            var r = await actions.GetBalanceAsync(GameProviderConst.SBOBET, request.PlayerCode)
-                .ConfigureAwait(false);
-
-            return map.Response(request.PlayerCode, r);
+            var service = factory.Get(request.ProductType);
+            return await service.GetBalanceAsync(request).ConfigureAwait(false);
         }
 
         [HttpPost]
