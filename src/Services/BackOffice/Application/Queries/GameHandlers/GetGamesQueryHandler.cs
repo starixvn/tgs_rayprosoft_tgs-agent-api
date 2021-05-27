@@ -37,6 +37,7 @@ namespace TGS.Services.BackOffice.Application.Queries.GameHandlers
                     Type = x.Type,
                     PlatformType = x.PlatformType,
                     SubGame = x.SubGame,
+                    AvailableToBrand = x.AvailableToBrand,
                     HasTurnoverOnTieBet = x.HasTurnoverOnTieBet,
                     Html5 = x.Html5,
                     AvailableCurrencies = x.AvailableCurrencies,

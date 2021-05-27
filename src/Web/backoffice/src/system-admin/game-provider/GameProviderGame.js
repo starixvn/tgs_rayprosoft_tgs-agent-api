@@ -222,6 +222,12 @@ export const GameProviderGameFormBody = ({}) => {
             <FieldStack orientation="horizontal">
                 <CheckboxField name="subGame" label="Sub Game" />
                 <CheckboxField
+                    name="availableToBrand"
+                    label="Available To Brand"
+                />
+            </FieldStack>
+            <FieldStack orientation="horizontal">
+                <CheckboxField
                     name="hasTurnoverOnTieBet"
                     label="Turnover On Tie Bet"
                 />
