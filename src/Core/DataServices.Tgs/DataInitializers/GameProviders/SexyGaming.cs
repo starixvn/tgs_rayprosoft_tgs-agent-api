@@ -75,12 +75,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 { 282202, new (GuidExtensions.NewSequentialGuid(), "EUR", 1, 500, 500) },
                 { 282204, new (GuidExtensions.NewSequentialGuid(), "EUR", 10, 2500, 2500) },
                 { 282205, new (GuidExtensions.NewSequentialGuid(), "EUR", 10, 5000, 5000) },
-                { 280605, new (GuidExtensions.NewSequentialGuid(), "IDR", 50, 5000, 5000) },
-                { 280606, new (GuidExtensions.NewSequentialGuid(), "IDR", 100, 10000, 10000) },
-                { 280607, new (GuidExtensions.NewSequentialGuid(), "IDR", 200, 20000, 20000) },
-                { 281503, new (GuidExtensions.NewSequentialGuid(), "INR", 200, 7500, 7500) },
-                { 281504, new (GuidExtensions.NewSequentialGuid(), "INR", 300, 15000, 15000) },
-                { 281505, new (GuidExtensions.NewSequentialGuid(), "INR", 600, 30000, 30000) },
+                { 280605, new (GuidExtensions.NewSequentialGuid(), "IDR_1000", 50, 5000, 5000) },
+                { 280606, new (GuidExtensions.NewSequentialGuid(), "IDR_1000", 100, 10000, 10000) },
+                { 280607, new (GuidExtensions.NewSequentialGuid(), "IDR_1000", 200, 20000, 20000) },
+                { 281301, new (GuidExtensions.NewSequentialGuid(), "IDR", 5000, 500000, 500000) },//PTI
+                { 281302, new (GuidExtensions.NewSequentialGuid(), "IDR", 5000, 50000000, 50000000) },//PTI
                 { 300403, new (GuidExtensions.NewSequentialGuid(), "JPY", 200, 50000, 50000) },
                 { 280801, new (GuidExtensions.NewSequentialGuid(), "KRW", 5000, 100000, 100000) },
                 { 280802, new (GuidExtensions.NewSequentialGuid(), "KRW", 100000, 10000000, 10000000) },
@@ -90,7 +89,23 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 { 280103, new (GuidExtensions.NewSequentialGuid(), "MYR", 5, 1000, 1000) },
                 { 280908, new (GuidExtensions.NewSequentialGuid(), "THB", 100, 20000, 20000) },
                 { 280909, new (GuidExtensions.NewSequentialGuid(), "THB", 500, 50000, 50000) },
-                { 280910, new (GuidExtensions.NewSequentialGuid(), "THB", 1000, 100000, 100000) }
+                { 280910, new (GuidExtensions.NewSequentialGuid(), "THB", 1000, 100000, 100000) },
+                { 280201, new (GuidExtensions.NewSequentialGuid(), "HKD", 2, 500, 500) },
+                { 280203, new (GuidExtensions.NewSequentialGuid(), "HKD", 10, 20000, 20000) },
+                { 280204, new (GuidExtensions.NewSequentialGuid(), "HKD", 20, 4000, 4000) },
+                { 280205, new (GuidExtensions.NewSequentialGuid(), "HKD", 40, 10000, 10000) },
+                { 280206, new (GuidExtensions.NewSequentialGuid(), "HKD", 5, 5000, 5000) },
+                { 280701, new (GuidExtensions.NewSequentialGuid(), "USD", 1, 100, 100) },
+                { 280702, new (GuidExtensions.NewSequentialGuid(), "USD", 1, 500, 500) },
+                { 280703, new (GuidExtensions.NewSequentialGuid(), "USD", 5, 200, 200) },
+                { 280704, new (GuidExtensions.NewSequentialGuid(), "USD", 5, 1000, 1000) },
+                { 280705, new (GuidExtensions.NewSequentialGuid(), "USD", 10, 500, 500) },
+                { 281101, new (GuidExtensions.NewSequentialGuid(), "VND_1000", 10, 500, 500) },
+                { 281102, new (GuidExtensions.NewSequentialGuid(), "VND_1000", 20, 1000, 1000) },
+                { 281103, new (GuidExtensions.NewSequentialGuid(), "VND_1000", 50, 2500, 2500) },
+                { 281104, new (GuidExtensions.NewSequentialGuid(), "VND_1000", 100, 5000, 5000) },
+                { 281105, new (GuidExtensions.NewSequentialGuid(), "VND_1000", 200, 10000, 10000) },
+                { 281401, new (GuidExtensions.NewSequentialGuid(), "VND", 10000, 500000, 500000) }//PTV
             };
 
             GameProviderBetLimit[] IGameProvider.BetLimits => BetLimitMapper.Select(x => x.Value).ToArray();
