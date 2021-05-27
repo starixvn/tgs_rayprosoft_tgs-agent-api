@@ -34,8 +34,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         private readonly Dictionary<string, StationLetterStatus> _typeDictionary =
             new()
             {
-                {"pass", StationLetterStatus.Published},
-                {"reject", StationLetterStatus.Rejected}
+                { "pass", StationLetterStatus.Published },
+                { "reject", StationLetterStatus.Rejected }
             };
 
         private readonly IUploadService _uploadService;
@@ -154,7 +154,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
 
             var allPlayers = await _playerQueries.GetQueries()
-                .Where(p => p.Status == PlayerStatus.Enabled)
+                .Where(p => p.Status == PlayerStatus.Enabled
+                    && p.BrandId == request.BrandId)
                 .ToArrayAsync();
 
             if (!request.AssignedAllPlayers)
@@ -185,14 +186,14 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .ToArrayAsync();
 
             var players = from u in users
-                join p in allPlayers on u equals p.Username
-                    into tmpU
-                from p in tmpU.DefaultIfEmpty()
-                select new GetPlayerFromFileResponse.PlayerModel
-                {
-                    Username = u,
-                    Exists = p != null
-                };
+                          join p in allPlayers on u equals p.Username
+                              into tmpU
+                          from p in tmpU.DefaultIfEmpty()
+                          select new GetPlayerFromFileResponse.PlayerModel
+                          {
+                              Username = u,
+                              Exists = p != null
+                          };
 
             return new GetPlayerFromFileResponse
             {
