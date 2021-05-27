@@ -36,6 +36,7 @@ namespace TGS.Services.Report.Application.Commands.MarketAggregate
             _playerAggregateService = playerAggregateService;
             _marketAggregateService = marketAggregateService;
             _settingsService = settingsService;
+            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         public override async Task<MessageResponse> Handle(CreateMarketAggregateModel request,
@@ -79,11 +80,54 @@ namespace TGS.Services.Report.Application.Commands.MarketAggregate
 
             await _marketAggregateService.CreateMarketAggregatesAsync(aggregate);
 
-            var CurrencyNetProfitsJson =
+            var currencyNetProfitsJson =
                 await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.CurrencyNetProfit);
-            var promotionTypeGroups =
-                _jsonSerializationProvider.DeserializeFromString<CurrencyNetProfit[]>(CurrencyNetProfitsJson.Value);
+            var currencyNetProfits =
+                _jsonSerializationProvider.DeserializeFromString<CurrencyNetProfit[]>(currencyNetProfitsJson.Value);
 
+            var firstDayOfMonth = new DateTimeOffset(reportDate.Year, reportDate.Month, 1, 0, 0, 0, new(8, 0, 0));
+
+            var brandNetProfits = await _marketAggregateService.GetMarketAggregateQueries()
+                .Where(x => x.ReportDate >= firstDayOfMonth && x.ReportDate <= reportDate)
+                .GroupBy(x => x.BrandId,
+                    (brandId, markets) => new {BrandId = brandId, NetProfit = markets.Sum(m => m.NetProfit)})
+                .Where(x => x.NetProfit < 0)
+                .Join(_marketAggregateService.Repository.Brands, market => market.BrandId, brand => brand.Id,
+                    (market, brands) => new {market, brands})
+                .Select(x => new {x.market.BrandId, x.brands.Currencies.First().CurrencyCode, x.market.NetProfit})
+                .ToArrayAsync(cancellationToken);
+
+            var brands = brandNetProfits.Join(currencyNetProfits, bn => bn.CurrencyCode, cn => cn.CurrencyCode,
+                    (bn, cn) => new {bn, cn})
+                .Select(x =>
+                {
+                    Array.Sort(x.cn.SendPercentages);
+                    var netProfitList = x.cn.SendPercentages.Select(percentage =>
+                        new {x.cn.NetProfit, calculatedNetProfit = percentage * x.cn.NetProfit}).ToArray();
+
+                    decimal? percentageKey = null;
+                    foreach (var netProfit in netProfitList)
+                    {
+                        if (x.bn.NetProfit < -netProfit.calculatedNetProfit)
+                        {
+                            percentageKey = netProfit.NetProfit;
+                        }
+                    }
+
+                    return new {x.bn.BrandId, percentageKey};
+                }).ToArray();
+
+            var netProfitEmailsJson =
+                await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.NetProfitEmail);
+            var netProfitEmails =
+                _jsonSerializationProvider.DeserializeFromString<NetProfitEmail[]>(netProfitEmailsJson.Value);
+
+            var sendBrandList = brands.Join(netProfitEmails, b => b.percentageKey, n => n.SendPercentage,
+                    (brand, email) => new {brand, email})
+                .Select(x => new
+                {
+                    x.brand.BrandId, Percentage = x.brand.percentageKey, x.email.Subject, x.email.Content
+                });
 
             return CreateValidResponse<MessageResponse>();
         }

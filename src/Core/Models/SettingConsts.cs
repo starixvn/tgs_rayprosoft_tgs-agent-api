@@ -10,6 +10,7 @@ namespace TGS.Core.Models
         public const string SuperLicenseeCodes = "SuperLicenseeCodes";
         public const string PromotionType = "PromotionTypes";
         public const string CurrencyNetProfit = "CurrencyNetProfit";
+        public const string NetProfitEmail = "NetProfitEmail";
 
         public static class GameProviderConfigurations
         {

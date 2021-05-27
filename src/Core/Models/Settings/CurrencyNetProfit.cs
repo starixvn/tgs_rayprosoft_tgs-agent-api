@@ -1,8 +1,9 @@
 ﻿namespace TGS.Core.Models.Settings
 {
-    public class CurrencyNetProfit
+    public record CurrencyNetProfit
     {
-        public string CurrencyCode { get; set; }
-        public decimal NetProfit { get; set; }
+        public string CurrencyCode { get; init; }
+        public decimal NetProfit { get; init; }
+        public decimal[] SendPercentages { get; init; }
     }
 }

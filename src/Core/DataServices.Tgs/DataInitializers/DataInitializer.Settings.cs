@@ -28,7 +28,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     "Promotion Types"),
                 CreateSetting(SettingConsts.CurrencyNetProfit,
                     _jsonSerializationProvider.SerializeToString(GetCurrencyNetProfits(), options),
-                    "Currency NetProfit")
+                    "Currency NetProfit"),
+                CreateSetting(SettingConsts.NetProfitEmail,
+                    _jsonSerializationProvider.SerializeToString(GetCurrencyNetProfits(), options),
+                    "NetProfit Email")
             };
 
             var gameProviderSettings = _gameProviders.Select(gp =>
@@ -57,17 +60,90 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now
             };
 
+        private static NetProfitEmail[] GetNetProfitEmails() =>
+            new[]
+            {
+                new()
+                {
+                    Subject = "RMB",
+                    SendPercentage = 60.0M,
+                    Content =
+                        "60% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                },
+                new NetProfitEmail
+                {
+                    Subject = "RMB",
+                    SendPercentage = 70.0M,
+                    Content =
+                        "70% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                },
+                new NetProfitEmail
+                {
+                    Subject = "RMB",
+                    SendPercentage = 80.0M,
+                    Content =
+                        "80% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                },
+                new NetProfitEmail
+                {
+                    Subject = "RMB",
+                    SendPercentage = 90.0M,
+                    Content =
+                        "90% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                }
+            };
+
         private static CurrencyNetProfit[] GetCurrencyNetProfits() =>
             new[]
             {
-                new() {CurrencyCode = "RMB", NetProfit = 100000.00M},
-                new CurrencyNetProfit {CurrencyCode = "IDR", NetProfit = 100000.00M},
-                new CurrencyNetProfit {CurrencyCode = "IDR1000", NetProfit = 100000.00M},
-                new CurrencyNetProfit {CurrencyCode = "MYR", NetProfit = 100000.00M},
-                new CurrencyNetProfit {CurrencyCode = "THB", NetProfit = 100000.00M},
-                new CurrencyNetProfit {CurrencyCode = "VND", NetProfit = 100000.00M},
-                new CurrencyNetProfit {CurrencyCode = "VND1000", NetProfit = 100000.00M},
-                new CurrencyNetProfit {CurrencyCode = "USD", NetProfit = 100000.00M}
+                new()
+                {
+                    CurrencyCode = "RMB",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "IDR",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "IDR1000",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "MYR",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "THB",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "VND",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "VND1000",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "USD",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                }
             };
 
         private static PromotionTypeGroup[] GetPromotionTypes() =>
