@@ -3463,7 +3463,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_bucket_histories");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameTypeAggregate", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameAggregate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -3487,6 +3487,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
 
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uuid")
@@ -3564,18 +3568,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("win_loss");
 
                     b.HasKey("Id")
-                        .HasName("pk_player_game_type_rebate_aggregates_id");
+                        .HasName("pk_player_game_rebate_aggregates_id");
 
                     b.HasIndex("BrandId", "ReportDate")
-                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date");
+                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date");
 
                     b.HasIndex("BrandId", "ReportDate", "AgentId")
-                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_agent_id");
+                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_agent_id");
 
                     b.HasIndex("BrandId", "ReportDate", "PlayerCode")
-                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_player_code");
+                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_player_code");
 
-                    b.ToTable("player_game_type_rebate_aggregates", "report");
+                    b.ToTable("player_game_rebate_aggregates", "report");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
@@ -4343,6 +4347,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("currency_code");
 
+                    b.Property<decimal?>("EffectiveBettingPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("effective_betting_percentage");
+
                     b.Property<DateTimeOffset?>("ExternalClosedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("external_closed_on");
@@ -4373,6 +4382,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("player_code");
+
+                    b.Property<bool?>("Rebate")
+                        .HasColumnType("boolean")
+                        .HasColumnName("rebate");
 
                     b.Property<decimal?>("ReopenTurnoverAdjustment")
                         .HasColumnType("numeric")
@@ -4468,6 +4481,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
 
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uuid")
