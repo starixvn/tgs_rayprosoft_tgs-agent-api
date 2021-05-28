@@ -42,3 +42,13 @@ export const usePaymentMethodChannelList = () => {
         ...rest
     }
 }
+
+export const useAddPaymentMethodChannel = (data) => {
+    let url = data ? `/api/pmc` : ""
+    return usePostData(url, data)
+}
+
+export const useDeletePaymentMethodChannel = (id) => {
+    let url = id ? `/api/pmc/${id}` : ""
+    return useDelete(url)
+}
