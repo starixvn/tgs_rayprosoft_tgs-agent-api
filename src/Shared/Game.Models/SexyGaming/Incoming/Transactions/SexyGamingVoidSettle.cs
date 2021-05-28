@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.SexyGaming.Enums;
 
-namespace TGS.Shared.Game.Models.SexyGaming.Incoming
+namespace TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions
 {
     public record SexyGamingVoidSettle
     {
