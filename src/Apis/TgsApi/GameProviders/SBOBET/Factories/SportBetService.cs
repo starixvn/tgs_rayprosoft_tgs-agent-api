@@ -13,7 +13,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             ISBOBETActionModelMapper map,
             ISBOBETServices services,
             ISettingOperations settingOperations)
-            : base(httpContextAccessor, actions, map, services, settingOperations)
+            : base(httpContextAccessor, actions, map,
+                services, settingOperations)
         {
         }
     }

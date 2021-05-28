@@ -15,14 +15,16 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
         public IBetService Get(int productType) =>
             productType switch
             {
-                // sports / virtual sports
-                1 or 5 => ActivatorUtilities.CreateInstance<SportBetService>(_serviceProvider),
+                // sports 
+                1 => ActivatorUtilities.CreateInstance<SportBetService>(_serviceProvider),
 
                 // sbo rng
                 3 => ActivatorUtilities.CreateInstance<RngBetService>(_serviceProvider),
 
-                // rest games
-                _ => ActivatorUtilities.CreateInstance<OthersBetService>(_serviceProvider)
+                // virtual sports
+                5 => ActivatorUtilities.CreateInstance<VirtualSportBetService>(_serviceProvider),
+
+                _ => throw new NotImplementedException()
             };
     }
 }
