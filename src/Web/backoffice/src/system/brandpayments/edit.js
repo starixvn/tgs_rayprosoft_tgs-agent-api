@@ -33,9 +33,9 @@ import BrandPaymentStatus, {
     BrandPaymentStatusButton
 } from "./BrandPaymentStatus"
 import {
-    useUpdatePayment,
+    useUpdateBrandPayment,
     useBrandPaymentUpload,
-    useAddBrandPayment
+    useAddDepositBrandPayment
 } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import {
@@ -117,10 +117,8 @@ const EditDialog = ({
 
     let [submitData, setSubmit] = useState()
 
-    let { result, isLoading, error, mutate, deleteCache } = useUpdatePayment(
-        record.id,
-        submitData
-    )
+    let { result, isLoading, error, mutate, deleteCache } =
+        useUpdateBrandPayment(record.id, submitData)
 
     if (isLoadingPayment) {
         return <LoadingBackdrop {...dialog} />
@@ -291,7 +289,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
 
     let [formData, setSubmit] = useState()
     let { result, isLoading, error, mutate, deleteCache } =
-        useAddBrandPayment(formData)
+        useAddDepositBrandPayment(formData)
 
     if (isLoadingPayment) {
         return <LoadingBackdrop {...dialog} />
