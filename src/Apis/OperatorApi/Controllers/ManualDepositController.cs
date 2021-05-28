@@ -9,9 +9,9 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
-using TGS.Services.Operator.Deposit;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Services.Deposit;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

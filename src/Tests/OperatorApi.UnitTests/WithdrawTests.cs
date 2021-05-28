@@ -14,10 +14,11 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Withdraw;
 using TGS.Services.Payment;
 using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
+using TGS.Services.Operator.Services.Withdraw;
+using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

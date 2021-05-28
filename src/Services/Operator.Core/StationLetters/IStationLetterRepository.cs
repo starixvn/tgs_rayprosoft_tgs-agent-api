@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using TGS.Paging;
+using TGS.Services.Operator;
+using TGS.Services.Operator.StationLetters;
+
+namespace TGS.Services.Operator.StationLetters
+{
+    public interface IStationLetterRepository
+    {
+        ValueTask<int> QueryStationLettersTotalCountAsync(string playerCode);
+
+        IAsyncEnumerable<StationLetter> QueryStationLettersAsync(string playerCode, Paging<StationLetter> paging);
+
+        IAsyncEnumerable<StationLetter> QueryStationLettersAsync(string playerCode);
+
+        ValueTask SetStationLetterHaveReadAsync(string playerCode, Guid letterId);
+    }
+}

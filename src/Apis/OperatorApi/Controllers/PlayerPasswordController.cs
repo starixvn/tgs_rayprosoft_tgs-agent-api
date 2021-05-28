@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator.Player;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Services.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

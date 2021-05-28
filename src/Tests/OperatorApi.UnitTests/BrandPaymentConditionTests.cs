@@ -3,6 +3,7 @@ using Moq;
 using NUnit.Framework;
 using TGS.Services.Operator;
 using TGS.Services.Payment;
+using TGS.Services.Operator.BrandPayment.PaymentConditions;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

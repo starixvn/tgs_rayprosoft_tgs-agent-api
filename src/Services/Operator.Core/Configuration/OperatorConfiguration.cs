@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Payment.Configuration;
 using TGS.Services.WalletService.Configuration;
+using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Services.Operator.Configuration
 {

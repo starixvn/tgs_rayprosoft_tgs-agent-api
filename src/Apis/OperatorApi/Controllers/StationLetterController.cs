@@ -10,8 +10,9 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operator;
-using TGS.Services.Operator.StationLetters;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Services.StationLetters;
+using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

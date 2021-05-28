@@ -9,9 +9,9 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
-using TGS.Services.Operator.Withdraw;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Services.Withdraw;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

@@ -9,10 +9,11 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Deposit;
-using TGS.Services.Operator.Withdraw;
 using TGS.Services.Payment;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Services.Deposit;
+using TGS.Services.Operator.Services.Withdraw;
+using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

@@ -13,6 +13,7 @@ using TGS.Core.Models.Messages;
 using TGS.Operator.Repositories;
 using TGS.Paging;
 using TGS.Services.Operator;
+using TGS.Services.Operator.Services.StationLetters;
 using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -32,7 +33,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actual = sut.QueryAsync(new GetStationLettersQuery(playerCode, new PageableRequest()));
 
             moqStationLetterRepository.Verify(
-                fake => fake.QueryStationLettersAsync(It.Is<string>(x => x == playerCode), It.IsAny<Paging<Services.Operator.StationLetter>>()),
+                fake => fake.QueryStationLettersAsync(It.Is<string>(x => x == playerCode), It.IsAny<Paging<TGS.Services.Operator.StationLetters.StationLetter>>()),
                 Times.Exactly(1));
         }
 
@@ -150,7 +151,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var sut = new StationLetterRepository(repository);
 
-            var actual = await sut.QueryStationLettersAsync(playerCode, new Paging<Services.Operator.StationLetter>() { Page = 0, RowCount = 50 }).ToListAsync();
+            var actual = await sut.QueryStationLettersAsync(playerCode, new Paging<TGS.Services.Operator.StationLetters.StationLetter>() { Page = 0, RowCount = 50 }).ToListAsync();
 
             Assert.AreEqual(1, actual.Count);
         }
