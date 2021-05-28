@@ -41,21 +41,16 @@ export const PlayerBalanceChangePanel = ({ brandId, playerCode, ...props }) => {
     })
 
     let { pageSize, accountChangeType, from, to } = state
-    let {
-        isLoading,
-        data,
-        error,
-        mutate,
-        deleteCache
-    } = usePlayerBalanceChanges(
-        isActive
-            ? toApiParams({
-                  ...state,
-                  sortby: "recordedOn",
-                  orderby: Descending
-              })
-            : undefined
-    )
+    let { isLoading, data, error, mutate, deleteCache } =
+        usePlayerBalanceChanges(
+            isActive
+                ? toApiParams({
+                      ...state,
+                      sortby: "recordedOn",
+                      orderby: Descending
+                  })
+                : undefined
+        )
 
     let columns = useColumns({ items: data?.items })
 
@@ -228,6 +223,12 @@ const GameProviderFundOutTrans = {
     en: "Fund Out"
 }
 
+const CancelWithdrawal = "CancelWithdrawal"
+const CancelWithdrawalTrans = {
+    zh: "取消提款",
+    en: "Cancel Withdrawal"
+}
+
 const Other = "Other"
 const OtherTrans = {
     zh: "其他",
@@ -277,6 +278,10 @@ const PlayerTransactionTypeSelect = ({ placeholder, ...props }) => {
         {
             label: useTrans(GameProviderFundInTrans),
             value: GameProviderFundIn
+        },
+        {
+            label: useTrans(CancelWithdrawalTrans),
+            value: CancelWithdrawal
         },
         {
             label: useTrans(OtherTrans),
@@ -343,6 +348,8 @@ const PlayerTransactionTypeLabel = ({ value = "" }) => {
             return <Trans {...GameProviderFundOutTrans} />
         case GameProviderFundIn:
             return <Trans {...GameProviderFundInTrans} />
+        case CancelWithdrawal:
+            return <Trans {...CancelWithdrawalTrans} />
         case Other:
             return <Trans {...OtherTrans} />
         default:
