@@ -220,10 +220,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 };
             }
 
-            var cancelInfo = betInfo with {Status = BetStatus.Void};
+            balance = balance - betInfo.SettleAmount.GetValueOrDefault(0) + betInfo.BetAmount;
 
+            var cancelInfo = betInfo with {Status = BetStatus.Void};
             betInfos[betInfo.TransactionId] = cancelInfo;
-            balance = balance - betInfo.SettleAmount.GetValueOrDefault() + betInfo.BetAmount;
 
             await CacheBalanceAsync(playerCode, balance).ConfigureAwait(false);
             await CachedBetInfosInfoAsync(transferCode, betInfos);
@@ -237,12 +237,67 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             };
         }
 
-        public async ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request) =>
-            throw new NotImplementedException();
+        public async ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request)
+        {
+            var playerCode = request.PlayerCode;
+            var transferCode = request.ExternalTransactionId;
+
+            var betInfos = await GetBetInfosAsync(transferCode);
+            if (betInfos == null || betInfos.Count == 0)
+            {
+                return new()
+                {
+                    ErrorCode = (int)GameApiError.BetNotExist,
+                    ErrorMessage = GameApiError.BetNotExist.Description(),
+                    PlayerCode = playerCode
+                };
+            }
+
+            var balance = await GetBalanceAsync(playerCode);
+            var betInfo = betInfos.ElementAt(0).Value;
+
+            if (betInfo.Status == BetStatus.Running && betInfo.IsRollback)
+            {
+                return new()
+                {
+                    ErrorCode = (int)GameApiError.BetAlreadyRollback,
+                    ErrorMessage = GameApiError.BetAlreadyRollback.Description(),
+                    PlayerCode = playerCode
+                };
+            }
+
+            if (betInfo.Status == BetStatus.Void)
+            {
+                balance -= betInfo.BetAmount;
+            }
+            else
+            {
+                balance -= betInfo.SettleAmount.GetValueOrDefault(0);
+            }
+
+            var rollbackInfo = betInfo with
+            {
+                SettleAmount = null,
+                Status = BetStatus.Running,
+                IsRollback = true
+            };
+
+            betInfos[betInfo.TransactionId] = rollbackInfo;
+
+            await CacheBalanceAsync(playerCode, balance).ConfigureAwait(false);
+            await CachedBetInfosInfoAsync(transferCode, betInfos);
+
+            return new()
+            {
+                ErrorCode = (int)GameApiError.Success,
+                ErrorMessage = string.Empty,
+                PlayerCode = playerCode,
+                Balance = balance
+            };
+        }
 
         public async ValueTask<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request)
         {
-            var playerCode = request.PlayerCode;
             var transactionId = request.ExternalRoundId;
             var transferCode = request.ExternalTransactionId;
 
@@ -297,6 +352,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 }).ConfigureAwait(false);
 
         private record BetInfo(string TransferCode, string TransactionId, decimal BetAmount,
-            decimal? SettleAmount = null, BetStatus Status = BetStatus.Running);
+            decimal? SettleAmount = null, BetStatus Status = BetStatus.Running, bool IsRollback = false);
     }
 }

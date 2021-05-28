@@ -14,7 +14,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Enums
         InvalidIp = 2,
 
         [Description("userName empty")]
-        PlayerNotFound = 3,
+        UsernameIsEmpty = 3,
 
         [Description("CompanyKey Error")]
         InvalidCredentials = 4,
