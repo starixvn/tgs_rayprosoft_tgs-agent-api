@@ -16,9 +16,9 @@ namespace TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions
         [JsonPropertyName("userId")]
         public string UserId { get; set; }
         [JsonPropertyName("platform")]
-        public SexyGamingPlatform Platform { get; set; }
+        public string Platform { get; set; }
         [JsonPropertyName("gameType")]
-        public SexyGamingGameType GameType { get; set; }
+        public string GameType { get; set; }
         [JsonPropertyName("gameCode")]
         public string GameCode { get; set; }
         [JsonPropertyName("gameName")]

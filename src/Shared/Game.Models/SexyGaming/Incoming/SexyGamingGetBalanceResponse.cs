@@ -13,6 +13,6 @@ namespace TGS.Shared.Game.Models.SexyGaming.Incoming
         [JsonPropertyName("balance")]
         public decimal Balance { get; set; }
         [JsonPropertyName("balanceTs")]
-        public DateTimeOffset BalanceTs { get; set; }
+        public string BalanceTs { get; set; }
     }
 }
