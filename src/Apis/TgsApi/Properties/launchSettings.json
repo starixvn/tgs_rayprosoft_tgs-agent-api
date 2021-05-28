@@ -111,6 +111,16 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
+    "TgsApi-SexyGaming": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "SG",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
@@ -205,6 +215,17 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
       "environmentVariables": {
         "GameProviderCode": "JDB",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "publishAllPorts": true,
+      "useSSL": true
+    },
+    "Docker-SexyGaming": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "GameProviderCode": "SG",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "publishAllPorts": true,

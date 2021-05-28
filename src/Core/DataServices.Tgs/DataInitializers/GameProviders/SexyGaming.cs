@@ -57,7 +57,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage(), new CNLanguage(), new TWLanguage()
+                new USLanguage("en"), new CNLanguage("cn"), new JPLanguage("jp"), new THLanguage("th"), new VNLanguage("vn")
             };
 
             IGame[] IGameProvider.Games => _games;
