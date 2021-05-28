@@ -1,6 +1,6 @@
 export const stringifyJSON = (value = "") => {
     try {
-        if (typeof value === "string") {
+        if (typeof value === "string" && value != "") {
             let parsed = parseJSON(value)
             return JSON.stringify(parsed, null, 4)
         }

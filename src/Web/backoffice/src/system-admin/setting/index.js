@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Box, Button, Set, Icon } from "bumbag"
+import { Box, Button, Set, Icon, Level } from "bumbag"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
@@ -18,7 +18,11 @@ import SearchButton from "../../button/SearchButton"
 import { PageContent } from "../../page/Content"
 import AlertDialog from "../../dialog/Alert"
 import { Trans } from "../../i18n"
-import { EditSettingDisclosure, ViewSettingDisclosure } from "./edit"
+import {
+    AddSettingDisclosure,
+    EditSettingDisclosure,
+    ViewSettingDisclosure
+} from "./edit"
 import equals from "fast-deep-equal"
 
 export { Code }
@@ -48,27 +52,20 @@ const Body = () => {
         <PageContent
             title={<Trans zh="设定" en="Setting" />}
             actionBar={
-                <>
+                <Level>
                     <SearchBar
                         key={state?.key}
                         search={(data) => {
-                            let newState = {
+                            setState({
                                 pageIndex: 0,
-                                key: data?.key
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    key: state?.key
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
-                </>
+                    <AddSettingDisclosure onSubmitted={mutate} />
+                </Level>
             }
         >
             <Table
