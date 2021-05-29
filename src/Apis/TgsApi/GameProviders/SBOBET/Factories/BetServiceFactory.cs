@@ -18,11 +18,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 // sports 
                 1 => ActivatorUtilities.CreateInstance<SportBetService>(_serviceProvider),
 
-                // sbo rng
+                // sbo rng game
                 3 => ActivatorUtilities.CreateInstance<RngGameBetService>(_serviceProvider),
 
                 // virtual sports
                 5 => ActivatorUtilities.CreateInstance<VirtualSportBetService>(_serviceProvider),
+
+                // casino game
+                7 => ActivatorUtilities.CreateInstance<CasinoBetService>(_serviceProvider),
+
 
                 _ => throw new NotImplementedException()
             };
