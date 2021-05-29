@@ -4,7 +4,7 @@
     {
         public static class RedisKey
         {
-            public static readonly string RollbackTransction = "SBORollbackTrx";
+            public static readonly string RollbackTransaction = "SBORollbackTrx";
         }
     }
 }

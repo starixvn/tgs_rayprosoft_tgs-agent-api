@@ -95,13 +95,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransction,
+            var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransaction,
                 externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
 
             var betData = ActionModelMap.Request(data, externalRoundId, request, hasRollback);
             var r = await GamePlayActions.SettleBetAsync(betData).ConfigureAwait(false);
 
-            await RedisCacheManager.ClearCacheAsync(SBOBETConsts.RedisKey.RollbackTransction,
+            await RedisCacheManager.ClearCacheAsync(SBOBETConsts.RedisKey.RollbackTransaction,
                 externalRoundId, true).ConfigureAwait(false);
 
             return ActionModelMap.Response(request, r);
@@ -130,7 +130,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var playerCode = request.PlayerCode;
             var externalRoundId = request.ExternalTransactionId;
 
-            var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransction,
+            var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransaction,
                 externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
 
             if (hasRollback)
@@ -162,7 +162,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 
             if (r.Transactions.All(t => !t.IsDuplicate))
             {
-                await RedisCacheManager.SafeCacheForeverAsync(SBOBETConsts.RedisKey.RollbackTransction, externalRoundId,
+                await RedisCacheManager.SafeCacheForeverAsync(SBOBETConsts.RedisKey.RollbackTransaction,
+                    externalRoundId,
                     true);
             }
 
