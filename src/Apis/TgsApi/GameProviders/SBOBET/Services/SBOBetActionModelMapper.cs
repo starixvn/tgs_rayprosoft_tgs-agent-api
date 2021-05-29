@@ -19,10 +19,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     public interface ISBOBETActionModelMapper
     {
         BetData Request(GameProviderConfigurationData data, PlaceBetRequest request,
-            bool allowPlaceBetWithDifferentPlatformToken);
+            bool allowPlaceBetWithDifferentPlatformToken = false);
+
+        BetData CancelAndPlaceBetRequest(GameProviderConfigurationData data, PlaceBetRequest request,
+            bool allowPlaceBetWithDifferentPlatformToken = false);
 
         BetData Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request,
-            bool hasRollback);
+            bool hasRollback, bool forceCloseRound = false);
 
         BetData Request(GameProviderConfigurationData data, CancelBetRequest request);
 
@@ -56,30 +59,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     {
         private const string GameProviderCode = Consts.GameProvider.SBOBET;
         private const bool HasCurrencyFromGameProvider = false;
-
-        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request,
-            bool allowPlaceBetWithDifferentPlatformToken)
-        {
-            var externalTransactionId = request.ExternalTransactionId;
-            var externalRoundId = request.ExternalRoundId;
-
-            var transactions = new TransactionData[]
-            {
-                new()
-                {
-                    Amount = request.Amount,
-                    ExternalTransactionId = externalTransactionId,
-                    ExternalRoundId = externalRoundId,
-                    ExternalBetId = externalTransactionId,
-                    ExternalGameActionGroupId = externalRoundId,
-                    ExternalGameId = request.ExternalGameId,
-                    GameActionType = PlaceBet,
-                    TimeStamp = request.BetTime
-                }
-            };
-
-            return GetBetData(data, request.PlayerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
-        }
 
         BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, CancelBetRequest request)
         {
@@ -222,7 +201,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             GameProviderConfigurationData data,
             string externalRoundId,
             SettleBetRequest request,
-            bool hasRollback)
+            bool hasRollback,
+            bool forceCloseRound)
         {
             var externalTransactionReferenceId = request.ExternalTransactionId;
 
@@ -242,11 +222,73 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalGameActionGroupId = externalRoundId,
                     ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
                     GameActionType = GetGameActionType(request.Result),
-                    TimeStamp = request.SettleTime
+                    TimeStamp = request.SettleTime,
+                    RoundClosed = forceCloseRound ? true : null
                 }
             };
 
             return GetBetData(data, request.PlayerCode, transactions);
+        }
+
+        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request,
+            bool allowPlaceBetWithDifferentPlatformToken)
+        {
+            var externalTransactionId = request.ExternalTransactionId;
+            var externalRoundId = request.ExternalRoundId;
+
+            var transactions = new TransactionData[]
+            {
+                new()
+                {
+                    Amount = request.Amount,
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = request.ExternalGameId,
+                    GameActionType = PlaceBet,
+                    TimeStamp = request.BetTime
+                }
+            };
+
+            return GetBetData(data, request.PlayerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
+        }
+
+        BetData ISBOBETActionModelMapper.CancelAndPlaceBetRequest(GameProviderConfigurationData data,
+            PlaceBetRequest request, bool allowPlaceBetWithDifferentPlatformToken)
+        {
+            var externalTransactionId = request.ExternalTransactionId;
+            var externalRoundId = request.ExternalRoundId;
+
+            var transactions = new TransactionData[]
+            {
+                new()
+                {
+                    Amount = request.Amount,
+                    ExternalTransactionId = $"{externalTransactionId}_cancel",
+                    ExternalTransactionReferenceId = externalTransactionId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = request.ExternalGameId,
+                    GameActionType = CancelTransaction,
+                    TimeStamp = request.BetTime,
+                    RoundClosed = false
+                },
+                new()
+                {
+                    Amount = request.Amount,
+                    ExternalTransactionId = $"{externalTransactionId}_raise",
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = request.ExternalGameId,
+                    GameActionType = PlaceBet,
+                    TimeStamp = request.BetTime
+                }
+            };
+
+            return GetBetData(data, request.PlayerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
         }
 
         #region Private Methods

@@ -73,7 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = ActionModelMap.Request(data, request, false);
+            var betData = ActionModelMap.Request(data, request);
             var r = await GamePlayActions.PlaceBetAsync(betData).ConfigureAwait(false);
             return ActionModelMap.Response(request, r);
         }

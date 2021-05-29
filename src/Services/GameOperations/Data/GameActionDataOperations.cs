@@ -84,10 +84,10 @@ namespace TGS.Services.GameOperations.Data
 
         ValueTask<BetResult> IGameActionDataOperations.PlaceBetAsync(BetData data)
         {
-            if (data.Transactions.Any(t => t.GameActionType.IsNotAllOf(UnlockAmount, PlaceBet)))
+            if (data.Transactions.Any(t => t.GameActionType.IsNotAllOf(UnlockAmount, PlaceBet, CancelTransaction)))
             {
                 throw new InvalidOperationException(
-                    "Only allow game action type UnlockAmount / PlaceBet in place bet action");
+                    "Only allow game action type UnlockAmount / CancelTransaction /  PlaceBet in place bet action");
             }
 
             return ExecuteGameActionAsync(data);

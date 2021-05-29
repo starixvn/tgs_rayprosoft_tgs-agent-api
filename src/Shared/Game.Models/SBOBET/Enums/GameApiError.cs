@@ -46,6 +46,8 @@ namespace TGS.Shared.Game.Models.SBOBET.Enums
 
         IncorrectFormat = 2007,
         InvalidArguments = 2008,
+
+        [Description("Invalid Amount")]
         InvalidAmount = 2009,
         InvalidGameAction = 2010,
         UnderMaintenance = 2011,
