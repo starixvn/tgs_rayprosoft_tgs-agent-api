@@ -33,7 +33,7 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool? DebitSucceeded { get; set; }
 
-        [JsonPropertyName("successcrebit")]
+        [JsonPropertyName("successcredit")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public bool? CreditSucceeded { get; set; }
 
