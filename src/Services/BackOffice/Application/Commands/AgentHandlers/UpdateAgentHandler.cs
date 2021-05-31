@@ -6,6 +6,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
+using TGS.Services.BackOffice.Domain.Enums;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
@@ -35,6 +36,13 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     x.LevelType == AgentLevelType.Chief))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
+            }
+
+            if (request.UpdateType == MemberUpdateType.Contact &&
+                request.Email.IsNotNullOrEmpty() &&
+                await _service.ExistsAsync(x => x.Id != agent.Id && x.Email == request.Email))
+            {
+                return CreateInvalidResponse<MessageResponse>(Agent.EmailExisted);
             }
 
             await _service.UpdateAgentAsync(agent, request);

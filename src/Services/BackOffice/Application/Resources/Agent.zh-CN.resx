@@ -147,4 +147,7 @@
   <data name="InsufficientBalance" xml:space="preserve">
     <value>余额不足</value>
   </data>
+  <data name="EmailExisted" xml:space="preserve">
+    <value>邮件信箱已存在</value>
+  </data>
 </root>
