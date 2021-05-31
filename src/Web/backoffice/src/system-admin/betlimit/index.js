@@ -8,7 +8,7 @@ import {
     useUserRoleId
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
-import { Code } from "./menu"
+import { Code, Update } from "./menu"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useForm, FormProvider } from "react-hook-form"
@@ -110,8 +110,9 @@ const SearchBar = ({ keyword = "", search, isLoading }) => {
 }
 
 const useColumns = ({ items = [], mutate }) => {
-    return useMemo(
-        () => [
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    return useMemo(() => {
+        let columns = [
             textColumn({
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
@@ -151,24 +152,30 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: "updatedByUsername",
                 Header: <Trans zh="更新人" en="Updated By" />,
                 disableSortBy: true
-            }),
-            textColumn({
-                id: "actions",
-                Header: <Trans zh="操作" en="Actions" />,
-                accessor: (row) => row,
-                disableSortBy: true,
-                Cell: ({ value: record }) => {
-                    return (
-                        <Set orientation="horizontal">
-                            <EditBetLimitDisclosure
-                                record={record}
-                                onSubmitted={mutate}
-                            />
-                        </Set>
-                    )
-                }
             })
-        ],
-        [JSON.stringify(items)]
-    )
+        ]
+
+        if (hasUpdateAuth) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    Header: <Trans zh="操作" en="Actions" />,
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Cell: ({ value: record }) => {
+                        return (
+                            <Set orientation="horizontal">
+                                <EditBetLimitDisclosure
+                                    record={record}
+                                    onSubmitted={mutate}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
 }

@@ -15,6 +15,7 @@ import {
     Card,
     Level
 } from "bumbag"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure, {
     AddDisclosure,
     EditDisclosure
@@ -35,14 +36,6 @@ import clone from "clone-deep"
 import { pageCount, Table, toApiParams, useTable } from "../../table"
 import textColumn from "../../table/column/textColumn"
 import { InputField, Input } from "../../input/Input"
-import { CheckboxField } from "../../checkbox/Checkbox"
-import GameStatus, { GameStatusSelectField } from "../../game/games/GameStatus"
-import { GameTypeSelectField } from "../../game/GameType"
-import {
-    GamePlatformLabel,
-    GamePlatformTypeSelectField
-} from "../../game/games/GamePlatform"
-import { useDropzone } from "react-dropzone"
 import {
     AddGameProviderGameDisclosure,
     GameProviderGameDisclosure
@@ -51,9 +44,15 @@ import { BatchAddGameProviderGameListDisclosure } from "./BatchAddGameProviderGa
 import SearchButton from "../../button/SearchButton"
 import { useGameProviderGameList } from "../../game/games/client"
 import dateTimeColumn from "../../table/column/dateTime"
+import { View, Update } from "./menu"
 
 export const GameProviderGameListDisclosure = ({ gameProviderId }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([View])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>
@@ -179,6 +178,7 @@ const ActionBar = ({ gameProviderId, code, id, search, mutate, isLoading }) => {
 }
 
 const useColumns = ({ items = [], mutate }) => {
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
     return useMemo(() => {
         let columns = [
             textColumn({
@@ -211,24 +211,29 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: "updatedByUsername",
                 Header: <Trans zh="更改者" en="Updated By" />,
                 disableSortBy: true
-            }),
-            textColumn({
-                id: "actions",
-                accessor: (row) => row,
-                Header: <Trans zh="操作" en="Actions" />,
-                disableSortBy: true,
-                Cell: ({ value: record }) => {
-                    return (
-                        <Set orientation="horizontal" alignX="center">
-                            <GameProviderGameDisclosure
-                                record={record}
-                                onSubmitted={mutate}
-                            />
-                        </Set>
-                    )
-                }
             })
         ]
+
+        if (hasUpdateAuth) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    accessor: (row) => row,
+                    Header: <Trans zh="操作" en="Actions" />,
+                    disableSortBy: true,
+                    Cell: ({ value: record }) => {
+                        return (
+                            <Set orientation="horizontal" alignX="center">
+                                <GameProviderGameDisclosure
+                                    record={record}
+                                    onSubmitted={mutate}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
+        }
 
         return columns
     }, [JSON.stringify(items)])

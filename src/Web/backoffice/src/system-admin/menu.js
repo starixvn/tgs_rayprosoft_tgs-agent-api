@@ -120,6 +120,7 @@ export const codeLabelPair = [
             label: labelOf,
             subLabelPairs: [
                 gameProviderPair,
+                brandPaymentsPair,
                 languagePair,
                 currencyPair,
                 betLimitPair,
