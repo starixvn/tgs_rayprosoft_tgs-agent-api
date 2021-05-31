@@ -83,10 +83,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId,
                 gameActionTypes).ConfigureAwait(false);
 
-        public async ValueTask<GameActionData> GetValidGameActionsAsync(Guid gameProviderId, string playerCode,
-            string externalRoundId, int gameId) =>
-            await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId,
-                gameId).ConfigureAwait(false);
+        public async ValueTask<GameActionData> GetValidGameActionsAsync(
+            Guid gameProviderId,
+            string playerCode,
+            string externalRoundId,
+            int gameId)
+            => await _gameActionQueries
+                .GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId)
+                .ConfigureAwait(false);
 
         public async
             ValueTask<(RoundStatus RoundStatus, int GameId, PlatformType PlatformType)> GetRoundStatusAndGameIdAndPlatformAsync(

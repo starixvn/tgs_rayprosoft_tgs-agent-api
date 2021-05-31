@@ -11,6 +11,8 @@ using TGS.Core.Models.Exceptions;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
+using TGS.Shared.Game.Models.SBOBET.Enums;
+using TGS.Core.Models.GameProviders.Settings;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 {
@@ -61,7 +63,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             if (ga == null)
             {
                 throw new InvalidGameActionException(
-                    $"Transaction of transferCode: {request.ExternalTransactionId} and transactionId: {request.ExternalRoundId} is not found.",
+                    $"Transaction of transferCode: {request.ExternalTransactionId} " +
+                    $"and transactionId: {request.ExternalRoundId} is not found.",
                     InvalidGameActionErrorCode.TransactionNotFound);
             }
 
@@ -70,9 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 
         public override async ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
         {
-            var response = await base
-                .PlaceBetAsync(request)
-                .ConfigureAwait(false);
+            var response = await base.PlaceBetAsync(request).ConfigureAwait(false);
 
             await _redisDb
                 .StringSetAsync(request.ExternalTransactionId, request.ExternalRoundId)
@@ -106,11 +107,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
 
             if (roundStatus == RoundStatus.Closed)
-                return new SettleBetResponse
-                {
-                    ErrorCode = 2002,
-                    ErrorMessage = "Round already closed"
-                };
+                return ActionModelMap.Response<SettleBetResponse>(playerCode, GameApiError.BetAlreadyCanceled);
 
             var betData = ActionModelMap.Request(data, externalRoundId, request, hasRollback);
             var r = await GamePlayActions.SettleBetAsync(betData).ConfigureAwait(false);
