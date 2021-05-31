@@ -129,6 +129,18 @@ export const SportGameTypes = [
 
 export const isSportGameType = (value = "") => SportGameTypes.includes(value)
 
+const LobbyGameTypes = [
+    VirtualSportsLobby,
+    LiveDealerLobby,
+    CardGameLobby,
+    FishingLobby,
+    ArcadeLobby,
+    LotteryLobby
+]
+export const isLobbyGameType = (value = "") => LobbyGameTypes.includes(value)
+
+export const notLobbyGameType = (value = "") => !isLobbyGameType(value)
+
 const LiveDealerGroupTrans = {
     zh: "真人",
     en: "Live Dealer"

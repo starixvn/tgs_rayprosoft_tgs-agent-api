@@ -32,15 +32,21 @@ export const toDataOrError = (response) => {
         }
     }
 
-    return response.json().then((data) => {
-        if (!data?.valid && data?.message) {
-            return Promise.reject({
-                title: data.message
-            })
-        }
+    return response
+        .json()
+        .then((data) => {
+            if (!data?.valid && data?.message) {
+                return Promise.reject({
+                    title: data.message
+                })
+            }
 
-        return data
-    })
+            return data
+        })
+        .catch((error) => {
+            console.warn(error)
+            return response?.ok
+        })
 }
 
 const BadRequest = 400

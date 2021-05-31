@@ -121,6 +121,7 @@ const GameListDialog = ({ gameProviderId, dialog, ...props }) => {
                         })
                         mutate()
                     }}
+                    mutate={mutate}
                 />
                 <Table
                     columns={columns}

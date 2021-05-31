@@ -69,7 +69,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             if (error is
                 GameApiError.UnknownException or
                 GameApiError.AuthenticationSignIsInvalid or
-                GameApiError.AccountDoesNotExist)
+                GameApiError.AccountDoesNotExist or
+                GameApiError.InsufficientBettingBalance)
             {
                 response = new BigGamingResponse()
                 {

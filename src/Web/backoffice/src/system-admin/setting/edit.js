@@ -14,15 +14,106 @@ import {
 } from "bumbag"
 import { Update as UpdateMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { EditDisclosure, ViewDisclosure } from "../../dialog/Disclosure"
+import {
+    AddDisclosure,
+    EditDisclosure,
+    ViewDisclosure
+} from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { Trans, useTrans } from "../../i18n"
 import Input, { InputField } from "../../input/Input"
-import { useUpdateSystemSetting } from "./client"
+import { useAddSystemSetting, useUpdateSystemSetting } from "./client"
 import { useForm, Controller } from "react-hook-form"
 import { TextareaField } from "../../textarea"
 import { stringifyJSON } from "../../text/json"
 import { JsonEditor } from "../../text/editor/JsonEditor"
+
+export const AddSettingDisclosure = ({ onSubmitted }) => {
+    let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
+    if (!isDisplay) {
+        return null
+    }
+
+    return (
+        <>
+            <AddDisclosure {...dialog} />
+            {dialog.visible && (
+                <AddDialog onSubmitted={onSubmitted} dialog={dialog} />
+            )}
+        </>
+    )
+}
+
+const AddDialog = ({ dialog, onSubmitted }) => {
+    let title = useTrans({
+        zh: "新增设定",
+        en: "Add Setting"
+    })
+
+    let [formData, setSubmit] = useState()
+    let { isLoading, result, error, mutate, deleteCache } =
+        useAddSystemSetting(formData)
+
+    let formMethods = useForm({
+        defaultValues: {
+            key: "",
+            value: "",
+            description: ""
+        }
+    })
+
+    const onSubmit = (data) => {
+        setSubmit(data)
+    }
+
+    const reset = () => {
+        deleteCache()
+        mutate(undefined, false)
+        setSubmit(undefined)
+    }
+
+    return (
+        <FormDialog
+            formMethods={formMethods}
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+            result={result}
+            error={error}
+            onCloseErrorAlert={reset}
+            onSubmitted={onSubmitted}
+            title={title}
+            dialog={dialog}
+            showActionButtons
+            maxWidth="90vw"
+            width="90vw"
+            height="90vh"
+            maxHeight="90vh"
+            placement="top"
+            css={css`
+                & .bb-DialogContent {
+                    flex: 1 100%;
+                    max-height: unset;
+
+                    > .bb-Box {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+                    }
+                }
+            `}
+        >
+            <FieldStack orientation="vertical" flex="1 100%">
+                <FieldStack orientation="horizontal">
+                    <InputField name="key" label="Key" required />
+                    <InputField name="description" label="Description" />
+                </FieldStack>
+                <JsonEditor name="value" required height="60vh" />
+            </FieldStack>
+        </FormDialog>
+    )
+}
 
 export const EditSettingDisclosure = ({ record, onSubmitted }) => {
     let dialog = useModalState()
@@ -55,13 +146,8 @@ const EditDialog = ({ record, onSubmitted, dialog, ...props }) => {
     })
 
     let [formData, setSubmit] = useState()
-    let {
-        result,
-        isLoading,
-        error,
-        mutate,
-        deleteCache
-    } = useUpdateSystemSetting(key, formData)
+    let { result, isLoading, error, mutate, deleteCache } =
+        useUpdateSystemSetting(key, formData)
 
     let formMethods = useForm({
         defaultValues: {

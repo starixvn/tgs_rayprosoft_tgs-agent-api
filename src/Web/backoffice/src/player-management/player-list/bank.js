@@ -334,10 +334,9 @@ const EditBody = ({ brandId }) => {
 
     let BankTypeFieldName = "bankType"
     let bankType = watch(BankTypeFieldName)
-    let paymentChannelIdRange =
-        data?.items
-            ?.filter((item) => item.bankType === bankType)
-            ?.map(({ paymentChannelId }) => paymentChannelId) ?? []
+    let paymentChannelIdRange = data?.items
+        ?.filter((item) => item.bankType === bankType)
+        ?.map(({ paymentChannelId }) => paymentChannelId)
 
     let isBank = PaymentMethodBankType.isBank(bankType)
     let isCrypto = PaymentMethodBankType.isCrypto(bankType)
