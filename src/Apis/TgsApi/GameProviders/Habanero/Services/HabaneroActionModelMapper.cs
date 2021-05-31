@@ -135,6 +135,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                     Status = new()
                     {
                         Success = false,
+                        HasAuthenticationError = true,
                         Message = $"code: {(int)error}, message: {message}"
                     }
                 }
