@@ -11,13 +11,13 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.Promotion;
+using TGS.Services.Promotion.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
 using TGS.Services.TgsTransaction.Core;
 using TGS.Services.WalletService;
-using TGS.Services.PlayerBucket.Models;
-using TGS.Services.PlayerBucket;
-using TGS.Services.Promotion.Models.PromotionBonus;
-using TGS.Services.Promotion;
 
 namespace TGS.Services.Report.Application.Commands.Promotion
 {
@@ -31,7 +31,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
         private static readonly DateTimeOffset _PreviousMonday = _Now.AddDays(-7).GetMonday();
         private static readonly DateTimeOffset _PreviousSunday = _Now.AddDays(-7).GetSunday();
         private readonly IPlayerBucketRepository _playerBucketService;
-        private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
+        private readonly IPlayerGameAggregateService _playerGameTypeAggregateService;
         private readonly ITgsPlayerService _playerService;
         private readonly IPromotionBonusRepository _promotionBonusService;
         private readonly ITgsPromotionService _promotionService;
@@ -39,7 +39,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
         private readonly IWalletRepository _walletRepository;
 
         public CreatePromotionBonusWeeklyHandler(IPromotionBonusRepository promotionBonusService,
-            IPlayerGameTypeAggregateService playerGameTypeAggregateService,
+            IPlayerGameAggregateService playerGameTypeAggregateService,
             ITgsPromotionService promotionService,
             ITgsPlayerService playerService,
             IPlayerBucketRepository playerBucketService,
@@ -87,10 +87,15 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
-            var playerGameTypeRoundAggregate = await _playerGameTypeAggregateService.GetPlayerGameTypeAggregateQueries()
+            var playerGameRoundAggregate = await _playerGameTypeAggregateService.GetPlayerGameAggregateQueries()
                 .Where(x => x.ReportDate >= _PreviousMonday && x.ReportDate <= _PreviousSunday)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
+                .Join(_playerGameTypeAggregateService.Repository.BrandGames,
+                    aggregate => new {aggregate.BrandId, aggregate.GameId},
+                    brandGame => new {brandGame.BrandId, brandGame.GameId},
+                    (aggregate, brandGame) => new {aggregate, brandGame})
+                .Where(x => x.brandGame.Rebate)
                 .ToArrayAsync(cancellationToken);
 
             var promotionBonus = promotions.Select(x =>
@@ -98,7 +103,8 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 var id = GuidExtensions.NewSequentialGuid();
                 var from = x.From > _PreviousMonday ? x.From : _PreviousMonday;
                 var to = x.To < _PreviousSunday ? x.To : _PreviousSunday;
-                var (players, amountUsed) = GetPromotionBonusPlayers(id, x, playerGameTypeRoundAggregate, from, to);
+                var (players, amountUsed) =
+                    GetPromotionBonusPlayers(id, x, playerGameRoundAggregate.Select(p => p.aggregate), from, to);
                 x.AmountUsed = amountUsed;
 
                 return new PromotionBonusModel
@@ -178,7 +184,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
         }
 
         private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(Guid id,
-            Core.DataServices.Tgs.Models.Promotion promotion, IEnumerable<PlayerGameTypeAggregate> aggregates,
+            Core.DataServices.Tgs.Models.Promotion promotion, IEnumerable<PlayerGameAggregate> aggregates,
             DateTimeOffset from, DateTimeOffset to)
         {
             var amount = promotion.AmountUsed;

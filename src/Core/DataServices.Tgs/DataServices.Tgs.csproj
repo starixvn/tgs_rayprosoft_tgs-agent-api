@@ -6,8 +6,6 @@
     <RootNamespace>TGS.Core.DataServices.Tgs</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>  </ItemGroup>
-
   <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -39,7 +37,8 @@
     <EmbeddedResource Include="SqlScripts\Functions\log_get_api_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_log_records.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_account_change_records.sql" />
-    <EmbeddedResource Include="SqlScripts\Functions\report_get_round_aggregates.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\report_get_round_and_set_game_setting_aggregates.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\report_generate_round_aggregates.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\agent_wallet_update_wallet_balance.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\admin_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\api_logs.sql" />
@@ -81,6 +80,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Views\vw_valid_game_actions.sql" />
     <None Remove="DataInitializers\Games\JDB.csv" />
+    <None Remove="SqlScripts\Functions\report_get_round_and_set_game_setting_aggregates.sql" />
     <EmbeddedResource Include="DataInitializers\Games\JDB.csv" />
   </ItemGroup>
 

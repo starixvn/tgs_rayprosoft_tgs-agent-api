@@ -10,6 +10,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public Guid? AgentId { get; set; }
         public string PlayerCode { get; set; }
         public Guid GameProviderId { get; set; }
+        public int GameId { get; set; }
         public GameType GameType { get; set; }
         public int Hour { get; set; }
         public int Minute { get; set; }

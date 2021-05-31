@@ -17,7 +17,7 @@ namespace TGS.Services.Report.Application.Extensions
             services.AddTransient<ITgsPromotionService, TgsPromotionService>();
             services.AddTransient<IAgentDividendService, AgentDividendService>();
             services.AddTransient<IPlayerAggregateService, PlayerAggregateService>();
-            services.AddTransient<IPlayerGameTypeAggregateService, PlayerGameTypeAggregateService>();
+            services.AddTransient<IPlayerGameAggregateService, PlayerGameAggregateService>();
             services.AddTransient<IRoundAggregateService, RoundAggregateService>();
             services.AddTransient<IPlayerRebateService, PlayerRebateService>();
 
