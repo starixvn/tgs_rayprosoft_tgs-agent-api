@@ -39,9 +39,10 @@ const Body = () => {
         keyword: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useBetLimitList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useBetLimitList({
+        ...toApiParams(state),
+        sortby: "id"
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
@@ -52,20 +53,12 @@ const Body = () => {
                     <SearchBar
                         code={state?.code}
                         name={state?.name}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                keyword: data?.keyword
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    keyword: state?.keyword
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />

@@ -41,7 +41,10 @@ const Body = () => {
         sortby: "code"
     })
     let { pageIndex, pageSize, name } = state
-    let { data, isLoading, mutate } = useGameProviderList(toApiParams(state))
+    let { data, isLoading, mutate } = useGameProviderList({
+        ...toApiParams(state),
+        sortby: "code"
+    })
 
     let columns = useColumns({ items: data?.items, mutate })
 

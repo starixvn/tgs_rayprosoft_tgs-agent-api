@@ -132,7 +132,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(role.ResellerId, x => x.ResellerId == role.ResellerId)
                 .Where(role.LicenseeId, x => x.LicenseeId == role.LicenseeId)
                 .Where(role.BrandId, x => x.BrandId == role.BrandId)
-                .AnyAsync(x => x.Name == request.Name);
+                .AnyAsync(x => x.Id != role.Id && x.Name == request.Name);
 
             if (roleNameExisted)
             {

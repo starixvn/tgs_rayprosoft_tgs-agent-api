@@ -40,9 +40,10 @@ const Body = () => {
         name: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useLanguageList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useLanguageList({
+        ...toApiParams(state),
+        sortby: "cultureCode"
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
@@ -53,22 +54,12 @@ const Body = () => {
                     <SearchBar
                         cultureCode={state?.cultureCode}
                         languageCode={state?.languageCode}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                cultureCode: data?.cultureCode,
-                                languageCode: data?.languageCode
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    cultureCode: state?.cultureCode,
-                                    languageCode: state?.languageCode
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />

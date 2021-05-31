@@ -43,9 +43,10 @@ const Body = () => {
         key: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useSystemSettingList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useSystemSettingList({
+        ...toApiParams(state),
+        sortby: "key"
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
     return (

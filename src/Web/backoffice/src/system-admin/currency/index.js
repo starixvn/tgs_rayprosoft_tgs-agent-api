@@ -40,9 +40,10 @@ const Body = () => {
         name: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useCurrencyList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useCurrencyList({
+        ...toApiParams(state),
+        sortby: "code"
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
@@ -53,22 +54,12 @@ const Body = () => {
                     <SearchBar
                         code={state?.code}
                         name={state?.name}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                code: data?.code,
-                                name: data?.name
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    code: state?.code,
-                                    name: state?.name
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />

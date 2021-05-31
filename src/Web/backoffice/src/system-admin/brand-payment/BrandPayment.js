@@ -126,6 +126,7 @@ export const AddBrandPaymentDisclosure = ({ brandId, onSubmitted }) => {
 
 const EditDialog = ({
     record: { id, extendedData = {}, ...record },
+    onSubmitted,
     dialog
 }) => {
     let title = useTrans({
@@ -137,10 +138,11 @@ const EditDialog = ({
     let { isLoading, result, error, deleteCache, mutate } =
         useUpdateBrandPayment(id, formData)
 
-    const onSubmit = (data) => {
+    const onSubmit = ({ extendedData, ...data }) => {
         setSubmit({
             ...record,
-            ...data
+            ...data,
+            extendedData: parseJSON(extendedData)
         })
     }
 
@@ -157,6 +159,7 @@ const EditDialog = ({
                 extendedData: stringifyJSON(extendedData)
             }}
             onSubmit={onSubmit}
+            onSubmitted={onSubmitted}
             isLoading={isLoading}
             result={result}
             error={error}

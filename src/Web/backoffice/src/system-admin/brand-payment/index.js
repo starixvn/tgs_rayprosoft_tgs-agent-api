@@ -159,8 +159,7 @@ const useColumns = ({ items = [], mutate }) =>
                 accessor: "channelName",
                 Header: <Trans zh="通道名称" en="Channel Name" />,
                 disableSortBy: true
-            })
-            /*
+            }),
             textColumn({
                 id: "actions",
                 accessor: (row) => row,
@@ -175,7 +174,6 @@ const useColumns = ({ items = [], mutate }) =>
                     )
                 }
             })
-            */
         ],
         [JSON.stringify(items)]
     )

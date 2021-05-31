@@ -12,45 +12,45 @@ export const Verify = "verify"
 export const View = "view"
 
 export const label = ({ codes = [], locale = Locales.zh }) => {
-  let [code = ""] = codes
-  code = code.toLowerCase()
+    let [code = ""] = codes
+    code = code.toLowerCase()
 
-  switch (code) {
-    case Create:
-      return getTrans(
-        {
-          zh: "新增公告",
-          en: "Add announcement"
-        },
-        locale
-      )
-    case Update:
-      return getTrans(
-        {
-          zh: "修改公告",
-          en: "Edit announcement"
-        },
-        locale
-      )
-    case Verify:
-      return getTrans(
-        {
-          zh: "审核公告",
-          en: "Verify announcement"
-        },
-        locale
-      )
-    case View:
-      return getTrans(
-        {
-          zh: "查看公告",
-          en: "View announcement"
-        },
-        locale
-      )
-    default:
-      return ""
-  }
+    switch (code) {
+        case Create:
+            return getTrans(
+                {
+                    zh: "新增",
+                    en: "Add"
+                },
+                locale
+            )
+        case Update:
+            return getTrans(
+                {
+                    zh: "修改",
+                    en: "Edit"
+                },
+                locale
+            )
+        case Verify:
+            return getTrans(
+                {
+                    zh: "审核",
+                    en: "Audit"
+                },
+                locale
+            )
+        case View:
+            return getTrans(
+                {
+                    zh: "查看",
+                    en: "View"
+                },
+                locale
+            )
+        default:
+            return ""
+    }
 }
 
 export const codeLabelPair = [Code, label]
