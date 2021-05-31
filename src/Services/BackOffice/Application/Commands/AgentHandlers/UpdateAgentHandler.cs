@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -40,7 +41,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
 
             if (request.UpdateType == MemberUpdateType.Contact &&
                 request.Email.IsNotNullOrEmpty() &&
-                await _service.ExistsAsync(x => x.Id != agent.Id && x.Email == request.Email))
+                await _service.ExistsAsync(x => x.Id != agent.Id && EF.Functions.ILike(x.Email, $"%{request.Email}%")))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.EmailExisted);
             }
