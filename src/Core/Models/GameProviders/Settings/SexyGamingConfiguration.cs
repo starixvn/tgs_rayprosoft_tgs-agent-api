@@ -13,5 +13,6 @@ namespace TGS.Core.Models.GameProviders.Settings
         public string AgentId { get; init; }
         public string Cert { get; init; }
         public SexyGamingBetLimit BetLimit { get; init; }
+        public OppositeBetSetting[] OppositeBets { get; init; }
     }
 }

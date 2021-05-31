@@ -8,7 +8,6 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
@@ -30,7 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
-             ITokenProvider tokenProvider,
+            ITokenProvider tokenProvider,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
@@ -49,30 +48,44 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
             var form = await context.Request.ReadFormAsync();
             var key = form.GetValue<string>(SexyGamingConsts.Parameters.Key);
 
-
-
             if (key.IgnoreCaseNotEquals(configuration.Cert))
             {
                 throw new MissingTokenException($"Authentication encryption failed({key})");
             }
 
-            var extension1 = form.GetValue<string>(SexyGamingConsts.Parameters.Extension1);
-            var extensionDir = JsonSerializer.Deserialize<Dictionary<string, string>>(extension1);
-            var loginRecord = await DecryptTokenAsync(extensionDir["token"]);
-
-            var playerCode = loginRecord.PlayerCode;
-            var platformType = loginRecord.PlatformType;
+            var Message = JsonDocument.Parse(form.GetValue<string>(SexyGamingConsts.Parameters.Message));
+            var data = _jsonSerializationProvider.DeserializeFromString<SexyGamingSingleWalletBaseRequest>(
+                _jsonSerializationProvider.SerializeToString(Message));
 
             var gameProviderId =
-                await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.SexyGaming);
-            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
-
+                    await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.SexyGaming);
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
-            context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
-            context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
-            context.Items.Add(Consts.ContextItems.PlatformType, platformType);
 
+            /*
+             * Place bet: 1 player / multiple transactions (1 confirm action)
+             * Cancel bet: 1 player / multiple transactions (1 confirm action)
+             * Settle: multiple player / multiple transactions (1 round action)
+             * Unsettle: multiple player / multiple transactions (1 round action)
+             * Voidbet: multiple player / multiple transactions (1 round action)
+             * VoidSettle: 1 player / multiple transaction (by selected transaction)
+             */
+            if (data.Action.IgnoreCaseEquals("getBalance") || data.Action.IgnoreCaseEquals("bet") || data.Action.IgnoreCaseEquals("cancelBet") || data.Action.IgnoreCaseEquals("voidSettle"))
+            {
+                var extension1 = form.GetValue<string>(SexyGamingConsts.Parameters.Extension1);
+                var extensionDir = JsonSerializer.Deserialize<Dictionary<string, string>>(extension1);
+                var loginRecord = await DecryptTokenAsync(extensionDir["token"]);
+
+                var playerCode = loginRecord.PlayerCode;
+                var platformType = loginRecord.PlatformType;
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
+
+                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+                context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
+                context.Items.Add(Consts.ContextItems.PlatformType, platformType);
+
+            }
             await next(context);
         }
 

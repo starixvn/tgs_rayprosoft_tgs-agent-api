@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Commons.Middlewares;
-using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
@@ -36,6 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
 
             var response = new SexyGamingBaseResponse()
             {
+
                 Status = ((int)error).ToString(),
                 Desc = (!string.IsNullOrEmpty(error.Description())) ? error.Description() : message
             };

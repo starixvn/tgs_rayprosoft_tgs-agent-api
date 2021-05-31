@@ -30,9 +30,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
                 _ => provider.GetRequiredService<TgsErrorMapper>()
             });
 
-            services.AddScoped<HandleSexyGamingExceptionMiddleware>();
             services.AddScoped<AuthorizeSexyGamingMiddleware>();
-
+            services.AddScoped<HandleSexyGamingExceptionMiddleware>();
+            services.AddScoped<ISexyGamingServices, SexyGamingServices>();
+            services.AddScoped<ISexyGamingActionModelMapper, SexyGamingActionModelMapper>();
 
         }
 

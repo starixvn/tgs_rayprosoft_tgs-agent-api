@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -15,25 +17,31 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
     {
         BetData BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source);
 
-        BetData CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source);
+        Task<BetData> CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source);
 
-        BetData VoidBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingVoidBett[] source);
+        BatchBetData VoidBetAsync(GameProviderConfigurationData data, SexyGamingVoidBett[] source);
 
-        BetData SettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingSettle[] source, OppositeBetSetting[] oppositeBetSettings);
+        BatchBetData SettleAsync(GameProviderConfigurationData data, SexyGamingSettle[] source, OppositeBetSetting[] oppositeBetSettings);
 
-        BetData UnsettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingUnsettle[] source, OppositeBetSetting[] oppositeBetSettings);
+        Task<BatchBetData> UnsettleAsync(GameProviderConfigurationData data, SexyGamingUnsettle[] source);
 
-        BetData VoidSettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingVoidSettle[] source, OppositeBetSetting[] oppositeBetSettings);
+        BatchBetData VoidSettleAsync(GameProviderConfigurationData data, SexyGamingVoidSettle[] source);
     }
 
     public class SexyGamingActionModelMapper : ISexyGamingActionModelMapper
     {
-        private const string GameProviderCode = Consts.GameProvider.BigGaming;
+        private const string GameProviderCode = Consts.GameProvider.SexyGaming;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ISexyGamingServices _services;
 
-        private readonly Dictionary<string, decimal> _bullBullOddsMapper;
-
-        public SexyGamingActionModelMapper()
-        { }
+        public SexyGamingActionModelMapper(
+            ISexyGamingServices services,
+            IJsonSerializationProvider jsonSerializationProvider
+            )
+        {
+            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+        }
 
 
         BetData ISexyGamingActionModelMapper.BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source)
@@ -48,6 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                                     ExternalGameActionGroupId = order.PlatformTxId.ToString(),
                                     ExternalGameId = order.GameCode.ToString(),
                                     GameActionType = GameActionType.PlaceBet,
+                                    ExtraData = order.BetTime.ToIso8601String(true),
                                     TimeStamp = DateTimeOffset.UtcNow,
                                     BetType = order.BetType
                                 }).ToArray();
@@ -55,92 +64,120 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             return GetBetData(data, playCode, transactions);
         }
 
-        BetData ISexyGamingActionModelMapper.CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source)
+        async Task<BetData> ISexyGamingActionModelMapper.CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source)
         {
-            var transactions = (from order in source
-                                select new TransactionData
-                                {
-                                    Amount = 0,
-                                    ExternalTransactionId = $"{ order.PlatformTxId.ToString()}_cancel",
-                                    ExternalRoundId = order.RoundId,
-                                    ExternalBetId = order.PlatformTxId.ToString(),
-                                    ExternalGameActionGroupId = order.PlatformTxId.ToString(),
-                                    ExternalGameId = order.GameCode.ToString(),
-                                    GameActionType = GameActionType.CancelTransaction,
-                                    TimeStamp = DateTimeOffset.UtcNow,
-                                }).ToArray();
+            var transactionDatas = new List<TransactionData>();
+            foreach (var order in source)
+            {
+                var bet = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId.ToString()}").ConfigureAwait(false);
+                if (bet != null)
+                {
+                    transactionDatas.Add(new TransactionData()
+                    {
+                        Amount = 0,
+                        Commission = 0,
+                        ExternalGameId = order.GameCode,
+                        ExternalBetId = bet.ExternalBetId,
+                        ExternalRoundId = bet.ExternalRoundId,
+                        ExternalTransactionId = $"{ order.PlatformTxId}_cancelBet",
+                        ExternalTransactionReferenceId = order.PlatformTxId,
+                        GameActionType = GameActionType.CancelTransaction,
+                        TimeStamp = DateTimeOffset.UtcNow,
+                        RoundDetail = _jsonSerializationProvider.SerializeToString(order.GameInfo)
+                    });
+                }
+            }
 
-            return GetBetData(data, playCode, transactions);
+            return GetBetData(data, playCode, transactionDatas.ToArray());
         }
 
-        BetData ISexyGamingActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingSettle[] source, OppositeBetSetting[] oppositeBetSettings)
+        BatchBetData ISexyGamingActionModelMapper.SettleAsync(GameProviderConfigurationData data, SexyGamingSettle[] source, OppositeBetSetting[] oppositeBetSettings)
         {
-            var transactions = (from order in source
-                                select new TransactionData
-                                {
-                                    Amount = Math.Abs(order.WinAmount),
-                                    ExternalTransactionId = $"{ order.PlatformTxId.ToString()}_settle",
-                                    ExternalBetId = order.PlatformTxId.ToString(),
-                                    ExternalGameActionGroupId = order.PlatformTxId.ToString(),
-                                    ExternalGameId = order.GameCode.ToString(),
-                                    GameActionType = (order.WinAmount == Math.Abs(order.BetAmount)) ? GameActionType.TieBet : (order.WinAmount > 0) ? GameActionType.WinBet : GameActionType.LoseBet,
-                                    TimeStamp = DateTimeOffset.UtcNow,
-                                }).ToArray();
-
-            return GetBetData(data, playCode, transactions, oppositeBetSettings: oppositeBetSettings);
+            var batchTransactionData = (from order in source
+                                        select new BatchTransactionData()
+                                        {
+                                            PlayerCode = order.UserId,
+                                            GameProviderConfigurationId = data.GameProviderConfigurationId,
+                                            Amount = Math.Abs(order.WinAmount),
+                                            Commission = 0,
+                                            ExternalGameId = order.GameCode,
+                                            ExternalBetId = order.PlatformTxId.ToString(),
+                                            ExternalRoundId = order.RoundId.ToString(),
+                                            ExternalTransactionId = $"{ order.PlatformTxId}_settle",
+                                            ExternalTransactionReferenceId = order.PlatformTxId,
+                                            GameActionType = (order.WinAmount == Math.Abs(order.BetAmount)) ? GameActionType.TieBet : (order.WinAmount > 0) ? GameActionType.WinBet : GameActionType.LoseBet,
+                                            BetType = order.BetType,
+                                            Timestamp = DateTime.UtcNow,
+                                            RoundDetail = _jsonSerializationProvider.SerializeToString(order.GameInfo)
+                                        }).ToArray();
+            return GetBetData(data, batchTransactionData);
         }
 
-        BetData ISexyGamingActionModelMapper.UnsettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingUnsettle[] source, OppositeBetSetting[] oppositeBetSettings)
+        async Task<BatchBetData> ISexyGamingActionModelMapper.UnsettleAsync(GameProviderConfigurationData data, SexyGamingUnsettle[] source)
         {
-            var transactions = (from order in source
-                                select new TransactionData
-                                {
-                                    Amount = 0,
-                                    ExternalTransactionId = $"{ order.PlatformTxId.ToString()}_cancel",
-                                    ExternalBetId = order.PlatformTxId.ToString(),
-                                    ExternalGameActionGroupId = order.PlatformTxId.ToString(),
-                                    ExternalGameId = order.GameCode.ToString(),
-                                    GameActionType = GameActionType.CancelTransaction,
-                                    TimeStamp = DateTimeOffset.UtcNow,
-                                }).ToArray();
+            var batchTransactionData = new List<BatchTransactionData>();
+            foreach (var order in source)
+            {
+                var settle = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle").ConfigureAwait(false);
+                if (settle != null)
+                {
+                    batchTransactionData.Add(new BatchTransactionData()
+                    {
+                        PlayerCode = order.UserId,
+                        GameProviderConfigurationId = data.GameProviderConfigurationId,
+                        Amount = 0,
+                        Commission = 0,
+                        ExternalGameId = order.GameCode,
+                        ExternalBetId = settle.ExternalRoundId.ToString(),
+                        ExternalRoundId = settle.ExternalRoundId.ToString(),
+                        ExternalTransactionId = $"{ order.PlatformTxId}_unsettle",
+                        ExternalTransactionReferenceId = order.PlatformTxId,
+                        GameActionType = GameActionType.CancelTransaction,
+                    });
+                }
+            }
 
-            return GetBetData(data, playCode, transactions, oppositeBetSettings: oppositeBetSettings);
+            return GetBetData(data, batchTransactionData.ToArray());
         }
 
-        BetData ISexyGamingActionModelMapper.VoidBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingVoidBett[] source)
+        BatchBetData ISexyGamingActionModelMapper.VoidBetAsync(GameProviderConfigurationData data, SexyGamingVoidBett[] source)
         {
-            var transactions = (from order in source
-                                select new TransactionData
-                                {
-                                    Amount = Math.Abs(order.BetAmount),
-                                    ExternalTransactionId = $"{ order.PlatformTxId.ToString()}_cancel",
-                                    ExternalBetId = order.PlatformTxId.ToString(),
-                                    ExternalGameActionGroupId = order.PlatformTxId.ToString(),
-                                    ExternalGameId = order.GameCode.ToString(),
-                                    GameActionType = GameActionType.CancelTransaction,
-                                    TimeStamp = DateTimeOffset.UtcNow,
-                                }).ToArray();
 
-            return GetBetData(data, playCode, transactions);
+            var batchTransactionData = (from order in source
+                                        select new BatchTransactionData()
+                                        {
+                                            PlayerCode = order.UserId,
+                                            GameProviderConfigurationId = data.GameProviderConfigurationId,
+                                            Amount = 0,
+                                            Commission = 0,
+                                            ExternalGameId = order.GameCode,
+                                            ExternalBetId = order.PlatformTxId.ToString(),
+                                            ExternalRoundId = order.RoundId.ToString(),
+                                            ExternalTransactionId = $"{ order.PlatformTxId.ToString()}_voidBet",
+                                            ExternalTransactionReferenceId = order.PlatformTxId,
+                                            GameActionType = GameActionType.CancelTransaction,
+                                        }).ToArray();
+            return GetBetData(data, batchTransactionData);
         }
 
-        BetData ISexyGamingActionModelMapper.VoidSettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingVoidSettle[] source, OppositeBetSetting[] oppositeBetSettings)
+        BatchBetData ISexyGamingActionModelMapper.VoidSettleAsync(GameProviderConfigurationData data, SexyGamingVoidSettle[] source)
         {
-            var transactions = (from order in source
-                                select new TransactionData
-                                {
-                                    Amount = Math.Abs(order.BetAmount),
-                                    ExternalTransactionId = $"{ order.PlatformTxId.ToString()}_cancel",
-                                    ExternalBetId = order.PlatformTxId.ToString(),
-                                    ExternalGameActionGroupId = order.PlatformTxId.ToString(),
-                                    ExternalGameId = order.GameCode.ToString(),
-                                    GameActionType = GameActionType.CancelTransaction,
-                                    TimeStamp = DateTimeOffset.UtcNow,
-                                }).ToArray();
-
-            return GetBetData(data, playCode, transactions, oppositeBetSettings: oppositeBetSettings);
+            var batchTransactionData = (from order in source
+                                        select new BatchTransactionData()
+                                        {
+                                            PlayerCode = order.UserId,
+                                            GameProviderConfigurationId = data.GameProviderConfigurationId,
+                                            Amount = 0,
+                                            Commission = 0,
+                                            ExternalGameId = order.GameCode,
+                                            ExternalBetId = order.PlatformTxId.ToString(),
+                                            ExternalRoundId = order.RoundId.ToString(),
+                                            ExternalTransactionId = $"{ order.PlatformTxId.ToString()}_voidSettle",
+                                            ExternalTransactionReferenceId = order.PlatformTxId,
+                                            GameActionType = GameActionType.CancelTransaction,
+                                        }).ToArray();
+            return GetBetData(data, batchTransactionData);
         }
-
 
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
           TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false,
@@ -163,5 +200,19 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                   Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
               }).ToArray()
           };
+
+        private static BatchBetData GetBetData(GameProviderConfigurationData data,
+         BatchTransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false,
+         OppositeBetSetting[] oppositeBetSettings = null) =>
+         new()
+         {
+             GameProviderId = data.GameProviderId,
+             GameProviderCode = GameProviderCode,
+             AutoCloseRound = false,
+             ExternalBatchId = string.Empty,
+             AllowCancelCancelTransaction = false,
+             HasCurrencyFromGameProvider = false,
+             Transactions = transactions,
+         };
     }
 }
