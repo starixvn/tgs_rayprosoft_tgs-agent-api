@@ -127,4 +127,7 @@
   <data name="InsufficientBalance" xml:space="preserve">
     <value>Insufficient balance.</value>
   </data>
+  <data name="EmailExisted" xml:space="preserve">
+    <value>Email is existed.</value>
+  </data>
 </root>
