@@ -1,32 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using StackExchange.Redis;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
-using TGS.Shared.Game.Models.SBOBET.Enums;
 using TGS.Shared.Game.Models.SBOBET.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 {
     public class WanMeiBetService : BaseBetService
     {
-        private readonly IDatabase _redisDb;
-
         public WanMeiBetService(
             IHttpContextAccessor httpContextAccessor,
             IGamePlayActions actions,
             ISBOBETActionModelMapper map,
             ISBOBETServices services,
             ISettingOperations settingOperations,
-            IRedisCacheManager redisCacheManager,
-            IRedisRepository redisRepository)
+            IRedisCacheManager redisCacheManager)
             : base(
                 httpContextAccessor.HttpContext,
                 actions,
@@ -35,29 +33,35 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 settingOperations,
                 redisCacheManager)
         {
-            if (redisRepository is null)
-            {
-                throw new ArgumentNullException(nameof(redisRepository));
-            }
-
-            _redisDb = redisRepository.GetDb();
         }
 
         public override async ValueTask<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request)
         {
             var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var externalRoundId = request.ExternalRoundId;
+            var externalTransactionId = request.ExternalTransactionId;
             var playerCode = request.PlayerCode;
 
             var (_, gameId, _) = await Services.GetRoundStatusAndGameIdAndPlatformAsync(
                 gameProviderId,
                 playerCode,
                 externalRoundId,
-                request.ExternalTransactionId).ConfigureAwait(false);
+                externalTransactionId).ConfigureAwait(false);
 
-            var ga = await Services
+            var gameActionData = await Services
                 .GetValidGameActionsAsync(gameProviderId, request.PlayerCode, request.ExternalRoundId, gameId)
                 .ConfigureAwait(false);
+
+            if (gameActionData == null)
+            {
+                throw new InvalidGameActionException(
+                    $"Transaction of transferCode: {request.ExternalTransactionId} " +
+                    $"and transactionId: {request.ExternalRoundId} is not found.",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
+            var ga = gameActionData.GameActions.FirstOrDefault(act =>
+                act.ExternalTransactionId.IgnoreCaseEquals(externalTransactionId));
 
             if (ga == null)
             {
@@ -67,16 +71,28 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                     InvalidGameActionErrorCode.TransactionNotFound);
             }
 
-            return ActionModelMap.Response(request, ga);
+            var isTransactionCancelled = gameActionData.GameActions.Any(act =>
+                act.Type == GameActionType.CancelTransaction && act.ReferencedGameActionId == ga.Id);
+
+            return ActionModelMap.WanMeiResponse(request, gameActionData, isTransactionCancelled);
         }
 
         public override async ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request)
         {
             var response = await base.PlaceBetAsync(request).ConfigureAwait(false);
 
-            await _redisDb
-                .StringSetAsync(request.ExternalRoundId, request.ExternalTransactionId)
+            var transactions = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.BetTransaction,
+                    request.ExternalRoundId, () => Task.FromResult(new Dictionary<string, BetTransaction>()))
                 .ConfigureAwait(false);
+
+            var transactionId = request.ExternalTransactionId;
+            if (!transactions.ContainsKey(transactionId))
+            {
+                transactions[transactionId] = new(transactionId);
+            }
+
+            await RedisCacheManager.SafeCacheForeverAsync(SBOBETConsts.RedisKey.BetTransaction,
+                request.ExternalRoundId, transactions).ConfigureAwait(false);
 
             return response;
         }
@@ -87,11 +103,21 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
 
-            var externalRoundId = request.ExternalRoundId;
-            var externalTransactionId = await _redisDb
-                .StringGetAsync(externalRoundId)
+            var transactions = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.BetTransaction,
+                    request.ExternalRoundId, () => Task.FromResult(new Dictionary<string, BetTransaction>()))
                 .ConfigureAwait(false);
 
+            var externalRoundId = request.ExternalRoundId;
+            var transaction = transactions.Values.FirstOrDefault(t => !t.IsSettled);
+
+            if (transaction == null)
+            {
+                throw new InvalidGameActionException(
+                    $"Transaction of transferCode: {request.ExternalRoundId} is not found.",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
+            var externalTransactionId = transaction.ExternalTransactionId;
             var playerCode = request.PlayerCode;
 
             var (roundStatus, _, platformType) = await Services.GetRoundStatusAndGameIdAndPlatformAsync(
@@ -104,19 +130,26 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransaction,
-                externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
+            //var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransaction,
+            //    externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
 
-            if (roundStatus == RoundStatus.Closed)
-                return ActionModelMap.Response<SettleBetResponse>(playerCode, GameApiError.BetAlreadyCanceled);
+            //if (roundStatus == RoundStatus.Closed)
+            //    return ActionModelMap.Response<SettleBetResponse>(playerCode, GameApiError.BetAlreadyCanceled);
 
-            var betData = ActionModelMap.Request(data, externalRoundId, request, hasRollback);
+            var betData = ActionModelMap.WanMeiRequest(data, externalTransactionId, externalRoundId, request);
             var r = await GamePlayActions.SettleBetAsync(betData).ConfigureAwait(false);
 
-            await RedisCacheManager.ClearCacheAsync(SBOBETConsts.RedisKey.RollbackTransaction,
-                externalRoundId, true).ConfigureAwait(false);
+            transactions[externalTransactionId] = transaction with {IsSettled = true};
+            await RedisCacheManager.SafeCacheForeverAsync(SBOBETConsts.RedisKey.BetTransaction,
+                request.ExternalRoundId, transactions).ConfigureAwait(false);
+
+            //await RedisCacheManager.ClearCacheAsync(SBOBETConsts.RedisKey.RollbackTransaction,
+            //    externalRoundId, true).ConfigureAwait(false);
 
             return ActionModelMap.Response(request, r);
         }
+
+
+        private record BetTransaction(string ExternalTransactionId, bool IsSettled = false, bool IsCancelled = false);
     }
 }
