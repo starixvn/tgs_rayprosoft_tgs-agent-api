@@ -33,8 +33,10 @@ namespace TGS.Services.Agent.Agent
             if (result == null)
                 throw new ValidateCodeNotVerifyException();
 
+            var agentId = new Guid(result.Id);
+
             var username = await _agentOperations
-                .GetAgentAsync(new Guid(result.Id))
+                .GetAgentAsync(agentId)
                 .ConfigureAwait(false);
             var updatedOn = DateTimeOffset.UtcNow;
 
@@ -43,7 +45,7 @@ namespace TGS.Services.Agent.Agent
                 .ChangeAgentPasswordAsync(new ChangeAgentPasswordData()
                 {
                     Username = username.Username,
-                    Id = new Guid(result.Id),
+                    Id = agentId,
                     Salt = newSalt,
                     Password = newPassword,
                     UpdatedOn = updatedOn
