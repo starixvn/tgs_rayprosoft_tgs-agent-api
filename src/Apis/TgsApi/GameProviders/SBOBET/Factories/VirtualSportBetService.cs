@@ -72,9 +72,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var externalRoundId = request.ExternalTransactionId;
             var playerCode = request.PlayerCode;
 
-            var (roundStatus, gameId, platformType) =
-                await Services.GetRoundStatusAndGameIdAndPlatformAsync(gameProviderId, playerCode,
-                    externalRoundId).ConfigureAwait(false);
+            var (roundStatus, gameId, platformType) = await Services.GetRoundStatusAndGameIdAndPlatformAsync(
+                gameProviderId,
+                playerCode,
+                externalRoundId,
+                externalRoundId).ConfigureAwait(false);
 
             var data = await Services
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)

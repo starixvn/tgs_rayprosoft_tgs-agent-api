@@ -29,8 +29,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             string externalRoundId,
             int gameId);
 
-        ValueTask<(RoundStatus RoundStatus, int GameId, PlatformType PlatformType)>
-            GetRoundStatusAndGameIdAndPlatformAsync(Guid gameProviderId, string playerCode, string externalRoundId);
+        ValueTask<(RoundStatus RoundStatus, int GameId, PlatformType PlatformType)> GetRoundStatusAndGameIdAndPlatformAsync(
+            Guid gameProviderId,
+            string playerCode,
+            string externalRoundId,
+            string transactionId);
 
         ValueTask<(PlatformType PlatformType, CachedGame[] Games)> GetPlatformTypeAndGameWithLoginRecordsAsync(
             Guid gameProviderId, string externalGameId, string playerCode);
@@ -55,7 +58,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             _playerOperations = playerOperations;
         }
 
-        async ValueTask<GameProviderConfigurationData> ISBOBETServices.GetGameProviderConfigurationDataAsync(
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
             Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
@@ -70,27 +73,34 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             };
         }
 
-        async ValueTask<GameActionExternalIds[]> ISBOBETServices.GetValidGameActionExternalIdsAsync(
+        public async ValueTask<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(
             Guid gameProviderId, string playerCode, string externalRoundId, int gameId) =>
             await _gameActionQueries.GetValidGameActionExternalIdsAsync(gameProviderId,
                 playerCode, externalRoundId, gameId, false).ConfigureAwait(false);
 
-        async ValueTask<GameActionExternalIds[]> ISBOBETServices.GetGameActionExternalIdsAsync(Guid gameProviderId,
+        public async ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes) =>
             await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId,
                 gameActionTypes).ConfigureAwait(false);
 
-        async ValueTask<GameActionData> ISBOBETServices.GetValidGameActionsAsync(Guid gameProviderId, string playerCode,
+        public async ValueTask<GameActionData> GetValidGameActionsAsync(Guid gameProviderId, string playerCode,
             string externalRoundId, int gameId) =>
             await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId,
                 gameId).ConfigureAwait(false);
 
-        async ValueTask<(RoundStatus RoundStatus, int GameId, PlatformType PlatformType)> ISBOBETServices.
-            GetRoundStatusAndGameIdAndPlatformAsync(Guid gameProviderId, string playerCode, string externalRoundId)
+        public async
+            ValueTask<(RoundStatus RoundStatus, int GameId, PlatformType PlatformType)> GetRoundStatusAndGameIdAndPlatformAsync(
+            Guid gameProviderId,
+            string playerCode,
+            string externalRoundId,
+            string transactionId)
         {
-            var externalTransactionId = externalRoundId;
+            var externalTransactionId = transactionId;
             var data = await _roundQueries
-                .GetRoundStatusAndGameIdAsync(gameProviderId, playerCode, externalRoundId,
+                .GetRoundStatusAndGameIdAsync(
+                    gameProviderId,
+                    playerCode,
+                    externalRoundId,
                     externalTransactionId)
                 .ConfigureAwait(false);
 
@@ -104,11 +114,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return (data.Value.RoundStatus, data.Value.GameId, PlatformType.Desktop);
         }
 
-        async ValueTask<(PlatformType, CachedGame[])> ISBOBETServices.
-            GetPlatformTypeAndGameWithLoginRecordsAsync(Guid gameProviderId, string externalGameId,
+        public async ValueTask<(PlatformType, CachedGame[])> GetPlatformTypeAndGameWithLoginRecordsAsync(Guid gameProviderId, string externalGameId,
                 string playerCode)
         {
-            var platformTypes = new[] {PlatformType.Desktop, PlatformType.Mobile};
+            var platformTypes = new[] { PlatformType.Desktop, PlatformType.Mobile };
             var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId)
                 .ConfigureAwait(false);
 
@@ -136,8 +145,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 {
                     GamePlatformType.DesktopAndMobile => platformTypes,
                     GamePlatformType.Desktop when game.Type == GameType.VirtualSports => platformTypes,
-                    GamePlatformType.Desktop => new[] {PlatformType.Desktop},
-                    GamePlatformType.Mobile => new[] {PlatformType.Mobile},
+                    GamePlatformType.Desktop => new[] { PlatformType.Desktop },
+                    GamePlatformType.Mobile => new[] { PlatformType.Mobile },
                     _ => throw new InvalidOperationException("Invalid game platform type mapping")
                 };
         }
