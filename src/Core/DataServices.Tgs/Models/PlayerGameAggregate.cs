@@ -3,12 +3,13 @@ using TGS.Core.Models.Enums;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class PlayerGameTypeAggregate
+    public class PlayerGameAggregate
     {
         public int Id { get; set; }
         public Guid BrandId { get; set; }
         public Guid? AgentId { get; set; }
         public Guid GameProviderId { get; set; }
+        public int GameId { get; set; }
         public string PlayerCode { get; set; }
         public int? VipLevel { get; set; }
         public GameType GameType { get; set; }

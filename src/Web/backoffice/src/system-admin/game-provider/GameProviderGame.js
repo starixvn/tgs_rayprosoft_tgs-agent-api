@@ -14,6 +14,7 @@ import {
     Dialog,
     Card
 } from "bumbag"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure, {
     AddDisclosure,
     EditDisclosure
@@ -45,9 +46,15 @@ import {
     GamePlatformTypeSelectField
 } from "../../game/games/GamePlatform"
 import { useDropzone } from "react-dropzone"
+import { Update } from "./menu"
 
 export const GameProviderGameDisclosure = ({ record, onSubmitted }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
 
     let isCreate = !record?.id
     let isEdit = !isCreate
@@ -71,6 +78,11 @@ export const AddGameProviderGameDisclosure = ({
     onSubmitted
 }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>

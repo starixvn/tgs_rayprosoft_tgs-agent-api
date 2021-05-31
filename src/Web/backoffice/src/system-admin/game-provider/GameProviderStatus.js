@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css, Global } from "@emotion/react"
 import { Stack, Heading, Box, Button, DropdownMenu } from "bumbag"
+import {
+    useIsDisplayMenuByRoute,
+    useHasSubMenuByRoute
+} from "../../user/context"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 import { useChangeGameProviderStatus } from "../../game/providers/client"
 import Alert from "../../dialog/Alert"
 import { useTrans, Trans } from "../../i18n"
+import { Update } from "./menu"
 
 const Active = "Active"
 const ActiveTrans = {
@@ -64,16 +69,11 @@ export const GameProviderStatusMenu = ({
     onSubmitted,
     ...props
 }) => {
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
     let { id, status } = record
     let [newState, setSubmit] = useState()
     let { result, isLoading, error, deleteCache, mutate } =
         useChangeGameProviderStatus(id, newState)
-
-    const reset = () => {
-        deleteCache()
-        mutate(undefined, false)
-        setSubmit(undefined)
-    }
 
     useEffect(() => {
         if (result && !error) {
@@ -81,6 +81,20 @@ export const GameProviderStatusMenu = ({
             onSubmitted?.()
         }
     }, [result, error])
+
+    if (!hasUpdateAuth) {
+        return (
+            <Button palette={toPalette(status)} disabled isStatic>
+                <GameProviderStatusLabel value={status} />
+            </Button>
+        )
+    }
+
+    const reset = () => {
+        deleteCache()
+        mutate(undefined, false)
+        setSubmit(undefined)
+    }
 
     return (
         <>

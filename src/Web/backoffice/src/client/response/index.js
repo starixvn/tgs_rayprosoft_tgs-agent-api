@@ -45,7 +45,7 @@ export const toDataOrError = (response) => {
         })
         .catch((error) => {
             console.warn(error)
-            return response?.ok
+            return Promise.reject(error)
         })
 }
 

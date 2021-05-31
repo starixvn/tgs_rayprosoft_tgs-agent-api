@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.GameProviders.Habanero.Exceptions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
@@ -79,7 +80,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             if (type == typeof(AuthorizePlayerRequest))
             {
                 var r = _json.DeserializeFromString<AuthorizePlayerRequest>(value);
-                var loginRecord = await DecryptTokenAsync(r.Detail.Token, false);
+                var loginRecord = await DecryptTokenAsync(r.Detail.Token);
                 playerCode = loginRecord.PlayerCode;
                 platformType = loginRecord.PlatformType;
             }
@@ -88,7 +89,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
                 var r = _json.DeserializeFromString<FundTransferRequest>(value);
                 var actionType = r.Detail.ActionType;
                 var allowExpiredLogin = actionType is not ActionType.PlaceAndSettleBet and not ActionType.PlaceBet;
-                var loginRecord = await DecryptTokenAsync(r.Detail.Token, allowExpiredLogin);
+                var throwExceptionIfFailToDecrypt = !r.Detail.IsCancel && !r.Detail.IsSettlementRetry;
+
+                var loginRecord = await DecryptTokenAsync(r.Detail.Token, throwExceptionIfFailToDecrypt);
 
                 if (allowExpiredLogin && loginRecord == null)
                 {
@@ -96,6 +99,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
                 }
                 else
                 {
+                    if (loginRecord == null)
+                    {
+                        throw new InvalidTokenException();
+                    }
+
                     playerCode = loginRecord.PlayerCode;
                     platformType = loginRecord.PlatformType;
                 }
@@ -105,6 +113,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
                 var r = _json.DeserializeFromString<QueryRequest>(value);
                 playerCode = r.Detail.PlayerCode;
             }
+
+            context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
+            context.Items.Add(Consts.ContextItems.PlatformType, platformType);
 
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
 
@@ -118,29 +129,34 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
 
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
             context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, gameProviderConfigurationId);
-            context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
-            context.Items.Add(Consts.ContextItems.PlatformType, platformType);
 
             await next(context);
         }
 
         private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(
-            string token, bool allowExpiredLogin)
+            string token, bool throwExceptionIfFailToDecrypt = true)
         {
             if (token.IsNullOrEmpty())
             {
                 throw new MissingTokenException("empty token");
             }
 
-            var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
-            var loginRecord = await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
-
-            if (!allowExpiredLogin && loginRecord == null)
+            Guid loginRecordId;
+            try
             {
-                throw new PlayerLoginExpiredException();
+                loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
+            }
+            catch
+            {
+                if (throwExceptionIfFailToDecrypt)
+                {
+                    throw new InvalidTokenException();
+                }
+
+                return null;
             }
 
-            return loginRecord;
+            return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
         }
     }
 }

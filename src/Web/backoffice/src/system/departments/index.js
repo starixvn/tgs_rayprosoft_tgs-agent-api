@@ -9,7 +9,7 @@ import {
 import sequenceColumn from "../../table/column/sequence"
 import { AddButton, EditButton } from "./edit"
 import { DeleteButton } from "./delete"
-import { Code } from "./menu"
+import { Code, Update, Delete } from "./menu"
 import { useDepartmentList } from "./client"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
@@ -32,9 +32,10 @@ const Body = () => {
     let { state, setState, setPageIndex, setSortOrder } = useTable()
     let { pageIndex, pageSize } = state
 
-    let { isLoading, data, error, mutate, deleteCache } = useDepartmentList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useDepartmentList({
+        ...toApiParams(state),
+        sortby: "name"
+    })
     let columns = useColumns({ mutate, items: data?.items })
 
     return (
@@ -69,7 +70,9 @@ const Body = () => {
 }
 
 const useColumns = ({ mutate, items = [] }) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasDeleteAuth = useIsDisplayMenuByRoute([Delete])
+    let hasAnyMenu = hasUpdateAuth || hasDeleteAuth
     return useMemo(() => {
         let columns = [
             sequenceColumn(),

@@ -8,7 +8,7 @@ import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, Update } from "./menu"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
@@ -128,9 +128,10 @@ const SearchBar = ({ search, isLoading, ...props }) => {
     )
 }
 
-const useColumns = ({ items = [], mutate }) =>
-    useMemo(
-        () => [
+const useColumns = ({ items = [], mutate }) => {
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    return useMemo(() => {
+        let columns = [
             textColumn({
                 accessor: "transferType",
                 Header: <Trans zh="Transfer Type" en="Transfer Type" />,
@@ -160,22 +161,27 @@ const useColumns = ({ items = [], mutate }) =>
                 Header: <Trans zh="通道名称" en="Channel Name" />,
                 disableSortBy: true
             })
-            /*
-            textColumn({
-                id: "actions",
-                accessor: (row) => row,
-                Header: <Trans zh="Actions" en="Actions" />,
-                disableSortBy: true,
-                Cell: ({ value }) => {
-                    return (
-                        <EditBrandPaymentDisclosure
-                            record={value}
-                            onSubmitted={mutate}
-                        />
-                    )
-                }
-            })
-            */
-        ],
-        [JSON.stringify(items)]
-    )
+        ]
+
+        if (hasUpdateAuth) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    accessor: (row) => row,
+                    Header: <Trans zh="Actions" en="Actions" />,
+                    disableSortBy: true,
+                    Cell: ({ value }) => {
+                        return (
+                            <EditBrandPaymentDisclosure
+                                record={value}
+                                onSubmitted={mutate}
+                            />
+                        )
+                    }
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
+}

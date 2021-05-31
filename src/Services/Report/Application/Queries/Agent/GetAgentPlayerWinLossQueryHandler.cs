@@ -15,11 +15,11 @@ namespace TGS.Services.Report.Application.Queries.Agent
         GetAgentPlayerWinLossQueryHandler : Handler<GetAgentPlayerWinLossRequest, PagedResponse<AgentPlayerWinLossModel>
         >
     {
-        private readonly IPlayerGameTypeAggregateService _service;
+        private readonly IPlayerGameAggregateService _service;
         private readonly ITgsAgentService _tgsAgentService;
         private readonly ITgsPlayerService _tgsPlayerService;
 
-        public GetAgentPlayerWinLossQueryHandler(IPlayerGameTypeAggregateService service,
+        public GetAgentPlayerWinLossQueryHandler(IPlayerGameAggregateService service,
             ITgsAgentService tgsAgentService,
             ITgsPlayerService tgsPlayerService,
             IHttpContextAccessor accessor) :
@@ -43,7 +43,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
             }
 
             var playerAggregate = await _service
-                .GetPlayerGameTypeAggregateQueries(q =>
+                .GetPlayerGameAggregateQueries(q =>
                     q.Where(x => x.AgentId == request.AgentId)
                         .Where(x => x.ReportDate >= request.From && x.ReportDate < request.To))
                 .GroupBy(g => g.PlayerCode, (playerCode, aggregate) => new

@@ -68,7 +68,7 @@ namespace TGS.Services.Report.Application.Queries.Player
                         BonusAmount = players.Sum(p => p.BonusAmount),
                         BetAmount = players.Sum(p => p.BetAmount),
                         ValidBetAmount = players.Sum(p => p.Turnover),
-                        WinLossAmount = players.Sum(p => p.Turnover),
+                        WinLossAmount = players.Sum(p => p.WinLossAmount),
                         NetProfit = players.Sum(p => p.NetProfit)
                     })
                 .ToArrayAsync(cancellationToken);
