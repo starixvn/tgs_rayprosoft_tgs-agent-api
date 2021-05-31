@@ -69,7 +69,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                         WinLossAmount = players.Sum(m => m.WinLossAmount),
                         NetProfit = players.Sum(m => m.NetProfit)
                     })
-                .GroupJoin(_service.Repository.PlayerGameTypeAggregates
+                .GroupJoin(_service.Repository.PlayerGameAggregates
                         .Where(x => x.BrandId == request.BrandId)
                         .Where(x => x.ReportDate >= from && x.ReportDate < to)
                         .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode),

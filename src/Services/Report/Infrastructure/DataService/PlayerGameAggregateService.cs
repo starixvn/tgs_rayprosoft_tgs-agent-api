@@ -10,41 +10,42 @@ using TGS.Services.Report.Application.Models.Player;
 
 namespace TGS.Services.Report.Infrastructure.DataService
 {
-    public interface IPlayerGameTypeAggregateService
+    public interface IPlayerGameAggregateService
     {
         ITgsRepository Repository { get; }
 
-        IQueryable<PlayerGameTypeAggregate> GetPlayerGameTypeAggregateQueries(
-            Func<IQueryable<PlayerGameTypeAggregate>, IQueryable<PlayerGameTypeAggregate>> preQuery = null,
+        IQueryable<PlayerGameAggregate> GetPlayerGameAggregateQueries(
+            Func<IQueryable<PlayerGameAggregate>, IQueryable<PlayerGameAggregate>> preQuery = null,
             bool tracking = false);
 
-        Task CreatePlayerGameTypeAggregatesAsync(PlayerGameTypeAggregateModel[] request);
-        Task DeletePlayerGameTypeAggregatesAsync(PlayerGameTypeAggregate[] markets);
-        Task<bool> ExistsAsync(Expression<Func<PlayerGameTypeAggregate, bool>> predicate);
+        Task CreatePlayerGameAggregatesAsync(PlayerGameTypeAggregateModel[] request);
+        Task DeletePlayerGameAggregatesAsync(PlayerGameAggregate[] markets);
+        Task<bool> ExistsAsync(Expression<Func<PlayerGameAggregate, bool>> predicate);
     }
 
-    public class PlayerGameTypeAggregateService : BaseRepositoryOperations<ITgsRepository>,
-        IPlayerGameTypeAggregateService
+    public class PlayerGameAggregateService : BaseRepositoryOperations<ITgsRepository>,
+        IPlayerGameAggregateService
     {
         private readonly ITgsRepository _repository;
 
-        public PlayerGameTypeAggregateService(ITgsRepository repository, ITgsRepository tgsRepository) :
+        public PlayerGameAggregateService(ITgsRepository repository, ITgsRepository tgsRepository) :
             base(repository)
         {
             _repository = repository;
         }
 
-        ITgsRepository IPlayerGameTypeAggregateService.Repository => _repository;
+        ITgsRepository IPlayerGameAggregateService.Repository => _repository;
 
-        Task IPlayerGameTypeAggregateService.CreatePlayerGameTypeAggregatesAsync(
+        Task IPlayerGameAggregateService.CreatePlayerGameAggregatesAsync(
             PlayerGameTypeAggregateModel[] models) =>
-            CreateEntitiesAsync(models.Select(model => new PlayerGameTypeAggregate
+            CreateEntitiesAsync(models.Select(model => new PlayerGameAggregate
             {
                 BrandId = model.BrandId,
                 AgentId = model.AgentId,
                 GameProviderId = model.GameProviderId,
                 PlayerCode = model.PlayerCode,
                 VipLevel = model.VipLevel,
+                GameId = model.GameId,
                 GameType = model.GameType,
                 Hour = model.Hour,
                 ReportDate = model.ReportDate,
@@ -61,15 +62,15 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AgentDividendPercentage = model.AgentDividendPercentage
             }).ToArray());
 
-        Task IPlayerGameTypeAggregateService.DeletePlayerGameTypeAggregatesAsync(PlayerGameTypeAggregate[] markets) =>
+        Task IPlayerGameAggregateService.DeletePlayerGameAggregatesAsync(PlayerGameAggregate[] markets) =>
             DeleteEntitiesAsync(markets);
 
-        Task<bool> IPlayerGameTypeAggregateService.ExistsAsync(
-            Expression<Func<PlayerGameTypeAggregate, bool>> predicate) =>
+        Task<bool> IPlayerGameAggregateService.ExistsAsync(
+            Expression<Func<PlayerGameAggregate, bool>> predicate) =>
             ExistsAsync(predicate);
 
-        IQueryable<PlayerGameTypeAggregate> IPlayerGameTypeAggregateService.GetPlayerGameTypeAggregateQueries(
-            Func<IQueryable<PlayerGameTypeAggregate>, IQueryable<PlayerGameTypeAggregate>> preQuery,
+        IQueryable<PlayerGameAggregate> IPlayerGameAggregateService.GetPlayerGameAggregateQueries(
+            Func<IQueryable<PlayerGameAggregate>, IQueryable<PlayerGameAggregate>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
     }

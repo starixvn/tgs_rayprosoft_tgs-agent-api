@@ -1,4 +1,4 @@
 ﻿namespace TGS.Clients.Report.Client.Models.Aggregate
 {
-    public record CreateUpdateRoundAggregateModel;
+    public record FillPlayerBucketMinutelyModel;
 }

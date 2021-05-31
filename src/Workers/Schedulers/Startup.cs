@@ -118,9 +118,14 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IPromotionSettlementDailyWorkerService, PromotionSettlementDailyWorkerService>();
             services.AddTransient<IPromotionSettlementWeeklyWorkerService, PromotionSettlementWeeklyWorkerService>();
             services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
+            services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
         }
 
         private static Type[] GetModuleTypes() =>
-            new[] {typeof(JobManagement), typeof(PromotionJobManagement)};
+            new[]
+            {
+                typeof(AggregateJobManagement), typeof(RebateAndDividendJobManagement),
+                typeof(PromotionJobManagement)
+            };
     }
 }

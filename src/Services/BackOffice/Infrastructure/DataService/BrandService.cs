@@ -279,8 +279,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     GameId = x.Id,
                     Game = x,
                     DisplayOrder = count,
-                    Rebate = false,
-                    EffectiveBettingPercentage = decimal.Zero
+                    Rebate = true,
+                    EffectiveBettingPercentage = 100M
                 });
             return new(games);
         }

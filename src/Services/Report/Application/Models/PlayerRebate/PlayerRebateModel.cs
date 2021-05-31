@@ -7,6 +7,7 @@ namespace TGS.Services.Report.Application.Models.PlayerRebate
         public int Id { get; set; }
         public Guid BrandId { get; set; }
         public Guid? AgentId { get; set; }
+        public int GameId { get; set; }
         public string PlayerCode { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset ReportDate { get; set; }
