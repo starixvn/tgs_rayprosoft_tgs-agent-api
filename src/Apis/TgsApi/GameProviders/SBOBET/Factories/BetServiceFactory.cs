@@ -27,7 +27,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 // casino game
                 7 => ActivatorUtilities.CreateInstance<CasinoBetService>(_serviceProvider),
 
-                9 => ActivatorUtilities.CreateInstance<RngGameBetService>(_serviceProvider),
+                // wan mei game
+                9 => ActivatorUtilities.CreateInstance<WanMeiBetService>(_serviceProvider),
 
                 _ => throw new NotImplementedException()
             };

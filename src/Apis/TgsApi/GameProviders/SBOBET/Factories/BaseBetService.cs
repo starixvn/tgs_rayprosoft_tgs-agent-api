@@ -44,7 +44,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 
         public virtual async ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request)
         {
-            var r = await GamePlayActions.GetBalanceAsync(Consts.GameProvider.SBOBET, request.PlayerCode)
+            var r = await GamePlayActions
+                .GetBalanceAsync(Consts.GameProvider.SBOBET, request.PlayerCode)
                 .ConfigureAwait(false);
 
             return ActionModelMap.Response(request.PlayerCode, r);
