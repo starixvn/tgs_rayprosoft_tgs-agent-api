@@ -204,7 +204,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             bool hasRollback,
             bool forceCloseRound)
         {
-            var externalTransactionReferenceId = request.ExternalTransactionId;
+            var externalTransactionReferenceId = externalRoundId;
 
             var externalTransactionId = !hasRollback
                 ? $"{externalTransactionReferenceId}_settle"
@@ -218,7 +218,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                     ExternalTransactionId = externalTransactionId,
                     ExternalTransactionReferenceId = externalTransactionReferenceId,
                     ExternalRoundId = externalRoundId,
-                    ExternalBetId = request.ExternalTransactionId,
+                    ExternalBetId = externalRoundId,
                     ExternalGameActionGroupId = externalRoundId,
                     ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
                     GameActionType = GetGameActionType(request.Result),

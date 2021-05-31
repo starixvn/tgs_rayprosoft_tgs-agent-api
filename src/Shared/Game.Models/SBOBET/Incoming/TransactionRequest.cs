@@ -5,6 +5,6 @@ namespace TGS.Shared.Game.Models.SBOBET.Incoming
     public record TransactionRequest : BaseRequest
     {
         [JsonPropertyName("transferCode")]
-        public string ExternalTransactionId { get; init; }
+        public string ExternalRoundId { get; init; }
     }
 }

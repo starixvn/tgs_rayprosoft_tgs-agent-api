@@ -5,7 +5,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Incoming
     public record CancelBetRequest : TransactionRequest
     {
         [JsonPropertyName("transactionId")]
-        public string ExternalRoundId { get; init; }
+        public string ExternalTransactionId { get; init; }
 
         [JsonPropertyName("IsCancelAll")]
         public bool IsCancelAll { get; init; }

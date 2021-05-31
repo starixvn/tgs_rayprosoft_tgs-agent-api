@@ -10,9 +10,8 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
-using TGS.Shared.Game.Models.SBOBET.Incoming;
 using TGS.Shared.Game.Models.SBOBET.Enums;
-using TGS.Core.Models.GameProviders.Settings;
+using TGS.Shared.Game.Models.SBOBET.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
 {
@@ -29,12 +28,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             IRedisCacheManager redisCacheManager,
             IRedisRepository redisRepository)
             : base(
-                  httpContextAccessor.HttpContext,
-                  actions,
-                  map,
-                  services,
-                  settingOperations,
-                  redisCacheManager)
+                httpContextAccessor.HttpContext,
+                actions,
+                map,
+                services,
+                settingOperations,
+                redisCacheManager)
         {
             if (redisRepository is null)
             {
@@ -76,7 +75,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var response = await base.PlaceBetAsync(request).ConfigureAwait(false);
 
             await _redisDb
-                .StringSetAsync(request.ExternalTransactionId, request.ExternalRoundId)
+                .StringSetAsync(request.ExternalRoundId, request.ExternalTransactionId)
                 .ConfigureAwait(false);
 
             return response;
@@ -88,16 +87,18 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
 
-            var externalRoundId = await _redisDb
-                .StringGetAsync(request.ExternalTransactionId)
+            var externalRoundId = request.ExternalRoundId;
+            var externalTransactionId = await _redisDb
+                .StringGetAsync(externalRoundId)
                 .ConfigureAwait(false);
+
             var playerCode = request.PlayerCode;
 
             var (roundStatus, _, platformType) = await Services.GetRoundStatusAndGameIdAndPlatformAsync(
                 gameProviderId,
                 playerCode,
                 externalRoundId,
-                request.ExternalTransactionId).ConfigureAwait(false);
+                externalTransactionId).ConfigureAwait(false);
 
             var data = await Services
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)

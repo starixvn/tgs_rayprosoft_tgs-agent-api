@@ -85,7 +85,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
 
-            var externalRoundId = request.ExternalTransactionId;
+            var externalRoundId = request.ExternalRoundId;
             var playerCode = request.PlayerCode;
 
             var (_, _, platformType) =
@@ -132,7 +132,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
         public virtual async ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request)
         {
             var playerCode = request.PlayerCode;
-            var externalRoundId = request.ExternalTransactionId;
+            var externalRoundId = request.ExternalRoundId;
 
             var hasRollback = await RedisCacheManager.SafeGetAsync(SBOBETConsts.RedisKey.RollbackTransaction,
                 externalRoundId, () => Task.FromResult(false)).ConfigureAwait(false);
@@ -142,7 +142,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 return ActionModelMap.Response<RollbackResponse>(playerCode, GameApiError.BetAlreadyRollback);
             }
 
-            var actionTypes = new[] { WinBet, LoseBet, TieBet, FreeBet, CancelTransaction };
+            var actionTypes = new[] {WinBet, LoseBet, TieBet, FreeBet, CancelTransaction};
 
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
