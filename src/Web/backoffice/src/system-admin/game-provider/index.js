@@ -154,7 +154,12 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: (row) => row,
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                Cell: ({ value }) => <GameProviderStatusMenu record={value} />
+                Cell: ({ value }) => (
+                    <GameProviderStatusMenu
+                        record={value}
+                        onSubmitted={mutate}
+                    />
+                )
             }),
             dateTimeColumn({
                 accessor: "updatedOn",
