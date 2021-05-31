@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Models.Services;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Agent
@@ -39,10 +40,10 @@ namespace TGS.Services.Agent.Agent
 
             var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);
             await _agentOperations
-                .ChangeAgentPasswordAsync(new()
+                .ChangeAgentPasswordAsync(new ChangeAgentPasswordData()
                 {
                     Username = username.Username,
-                    Id = result.Id,
+                    Id = new Guid(result.Id),
                     Salt = newSalt,
                     Password = newPassword,
                     UpdatedOn = updatedOn
