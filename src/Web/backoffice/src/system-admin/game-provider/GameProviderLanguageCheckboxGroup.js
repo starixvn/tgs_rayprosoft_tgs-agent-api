@@ -154,7 +154,8 @@ const CodeDialog = ({ value, disabled, dialog, onChange }) => {
                     onChange(code)
                     dialog.hide()
                 }}
-                submitText={disabled ? <CloseText /> : <ConfirmText />}
+                submitText={<ConfirmText />}
+                showActionButtons={!disabled}
                 dialog={dialog}
                 title={title}
                 hideBackdrop={true}

@@ -203,6 +203,7 @@ const CurrencyBetLimitsRow = ({
                             currencyFieldName={currencyFieldName}
                             currencyField={currencyField}
                             currencyFieldIndex={currencyFieldIndex}
+                            disabled={disabled}
                         />
                     </Table.HeadCell>
                     <Table.HeadCell textAlign="center">
@@ -435,7 +436,8 @@ const BetLimitRow = ({
 const CurrencyCodeDisclosure = ({
     currencyFieldName,
     currencyField,
-    currencyFieldIndex
+    currencyFieldIndex,
+    disabled
 }) => {
     let { control, setValue } = useFormContext()
     let name = `${currencyFieldName}.${currencyFieldIndex}.gameProviderCurrencyCode`
@@ -458,8 +460,11 @@ const CurrencyCodeDisclosure = ({
                     {dialog.visible && (
                         <CurrencyCodeDialog
                             value={value}
+                            disabled={disabled}
                             onChange={(code) => {
-                                setValue(name, code)
+                                if (!disabled) {
+                                    setValue(name, code)
+                                }
                             }}
                             dialog={dialog}
                         />
@@ -470,7 +475,7 @@ const CurrencyCodeDisclosure = ({
     )
 }
 
-const CurrencyCodeDialog = ({ value, onChange, dialog }) => {
+const CurrencyCodeDialog = ({ value, disabled, onChange, dialog }) => {
     let title = useTrans({
         zh: `游戏商币种代码`,
         en: `Game Provider Currency Code`
@@ -485,12 +490,13 @@ const CurrencyCodeDialog = ({ value, onChange, dialog }) => {
                     dialog.hide()
                 }}
                 submitText={<ConfirmText />}
+                showActionButtons={!disabled}
                 dialog={dialog}
                 title={title}
                 hideBackdrop={true}
                 minWidth="max-content"
             >
-                <Input name="code" defaultValue={value} />
+                <Input name="code" defaultValue={value} disabled={disabled} />
             </FormDialog>
         </Backdrop>
     )
