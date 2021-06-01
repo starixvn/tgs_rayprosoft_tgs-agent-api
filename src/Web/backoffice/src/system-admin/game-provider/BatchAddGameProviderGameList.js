@@ -16,6 +16,7 @@ import {
     Spinner,
     Alert
 } from "bumbag"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure, {
     AddDisclosure,
     ConfigIconDisclosure,
@@ -48,12 +49,19 @@ import { useDropzone } from "react-dropzone"
 import { GameProviderGameFormBody } from "./GameProviderGame"
 import { ConfirmText } from "../../button/ActionButtons"
 import sequenceColumn from "../../table/column/sequence"
+import { Update } from "./menu"
 
 export const BatchAddGameProviderGameListDisclosure = ({
     gameProviderId,
     onSubmitted
 }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
+
     return (
         <>
             <Disclosure {...dialog}>

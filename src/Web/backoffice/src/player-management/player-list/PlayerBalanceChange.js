@@ -229,12 +229,6 @@ const CancelWithdrawalTrans = {
     en: "Cancel Withdrawal"
 }
 
-const Other = "Other"
-const OtherTrans = {
-    zh: "其他",
-    en: "Other"
-}
-
 const PlayerTransactionTypeSelect = ({ placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "交易类型",
@@ -250,6 +244,10 @@ const PlayerTransactionTypeSelect = ({ placeholder, ...props }) => {
         {
             label: useTrans(WithdrawalTrans),
             value: Withdrawal
+        },
+        {
+            label: useTrans(CancelWithdrawalTrans),
+            value: CancelWithdrawal
         },
         {
             label: useTrans(AdjustTrans),
@@ -278,14 +276,6 @@ const PlayerTransactionTypeSelect = ({ placeholder, ...props }) => {
         {
             label: useTrans(GameProviderFundInTrans),
             value: GameProviderFundIn
-        },
-        {
-            label: useTrans(CancelWithdrawalTrans),
-            value: CancelWithdrawal
-        },
-        {
-            label: useTrans(OtherTrans),
-            value: Other
         },
         {
             label: useTrans(PlaceBetTrans),
@@ -350,8 +340,6 @@ const PlayerTransactionTypeLabel = ({ value = "" }) => {
             return <Trans {...GameProviderFundInTrans} />
         case CancelWithdrawal:
             return <Trans {...CancelWithdrawalTrans} />
-        case Other:
-            return <Trans {...OtherTrans} />
         default:
             return value
     }

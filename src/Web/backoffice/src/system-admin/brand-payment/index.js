@@ -8,7 +8,7 @@ import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, Update } from "./menu"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
@@ -23,8 +23,13 @@ import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
 import { PaymentChannelLabel } from "../../payment/channel/PaymentChannel"
 import { BrandPaymentStatusSelect } from "../../system/brandpayments/BrandPaymentStatus"
-import { AddBrandPaymentDisclosure } from "./BrandPayment"
+import {
+    AddBrandPaymentDisclosure,
+    EditBrandPaymentDisclosure
+} from "./BrandPayment"
 import AlertDialog from "../../dialog/Alert"
+import { PaymentMethodChannelListDisclosure } from "./PaymentMethodChannelList"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -48,11 +53,12 @@ const Body = () => {
 
     let { isLoading, data, error, mutate, deleteCache } = useBrandPaymentList({
         ...toApiParams(state),
-        sortby: "number"
+        sortby: "createdOn",
+        orderby: SortOrder.Descending
     })
 
     let items = data?.items
-    let columns = useColumns({ items })
+    let columns = useColumns({ items, mutate })
 
     return (
         <PageContent
@@ -61,13 +67,15 @@ const Body = () => {
                 <Level>
                     <SearchBar
                         search={(newState) => {
-                            console.log("newState", newState)
                             setState({ pageIndex: 0, ...newState })
                             mutate()
                         }}
                         isLoading={isLoading}
                     />
                     <Set orientation="horizontal">
+                        <PaymentMethodChannelListDisclosure
+                            onSubmitted={mutate}
+                        />
                         <AddBrandPaymentDisclosure
                             brandId={state.brandId}
                             onSubmitted={mutate}
@@ -120,9 +128,10 @@ const SearchBar = ({ search, isLoading, ...props }) => {
     )
 }
 
-const useColumns = ({ items = [] }) =>
-    useMemo(
-        () => [
+const useColumns = ({ items = [], mutate }) => {
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    return useMemo(() => {
+        let columns = [
             textColumn({
                 accessor: "transferType",
                 Header: <Trans zh="Transfer Type" en="Transfer Type" />,
@@ -152,6 +161,27 @@ const useColumns = ({ items = [] }) =>
                 Header: <Trans zh="通道名称" en="Channel Name" />,
                 disableSortBy: true
             })
-        ],
-        [JSON.stringify(items)]
-    )
+        ]
+
+        if (hasUpdateAuth) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    accessor: (row) => row,
+                    Header: <Trans zh="Actions" en="Actions" />,
+                    disableSortBy: true,
+                    Cell: ({ value }) => {
+                        return (
+                            <EditBrandPaymentDisclosure
+                                record={value}
+                                onSubmitted={mutate}
+                            />
+                        )
+                    }
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
+}

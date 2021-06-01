@@ -30,12 +30,18 @@ export const useBrandPayment = (id, searchParams) => {
     */
 }
 
-export const useAddBrandPayment = (data) => {
-    return usePostData(API, data)
+export const useAddDepositBrandPayment = (data) => {
+    let url = data ? `${API}/deposit` : ""
+    return usePostData(url, data)
 }
 
-export const useUpdatePayment = (id, data) => {
-    let url = id ? `${API}/${id}` : ""
+export const useAddWithdrawBrandPayment = (data) => {
+    let url = data ? `${API}/withdraw` : ""
+    return usePostData(url, data)
+}
+
+export const useUpdateBrandPayment = (id, data) => {
+    let url = id && data ? `${API}/${id}` : ""
     return usePutData(url, data)
 }
 

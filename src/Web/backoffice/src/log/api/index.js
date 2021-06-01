@@ -31,7 +31,7 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { InputField } from "../../input/Input"
 import AlertDialog from "../../dialog/Alert"
-import textColumn from "../../table/column/textColumn"
+import textColumn, { ellipsisTextColumn } from "../../table/column/textColumn"
 import numberColumn, {
     numberDecimalColumn,
     numberDecimalPercentageColumn
@@ -40,6 +40,7 @@ import { today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useApiLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
+import { CopyLongText } from "../../text/CopyLongText"
 
 export { Code }
 
@@ -207,27 +208,47 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => (
+                    <Box width="100%">
+                        <CopyLongText value={value} />
+                    </Box>
+                )
             }),
             textColumn({
                 accessor: "trackingId",
                 Header: <Trans zh="Tracking Id" en="Tracking Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => (
+                    <Box width="100%">
+                        <CopyLongText value={value} />
+                    </Box>
+                )
             }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => (
+                    <Box width="100%">
+                        <CopyLongText value={value} />
+                    </Box>
+                )
             }),
-            textColumn({
+            ellipsisTextColumn({
                 accessor: "path",
                 Header: <Trans zh="Path" en="Path" />,
                 disableSortBy: true,
-                wordBreak: "break-word",
                 textAlign: "left",
-                Cell: ({ value = "" }) => value
+                maxWidth: "20rem",
+                Cell: ({ value = "" }) => (
+                    <Box width="100%">
+                        <CopyLongText
+                            value={value}
+                            whiteSpace="normal"
+                            textAlign="left"
+                        />
+                    </Box>
+                )
             }),
             textColumn({
                 accessor: "method",

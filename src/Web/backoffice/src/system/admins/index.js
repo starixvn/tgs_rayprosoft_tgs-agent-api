@@ -11,7 +11,7 @@ import {
     useHasSubMenuByRoute,
     useUserId
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, View, Update } from "./menu"
 import { useAdminList } from "./client"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
@@ -42,11 +42,15 @@ const Body = () => {
 
     let { pageIndex, pageSize, username = "" } = state
 
-    let { isLoading, data, error, mutate, deleteCache } = useAdminList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useAdminList({
+        ...toApiParams(state),
+        sortby: "username"
+    })
 
-    let items = data?.items?.filter((item) => item.id != userId)
+    const filterOutCurrentUser = (items = []) =>
+        items.filter((item) => item.id != userId)
+
+    let items = filterOutCurrentUser(data?.items)
     let columns = useColumns({ mutate, items })
 
     return (
@@ -55,15 +59,13 @@ const Body = () => {
             actionBar={
                 <>
                     <SearchBar
-                        search={(data) => {
-                            let newState = {
+                        username={username}
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                username: data?.username
-                            }
-                            if (equals(newState, { pageIndex, username })) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isPending={isLoading}
                     />
@@ -93,16 +95,14 @@ const Body = () => {
     )
 }
 
-const SearchBar = ({ search, isLoading, ...props }) => {
+const SearchBar = ({ username = "", search, isLoading, ...props }) => {
     let formMethods = useForm({
-        defaultValues: { username: "" }
+        defaultValues: { username }
     })
-
-    const onSubmit = search
 
     return (
         <FormProvider {...formMethods}>
-            <form onSubmit={formMethods.handleSubmit(onSubmit)}>
+            <form onSubmit={formMethods.handleSubmit(search)}>
                 <Set>
                     <InputField
                         name="username"
@@ -123,7 +123,8 @@ const useSearchInputPlaceHolder = () =>
     })
 
 const useColumns = ({ mutate, items = [] }) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let hasUpdate = useIsDisplayMenuByRoute([Update])
+    let hasAnyMenu = hasUpdate
 
     return useMemo(() => {
         let columns = [

@@ -94,16 +94,16 @@ namespace TGS.Services.Report.Application.Commands.Agent
                             Turnover = playerAggregates.Sum(p => p.Turnover),
                             WinLossAmount = playerAggregates.Sum(p => p.WinLossAmount),
                             NetProfit = playerAggregates.Sum(p => p.NetProfit)
-                        }).GroupJoin(_playerAggregateService.Repository.PlayerGameTypeAggregates
+                        }).GroupJoin(_playerAggregateService.Repository.PlayerGameAggregates
                             .Where(x => x.AgentId != null)
                             .Where(x => x.BrandId == brand.Id)
                             .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
                                 x.ReportDate <= brand.CurrentSettlementTo),
                         p => new {p.BrandId, p.AgentId},
                         pg => new {pg.BrandId, pg.AgentId},
-                        (agent, playerGameTypeAggregates) => new {agent, playerGameTypeAggregates})
-                    .SelectMany(x => x.playerGameTypeAggregates.DefaultIfEmpty(),
-                        (x, playerGameTypeAggregate) => new
+                        (agent, playerGameAggregates) => new {agent, playerGameAggregates})
+                    .SelectMany(x => x.playerGameAggregates.DefaultIfEmpty(),
+                        (x, playerGameAggregate) => new
                         {
                             x.agent.AgentId,
                             x.agent.BrandId,
@@ -115,17 +115,17 @@ namespace TGS.Services.Report.Application.Commands.Agent
                             x.agent.Turnover,
                             x.agent.WinLossAmount,
                             x.agent.NetProfit,
-                            playerGameTypeAggregate
+                            playerGameAggregate
                         }).ToArrayAsync(cancellationToken);
 
                 var agentDividends = agentBonus
-                    .Where(x => x.playerGameTypeAggregate is not null)
+                    .Where(x => x.playerGameAggregate is not null)
                     .GroupBy(
                         x => new
                         {
                             x.AgentId,
                             x.BrandId,
-                            x.playerGameTypeAggregate.AgentDividendPercentage,
+                            x.playerGameAggregate.AgentDividendPercentage,
                             x.DepositAmount,
                             x.WithdrawalAmount,
                             x.AdjustmentAmount,
@@ -151,40 +151,40 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                 x.WinLossAmount,
                                 x.NetProfit,
                                 LiveDealerWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.LiveDealer)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.LiveDealer)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 SlotWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.Slot)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.Slot)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 FishingWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.Fishing)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.Fishing)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 ArcadeWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.Arcade)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.Arcade)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 TableGameWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.TableGame)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.TableGame)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 LotteryWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.Lottery)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.Lottery)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 CardGameWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.CardGame)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.CardGame)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 SportsWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.Sportsbook)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.Sportsbook)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 ESportsWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.ESports)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.ESports)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
                                 VirtualSportsWinLoss =
-                                    agents.Where(l => l.playerGameTypeAggregate.GameType == GameType.VirtualSports)
-                                        .Sum(l => l.playerGameTypeAggregate.WinLoss),
-                                WinLoss = agents.Sum(l => l.playerGameTypeAggregate.WinLoss),
+                                    agents.Where(l => l.playerGameAggregate.GameType == GameType.VirtualSports)
+                                        .Sum(l => l.playerGameAggregate.WinLoss),
+                                WinLoss = agents.Sum(l => l.playerGameAggregate.WinLoss),
                                 AgentDividendAmount = x.AgentDividendPercentage *
                                     (x.WinLossAmount - x.AdjustmentAmount -
                                         x.BonusAmount - agents
-                                            .Sum(m => m.playerGameTypeAggregate.VipRebateAmount)) / 100M
+                                            .Sum(m => m.playerGameAggregate.VipRebateAmount)) / 100M
                             };
                         })
                     .GroupBy(x => new {x.AgentId, x.BrandId, x.AgentDividendPercentage},
@@ -223,7 +223,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                             {
                                                 g.AgentId,
                                                 g.BrandId,
-                                                g.playerGameTypeAggregate.AgentDividendPercentage,
+                                                g.playerGameAggregate.AgentDividendPercentage,
                                                 g.WinLossAmount,
                                                 g.BonusAmount,
                                                 g.AdjustmentAmount,
@@ -241,7 +241,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                                 agent.AdjustmentAmount,
                                                 agent.AgentDividendPercentage,
                                                 RebateAmount = childAgents.Sum(c =>
-                                                    c.playerGameTypeAggregate.VipRebateAmount)
+                                                    c.playerGameAggregate.VipRebateAmount)
                                             }).ToArray();
 
                                     var amount = childAgentPlayers.Sum(c =>

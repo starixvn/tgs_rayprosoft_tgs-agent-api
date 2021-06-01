@@ -21,12 +21,23 @@ namespace TGS.Apis.ReportApi.Controllers
         [HttpPost]
         [Description("Create round aggregate")]
         public Task<MessageResponse> CreateRoundAggregateAsync() =>
-            _mediator.Send(new CreateUpdateRoundAggregateModel());
+            _mediator.Send(new CreateRoundAggregateRequest());
+
+        [HttpPost("fillPlayerBucketMinutely")]
+        [Description("Fill player bucket minutely")]
+        public Task<MessageResponse> FillPlayerBucketMinutelyAsync() =>
+            _mediator.Send(new FillPlayerBucketMinutelyRequest());
+
+        [HttpPost("manualFillPlayerBucketMinutely")]
+        [Description("Manual fill player bucket minutely")]
+        public Task<MessageResponse>
+            ManualFillPlayerBucketMinutelyAsync(ManualFillPlayerBucketMinutelyRequest request) =>
+            _mediator.Send(request);
 
         [HttpPost("manual")]
         [Description("Manual create or update round aggregate")]
         public Task<MessageResponse> ManualCreateUpdateRoundAggregateAsync(
-            ManualCreateUpdateRoundAggregateModel request) =>
+            ManualCreateRoundAggregateModel request) =>
             _mediator.Send(request);
     }
 }

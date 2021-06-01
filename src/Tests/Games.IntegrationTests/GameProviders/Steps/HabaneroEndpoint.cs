@@ -318,7 +318,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             response.Should().NotBeNull();
             response.Result.Status.Success.Should().BeFalse();
-            response.Result.Status.HasAuthenticationError.Should().BeNull();
+            response.Result.Status.HasAuthenticationError.Should().BeTrue();
             response.Result.Balance.Should().BeNull();
             response.Result.CurrencyCode.Should().BeNullOrEmpty();
             response.Result.PlayerCode.Should().BeNullOrEmpty();

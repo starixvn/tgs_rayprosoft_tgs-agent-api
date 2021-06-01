@@ -14,10 +14,10 @@ namespace TGS.Services.Report.Application.Queries.Vip
 {
     internal class GetVipRebateReportQueryHandler : Handler<GetVipRebateReportRequest, PagedResponse<VipRebateModel>>
     {
-        private readonly IPlayerGameTypeAggregateService _service;
+        private readonly IPlayerGameAggregateService _service;
         private readonly ITgsPlayerService _tgsPlayerService;
 
-        public GetVipRebateReportQueryHandler(IPlayerGameTypeAggregateService service,
+        public GetVipRebateReportQueryHandler(IPlayerGameAggregateService service,
             ITgsPlayerService tgsPlayerService,
             IHttpContextAccessor accessor) :
             base(accessor)
@@ -42,7 +42,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                 await _tgsPlayerService.GetPlayerAsync(x =>
                     x.BrandId == request.BrandId && x.Username == request.Username);
 
-            return await _service.GetPlayerGameTypeAggregateQueries()
+            return await _service.GetPlayerGameAggregateQueries()
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.ReportDate >= from && x.ReportDate < to)
                 .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)

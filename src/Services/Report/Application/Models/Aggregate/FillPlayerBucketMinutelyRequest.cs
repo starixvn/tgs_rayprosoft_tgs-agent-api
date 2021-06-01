@@ -3,5 +3,5 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Report.Application.Models.Aggregate
 {
-    public record CreateUpdateRoundAggregateModel : IRequest<MessageResponse>;
+    public record FillPlayerBucketMinutelyRequest : IRequest<MessageResponse>;
 }

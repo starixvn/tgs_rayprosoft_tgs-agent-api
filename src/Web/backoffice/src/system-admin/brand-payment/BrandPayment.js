@@ -14,8 +14,15 @@ import {
     Dialog,
     Card,
     FieldWrapper,
-    Columns
+    Columns,
+    DropdownMenu
 } from "bumbag"
+import {
+    useIsDisplayMenuByRoute,
+    useHasSubMenuByRoute,
+    useUserRoleType,
+    useUserRoleId
+} from "../../user/context"
 import Disclosure, {
     AddDisclosure,
     EditDisclosure
@@ -30,10 +37,6 @@ import {
 import FormDialog from "../../form/FormDialog"
 import { Trans, useLocale, useTrans } from "../../i18n"
 import Backdrop from "../../dialog/Backdrop"
-import {
-    useAddGameProviderGameList,
-    useUpdateGameProviderGame
-} from "../../game/games/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
@@ -41,14 +44,11 @@ import { Table } from "../../table"
 import textColumn from "../../table/column/textColumn"
 import { InputField, Input } from "../../input/Input"
 import { CheckboxField } from "../../checkbox/Checkbox"
-import GameStatus, { GameStatusSelectField } from "../../game/games/GameStatus"
-import { GameTypeSelectField } from "../../game/GameType"
 import {
-    GamePlatformLabel,
-    GamePlatformTypeSelectField
-} from "../../game/games/GamePlatform"
-import { useDropzone } from "react-dropzone"
-import { useAddBrandPayment } from "../../system/brandpayments/client"
+    useAddDepositBrandPayment,
+    useAddWithdrawBrandPayment,
+    useUpdateBrandPayment
+} from "../../system/brandpayments/client"
 import BrandPaymentStatus, {
     BrandPaymentStatusSelect
 } from "../../system/brandpayments/BrandPaymentStatus"
@@ -61,19 +61,23 @@ import { PlayerListCondition } from "../../system/brandpayments/condition"
 import Select from "../../select/Select"
 import { JsonEditor } from "../../text/editor/JsonEditor"
 import NumberRangeInputGroup from "../../number/RangeInput"
-import { BrandPaymentTransferTypeSelectField } from "../../system/brandpayments/BrandPaymentTransferType"
+import { parseJSON, stringifyJSON } from "../../text/json"
+import { Update } from "./menu"
 
-export const AddBrandPaymentDisclosure = ({ brandId, onSubmitted }) => {
+export const EditBrandPaymentDisclosure = ({ record, onSubmitted }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>
-            <Disclosure {...dialog}>
-                <Trans zh="新增品牌支付" en="Add Brand Payment" />
-            </Disclosure>
+            <EditDisclosure {...dialog} />
             {dialog.visible && (
-                <AddDialog
-                    brandId={brandId}
+                <EditDialog
+                    record={record}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
                 />
@@ -82,10 +86,120 @@ export const AddBrandPaymentDisclosure = ({ brandId, onSubmitted }) => {
     )
 }
 
-const AddDialog = ({ brandId, dialog }) => {
+export const AddBrandPaymentDisclosure = ({ brandId, onSubmitted }) => {
+    let depositDialog = useModalState()
+    let withdrawDialog = useModalState()
+
+    let depositLabel = useTrans({
+        zh: "新增存款支付",
+        en: "Add Deposit Payment"
+    })
+    let withdrawLabel = useTrans({
+        zh: "新增提款支付",
+        en: "Add Withdraw Payment"
+    })
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
+
+    return (
+        <>
+            <DropdownMenu
+                menu={
+                    <>
+                        <DropdownMenu.Item onClick={depositDialog.show}>
+                            {depositLabel}
+                        </DropdownMenu.Item>
+                        <DropdownMenu.Item onClick={withdrawDialog.show}>
+                            {withdrawLabel}
+                        </DropdownMenu.Item>
+                    </>
+                }
+            >
+                <Button iconAfter="chevron-down">
+                    <Trans zh="品牌支付" en="Brand Payment" />
+                </Button>
+            </DropdownMenu>
+            {depositDialog.visible && (
+                <AddDepositDialog
+                    title={depositLabel}
+                    brandId={brandId}
+                    onSubmitted={onSubmitted}
+                    dialog={depositDialog}
+                />
+            )}
+            {withdrawDialog.visible && (
+                <AddWithdrawDialog
+                    title={withdrawLabel}
+                    brandId={brandId}
+                    onSubmitted={onSubmitted}
+                    dialog={withdrawDialog}
+                />
+            )}
+        </>
+    )
+}
+
+const EditDialog = ({
+    record: { id, extendedData = {}, ...record },
+    onSubmitted,
+    dialog
+}) => {
+    let title = useTrans({
+        zh: "Edit",
+        en: "Edit"
+    })
+
     let [formData, setSubmit] = useState()
     let { isLoading, result, error, deleteCache, mutate } =
-        useAddBrandPayment(formData)
+        useUpdateBrandPayment(id, formData)
+
+    const onSubmit = ({ extendedData, ...data }) => {
+        setSubmit({
+            ...record,
+            ...data,
+            extendedData: parseJSON(extendedData)
+        })
+    }
+
+    const reset = () => {
+        deleteCache()
+        mutate(undefined, false)
+        setSubmit(undefined)
+    }
+
+    return (
+        <FormDialog
+            defaultValues={{
+                ...clone(record),
+                extendedData: stringifyJSON(extendedData)
+            }}
+            onSubmit={onSubmit}
+            onSubmitted={onSubmitted}
+            isLoading={isLoading}
+            result={result}
+            error={error}
+            onCloseErrorAlert={reset}
+            title={title}
+            dialog={dialog}
+            width="65vw"
+            maxWidth="80vw"
+        >
+            <EditFormBody brandId={record?.brandId} />
+        </FormDialog>
+    )
+}
+
+const EditFormBody = () => {
+    return <ExtendedDataField />
+}
+
+const AddDepositDialog = ({ title, brandId, dialog }) => {
+    let [formData, setSubmit] = useState()
+    let { isLoading, result, error, deleteCache, mutate } =
+        useAddDepositBrandPayment(formData)
 
     const onSubmit = (data) => {
         setSubmit({
@@ -116,7 +230,51 @@ const AddDialog = ({ brandId, dialog }) => {
             result={result}
             error={error}
             onCloseErrorAlert={reset}
-            title="Add"
+            title={title}
+            dialog={dialog}
+            width="65vw"
+            maxWidth="80vw"
+        >
+            <FormBody brandId={brandId} />
+        </FormDialog>
+    )
+}
+
+const AddWithdrawDialog = ({ title, brandId, dialog }) => {
+    let [formData, setSubmit] = useState()
+    let { isLoading, result, error, deleteCache, mutate } =
+        useAddWithdrawBrandPayment(formData)
+
+    const onSubmit = (data) => {
+        setSubmit({
+            brandId,
+            ...data
+        })
+    }
+
+    const reset = () => {
+        deleteCache()
+        mutate(undefined, false)
+        setSubmit(undefined)
+    }
+
+    return (
+        <FormDialog
+            defaultValues={{
+                paymentStatus: BrandPaymentStatus.Enabled,
+                playerListCondition: PlayerListCondition.MatchOne,
+                allPlayers: true,
+                transferLimitFrom: "0",
+                depositedAmountMin: "0",
+                depositedAmountUnlimited: true,
+                extendedData: JSON.stringify({})
+            }}
+            onSubmit={onSubmit}
+            isLoading={isLoading}
+            result={result}
+            error={error}
+            onCloseErrorAlert={reset}
+            title={title}
             dialog={dialog}
             width="65vw"
             maxWidth="80vw"
@@ -135,12 +293,6 @@ const FormBody = ({ brandId }) => {
                         <MerchantIdSelect />
                     </FieldWrapper>
                 )}
-
-                <BrandPaymentTransferTypeSelectField
-                    name="transferType"
-                    label="Transfer Type"
-                    required
-                />
             </FieldStack>
 
             <Columns>
@@ -199,9 +351,10 @@ const TransferLimitRangeField = () => {
 }
 
 const ExtendedDataField = () => {
+    let FieldName = "extendedData"
     return (
         <FieldWrapper label="Extended Data">
-            <JsonEditor name="extendedData" required height="30vh" />
+            <JsonEditor name={FieldName} required height="30vh" />
         </FieldWrapper>
     )
 }

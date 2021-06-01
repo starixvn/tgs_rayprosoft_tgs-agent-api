@@ -91,6 +91,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Key = request.Key,
                 Value = request.Value,
                 Description = request.Description,
+                CreatedOn = DateTimeOffset.Now,
+                CreatedByUsername = Username,
                 UpdatedOn = DateTimeOffset.Now,
                 UpdatedByUsername = Username
             };

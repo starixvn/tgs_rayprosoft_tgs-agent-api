@@ -8,7 +8,7 @@ import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, Update } from "./menu"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
@@ -41,7 +41,10 @@ const Body = () => {
         sortby: "code"
     })
     let { pageIndex, pageSize, name } = state
-    let { data, isLoading, mutate } = useGameProviderList(toApiParams(state))
+    let { data, isLoading, mutate } = useGameProviderList({
+        ...toApiParams(state),
+        sortby: "code"
+    })
 
     let columns = useColumns({ items: data?.items, mutate })
 
@@ -126,7 +129,8 @@ const SearchBar = ({
 }
 
 const useColumns = ({ items = [], mutate }) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasAnyMenu = hasUpdateAuth
 
     return useMemo(() => {
         let columns = [
@@ -150,13 +154,12 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: (row) => row,
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                Cell: ({ value }) => {
-                    return (
-                        <Box alignX="center">
-                            <GameProviderStatusMenu record={value} />
-                        </Box>
-                    )
-                }
+                Cell: ({ value }) => (
+                    <GameProviderStatusMenu
+                        record={value}
+                        onSubmitted={mutate}
+                    />
+                )
             }),
             dateTimeColumn({
                 accessor: "updatedOn",

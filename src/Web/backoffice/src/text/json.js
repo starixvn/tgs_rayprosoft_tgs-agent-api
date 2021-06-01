@@ -1,8 +1,10 @@
 export const stringifyJSON = (value = "") => {
     try {
-        if (typeof value === "string") {
+        if (typeof value === "string" && value !== "") {
             let parsed = parseJSON(value)
             return JSON.stringify(parsed, null, 4)
+        } else {
+            return JSON.stringify(value, null, 4)
         }
     } catch (error) {
         //ignore
@@ -17,6 +19,8 @@ export const tryStringifyJSON = (value) => {
         if (typeof value === "string") {
             let parsed = JSON.parse(value)
             return [true, JSON.stringify(parsed, null, 4)]
+        } else {
+            return [true, JSON.stringify(value, null, 4)]
         }
     } catch (error) {
         //ignore
