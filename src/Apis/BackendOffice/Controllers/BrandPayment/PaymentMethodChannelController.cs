@@ -33,7 +33,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             await createService.ExecuteAsync(command).ConfigureAwait(false);
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task DeletePaymentMethodChannelAsync(
             [FromServices] ICommandService<DeletePaymentMethodChannelCommand> deleteService,
             Guid id)

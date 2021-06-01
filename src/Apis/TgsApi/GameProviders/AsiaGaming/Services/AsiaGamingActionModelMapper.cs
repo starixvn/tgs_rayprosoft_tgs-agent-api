@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -54,10 +55,12 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var timestamp = isPlaceBetOrCancel ? r.Record.BetTime : r.Record.SettleTime;
             var amount = isPlaceBetOrCancel ? Math.Abs(r.Record.Amount) : r.Record.BetAmount + r.Record.WinAmount;
 
+            var isRoundFinish = bool.TryParse(r.Record.RoundFinish, out var finish) && finish;
+
             var count = r.Record.TransactionIds.Length;
             var transactions = r.Record.TransactionIds.Select((tId, index) =>
             {
-                var transactionId = GetTransactionId(transactionType, tId);
+                var transactionId = GetTransactionId(r.Record, isLockGame, tId);
                 return new TransactionData
                 {
                     Amount = amount,
@@ -70,7 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                     GameActionType = gameActionType,
                     TimeStamp = GetTimestamp(timestamp),
                     RoundClosed = index == count - 1 ? null : false,
-                    RoundDetail = GetRoundHistory(r.Record.RoundFinish, r.Record.GameResult),
+                    RoundDetail = GetRoundHistory(isRoundFinish, r.Record.GameResult),
                     BetType = r.Record.PlayType
                 };
             }).ToArray();
@@ -174,8 +177,19 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 _                      => GameActionType.PlaceBet
             };
 
-        private static string GetTransactionId(TransactionType transactionType, string transactionId) =>
-            transactionType == TransactionType.BET ? transactionId : $"{transactionId}_{transactionType}";
+        private static string GetTransactionId(TransferRecord record, bool isLockGame, string transactionId)
+        {
+            var transactionType = record.TransactionType;
+
+            return transactionType switch
+            {
+                TransactionType.BET    => transactionId,
+                TransactionType.REFUND => $"{transactionId}_{transactionType}",
+                _ => isLockGame
+                    ? $"{transactionId}_{record.BillNo}_{transactionType}"
+                    : $"{transactionId}_{transactionType}"
+            };
+        }
 
         private static string GetTransactionReferenceId(TransferRecord record, bool isLockGame, string transactionId)
         {
@@ -197,8 +211,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             return new(dateTime, offset);
         }
 
-        private string GetRoundHistory(string roundFinish, string roundResult) =>
-            bool.TryParse(roundFinish, out var finish) && finish
+        private string GetRoundHistory(bool isRoundFinish, string roundResult) =>
+            isRoundFinish && roundResult.IsNotNullOrEmpty()
                 ? _jsonSerialization.SerializeToString(new GameHistory {RoundResult = roundResult})
                 : string.Empty;
 

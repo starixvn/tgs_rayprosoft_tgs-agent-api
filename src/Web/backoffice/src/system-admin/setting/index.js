@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Box, Button, Set, Icon } from "bumbag"
+import { Box, Button, Set, Icon, Level } from "bumbag"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
@@ -8,7 +8,7 @@ import {
     useUserRoleId
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
-import { Code } from "./menu"
+import { Code, View, Update } from "./menu"
 import { useSystemSettingList } from "./client"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
@@ -18,7 +18,11 @@ import SearchButton from "../../button/SearchButton"
 import { PageContent } from "../../page/Content"
 import AlertDialog from "../../dialog/Alert"
 import { Trans } from "../../i18n"
-import { EditSettingDisclosure, ViewSettingDisclosure } from "./edit"
+import {
+    AddSettingDisclosure,
+    EditSettingDisclosure,
+    ViewSettingDisclosure
+} from "./edit"
 import equals from "fast-deep-equal"
 
 export { Code }
@@ -39,36 +43,30 @@ const Body = () => {
         key: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useSystemSettingList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useSystemSettingList({
+        ...toApiParams(state),
+        sortby: "key"
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
         <PageContent
             title={<Trans zh="设定" en="Setting" />}
             actionBar={
-                <>
+                <Level>
                     <SearchBar
                         key={state?.key}
                         search={(data) => {
-                            let newState = {
+                            setState({
                                 pageIndex: 0,
-                                key: data?.key
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    key: state?.key
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
-                </>
+                    <AddSettingDisclosure onSubmitted={mutate} />
+                </Level>
             }
         >
             <Table
@@ -115,8 +113,10 @@ const SearchBar = ({ key = "", search, isLoading }) => {
 }
 
 const useColumns = ({ items = [], mutate }) => {
-    return useMemo(
-        () => [
+    let hasViewAuth = useIsDisplayMenuByRoute([View])
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    return useMemo(() => {
+        let columns = [
             textColumn({
                 accessor: "key",
                 Header: <Trans zh="Key" en="Key" />,
@@ -147,25 +147,31 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: "updatedByUsername",
                 Header: <Trans zh="更新人" en="Updated By" />,
                 disableSortBy: true
-            }),
-            textColumn({
-                id: "actions",
-                Header: <Trans zh="操作" en="Actions" />,
-                accessor: (row) => row,
-                disableSortBy: true,
-                Cell: ({ value: record }) => {
-                    return (
-                        <Set orientation="horizontal">
-                            <ViewSettingDisclosure record={record} />
-                            <EditSettingDisclosure
-                                record={record}
-                                onSubmitted={mutate}
-                            />
-                        </Set>
-                    )
-                }
             })
-        ],
-        [JSON.stringify(items)]
-    )
+        ]
+
+        if (hasViewAuth || hasUpdateAuth) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    Header: <Trans zh="操作" en="Actions" />,
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Cell: ({ value: record }) => {
+                        return (
+                            <Set orientation="horizontal" alignX="center">
+                                <ViewSettingDisclosure record={record} />
+                                <EditSettingDisclosure
+                                    record={record}
+                                    onSubmitted={mutate}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
 }

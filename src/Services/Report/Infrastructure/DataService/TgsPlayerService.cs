@@ -46,6 +46,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AccountChangeType.Rebate     => TransactionType.Rebate,
                 AccountChangeType.Dividend   => TransactionType.Dividend,
                 AccountChangeType.Promotion  => TransactionType.Promotion,
+                AccountChangeType.GameProviderFundOut =>  TransactionType.GameProviderFundOut,
+                AccountChangeType.GameProviderFundIn => TransactionType.GameProviderFundIn,
+                AccountChangeType.CancelWithdrawal => TransactionType.CancelWithdrawal,
                 _                            => null
             };
 

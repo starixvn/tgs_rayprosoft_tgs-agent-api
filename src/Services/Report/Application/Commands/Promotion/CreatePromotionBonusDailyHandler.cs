@@ -11,13 +11,13 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.Promotion;
+using TGS.Services.Promotion.Models.PromotionBonus;
 using TGS.Services.Report.Infrastructure.DataService;
 using TGS.Services.TgsTransaction.Core;
 using TGS.Services.WalletService;
-using TGS.Services.PlayerBucket.Models;
-using TGS.Services.PlayerBucket;
-using TGS.Services.Promotion.Models.PromotionBonus;
-using TGS.Services.Promotion;
 
 namespace TGS.Services.Report.Application.Commands.Promotion
 {
@@ -26,7 +26,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             MessageResponse>
     {
         private readonly IPlayerBucketRepository _playerBucketService;
-        private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
+        private readonly IPlayerGameAggregateService _playerGameTypeAggregateService;
         private readonly ITgsPlayerService _playerService;
         private readonly IPromotionBonusRepository _promotionBonusService;
         private readonly ITgsPromotionService _promotionService;
@@ -34,7 +34,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
         private readonly IWalletRepository _walletRepository;
 
         public CreatePromotionBonusDailyQueryHandler(IPromotionBonusRepository promotionBonusService,
-            IPlayerGameTypeAggregateService playerGameTypeAggregateService,
+            IPlayerGameAggregateService playerGameTypeAggregateService,
             ITgsPlayerService playerService,
             ITgsPromotionService promotionService,
             IPlayerBucketRepository playerBucketService,
@@ -88,16 +88,22 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
-            var playerGameTypeRoundAggregate = await _playerGameTypeAggregateService.GetPlayerGameTypeAggregateQueries()
+            var playerGameRoundAggregate = await _playerGameTypeAggregateService.GetPlayerGameAggregateQueries()
                 .Where(x => x.ReportDate == reportDate)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
+                .Join(_playerGameTypeAggregateService.Repository.BrandGames,
+                    aggregate => new {aggregate.BrandId, aggregate.GameId},
+                    brandGame => new {brandGame.BrandId, brandGame.GameId},
+                    (aggregate, brandGame) => new {aggregate, brandGame})
+                .Where(x => x.brandGame.Rebate)
                 .ToArrayAsync(cancellationToken);
 
             var promotionBonus = promotions.Select(x =>
             {
                 var id = GuidExtensions.NewSequentialGuid();
-                var (players, amountUsed) = GetPromotionBonusPlayers(id, x, playerGameTypeRoundAggregate);
+                var (players, amountUsed) =
+                    GetPromotionBonusPlayers(id, x, playerGameRoundAggregate.Select(p => p.aggregate));
                 x.AmountUsed = amountUsed;
 
                 return new PromotionBonusModel
@@ -177,7 +183,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
         }
 
         private static (PromotionBonusPlayerModel[], decimal) GetPromotionBonusPlayers(Guid id,
-            Core.DataServices.Tgs.Models.Promotion promotion, IEnumerable<PlayerGameTypeAggregate> aggregates)
+            Core.DataServices.Tgs.Models.Promotion promotion, IEnumerable<PlayerGameAggregate> aggregates)
         {
             var amount = promotion.AmountUsed;
 

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Models.Services;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Agent
@@ -32,17 +33,19 @@ namespace TGS.Services.Agent.Agent
             if (result == null)
                 throw new ValidateCodeNotVerifyException();
 
+            var agentId = new Guid(result.Id);
+
             var username = await _agentOperations
-                .GetAgentAsync(new Guid(result.Id))
+                .GetAgentAsync(agentId)
                 .ConfigureAwait(false);
             var updatedOn = DateTimeOffset.UtcNow;
 
             var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);
             await _agentOperations
-                .ChangeAgentPasswordAsync(new()
+                .ChangeAgentPasswordAsync(new ChangeAgentPasswordData()
                 {
                     Username = username.Username,
-                    Id = result.Id,
+                    Id = agentId,
                     Salt = newSalt,
                     Password = newPassword,
                     UpdatedOn = updatedOn

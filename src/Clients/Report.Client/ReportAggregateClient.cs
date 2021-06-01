@@ -15,8 +15,10 @@ namespace TGS.Clients.Report.Client
         Task<MessageResponse> CreateAgentDividendAsync(CreateAgentDividendsRequest request);
         Task<MessageResponse> CreatePlayerAggregateAsync(CreateUpdatePlayerAggregateModel request);
         Task<MessageResponse> ManualCreatePlayerAggregateAsync(ManualCreateUpdatePlayerAggregateModel request);
-        Task<MessageResponse> CreateUpdateRoundAggregateAsync(CreateUpdateRoundAggregateModel request);
-        Task<MessageResponse> ManualCreateUpdateRoundAggregateAsync(ManualCreateUpdateRoundAggregateModel request);
+        Task<MessageResponse> CreateRoundAggregateAsync(CreateRoundAggregateModel request);
+        Task<MessageResponse> FillPlayerBucketMinutelyAsync(FillPlayerBucketMinutelyModel request);
+        Task<MessageResponse> ManualFillPlayerBucketMinutelyAsync(ManualFillPlayerBucketMinutelyModel request);
+        Task<MessageResponse> ManualCreateRoundAggregateAsync(ManualCreateUpdateRoundAggregateModel request);
     }
 
     public class ReportAggregateClient : BaseApiClient, IReportAggregateClient
@@ -47,17 +49,17 @@ namespace TGS.Clients.Report.Client
                 options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
 
-        async Task<MessageResponse> IReportAggregateClient.CreateUpdateRoundAggregateAsync(
-            CreateUpdateRoundAggregateModel request)
+        async Task<MessageResponse> IReportAggregateClient.CreateRoundAggregateAsync(
+            CreateRoundAggregateModel request)
         {
-            var prefix = "Report.CreateUpdatePlayerAggregate";
-            return await ExecuteJsonRequestAsync<CreateUpdateRoundAggregateModel, MessageResponse>(
+            var prefix = "Report.CreateRoundAggregate";
+            return await ExecuteJsonRequestAsync<CreateRoundAggregateModel, MessageResponse>(
                 HttpMethod.Post,
                 "/api/roundAggregate", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
 
-        async Task<MessageResponse> IReportAggregateClient.ManualCreateUpdateRoundAggregateAsync(
+        async Task<MessageResponse> IReportAggregateClient.ManualCreateRoundAggregateAsync(
             ManualCreateUpdateRoundAggregateModel request)
         {
             var prefix = $"Report.{request.Date}.{request.Hour}.ManualCreateUpdatePlayerAggregate";
@@ -82,6 +84,26 @@ namespace TGS.Clients.Report.Client
             return await ExecuteJsonRequestAsync<CreateAgentDividendsRequest, MessageResponse>(
                 HttpMethod.Post,
                 "/api/agentReport/dividends", request, logPrefix: prefix,
+                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
+        }
+
+        async Task<MessageResponse> IReportAggregateClient.FillPlayerBucketMinutelyAsync(
+            FillPlayerBucketMinutelyModel request)
+        {
+            var prefix = "Report.FillPlayerBucketMinutely";
+            return await ExecuteJsonRequestAsync<FillPlayerBucketMinutelyModel, MessageResponse>(
+                HttpMethod.Post,
+                "/api/roundAggregate/fillPlayerBucketMinutely", request, logPrefix: prefix,
+                options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
+        }
+
+        async Task<MessageResponse> IReportAggregateClient.ManualFillPlayerBucketMinutelyAsync(
+            ManualFillPlayerBucketMinutelyModel request)
+        {
+            var prefix = "Report.ManualFillPlayerBucketMinutely";
+            return await ExecuteJsonRequestAsync<ManualFillPlayerBucketMinutelyModel, MessageResponse>(
+                HttpMethod.Post,
+                "/api/roundAggregate/manualFillPlayerBucketMinutely", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
     }

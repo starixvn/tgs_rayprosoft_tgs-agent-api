@@ -43,21 +43,16 @@ export const AgentBalanceChangePanel = ({ brandId, agentId, ...props }) => {
     })
 
     let { pageSize, accountChangeType, from, to } = state
-    let {
-        isLoading,
-        data,
-        error,
-        mutate,
-        deleteCache
-    } = useAgentBalanceChanges(
-        isActive
-            ? toApiParams({
-                  ...state,
-                  sortby: "recordedOn",
-                  orderby: Descending
-              })
-            : undefined
-    )
+    let { isLoading, data, error, mutate, deleteCache } =
+        useAgentBalanceChanges(
+            isActive
+                ? toApiParams({
+                      ...state,
+                      sortby: "recordedOn",
+                      orderby: Descending
+                  })
+                : undefined
+        )
 
     let columns = useColumns({ items: data?.items })
 
@@ -177,6 +172,13 @@ const WithdrawalTrans = {
     zh: "提款",
     en: "Withdrawal"
 }
+
+const CancelWithdrawal = "CancelWithdrawal"
+const CancelWithdrawalTrans = {
+    zh: "取消提款",
+    en: "Cancel Withdrawal"
+}
+
 const Adjust = "Adjust"
 const AdjustTrans = {
     zh: "调账",
@@ -206,6 +208,10 @@ const AgentTransactionTypeSelect = ({ placeholder, ...props }) => {
             value: Withdrawal
         },
         {
+            label: useTrans(CancelWithdrawalTrans),
+            value: CancelWithdrawal
+        },
+        {
             label: useTrans(AdjustTrans),
             value: Adjust
         },
@@ -228,6 +234,8 @@ const AgentTransactionTypeLabel = ({ value = "" }) => {
             return <Trans {...AdjustTrans} />
         case Dividend:
             return <Trans {...DividendTrans} />
+        case CancelWithdrawal:
+            return <Trans {...CancelWithdrawalTrans} />
         default:
             return value
     }

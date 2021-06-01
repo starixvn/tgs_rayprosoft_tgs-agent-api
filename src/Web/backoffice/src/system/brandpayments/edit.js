@@ -33,10 +33,9 @@ import BrandPaymentStatus, {
     BrandPaymentStatusButton
 } from "./BrandPaymentStatus"
 import {
-    useUpdatePayment,
+    useUpdateBrandPayment,
     useBrandPaymentUpload,
-    useAddBrandPayment,
-    useBrandPaymentMethodChannelList
+    useAddDepositBrandPayment
 } from "./client"
 import AlertDialog from "../../dialog/Alert"
 import {
@@ -58,7 +57,10 @@ import Input from "../../input/Input"
 import { Checkbox, CheckboxField } from "../../checkbox/Checkbox"
 import { Switch } from "../../switch/Switch"
 import clone from "clone-deep"
-import { usePaymentList } from "../../payment/client"
+import {
+    usePaymentList,
+    usePaymentMethodChannelList
+} from "../../payment/client"
 import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import {
     PaymentMethodLabel,
@@ -115,10 +117,8 @@ const EditDialog = ({
 
     let [submitData, setSubmit] = useState()
 
-    let { result, isLoading, error, mutate, deleteCache } = useUpdatePayment(
-        record.id,
-        submitData
-    )
+    let { result, isLoading, error, mutate, deleteCache } =
+        useUpdateBrandPayment(record.id, submitData)
 
     if (isLoadingPayment) {
         return <LoadingBackdrop {...dialog} />
@@ -244,7 +244,7 @@ const useBankTransferPayment = () => {
         error: paymentMethodChannelListError,
         mutate: mutatePaymentMethodChannelList,
         deleteCache: deletePaymentMethodChannelListCache
-    } = useBrandPaymentMethodChannelList()
+    } = usePaymentMethodChannelList()
 
     let manualPayment = paymentListData?.find(({ code }) => code === "Manual")
 
@@ -256,16 +256,6 @@ const useBankTransferPayment = () => {
         paymentMethodChannelList?.allData?.filter((item) => {
             return item.methodId === bankTransferPaymentMethod.id
         })
-
-    /*
-    let manualBankTransferPaymentMethodChannels =
-        paymentMethodChannelList?.allData?.filter((item) => {
-            return (
-                item.methodId === bankTransferPaymentMethod.id &&
-                item.paymentId === manualPayment.id
-            )
-        })
-    */
 
     return {
         isLoading:
@@ -299,7 +289,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
 
     let [formData, setSubmit] = useState()
     let { result, isLoading, error, mutate, deleteCache } =
-        useAddBrandPayment(formData)
+        useAddDepositBrandPayment(formData)
 
     if (isLoadingPayment) {
         return <LoadingBackdrop {...dialog} />

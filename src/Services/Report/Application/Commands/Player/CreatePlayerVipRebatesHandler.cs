@@ -6,7 +6,6 @@ using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -21,26 +20,23 @@ namespace TGS.Services.Report.Application.Commands.Player
             MessageResponse>
     {
         private readonly ITgsBrandService _brandService;
-        private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
+        private readonly IPlayerGameAggregateService _playerGameAggregateService;
         private readonly IPlayerRebateService _playerRebateService;
         private readonly ITgsPlayerService _playerService;
-        private readonly ITransactionManager _transactionManager;
         private readonly IWalletRepository _walletRepository;
 
         public CreatePlayerVipRebatesHandler(ITgsBrandService brandService,
             IPlayerRebateService playerRebateService,
-            IPlayerGameTypeAggregateService playerGameTypeAggregateService,
+            IPlayerGameAggregateService playerGameAggregateService,
             IWalletRepository walletRepository,
             ITgsPlayerService playerService,
-            ITransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _brandService = brandService;
             _playerRebateService = playerRebateService;
-            _playerGameTypeAggregateService = playerGameTypeAggregateService;
+            _playerGameAggregateService = playerGameAggregateService;
             _walletRepository = walletRepository;
             _playerService = playerService;
-            _transactionManager = transactionManager;
         }
 
         public override async Task<MessageResponse> Handle(CreatePlayerRebateRequest request,
@@ -63,20 +59,25 @@ namespace TGS.Services.Report.Application.Commands.Player
                     $"The rebates of {reportDate} have generated.");
             }
 
-            var playerRebates = await _playerGameTypeAggregateService
-                .GetPlayerGameTypeAggregateQueries(q => q.Where(x => x.ReportDate == reportDate))
+            var playerRebates = await _playerGameAggregateService
+                .GetPlayerGameAggregateQueries(q => q.Where(x => x.ReportDate == reportDate))
+                .Join(_playerGameAggregateService.Repository.BrandGames,
+                    aggregate => new {aggregate.BrandId, aggregate.GameId},
+                    brandGame => new {brandGame.BrandId, brandGame.GameId},
+                    (aggregate, brandGame) => new {aggregate, brandGame})
+                .Where(x => x.brandGame.Rebate)
                 .GroupBy(
                     x => new
                     {
-                        x.BrandId,
-                        x.PlayerCode,
-                        x.AgentId,
-                        x.VipCardGameRebatePercentage,
-                        x.VipLiveDealerRebatePercentage,
-                        x.VipLotteryRebatePercentage,
-                        x.VipSlotRebatePercentage,
-                        x.VipSportsRebatePercentage,
-                        x.VipVirtualSportsRebatePercentage
+                        x.aggregate.BrandId,
+                        x.aggregate.PlayerCode,
+                        x.aggregate.AgentId,
+                        x.aggregate.VipCardGameRebatePercentage,
+                        x.aggregate.VipLiveDealerRebatePercentage,
+                        x.aggregate.VipLotteryRebatePercentage,
+                        x.aggregate.VipSlotRebatePercentage,
+                        x.aggregate.VipSportsRebatePercentage,
+                        x.aggregate.VipVirtualSportsRebatePercentage
                     },
                     (x, list) => new PlayerRebateModel
                     {
@@ -91,35 +92,43 @@ namespace TGS.Services.Report.Application.Commands.Player
                         VipSportsRebatePercentage = x.VipSportsRebatePercentage,
                         VipVirtualSportsRebatePercentage = x.VipVirtualSportsRebatePercentage,
                         SportsTurnover =
-                            list.Where(l => Consts.SportsGroup.Contains(l.GameType))
-                                .Sum(x => x.Turnover),
+                            list.Where(l => Consts.SportsGroup.Contains(l.aggregate.GameType))
+                                .Sum(x => x.aggregate.Turnover),
                         SportsRebateAmount = x.VipSportsRebatePercentage * list.Where(l =>
-                                Consts.SportsGroup.Contains(l.GameType))
-                            .Sum(x => x.Turnover) / 100M,
+                                Consts.SportsGroup.Contains(l.aggregate.GameType))
+                            .Sum(x => x.aggregate.Turnover) / 100M,
                         VirtualSportsTurnover =
-                            list.Where(l => l.GameType == GameType.VirtualSports).Sum(a => a.Turnover),
+                            list.Where(l => l.aggregate.GameType == GameType.VirtualSports)
+                                .Sum(a => a.aggregate.Turnover),
                         VirtualSportsRebateAmount =
                             x.VipVirtualSportsRebatePercentage *
-                            list.Where(l => l.GameType == GameType.VirtualSports).Sum(a => a.Turnover) / 100M,
-                        LiveDealerTurnover = list.Where(l => l.GameType == GameType.LiveDealer).Sum(a => a.Turnover),
+                            list.Where(l => l.aggregate.GameType == GameType.VirtualSports)
+                                .Sum(a => a.aggregate.Turnover) / 100M,
+                        LiveDealerTurnover =
+                            list.Where(l => l.aggregate.GameType == GameType.LiveDealer).Sum(a => a.aggregate.Turnover),
                         LiveDealerRebateAmount =
                             x.VipLiveDealerRebatePercentage *
-                            list.Where(l => l.GameType == GameType.LiveDealer).Sum(a => a.Turnover) / 100M,
-                        CardGameTurnover = list.Where(l => l.GameType == GameType.CardGame).Sum(a => a.Turnover),
+                            list.Where(l => l.aggregate.GameType == GameType.LiveDealer)
+                                .Sum(a => a.aggregate.Turnover) / 100M,
+                        CardGameTurnover =
+                            list.Where(l => l.aggregate.GameType == GameType.CardGame).Sum(a => a.aggregate.Turnover),
                         CardGameRebateAmount =
                             x.VipCardGameRebatePercentage *
-                            list.Where(l => l.GameType == GameType.CardGame).Sum(a => a.Turnover) / 100M,
-                        SlotTurnover = list.Where(l => Consts.SlotGroup.Contains(l.GameType)).Sum(a => a.Turnover),
+                            list.Where(l => l.aggregate.GameType == GameType.CardGame).Sum(a => a.aggregate.Turnover) /
+                            100M,
+                        SlotTurnover =
+                            list.Where(l => Consts.SlotGroup.Contains(l.aggregate.GameType))
+                                .Sum(a => a.aggregate.Turnover),
                         SlotRebateAmount =
                             x.VipSlotRebatePercentage * list.Where(l =>
-                                Consts.SlotGroup.Contains(l.GameType)).Sum(a => a.Turnover) /
+                                Consts.SlotGroup.Contains(l.aggregate.GameType)).Sum(a => a.aggregate.Turnover) /
                             100M,
-                        LotteryTurnover = list.Where(a => a.GameType == GameType.Lottery)
-                            .Sum(a => a.Turnover),
+                        LotteryTurnover = list.Where(a => a.aggregate.GameType == GameType.Lottery)
+                            .Sum(a => a.aggregate.Turnover),
                         LotteryRebateAmount =
-                            x.VipLotteryRebatePercentage * list.Where(a => a.GameType == GameType.Lottery)
-                                .Sum(a => a.Turnover) / 100M,
-                        RebateAmount = list.Sum(l => l.VipRebateAmount)
+                            x.VipLotteryRebatePercentage * list.Where(a => a.aggregate.GameType == GameType.Lottery)
+                                .Sum(a => a.aggregate.Turnover) / 100M,
+                        RebateAmount = list.Sum(l => l.aggregate.VipRebateAmount)
                     })
                 .ToArrayAsync(cancellationToken);
 

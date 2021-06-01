@@ -33,3 +33,22 @@ export const usePaymentList = () => {
         ...rest
     }
 }
+
+export const usePaymentMethodChannelList = () => {
+    let { data, ...rest } = useGet(`/api/pmc`)
+
+    return {
+        data: data?.data,
+        ...rest
+    }
+}
+
+export const useAddPaymentMethodChannel = (data) => {
+    let url = data ? `/api/pmc` : ""
+    return usePostData(url, data)
+}
+
+export const useDeletePaymentMethodChannel = (id) => {
+    let url = id ? `/api/pmc/${id}` : ""
+    return useDelete(url)
+}

@@ -70,6 +70,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Email is existed..
+        /// </summary>
+        public static string EmailExisted {
+            get {
+                return ResourceManager.GetString("EmailExisted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Insufficient balance..
         /// </summary>
         public static string InsufficientBalance {

@@ -49,6 +49,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AgentId = model.AgentId,
                 GameProviderId = model.GameProviderId,
                 PlayerCode = model.PlayerCode,
+                GameId = model.GameId,
                 GameType = model.GameType,
                 Hour = model.Hour,
                 Minute = model.Minute,
@@ -150,6 +151,11 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     playerAggregate.PromotionAmount;
             }
 
+            playerAggregates = playerAggregates.Where(x =>
+                x.RegisteredCount != 0 || x.FirstFundInCount != 0 || x.DepositAmount != 0 || x.WithdrawalAmount != 0 ||
+                x.AdjustmentAmount != 0 || x.BonusAmount != 0 || x.BetAmount != 0 || x.Turnover != 0 ||
+                x.WinLossAmount != 0 || x.NetProfit != 0).ToArray();
+
             var playerAggregateByGameType = roundAggregates.GroupJoin(
                     _tgsRepository.Players.Include(x => x.Agent).Include(x => x.Vip),
                     r => r.PlayerCode, p => p.PlayerCode, (r, p) => new {r, p = p.DefaultIfEmpty()})
@@ -161,6 +167,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                         x.r.AgentId,
                         x.r.PlayerCode,
                         x.r.GameProviderId,
+                        x.r.GameId,
                         x.r.GameType,
                         x.Vip,
                         x.Agent
@@ -174,6 +181,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             PlayerCode = x.PlayerCode,
                             VipLevel = x.Vip?.Level,
                             GameProviderId = x.GameProviderId,
+                            GameId = x.GameId,
                             GameType = x.GameType,
                             Hour = start.Hour,
                             VipSportsRebatePercentage = x.Vip?.SportsRebatePercentage ?? 0M,

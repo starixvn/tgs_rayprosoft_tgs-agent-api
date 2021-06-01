@@ -17,7 +17,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
         IQueryable<Round> GetRoundQueries(Func<IQueryable<Round>, IQueryable<Round>> preQuery = null,
             bool tracking = false);
 
-        Task<RoundAggregateModel[]> GetRoundsAsync(DateTimeOffset start, DateTimeOffset end);
+        Task<RoundAggregateModel[]> GenerateRoundAggregateAsync(DateTimeOffset start, DateTimeOffset end);
+        Task<RoundAggregateModel[]> GetMinuteRoundAggregateAsync(DateTimeOffset start, DateTimeOffset end);
     }
 
     public class TgsRoundService : BaseRepositoryOperations<ITgsRepository>, ITgsRoundService
@@ -37,9 +38,30 @@ namespace TGS.Services.Report.Infrastructure.DataService
             GetQueriesAsync(preQuery, tracking);
 
         async Task<RoundAggregateModel[]> ITgsRoundService.
-            GetRoundsAsync(DateTimeOffset start, DateTimeOffset end)
+            GenerateRoundAggregateAsync(DateTimeOffset start, DateTimeOffset end)
         {
-            const string spName = "dbo.report_get_round_aggregates";
+            const string spName = "dbo.report_generate_round_aggregates";
+            var result = await _repository
+                .SqlQueryMultipleAsync<RoundAggregateModel>(spName, parameters:
+                    new Dictionary<string, object>
+                    {
+                        {"_from", start},
+                        {"_to", end},
+                        {
+                            "_report_date",
+                            new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset)
+                        },
+                        {"_created_on", DateTimeOffset.Now.ToOffset(start.Offset)},
+                        {"_hour", start.Hour},
+                        {"_minute", start.Minute}
+                    });
+            return result.ToArray();
+        }
+
+        async Task<RoundAggregateModel[]> ITgsRoundService.GetMinuteRoundAggregateAsync(DateTimeOffset start,
+            DateTimeOffset end)
+        {
+            const string spName = "dbo.report_get_round_and_set_game_setting_aggregates";
             var result = await _repository
                 .SqlQueryMultipleAsync<RoundAggregateModel>(spName, parameters:
                     new Dictionary<string, object>
@@ -51,7 +73,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset)
                         },
                         {"_hour", start.Hour},
-                        {"_minute", 0}
+                        {"_minute", start.Minute}
                     });
             return result.ToArray();
         }

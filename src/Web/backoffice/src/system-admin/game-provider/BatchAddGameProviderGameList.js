@@ -16,6 +16,7 @@ import {
     Spinner,
     Alert
 } from "bumbag"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure, {
     AddDisclosure,
     ConfigIconDisclosure,
@@ -48,12 +49,18 @@ import { useDropzone } from "react-dropzone"
 import { GameProviderGameFormBody } from "./GameProviderGame"
 import { ConfirmText } from "../../button/ActionButtons"
 import sequenceColumn from "../../table/column/sequence"
+import { Update } from "./menu"
 
 export const BatchAddGameProviderGameListDisclosure = ({
     gameProviderId,
     onSubmitted
 }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>
@@ -229,14 +236,18 @@ const EditGameDialog = ({ record, onChange, dialog }) => {
         en: "Edit Game"
     })
 
+    const onSubmit = (data) => {
+        onChange?.(data)
+        dialog.hide()
+    }
+
     return (
         <Backdrop {...dialog}>
             <FormDialog
                 defaultValues={clone(record)}
                 submitText={<ConfirmText />}
                 title={title}
-                onSubmit={onChange}
-                onSubmitted={dialog.hide}
+                onSubmit={onSubmit}
                 stopPropagation
                 hideBackdrop
                 title={title}

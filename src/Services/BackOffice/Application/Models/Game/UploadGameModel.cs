@@ -14,6 +14,7 @@ namespace TGS.Services.BackOffice.Application.Models.Game
         public string EndpointPath { get; set; }
         public string Description { get; set; }
         public Boolean? SubGame { get; set; }
+        public Boolean? AvailableToBrand { get; set; }
         public Boolean? Html5 { get; set; }
         public string AvailableCurrencies { get; set; }
     }

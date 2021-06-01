@@ -10,6 +10,7 @@ namespace TGS.Services.Report.Application.Models.Player
         public string PlayerCode { get; set; }
         public int? VipLevel { get; set; }
         public Guid GameProviderId { get; set; }
+        public int GameId { get; set; }
         public GameType GameType { get; set; }
         public int Hour { get; set; }
         public decimal Turnover { get; set; }
