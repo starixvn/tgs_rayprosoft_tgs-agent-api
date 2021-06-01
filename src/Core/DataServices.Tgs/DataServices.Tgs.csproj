@@ -24,6 +24,7 @@
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\SG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
     <EmbeddedResource Include="Migrations\RefactorWithdrawForm.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_provider_configuration_for_cache.sql" />
@@ -80,9 +81,6 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_external_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Views\vw_valid_game_actions.sql" />
-    <None Remove="DataInitializers\Games\JDB.csv" />
-    <None Remove="Migrations\RefactorWithdrawForm.sql" />
-    <None Remove="SqlScripts\Functions\report_get_round_and_set_game_setting_aggregates.sql" />
     <EmbeddedResource Include="DataInitializers\Games\JDB.csv" />
   </ItemGroup>
 
