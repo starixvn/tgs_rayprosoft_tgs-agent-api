@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -16,18 +14,30 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<Guid> GetGameProviderId();
+        ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
+        ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
     }
     internal sealed class SexyGamingServices : ISexyGamingServices
     {
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameActionQueries _gameActionQueries;
+        private readonly IBrandOperations _brandOperations;
+        private readonly IPlayerOperations _playerOperations;
         public SexyGamingServices(
             IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries)
+            IGameActionQueries gameActionQueries,
+            IBrandOperations brandOperations,
+            IPlayerOperations playerOperations
+            )
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
+            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
+
+        async ValueTask<Guid> ISexyGamingServices.GetBrandIdByPlayerCodeAsync(string playerCode)
+            => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
 
         async ValueTask<GameActionExternalIds> ISexyGamingServices.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
@@ -44,6 +54,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 AutoCloseRound = autoCloseRound,
                 PlatformType = platformType
             };
+        }
+
+        async ValueTask<Guid> ISexyGamingServices.GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+        {
+            var cachedBrandGameProviderConfiguration = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId).ConfigureAwait(false);
+            return cachedBrandGameProviderConfiguration.GameProviderConfigurationId;
         }
 
         async ValueTask<Guid> ISexyGamingServices.GetGameProviderId()

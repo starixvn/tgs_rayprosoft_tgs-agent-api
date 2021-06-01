@@ -36,7 +36,7 @@ namespace TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions
         [JsonPropertyName("updateTime")]
         public DateTimeOffset UpdateTime { get; init; }
         [JsonPropertyName("roundId")]
-        public decimal RoundId { get; init; }
+        public string RoundId { get; init; }
         [JsonPropertyName("gameInfo")]
         public JsonDocument GameInfo { get; init; }
         [JsonPropertyName("txTime")]

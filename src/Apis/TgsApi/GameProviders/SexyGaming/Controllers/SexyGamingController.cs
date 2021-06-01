@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Net.Mime;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
-using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
@@ -168,14 +166,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
 
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
-                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
-                .ConfigureAwait(false);
 
-            var betData = _map.VoidBetAsync(gameProviderConfigurationData, data.Transaction);
+            var betData = await _map.VoidBetAsync(gameProviderId, data.Transaction).ConfigureAwait(false);
             await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
 
             return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
@@ -188,8 +181,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
         [HttpPost("settle")]
         public async Task<JsonDocument> SettleAsync(JsonDocument request)
         {
+
             var data = _jsonSerializationProvider.DeserializeFromString<SexyGamingSingleWalletTxnsRequest<SexyGamingSettle>>(
                 _jsonSerializationProvider.SerializeToString(request));
+
 
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<SexyGamingConfiguration>(
@@ -197,16 +192,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
 
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
-                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
-                .ConfigureAwait(false);
-
-            var betData = _map.SettleAsync(gameProviderConfigurationData, data.Transaction, configuration.OppositeBets);
+            var betData = await _map.SettleAsync(gameProviderId, data.Transaction, configuration.OppositeBets).ConfigureAwait(false);
             await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
-
 
             return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
             {
@@ -223,14 +211,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
 
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
-                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
-                .ConfigureAwait(false);
-
-            var betData = await _map.UnsettleAsync(gameProviderConfigurationData, data.Transaction).ConfigureAwait(false);
+            var betData = await _map.UnsettleAsync(gameProviderId, data.Transaction).ConfigureAwait(false);
             await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
 
             return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
@@ -248,6 +230,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
 
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
@@ -255,8 +238,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.VoidSettleAsync(gameProviderConfigurationData, data.Transaction);
-            await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
+            var betData = await _map.VoidSettleAsync(gameProviderConfigurationData, playerCode, data.Transaction).ConfigureAwait(false);
+            await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
 
             return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
             {
@@ -276,7 +259,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 BalanceTs = string.Empty
             }));
         }
-
 
         [HttpPost("ping")]
         public async Task<JsonDocument> PingAsync(JsonDocument request) => JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()

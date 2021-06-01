@@ -69,6 +69,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
              * Voidbet: multiple player / multiple transactions (1 round action)
              * VoidSettle: 1 player / multiple transaction (by selected transaction)
              */
+            /*
+             * 貴司應該會遇到這三個流程
+             * Unsettle : 當出現技術問題需要更換成績時。 流程 : bet -> settle -> 技術問題需要改成績 -> unsettle  -> settle
+             * Void Settle : 當出現技術問題要將使用者單筆交易void時。 流程 : bet -> settle -> 技術問題需要void使用者單筆交易 -> void settle
+             * Void bet : 當出現技術問題要將整局void時。 流程 : bet -> settle -> 技術問題需要void整局 -> unsettle -> void bet
+             */
             if (data.Action.IgnoreCaseEquals("getBalance") || data.Action.IgnoreCaseEquals("bet") || data.Action.IgnoreCaseEquals("cancelBet") || data.Action.IgnoreCaseEquals("voidSettle"))
             {
                 var extension1 = form.GetValue<string>(SexyGamingConsts.Parameters.Extension1);
