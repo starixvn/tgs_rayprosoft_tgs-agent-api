@@ -22,11 +22,11 @@ export const CopyLongText = ({ value = "", ...props }) => {
     return (
         <Popover.State>
             <Popover.Disclosure
-                {...props}
                 onClick={() => copy(value)}
                 width="100%"
                 overflow="hidden"
                 textOverflow="ellipsis"
+                {...props}
             >
                 <arrb title={value}>{value}</arrb>
             </Popover.Disclosure>
