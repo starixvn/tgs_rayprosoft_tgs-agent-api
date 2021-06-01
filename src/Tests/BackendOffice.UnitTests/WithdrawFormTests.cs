@@ -171,6 +171,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 {
                     Id = Guid.NewGuid(),
                     PlayerCode = "PlayerCode",
+                    UserName = "Player1",
+                    UserType = 1,
                     BrandId = brandId,
                     Amount = 1000M,
                     Status = 1000,
