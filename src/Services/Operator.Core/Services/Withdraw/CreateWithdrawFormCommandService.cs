@@ -4,14 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Tgs.Payment;
 using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operations;
-using TGS.Services.Payment;
+using TGS.Services.Operator.BrandPayment;
 using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Withdraw;
-using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Services.Operator.Services.Withdraw
 {

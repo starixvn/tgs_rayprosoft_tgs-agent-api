@@ -4,14 +4,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Payment;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
-using TGS.Services.Payment;
-using TGS.ServiceUtility;
 using TGS.Services.Operator.Services.Deposit;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -19,44 +18,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class ManualDepositController : ControllerBase
     {
-        [HttpPut]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public async ValueTask<Guid> SubmitDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] ManualDepositSerializer serializer,
-            [FromBody] SubmitManualDepositRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                "tgs.payment.manual.deposit",
-                request.PromotionId,
-                _ => serializer.Serialize(
-                    new ManualDepositApplyInfo(
-                            request.BankAccount,
-                            brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
-                            brandPaymentBankInfo.RootElement.GetProperty("name").GetString())));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-        }
-
         [HttpGet("{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
@@ -120,6 +81,44 @@ namespace TGS.Apis.OperatorApi.Controllers
                 fileStream);
 
             await submitBandDepositFormCommandService.ExecuteAsync(command);
+        }
+
+        [HttpPut]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public async ValueTask<Guid> SubmitDepositRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] ManualDepositSerializer serializer,
+            [FromBody] SubmitManualDepositRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.manual.deposit",
+                request.PromotionId,
+                _ => serializer.Serialize(
+                    new ManualDepositApplyInfo(
+                            request.BankAccount,
+                            brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
+                            brandPaymentBankInfo.RootElement.GetProperty("name").GetString())));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
         }
     }
 }

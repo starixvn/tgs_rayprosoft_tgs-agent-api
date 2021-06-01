@@ -1,6 +1,4 @@
-﻿using TGS.Services.Payment;
-using TGS.Services.Operator.BrandPayment.PaymentConditions;
-using TGS.Services.Operator;
+﻿using Tgs.Payment;
 
 namespace TGS.Services.Operator.BrandPayment.PaymentConditions
 {

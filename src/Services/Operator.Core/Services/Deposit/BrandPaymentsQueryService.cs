@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using TGS.Services.Payment;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Deposit;
+using Tgs.Payment;
 using TGS.Services.Operator.BrandPayment.PaymentConditions;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Deposit
 {
@@ -72,7 +71,7 @@ namespace TGS.Services.Operator.Services.Deposit
                     blockListCondition,
                     whiteListCondition,
                     showOnAllPlayerCondition,
-                    bp.ConditionMatchType == ConditionMatchTypes.MatchAll
+                    bp.ConditionMatchType == ConditionMatchType.MatchAll
                         ? new MatchAllCondition(
                             depositedAmountCondition,
                             identityCondition,

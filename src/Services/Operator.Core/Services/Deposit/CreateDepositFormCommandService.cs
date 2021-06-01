@@ -3,9 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment;
 using TGS.Clients.Promotion.Client;
-using TGS.Services.Payment;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Deposit;
 
 namespace TGS.Services.Operator.Services.Deposit
 {

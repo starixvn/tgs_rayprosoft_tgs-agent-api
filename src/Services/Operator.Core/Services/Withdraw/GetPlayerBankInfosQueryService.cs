@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using TGS.Services.Payment;
+using Tgs.Payment;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Withdraw;
 
 namespace TGS.Services.Operator.Services.Withdraw
 {

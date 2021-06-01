@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Services.Payment;
+using Tgs.Payment;
 using TGS.Services.Operator.Services.Withdraw;
 
 namespace TGS.Tests.OperatorApi.UnitTests

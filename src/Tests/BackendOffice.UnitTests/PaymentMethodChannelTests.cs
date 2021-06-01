@@ -1,10 +1,10 @@
 ﻿using System;
 using Moq;
 using NUnit.Framework;
+using Tgs.Payment;
 using TGS.Services.BackOffice.Application.Commands.PaymentMethodChannel;
 using TGS.Services.BackOffice.Application.Queries.BrandPayment;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.Payment;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {

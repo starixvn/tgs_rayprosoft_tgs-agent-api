@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json;
+using Tgs.Payment;
 using Tgs.Payment.PrimePay;
-using TGS.Services.Payment;
 
 namespace TGS.Services.BackOffice.Domain
 {

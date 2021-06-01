@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.Payment;
 using TGS.Services.Operator;
-using TGS.Services.Payment;
 using TGS.Services.Operator.Services.Deposit;
 
 namespace TGS.Tests.OperatorApi.UnitTests

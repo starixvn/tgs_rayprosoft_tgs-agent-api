@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.Payment;
+using Tgs.Payment;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Deposit;
 
 namespace TGS.Services.Operator.Services.Deposit
 {

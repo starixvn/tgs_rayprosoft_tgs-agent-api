@@ -4,116 +4,24 @@ using System.Threading.Tasks;
 using ExpectedObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson.Serialization;
-using Moq;
 using NSubstitute;
 using NUnit.Framework;
+using Tgs.Payment;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
-using TGS.Services.Operator;
-using TGS.Services.Payment;
+using TGS.Services.Operator.BrandPayment;
+using TGS.Services.Operator.Services.Withdraw;
 using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
-using TGS.Services.Operator.Services.Withdraw;
-using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
     [TestFixture]
     public class WithdrawTests
     {
-        [Test]
-        public async Task Player_Can_Create_Withdraw_Form()
-        {
-            var fakeWalletRepository = Substitute.For<IWalletRepository>();
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-            var optionsAccessor = new OptionsWrapper<JsonOptions>(
-                new JsonOptions());
-
-            var sut = new CreateWithdrawFormCommandService(
-                fakeWalletRepository,
-                fakePaymentRepository,
-                fakePlayerOperations,
-                fakePlayerBucketRepository,
-                jsonSerializationProvider,
-                optionsAccessor);
-
-            var command = new CreateWithdrawFormCommand(
-                "ThisIsPlayerCode",
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                1000M);
-
-            fakePlayerOperations
-                .GetCachedPlayerAsync(Arg.Is(command.PlayerCode))
-                .Returns(new CachedPlayer
-                {
-                    PlayerCode = command.PlayerCode,
-                    DefaultWalletId = Guid.NewGuid()
-                });
-
-            fakeWalletRepository
-                .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.PlayerCode))
-                .Returns(2000M);
-
-
-            fakePlayerBucketRepository
-                .IsBucketFullAsync(Arg.Any<string>())
-                .Returns(true);
-
-            var fakeBankInfo = new BankInfo(
-                command.BankInfoId,
-                command.PlayerCode,
-                command.BrandId,
-                Guid.NewGuid(),
-                "Bank",
-                "{}");
-
-            var expected = new WithdrawFormCreateInfo(
-                command.PlayerCode,
-                command.BrandId,
-                command.Amount,
-                1000,
-                null,
-                command.BankInfoId,
-                BankInfo: jsonSerializationProvider.SerializeToString(
-                    new
-                    {
-                        fakeBankInfo.Id,
-                        fakeBankInfo.PaymentChannelId,
-                        fakeBankInfo.BankType,
-                        Detail = jsonSerializationProvider.DeserializeFromString<JsonDocument>(fakeBankInfo.Detail, null)
-                    },
-                    optionsAccessor.Value.JsonSerializerOptions)).ToExpectedObject();
-
-            fakePaymentRepository
-                .GetBankInfoByIdAsync(Arg.Any<Guid>())
-                .Returns(fakeBankInfo);
-
-            fakePaymentRepository
-                .When(fake => fake.CreateWithdrawFormAsync(Arg.Any<Guid>(), Arg.Any<WithdrawFormCreateInfo>()))
-                .Do(callInfo =>
-                {
-                    var info = callInfo.Arg<WithdrawFormCreateInfo>();
-
-                    expected.ShouldMatch(info);
-                });
-
-            await sut.ExecuteAsync(command);
-
-            _ = fakePaymentRepository
-                .Received(1)
-                .CreateWithdrawFormAsync(
-                    Arg.Any<Guid>(),
-                    Arg.Any<WithdrawFormCreateInfo>());
-        }
-
         [Test]
         public void Player_Balance_Not_Enough_Withdraw_Will_Throw_Exception()
         {
@@ -214,6 +122,94 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "detail");
 
             Assert.ThrowsAsync<InsufficientBucketException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
+        public async Task Player_Can_Create_Withdraw_Form()
+        {
+            var fakeWalletRepository = Substitute.For<IWalletRepository>();
+            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+            var jsonSerializationProvider = new JsonSerializationProvider();
+            var optionsAccessor = new OptionsWrapper<JsonOptions>(
+                new JsonOptions());
+
+            var sut = new CreateWithdrawFormCommandService(
+                fakeWalletRepository,
+                fakePaymentRepository,
+                fakePlayerOperations,
+                fakePlayerBucketRepository,
+                jsonSerializationProvider,
+                optionsAccessor);
+
+            var command = new CreateWithdrawFormCommand(
+                "ThisIsPlayerCode",
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                1000M);
+
+            fakePlayerOperations
+                .GetCachedPlayerAsync(Arg.Is(command.PlayerCode))
+                .Returns(new CachedPlayer
+                {
+                    PlayerCode = command.PlayerCode,
+                    DefaultWalletId = Guid.NewGuid()
+                });
+
+            fakeWalletRepository
+                .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.PlayerCode))
+                .Returns(2000M);
+
+            fakePlayerBucketRepository
+                .IsBucketFullAsync(Arg.Any<string>())
+                .Returns(true);
+
+            var fakeBankInfo = new BankInfo(
+                command.BankInfoId,
+                command.PlayerCode,
+                command.BrandId,
+                Guid.NewGuid(),
+                "Bank",
+                "{}");
+
+            var expected = new WithdrawFormCreateInfo(
+                command.PlayerCode,
+                command.BrandId,
+                command.Amount,
+                1000,
+                null,
+                command.BankInfoId,
+                BankInfo: jsonSerializationProvider.SerializeToString(
+                    new
+                    {
+                        fakeBankInfo.Id,
+                        fakeBankInfo.PaymentChannelId,
+                        fakeBankInfo.BankType,
+                        Detail = jsonSerializationProvider.DeserializeFromString<JsonDocument>(fakeBankInfo.Detail, null)
+                    },
+                    optionsAccessor.Value.JsonSerializerOptions)).ToExpectedObject();
+
+            fakePaymentRepository
+                .GetBankInfoByIdAsync(Arg.Any<Guid>())
+                .Returns(fakeBankInfo);
+
+            fakePaymentRepository
+                .When(fake => fake.CreateWithdrawFormAsync(Arg.Any<Guid>(), Arg.Any<WithdrawFormCreateInfo>()))
+                .Do(callInfo =>
+                {
+                    var info = callInfo.Arg<WithdrawFormCreateInfo>();
+
+                    expected.ShouldMatch(info);
+                });
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakePaymentRepository
+                .Received(1)
+                .CreateWithdrawFormAsync(
+                    Arg.Any<Guid>(),
+                    Arg.Any<WithdrawFormCreateInfo>());
         }
 
         [Test]

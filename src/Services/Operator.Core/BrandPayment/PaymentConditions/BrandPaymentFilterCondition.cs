@@ -1,15 +1,13 @@
-﻿using TGS.Services.Payment;
-using TGS.Services.Operator.BrandPayment.PaymentConditions;
-using TGS.Services.Operator;
+﻿using Tgs.Payment;
 
 namespace TGS.Services.Operator.BrandPayment.PaymentConditions
 {
     internal class BrandPaymentFilterCondition : IBrandPaymentCondition
     {
         private readonly BlockListCondition _blockListCondition;
-        private readonly WhiteListCondition _whiteListCondition;
-        private readonly ShowOnAllPlayersCondition _showOnAllPlayersCondition;
         private readonly IBrandPaymentCondition _brandPaymentCondition;
+        private readonly ShowOnAllPlayersCondition _showOnAllPlayersCondition;
+        private readonly WhiteListCondition _whiteListCondition;
 
         public BrandPaymentFilterCondition(
             BlockListCondition blockListCondition,

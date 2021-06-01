@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using TGS.Services.Payment;
+using Tgs.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.PaymentMethod

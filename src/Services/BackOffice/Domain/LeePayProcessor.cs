@@ -2,9 +2,9 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Tgs.Payment;
 using Tgs.Payment.LeePay;
 using TGS.Core.Infrastructures.Json;
-using TGS.Services.Payment;
 
 namespace TGS.Services.BackOffice.Domain
 {
