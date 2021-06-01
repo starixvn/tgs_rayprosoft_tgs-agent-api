@@ -189,13 +189,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 externalRoundId).ConfigureAwait(false);
 
             var ga = await Services
-                .GetValidGameActionsAsync(gameProviderId, request.PlayerCode, request.ExternalRoundId, gameId)
+                .GetGameActionDataByRoundAsync(gameProviderId, request.PlayerCode, request.ExternalRoundId, gameId)
                 .ConfigureAwait(false);
 
             if (ga == null)
             {
                 throw new InvalidGameActionException(
-                    $"Transaction of transferCode: {request.ExternalTransactionId} and transactionId: {request.ExternalRoundId} is not found.",
+                    $"Transaction of transferCode: {request.ExternalRoundId} and transactionId: {request.ExternalTransactionId} is not found.",
                     InvalidGameActionErrorCode.TransactionNotFound);
             }
 

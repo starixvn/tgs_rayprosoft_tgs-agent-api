@@ -53,7 +53,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Factories
                 .Select(g => g.Id).FirstOrDefault();
 
             var gameActionData =
-                await Services.GetValidGameActionsAsync(gameProviderId, playerCode, externalRoundId, gameId)
+                await Services.GetGameActionDataByRoundAsync(gameProviderId, playerCode, externalRoundId, gameId)
                     .ConfigureAwait(false);
 
             if (gameActionData == null)
