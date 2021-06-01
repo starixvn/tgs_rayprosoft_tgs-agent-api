@@ -28,7 +28,6 @@ COPY ["src/Repositories/TgsTransaction.Repositories/TgsTransaction.Repositories.
 COPY ["src/Repositories/BackOffice.Repositories/BackOffice.Repositories.csproj", "src/Repositories/BackOffice.Repositories/"]
 COPY ["src/Services/BackOffice/BackOffice.csproj", "src/Services/BackOffice/"]
 COPY ["src/Repositories/PaymentRepositories/PaymentRepositories.csproj", "src/Repositories/PaymentRepositories/"]
-COPY ["src/Services/Payment.Core/Payment.Core.csproj", "src/Services/Payment.Core/"]
 COPY ["src/Repositories/Wallet.Repositories/Wallet.Repositories.csproj", "src/Repositories/Wallet.Repositories/"]
 COPY ["src/Repositories/Promotion.Repositories/Promotion.Repositories.csproj", "src/Repositories/Promotion.Repositories/"]
 COPY ["src/Repositories/PlayerBucket.Repositories/PlayerBucket.Repositories.csproj", "src/Repositories/PlayerBucket.Repositories/"]
