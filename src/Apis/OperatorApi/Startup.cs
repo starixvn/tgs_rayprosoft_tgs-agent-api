@@ -33,6 +33,7 @@ using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
+using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Apis.OperatorApi
 {

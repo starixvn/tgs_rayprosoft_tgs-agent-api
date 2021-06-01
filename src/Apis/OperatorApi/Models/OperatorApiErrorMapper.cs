@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ValidateCode;
+using TGS.Services.Operator.BrandPayment;
 
 namespace TGS.Apis.OperatorApi.Models
 {

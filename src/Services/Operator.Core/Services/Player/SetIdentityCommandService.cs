@@ -1,0 +1,36 @@
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using TGS.Services.Operations;
+using TGS.ServiceUtility;
+using TGS.Services.Operator.Services.Player;
+
+namespace TGS.Services.Operator.Services.Player
+{
+    internal class SetIdentityCommandService : ICommandService<SetIdentityCommand>
+    {
+        private readonly IPlayerOperations _playerOperations;
+
+        public SetIdentityCommandService(IPlayerOperations playerOperations)
+        {
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+        }
+
+        public async ValueTask ExecuteAsync(SetIdentityCommand command, CancellationToken cancellationToken = default)
+        {
+            var player = await _playerOperations
+                .GetPlayerByCodeAsync(command.PlayerCode)
+                .ConfigureAwait(false);
+
+            var updatedOn = DateTimeOffset.UtcNow;
+            await _playerOperations
+                .SetIdentityAsync(
+                    command.PlayerCode,
+                    command.RealName,
+                    command.Identity,
+                    player.DefaultWalletCurrencyCode == "CNY" ? true : false,
+                    updatedOn)
+                .ConfigureAwait(false);
+        }
+    }
+}
