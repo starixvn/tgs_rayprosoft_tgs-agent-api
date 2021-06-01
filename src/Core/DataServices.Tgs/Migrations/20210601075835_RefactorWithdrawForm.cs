@@ -23,11 +23,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 nullable: false,
                 defaultValue: 0);
 
-            var assembly = Assembly.GetExecutingAssembly();
+            // 舊資料補回新增欄位的資料
+            //var assembly = Assembly.GetExecutingAssembly();
 
-            migrationBuilder.SqlResource(
-                assembly,
-                $"TGS.Core.DataServices.Tgs.Migrations.RefactorWithdrawForm.sql");
+            //migrationBuilder.SqlResource(
+            //    assembly,
+            //    $"TGS.Core.DataServices.Tgs.Migrations.RefactorWithdrawForm.sql");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
