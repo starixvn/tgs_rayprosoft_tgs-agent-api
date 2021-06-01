@@ -56,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 {"getBalance", GetBalanceAsync},
                 {"bet", BetAsync},
                 {"cancelBet", CancelBetAsync},
-                {"give", BetAsync},
+                {"give", GiveAsync},
                 {"settle", SettleAsync},
                 {"unsettle", UnsettleAsync},
                 {"voidBet", VoidBetAsync},
