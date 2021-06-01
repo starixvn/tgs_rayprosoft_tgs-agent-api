@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.Payment;
 
 namespace TGS.Payment.Repositories
 {
@@ -183,7 +183,7 @@ namespace TGS.Payment.Repositories
                     From = row.DepositedAmountMin,
                     To = row.DepositedAmountUnlimited ? decimal.MaxValue : row.DepositedAmountMax
                 },
-                row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
+                row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchType.MatchOne : ConditionMatchType.MatchAll,
                 row.TransferType switch
                 {
                     PaymentTransferType.Withdrawal => TransferType.Withdraw,
@@ -223,7 +223,7 @@ namespace TGS.Payment.Repositories
                     From = bp.DepositedAmountMin,
                     To = bp.DepositedAmountUnlimited ? decimal.MaxValue : bp.DepositedAmountMax
                 },
-                bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
+                bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchType.MatchOne : ConditionMatchType.MatchAll,
                 bp.TransferType switch
                 {
                     PaymentTransferType.Withdrawal => TransferType.Withdraw,

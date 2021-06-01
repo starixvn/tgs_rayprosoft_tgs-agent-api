@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment.LeePay;
+using Tgs.Payment;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator.Deposit;
-using TGS.Services.Payment;
+using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers

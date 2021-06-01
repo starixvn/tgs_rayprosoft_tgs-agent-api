@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Payment;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
 

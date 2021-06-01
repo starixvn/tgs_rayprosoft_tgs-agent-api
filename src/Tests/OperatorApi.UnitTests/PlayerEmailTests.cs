@@ -8,7 +8,8 @@ using NUnit.Framework;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Player;
+using TGS.Services.Operator.Services.Player;
+using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

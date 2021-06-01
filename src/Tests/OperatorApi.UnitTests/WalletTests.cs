@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Wallet;
 using ExpectedObjects;
 using Moq;
 using System.Threading.Tasks;
@@ -9,6 +8,7 @@ using TGS.Core.Models.Services.Caches;
 using System;
 using TGS.Core.Models.Enums;
 using TGS.Services.WalletService;
+using TGS.Services.Operator.Services.Wallet;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
