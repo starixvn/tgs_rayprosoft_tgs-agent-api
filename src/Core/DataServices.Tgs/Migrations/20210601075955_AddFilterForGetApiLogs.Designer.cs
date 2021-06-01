@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210601070055_AddFilterForGetApiLogs")]
+    [Migration("20210601075955_AddFilterForGetApiLogs")]
     partial class AddFilterForGetApiLogs
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
