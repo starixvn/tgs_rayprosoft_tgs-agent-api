@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -14,6 +15,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
     {
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
+        ValueTask<Guid> GetGameProviderId();
     }
     internal sealed class SexyGamingServices : ISexyGamingServices
     {
@@ -42,6 +44,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 AutoCloseRound = autoCloseRound,
                 PlatformType = platformType
             };
+        }
+
+        async ValueTask<Guid> ISexyGamingServices.GetGameProviderId()
+        {
+            return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.SexyGaming).ConfigureAwait(false);
         }
     }
 }

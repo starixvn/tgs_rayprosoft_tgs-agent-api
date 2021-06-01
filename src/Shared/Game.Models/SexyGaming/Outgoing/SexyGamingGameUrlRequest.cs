@@ -19,7 +19,7 @@ namespace TGS.Shared.Game.Models.SexyGaming.Outgoing
         [JsonPropertyName("gameType")]
         public string GameType => "LIVE";
         [JsonPropertyName("language")]
-        public string Language => "en";
+        public string Language { get; set; } = "en";
         [JsonPropertyName("extension1")]
         public string Extension1 { get; set; }
     }

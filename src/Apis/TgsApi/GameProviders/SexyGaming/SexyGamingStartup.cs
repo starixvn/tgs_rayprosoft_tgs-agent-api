@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
@@ -34,6 +36,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
             services.AddScoped<HandleSexyGamingExceptionMiddleware>();
             services.AddScoped<ISexyGamingServices, SexyGamingServices>();
             services.AddScoped<ISexyGamingActionModelMapper, SexyGamingActionModelMapper>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(SexyGamingGameInitializer) }, (provider, _) =>
+                  provider.GetRequiredService<SexyGamingGameInitializer>());
 
         }
 

@@ -34,11 +34,15 @@ namespace TGS.Shared.Game.ApiClients.SexyGaming
 
         public async Task<SexyGamingCreateMemberResponse> CreatePlayerAsync(SexyGamingConfiguration configuration, SexyGamingCreateMemberRequest request)
         {
+            request.AgentId = configuration.AgentId;
+            request.Cert = configuration.Cert;
             return await GetAPIAsync<SexyGamingCreateMemberRequest, SexyGamingCreateMemberResponse>(configuration, "/wallet/createMember", request, $"{_gameProvider}.CreatePlayerAsync").ConfigureAwait(false);
         }
 
         public async Task<SexyGamingGameUrlResponse> GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingGameUrlRequest request)
         {
+            request.AgentId = configuration.AgentId;
+            request.Cert = configuration.Cert;
             return await GetAPIAsync<SexyGamingGameUrlRequest, SexyGamingGameUrlResponse>(configuration, "/wallet/login", request, $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
         }
 
