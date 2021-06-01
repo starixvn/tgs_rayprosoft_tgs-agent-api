@@ -46,12 +46,6 @@ const ExceptionDialog = ({ value = "", dialog, ...props }) => {
             showCloseButton
             width="80vw"
             maxWidth="80vw"
-            maxHeight="90vh"
-            css={css`
-                & .bb-DialogContent {
-                    max-height: 90vh;
-                }
-            `}
             {...dialog}
         >
             <Code isBlock wordBreak="break-word">

@@ -20,6 +20,7 @@ import { AddGameProviderButton, EditButton } from "./edit"
 import { GameProviderStatusMenu } from "./GameProviderStatus"
 import textColumn from "../../table/column/textColumn"
 import { GameProviderGameListDisclosure } from "./GameProviderGameList"
+import { GameProviderConfigListDisclosure } from "./GameProviderConfigList"
 
 export { Code }
 
@@ -186,6 +187,9 @@ const useColumns = ({ items = [], mutate }) => {
                                 <EditButton
                                     record={value}
                                     onSubmitted={mutate}
+                                />
+                                <GameProviderConfigListDisclosure
+                                    gameProviderId={value?.id}
                                 />
                                 <GameProviderGameListDisclosure
                                     gameProviderId={value?.id}

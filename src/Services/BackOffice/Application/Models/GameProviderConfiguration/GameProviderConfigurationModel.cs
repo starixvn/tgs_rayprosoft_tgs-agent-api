@@ -14,7 +14,7 @@ namespace TGS.Services.BackOffice.Application.Models.GameProviderConfiguration
         public Guid GameProviderId { get; set; }
         public string DesktopEndpoint { get; set; }
         public string MobileEndpoint { get; set; }
-        public string ConfigurationData { get; set; }
+        public string ConfigurationData { get; set; } = "";
         public bool IsDefault { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
