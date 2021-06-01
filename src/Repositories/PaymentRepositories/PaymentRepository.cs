@@ -68,12 +68,18 @@ namespace TGS.Payment.Repositories
         {
             var currentDate = DateTimeOffset.UtcNow;
 
+            var player = await _tgsRepository.Players
+                .FindAsync(form.PlayerCode)
+                .ConfigureAwait(false);
+
             await _tgsRepository.WithdrawForms
                 .AddAsync(new WithdrawForm
                 {
                     Id = createFormId,
                     BrandId = form.BrandId,
                     PlayerCode = form.PlayerCode,
+                    UserName = player.Username,
+                    UserType = 1,
                     BrandPaymentId = form.BrandPaymentId,
                     Amount = form.Amount,
                     BankInfoId = form.BankInfoId,
@@ -288,7 +294,6 @@ namespace TGS.Payment.Repositories
         public ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid formId)
         {
             var query = from df in _tgsRepository.WithdrawForms
-                            .Include(f => f.Player)
                             .Include(f => f.BrandPayment)
                             .ThenInclude(bp => bp.PaymentMethodChannel)
                             .AsAsyncEnumerable()
@@ -296,7 +301,7 @@ namespace TGS.Payment.Repositories
                         select new WithdrawFormInfo(
                             df.Id,
                             df.PlayerCode,
-                            df.Player.Username,
+                            df.UserName,
                             df.BrandId,
                             df.Amount,
                             df.Status,
