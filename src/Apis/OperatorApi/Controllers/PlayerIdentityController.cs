@@ -7,7 +7,7 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Player;
+using TGS.Services.Operator.Services.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

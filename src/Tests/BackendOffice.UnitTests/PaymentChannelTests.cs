@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Moq;
+﻿using Moq;
 using NUnit.Framework;
-using TGS.Services.BackOffice.Application.Queries.BrandPayment;
+using Tgs.Payment;
 using TGS.Services.BackOffice.Application.Queries.PaymentChannel;
-using TGS.Services.Payment;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {

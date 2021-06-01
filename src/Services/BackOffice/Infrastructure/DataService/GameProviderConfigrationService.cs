@@ -83,7 +83,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             configuration.Description = request.Description;
             configuration.ClientId = request.ClientId;
             configuration.SecretKey = request.SecretKey;
-            configuration.Status = Status.Active;
+            configuration.Status = request.Status;
             configuration.GameProviderId = request.GameProviderId;
             configuration.DesktopEndpoint = request.DesktopEndpoint;
             configuration.MobileEndpoint = request.MobileEndpoint;

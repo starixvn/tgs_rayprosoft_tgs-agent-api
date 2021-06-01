@@ -49,12 +49,6 @@ const DetailDialog = ({ record = {}, dialog, ...props }) => {
             showCloseButton
             width="80vw"
             maxWidth="80vw"
-            maxHeight="90vh"
-            css={css`
-                & .bb-DialogContent {
-                    max-height: 90vh;
-                }
-            `}
             {...dialog}
         >
             <FieldStack orientation="vertical">

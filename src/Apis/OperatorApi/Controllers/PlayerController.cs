@@ -6,7 +6,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Player;
+using TGS.Services.Operator.Services.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

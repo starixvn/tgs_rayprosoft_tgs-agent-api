@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using Tgs.Payment;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
-using TGS.Services.Payment;
 
 namespace TGS.Apis.BackendOffice.Extensions
 {
@@ -17,13 +17,6 @@ namespace TGS.Apis.BackendOffice.Extensions
                 _ => FlowState.Unkown,
             };
 
-        public static ReviewState ToReviewState(this ReviewResponseState reviewResponse)
-                    => reviewResponse switch
-                    {
-                        ReviewResponseState.Approve => ReviewState.Approve,
-                        _ => ReviewState.Reject
-                    };
-
         public static IEnumerable<PaymentFlowState> ToPaymentFlowState(this FlowState? status)
         {
             return status switch
@@ -35,5 +28,12 @@ namespace TGS.Apis.BackendOffice.Extensions
                 _ => new[] { PaymentFlowState.WaitPayment, PaymentFlowState.WaitApprove, PaymentFlowState.Approved, PaymentFlowState.Reject }
             };
         }
+
+        public static ReviewState ToReviewState(this ReviewResponseState reviewResponse)
+                            => reviewResponse switch
+                            {
+                                ReviewResponseState.Approve => ReviewState.Approve,
+                                _ => ReviewState.Reject
+                            };
     }
 }

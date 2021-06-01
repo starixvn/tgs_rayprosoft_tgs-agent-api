@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
-using TGS.Services.Payment;
 
 namespace TGS.Payment.Repositories
 {
@@ -68,12 +68,18 @@ namespace TGS.Payment.Repositories
         {
             var currentDate = DateTimeOffset.UtcNow;
 
+            var player = await _tgsRepository.Players
+                .FindAsync(form.PlayerCode)
+                .ConfigureAwait(false);
+
             await _tgsRepository.WithdrawForms
                 .AddAsync(new WithdrawForm
                 {
                     Id = createFormId,
                     BrandId = form.BrandId,
                     PlayerCode = form.PlayerCode,
+                    UserName = player.Username,
+                    UserType = 1,
                     BrandPaymentId = form.BrandPaymentId,
                     Amount = form.Amount,
                     BankInfoId = form.BankInfoId,
@@ -183,7 +189,7 @@ namespace TGS.Payment.Repositories
                     From = row.DepositedAmountMin,
                     To = row.DepositedAmountUnlimited ? decimal.MaxValue : row.DepositedAmountMax
                 },
-                row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
+                row.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchType.MatchOne : ConditionMatchType.MatchAll,
                 row.TransferType switch
                 {
                     PaymentTransferType.Withdrawal => TransferType.Withdraw,
@@ -223,7 +229,7 @@ namespace TGS.Payment.Repositories
                     From = bp.DepositedAmountMin,
                     To = bp.DepositedAmountUnlimited ? decimal.MaxValue : bp.DepositedAmountMax
                 },
-                bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchTypes.MatchOne : ConditionMatchTypes.MatchAll,
+                bp.PlayerListCondition == PlayerListCondition.MatchOne ? ConditionMatchType.MatchOne : ConditionMatchType.MatchAll,
                 bp.TransferType switch
                 {
                     PaymentTransferType.Withdrawal => TransferType.Withdraw,
@@ -288,7 +294,6 @@ namespace TGS.Payment.Repositories
         public ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid formId)
         {
             var query = from df in _tgsRepository.WithdrawForms
-                            .Include(f => f.Player)
                             .Include(f => f.BrandPayment)
                             .ThenInclude(bp => bp.PaymentMethodChannel)
                             .AsAsyncEnumerable()
@@ -296,7 +301,7 @@ namespace TGS.Payment.Repositories
                         select new WithdrawFormInfo(
                             df.Id,
                             df.PlayerCode,
-                            df.Player.Username,
+                            df.UserName,
                             df.BrandId,
                             df.Amount,
                             df.Status,

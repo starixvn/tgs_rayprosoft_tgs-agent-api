@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.Payment;
 
 namespace TGS.BackOffice.Repositories
 {

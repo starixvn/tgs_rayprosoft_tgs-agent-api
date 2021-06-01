@@ -13,7 +13,8 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.PayPassowrd;
+using TGS.Services.Operator.Services.PayPassowrd;
+using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

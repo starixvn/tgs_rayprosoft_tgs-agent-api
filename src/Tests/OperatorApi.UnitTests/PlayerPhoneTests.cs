@@ -7,7 +7,8 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.SmsService.Client;
-using TGS.Services.Operator.Player;
+using TGS.Services.Operator.Services.Player;
+using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

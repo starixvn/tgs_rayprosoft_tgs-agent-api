@@ -1,7 +1,7 @@
 ﻿using Moq;
 using NUnit.Framework;
+using Tgs.Payment;
 using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
-using TGS.Services.Payment;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {

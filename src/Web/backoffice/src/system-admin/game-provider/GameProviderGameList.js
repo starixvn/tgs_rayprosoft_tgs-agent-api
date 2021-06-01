@@ -45,6 +45,7 @@ import SearchButton from "../../button/SearchButton"
 import { useGameProviderGameList } from "../../game/games/client"
 import dateTimeColumn from "../../table/column/dateTime"
 import { View, Update } from "./menu"
+import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
 
 export const GameProviderGameListDisclosure = ({ gameProviderId }) => {
     let dialog = useModalState()
@@ -95,17 +96,12 @@ const GameListDialog = ({ gameProviderId, dialog, ...props }) => {
         <Dialog.Modal
             title={title}
             {...dialog}
+            footer={<CloseButtonFooter alignX="right" dialog={dialog} />}
             showCloseButton
             hideOnClickOutside={false}
             placement="top"
             width="80vw"
             maxWidth="80vw"
-            maxHeight="90vh"
-            css={css`
-                & .bb-DialogContent {
-                    max-height: 90vh;
-                }
-            `}
         >
             <FieldStack>
                 <ActionBar
