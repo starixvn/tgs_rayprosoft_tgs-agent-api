@@ -9,9 +9,9 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.GameBalance;
 using TGS.Services.PluggableServices;
 using TGS.Services.PluggableServices.Models;
+using TGS.Services.Operator.Services.GameBalance;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {

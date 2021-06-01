@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using TGS.Services.Operator;
+using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Apis.OperatorApi
 {

@@ -22,8 +22,9 @@
     </PackageReference>
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
     <PackageReference Include="Tgs.Payment" Version="0.0.5" />
+    <PackageReference Include="Tgs.Payment.Core" Version="0.0.1-alpha" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.8" />
-    <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.4" />
+    <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.5" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
@@ -34,7 +35,6 @@
     <ProjectReference Include="..\..\Repositories\TgsTransaction.Repositories\TgsTransaction.Repositories.csproj" />
     <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
     <ProjectReference Include="..\Operations\Operations.csproj" />
-    <ProjectReference Include="..\Payment.Core\Payment.Core.csproj" />
     <ProjectReference Include="..\TgsTransaction.Core\TgsTransaction.Core.csproj" />
     <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>

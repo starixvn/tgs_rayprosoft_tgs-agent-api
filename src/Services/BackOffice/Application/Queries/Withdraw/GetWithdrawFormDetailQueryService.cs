@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.Payment;
+using Tgs.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw

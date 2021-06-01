@@ -13,6 +13,7 @@ using TechTalk.SpecFlow;
 using TGS.Apis.ValidateCodeApi;
 using TGS.Services.Operator;
 using TGS.Services.ValidateCode;
+using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.ValidateCode.IntegrationTests
 {

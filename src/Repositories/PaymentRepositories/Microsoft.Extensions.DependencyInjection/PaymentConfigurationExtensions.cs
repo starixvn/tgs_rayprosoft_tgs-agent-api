@@ -1,5 +1,5 @@
-﻿using TGS.Payment.Repositories;
-using TGS.Services.Payment.Configuration;
+﻿using Tgs.Payment.Configuration;
+using TGS.Payment.Repositories;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

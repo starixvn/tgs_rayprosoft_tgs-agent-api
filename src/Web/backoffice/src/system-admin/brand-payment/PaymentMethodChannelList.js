@@ -45,6 +45,7 @@ import AlertDialog from "../../dialog/Alert"
 import Backdrop from "../../dialog/Backdrop"
 import { DeleteText } from "../../button/ActionButtons"
 import { View, Update } from "./menu"
+import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
 
 export const PaymentMethodChannelListDisclosure = ({}) => {
     let dialog = useModalState()
@@ -84,6 +85,7 @@ const ListDialog = ({ dialog }) => {
             title="Payment Method Channel List"
             showCloseButton
             {...dialog}
+            footer={<CloseButtonFooter dialog={dialog} alignX="right" />}
             hideOnClickOutside={false}
             width="60vw"
             maxWidth="60vw"

@@ -1,4 +1,4 @@
-﻿using TGS.Services.Payment;
+﻿using Tgs.Payment;
 
 namespace TGS.Payment.Repositories
 {

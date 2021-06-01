@@ -40,7 +40,7 @@ import { today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useApiLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
-import { CopyLongText } from "../../text/CopyLongText"
+import { CopyTextBox } from "../../text/CopyTextBox"
 
 export { Code }
 
@@ -91,26 +91,13 @@ const Body = ({}) => {
                     path={state?.path}
                     method={state?.method}
                     search={({ start, end, ...data }) => {
-                        let newState = {
+                        setState({
                             pageIndex: 0,
                             from: start,
                             to: end,
                             ...data
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                from: state?.from,
-                                to: state?.to,
-                                trackingId: state?.trackingId,
-                                ip: state?.ip,
-                                path: state?.path,
-                                method: state?.method
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                        })
+                        mutate()
                     }}
                     isLoading={isLoading}
                 />
@@ -208,31 +195,19 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => (
-                    <Box width="100%">
-                        <CopyLongText value={value} />
-                    </Box>
-                )
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "trackingId",
                 Header: <Trans zh="Tracking Id" en="Tracking Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => (
-                    <Box width="100%">
-                        <CopyLongText value={value} />
-                    </Box>
-                )
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => (
-                    <Box width="100%">
-                        <CopyLongText value={value} />
-                    </Box>
-                )
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             ellipsisTextColumn({
                 accessor: "path",
@@ -241,13 +216,11 @@ const useColumns = ({ items = [] } = {}) => {
                 textAlign: "left",
                 maxWidth: "20rem",
                 Cell: ({ value = "" }) => (
-                    <Box width="100%">
-                        <CopyLongText
-                            value={value}
-                            whiteSpace="normal"
-                            textAlign="left"
-                        />
-                    </Box>
+                    <CopyTextBox
+                        value={value}
+                        whiteSpace="normal"
+                        textAlign="left"
+                    />
                 )
             }),
             textColumn({

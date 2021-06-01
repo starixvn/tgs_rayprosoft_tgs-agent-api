@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
-using PlayerBucket.Repositories;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -15,10 +15,8 @@ using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Payment;
-using TGS.Services.WalletService;
-using TGS.Services.PlayerBucket.Models;
 using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {

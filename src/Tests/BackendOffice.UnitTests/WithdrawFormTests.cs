@@ -13,7 +13,6 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Payment;
 using TGS.Services.WalletService;
 
 namespace TGS.Tests.BackendOffice.UnitTests
@@ -102,7 +101,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                         From = 0M,
                         To = decimal.MaxValue
                     },
-                    ConditionMatchTypes.MatchOne,
+                    ConditionMatchType.MatchOne,
                     TransferType.Withdraw,
                     true)));
 
@@ -172,6 +171,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 {
                     Id = Guid.NewGuid(),
                     PlayerCode = "PlayerCode",
+                    UserName = "Player1",
+                    UserType = 1,
                     BrandId = brandId,
                     Amount = 1000M,
                     Status = 1000,

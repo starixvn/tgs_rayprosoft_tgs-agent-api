@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Tgs.Payment;
 using TGS.Core.Models.Messages;
-using TGS.Services.Payment;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
 {

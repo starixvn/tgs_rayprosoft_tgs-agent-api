@@ -41,7 +41,7 @@ import { today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useAdminLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
-import { CopyLongText } from "../../text/CopyLongText"
+import { CopyTextBox } from "../../text/CopyTextBox"
 
 export { Code }
 
@@ -196,31 +196,19 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => (
-                    <Box width="100%">
-                        <CopyLongText value={value} />
-                    </Box>
-                )
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "trackingId",
                 Header: <Trans zh="Tracking Id" en="Tracking Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => (
-                    <Box width="100%">
-                        <CopyLongText value={value} />
-                    </Box>
-                )
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => (
-                    <Box width="100%">
-                        <CopyLongText value={value} />
-                    </Box>
-                )
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "path",
@@ -228,13 +216,7 @@ const useColumns = ({ items = [] } = {}) => {
                 disableSortBy: true,
                 textAlign: "left",
                 Cell: ({ value = "" }) => (
-                    <Box width="100%">
-                        <CopyLongText
-                            value={value}
-                            alignX="left"
-                            textAlign="left"
-                        />
-                    </Box>
+                    <CopyTextBox value={value} alignX="left" textAlign="left" />
                 )
             }),
             textColumn({
