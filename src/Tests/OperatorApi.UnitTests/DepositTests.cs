@@ -7,6 +7,7 @@ using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using TGS.Apis.FileService.Clients;
 using TGS.Clients.Promotion.Client;
