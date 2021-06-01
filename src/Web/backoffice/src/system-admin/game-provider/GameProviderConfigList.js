@@ -36,19 +36,14 @@ import clone from "clone-deep"
 import { pageCount, Table, toApiParams, useTable } from "../../table"
 import textColumn from "../../table/column/textColumn"
 import { InputField, Input } from "../../input/Input"
-import {
-    AddGameProviderGameDisclosure,
-    GameProviderGameDisclosure
-} from "./GameProviderGame"
-import { BatchAddGameProviderGameListDisclosure } from "./BatchAddGameProviderGameList"
 import SearchButton from "../../button/SearchButton"
-import { useGameProviderGameList } from "../../game/games/client"
 import dateTimeColumn from "../../table/column/dateTime"
 import { View, Update } from "./menu"
 import { CopyTextBox } from "../../text/CopyTextBox"
 import {
     AddGameProviderConfigDisclosure,
-    EditGameProviderConfigDisclosure
+    EditGameProviderConfigDisclosure,
+    ViewGameProviderConfigDisclosure
 } from "./GameProviderConfig"
 import { useGameProviderConfigList } from "../../game/providers/configs/client"
 import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
@@ -218,6 +213,9 @@ const useColumns = ({ items = [], mutate }) => {
                     Cell: ({ value: record }) => {
                         return (
                             <Set orientation="horizontal" alignX="center">
+                                <ViewGameProviderConfigDisclosure
+                                    id={record.id}
+                                />
                                 <EditGameProviderConfigDisclosure
                                     id={record.id}
                                     onSubmitted={mutate}

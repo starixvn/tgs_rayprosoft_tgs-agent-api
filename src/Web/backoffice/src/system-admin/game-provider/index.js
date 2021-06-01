@@ -16,7 +16,11 @@ import equals from "fast-deep-equal"
 import { FormProvider, useForm } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import { useGameProviderList } from "../../game/providers/client"
-import { AddGameProviderButton, EditButton } from "./edit"
+import {
+    AddGameProviderButton,
+    EditGameProviderButton,
+    ViewGameProviderDisclosure
+} from "./GameProvider"
 import { GameProviderStatusMenu } from "./GameProviderStatus"
 import textColumn from "../../table/column/textColumn"
 import { GameProviderGameListDisclosure } from "./GameProviderGameList"
@@ -184,8 +188,11 @@ const useColumns = ({ items = [], mutate }) => {
                     Cell: ({ value }) => {
                         return (
                             <Set orientation="vertical" alignX="center">
-                                <EditButton
-                                    record={value}
+                                <ViewGameProviderDisclosure
+                                    gameProviderId={value?.id}
+                                />
+                                <EditGameProviderButton
+                                    gameProviderId={value?.id}
                                     onSubmitted={mutate}
                                 />
                                 <GameProviderConfigListDisclosure

@@ -13,8 +13,12 @@ import {
     useModalState
 } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import { Update as UpdateMenu } from "./menu"
-import { AddDisclosure, EditDisclosure } from "../../dialog/Disclosure"
+import { View, Update as UpdateMenu } from "./menu"
+import {
+    AddDisclosure,
+    EditDisclosure,
+    ViewDisclosure
+} from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { Trans, useTrans } from "../../i18n"
 import {
@@ -39,12 +43,80 @@ import {
     mapCheckedByCultureCode,
     mapMergeChecked
 } from "../../checkbox/mapChecked"
-import ConfirmButtonFooter from "../../form/ConfirmButtonFooter"
+import ConfirmButtonFooter, {
+    CloseButtonFooter
+} from "../../form/ConfirmButtonFooter"
 import Checkbox from "../../checkbox"
 import { GameProviderCurrencyBetLimitFieldsBox } from "./GameProviderCurrencyBetLimitFieldsBox"
 import clone from "clone-deep"
 
-export const EditButton = ({ record, onSubmitted, ...props }) => {
+export const ViewGameProviderDisclosure = ({ gameProviderId }) => {
+    let dialog = useModalState()
+    let isDisplay = useIsDisplayMenuByRoute([View])
+    if (!isDisplay) {
+        return null
+    }
+
+    return (
+        <>
+            <ViewDisclosure {...dialog} />
+            {dialog.visible && (
+                <ViewDialog gameProviderId={gameProviderId} dialog={dialog} />
+            )}
+        </>
+    )
+}
+
+const ViewDialog = ({ gameProviderId, dialog }) => {
+    let {
+        gameProvider,
+        languages,
+        currencies,
+        isLoading,
+        error,
+        mutateGameProvider,
+        deleteGameProviderCache
+    } = useFormDataInit(gameProviderId)
+
+    let title = useTrans({
+        zh: "游戏商",
+        en: "Game Provider"
+    })
+
+    if (isLoading) {
+        return <LoadingBackdrop {...dialog} />
+    }
+
+    if (error) {
+        return <AlertDialog {...error} onClickClose={dialog.hide} />
+    }
+
+    return (
+        <FormDialog
+            defaultValues={{ ...gameProvider, languages, currencies }}
+            footer={<CloseButtonFooter dialog={dialog} alignX="right" />}
+            showActionButtons={false}
+            title={title}
+            dialog={dialog}
+            placement="top"
+            minWidth="80vw"
+            maxWidth="90vw"
+            css={css`
+                & .bb-DialogContent {
+                    position: relative;
+                }
+            `}
+        >
+            <FormBody readOnly />
+        </FormDialog>
+    )
+}
+
+export const EditGameProviderButton = ({
+    gameProviderId,
+    onSubmitted,
+    ...props
+}) => {
     let dialog = useModalState()
     let isDisplay = useIsDisplayMenuByRoute([UpdateMenu])
     if (!isDisplay) {
@@ -56,7 +128,7 @@ export const EditButton = ({ record, onSubmitted, ...props }) => {
             <EditDisclosure {...dialog} />
             {dialog.visible && (
                 <EditDialog
-                    id={record?.id}
+                    gameProviderId={gameProviderId}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
                 />
@@ -145,12 +217,12 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
                 }
             `}
         >
-            <EditBody isAdd={true} />
+            <FormBody isAdd={true} />
         </FormDialog>
     )
 }
 
-const EditDialog = ({ id, onSubmitted, dialog, ...props }) => {
+const EditDialog = ({ gameProviderId, onSubmitted, dialog, ...props }) => {
     let {
         gameProvider,
         languages,
@@ -159,10 +231,10 @@ const EditDialog = ({ id, onSubmitted, dialog, ...props }) => {
         error: formDataError,
         mutateGameProvider,
         deleteGameProviderCache
-    } = useFormDataInit(id)
+    } = useFormDataInit(gameProviderId)
     let [formData, setSubmit] = useState()
     let { result, isLoading, error, mutate, deleteCache } =
-        useUpdateGameProvider(id, formData)
+        useUpdateGameProvider(gameProviderId, formData)
 
     let title = useTrans({
         zh: "编辑游戏商",
@@ -215,7 +287,7 @@ const EditDialog = ({ id, onSubmitted, dialog, ...props }) => {
                 }
             `}
         >
-            <EditBody />
+            <FormBody />
         </FormDialog>
     )
 }
@@ -250,10 +322,12 @@ const normalizeFormData = ({ currencies, languages, ...data }) => {
     }
 }
 
-const EditBody = ({ readonly, isAdd = false }) => {
-    let { watch, getValues, register } = useFormContext()
+const FormBody = ({ readOnly, isAdd = false }) => {
+    //TODO: get value from id field -> isAdd
+    let { watch, getValues } = useFormContext()
 
-    let editable = !readonly
+    let editable = !readOnly
+    let disabled = readOnly
     return (
         <Stack orientation="vertical" marginLeft="1rem">
             <Heading use="h5" marginBottom="major-1">
@@ -265,63 +339,61 @@ const EditBody = ({ readonly, isAdd = false }) => {
                     <Trans zh="游戏商代码" en="Code" />
                 </NormalLabel>
                 <Box alignY="center">
-                    <Input name="code" type={isAdd ? "input" : "hidden"} />
-                    {!isAdd && <Text.Block>{getValues("code")}</Text.Block>}
+                    <Input name="code" readOnly={readOnly || !isAdd} />
                 </Box>
 
                 <NormalLabel>
                     <Trans zh="游戏商名称" en="Name" />
                 </NormalLabel>
                 <Box alignY="center">
-                    {editable && <Input name="name" required />}
-                    {readonly && <Text.Block>{getValues("name")}</Text.Block>}
+                    <Input name="name" required readOnly={readOnly} />
                 </Box>
 
                 <NormalLabel>
                     <Trans zh="游戏商简介" en="Description" />
                 </NormalLabel>
-                <Input name="description" />
+                <Input name="description" readOnly={readOnly} />
 
                 <NormalLabel>
                     <Trans zh="状态" en="Status" />
                 </NormalLabel>
-                <GameProviderStatusSelect />
+                <GameProviderStatusSelect disabled={disabled} />
 
                 <NormalLabel>
                     <Trans zh="Auto Close Round" en="Auto Close Round" />
                 </NormalLabel>
-                <Checkbox name="autoCloseRound" />
+                <Checkbox name="autoCloseRound" disabled={disabled} />
 
                 <NormalLabel>
                     <Trans zh="Support Test Player" en="Support Test Player" />
                 </NormalLabel>
-                <Checkbox name="supportTestPlayer" />
+                <Checkbox name="supportTestPlayer" disabled={disabled} />
 
                 <NormalLabel>
                     <Trans zh="Allow Kick Player" en="Allow Kick Player" />
                 </NormalLabel>
-                <Checkbox name="allowKickPlayer" />
+                <Checkbox name="allowKickPlayer" disabled={disabled} />
 
                 <NormalLabel>
                     <Trans zh="Place Bet Timeout" en="Place Bet Timeout" />
                 </NormalLabel>
-                <Input name="placeBetTimeout" />
+                <Input name="placeBetTimeout" readOnly={readOnly} />
 
                 <NormalLabel>
                     <Trans zh="Settle Bet Timeout" en="Settle Bet Timeout" />
                 </NormalLabel>
-                <Input name="settleBetTimeout" />
+                <Input name="settleBetTimeout" readOnly={readOnly} />
 
-                <LanguageFieldsBox />
+                <LanguageFieldsBox disabled={disabled} />
 
-                <GameProviderCurrencyBetLimitFieldsBox disabled={readonly} />
+                <GameProviderCurrencyBetLimitFieldsBox disabled={readOnly} />
             </FieldValues>
         </Stack>
     )
 }
 
 const LanguageFieldsBox = ({ disabled }) => {
-    let { watch, control } = useFormContext()
+    let { control } = useFormContext()
 
     let fieldsName = "languages"
     let fieldArrayContext = useFieldArray({

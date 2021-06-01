@@ -20,6 +20,6 @@ namespace TGS.Services.BackOffice.Application.Models.Game
         public bool AvailableToBrand { get; set; }
         public bool HasTurnoverOnTieBet { get; set; }
         public bool Html5 { get; set; }
-        public string AvailableCurrencies { get; set; }
+        public string AvailableCurrencies { get; set; } = "";
     }
 }

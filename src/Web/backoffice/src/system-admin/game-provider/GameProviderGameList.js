@@ -38,7 +38,8 @@ import textColumn from "../../table/column/textColumn"
 import { InputField, Input } from "../../input/Input"
 import {
     AddGameProviderGameDisclosure,
-    GameProviderGameDisclosure
+    EditGameProviderGameDisclosure,
+    ViewGameProviderGameDisclosure
 } from "./GameProviderGame"
 import { BatchAddGameProviderGameListDisclosure } from "./BatchAddGameProviderGameList"
 import SearchButton from "../../button/SearchButton"
@@ -220,7 +221,10 @@ const useColumns = ({ items = [], mutate }) => {
                     Cell: ({ value: record }) => {
                         return (
                             <Set orientation="horizontal" alignX="center">
-                                <GameProviderGameDisclosure
+                                <ViewGameProviderGameDisclosure
+                                    record={record}
+                                />
+                                <EditGameProviderGameDisclosure
                                     record={record}
                                     onSubmitted={mutate}
                                 />
