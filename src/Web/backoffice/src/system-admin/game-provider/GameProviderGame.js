@@ -48,6 +48,7 @@ import {
 import { useDropzone } from "react-dropzone"
 import { Update } from "./menu"
 
+//TODO: edit & view disclosure
 export const GameProviderGameDisclosure = ({ record, onSubmitted }) => {
     let dialog = useModalState()
 
