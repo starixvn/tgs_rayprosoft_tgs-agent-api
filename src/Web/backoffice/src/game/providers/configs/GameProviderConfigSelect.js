@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import Select from "../../../select/Select"
 import { Locales, Trans, useTrans } from "../../../i18n"
-import { useGameProviderConfigurationList } from "./client"
+import { useGameProviderConfigList } from "./client"
 
 export const GameProviderConfigSelect = ({
     placeholder,
@@ -15,11 +15,12 @@ export const GameProviderConfigSelect = ({
     })
     placeholder = placeholder ?? defaultPlaceholder
 
-    let { items = [], isLoading, error } = useGameProviderConfigurationList({
+    let { data, isLoading, error } = useGameProviderConfigList({
         gameProviderId,
-        showAll: true
+        showAll: true,
+        sortby: "name"
     })
-    let options = items?.map(({ name, id, ...item }) => ({
+    let options = data?.items?.map(({ name, id, ...item }) => ({
         label: name,
         value: id
     }))

@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Payment;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
-using TGS.Services.Operator;
-using TGS.Services.Operator.Deposit;
-using TGS.Services.Operator.Withdraw;
-using TGS.Services.Payment;
+using TGS.Services.Operator.BrandPayment;
+using TGS.Services.Operator.Services.Deposit;
+using TGS.Services.Operator.Services.Withdraw;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers

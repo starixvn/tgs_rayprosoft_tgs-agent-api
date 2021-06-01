@@ -32,7 +32,7 @@ import GameProviderSelect from "../../game/providers/GameProviderSelect"
 import { useGameRoundList } from "../../game/round/client"
 import { GameRoundButton } from "./button"
 import AlertDialog from "../../dialog/Alert"
-import { CopyLongText } from "../../text/CopyLongText"
+import { CopyTextBox } from "../../text/CopyTextBox"
 
 export { Code }
 
@@ -232,21 +232,21 @@ const useColumns = ({ items = [] }) => {
                 accessor: "playerName",
                 Header: <Trans zh="用户名" en="Player Name" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => <CopyLongText value={value} />
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             ellipsisTextColumn({
                 accessor: "externalRoundId",
                 Header: <Trans zh="三方订单ID" en="External Id" />,
                 disableSortBy: true,
                 maxWidth: "8rem",
-                Cell: ({ value = "" }) => <CopyLongText value={value} />
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             ellipsisTextColumn({
                 accessor: "id",
                 Header: <Trans zh="订单ID" en="Id" />,
                 disableSortBy: true,
                 maxWidth: "8rem",
-                Cell: ({ value = "" }) => <CopyLongText value={value} />
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             dateTimeColumn({
                 accessor: "createdOn",

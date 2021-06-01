@@ -8,7 +8,7 @@ import {
     useUserRoleId
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
-import { Code } from "./menu"
+import { Code, Update } from "./menu"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useForm, FormProvider } from "react-hook-form"
@@ -39,9 +39,10 @@ const Body = () => {
         keyword: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useBetLimitList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useBetLimitList({
+        ...toApiParams(state),
+        sortby: "id"
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
@@ -52,20 +53,12 @@ const Body = () => {
                     <SearchBar
                         code={state?.code}
                         name={state?.name}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                keyword: data?.keyword
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    keyword: state?.keyword
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
@@ -117,8 +110,9 @@ const SearchBar = ({ keyword = "", search, isLoading }) => {
 }
 
 const useColumns = ({ items = [], mutate }) => {
-    return useMemo(
-        () => [
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    return useMemo(() => {
+        let columns = [
             textColumn({
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
@@ -158,24 +152,30 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: "updatedByUsername",
                 Header: <Trans zh="更新人" en="Updated By" />,
                 disableSortBy: true
-            }),
-            textColumn({
-                id: "actions",
-                Header: <Trans zh="操作" en="Actions" />,
-                accessor: (row) => row,
-                disableSortBy: true,
-                Cell: ({ value: record }) => {
-                    return (
-                        <Set orientation="horizontal">
-                            <EditBetLimitDisclosure
-                                record={record}
-                                onSubmitted={mutate}
-                            />
-                        </Set>
-                    )
-                }
             })
-        ],
-        [JSON.stringify(items)]
-    )
+        ]
+
+        if (hasUpdateAuth) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    Header: <Trans zh="操作" en="Actions" />,
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Cell: ({ value: record }) => {
+                        return (
+                            <Set orientation="horizontal">
+                                <EditBetLimitDisclosure
+                                    record={record}
+                                    onSubmitted={mutate}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
 }

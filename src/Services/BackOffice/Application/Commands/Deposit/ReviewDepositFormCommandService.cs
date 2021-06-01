@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.BackOffice.Domain;
+using Tgs.Payment;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Payment;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using TGS.ServiceUtility;

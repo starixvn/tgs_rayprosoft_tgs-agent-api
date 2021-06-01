@@ -17,6 +17,12 @@ import {
     Columns,
     DropdownMenu
 } from "bumbag"
+import {
+    useIsDisplayMenuByRoute,
+    useHasSubMenuByRoute,
+    useUserRoleType,
+    useUserRoleId
+} from "../../user/context"
 import Disclosure, {
     AddDisclosure,
     EditDisclosure
@@ -56,9 +62,15 @@ import Select from "../../select/Select"
 import { JsonEditor } from "../../text/editor/JsonEditor"
 import NumberRangeInputGroup from "../../number/RangeInput"
 import { parseJSON, stringifyJSON } from "../../text/json"
+import { Update } from "./menu"
 
 export const EditBrandPaymentDisclosure = ({ record, onSubmitted }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>
@@ -86,6 +98,12 @@ export const AddBrandPaymentDisclosure = ({ brandId, onSubmitted }) => {
         zh: "新增提款支付",
         en: "Add Withdraw Payment"
     })
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
+
     return (
         <>
             <DropdownMenu
@@ -126,6 +144,7 @@ export const AddBrandPaymentDisclosure = ({ brandId, onSubmitted }) => {
 
 const EditDialog = ({
     record: { id, extendedData = {}, ...record },
+    onSubmitted,
     dialog
 }) => {
     let title = useTrans({
@@ -137,10 +156,11 @@ const EditDialog = ({
     let { isLoading, result, error, deleteCache, mutate } =
         useUpdateBrandPayment(id, formData)
 
-    const onSubmit = (data) => {
+    const onSubmit = ({ extendedData, ...data }) => {
         setSubmit({
             ...record,
-            ...data
+            ...data,
+            extendedData: parseJSON(extendedData)
         })
     }
 
@@ -157,6 +177,7 @@ const EditDialog = ({
                 extendedData: stringifyJSON(extendedData)
             }}
             onSubmit={onSubmit}
+            onSubmitted={onSubmitted}
             isLoading={isLoading}
             result={result}
             error={error}

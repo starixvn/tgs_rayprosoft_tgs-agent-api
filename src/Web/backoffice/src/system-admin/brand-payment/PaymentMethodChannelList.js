@@ -17,6 +17,7 @@ import {
     Columns,
     DropdownMenu
 } from "bumbag"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import { Disclosure, DeleteDisclosure } from "../../dialog/Disclosure"
 import {
     useAddPaymentMethodChannel,
@@ -43,9 +44,16 @@ import { FormDialog } from "../../form/FormDialog"
 import AlertDialog from "../../dialog/Alert"
 import Backdrop from "../../dialog/Backdrop"
 import { DeleteText } from "../../button/ActionButtons"
+import { View, Update } from "./menu"
+import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
 
 export const PaymentMethodChannelListDisclosure = ({}) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([View])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>
@@ -77,6 +85,7 @@ const ListDialog = ({ dialog }) => {
             title="Payment Method Channel List"
             showCloseButton
             {...dialog}
+            footer={<CloseButtonFooter dialog={dialog} alignX="right" />}
             hideOnClickOutside={false}
             width="60vw"
             maxWidth="60vw"
@@ -99,6 +108,12 @@ const ActionBar = ({ mutate }) => {
 
 const AddDialogDisclosure = ({ onSubmitted }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
+
     return (
         <>
             <Disclosure {...dialog}>
@@ -168,9 +183,10 @@ const FormBody = () => {
     )
 }
 
-const useColumns = ({ items = [], mutate }) =>
-    useMemo(
-        () => [
+const useColumns = ({ items = [], mutate }) => {
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    return useMemo(() => {
+        let columns = [
             textColumn({
                 accessor: "paymentId",
                 Header: <Trans zh="支付厂商" en="Payment Name" />,
@@ -188,25 +204,37 @@ const useColumns = ({ items = [], mutate }) =>
                 Header: <Trans zh="支付通道" en="Payment Channel" />,
                 disableSortBy: true,
                 Cell: ({ value }) => <PaymentChannelLabel value={value} />
-            }),
-            textColumn({
-                id: "actions",
-                accessor: (row) => row,
-                Header: <Trans zh="Actions" en="Actions" />,
-                disableSortBy: true,
-                Cell: ({ value }) => (
-                    <DeleteDialogDisclosure
-                        record={value}
-                        onSubmitted={mutate}
-                    />
-                )
             })
-        ],
-        [JSON.stringify(items)]
-    )
+        ]
+
+        if (hasUpdateAuth) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    accessor: (row) => row,
+                    Header: <Trans zh="Actions" en="Actions" />,
+                    disableSortBy: true,
+                    Cell: ({ value }) => (
+                        <DeleteDialogDisclosure
+                            record={value}
+                            onSubmitted={mutate}
+                        />
+                    )
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
+}
 
 const DeleteDialogDisclosure = ({ record, onSubmitted }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>

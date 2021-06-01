@@ -28,10 +28,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandGameProviderHandlers
                     .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
                     .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
                     .Where(BrandId != null, b => b.BrandId == BrandId)
-                    .Where(request.Keyword, x => x.GameProvider.Name.Contains(request.Keyword))
-                    .Where(ResellerId != null, r => r.Brand.Licensee.ResellerId == ResellerId)
-                    .Where(LicenseeId != null, l => l.Brand.LicenseeId == LicenseeId)
-                    .Where(BrandId != null, l => l.Id == BrandId))
+                    .Where(request.Keyword, x => x.GameProvider.Name.Contains(request.Keyword)))
                 .Select(x => new BrandGameProviderModel
                 {
                     Id = x.Id,

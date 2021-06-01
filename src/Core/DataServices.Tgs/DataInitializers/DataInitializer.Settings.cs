@@ -229,15 +229,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("Update"),
-                                new MenuSetting("View"), new MenuSetting("Verify")
+                                new MenuSetting("View"), new MenuSetting("Create"),
+                                new MenuSetting("Update"), new MenuSetting("Verify")
                             }
                         },
                         new MenuSetting("StationLetter")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("View"),
+                                new MenuSetting("View"), new MenuSetting("Create"), 
                                 new MenuSetting("Verify")
                             }
                         },
@@ -245,7 +245,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("View"),
+                                new MenuSetting("View"), new MenuSetting("Create"),
                                 new MenuSetting("Update")
                             }
                         }
@@ -363,13 +363,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         new MenuSetting("Admins")
                         {
-                            SubMenus = new[] {new MenuSetting("Create"), new MenuSetting("Update")}
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Create"), new MenuSetting("Update")}
                         },
                         new MenuSetting("Roles")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("Update"),
+                                new MenuSetting("View"), new MenuSetting("Create"), new MenuSetting("Update"),
                                 new MenuSetting("Delete"), new MenuSetting("Copy")
                             }
                         },
@@ -377,7 +377,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("Update"),
+                                new MenuSetting("View"), new MenuSetting("Create"), new MenuSetting("Update"),
                                 new MenuSetting("Delete")
                             }
                         },

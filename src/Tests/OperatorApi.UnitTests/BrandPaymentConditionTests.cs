@@ -1,8 +1,9 @@
 ﻿using System;
 using Moq;
 using NUnit.Framework;
+using Tgs.Payment;
 using TGS.Services.Operator;
-using TGS.Services.Payment;
+using TGS.Services.Operator.BrandPayment.PaymentConditions;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -10,11 +11,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class BrandPaymentConditionTests
     {
         [Test]
-        public void DepositedAmountCondition_Should_Success()
+        public void AllMatchCondition_Should_All_SubConditions_Pass()
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
-                10M,
+                100M,
                 false,
                 false,
                 null);
@@ -41,11 +42,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
-            var sut = new DepositedAmountCondition(brandPayment.DepositedAmountLimit);
+            var fakeCondition1 = new Mock<IBrandPaymentCondition>();
+
+            fakeCondition1
+                .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+                .Returns(true);
+
+            var fakeCondition2 = new Mock<IBrandPaymentCondition>();
+
+            fakeCondition2
+                .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+                .Returns(true);
+
+            var fakeCondition3 = new Mock<IBrandPaymentCondition>();
+
+            fakeCondition3
+                .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+                .Returns(true);
+
+            var sut = new MatchAllCondition(
+                fakeCondition1.Object,
+                fakeCondition2.Object,
+                fakeCondition3.Object);
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 
@@ -53,12 +75,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Authenticate_Identity_Should_Success()
+        public void AllPlayers_Is_False_Will_Ignore_After_Conditions()
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
                 100M,
-                true,
+                false,
                 false,
                 null);
 
@@ -77,22 +99,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 100M
                 },
                 false,
-                true,
+                false,
                 false,
                 new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
-            var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
+            var fakeCondition = new Mock<IBrandPaymentCondition>();
+
+            fakeCondition
+                .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
+                .Returns(true);
+
+            var sut = new BrandPaymentFilterCondition(
+                new BlockListCondition(Array.Empty<Guid>()),
+                new WhiteListCondition(Array.Empty<Guid>()),
+                new ShowOnAllPlayersCondition(),
+                fakeCondition.Object);
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 
-            Assert.IsTrue(actual);
+            Assert.IsFalse(actual);
         }
 
         [Test]
@@ -127,7 +159,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
@@ -170,7 +202,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
@@ -182,13 +214,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Authenticate_Phone_Should_Success()
+        public void Authenticate_Identity_Should_Success()
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
                 100M,
-                false,
                 true,
+                false,
                 null);
 
             var brandPayment = new BrandPaymentInfo(
@@ -206,18 +238,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     To = 100M
                 },
                 false,
-                false,
                 true,
+                false,
                 new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
-            var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
+            var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 
@@ -256,7 +288,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
@@ -268,14 +300,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void VipCondition_Should_Success()
+        public void Authenticate_Phone_Should_Success()
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
                 100M,
                 false,
-                false,
-                Guid.NewGuid());
+                true,
+                null);
 
             var brandPayment = new BrandPaymentInfo(
                 Guid.NewGuid(),
@@ -293,17 +325,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 },
                 false,
                 false,
-                false,
+                true,
                 new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
-            var sut = new VipCondition(new[] { playerInfo.VipLevel.Value });
+            var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 
@@ -311,7 +343,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void VipCondition_Is_Empty_Should_Invalid()
+        public void BlockList_Is_First_Check()
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
@@ -342,97 +374,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
-            var sut = new VipCondition(Array.Empty<Guid>());
+            var fakeCondition = new Mock<IBrandPaymentCondition>();
 
-            var actual = sut.IsValid(brandPayment, playerInfo);
-
-            Assert.IsFalse(actual);
-        }
-
-        [Test]
-        public void Player_In_WhiteList_Should_Pass()
-        {
-            var playerInfo = new PlayerInfo(
-                "ThisIsPlayerCode",
-                100M,
-                false,
-                false,
-                null);
-
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
-                {
-                    From = 10M,
-                    To = 100M
-                },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
-                {
-                    From = 10M,
-                    To = 1000M
-                },
-                ConditionMatchTypes.MatchAll,
-                TransferType.Deposit,
-                true);
-
-            var sut = new WhiteListCondition(new[] { brandPayment.Id });
-
-            var actual = sut.IsValid(brandPayment, playerInfo);
-
-            Assert.IsTrue(actual);
-        }
-
-        [Test]
-        public void Player_In_BlockList_Should_Invalid()
-        {
-            var playerInfo = new PlayerInfo(
-                "ThisIsPlayerCode",
-                100M,
-                false,
-                false,
-                null);
-
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
-                {
-                    From = 10M,
-                    To = 100M
-                },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
-                {
-                    From = 10M,
-                    To = 1000M
-                },
-                ConditionMatchTypes.MatchAll,
-                TransferType.Deposit,
-                true);
-
-            var sut = new BlockListCondition(new[] { brandPayment.Id });
+            var sut = new BrandPaymentFilterCondition(
+                new BlockListCondition(new[] { brandPayment.Id }),
+                new WhiteListCondition(new[] { brandPayment.Id }),
+                new ShowOnAllPlayersCondition(),
+                fakeCondition.Object);
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 
@@ -471,7 +423,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
@@ -483,7 +435,50 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void BlockList_Is_First_Check()
+        public void DepositedAmountCondition_Should_Success()
+        {
+            var playerInfo = new PlayerInfo(
+                "ThisIsPlayerCode",
+                10M,
+                false,
+                false,
+                null);
+
+            var brandPayment = new BrandPaymentInfo(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                "TestChannel",
+                "TestChannelCode",
+                string.Empty,
+                new ValueRange<decimal>
+                {
+                    From = 10M,
+                    To = 100M
+                },
+                false,
+                false,
+                false,
+                new ValueRange<decimal>
+                {
+                    From = 10M,
+                    To = 1000M
+                },
+                ConditionMatchType.MatchAll,
+                TransferType.Deposit,
+                true);
+
+            var sut = new DepositedAmountCondition(brandPayment.DepositedAmountLimit);
+
+            var actual = sut.IsValid(brandPayment, playerInfo);
+
+            Assert.IsTrue(actual);
+        }
+
+        [Test]
+        public void Player_In_BlockList_Should_Invalid()
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
@@ -514,21 +509,58 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
-            var fakeCondition = new Mock<IBrandPaymentCondition>();
-
-            var sut = new BrandPaymentFilterCondition(
-                new BlockListCondition(new[] { brandPayment.Id }),
-                new WhiteListCondition(new[] { brandPayment.Id }),
-                new ShowOnAllPlayersCondition(),
-                fakeCondition.Object);
+            var sut = new BlockListCondition(new[] { brandPayment.Id });
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 
             Assert.IsFalse(actual);
+        }
+
+        [Test]
+        public void Player_In_WhiteList_Should_Pass()
+        {
+            var playerInfo = new PlayerInfo(
+                "ThisIsPlayerCode",
+                100M,
+                false,
+                false,
+                null);
+
+            var brandPayment = new BrandPaymentInfo(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                "TestChannel",
+                "TestChannelCode",
+                string.Empty,
+                new ValueRange<decimal>
+                {
+                    From = 10M,
+                    To = 100M
+                },
+                false,
+                false,
+                false,
+                new ValueRange<decimal>
+                {
+                    From = 10M,
+                    To = 1000M
+                },
+                ConditionMatchType.MatchAll,
+                TransferType.Deposit,
+                true);
+
+            var sut = new WhiteListCondition(new[] { brandPayment.Id });
+
+            var actual = sut.IsValid(brandPayment, playerInfo);
+
+            Assert.IsTrue(actual);
         }
 
         [Test]
@@ -563,7 +595,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
@@ -574,123 +606,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 new WhiteListCondition(new[] { brandPayment.Id }),
                 new ShowOnAllPlayersCondition(),
                 fakeCondition.Object);
-
-            var actual = sut.IsValid(brandPayment, playerInfo);
-
-            Assert.IsTrue(actual);
-        }
-
-        [Test]
-        public void AllPlayers_Is_False_Will_Ignore_After_Conditions()
-        {
-            var playerInfo = new PlayerInfo(
-                "ThisIsPlayerCode",
-                100M,
-                false,
-                false,
-                null);
-
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
-                {
-                    From = 10M,
-                    To = 100M
-                },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
-                {
-                    From = 10M,
-                    To = 1000M
-                },
-                ConditionMatchTypes.MatchAll,
-                TransferType.Deposit,
-                true);
-
-            var fakeCondition = new Mock<IBrandPaymentCondition>();
-
-            fakeCondition
-                .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
-                .Returns(true);
-
-            var sut = new BrandPaymentFilterCondition(
-                new BlockListCondition(Array.Empty<Guid>()),
-                new WhiteListCondition(Array.Empty<Guid>()),
-                new ShowOnAllPlayersCondition(),
-                fakeCondition.Object);
-
-            var actual = sut.IsValid(brandPayment, playerInfo);
-
-            Assert.IsFalse(actual);
-        }
-
-        [Test]
-        public void AllMatchCondition_Should_All_SubConditions_Pass()
-        {
-            var playerInfo = new PlayerInfo(
-                "ThisIsPlayerCode",
-                100M,
-                false,
-                false,
-                null);
-
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
-                {
-                    From = 10M,
-                    To = 100M
-                },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
-                {
-                    From = 10M,
-                    To = 1000M
-                },
-                ConditionMatchTypes.MatchAll,
-                TransferType.Deposit,
-                true);
-
-            var fakeCondition1 = new Mock<IBrandPaymentCondition>();
-
-            fakeCondition1
-                .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
-                .Returns(true);
-
-            var fakeCondition2 = new Mock<IBrandPaymentCondition>();
-
-            fakeCondition2
-                .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
-                .Returns(true);
-
-            var fakeCondition3 = new Mock<IBrandPaymentCondition>();
-
-            fakeCondition3
-                .Setup(fake => fake.IsValid(It.IsAny<BrandPaymentInfo>(), It.IsAny<PlayerInfo>()))
-                .Returns(true);
-
-            var sut = new MatchAllCondition(
-                fakeCondition1.Object,
-                fakeCondition2.Object,
-                fakeCondition3.Object);
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 
@@ -729,7 +644,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     From = 10M,
                     To = 1000M
                 },
-                ConditionMatchTypes.MatchAll,
+                ConditionMatchType.MatchAll,
                 TransferType.Deposit,
                 true);
 
@@ -755,6 +670,92 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeCondition1.Object,
                 fakeCondition2.Object,
                 fakeCondition3.Object);
+
+            var actual = sut.IsValid(brandPayment, playerInfo);
+
+            Assert.IsTrue(actual);
+        }
+
+        [Test]
+        public void VipCondition_Is_Empty_Should_Invalid()
+        {
+            var playerInfo = new PlayerInfo(
+                "ThisIsPlayerCode",
+                100M,
+                false,
+                false,
+                null);
+
+            var brandPayment = new BrandPaymentInfo(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                "TestChannel",
+                "TestChannelCode",
+                string.Empty,
+                new ValueRange<decimal>
+                {
+                    From = 10M,
+                    To = 100M
+                },
+                false,
+                false,
+                false,
+                new ValueRange<decimal>
+                {
+                    From = 10M,
+                    To = 1000M
+                },
+                ConditionMatchType.MatchAll,
+                TransferType.Deposit,
+                true);
+
+            var sut = new VipCondition(Array.Empty<Guid>());
+
+            var actual = sut.IsValid(brandPayment, playerInfo);
+
+            Assert.IsFalse(actual);
+        }
+
+        [Test]
+        public void VipCondition_Should_Success()
+        {
+            var playerInfo = new PlayerInfo(
+                "ThisIsPlayerCode",
+                100M,
+                false,
+                false,
+                Guid.NewGuid());
+
+            var brandPayment = new BrandPaymentInfo(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                "TestChannel",
+                "TestChannelCode",
+                string.Empty,
+                new ValueRange<decimal>
+                {
+                    From = 10M,
+                    To = 100M
+                },
+                false,
+                false,
+                false,
+                new ValueRange<decimal>
+                {
+                    From = 10M,
+                    To = 1000M
+                },
+                ConditionMatchType.MatchAll,
+                TransferType.Deposit,
+                true);
+
+            var sut = new VipCondition(new[] { playerInfo.VipLevel.Value });
 
             var actual = sut.IsValid(brandPayment, playerInfo);
 

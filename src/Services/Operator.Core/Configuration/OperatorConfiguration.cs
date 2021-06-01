@@ -1,7 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Tgs.Payment.Configuration;
 using TGS.Core.Infrastructures.Mail;
-using TGS.Services.Payment.Configuration;
+using TGS.Services.Operator.StationLetters;
 using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Operator.Configuration

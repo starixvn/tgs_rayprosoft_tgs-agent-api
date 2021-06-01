@@ -20,6 +20,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(w => w.PlayerCode)
                 .IsRequired();
 
+            builder.Property(w => w.UserName);
+
+            builder.Property(w => w.UserType)
+                .IsRequired()
+                .HasDefaultValue(0);
+
             builder.Property(w => w.Amount)
                 .HasPrecision(18, 6)
                 .IsRequired();

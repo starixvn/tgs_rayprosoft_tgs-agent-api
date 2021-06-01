@@ -32,7 +32,7 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { InputField } from "../../input/Input"
 import AlertDialog from "../../dialog/Alert"
-import textColumn from "../../table/column/textColumn"
+import textColumn, { ellipsisTextColumn } from "../../table/column/textColumn"
 import numberColumn, {
     numberDecimalColumn,
     numberDecimalPercentageColumn
@@ -41,6 +41,7 @@ import { today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useAdminLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
+import { CopyTextBox } from "../../text/CopyTextBox"
 
 export { Code }
 
@@ -195,26 +196,28 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "trackingId",
                 Header: <Trans zh="Tracking Id" en="Tracking Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "path",
                 Header: <Trans zh="Path" en="Path" />,
                 disableSortBy: true,
                 textAlign: "left",
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => (
+                    <CopyTextBox value={value} alignX="left" textAlign="left" />
+                )
             }),
             textColumn({
                 accessor: "method",
