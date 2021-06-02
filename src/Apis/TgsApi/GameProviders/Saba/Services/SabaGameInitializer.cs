@@ -84,6 +84,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
 
             var apiUrl = configuration.ApiUrl;
             var vendorId = configuration.VendorId;
+            var operatorId = configuration.OperatorId;
 
             var gameUrlRequest = new GameUrlRequest
             {
@@ -106,6 +107,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
             var createMemberResponse = await _client.CreateMemberAsync(apiUrl,
                 new()
                 {
+                    OperatorId = operatorId,
                     VendorId = vendorId,
                     PlayerCode = playerCode,
                     Username = playerCode,
