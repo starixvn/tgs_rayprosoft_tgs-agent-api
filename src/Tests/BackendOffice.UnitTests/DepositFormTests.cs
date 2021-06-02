@@ -74,6 +74,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     1000,
                     null,
                     null,
+                    null,
                     DateTimeOffset.UtcNow,
                     DateTimeOffset.UtcNow)));
             moqPlayerService

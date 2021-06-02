@@ -44,7 +44,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 var actualAmount = await _playerBucketRepository
                     .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
                         command.BrandId,
-                        null,
+                        form.PromotionId,
                         player.PlayerCode,
                         player.DefaultWalletId,
                         form.Amount))

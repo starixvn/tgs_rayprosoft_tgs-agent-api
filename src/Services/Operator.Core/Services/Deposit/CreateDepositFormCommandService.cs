@@ -51,6 +51,7 @@ namespace TGS.Services.Operator.Services.Deposit
                 command.BrandId,
                 command.BrandPaymentId,
                 command.Amount,
+                command.PromotionId,
                 applyInfo);
 
             await _paymentRepository

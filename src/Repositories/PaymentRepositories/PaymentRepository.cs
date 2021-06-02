@@ -56,6 +56,7 @@ namespace TGS.Payment.Repositories
                     Amount = form.Amount,
                     ApplyInfo = form.ApplyInfo,
                     PaymentReturn = form.PaymentReturn,
+                    PromotionId = form.PromotionId,
                     CreatedOn = currentDate,
                     UpdatedOn = currentDate
                 })
@@ -268,6 +269,7 @@ namespace TGS.Payment.Repositories
                             df.Status,
                             df.ApplyInfo,
                             df.PaymentReturn,
+                            df.PromotionId,
                             df.CreatedOn,
                             df.UpdatedOn);
 
