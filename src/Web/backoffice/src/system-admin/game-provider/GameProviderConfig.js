@@ -341,7 +341,7 @@ const DefaultSwitchField = ({ name = "isDefault", disabled, readOnly }) => {
 const Active = "Active"
 const ActiveTrans = {
     zh: "开启",
-    en: "Enabled"
+    en: "Active"
 }
 
 const Inactive = "Inactive"
