@@ -29,8 +29,18 @@ export const urlWith = (searchParams = {}, url) => {
 
 const stringOf = (value) => value?.toISOString?.() ?? value
 
+const FailedToFetchDefaultMessage = "Failed to fetch"
+const FailedToFetchTrans = {
+    zh: "获取数据失败",
+    en: FailedToFetchDefaultMessage
+}
 const reject = (error) => {
-    return Promise.reject({ title: error?.toString?.() ?? "Error" })
+    let locale = getAcceptLang()
+    let title = error?.message ?? error?.toString?.() ?? "Error"
+    if (title == "Failed to fetch") {
+        title = FailedToFetchTrans?.[locale] ?? FailedToFetchDefaultMessage
+    }
+    return Promise.reject({ title })
 }
 
 export const get = (
