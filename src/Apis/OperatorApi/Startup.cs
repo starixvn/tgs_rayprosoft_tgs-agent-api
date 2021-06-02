@@ -34,6 +34,7 @@ using TGS.Services.Operator;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
 using TGS.Services.Operator.ValidateCode;
+using Tgs.Payment.ApplePay;
 
 namespace TGS.Apis.OperatorApi
 {
@@ -132,7 +133,8 @@ namespace TGS.Apis.OperatorApi
                 })
                 .Services
                 .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>()
-                .AddSingleton<PrimePaySerializer>();
+                .AddSingleton<PrimePaySerializer>()
+                .AddSingleton<ApplePaySerializer>();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()
