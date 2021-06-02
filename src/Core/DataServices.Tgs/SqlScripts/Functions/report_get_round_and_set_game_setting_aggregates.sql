@@ -38,8 +38,7 @@ AS $$
 		r.valid_bet_amount,
 		r.turnover,
 		r.win_loss,
-		bg.rebate,
-		bg.effective_betting_percentage
+		CASE WHEN bg.effective_betting_percentage is null THEN 100 ELSE bg.effective_betting_percentage END AS effective_betting_percentage
 		from bet.rounds r
 		join dbo.games g on r.game_id = g.id
 		join dbo.players p on r.player_code = p.player_code
@@ -64,7 +63,7 @@ AS $$
 		from rounds
 		group by brand_id, game_provider_id, player_code, agent_id, username,game_id,game_type),
 		update_rounds as (
-		  UPDATE bet.rounds r SET rebate = br.rebate,effective_betting_percentage = br.effective_betting_percentage
+		  UPDATE bet.rounds r SET effective_betting_percentage = br.effective_betting_percentage
 		  FROM rounds br where r.id in (br.round_id)
 		)
 

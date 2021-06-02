@@ -1,0 +1,10 @@
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
+Baccarat Classic,Baccarat_Classic,,MX-LIVE-001,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Baccarat,Baccarat,,MX-LIVE-002,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Baccarat Insurance,Baccarat_Insurance,,MX-LIVE-003,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+DragonTiger,DragonTiger,,MX-LIVE-006,LiveDealer,DesktopAndMobile,TRUE,,,FALSE,TRUE,TRUE,
+SicBo,SicBo,,MX-LIVE-007,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Roulette,Roulette,,MX-LIVE-009,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Red Blue Duel,Red_Blue_Duel,,MX-LIVE-010,LiveDealer,Mobile,TRUE,,,FALSE,TRUE,TRUE,
+Twenty,Twenty,,MX-LIVE-011,LiveDealer,Mobile,FALSE,,,FALSE,TRUE,TRUE,
+AndarBahar,AndarBahar,,MX-LIVE-012,LiveDealer,Mobile,FALSE,,,FALSE,TRUE,TRUE,

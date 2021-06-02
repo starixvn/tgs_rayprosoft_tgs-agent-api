@@ -62,7 +62,7 @@ namespace TGS.Services.Report.Application.Queries.Round
                         x.detail,
                         gameProvider
                     })
-                .Join(_service.TgsRepository.BrandGames,
+                .GroupJoin(_service.TgsRepository.BrandGames,
                     roundGroup => new {roundGroup.round.BrandId, roundGroup.round.GameId},
                     brandGame => new {brandGame.BrandId, brandGame.GameId},
                     (roundGroup, brandGame) => new
@@ -72,6 +72,16 @@ namespace TGS.Services.Report.Application.Queries.Round
                         roundGroup.game,
                         roundGroup.gameProvider,
                         roundGroup.detail,
+                        brandGame
+                    })
+                .SelectMany(x => x.brandGame.DefaultIfEmpty(),
+                    (x, brandGame) => new
+                    {
+                        x.round,
+                        x.player,
+                        x.game,
+                        x.gameProvider,
+                        x.detail,
                         brandGame
                     })
                 .Select(combine => new RoundModel
@@ -95,7 +105,7 @@ namespace TGS.Services.Report.Application.Queries.Round
                     BetAmount = combine.round.BetAmount,
                     ValidBetAmount =
                         combine.round.Turnover * (combine.round.EffectiveBettingPercentage ??
-                            combine.brandGame.EffectiveBettingPercentage) / 100M,
+                            (combine.brandGame == null ? 100M : combine.brandGame.EffectiveBettingPercentage)) / 100M,
                     SettleAmount = combine.round.SettleAmount,
                     WinLoss = -combine.round.WinLoss,
                     AdditionalData = combine.detail.AdditionalData
