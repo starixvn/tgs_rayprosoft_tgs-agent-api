@@ -29,9 +29,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 CreateSetting(SettingConsts.CurrencyNetProfit,
                     _jsonSerializationProvider.SerializeToString(GetCurrencyNetProfits(), options),
                     "Currency NetProfit"),
-                CreateSetting(SettingConsts.NetProfitEmail,
-                    _jsonSerializationProvider.SerializeToString(GetCurrencyNetProfits(), options),
-                    "NetProfit Email")
+                CreateSetting(SettingConsts.ArrearsEmail,
+                    _jsonSerializationProvider.SerializeToString(GetArrearsEmail(), options),
+                    "Arrears Email")
             };
 
             var gameProviderSettings = _gameProviders.Select(gp =>
@@ -60,36 +60,52 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now
             };
 
-        private static NetProfitEmail[] GetNetProfitEmails() =>
-            new[]
+        private static ArrearsEmail GetArrearsEmail() =>
+            new()
             {
-                new()
+                Manager = new()
                 {
-                    Subject = "RMB",
-                    SendPercentage = 60.0M,
+                    Emails = new[] {"rico.lin@rayprosoft.com"},
+                    Subject = "Manager",
                     Content =
-                        "60% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                        "HI Manager, \r\n '{0}'."
                 },
-                new NetProfitEmail
+                SettlementDay = new()
                 {
-                    Subject = "RMB",
-                    SendPercentage = 70.0M,
+                    Subject = "settlementDay",
                     Content =
-                        "70% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                        "settlementDay hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
                 },
-                new NetProfitEmail
+                Daily = new[]
                 {
-                    Subject = "RMB",
-                    SendPercentage = 80.0M,
-                    Content =
-                        "80% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
-                },
-                new NetProfitEmail
-                {
-                    Subject = "RMB",
-                    SendPercentage = 90.0M,
-                    Content =
-                        "90% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    new()
+                    {
+                        Subject = "60%",
+                        SendPercentage = 60.0M,
+                        Content =
+                            "60% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    },
+                    new ArrearsEmailInfoDaily
+                    {
+                        Subject = "70%",
+                        SendPercentage = 70.0M,
+                        Content =
+                            "70% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    },
+                    new ArrearsEmailInfoDaily
+                    {
+                        Subject = "80%",
+                        SendPercentage = 80.0M,
+                        Content =
+                            "80% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    },
+                    new ArrearsEmailInfoDaily
+                    {
+                        Subject = "90%",
+                        SendPercentage = 90.0M,
+                        Content =
+                            "90% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    }
                 }
             };
 
@@ -237,7 +253,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("View"), new MenuSetting("Create"), 
+                                new MenuSetting("View"), new MenuSetting("Create"),
                                 new MenuSetting("Verify")
                             }
                         },
@@ -363,22 +379,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         new MenuSetting("Admins")
                         {
-                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Create"), new MenuSetting("Update")}
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"), new MenuSetting("Create"),
+                                new MenuSetting("Update")
+                            }
                         },
                         new MenuSetting("Roles")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("View"), new MenuSetting("Create"), new MenuSetting("Update"),
-                                new MenuSetting("Delete"), new MenuSetting("Copy")
+                                new MenuSetting("View"), new MenuSetting("Create"),
+                                new MenuSetting("Update"), new MenuSetting("Delete"),
+                                new MenuSetting("Copy")
                             }
                         },
                         new MenuSetting("Departments")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("View"), new MenuSetting("Create"), new MenuSetting("Update"),
-                                new MenuSetting("Delete")
+                                new MenuSetting("View"), new MenuSetting("Create"),
+                                new MenuSetting("Update"), new MenuSetting("Delete")
                             }
                         },
                         new MenuSetting("BrandPayments")
@@ -391,12 +412,30 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("GameProviders") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("BrandPayments") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Language") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Currency") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("BetLimit") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Settings") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("GameProviders")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("BrandPayments")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Language")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Currency")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("BetLimit")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Settings")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("Log")
