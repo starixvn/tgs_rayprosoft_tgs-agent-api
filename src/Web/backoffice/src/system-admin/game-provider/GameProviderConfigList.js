@@ -47,6 +47,7 @@ import {
 } from "./GameProviderConfig"
 import { useGameProviderConfigList } from "../../game/providers/configs/client"
 import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
+import { Switch } from "../../switch/Switch"
 
 export const GameProviderConfigListDisclosure = ({ gameProviderId }) => {
     let dialog = useModalState()
@@ -184,6 +185,12 @@ const useColumns = ({ items = [], mutate }) => {
                 Header: <Trans zh="Secret Key" en="secret Key" />,
                 disableSortBy: true,
                 Cell: ({ value = "" }) => <CopyTextBox value={value} />
+            }),
+            textColumn({
+                accessor: "isDefault",
+                Header: <Trans zh="Default" en="Default" />,
+                disableSortBy: true,
+                Cell: ({ value = "" }) => <Switch checked={value} />
             }),
             textColumn({
                 accessor: "status",
