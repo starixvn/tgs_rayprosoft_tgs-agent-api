@@ -8,7 +8,7 @@ namespace Infrastructures.UnitTests
     public class ClientPathTests
     {
         [Test]
-        public void TestMethod()
+        public void Client_Should_Process_Nullable_DateTimeOffset()
         {
             var parameter = new
             {
