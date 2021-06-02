@@ -77,7 +77,7 @@ namespace TGS.Payment.Repositories
                 {
                     Id = createFormId,
                     BrandId = form.BrandId,
-                    PlayerCode = form.UserId,
+                    UserId = form.UserId,
                     UserName = player.Username,
                     UserType = 1,
                     BrandPaymentId = form.BrandPaymentId,
@@ -300,7 +300,7 @@ namespace TGS.Payment.Repositories
                         where df.Id == formId
                         select new WithdrawFormInfo(
                             df.Id,
-                            df.PlayerCode,
+                            df.UserId,
                             (UserType)df.UserType,
                             df.UserName,
                             df.BrandId,

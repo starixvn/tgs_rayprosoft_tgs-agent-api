@@ -172,7 +172,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 new WithdrawForm
                 {
                     Id = Guid.NewGuid(),
-                    PlayerCode = "PlayerCode",
+                    UserId = "PlayerCode",
                     UserName = "Player1",
                     UserType = 1,
                     BrandId = brandId,
