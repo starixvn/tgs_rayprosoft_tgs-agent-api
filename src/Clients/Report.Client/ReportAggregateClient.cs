@@ -17,7 +17,6 @@ namespace TGS.Clients.Report.Client
         Task<MessageResponse> ManualCreatePlayerAggregateAsync(ManualCreateUpdatePlayerAggregateModel request);
         Task<MessageResponse> CreateRoundAggregateAsync(CreateRoundAggregateModel request);
         Task<MessageResponse> FillPlayerBucketMinutelyAsync(FillPlayerBucketMinutelyModel request);
-        Task<MessageResponse> CreateMarketAggregateAsync(CreateMarketAggregateModel request);
         Task<MessageResponse> ManualFillPlayerBucketMinutelyAsync(ManualFillPlayerBucketMinutelyModel request);
         Task<MessageResponse> ManualCreateRoundAggregateAsync(ManualCreateUpdateRoundAggregateModel request);
     }
@@ -87,7 +86,8 @@ namespace TGS.Clients.Report.Client
                 "/api/agentReport/dividends", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
         }
-async Task<MessageResponse> IReportAggregateClient.FillPlayerBucketMinutelyAsync(
+
+        async Task<MessageResponse> IReportAggregateClient.FillPlayerBucketMinutelyAsync(
             FillPlayerBucketMinutelyModel request)
         {
             var prefix = "Report.FillPlayerBucketMinutely";
@@ -95,15 +95,6 @@ async Task<MessageResponse> IReportAggregateClient.FillPlayerBucketMinutelyAsync
                 HttpMethod.Post,
                 "/api/roundAggregate/fillPlayerBucketMinutely", request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true}).ConfigureAwait(false);
-        }
-        async Task<MessageResponse> IReportAggregateClient.CreateMarketAggregateAsync(
-            CreateMarketAggregateModel request)
-        {
-            var prefix = "Report.CreateMarketAggregate";
-            return await ExecuteJsonRequestAsync<CreateMarketAggregateModel, MessageResponse>(
-                HttpMethod.Post,
-                "/api/marketAggregate", request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true }).ConfigureAwait(false);
         }
 
         async Task<MessageResponse> IReportAggregateClient.ManualFillPlayerBucketMinutelyAsync(
