@@ -14,7 +14,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Enums
         InvalidIp = 2,
 
         [Description("userName empty")]
-        PlayerNotFound = 3,
+        UsernameIsEmpty = 3,
 
         [Description("CompanyKey Error")]
         InvalidCredentials = 4,
@@ -46,6 +46,8 @@ namespace TGS.Shared.Game.Models.SBOBET.Enums
 
         IncorrectFormat = 2007,
         InvalidArguments = 2008,
+
+        [Description("Invalid Amount")]
         InvalidAmount = 2009,
         InvalidGameAction = 2010,
         UnderMaintenance = 2011,

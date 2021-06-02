@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.GameProviders.SBOBET.Exceptions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
@@ -21,7 +22,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
                 {typeof(InvalidCredentialsException), InvalidCredentials},
                 {typeof(MissingTokenException), PlayerNotLogin},
                 {typeof(PlayerLoginExpiredException), PlayerNotLogin},
-                {typeof(PlayerNotFoundException), PlayerNotFound},
+                {typeof(PlayerNotFoundException), MemberNotExist},
+                {typeof(EmptyUsernameException), UsernameIsEmpty},
                 {typeof(PlayerDisabledException), UserBlocked},
                 {typeof(CountryRestrictedException), CountryRestricted},
                 {typeof(CurrencyNotMatchingException), CurrencyMismatch},
