@@ -29,6 +29,10 @@ export const urlWith = (searchParams = {}, url) => {
 
 const stringOf = (value) => value?.toISOString?.() ?? value
 
+const reject = (error) => {
+    return Promise.reject({ title: error?.toString?.() ?? "Error" })
+}
+
 export const get = (
     url = "",
     { searchParams = {}, headers = {}, ...options } = {}
@@ -37,7 +41,13 @@ export const get = (
     if (!headers["Accept-Language"]) {
         headers["Accept-Language"] = getAcceptLangCulture()
     }
-    return fetch(url, { headers, ...options }).then(toDataOrError)
+
+    return fetch(url, { headers, ...options })
+        .catch((error) => {
+            console.warn(error)
+            return reject(error)
+        })
+        .then(toDataOrError)
 }
 
 export const put = (url, options) => fetchApi("PUT", url, options)
@@ -65,7 +75,12 @@ const fetchApi = (
         headers,
         body: body ?? JSON.stringify(dropEmptyValues(data)),
         ...options
-    }).then(toDataOrError)
+    })
+        .catch((error) => {
+            console.warn(error)
+            return reject(error)
+        })
+        .then(toDataOrError)
 }
 
 const dropEmptyValues = (record) => {
