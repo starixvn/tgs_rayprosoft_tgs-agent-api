@@ -17,8 +17,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(w => w.BrandId)
                 .IsRequired();
 
-            builder.Property(w => w.PlayerCode)
-                .IsRequired();
+            builder.Property(w => w.UserId);
 
             builder.Property(w => w.UserName);
 
@@ -61,14 +60,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(w => w.UpdatedOn)
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
-
-            builder.HasOne(w => w.Player)
-                .WithMany()
-                .HasForeignKey(w => w.PlayerCode)
-                .HasConstraintName("fk_withdraw_forms_players_player_code");
-
-            builder.HasIndex(w => w.PlayerCode)
-                .HasDatabaseName("ix_withdraw_forms_player_code");
 
             builder.HasOne(w => w.Brand)
                 .WithMany()

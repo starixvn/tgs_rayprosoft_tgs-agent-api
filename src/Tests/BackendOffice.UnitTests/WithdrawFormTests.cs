@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -68,6 +69,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 .Returns(ValueTask.FromResult(new WithdrawFormInfo(
                     formId,
                     "ThisIsPlayerCode",
+                    UserType.Player,
                     "UserName",
                     Guid.NewGuid(),
                     1000M,
@@ -170,7 +172,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 new WithdrawForm
                 {
                     Id = Guid.NewGuid(),
-                    PlayerCode = "PlayerCode",
+                    UserId = "PlayerCode",
                     UserName = "Player1",
                     UserType = 1,
                     BrandId = brandId,

@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
@@ -30,10 +30,9 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Extensions;
-using TGS.Services.Operator;
+using TGS.Services.Operator.ValidateCode;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
-using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Apis.OperatorApi
 {
