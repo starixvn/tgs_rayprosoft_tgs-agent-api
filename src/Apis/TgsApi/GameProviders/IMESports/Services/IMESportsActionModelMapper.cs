@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -25,9 +26,9 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
 
         BetResponse Response(BetResult r);
 
-        BatchBetData Request(Guid gameProviderId, 
-            Dictionary<string, (Guid GameProviderConfigurationId, string PlayerCode)> playerConfigurationIds, 
-            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, 
+        BatchBetData Request(Guid gameProviderId,
+            Dictionary<string, (Guid GameProviderConfigurationId, string PlayerCode)> playerConfigurationIds,
+            IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds,
             BetRequest request, bool isSettle);
 
         IEnumerable<TransactionResponse> Response(BatchBetResult r);
@@ -35,15 +36,15 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
 
     public sealed class IMESportsActionModelMapper : IIMESportsActionModelMapper
     {
-        private readonly IIMESportsServices _services;
         private const string GameProviderCode = Consts.GameProvider.IMESports;
         private const bool HasCurrencyFromGameProvider = false;
+        private readonly IIMESportsServices _services;
 
         public IMESportsActionModelMapper(IIMESportsServices services)
         {
             _services = services;
         }
-        
+
         GetBalanceResponse IIMESportsActionModelMapper.Response(string playerCode, GetBalanceResult r) =>
             new()
             {
@@ -52,7 +53,8 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 Balance = r.Balance
             };
 
-        BetData IIMESportsActionModelMapper.Request(GameProviderConfigurationData data, BetRequest request, string playerCode,
+        BetData IIMESportsActionModelMapper.Request(GameProviderConfigurationData data, BetRequest request,
+            string playerCode,
             bool allowPlaceBetWithDifferentPlatformToken)
         {
             var transactions = request.Transactions.Select(t => new TransactionData
@@ -74,56 +76,64 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             => new()
             {
                 Results = (from res in r.Transactions
-                          select new TransactionResponse
-                {
-                    InternalTransactionId = res.InternalTransactionId.Value,
-                    ExternalTransactionId = res.ExternalTransactionId,
-                    Balance = r.Balance
-                }).ToArray()
+                           select new TransactionResponse
+                           {
+                               InternalTransactionId = res.InternalTransactionId.Value,
+                               ExternalTransactionId = res.ExternalTransactionId,
+                               Balance = r.Balance
+                           }).ToArray()
             };
 
         BatchBetData IIMESportsActionModelMapper.Request(Guid gameProviderId,
             Dictionary<string, (Guid GameProviderConfigurationId, string PlayerCode)> playerConfigurationIds,
-            IDictionary<string, IEnumerable<GameActionExternalIds>> externalList, 
-            BetRequest request, bool isSettle)
-        {
-            return new()
+            IDictionary<string, IEnumerable<GameActionExternalIds>> externalList,
+            BetRequest request, bool isSettle) =>
+            new()
             {
                 ExternalBatchId = Guid.NewGuid().ToString(),
                 GameProviderId = gameProviderId,
                 GameProviderCode = GameProviderCode,
                 AutoCloseRound = true,
                 AllowCancelCancelTransaction = true,
-                Transactions = request.Transactions.Where(t => GetGameActionType(t.ActionType, t.Amount).IsSettleBet() == isSettle).
-                                                    Select(t =>
-                {
-                    playerConfigurationIds.TryGetValue(t.PlayerCode, out var playerGameProviderConfigurationId);
-                    var externalIds = externalList[t.ExternalRoundId];
-                    var externalId = externalIds.First(e => GetRefGameActionTypes(t.ActionType).Contains(e.GameActionType));
-                    
-                    return new BatchTransactionData
+                Transactions = request.Transactions
+                    .Where(t => GetGameActionType(t.ActionType, t.Amount).IsSettleBet() == isSettle).Select(t =>
                     {
-                        PlayerCode = playerGameProviderConfigurationId.PlayerCode,
-                        GameProviderConfigurationId = playerGameProviderConfigurationId.GameProviderConfigurationId,
-                        Amount = Math.Abs(t.Amount),
-                        ExternalRoundId = t.ExternalRoundId,
-                        ExternalBetId = t.ExternalRoundId,
-                        ExternalGameId = t.ExternalGameId,
-                        ExternalTransactionId = t.ExternalTransactionId,
-                        ExternalTransactionReferenceId = externalId.ExternalTransactionId,
-                        GameActionType = GetGameActionType(t.ActionType, t.Amount),
-                        RoundClosed = isSettle ? (bool?)null : false,
-                        CurrencyCode = t.Currency,
-                        Timestamp = t.Timestamp
-                    };
-                }).ToArray()
+                        playerConfigurationIds.TryGetValue(t.PlayerCode, out var playerGameProviderConfigurationId);
+                        var externalIds = externalList[t.ExternalRoundId];
+                        var externalId = externalIds.FirstOrDefault(e =>
+                            GetRefGameActionTypes(t.ActionType).Contains(e.GameActionType));
+
+                        if (externalId != null)
+                        {
+                            return new BatchTransactionData
+                            {
+                                PlayerCode = playerGameProviderConfigurationId.PlayerCode,
+                                GameProviderConfigurationId =
+                                    playerGameProviderConfigurationId.GameProviderConfigurationId,
+                                Amount = Math.Abs(t.Amount),
+                                ExternalRoundId = t.ExternalRoundId,
+                                ExternalBetId = t.ExternalRoundId,
+                                ExternalGameId = t.ExternalGameId,
+                                ExternalTransactionId = t.ExternalTransactionId,
+                                ExternalTransactionReferenceId = externalId.ExternalTransactionId,
+                                GameActionType = GetGameActionType(t.ActionType, t.Amount),
+                                RoundClosed = isSettle ? null : false,
+                                CurrencyCode = t.Currency,
+                                Timestamp = t.Timestamp
+                            };
+                        }
+
+                        var errorCode = isSettle
+                            ? InvalidGameActionErrorCode.TransactionBeingReferencedNotFound
+                            : InvalidGameActionErrorCode.TransactionBeingCancelledNotFound;
+                        throw new InvalidGameActionException("Transaction Not Found", errorCode);
+                    }).ToArray()
             };
-        }
 
         IEnumerable<TransactionResponse> IIMESportsActionModelMapper.Response(BatchBetResult r)
         {
             var results = new List<TransactionResponse>();
-            
+
             results.AddRange(
                 from result in r.Results
                 join balance in r.PlayerBalances
@@ -134,7 +144,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                     InternalTransactionId = result.InternalTransactionId.Value,
                     Balance = balance.Value
                 });
-            
+
             results.AddRange(
                 from error in r.Errors
                 select new TransactionResponse
@@ -177,7 +187,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 case PlaceBetRefund:
                 case CancelFT:
                 case CancelSingleWager:
-                case CancelParlay: 
+                case CancelParlay:
                 // cancel settlement
                 case UnsettleFT:
                 case UnsettleParlay:
@@ -191,7 +201,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                     throw new ArgumentOutOfRangeException(nameof(actionId), $"unrecognized action type id: {actionId}");
             }
         }
-        
+
         private static GameActionType[] GetRefGameActionTypes(ActionType actionId)
         {
             switch (actionId)
@@ -202,16 +212,16 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 case CancelFT:
                 case CancelSingleWager:
                 case CancelParlay:
-                    return new []{ GameActionType.PlaceBet };
+                    return new[] {GameActionType.PlaceBet};
 
                 case UncancelFT:
                 case UncancelSingleWager:
                 case UncancelParlay:
-                    return new []{ CancelTransaction };
-                
+                    return new[] {CancelTransaction};
+
                 case UnsettleFT:
                 case UnsettleParlay:
-                    return new []{ WinBet, LoseBet };
+                    return new[] {WinBet, LoseBet};
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(actionId), $"unrecognized action type id: {actionId}");
