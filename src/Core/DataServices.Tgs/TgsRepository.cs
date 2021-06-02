@@ -170,7 +170,6 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<PlayerAggregate> PlayerAggregates { get; set; }
         DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
         DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
-        DbSet<MarketAggregate> MarketAggregates { get; set; }
         DbSet<ApiLog> ApiLogs { get; set; }
 
         DbSet<LogRecord> LogRecords { get; set; }
@@ -338,7 +337,6 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<PlayerAggregate> PlayerAggregates { get; set; }
         public DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
         public DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
-        public DbSet<MarketAggregate> MarketAggregates { get; set; }
 
         public DbSet<ApiLog> ApiLogs { get; set; }
 
