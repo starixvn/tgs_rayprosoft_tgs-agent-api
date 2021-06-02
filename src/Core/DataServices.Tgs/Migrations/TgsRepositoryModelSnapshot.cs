@@ -4383,10 +4383,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("player_code");
 
-                    b.Property<bool?>("Rebate")
-                        .HasColumnType("boolean")
-                        .HasColumnName("rebate");
-
                     b.Property<decimal?>("ReopenTurnoverAdjustment")
                         .HasColumnType("numeric")
                         .HasColumnName("reopen_turnover_adjustment");
@@ -5226,11 +5222,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("payment_return");
 
-                    b.Property<string>("PlayerCode")
-                        .IsRequired()
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("player_code");
-
                     b.Property<string>("Remark")
                         .HasColumnType("text")
                         .HasColumnName("remark");
@@ -5246,6 +5237,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_on")
                         .HasDefaultValueSql("Now()");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
 
                     b.Property<string>("UserName")
                         .HasColumnType("text")
@@ -5265,9 +5260,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("BrandPaymentId")
                         .HasDatabaseName("ix_withdraw_froms_brand_payment_id");
-
-                    b.HasIndex("PlayerCode")
-                        .HasDatabaseName("ix_withdraw_forms_player_code");
 
                     b.ToTable("withdraw_forms");
                 });
@@ -6557,18 +6549,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasForeignKey("BrandPaymentId")
                         .HasConstraintName("fk_withdraw_forms_brand_payments_brand_payment_id");
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerCode")
-                        .HasConstraintName("fk_withdraw_forms_players_player_code")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Brand");
 
                     b.Navigation("BrandPayment");
-
-                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>

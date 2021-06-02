@@ -19,7 +19,7 @@
         "GameProviderCode": "SBO",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:62330"
+      "applicationUrl": "http://localhost:62330;http://+:62330"
     },
     "TgsApi-Habanero": {
       "commandName": "Project",

@@ -16,11 +16,16 @@ import equals from "fast-deep-equal"
 import { FormProvider, useForm } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import { useGameProviderList } from "../../game/providers/client"
-import { AddGameProviderButton, EditButton } from "./edit"
+import {
+    AddGameProviderButton,
+    EditGameProviderButton,
+    ViewGameProviderDisclosure
+} from "./GameProvider"
 import { GameProviderStatusMenu } from "./GameProviderStatus"
 import textColumn from "../../table/column/textColumn"
 import { GameProviderGameListDisclosure } from "./GameProviderGameList"
 import { GameProviderConfigListDisclosure } from "./GameProviderConfigList"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -42,7 +47,7 @@ const Body = () => {
         sortby: "code"
     })
     let { pageIndex, pageSize, name } = state
-    let { data, isLoading, mutate } = useGameProviderList({
+    let { isLoading, data, error, mutate, deleteCache } = useGameProviderList({
         ...toApiParams(state),
         sortby: "code"
     })
@@ -74,6 +79,15 @@ const Body = () => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }
@@ -184,8 +198,11 @@ const useColumns = ({ items = [], mutate }) => {
                     Cell: ({ value }) => {
                         return (
                             <Set orientation="vertical" alignX="center">
-                                <EditButton
-                                    record={value}
+                                <ViewGameProviderDisclosure
+                                    gameProviderId={value?.id}
+                                />
+                                <EditGameProviderButton
+                                    gameProviderId={value?.id}
                                     onSubmitted={mutate}
                                 />
                                 <GameProviderConfigListDisclosure

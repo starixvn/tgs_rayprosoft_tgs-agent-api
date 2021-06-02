@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.ServiceUtility;
 
