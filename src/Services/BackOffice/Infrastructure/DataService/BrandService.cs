@@ -175,8 +175,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 BrandId = brand.Id,
                 GameId = id,
                 DisplayOrder = brand.Games.Count + 1 + index,
-                Rebate = false,
-                EffectiveBettingPercentage = decimal.Zero
+                Rebate = true,
+                EffectiveBettingPercentage = 100M
             });
             var delGroupGames =
                 brand.BrandGroups.SelectMany(x => x.BrandGames.Where(g => delList.Contains(g.BrandGame.GameId)));

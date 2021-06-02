@@ -4383,10 +4383,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("player_code");
 
-                    b.Property<bool?>("Rebate")
-                        .HasColumnType("boolean")
-                        .HasColumnName("rebate");
-
                     b.Property<decimal?>("ReopenTurnoverAdjustment")
                         .HasColumnType("numeric")
                         .HasColumnName("reopen_turnover_adjustment");

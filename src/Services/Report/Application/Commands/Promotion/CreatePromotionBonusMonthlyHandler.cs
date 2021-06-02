@@ -93,12 +93,13 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                 .Where(x => x.ReportDate >= _PreviousFirstDayOfMonth && x.ReportDate <= _CurrentFirstDayOfMonth)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
-                .Join(_playerGameTypeAggregateService.Repository.BrandGames,
+                .GroupJoin(_playerGameTypeAggregateService.Repository.BrandGames,
                     aggregate => new {aggregate.BrandId, aggregate.GameId},
                     brandGame => new {brandGame.BrandId, brandGame.GameId},
                     (aggregate, brandGame) => new {aggregate, brandGame})
-                .Where(x => x.brandGame.Rebate)
-                .ToArrayAsync(cancellationToken);
+                .SelectMany(x => x.brandGame.DefaultIfEmpty(),
+                    (x, brandGame) => new {x.aggregate, brandGame})
+                .Where(x => x.brandGame == null || x.brandGame.Rebate).ToArrayAsync(cancellationToken);
 
             var promotionBonus = promotions.Select(x =>
             {
