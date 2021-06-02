@@ -47,6 +47,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1000,
                     null,
                     null,
+                    null,
                     DateTimeOffset.Now,
                     DateTimeOffset.Now)));
 
@@ -91,6 +92,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 command.BrandId,
                 command.BrandPaymentId,
                 command.Amount,
+                command.PromotionId,
                 serializer.Serialize(
                     new ManualDepositApplyInfo(
                         "ThisIsBankAccount",
@@ -161,6 +163,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 command.BrandId,
                 command.BrandPaymentId,
                 command.Amount,
+                command.PromotionId,
                 serializer.Serialize(
                     new LeePayDepositApplyInfo(
                             new LeePayDepositSettings(
@@ -217,6 +220,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1000M,
                     null,
                     1000,
+                    null,
                     null,
                     null,
                     DateTimeOffset.Now,
@@ -314,6 +318,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1000M,
                     null,
                     1000,
+                    null,
                     null,
                     null,
                     DateTimeOffset.Now,
