@@ -6,7 +6,7 @@ namespace TGS.Shared.Game.Models.SBOBET.Incoming
     public record PlaceBetRequest : TransactionRequest
     {
         [JsonPropertyName("transactionId")]
-        public string ExternalRoundId { get; init; }
+        public string ExternalTransactionId { get; init; }
 
         [JsonPropertyName("betTime")]
         public DateTimeOffset BetTime { get; init; }

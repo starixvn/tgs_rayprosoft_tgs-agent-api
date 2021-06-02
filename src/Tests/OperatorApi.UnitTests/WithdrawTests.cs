@@ -175,6 +175,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var expected = new WithdrawFormCreateInfo(
                 command.PlayerCode,
+                UserType.Player,
                 command.BrandId,
                 command.Amount,
                 1000,

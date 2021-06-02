@@ -39,6 +39,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 BrandId = brandId,
                 PlayerCode = playerTokenData.PlayerCode,
+                CurrentDate = DateTimeOffset.Now,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
@@ -48,7 +49,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var response = await _client.GetPromotionsAsync(promotionsRequest);
 
-            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
+            return new() { TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>() };
         }
     }
 }

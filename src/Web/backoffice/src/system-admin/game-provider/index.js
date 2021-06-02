@@ -25,6 +25,7 @@ import { GameProviderStatusMenu } from "./GameProviderStatus"
 import textColumn from "../../table/column/textColumn"
 import { GameProviderGameListDisclosure } from "./GameProviderGameList"
 import { GameProviderConfigListDisclosure } from "./GameProviderConfigList"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -46,7 +47,7 @@ const Body = () => {
         sortby: "code"
     })
     let { pageIndex, pageSize, name } = state
-    let { data, isLoading, mutate } = useGameProviderList({
+    let { isLoading, data, error, mutate, deleteCache } = useGameProviderList({
         ...toApiParams(state),
         sortby: "code"
     })
@@ -78,6 +79,15 @@ const Body = () => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && (
+                <AlertDialog
+                    {...error}
+                    onClickClose={() => {
+                        deleteCache()
+                        mutate({ data: undefined }, false)
+                    }}
+                />
+            )}
         </PageContent>
     )
 }

@@ -22,7 +22,7 @@ import {
 } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { Trans, useTrans } from "../../i18n"
-import { useForm, useFormContext } from "react-hook-form"
+import { useForm, useFormContext, useWatch } from "react-hook-form"
 import { InputField, Input } from "../../input/Input"
 import clone from "clone-deep"
 import { useAddPromotion, useUpdatePromotion } from "./client"
@@ -340,9 +340,10 @@ const ViewDialog = ({ brandId, record, dialog, ...props }) => {
 
 const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
     let { start: startOfToday } = today()
-    let { watch } = useFormContext()
+    let { watch, control, setValue } = useFormContext()
 
-    let totalAmountLimit = watch("totalAmountLimit")
+    let TotalAmountLimitFieldName = "totalAmountLimit"
+    let totalAmountLimit = watch(TotalAmountLimitFieldName)
     let unlimitedTotalAmount = watch("unlimited")
     let limitedTotalAmount = !unlimitedTotalAmount
 
@@ -351,15 +352,40 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
         en: "Unlimited"
     })
 
-    let promotionTypeGroup = watch("promotionTypeGroup")
+    let PromotionTypeGroupFieldName = "promotionTypeGroup"
+    let promotionTypeGroup = useWatch({
+        control,
+        name: PromotionTypeGroupFieldName
+    })
+    let isTurnover = promotionTypeGroup === PromotionTypeGroup.Turnover
     let isPromotionTypeTurnoverRelated =
         promotionTypeGroup === PromotionTypeGroup.Turnover ||
         promotionTypeGroup === PromotionTypeGroup.ReliefMoney
-    let gameTypeGroup = watch("gameTypeGroup")
 
-    let promotionType = watch("promotionType")
+    let PromotionTypeFieldName = "promotionType"
+    let promotionType = useWatch({
+        control,
+        name: PromotionTypeFieldName
+    })
 
-    let autoSentPlayerBonus = watch("autoSentPlayerBonus")
+    let GameTypeGroupFieldName = "gameTypeGroup"
+    let gameTypeGroup = useWatch({
+        control,
+        name: GameTypeGroupFieldName
+    })
+
+    let AutoSentPlayerBonusFieldName = "autoSentPlayerBonus"
+    let autoSentPlayerBonus = useWatch({
+        control,
+        name: AutoSentPlayerBonusFieldName
+    })
+    console.log("autoSentPlayerBonus", autoSentPlayerBonus)
+    useEffect(() => {
+        if (isTurnover) {
+            setValue(AutoSentPlayerBonusFieldName, false)
+        }
+    }, [isTurnover])
+
     let autoPayoutLabel = useTrans({
         zh: "自動",
         en: "Auto"
@@ -419,12 +445,14 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 </NormalLabel>
                 <Box alignY="center">
                     {editable && (
-                        <PromotionTypeGroupSelect name="promotionTypeGroup" />
+                        <PromotionTypeGroupSelect
+                            name={PromotionTypeGroupFieldName}
+                        />
                     )}
                     {disabled && (
                         <>
                             <PromotionTypeGroupSelect
-                                name="promotionTypeGroup"
+                                name={PromotionTypeGroupFieldName}
                                 value={promotionTypeGroup}
                                 display="none"
                             />
@@ -442,7 +470,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 <Box alignY="center">
                     {editable && (
                         <PromotionTypeSelect
-                            name="promotionType"
+                            name={PromotionTypeFieldName}
                             group={promotionTypeGroup}
                             required
                         />
@@ -450,7 +478,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     {disabled && (
                         <>
                             <PromotionTypeSelect
-                                name="promotionType"
+                                name={PromotionTypeFieldName}
                                 value={promotionType}
                                 display="none"
                             />
@@ -465,17 +493,34 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 <NormalLabel>
                     <Trans zh="活动派发" en="Auto Bonus Payout" />
                 </NormalLabel>
-                <Box>
-                    <Switch
-                        name="autoSentPlayerBonus"
-                        label={
-                            autoSentPlayerBonus
-                                ? autoPayoutLabel
-                                : manualPayoutLabel
-                        }
-                        disabled={disabled}
-                    />
-                </Box>
+                <Set orientation="horizontal">
+                    {isTurnover && (
+                        <>
+                            <Switch label={manualPayoutLabel} checked={false} />
+                            <Switch
+                                name={AutoSentPlayerBonusFieldName}
+                                label={
+                                    autoSentPlayerBonus
+                                        ? autoPayoutLabel
+                                        : manualPayoutLabel
+                                }
+                                visibility="hidden"
+                                checked={false}
+                            />
+                        </>
+                    )}
+                    {!isTurnover && (
+                        <Switch
+                            name={AutoSentPlayerBonusFieldName}
+                            label={
+                                autoSentPlayerBonus
+                                    ? autoPayoutLabel
+                                    : manualPayoutLabel
+                            }
+                            disabled={disabled}
+                        />
+                    )}
+                </Set>
 
                 <NormalLabel>
                     <Trans zh="活动费用" en="Total Amount Limit" />
@@ -483,14 +528,17 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 <Set orientation="horizontal" alignY="center">
                     {unlimitedTotalAmount && (
                         <Box>
-                            <Input name="totalAmountLimit" type="hidden" />
+                            <Input
+                                name={TotalAmountLimitFieldName}
+                                type="hidden"
+                            />
                             <Input value={totalAmountLimit} disabled />
                         </Box>
                     )}
                     {limitedTotalAmount && (
                         <>
                             <NumberInput
-                                name="totalAmountLimit"
+                                name={TotalAmountLimitFieldName}
                                 required
                                 disabled={disabled}
                             />
@@ -511,14 +559,14 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                         <Box>
                             {editable && (
                                 <GameTypeGroupSelect
-                                    name="gameTypeGroup"
+                                    name={GameTypeGroupFieldName}
                                     disabled={disabled}
                                 />
                             )}
                             {disabled && (
                                 <>
                                     <GameTypeGroupSelect
-                                        name="gameTypeGroup"
+                                        name={GameTypeGroupFieldName}
                                         value={gameTypeGroup}
                                         display="none"
                                     />

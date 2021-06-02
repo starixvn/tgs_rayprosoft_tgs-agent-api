@@ -125,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 .ConfigureAwait(false);
 
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                await _settingOperations.GetValueFromJsonByKeyAsync<BigGamingConfiguration>(
                     SettingConsts.GameProviderConfigurations.BigGaming);
 
             var betData = _map.Request(gameProviderConfigurationData, data, configuration.OppositeBets);
@@ -166,7 +166,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 .ConfigureAwait(false);
 
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                await _settingOperations.GetValueFromJsonByKeyAsync<BigGamingConfiguration>(
                     SettingConsts.GameProviderConfigurations.BigGaming);
 
             var balance = default(decimal);

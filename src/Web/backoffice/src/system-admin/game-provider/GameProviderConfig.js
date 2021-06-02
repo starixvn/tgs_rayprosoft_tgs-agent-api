@@ -10,6 +10,7 @@ import {
     Set,
     Flex,
     FieldStack,
+    FieldWrapper,
     useModalState,
     Dialog,
     Card
@@ -56,6 +57,7 @@ import {
 import { SelectField } from "../../select/Select"
 import { SwitchField } from "../../switch/Switch"
 import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
+import { JsonEditor } from "../../text/editor/JsonEditor"
 
 export const AddGameProviderConfigDisclosure = ({
     gameProviderId,
@@ -315,12 +317,13 @@ const FormBody = ({ readOnly = false }) => {
                 autoComplete="off"
                 label="Mobile Endpoint"
             />
-            <InputField
-                name="configurationData"
-                readOnly={readOnly}
-                autoComplete="off"
-                label="Configuration Data"
-            />
+            <FieldWrapper label="Configuration Data">
+                <JsonEditor
+                    name="configurationData"
+                    disabled={readOnly}
+                    height="30vh"
+                />
+            </FieldWrapper>
         </FieldStack>
     )
 }
@@ -338,7 +341,7 @@ const DefaultSwitchField = ({ name = "isDefault", disabled, readOnly }) => {
 const Active = "Active"
 const ActiveTrans = {
     zh: "开启",
-    en: "Enabled"
+    en: "Active"
 }
 
 const Inactive = "Inactive"

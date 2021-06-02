@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.GameProviders.SBOBET.Factories;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.SBOBET.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -49,6 +50,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
 
             services.AddScopedWithResolver<IPlayerAction>(new[] {typeof(SBOBETPlayerAction)}, (provider, _) =>
                 provider.GetRequiredService<SBOBETPlayerAction>());
+
+            services.AddTransient<IBetServiceFactory, BetServiceFactory>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

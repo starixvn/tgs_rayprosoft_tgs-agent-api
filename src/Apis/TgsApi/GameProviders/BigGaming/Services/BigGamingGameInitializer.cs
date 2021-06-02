@@ -89,6 +89,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         throw new GameProviderApiErrorException(responseGameUrl.Error.Message);
                     }
                 }
+                else
+                {
+                    throw new GameProviderApiErrorException(responseGameUrl.Error.Message);
+                }
 
             }
             else

@@ -28,9 +28,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string PaymentReturn { get; set; }
 
-        public virtual Player Player { get; set; }
-
-        public string PlayerCode { get; set; }
+        public string UserId { get; set; }
 
         public string Remark { get; set; }
 

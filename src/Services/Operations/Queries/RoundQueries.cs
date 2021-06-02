@@ -98,8 +98,11 @@ namespace TGS.Services.Operations.Queries
         }
 
         async ValueTask<(RoundStatus RoundStatus, int GameId)?> IRoundQueries.
-            GetRoundStatusAndGameIdAsync(Guid gameProviderId, string playerCode,
-                string externalRoundId, string externalTransactionId)
+            GetRoundStatusAndGameIdAsync(
+            Guid gameProviderId,
+            string playerCode,
+            string externalRoundId,
+            string externalTransactionId)
         {
             var data = await (from ga in _repository.GameActions
                               let r = ga.Round

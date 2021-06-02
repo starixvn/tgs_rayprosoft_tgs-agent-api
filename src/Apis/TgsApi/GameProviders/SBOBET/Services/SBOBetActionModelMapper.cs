@@ -19,10 +19,16 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     public interface ISBOBETActionModelMapper
     {
         BetData Request(GameProviderConfigurationData data, PlaceBetRequest request,
-            bool allowPlaceBetWithDifferentPlatformToken);
+            bool allowPlaceBetWithDifferentPlatformToken = false);
+
+        BetData CancelAndPlaceBetRequest(GameProviderConfigurationData data, PlaceBetRequest request,
+            bool allowPlaceBetWithDifferentPlatformToken = false);
 
         BetData Request(GameProviderConfigurationData data, string externalRoundId, SettleBetRequest request,
-            RoundStatus? roundStatus, GameActionExternalIds[] settleGameActionExternalIds);
+            bool hasRollback, bool forceCloseRound = false);
+
+        BetData WanMeiRequest(GameProviderConfigurationData data, string betTransactionId, string externalRoundId,
+            SettleBetRequest request, bool hasRollback);
 
         BetData Request(GameProviderConfigurationData data, CancelBetRequest request);
 
@@ -31,6 +37,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         BetData Request(GameProviderConfigurationData data, RollbackRequest request,
             GameActionExternalIds[] gameActionExternalIds);
+
+        BetData WanMeiRequest(GameProviderConfigurationData data, RollbackRequest request,
+            GameActionData gameActionData);
 
         BatchBetData Request(Guid gameProviderId, Dictionary<string, Guid> playerConfigurationIds, bool autoCloseRound,
             BatchRequest request);
@@ -47,6 +56,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
 
         GetBetStatusResponse Response(GetBetStatusRequest request, GameActionData ga);
 
+        GetBetStatusResponse WanMeiResponse(GetBetStatusRequest request, GameActionData ga);
+
         T Response<T>(string playerCode, GameApiError errorCode) where T : BaseResponse, new();
 
         BatchResponse Response(BatchBetResult r);
@@ -56,59 +67,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
     {
         private const string GameProviderCode = Consts.GameProvider.SBOBET;
         private const bool HasCurrencyFromGameProvider = false;
-
-        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request,
-            bool allowPlaceBetWithDifferentPlatformToken)
-        {
-            var externalTransactionId = request.ExternalTransactionId;
-            var externalRoundId = request.ExternalRoundId;
-
-            var transactions = new TransactionData[]
-            {
-                new()
-                {
-                    Amount = request.Amount,
-                    ExternalTransactionId = externalTransactionId,
-                    ExternalRoundId = externalRoundId,
-                    ExternalBetId = externalTransactionId,
-                    ExternalGameActionGroupId = externalRoundId,
-                    ExternalGameId = request.ExternalGameId,
-                    GameActionType = PlaceBet,
-                    TimeStamp = request.BetTime
-                }
-            };
-
-            return GetBetData(data, request.PlayerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
-        }
-
-        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, string externalRoundId,
-            SettleBetRequest request, RoundStatus? roundStatus, GameActionExternalIds[] settleGameActionExternalIds)
-        {
-            var settleCount = settleGameActionExternalIds.Length;
-            var externalTransactionReferenceId = request.ExternalTransactionId;
-
-            var externalTransactionId = roundStatus == RoundStatus.Closed || settleCount == 0
-                ? $"{externalTransactionReferenceId}_settle"
-                : $"{externalTransactionReferenceId}_settle_{settleCount}";
-
-            var transactions = new TransactionData[]
-            {
-                new()
-                {
-                    Amount = request.WinLoss,
-                    ExternalTransactionId = externalTransactionId,
-                    ExternalTransactionReferenceId = externalTransactionReferenceId,
-                    ExternalRoundId = externalRoundId,
-                    ExternalBetId = request.ExternalTransactionId,
-                    ExternalGameActionGroupId = externalRoundId,
-                    ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
-                    GameActionType = GetGameActionType(request.Result),
-                    TimeStamp = request.SettleTime
-                }
-            };
-
-            return GetBetData(data, request.PlayerCode, transactions);
-        }
 
         BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, CancelBetRequest request)
         {
@@ -187,6 +145,44 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             return GetBetData(data, request.PlayerCode, transactions);
         }
 
+        BetData ISBOBETActionModelMapper.WanMeiRequest(GameProviderConfigurationData data, RollbackRequest request,
+            GameActionData gameActionData)
+        {
+            var gameActions = gameActionData.GameActions.OrderBy(ga => ga.RecordedOn).ToArray();
+
+            GameActionRecord[] gameActionsToCancel = null;
+            if (gameActionData.Round.Status == RoundStatus.Closed)
+            {
+                var cancellations = gameActions.Where(ga => ga.Type == CancelTransaction).ToArray();
+                var bets = gameActions.Where(ga => ga.Type == PlaceBet).ToArray();
+                var isVoid = bets.All(ga => cancellations.Any(c => c.ReferencedGameActionId == ga.Id));
+
+                if (isVoid)
+                {
+                    gameActionsToCancel = cancellations
+                        .Where(c => bets.Any(b => b.Id == c.ReferencedGameActionId))
+                        .ToArray();
+                }
+            }
+
+            gameActionsToCancel ??= new[] {gameActions.Last()};
+
+            var transactions = gameActionsToCancel.Select(t => new TransactionData
+            {
+                ExternalTransactionId = $"{t.ExternalTransactionId}_cancel",
+                ExternalTransactionReferenceId = t.ExternalTransactionId,
+                ExternalRoundId = gameActionData.Round.ExternalRoundId,
+                ExternalBetId = t.ExternalBetId,
+                ExternalGameActionGroupId = t.ExternalGameActionGroupId,
+                ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
+                GameActionType = CancelTransaction,
+                TimeStamp = DateTimeOffset.UtcNow,
+                RoundClosed = false
+            }).ToArray();
+
+            return GetBetData(data, request.PlayerCode, transactions);
+        }
+
         GetBalanceResponse ISBOBETActionModelMapper.Response(string playerCode, GetBalanceResult r) =>
             Response<GetBalanceResponse>(playerCode, r.Balance);
 
@@ -244,8 +240,183 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             };
         }
 
+        GetBetStatusResponse ISBOBETActionModelMapper.WanMeiResponse(GetBetStatusRequest request, GameActionData data)
+        {
+            var externalTransactionId = request.ExternalTransactionId;
+            var externalRoundId = request.ExternalRoundId;
+
+            var roundData = data.Round;
+
+            var ga = data.GameActions.FirstOrDefault(act =>
+                act.ExternalTransactionId.IgnoreCaseEquals(externalTransactionId));
+
+            if (ga == null)
+            {
+                return new()
+                {
+                    ErrorCode = (int)GameApiError.BetNotExist,
+                    ErrorMessage = GameApiError.BetNotExist.Description(),
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalRoundId = externalRoundId
+                };
+            }
+
+            var reference = data.GameActions.FirstOrDefault(act => act.ReferencedGameActionId == ga.Id &&
+                !data.GameActions.Any(refe => refe.Type == CancelTransaction &&
+                    refe.ReferencedGameActionId == act.Id));
+
+            var status = reference == null
+                ? GetBetStatus(roundData)
+                : reference.Type switch
+                {
+                    CancelTransaction                      => BetStatus.Void,
+                    WinBet or LoseBet or TieBet or FreeBet => BetStatus.Settled,
+                    _                                      => GetBetStatus(roundData)
+                };
+
+            var (stake, winloss) = GetStakeAndWinLoss(status, data, externalRoundId, externalTransactionId);
+
+            return new()
+            {
+                ErrorCode = (int)GameApiError.Success,
+                ErrorMessage = GameApiError.Success.Description(),
+                ExternalTransactionId = externalTransactionId,
+                ExternalRoundId = externalRoundId,
+                Stake = stake,
+                WinLoss = winloss,
+                Status = status.Description()
+            };
+        }
+
         T ISBOBETActionModelMapper.Response<T>(string playerCode, GameApiError errorCode) =>
             Response<T>(playerCode, 0, errorCode);
+
+        BetData ISBOBETActionModelMapper.Request(
+            GameProviderConfigurationData data,
+            string externalRoundId,
+            SettleBetRequest request,
+            bool hasRollback,
+            bool forceCloseRound)
+        {
+            var externalTransactionReferenceId = externalRoundId;
+
+            var externalTransactionId = !hasRollback
+                ? $"{externalTransactionReferenceId}_settle"
+                : $"{externalTransactionReferenceId}_resettle";
+
+            var transactions = new TransactionData[]
+            {
+                new()
+                {
+                    Amount = request.WinLoss,
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalTransactionReferenceId = externalTransactionReferenceId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
+                    GameActionType = GetGameActionType(request.Result),
+                    TimeStamp = request.SettleTime,
+                    RoundClosed = forceCloseRound ? true : null
+                }
+            };
+
+            return GetBetData(data, request.PlayerCode, transactions);
+        }
+
+        BetData ISBOBETActionModelMapper.WanMeiRequest(
+            GameProviderConfigurationData data,
+            string betTransactionId,
+            string externalRoundId,
+            SettleBetRequest request,
+            bool hasRollback)
+        {
+            var externalTransactionReferenceId = betTransactionId;
+
+            var externalTransactionId = !hasRollback
+                ? $"{externalTransactionReferenceId}_settle"
+                : $"{externalTransactionReferenceId}_resettle";
+
+            var transactions = new TransactionData[]
+            {
+                new()
+                {
+                    Amount = request.WinLoss,
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalTransactionReferenceId = externalTransactionReferenceId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = request.GameType == 0 ? null : request.ExternalGameId,
+                    GameActionType = GetGameActionType(request.Result),
+                    TimeStamp = request.SettleTime,
+                    RoundClosed = true
+                }
+            };
+
+            return GetBetData(data, request.PlayerCode, transactions);
+        }
+
+        BetData ISBOBETActionModelMapper.Request(GameProviderConfigurationData data, PlaceBetRequest request,
+            bool allowPlaceBetWithDifferentPlatformToken)
+        {
+            var externalTransactionId = request.ExternalTransactionId;
+            var externalRoundId = request.ExternalRoundId;
+
+            var transactions = new TransactionData[]
+            {
+                new()
+                {
+                    Amount = request.Amount,
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = request.ExternalGameId,
+                    GameActionType = PlaceBet,
+                    TimeStamp = request.BetTime
+                }
+            };
+
+            return GetBetData(data, request.PlayerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
+        }
+
+        BetData ISBOBETActionModelMapper.CancelAndPlaceBetRequest(GameProviderConfigurationData data,
+            PlaceBetRequest request, bool allowPlaceBetWithDifferentPlatformToken)
+        {
+            var externalTransactionId = request.ExternalTransactionId;
+            var externalRoundId = request.ExternalRoundId;
+
+            var transactions = new TransactionData[]
+            {
+                new()
+                {
+                    Amount = request.Amount,
+                    ExternalTransactionId = $"{externalTransactionId}_cancel",
+                    ExternalTransactionReferenceId = externalTransactionId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = request.ExternalGameId,
+                    GameActionType = CancelTransaction,
+                    TimeStamp = request.BetTime,
+                    RoundClosed = false
+                },
+                new()
+                {
+                    Amount = request.Amount,
+                    ExternalTransactionId = $"{externalTransactionId}_raise",
+                    ExternalRoundId = externalRoundId,
+                    ExternalBetId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalGameId = request.ExternalGameId,
+                    GameActionType = PlaceBet,
+                    TimeStamp = request.BetTime
+                }
+            };
+
+            return GetBetData(data, request.PlayerCode, transactions, allowPlaceBetWithDifferentPlatformToken);
+        }
 
         #region Private Methods
 

@@ -38,6 +38,7 @@ namespace TGS.BackOffice.Repositories
                             df.Status,
                             df.ApplyInfo,
                             df.PaymentReturn,
+                            df.PromotionId,
                             df.CreatedOn,
                             df.UpdatedOn);
 

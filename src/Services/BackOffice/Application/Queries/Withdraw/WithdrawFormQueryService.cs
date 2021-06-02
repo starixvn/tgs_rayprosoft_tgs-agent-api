@@ -54,7 +54,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                 .ToAsyncEnumerable()
                 .Select(form => new WithdrawFormModel(
                     form.Id,
-                    form.PlayerCode,
+                    form.UserId,
                     form.UserName,
                     form.BrandId,
                     form.BrandPaymentId,
