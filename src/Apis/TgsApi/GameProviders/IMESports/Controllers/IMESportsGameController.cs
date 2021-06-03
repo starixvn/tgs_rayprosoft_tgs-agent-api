@@ -154,9 +154,10 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
                 transactionResponse.AddRange(_map.Response(result));
             }
 
-            if (notFoundTransactions.Count > 0)
+            var notFounds = notFoundTransactions.ToArray();
+            if (notFounds.Length > 0)
             {
-                transactionResponse.AddRange(notFoundTransactions.Select(transactionId => new TransactionResponse
+                transactionResponse.AddRange(notFounds.Select(transactionId => new TransactionResponse
                 {
                     ErrorCode = (int)GameApiError.TransactionIdNotFound,
                     ErrorMessage = "TransactionId is not found",
