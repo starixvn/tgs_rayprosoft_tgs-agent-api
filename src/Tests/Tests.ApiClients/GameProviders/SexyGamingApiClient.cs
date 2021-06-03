@@ -10,13 +10,15 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Shared.Game.Models.SexyGaming.Common;
 using TGS.Shared.Game.Models.SexyGaming.Incoming;
+using TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions;
 
 namespace TGS.Tests.ApiClients.GameProviders
 {
     public interface ISexyGamingApiClient
     {
-        ValueTask<SexyGamingGetBalanceResponse> GetBalanceAsyncstAsync(string key, string token, SexyGamingGetBalanceRequest request);
-        ValueTask<JsonDocument> EntranceAsyncstAsync(JsonDocument request);
+        ValueTask<SexyGamingGetBalanceResponse> GetPlayerBalanceAsync(string key, string token, SexyGamingGetBalanceRequest request);
+        ValueTask<SexyGamingGetBalanceResponse> PlaceBetAsync(string key, string token, SexyGamingSingleWalletTxnsRequest<SexyGamingBet> request);
+        ValueTask<SexyGamingBaseResponse> SettleBetAsync(string key, SexyGamingSingleWalletTxnsRequest<SexyGamingSettle> request);
     }
 
     public sealed class SexyGamingApiClient : BaseApiClient, ISexyGamingApiClient
@@ -31,7 +33,7 @@ namespace TGS.Tests.ApiClients.GameProviders
             _json = json ?? throw new ArgumentNullException(nameof(json));
         }
 
-        public async ValueTask<SexyGamingGetBalanceResponse> GetBalanceAsyncstAsync(string key, string token, SexyGamingGetBalanceRequest request)
+        async ValueTask<SexyGamingGetBalanceResponse> ISexyGamingApiClient.GetPlayerBalanceAsync(string key, string token, SexyGamingGetBalanceRequest request)
         {
             var data = new SexyGamingSingleWalletRequest()
             {
@@ -44,13 +46,32 @@ namespace TGS.Tests.ApiClients.GameProviders
                 .ConfigureAwait(false);
         }
 
-
-        public async ValueTask<JsonDocument> EntranceAsyncstAsync(JsonDocument request)
+        async ValueTask<SexyGamingGetBalanceResponse> ISexyGamingApiClient.PlaceBetAsync(string key, string token, SexyGamingSingleWalletTxnsRequest<SexyGamingBet> request)
         {
-            var parameters = ConvertToKeyValue(request);
-            return await ExecuteFormRequestAsync<JsonDocument>($"{RoutePrefix}/entrance", parameters)
+            var data = new SexyGamingSingleWalletRequest()
+            {
+                Key = key,
+                Message = Json.SerializeToString(request),
+                Extension1 = _json.SerializeToString(new { token })
+            };
+            var parameters = ConvertToKeyValue(data);
+            return await ExecuteFormRequestAsync<SexyGamingGetBalanceResponse>($"{RoutePrefix}/entrance", parameters)
                 .ConfigureAwait(false);
         }
+
+        async ValueTask<SexyGamingBaseResponse> ISexyGamingApiClient.SettleBetAsync(string key, SexyGamingSingleWalletTxnsRequest<SexyGamingSettle> request)
+        {
+            var data = new SexyGamingSingleWalletRequest()
+            {
+                Key = key,
+                Message = Json.SerializeToString(request)
+            };
+            var parameters = ConvertToKeyValue(data);
+            return await ExecuteFormRequestAsync<SexyGamingGetBalanceResponse>($"{RoutePrefix}/entrance", parameters)
+                .ConfigureAwait(false);
+        }
+
+
 
 
         private Dictionary<string, string> ConvertToKeyValue(object request)
