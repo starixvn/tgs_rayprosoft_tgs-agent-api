@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
@@ -24,12 +23,13 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
 {
     public sealed class IMESportsGameHistory : BaseBetHistory
     {
+        private static readonly string _timeFormat = "yyyy-MM-dd HH.mm.ss";
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IIMESportsApiClient _client;
         private readonly IJsonSerializationProvider _json;
         private readonly IPlayerOperations _playerOperations;
-        private readonly ISettingOperations _settingOperations;
         private readonly IIMESportsServices _services;
+        private readonly ISettingOperations _settingOperations;
 
         public IMESportsGameHistory(
             IRoundQueries roundQueries,
@@ -62,8 +62,9 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId, language)
                 .ConfigureAwait(false);
 
-            var result = await GetHistoryResultAsync(config, merchant, round.ExternalCreatedOn.Value, culture, round.ExternalRoundId);
-                
+            var result = await GetHistoryResultAsync(config, merchant, round.ExternalCreatedOn!.Value, culture,
+                round.ExternalRoundId);
+
             if (result == null)
             {
                 return new();
@@ -81,38 +82,17 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             };
         }
 
-        private async Task<HistoryResult> GetHistoryResultAsync(IMESportsConfiguration config, IMESportsBrandMerchant merchant, DateTimeOffset externalCreatedOn, string culture, string transactionId)
+        private async Task<HistoryResult> GetHistoryResultAsync(IMESportsConfiguration config,
+            IMESportsBrandMerchant merchant, DateTimeOffset externalCreatedOn, string culture, string transactionId)
         {
-            var startDate = externalCreatedOn.AddMinutes(-1).ToDateTimeFormat();
-            var endDate = externalCreatedOn.AddMinutes(1).ToDateTimeFormat();
-            int currentPage = 1, totalPage = 0;
-            var response = await _client.GetRoundHistoryAsync(merchant.ApiUrl, new()
-            {
-                MerchantCode = merchant.MerchantCode,
-                ProductWallet = config.ProductWallet,
-                StartDate = startDate,
-                EndDate = endDate,
-                Page = currentPage,
-                Language = culture
-            }).ConfigureAwait(false);
+            var createdOn = externalCreatedOn.ToOffset(TimeSpan.FromHours(8));
 
-            if (response.ErrorCode != GameApiError.Success)
-            {
-                throw new GameProviderApiErrorException($"Get {Consts.GameProvider.IMESports} history fail: {response.Message}");
-            }
+            var startDate = createdOn.AddMinutes(-1).ToString(_timeFormat);
+            var endDate = createdOn.AddMinutes(1).ToString(_timeFormat);
+            var currentPage = 1;
 
-            totalPage = response.Pagination.TotalPage;
-            var result = GetHistoryResult(response, transactionId);
-            
-            if (totalPage == 1 || result != null)
-            {
-                return result;
-            }
-            
-            currentPage++;
-            while (result is null && currentPage <= totalPage)
-            {
-                response = await _client.GetRoundHistoryAsync(merchant.ApiUrl, new()
+            var response = await _client.GetRoundHistoryAsync(merchant.ApiUrl,
+                new()
                 {
                     MerchantCode = merchant.MerchantCode,
                     ProductWallet = config.ProductWallet,
@@ -121,6 +101,34 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                     Page = currentPage,
                     Language = culture
                 }).ConfigureAwait(false);
+
+            if (response.ErrorCode != GameApiError.Success)
+            {
+                throw new GameProviderApiErrorException(
+                    $"Get {Consts.GameProvider.IMESports} history fail: {response.Message}");
+            }
+
+            var totalPage = response.Pagination.TotalPage;
+            var result = GetHistoryResult(response, transactionId);
+
+            if (totalPage == 1 || result != null)
+            {
+                return result;
+            }
+
+            currentPage++;
+            while (result is null && currentPage <= totalPage)
+            {
+                response = await _client.GetRoundHistoryAsync(merchant.ApiUrl,
+                    new()
+                    {
+                        MerchantCode = merchant.MerchantCode,
+                        ProductWallet = config.ProductWallet,
+                        StartDate = startDate,
+                        EndDate = endDate,
+                        Page = currentPage,
+                        Language = culture
+                    }).ConfigureAwait(false);
                 result = GetHistoryResult(response, transactionId);
                 currentPage++;
             }
@@ -128,9 +136,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             return result;
         }
 
-        private HistoryResult GetHistoryResult(GetRoundHistoryResponse response, string transactionId)
-        {
-            return response.Results.FirstOrDefault(r => r.BetId == transactionId);
-        }
+        private static HistoryResult GetHistoryResult(GetRoundHistoryResponse response, string transactionId) =>
+            response.Results.FirstOrDefault(r => r.BetId == transactionId);
     }
 }
