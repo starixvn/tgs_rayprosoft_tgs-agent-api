@@ -67,7 +67,13 @@ const BodyContent = ({ brandId = "" }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, status, vipId, username = "" } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = usePlayerList({
+    let {
+        data = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = usePlayerList({
         ...toApiParams(state),
         sortby: "username",
         brandId
@@ -80,27 +86,12 @@ const BodyContent = ({ brandId = "" }) => {
             actionBar={
                 <SearchBar
                     brandId={brandId}
-                    search={(data) => {
-                        let newState = {
-                            pageIndex: 0,
-                            status: data.status,
-                            vipId: data.vipId,
-                            username: data.username
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                status,
-                                vipId,
-                                username
-                            })
-                        ) {
-                            mutate()
-                        }
+                    search={(data = {}) => {
                         setState({
                             pageIndex: 0,
                             ...data
                         })
+                        mutate()
                     }}
                     isLoading={isLoading}
                 />
@@ -115,15 +106,7 @@ const BodyContent = ({ brandId = "" }) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
