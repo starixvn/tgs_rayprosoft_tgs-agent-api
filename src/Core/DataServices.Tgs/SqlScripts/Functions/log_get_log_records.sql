@@ -1,3 +1,4 @@
+DROP FUNCTION IF EXISTS log.log_get_log_records;
 CREATE OR REPLACE FUNCTION log.log_get_log_records(
 	_from timestamptz, 
 	_to timestamptz, 
@@ -37,7 +38,7 @@ BEGIN
       AND a.recorded_on < _to  
       AND (_tracking_id IS NULL OR a.tracking_id = _tracking_id)
 	  AND (_level IS NULL OR a.level = _level)
-      AND ((_server_name IS NULL OR _server_name = '') OR lower(a.server_name) LIKE '%' || lower(_server_name) || '%')
+	  and ((_server_name is null or _server_name = '') OR a.server_name ilike '%' || _server_name || '%')
     ORDER BY
 			CASE WHEN _is_desc = false AND _sort_by = 'RecordedOn'	THEN recorded_on	END ASC,
 			CASE WHEN _is_desc = false AND _sort_by = 'Level'		THEN level			END ASC,
