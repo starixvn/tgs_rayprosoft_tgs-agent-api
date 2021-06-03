@@ -6,6 +6,7 @@ namespace TGS.Core.Models.GameProviders.Settings
     public record JDBConfiguration : PluggableConfigurationBase
     {
         public Uri ApiUrl { get; init; }
+
         public bool MoreGame { get; init; }
 
         public string AESIv { get; init; }
@@ -13,6 +14,8 @@ namespace TGS.Core.Models.GameProviders.Settings
         public string AESKey { get; init; }
 
         public string ClientDomain { get; init; }
+
+        public int TimezoneHour { get; init; }
 
         public JDBAgent[] Agents { get; init; }
     }

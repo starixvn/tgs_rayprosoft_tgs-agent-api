@@ -15,9 +15,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
     public interface IJDBActionModelMapper
     {
         BetData Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request,
-            PlatformType platformType);
+            PlatformType platformType, int timezoneHour);
 
-        BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request, string externalRoundId);
+        BetData Request(GameProviderConfigurationData data, CancelTransactionRequest request,
+            string externalRoundId);
 
         BaseActionResponse Response(GetBalanceResult result);
 
@@ -35,8 +36,15 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 Balance = result.Balance
             };
 
+        BaseActionResponse IJDBActionModelMapper.Response(BetResult result) =>
+            new()
+            {
+                Status = GameApiStatus.Succeed.Description(),
+                Balance = result.Balance
+            };
+
         BetData IJDBActionModelMapper.Request(GameProviderConfigurationData data, PlaceAndSettleBetRequest request,
-            PlatformType platformType)
+            PlatformType platformType, int timezoneHour)
         {
             var transactions = new List<TransactionData>(2);
             var externalTransactionId = request.TransferId.ToString();
@@ -53,7 +61,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ExternalRoundId = externalRoundId,
                 ExternalGameId = externalGameId,
                 GameActionType = PlaceBet,
-                TimeStamp = GetTimestamp(request.GameDate),
+                TimeStamp = GetTimestamp(request.GameDate, timezoneHour),
                 RoundClosed = false
             });
 
@@ -68,7 +76,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 ExternalRoundId = externalRoundId,
                 ExternalGameId = externalGameId,
                 GameActionType = request.Win > 0 ? WinBet : LoseBet,
-                TimeStamp = GetTimestamp(request.LastModifyTime),
+                TimeStamp = GetTimestamp(request.LastModifyTime, timezoneHour),
                 RoundClosed = true
             });
 
@@ -109,13 +117,6 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             return GetBetData(request.UserId, null, data, transactions, null, false);
         }
 
-        BaseActionResponse IJDBActionModelMapper.Response(BetResult result) =>
-            new()
-            {
-                Status = GameApiStatus.Succeed.Description(),
-                Balance = result.Balance
-            };
-
         #region Private Methods
 
         private static BetData GetBetData(string playerCode, string currencyCode, GameProviderConfigurationData data,
@@ -132,9 +133,9 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
             Transactions = transactions
         };
 
-        private static DateTimeOffset GetTimestamp(string timeStamp)
+        private static DateTimeOffset GetTimestamp(string timeStamp, int hour)
         {
-            var offset = TimeSpan.FromHours(8);
+            var offset = TimeSpan.FromHours(hour);
             var dateTime = DateTime.ParseExact(timeStamp, "dd-MM-yyyy HH:mm:ss", null, DateTimeStyles.AllowWhiteSpaces);
             return new(dateTime, offset);
         }
