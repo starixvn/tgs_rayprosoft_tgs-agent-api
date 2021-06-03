@@ -219,8 +219,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Middlewares
 
         private async ValueTask<PlatformType> GetPlatformTypeFromCachedLoginRecordAsync(string playerCode)
         {
-            var loginRecord = await _cacheManger.SafeGetAsync<CachedPlayerLoginRecord>(SabaConsts.RedisKey.Token,
-                playerCode, () => null);
+            var loginRecord = await _cacheManger.SafeGetAsync(SabaConsts.RedisKey.Token,
+                playerCode, () => Task.FromResult((CachedPlayerLoginRecord)null));
 
             return loginRecord?.PlatformType ?? PlatformType.Desktop;
         }
