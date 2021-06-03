@@ -98,6 +98,11 @@ services:
       dockerfile: ./src/Web/backoffice/Dockerfile
     image: backoffice-site
     container_name: backoffice-site
+    environment:
+      MODE: "production"
+      LOGIN_BUTTON_PALETTE: "primary"
+      #MODE: "development"
+      #HEADER_BACKGROUND: "#f7f7fa"
     labels:
       - traefik.enable=true
       - traefik.http.routers.backoffice-site.rule=Host(`backoffice.localhost`)

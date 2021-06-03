@@ -379,7 +379,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
         control,
         name: AutoSentPlayerBonusFieldName
     })
-    console.log("autoSentPlayerBonus", autoSentPlayerBonus)
+
     useEffect(() => {
         if (isTurnover) {
             setValue(AutoSentPlayerBonusFieldName, false)

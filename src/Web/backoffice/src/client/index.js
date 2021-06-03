@@ -113,6 +113,14 @@ const DefaultUpdateOptions = {
     dedupingInterval: 100
 }
 
+const deleteCacheBy = (key = "") => {
+    if (key) {
+        cache.delete(key)
+        cache.delete(`err@${key}`)
+        cache.delete(`req@${key}`)
+    }
+}
+
 export const useGet = (url, options = DefaultUpdateOptions) => {
     let fetchData = !!url
     let key = fetchData ? url : null
@@ -125,7 +133,7 @@ export const useGet = (url, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(key),
+        deleteCache: () => deleteCacheBy(key),
         clearCache: () => cache.clear()
     }
 }
@@ -147,7 +155,7 @@ export const usePostData = (url, data, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -180,7 +188,7 @@ export const usePostFormData = (
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -202,7 +210,7 @@ export const usePutData = (url, data, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -223,7 +231,7 @@ export const usePut = (url, settings, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -245,7 +253,7 @@ export const useDelete = (url, settings) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(key),
+        deleteCache: () => deleteCacheBy(key),
         clearCache: () => cache.clear()
     }
 }

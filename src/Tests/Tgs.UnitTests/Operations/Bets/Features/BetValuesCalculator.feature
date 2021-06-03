@@ -139,6 +139,10 @@ Scenario: 11 - Bet, then Tie for Baccarat (does not count towards turnover), the
 @OppositeBets
 Scenario: 12 - Opposite Bets with equal amount.
 	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | Banker  |
+		| 1     | Player  |
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
 	| 1  |        | PlaceBet | -100   | 400          | 0        | 0       | 0                | 100            |                  | Player   |                           |
@@ -151,6 +155,10 @@ Scenario: 12 - Opposite Bets with equal amount.
 @OppositeBets
 Scenario: 13 - Opposite Bets with equal amount, and tie turnover.
 	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | Banker  |
+		| 1     | Player  |
 		And game with turnover on tie bet
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
@@ -164,6 +172,10 @@ Scenario: 13 - Opposite Bets with equal amount, and tie turnover.
 @OppositeBets
 Scenario: 14 - Opposite Bets with equal amount, and No tie turnover.
 	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | Banker  |
+		| 1     | Player  |
 		And game with no turnover on tie bet
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
@@ -177,6 +189,10 @@ Scenario: 14 - Opposite Bets with equal amount, and No tie turnover.
 @OppositeBets
 Scenario: 15 - Opposite Bets with different amount.
 	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | Banker  |
+		| 1     | Player  |
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
 	| 1  |        | PlaceBet | -50    | 450          | 0        | 0       | 0                | 50             |                  | Player   |                           |
@@ -189,6 +205,10 @@ Scenario: 15 - Opposite Bets with different amount.
 @OppositeBets
 Scenario: 16 - Opposite Bets with different amount, and tie turnover. (Banker and Player)
 	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | Banker  |
+		| 1     | Player  |
 		And game with turnover on tie bet
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
@@ -202,6 +222,10 @@ Scenario: 16 - Opposite Bets with different amount, and tie turnover. (Banker an
 @OppositeBets
 Scenario: 17 - Opposite Bets with different amount, and No tie turnover. (Banker and Player)
 	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | Banker  |
+		| 1     | Player  |
 		And game with no turnover on tie bet
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
@@ -215,6 +239,10 @@ Scenario: 17 - Opposite Bets with different amount, and No tie turnover. (Banker
 @OppositeBets
 Scenario: 18 - Opposite Bets with different amount, and tie turnover. (Dragon and Tiger)
 	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | Dragon  |
+		| 1     | Tiger   |
 		And game with turnover on tie bet
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
@@ -228,6 +256,10 @@ Scenario: 18 - Opposite Bets with different amount, and tie turnover. (Dragon an
 @OppositeBets
 Scenario: 19 - Opposite Bets with different amount, and No tie turnover. (Dragon and Tiger)
 	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | Dragon  |
+		| 1     | Tiger   |
 		And game with no turnover on tie bet
 	When I perform the following actions I will see the expected results
 	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
@@ -266,3 +298,21 @@ Scenario: 22 - Win Jackpot
 	| 1  |        | WinJackpot | 100    | 600          | 0        | -100    | 0                | 0              | Yes              |          |                           |
 	|    |        | Totals     | 100    | 600          | 0        | -100    | 0                | 0              |                  |          |                           |
 	Then the final bet amount is 0 and valid bet amount is 0 and settle amount is 100
+
+@OppositeBets
+Scenario: 23 - Opposite Bets with same bet type in different group and with equal amount.
+	Given initial balance of $500
+		And Opposite Bet Patterns
+		| Group | BetType |
+		| 1     | 1       |
+		| 1     | 2       |
+		| 2     | 11      |
+		| 2     | 2       |
+	When I perform the following actions I will see the expected results
+	| Id | Ref Id | Type     | Amount | Post Balance | Turnover | WinLoss | TieBetAdjustment | Unsettled Bets | Is Closing Round | Bet Type | JackpotContributionAmount |
+	| 1  |        | PlaceBet | -100   | 400          | 0        | 0       | 0                | 100            |                  | 11       |                           |
+	| 2  |        | PlaceBet | -100   | 300          | 0        | 0       | 0                | 100            |                  | 2        |                           |
+	| 3  | 1      | WinBet   | 200    | 500          | 0        | 0       | 0                | 0              |                  |          |                           |
+	| 4  | 2      | LoseBet  | 0      | 500          | 0        | 0       | 0                | -200           | Yes              |          |                           |
+	|    |        | Totals   | 0      | 500          | 0        | 0       | 0                | 0              |                  |          |                           |
+	Then the final bet amount is 200 and valid bet amount is 200 and settle amount is 200
