@@ -7,7 +7,7 @@ import Input from "../input/Input"
 import { PasswordInputField } from "../input/PasswordInput"
 import { LangDropdownMenu, useLocale, useTrans } from "../i18n"
 import { CloseText } from "../button/ActionButtons"
-import { getLoginButtonPalette } from "../env"
+import { getLoginButtonBackground, getLoginButtonColor } from "../env"
 
 export const Path = "/login"
 
@@ -84,7 +84,8 @@ export const Form = () => {
                             />
                             <Button
                                 type="submit"
-                                palette={getLoginButtonPalette()}
+                                color={getLoginButtonColor()}
+                                background={getLoginButtonBackground()}
                                 isLoading={isAuthLoading}
                             >
                                 {loginLabel}

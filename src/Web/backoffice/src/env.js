@@ -2,9 +2,17 @@
  * env =
  * {
  *  mode: "production" | "development",
- *  loginButtonPalette: "primary" | "",
- *  headerBackground: "" | "#f7f7fa"
+ *  loginButtonColor: "#ffffff" | "#212121",
+ *  loginButtonBackground: "#1e417b" | "#f7f7fa",
+ *  headerBackground: "#1e417b" | "#f7f7fa"
+ *  headerButtonColor: "#ffffff" | "#212121",
+ *  headerButtonBackground: "transparent" | ""
  * }
+ *
+ * Note: env declared in public/env.html
+ *
+ * ref:
+ * https://caddyserver.com/docs/modules/http.handlers.templates
  */
 
 const Development = "development"
@@ -15,16 +23,29 @@ export const isDev = () => window?.env?.mode === Development
 
 export const isProduction = () => window?.env?.mode === Production
 
-export const getLoginButtonPalette = () =>
-    window?.env?.loginButtonPalette || "default"
+export const getLoginButtonColor = () =>
+    window?.env?.loginButtonColor || "#ffffff"
 
-export const getHeaderBackground = () => window?.env?.headerBackground
+export const getLoginButtonBackground = () =>
+    window?.env?.loginButtonBackground || "#1e417b"
+
+export const getHeaderBackground = () =>
+    window?.env?.headerBackground || "#1e417b"
+
+export const getHeaderButtonColor = () =>
+    window?.env?.headerButtonColor || "#ffffff"
+
+export const getHeaderButtonBackground = () =>
+    window?.env?.loginButtonBackground || "transparent"
 
 export default {
     Development,
     Production,
     isDev,
     isProduction,
-    getLoginButtonPalette,
-    getHeaderBackground
+    getLoginButtonColor,
+    getLoginButtonBackground,
+    getHeaderBackground,
+    getHeaderButtonColor,
+    getHeaderButtonBackground
 }
