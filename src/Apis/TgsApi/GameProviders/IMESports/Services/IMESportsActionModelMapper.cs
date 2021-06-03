@@ -25,7 +25,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
 
         BetResponse Response(BetResult r);
 
-        (BatchBetData BatchBetData, List<string> NotFoundTransactions) Request(Guid gameProviderId,
+        (BatchBetData BatchBetData, IEnumerable<string> NotFoundTransactions) Request(Guid gameProviderId,
             Dictionary<string, (Guid GameProviderConfigurationId, string PlayerCode)> playerConfigurationIds,
             IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds,
             BetRequest request, bool isSettle);
@@ -76,7 +76,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                            }).ToArray()
             };
 
-        (BatchBetData BatchBetData, List<string> NotFoundTransactions) IIMESportsActionModelMapper.Request(
+        (BatchBetData BatchBetData, IEnumerable<string> NotFoundTransactions) IIMESportsActionModelMapper.Request(
             Guid gameProviderId,
             Dictionary<string, (Guid GameProviderConfigurationId, string PlayerCode)> playerConfigurationIds,
             IDictionary<string, IEnumerable<GameActionExternalIds>> externalList,
