@@ -114,7 +114,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SexyGamingConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new Uri("http://game-sexygaming") : new("http://localhost:62330"),
+                        _env.IsDocker() ? new Uri("http://game-sg") : new("http://localhost:62330"),
                     ApiUrl = new("https://tttint.onlinegames22.com/"),
                     AgentId = "tgs",
                     Cert = "OFIHXL0mfK8AcohvyTs",
