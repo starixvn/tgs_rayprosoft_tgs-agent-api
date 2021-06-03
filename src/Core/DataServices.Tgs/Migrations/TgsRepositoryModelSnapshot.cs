@@ -373,6 +373,76 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_banks");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentBankInfo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<string>("BankType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_type");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("detail");
+
+                    b.Property<Guid>("PaymentChannelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_channel_id");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_bank_infos");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_bank_infos_agent_id");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_agent_bank_infos_brand_id");
+
+                    b.HasIndex("PaymentChannelId")
+                        .HasDatabaseName("ix_agent_bank_infos_payment_channel_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_agent_bank_infos_player_code");
+
+                    b.ToTable("agent_bank_infos");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividend", b =>
                 {
                     b.Property<int>("Id")
@@ -5305,6 +5375,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Agent");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentBankInfo", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_agent_bank_infos_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.PaymentChannel", "PaymentChannel")
+                        .WithMany()
+                        .HasForeignKey("PaymentChannelId")
+                        .HasConstraintName("fk_agent_bank_infos_payment_channels_payment_channel_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_agent_bank_infos_players_player_code");
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("PaymentChannel");
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentLoginRecord", b =>
