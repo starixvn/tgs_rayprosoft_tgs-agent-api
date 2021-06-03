@@ -15,7 +15,7 @@
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.14.1",
+    "@babel/preset-env": "^7.14.4",
     "@babel/preset-react": "^7.13.13",
     "@emotion/babel-preset-css-prop": "^11.2.0",
     "@emotion/react": "^11.4.0",
@@ -26,7 +26,7 @@
     "@snowpack/web-test-runner-plugin": "^0.2.2",
     "@testing-library/react": "^11.2.5",
     "@web/test-runner": "^0.12.17",
-    "bumbag": "2.0.0",
+    "bumbag": "2.0.4",
     "chai": "^4.3.4",
     "clone-deep": "^4.0.1",
     "cross-env": "^7.0.3",
@@ -38,7 +38,7 @@
     "react-dropzone": "^11.3.2",
     "react-hook-form": "^6.15.5",
     "react-router-dom": "^5.2.0",
-    "snowpack": "^3.4.0",
+    "snowpack": "^3.5.4",
     "swr": "^0.5.6"
   }
 }
