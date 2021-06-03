@@ -21,6 +21,7 @@ using TGS.Core.Models.Services.Data;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.IMESports.Common;
+using TGS.Shared.Game.Models.IMESports.Enums;
 using TGS.Shared.Game.Models.IMESports.Incoming;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
@@ -132,24 +133,38 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
 
         [HttpPost]
         [Route("freezewithdrawal")]
-        public ValueTask<BaseResponse> FreezeAsync(FreezeRequest request) => new(new BaseResponse());
+        public ValueTask<BaseResponse> FreezeAsync(FreezeRequest request) =>
+            new(new BaseResponse());
 
         private async Task<IEnumerable<TransactionResponse>> ExecuteBatchAsync(BetRequest request, Guid gameProviderId,
             Dictionary<string, (Guid, string)> data,
             IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, bool isSettle)
         {
-            var betData = _map.Request(gameProviderId, data, externalIds, request, isSettle);
+            var (batchBetData, notFoundTransactions) =
+                _map.Request(gameProviderId, data, externalIds, request, isSettle);
 
-            if (betData.Transactions.Any())
+            var transactionResponse = new List<TransactionResponse>();
+
+            if (batchBetData.Transactions.Any())
             {
                 var result = isSettle
-                    ? await _actions.SettleBatchAsync(betData).ConfigureAwait(false)
-                    : await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
+                    ? await _actions.SettleBatchAsync(batchBetData).ConfigureAwait(false)
+                    : await _actions.CancelBatchAsync(batchBetData).ConfigureAwait(false);
 
-                return _map.Response(result);
+                transactionResponse.AddRange(_map.Response(result));
             }
 
-            return Array.Empty<TransactionResponse>();
+            if (notFoundTransactions.Count > 0)
+            {
+                transactionResponse.AddRange(notFoundTransactions.Select(transactionId => new TransactionResponse
+                {
+                    ErrorCode = (int)GameApiError.TransactionIdNotFound,
+                    ErrorMessage = "TransactionId is not found",
+                    ExternalTransactionId = transactionId
+                }));
+            }
+
+            return transactionResponse.ToArray();
         }
 
         private async Task<Dictionary<string, (Guid, string)>> GetPlayerGameProviderConfigurationIdsAsync(
