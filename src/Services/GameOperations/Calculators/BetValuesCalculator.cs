@@ -190,7 +190,6 @@ namespace TGS.Services.GameOperations.Calculators
             var jackpotContributionAmount = allActions.Where(a => a.JackpotContribution != null)
                 .Sum(a => a.JackpotContribution.TotalAmount);
 
-
             var allBets = allActions.Where(a => a.Type == PlaceBet && a.IsCancelled == false).ToArray();
             var matchedPatternGroupIds = (from a in allBets
                                           from p in oppositeBetPatterns
@@ -217,7 +216,13 @@ namespace TGS.Services.GameOperations.Calculators
                     .Select(p => p.BetType).ToDictionary(p => p, _ => 0m);
 
                 var oppositeBetTypes = betAmountOfBetTypes.Keys;
-                var oppositeBets = allBets.Where(a => oppositeBetTypes.Contains(a.BetType)).ToArray();
+                var oppositeBets = uncalculatedBets.Where(a => oppositeBetTypes.Contains(a.BetType)).ToArray();
+
+                var count = oppositeBets.Select(a => a.BetType).Distinct().Count();
+                if (count != betAmountOfBetTypes.Count)
+                {
+                    continue;
+                }
 
                 foreach (var bet in oppositeBets)
                 {
