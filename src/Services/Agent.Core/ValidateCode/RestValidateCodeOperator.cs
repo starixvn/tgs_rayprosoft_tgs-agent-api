@@ -4,8 +4,10 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Agent.Properties;
+using TGS.Services.Agent.ValidateCode;
+using TGS.Services.Agent;
 
-namespace TGS.Services.Agent
+namespace TGS.Services.Agent.ValidateCode
 {
     internal class RestValidateCodeOperator : IValidateCodeOperator
     {

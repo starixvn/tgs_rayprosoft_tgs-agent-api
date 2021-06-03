@@ -4,14 +4,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Core.DataServices.Tgs;
+using TGS.Services.Agent.ValidateCode;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Agent.Agent
+namespace TGS.Services.Agent.Services.Agent
 {
     internal class ForgotPasswordCommandService : IGetService<ForgotPasswordCommand, string>
     {
-        private readonly ITgsRepository _tgsRepository;
         private readonly IValidateCodeGenerator _codeGenerator;
+        private readonly ITgsRepository _tgsRepository;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public ForgotPasswordCommandService(

@@ -4,8 +4,10 @@ using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
+using TGS.Services.Agent.ValidateCode;
+using TGS.Services.Agent;
 
-namespace TGS.Services.Agent
+namespace TGS.Services.Agent.ValidateCode
 {
     internal class ValidateCodeServiceClient : IValidateCodeServiceClient
     {

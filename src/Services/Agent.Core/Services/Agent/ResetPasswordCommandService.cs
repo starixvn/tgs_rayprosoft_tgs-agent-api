@@ -5,8 +5,10 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
 using TGS.ServiceUtility;
+using TGS.Services.Agent.ValidateCode;
+using TGS.Services.Agent.Services.Agent;
 
-namespace TGS.Services.Agent.Agent
+namespace TGS.Services.Agent.Services.Agent
 {
     internal class ResetPasswordCommandService : ICommandService<ResetPasswordCommand>
     {

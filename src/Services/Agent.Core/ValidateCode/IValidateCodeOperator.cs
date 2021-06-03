@@ -1,7 +1,8 @@
 ﻿using System.Globalization;
 using System.Threading.Tasks;
+using TGS.Services.Agent;
 
-namespace TGS.Services.Agent
+namespace TGS.Services.Agent.ValidateCode
 {
     public interface IValidateCodeOperator
     {

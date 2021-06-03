@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Models.Messages;
-using TGS.Services.Agent.Agent;
 using TGS.ServiceUtility;
+using TGS.Services.Agent.Services.Agent;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
