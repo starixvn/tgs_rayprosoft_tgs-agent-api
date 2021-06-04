@@ -22,7 +22,7 @@ namespace TGS.Promotion.Repositories
         {
             var dataKey = $"{_KeyPrefix}:{DateTimeOffset.Now:yyyyMMdd}:{playerCode}";
 
-            return await _redisDatabase
+            return !await _redisDatabase
                 .KeyExistsAsync(dataKey)
                 .ConfigureAwait(false);
         }
