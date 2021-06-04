@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
 using Tgs.Payment;
+using TGS.Clients.Promotion.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -48,11 +49,13 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqPlayerService = new Mock<IPlayerService>();
             var moqPlayerBucketRepository = new Mock<IPlayerBucketRepository>();
+            var moqPromotionClient = new Mock<IPromotionClient>();
 
             var sut = new ReviewDepositFormCommandService(
                 moqPaymentRepository.Object,
                 moqPlayerService.Object,
-                moqPlayerBucketRepository.Object);
+                moqPlayerBucketRepository.Object,
+                moqPromotionClient.Object);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();

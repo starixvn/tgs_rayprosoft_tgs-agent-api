@@ -26,12 +26,12 @@ namespace TGS.Clients.Promotion.Client
         }
 
         public async Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode,
-            Guid promotionId)
+            Guid promotionId, decimal amount)
         {
             var prefix = $"Promotion.PromotionId.{promotionId}.CheckCanJoinDepositPromotion";
             return await ExecuteJsonRequestAsync<JoinPromotionRequest, bool>(
                 HttpMethod.Get,
-                $"/api/promotion/{promotionId}/check/{brandId}/{playerCode}",
+                $"/api/promotion/{promotionId}/check/{brandId}/{playerCode}/{amount}",
                 null,
                 logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
@@ -61,6 +61,28 @@ namespace TGS.Clients.Promotion.Client
             return await ExecuteJsonRequestAsync<JoinPromotionRequest, MessageResponse>(HttpMethod.Post,
                 $"/api/promotion/{request.PromotionId}/addPlayer/{request.PlayerCode}", request, logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task RevertPromotionAsync(Guid promotionId, decimal amount)
+        {
+            var prefix = $"Promotion.Revert.{promotionId}";
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Delete,
+                $"/api/promotion/{promotionId}/{amount}");
+
+            request.Headers.Remove("Accept");
+            request.Headers.Add("Accept", "application/json");
+
+            var content = new StringContent(string.Empty);
+            content.Headers.Remove("Content-Type");
+            content.Headers.Add("Content-Type", "application/json");
+
+            request.Content = content;
+
+            var response = await SendAsync(request, prefix).ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
         }
 
         public async Task TagPlayerDepositAsync(string playerCode)

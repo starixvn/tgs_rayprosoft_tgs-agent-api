@@ -6,12 +6,12 @@ using ExpectedObjects;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Payment;
-using Tgs.Payment.Clients;
-using Tgs.Payment.LeePay;
 using TGS.Apis.FileService.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
+using Tgs.Payment;
+using Tgs.Payment.Clients;
+using Tgs.Payment.LeePay;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Commands;
 using TGS.Services.Operator;
@@ -136,25 +136,24 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 _ => serializer.Serialize(
                     new LeePayDepositApplyInfo(
-                            new LeePayDepositSettings(
-                                "systemId",
-                                "systemKey",
-                                createFormId,
-                                "CNY",
-                                "http://localhost",
-                                null),
-                            new LeePayDepositResponse(
-                                "00",
-                                null,
-                                "testOrderId",
-                                "testOrderNo",
-                                createFormId,
-                                "walletAddress",
-                                "http://test.com",
-                                11M,
-                                "CNY",
-                                0.1M,
-                                null))));
+                        new(
+                            "systemId",
+                            "systemKey",
+                            createFormId,
+                            "CNY",
+                            "http://localhost",
+                            null),
+                        new(
+                            "00",
+                            null,
+                            "testOrderId",
+                            "testOrderNo",
+                            createFormId,
+                            "walletAddress",
+                            "http://test.com",
+                            11M,
+                            "CNY",
+                            0.1M))));
 
             moqPaymentClient
                 .Setup(fake => fake.DepositAsync(
@@ -171,25 +170,24 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 command.PromotionId,
                 serializer.Serialize(
                     new LeePayDepositApplyInfo(
-                            new LeePayDepositSettings(
-                                "systemId",
-                                "systemKey",
-                                createFormId,
-                                "CNY",
-                                "http://localhost",
-                                null),
-                            new LeePayDepositResponse(
-                                "00",
-                                null,
-                                "testOrderId",
-                                "testOrderNo",
-                                createFormId,
-                                "walletAddress",
-                                "http://test.com",
-                                11M,
-                                "CNY",
-                                0.1M,
-                                null)))).ToExpectedObject();
+                        new(
+                            "systemId",
+                            "systemKey",
+                            createFormId,
+                            "CNY",
+                            "http://localhost",
+                            null),
+                        new(
+                            "00",
+                            null,
+                            "testOrderId",
+                            "testOrderNo",
+                            createFormId,
+                            "walletAddress",
+                            "http://test.com",
+                            11M,
+                            "CNY",
+                            0.1M)))).ToExpectedObject();
 
             await sut.ExecuteAsync(command);
 
@@ -282,11 +280,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>(),
                     It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
                     It.IsAny<Stream>()))
-                .Returns(ValueTask.FromResult(new FileView
-                {
-                    Id = "testFileId",
-                    ContentType = contentType
-                }));
+                .Returns(ValueTask.FromResult(new FileView {Id = "testFileId", ContentType = contentType}));
 
             await sut.ExecuteAsync(command);
 

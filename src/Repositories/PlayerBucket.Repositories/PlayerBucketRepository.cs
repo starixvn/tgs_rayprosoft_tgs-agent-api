@@ -133,7 +133,7 @@ namespace PlayerBucket.Repositories
                 var promotionBucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
                 {
                     PlayerCode = request.PlayerCode,
-                    BucketAmount = bonusAmount,
+                    BucketAmount = bonusAmount * promotion.TurnoverMultiple,
                     BucketType = BucketType.Promotion,
                     IsFull = false,
                     CreatedOn = DateTimeOffset.Now

@@ -9,13 +9,15 @@ namespace TGS.Clients.Promotion.Client
     {
         Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request);
 
-        Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode, Guid promotionId);
+        Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode, Guid promotionId, decimal amount);
 
         Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request);
 
         Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request);
 
         Task<MessageResponse> JoinAsync(JoinPromotionRequest request);
+
+        Task RevertPromotionAsync(Guid promotionId, decimal amount);
 
         Task TagPlayerDepositAsync(string playerCode);
 
