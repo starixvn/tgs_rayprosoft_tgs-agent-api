@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
+using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Extensions;
@@ -131,7 +132,8 @@ namespace TGS.Apis.OperatorApi
                 })
                 .Services
                 .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>()
-                .AddSingleton<PrimePaySerializer>();
+                .AddSingleton<PrimePaySerializer>()
+                .AddSingleton<ApplePaySerializer>();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()

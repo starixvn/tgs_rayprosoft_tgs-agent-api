@@ -28,7 +28,8 @@ export const BrandGameProviderCheckboxGroupTable = ({
 }) => {
     let { isLoading, data, error } = useBrandGameProviderList({
         brandId,
-        showAll: true
+        showAll: true,
+        sortby: "gameProviderName"
     })
 
     if (isLoading) {

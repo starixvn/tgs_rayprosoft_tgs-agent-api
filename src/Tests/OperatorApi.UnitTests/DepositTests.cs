@@ -330,5 +330,30 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Received(1)
                 .GetDepositFormByIdAsync(Arg.Is(query.FormId));
         }
+
+        [Test]
+        public void Daily_Second_Deposit_With_First_Deposit_Promotion_Should_Fail()
+        {
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqPaymentClient = new Mock<IPaymentClient>();
+            var moqPromotionClient = new Mock<IPromotionClient>();
+
+            var sut = new CreateDepositFormCommandService(
+                moqPaymentRepository.Object,
+                moqPaymentClient.Object,
+                moqPromotionClient.Object);
+
+            var createFormId = Guid.NewGuid();
+            var command = new CreateDepositFormCommand(
+                "ThisIsPlayerCode",
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                1000M,
+                "tgs.payment.leepay",
+                Guid.NewGuid(),
+                _ => "{}");
+
+            Assert.ThrowsAsync<CannotJoinPromotionException>(async () => await sut.ExecuteAsync(command));
+        }
     }
 }

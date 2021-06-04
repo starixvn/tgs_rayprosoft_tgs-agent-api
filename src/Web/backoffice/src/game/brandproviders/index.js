@@ -60,13 +60,12 @@ const BodyContent = ({ brandId }) => {
     })
     let { pageIndex, pageSize, keyword } = state
 
-    let {
-        isLoading,
-        data,
-        error,
-        mutate,
-        deleteCache
-    } = useBrandGameProviderList({ ...toApiParams(state), brandId })
+    let { isLoading, data, error, mutate, deleteCache } =
+        useBrandGameProviderList({
+            ...toApiParams(state),
+            brandId,
+            sortby: "gameProviderName"
+        })
 
     let columns = useColumns({ items: data?.items, mutate })
 
@@ -76,15 +75,12 @@ const BodyContent = ({ brandId }) => {
             actionBar={
                 <SearchBar
                     keyword={keyword}
-                    search={(data) => {
-                        let newState = {
+                    search={(data = {}) => {
+                        setState({
                             pageIndex: 0,
                             ...data
-                        }
-                        if (equals(newState, { pageIndex, keyword })) {
-                            mutate()
-                        }
-                        setState(newState)
+                        })
+                        mutate()
                     }}
                 />
             }
@@ -97,15 +93,7 @@ const BodyContent = ({ brandId }) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
