@@ -17,18 +17,18 @@ namespace TGS.Workers.Schedulers.Jobs
     [Queue(Consts.Queue.Report)]
     public sealed class ArrearsEmailWorker : BaseWork<TgsResponse>
     {
-        private readonly IEmailManager _emailManager;
+        private readonly IEmailClient _emailClient;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _repository;
 
         public ArrearsEmailWorker(
             ITgsRepository repository,
-            IEmailManager emailManager,
+            IEmailClient emailClient,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _repository = repository;
             _jsonSerializationProvider = jsonSerializationProvider;
-            _emailManager = emailManager;
+            _emailClient = emailClient;
         }
 
         public override async Task<TgsResponse> ExecuteAsync(object context)
@@ -114,33 +114,33 @@ namespace TGS.Workers.Schedulers.Jobs
             {
                 if (now.Day == 1)
                 {
-                    var mailMessage = new EmailPackage(
+                    var mailMessage = new SendEmailRequest(
                         new[] {brand.OperationalEmail},
                         arrearsEmail.SettlementDay.Subject,
                         string.Format(arrearsEmail.SettlementDay.Content, brand.NetProfit));
 
-                    await _emailManager.SendEmailAsync(mailMessage);
+                    await _emailClient.SendAsync(mailMessage);
                 }
                 else
                 {
-                    var mailMessage = new EmailPackage(
+                    var mailMessage = new SendEmailRequest(
                         new[] {brand.OperationalEmail},
                         brand.Subject,
                         string.Format(brand.Content, brand.NetProfit));
 
-                    await _emailManager.SendEmailAsync(mailMessage);
+                    await _emailClient.SendAsync(mailMessage);
                 }
             }
 
             if (sendBrandList.Any())
             {
                 var brandNetProfitStrings = sendBrandList.Select(x => $"{x.Name}: {x.NetProfit}<br>").ToArray();
-                var managerMailMessage = new EmailPackage(
+                var managerMailMessage = new SendEmailRequest(
                     new[] {arrearsEmail.Manager.Emails.JoinAsStringByComma()},
                     arrearsEmail.Manager.Subject,
                     string.Format(arrearsEmail.Manager.Content, brandNetProfitStrings.JoinAsString("")));
 
-                await _emailManager.SendEmailAsync(managerMailMessage);
+                await _emailClient.SendAsync(managerMailMessage);
             }
 
             return new();

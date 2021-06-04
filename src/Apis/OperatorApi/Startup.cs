@@ -24,6 +24,7 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
@@ -117,10 +118,6 @@ namespace TGS.Apis.OperatorApi
                 {
                     config.GetSection("Operator").Bind(options);
                 })
-                .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
-                {
-                    config.GetSection("EmailSetting").Bind(options);
-                })
                 .UseOperatorRepositories()
                 .ConfigurePayment(config =>
                 {
@@ -159,6 +156,12 @@ namespace TGS.Apis.OperatorApi
                     c.LocalizationEnabled = false;
                     c.ImplicitlyValidateChildProperties = true;
                 });
+
+            services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
+            {
+                var url = _configuration.GetSection("Email:Url");
+                c.BaseAddress = new(url.Value);
+            });
 
             services.AddHttpContextAccessor();
 

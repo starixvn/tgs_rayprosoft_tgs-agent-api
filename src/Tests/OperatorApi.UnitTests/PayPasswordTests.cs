@@ -93,7 +93,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakePlayerOperations.GetPlayerByCodeAsync(playerCode).Returns(player);
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-            var fakeEmailManager = Substitute.For<IEmailManager>();
+            var fakeEmailClient = Substitute.For<IEmailClient>();
 
             var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
 
@@ -101,7 +101,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakePlayerOperations,
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator,
-                fakeEmailManager);
+                fakeEmailClient);
 
             Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
         }
@@ -112,13 +112,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-            var fakeEmailManager = Substitute.For<IEmailManager>();
+            var fakeEmailClient = Substitute.For<IEmailClient>();
 
             var sut = new StartChangePayPasswordCommandService(
                 fakePlayerOperations,
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator,
-                fakeEmailManager);
+                fakeEmailClient);
 
             var email = "email@test.com";
             var player = new Player
@@ -153,18 +153,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Content = $"Your ID verification code is : {validateCode}"
             }.ToExpectedObject();
 
-            EmailPackage actual = null;
-            fakeEmailManager
-                .SendEmailAsync(Arg.Do<EmailPackage>(msg =>
+            SendEmailRequest actual = null;
+            fakeEmailClient
+                .SendAsync(Arg.Do<SendEmailRequest>(msg =>
                 {
                     actual = msg;
                 }))
-                .Returns(Task.CompletedTask);
+                .Returns(ValueTask.FromResult(new SendEmailResponse()));
             var actualSecurityKey = await sut.GetAsync(command);
 
-            _ = fakeEmailManager
+            _ = fakeEmailClient
                 .Received(1)
-                .SendEmailAsync(Arg.Any<EmailPackage>());
+                .SendAsync(Arg.Any<SendEmailRequest>());
 
             expected.ShouldMatch(actual);
             Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
