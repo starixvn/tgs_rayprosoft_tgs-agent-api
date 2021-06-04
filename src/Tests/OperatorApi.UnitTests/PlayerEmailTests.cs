@@ -44,9 +44,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var expected = new
             {
-                To = new MailAddressCollection() {
-                    new MailAddress(email)
-                },
+                Receivers = new[] { email },
                 Subject = "Verification Code",
                 Content = $"Your ID verification code is : {validateCode}"
             }.ToExpectedObject();
