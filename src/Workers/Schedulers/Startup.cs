@@ -12,6 +12,7 @@ using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Filters;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
@@ -89,7 +90,8 @@ namespace TGS.Workers.Schedulers
                 .AddHangfireScheduler(
                     _configuration,
                     jobProvider: new JobProvider(),
-                    typesToUseManagementPage: GetModuleTypes());
+                    typesToUseManagementPage: GetModuleTypes())
+                .AddMail(_configuration);
 
             services.AddControllers();
 
