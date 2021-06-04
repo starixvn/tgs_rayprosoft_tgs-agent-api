@@ -169,8 +169,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
         }
 
         private async Task<Dictionary<string, (Guid, string)>> GetPlayerGameProviderConfigurationIdsAsync(
-            Guid gameProviderId,
-            IMESportsConfiguration config, TransactionRequest[] transactions)
+            Guid gameProviderId, IMESportsConfiguration config, TransactionRequest[] transactions)
         {
             var map = new Dictionary<string, (Guid, string)>();
 

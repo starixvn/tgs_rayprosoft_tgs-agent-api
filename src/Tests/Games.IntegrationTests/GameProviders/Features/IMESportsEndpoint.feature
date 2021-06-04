@@ -127,7 +127,7 @@ Scenario: 04.a - Cancel bet
 	Then I will receive bet response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And the round will be Open
+		And the round will be Closed
 		
 Scenario: 04.b - Can cancel bet without player login
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -140,7 +140,7 @@ Scenario: 04.b - Can cancel bet without player login
 	Then I will receive bet response of no error and balance of $100
 		And player wallet database record will be for $100
 		And game action will be recorded in the database of type "CancelTransaction" for $10
-		And the round will be Open
+		And the round will be Closed
 
 Scenario: 04.c - Cancel settle
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
