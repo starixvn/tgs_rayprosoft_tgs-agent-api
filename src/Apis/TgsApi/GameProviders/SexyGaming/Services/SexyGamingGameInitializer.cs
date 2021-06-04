@@ -88,7 +88,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                     };
                     await _client.CreatePlayerAsync(configuration, createMemberRequest).ConfigureAwait(false);
 
-                    data = new SexyGamingGameUrlRequest()
+                    data = new SexyGamingLoginGameRequest()
                     {
                         UserId = player.PlayerCode,
                         IsMobileLogin = request.Token.PlatformType == Core.Models.Enums.PlatformType.Mobile,
