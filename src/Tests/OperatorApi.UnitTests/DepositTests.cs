@@ -6,13 +6,14 @@ using ExpectedObjects;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Payment;
-using Tgs.Payment.Clients;
-using Tgs.Payment.LeePay;
 using TGS.Apis.FileService.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
+using Tgs.Payment;
+using Tgs.Payment.Clients;
+using Tgs.Payment.LeePay;
 using TGS.Payment.ManualDeposit;
+using TGS.Services.Operations.Commands;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 
@@ -61,11 +62,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
             var moqPromotionClient = new Mock<IPromotionClient>();
+            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentRepository.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object);
+                moqPromotionClient.Object,
+                moqPlayerCommands.Object);
 
             var command = new CreateDepositFormCommand(
                 "ThisIsPlayerCode",
@@ -115,11 +118,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new LeePaySerializer(new JsonSerializationProvider());
             var moqPromotionClient = new Mock<IPromotionClient>();
+            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentRepository.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object);
+                moqPromotionClient.Object,
+                moqPlayerCommands.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(
@@ -131,25 +136,24 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 _ => serializer.Serialize(
                     new LeePayDepositApplyInfo(
-                            new LeePayDepositSettings(
-                                "systemId",
-                                "systemKey",
-                                createFormId,
-                                "CNY",
-                                "http://localhost",
-                                null),
-                            new LeePayDepositResponse(
-                                "00",
-                                null,
-                                "testOrderId",
-                                "testOrderNo",
-                                createFormId,
-                                "walletAddress",
-                                "http://test.com",
-                                11M,
-                                "CNY",
-                                0.1M,
-                                null))));
+                        new(
+                            "systemId",
+                            "systemKey",
+                            createFormId,
+                            "CNY",
+                            "http://localhost",
+                            null),
+                        new(
+                            "00",
+                            null,
+                            "testOrderId",
+                            "testOrderNo",
+                            createFormId,
+                            "walletAddress",
+                            "http://test.com",
+                            11M,
+                            "CNY",
+                            0.1M))));
 
             moqPaymentClient
                 .Setup(fake => fake.DepositAsync(
@@ -166,25 +170,24 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 command.PromotionId,
                 serializer.Serialize(
                     new LeePayDepositApplyInfo(
-                            new LeePayDepositSettings(
-                                "systemId",
-                                "systemKey",
-                                createFormId,
-                                "CNY",
-                                "http://localhost",
-                                null),
-                            new LeePayDepositResponse(
-                                "00",
-                                null,
-                                "testOrderId",
-                                "testOrderNo",
-                                createFormId,
-                                "walletAddress",
-                                "http://test.com",
-                                11M,
-                                "CNY",
-                                0.1M,
-                                null)))).ToExpectedObject();
+                        new(
+                            "systemId",
+                            "systemKey",
+                            createFormId,
+                            "CNY",
+                            "http://localhost",
+                            null),
+                        new(
+                            "00",
+                            null,
+                            "testOrderId",
+                            "testOrderNo",
+                            createFormId,
+                            "walletAddress",
+                            "http://test.com",
+                            11M,
+                            "CNY",
+                            0.1M)))).ToExpectedObject();
 
             await sut.ExecuteAsync(command);
 
@@ -277,11 +280,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>(),
                     It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
                     It.IsAny<Stream>()))
-                .Returns(ValueTask.FromResult(new FileView
-                {
-                    Id = "testFileId",
-                    ContentType = contentType
-                }));
+                .Returns(ValueTask.FromResult(new FileView {Id = "testFileId", ContentType = contentType}));
 
             await sut.ExecuteAsync(command);
 
@@ -337,11 +336,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqPaymentClient = new Mock<IPaymentClient>();
             var moqPromotionClient = new Mock<IPromotionClient>();
+            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentRepository.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object);
+                moqPromotionClient.Object,
+                moqPlayerCommands.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(
