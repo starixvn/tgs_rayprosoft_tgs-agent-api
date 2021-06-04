@@ -17,6 +17,8 @@ namespace TGS.Clients.Promotion.Client
 
         Task<MessageResponse> JoinAsync(JoinPromotionRequest request);
 
+        Task RevertPromotionAsync(Guid promotionId, decimal amount);
+
         Task TagPlayerDepositAsync(string playerCode);
 
         Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);

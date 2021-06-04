@@ -18,7 +18,7 @@ namespace Promotion.UnitTests
             var fakePromotionRepository = Substitute.For<IPromotionRepository>();
             var fakeServiceProvider = Substitute.For<IServiceProvider>();
             var checkerFactory = new PromotionCheckerFactory(
-                new Dictionary<string, Type> {["TestPromotionType"] = typeof(IPromotionChecker)},
+                new Dictionary<string, Type> { ["TestPromotionType"] = typeof(IPromotionChecker) },
                 fakeServiceProvider);
             var sut = new CheckCanJoinPromotionQueryService(fakePromotionRepository, checkerFactory);
 
@@ -31,7 +31,8 @@ namespace Promotion.UnitTests
                 .GetPromotionByIdAsync(query.PromotionId)
                 .Returns(new TGS.Core.DataServices.Tgs.Models.Promotion
                 {
-                    BrandId = query.BrandId, PromotionType = "TestPromotionType"
+                    BrandId = query.BrandId,
+                    PromotionType = "TestPromotionType"
                 });
 
             var fakeChecker = Substitute.For<IPromotionChecker>();
@@ -94,7 +95,7 @@ namespace Promotion.UnitTests
 
             fakePlayerService
                 .GetPlayerByPlayerCodeAsync(Arg.Any<string>())
-                .Returns(new Player {FirstDepositOn = null});
+                .Returns(new Player { FirstDepositOn = null });
 
             var actual = await sut.CheckAsync("ThisIsPlayerCode");
 
@@ -102,7 +103,7 @@ namespace Promotion.UnitTests
         }
 
         [Test]
-        public async Task Tag_Player_DepositAsync()
+        public async Task Tag_Player_Deposit()
         {
             var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
 
@@ -115,6 +116,22 @@ namespace Promotion.UnitTests
             _ = fakePlayerDataService
                 .Received(1)
                 .SetPlayerDepositAsync(command.PlayerCode);
+        }
+
+        [Test]
+        public async Task Can_Revert_Promotion()
+        {
+            var fakePromotionRepository = Substitute.For<IPromotionRepository>();
+
+            var sut = new RevertPromotionAmountCommandService(fakePromotionRepository);
+
+            var command = new RevertPromotionAmountCommand(Guid.NewGuid(), 1000M);
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakePromotionRepository
+                .Received(1)
+                .RevertPromotionAmountAsync(Arg.Is(command.PromotionId), Arg.Is(command.Amount));
         }
     }
 }

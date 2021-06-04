@@ -63,6 +63,28 @@ namespace TGS.Clients.Promotion.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
+        public async Task RevertPromotionAsync(Guid promotionId, decimal amount)
+        {
+            var prefix = $"Promotion.Revert.{promotionId}";
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Delete,
+                $"/api/promotion/{promotionId}/{amount}");
+
+            request.Headers.Remove("Accept");
+            request.Headers.Add("Accept", "application/json");
+
+            var content = new StringContent(string.Empty);
+            content.Headers.Remove("Content-Type");
+            content.Headers.Add("Content-Type", "application/json");
+
+            request.Content = content;
+
+            var response = await SendAsync(request, prefix).ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+        }
+
         public async Task TagPlayerDepositAsync(string playerCode)
         {
             var prefix = $"Promotion.Deposit.{playerCode}";

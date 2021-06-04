@@ -72,6 +72,20 @@ namespace TGS.Apis.PromotionApi.Controllers
         public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request) =>
             _mediator.Send(request);
 
+        [HttpDelete("{promotionId}/{amount}")]
+        public async Task RevertPromotionAsync(
+            [FromServices] ICommandService<RevertPromotionAmountCommand> revertService,
+            Guid promotionId,
+            decimal amount)
+        {
+            if (amount <= 0)
+                return;
+
+            var command = new RevertPromotionAmountCommand(promotionId, amount);
+
+            await revertService.ExecuteAsync(command).ConfigureAwait(false);
+        }
+
         [HttpPut("{id}")]
         [Description("Update a promotion")]
         public Task<MessageResponse> UpdatePromotionAsync(Guid id, UpdatePromotionRequest request)
