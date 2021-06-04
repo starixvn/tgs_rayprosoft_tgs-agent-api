@@ -8,13 +8,13 @@ namespace TGS.Shared.Game.Models.IMESports.Incoming
     {
         [JsonPropertyName("GameId")]
         public string ExternalGameId { get; init; }
-        
+
         [JsonPropertyName("BetId")]
         public string ExternalRoundId { get; init; }
-        
+
         [JsonPropertyName("TransactionId")]
         public string ExternalTransactionId { get; init; }
-        
+
         [JsonPropertyName("RefTransactionId")]
         public string[] RefTransactionIds { get; init; }
 
@@ -24,8 +24,10 @@ namespace TGS.Shared.Game.Models.IMESports.Incoming
         [JsonPropertyName("Amount")]
         public decimal Amount { get; init; }
 
-        [JsonPropertyName("Platform")] public string Platform { get; init; } = "Desktop";
-        
+        [JsonPropertyName("Platform")]
+        public string Platform { get; init; } = "Desktop";
+
+        [JsonConverter(typeof(StringToDateTimeOffsetConverter))]
         [JsonPropertyName("TimeStamp")]
         public DateTimeOffset Timestamp { get; init; }
     }

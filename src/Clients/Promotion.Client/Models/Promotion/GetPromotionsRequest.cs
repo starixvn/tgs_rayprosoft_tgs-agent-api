@@ -11,5 +11,6 @@ namespace TGS.Clients.Promotion.Client.Models.Promotion
         public string Type { get; set; }
         public SwitchStatus? Status { get; set; }
         public string Name { get; set; }
+        public DateTimeOffset? CurrentDate { get; set; }
     }
 }

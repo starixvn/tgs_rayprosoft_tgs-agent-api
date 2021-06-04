@@ -61,11 +61,13 @@ namespace TGS.Services.Report.Application.Commands.Player
 
             var playerRebates = await _playerGameAggregateService
                 .GetPlayerGameAggregateQueries(q => q.Where(x => x.ReportDate == reportDate))
-                .Join(_playerGameAggregateService.Repository.BrandGames,
+                .GroupJoin(_playerGameAggregateService.Repository.BrandGames,
                     aggregate => new {aggregate.BrandId, aggregate.GameId},
                     brandGame => new {brandGame.BrandId, brandGame.GameId},
                     (aggregate, brandGame) => new {aggregate, brandGame})
-                .Where(x => x.brandGame.Rebate)
+                .SelectMany(x => x.brandGame.DefaultIfEmpty(),
+                    (x, brandGame) => new {x.aggregate, brandGame})
+                .Where(x => x.brandGame == null || x.brandGame.Rebate)
                 .GroupBy(
                     x => new
                     {

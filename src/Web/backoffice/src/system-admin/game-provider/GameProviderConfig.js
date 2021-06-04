@@ -10,6 +10,7 @@ import {
     Set,
     Flex,
     FieldStack,
+    FieldWrapper,
     useModalState,
     Dialog,
     Card
@@ -17,7 +18,8 @@ import {
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure, {
     AddDisclosure,
-    EditDisclosure
+    EditDisclosure,
+    ViewDisclosure
 } from "../../dialog/Disclosure"
 import {
     useForm,
@@ -46,7 +48,7 @@ import {
     GamePlatformTypeSelectField
 } from "../../game/games/GamePlatform"
 import { useDropzone } from "react-dropzone"
-import { Update } from "./menu"
+import { View, Update } from "./menu"
 import {
     useAddGameProviderConfig,
     useGameProviderConfig,
@@ -54,6 +56,8 @@ import {
 } from "../../game/providers/configs/client"
 import { SelectField } from "../../select/Select"
 import { SwitchField } from "../../switch/Switch"
+import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
+import { JsonEditor } from "../../text/editor/JsonEditor"
 
 export const AddGameProviderConfigDisclosure = ({
     gameProviderId,
@@ -119,6 +123,56 @@ const AddConfigDialog = ({ gameProviderId, onSubmitted, dialog, ...props }) => {
                 width="500px"
             >
                 <FormBody />
+            </FormDialog>
+        </Backdrop>
+    )
+}
+
+export const ViewGameProviderConfigDisclosure = ({ id }) => {
+    let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([View])
+    if (!isDisplay) {
+        return null
+    }
+
+    return (
+        <>
+            <ViewDisclosure {...dialog} />
+            {dialog.visible && <ViewDialog id={id} dialog={dialog} />}
+        </>
+    )
+}
+
+const ViewDialog = ({ id, dialog, ...props }) => {
+    let title = useTrans({
+        zh: `游戏商配置`,
+        en: `Game Provider Config`
+    })
+
+    let { isLoading, data, error, mutate, deleteCache } =
+        useGameProviderConfig(id)
+
+    if (isLoading) {
+        return <LoadingBackdrop {...dialog} />
+    }
+
+    if (error) {
+        return <AlertDialog {...error} {...dialog} onClickClose={dialog.hide} />
+    }
+
+    return (
+        <Backdrop {...dialog}>
+            <FormDialog
+                defaultValues={clone(data)}
+                showActionButtons={false}
+                footer={<CloseButtonFooter dialog={dialog} alignX="right" />}
+                dialog={dialog}
+                title={title}
+                hideBackdrop
+                width="500px"
+            >
+                <FormBody readOnly />
             </FormDialog>
         </Backdrop>
     )
@@ -215,65 +269,79 @@ const EditConfigDialog = ({ id, onSubmitted, dialog, ...props }) => {
     )
 }
 
-const FormBody = () => {
+const FormBody = ({ readOnly = false }) => {
     return (
         <FieldStack>
-            <InputField name="name" required autoComplete="off" label="Name" />
+            <InputField
+                name="name"
+                required
+                readOnly={readOnly}
+                autoComplete="off"
+                label="Name"
+            />
             <InputField
                 name="description"
                 autoComplete="off"
+                readOnly={readOnly}
                 label="Description"
             />
             <FieldStack orientation="horizontal">
-                <DefaultSwitchField />
-                <ConfigurationStatusSelectField />
+                <DefaultSwitchField readOnly={readOnly} />
+                <ConfigurationStatusSelectField readOnly={readOnly} />
             </FieldStack>
             <InputField
                 name="clientId"
                 required
+                readOnly={readOnly}
                 autoComplete="off"
                 label="Client Id"
             />
             <InputField
                 name="secretKey"
                 required
+                readOnly={readOnly}
                 autoComplete="off"
                 label="Secret Key"
             />
             <InputField
                 name="desktopEndpoint"
                 required
+                readOnly={readOnly}
                 autoComplete="off"
                 label="Desktop Endpoint"
             />
             <InputField
                 name="mobileEndpoint"
                 required
+                readOnly={readOnly}
                 autoComplete="off"
                 label="Mobile Endpoint"
             />
-            <InputField
-                name="configurationData"
-                autoComplete="off"
-                label="Configuration Data"
-            />
+            <FieldWrapper label="Configuration Data">
+                <JsonEditor
+                    name="configurationData"
+                    disabled={readOnly}
+                    height="30vh"
+                />
+            </FieldWrapper>
         </FieldStack>
     )
 }
 
-const DefaultSwitchField = ({ name = "isDefault" }) => {
+const DefaultSwitchField = ({ name = "isDefault", disabled, readOnly }) => {
     let label = useTrans({
         zh: "预设",
         en: "Default"
     })
 
-    return <SwitchField name={name} label={label} />
+    disabled = disabled || readOnly
+    return <SwitchField name={name} disabled={disabled} label={label} />
 }
 
 const Active = "Active"
 const ActiveTrans = {
     zh: "开启",
-    en: "Enabled"
+    en: "Active"
 }
 
 const Inactive = "Inactive"
@@ -287,7 +355,12 @@ const MaintenanceTrans = {
     zh: "维护",
     en: Maintenance
 }
-const ConfigurationStatusSelectField = ({ name = "status", ...props }) => {
+const ConfigurationStatusSelectField = ({
+    name = "status",
+    disabled,
+    readOnly,
+    ...props
+}) => {
     let label = useTrans({
         zh: "状态",
         en: "Status"
@@ -311,12 +384,15 @@ const ConfigurationStatusSelectField = ({ name = "status", ...props }) => {
             value: Maintenance
         }
     ]
+
+    disabled = disabled || readOnly
     return (
         <SelectField
             name={name}
             label={label}
             placeholder={placeholder}
             options={options}
+            disabled={disabled}
             {...props}
         />
     )

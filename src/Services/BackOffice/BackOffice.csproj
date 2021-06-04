@@ -20,10 +20,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
-    <PackageReference Include="Tgs.Payment" Version="0.0.5" />
-    <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.4-alpha" />
-    <PackageReference Include="Tgs.Payment.Core" Version="0.0.1-alpha" />
+    <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />    
+    <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.4-alpha" />    
+    <PackageReference Include="Tgs.Payment.Client" Version="0.1.0-alpha" />
+    <PackageReference Include="Tgs.Payment.Core" Version="0.0.5-alpha" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.8" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.5" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />

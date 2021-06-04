@@ -44,7 +44,7 @@ export const useGameUrl = (
                 gpcode: data?.gameProviderCode,
                 gid: data?.gameId,
                 language: data?.language,
-                extends: { lobbyurl: location.host }
+                extends: { lobbyurl: `${location.protocol}//${location.host}` }
             })
         })
             .then(toDataOrError)

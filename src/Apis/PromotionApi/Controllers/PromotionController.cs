@@ -28,7 +28,7 @@ namespace TGS.Apis.PromotionApi.Controllers
             _mediator.Send(new CreatePromotionParticipantRequest(promotionId, playerCode));
 
         [HttpPut("{promotionId}/{status}")]
-        [Description("Add player to promotion")]
+        [Description("Change promotion status")]
         public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, SwitchStatus status) =>
             _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
 

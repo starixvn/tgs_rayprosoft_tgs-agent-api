@@ -9,7 +9,6 @@ using TGS.Services.GameOperations.Calculators;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Tests.TestsCommon;
 using TGS.Tests.TestsCommon.Extensions;
-using OppositeBetPattern = TGS.Services.GameOperations.Models.Data.OppositeBetPattern;
 
 namespace TGS.UnitTests.Operations.Bets.Steps
 {
@@ -17,13 +16,9 @@ namespace TGS.UnitTests.Operations.Bets.Steps
     [Scope(Tag = "BetValuesCalculator")]
     public sealed class BetValuesCalculator : SpecFlowBase
     {
-        private readonly IList<OppositeBetPattern> _oppositeBetPatterns;
-
         public BetValuesCalculator(ScenarioContext context)
             : base(context)
         {
-            _oppositeBetPatterns =
-                new OppositeBetPattern[] {new("Player", 1), new("Banker", 1), new("Dragon", 2), new("Tiger", 2)};
         }
 
         [Given(@"initial balance of \$(.*)")]
@@ -37,6 +32,23 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         [Given(@"game with turnover on tie bet")]
         public void GivenGameWithTurnoverOnTieBet() =>
             Set(SR.TurnoverOnTieBet, true);
+
+        [Given(@"Opposite Bet Patterns")]
+        public void GivenOppositeBetPatterns(Table table)
+        {
+            var patterns = table.CreateList(r =>
+            {
+                if (!int.TryParse(r[0], out var groupId))
+                {
+                    groupId = 0;
+                }
+
+                return new OppositeBetPattern(r[1], groupId);
+            }).ToArray();
+
+            Set(SR.OppositeBetPatterns, patterns);
+        }
+
 
         [When(@"I perform the following actions I will see the expected results")]
         public void WhenIPerformTheFollowingActionsIWillSeeTheExpectedResults(Table table)
@@ -85,7 +97,9 @@ namespace TGS.UnitTests.Operations.Bets.Steps
             var previousOutput = new List<BetValuesResult>();
             var calculator = (IBetValuesCalculator)new TGS.Services.GameOperations.Calculators.BetValuesCalculator();
 
-            var oppositeBetPatterns = HasTag("OppositeBets") ? _oppositeBetPatterns : null;
+            var oppositeBetPatterns = HasTag("OppositeBets")
+                ? Get<IList<OppositeBetPattern>>(SR.OppositeBetPatterns)
+                : null;
 
             foreach (var current in rows)
             {

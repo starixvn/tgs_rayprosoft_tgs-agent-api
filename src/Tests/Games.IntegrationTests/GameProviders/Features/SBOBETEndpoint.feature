@@ -833,7 +833,7 @@ Scenario: 09.g - Cannot resend rollback void round
 	Given I cancel the cancellation	
 		And balance now being $90
 	When I resend cancel the cancellation transaction
-	Then I will receive rollback response of error "InvalidGameAction"
+	Then I will receive rollback response of error "BetAlreadyRollback"
 	
 Scenario: 10.a - Get bet status of place bet
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -934,6 +934,7 @@ Scenario: 11.b - Win bet of sub game
 		And game action will be recorded in the database of type "WinBet" for $15
 		And the round will be closed
 
+@Ignore
 Scenario:  12 - Place bet with the same external round id in differnet game
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 		And player having balance of $100

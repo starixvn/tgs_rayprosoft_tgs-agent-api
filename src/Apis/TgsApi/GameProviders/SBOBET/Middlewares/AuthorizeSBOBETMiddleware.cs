@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.GameProviders.SBOBET.Exceptions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
@@ -56,6 +57,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Middlewares
 
                 await context.Response.WriteAsJsonAsync(response);
                 return;
+            }
+
+            if (playerCode.IsNullOrEmpty())
+            {
+                throw new EmptyUsernameException();
             }
 
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);

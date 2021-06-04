@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.ServiceUtility;
 
@@ -50,6 +51,7 @@ namespace TGS.Services.Operator.Services.Deposit
                 command.BrandId,
                 command.BrandPaymentId,
                 command.Amount,
+                command.PromotionId,
                 applyInfo);
 
             await _paymentRepository

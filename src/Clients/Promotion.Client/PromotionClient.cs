@@ -22,7 +22,7 @@ namespace TGS.Clients.Promotion.Client
             var prefix = $"Promotion.PromotionId.{request.PromotionId}.ChangeStatus";
             return await ExecuteJsonRequestAsync<UpdatePromotionStatusRequest, MessageResponse>(HttpMethod.Put,
                 $"/api/promotion/{request.PromotionId}/{request.Status}", request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                options: new() {PropertyNameCaseInsensitive = true});
         }
 
         public async Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode,
@@ -31,7 +31,7 @@ namespace TGS.Clients.Promotion.Client
             var prefix = $"Promotion.PromotionId.{promotionId}.CheckCanJoinDepositPromotion";
             return await ExecuteJsonRequestAsync<JoinPromotionRequest, bool>(HttpMethod.Get,
                 $"/api/promotion/{promotionId}/check/{brandId}/{playerCode}", null, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                options: new() {PropertyNameCaseInsensitive = true});
         }
 
         public async Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request)
@@ -39,7 +39,7 @@ namespace TGS.Clients.Promotion.Client
             var prefix = $"Promotion.BrandId.{request.BrandId}.CreatePromotion";
             return await ExecuteJsonRequestAsync<CreatePromotionRequest, MessageResponse>(HttpMethod.Post,
                 "/api/promotion", request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                options: new() {PropertyNameCaseInsensitive = true});
         }
 
         public async Task<PagedResponse<PromotionModel>> GetPromotionsAsync(GetPromotionsRequest request)
@@ -49,7 +49,7 @@ namespace TGS.Clients.Promotion.Client
 
             return await ExecuteJsonRequestAsync<GetPromotionsRequest, PagedResponse<PromotionModel>>(HttpMethod.Get,
                 path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                options: new() {PropertyNameCaseInsensitive = true});
         }
 
         public async Task<MessageResponse> JoinAsync(JoinPromotionRequest request)
@@ -57,7 +57,7 @@ namespace TGS.Clients.Promotion.Client
             var prefix = $"Promotion.PromotionId.{request.PromotionId}.JoinPromotion";
             return await ExecuteJsonRequestAsync<JoinPromotionRequest, MessageResponse>(HttpMethod.Post,
                 $"/api/promotion/{request.PromotionId}/addPlayer/{request.PlayerCode}", request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                options: new() {PropertyNameCaseInsensitive = true});
         }
 
         public async Task TagPlayerDepositAsync(string playerCode)
@@ -85,9 +85,9 @@ namespace TGS.Clients.Promotion.Client
         public async Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request)
         {
             var prefix = $"Promotion.PromotionId.{request.Id}.UpdatePromotion";
-            return await ExecuteJsonRequestAsync<UpdatePromotionRequest, MessageResponse>(HttpMethod.Post,
-                "/api/promotion", request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+            return await ExecuteJsonRequestAsync<UpdatePromotionRequest, MessageResponse>(HttpMethod.Put,
+                $"/api/promotion/{request.Id}", request, logPrefix: prefix,
+                options: new() {PropertyNameCaseInsensitive = true});
         }
     }
 }

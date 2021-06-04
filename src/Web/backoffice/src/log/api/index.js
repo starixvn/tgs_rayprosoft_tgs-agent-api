@@ -64,6 +64,7 @@ const Body = ({}) => {
         trackingId: "",
         ip: "",
         path: "",
+        prefix: "",
         method: ""
     })
 
@@ -89,6 +90,7 @@ const Body = ({}) => {
                     trackingId={state?.trackingId}
                     ip={state?.ip}
                     path={state?.path}
+                    prefix={state?.prefix}
                     method={state?.method}
                     search={({ start, end, ...data }) => {
                         setState({
@@ -132,6 +134,7 @@ const SearchBar = ({
     trackingId,
     ip,
     path,
+    prefix,
     method,
     search,
     isLoading,
@@ -145,6 +148,7 @@ const SearchBar = ({
             trackingId,
             ip,
             path,
+            prefix,
             method
         }
     })
@@ -175,6 +179,11 @@ const SearchBar = ({
                         name="path"
                         showEmptyFieldValueAddonAfter
                         placeholder="Path"
+                    />
+                    <InputField
+                        name="prefix"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Prefix"
                     />
                     <InputField
                         name="method"

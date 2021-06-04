@@ -11,6 +11,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
         public string Ip { get; set; }
         public string Path { get; set; }
         public string Method { get; set; }
-        public int ResponseCode { get; set; }
+        public string Prefix { get; set; }
+        public string ServerName { get; set; }
+        public int? ResponseCode { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Properties;
@@ -43,6 +44,11 @@ namespace TGS.Services.Promotion.Handlers
                 .Where(request.PlayerCode,
                     x => x.PromotionVipLevels.Count == 0 ||
                         x.PromotionVipLevels.Select(p => p.Level).Contains(player.Vip.Level))
+                .Where(
+                    request.CurrentDate, 
+                    x=> x.Status == SwitchStatus.Enabled
+                        && x.From <= request.CurrentDate
+                        && x.To > request.CurrentDate)
                 .Select(x => new PromotionModel
                 {
                     Id = x.Id,

@@ -29,6 +29,20 @@ export const urlWith = (searchParams = {}, url) => {
 
 const stringOf = (value) => value?.toISOString?.() ?? value
 
+const FailedToFetchDefaultMessage = "Failed to fetch"
+const FailedToFetchTrans = {
+    zh: "获取数据失败",
+    en: FailedToFetchDefaultMessage
+}
+const reject = (error) => {
+    let locale = getAcceptLang()
+    let title = error?.message ?? error?.toString?.() ?? "Error"
+    if (title == "Failed to fetch") {
+        title = FailedToFetchTrans?.[locale] ?? FailedToFetchDefaultMessage
+    }
+    return Promise.reject({ title })
+}
+
 export const get = (
     url = "",
     { searchParams = {}, headers = {}, ...options } = {}
@@ -37,7 +51,13 @@ export const get = (
     if (!headers["Accept-Language"]) {
         headers["Accept-Language"] = getAcceptLangCulture()
     }
-    return fetch(url, { headers, ...options }).then(toDataOrError)
+
+    return fetch(url, { headers, ...options })
+        .catch((error) => {
+            console.warn(error)
+            return reject(error)
+        })
+        .then(toDataOrError)
 }
 
 export const put = (url, options) => fetchApi("PUT", url, options)
@@ -65,7 +85,12 @@ const fetchApi = (
         headers,
         body: body ?? JSON.stringify(dropEmptyValues(data)),
         ...options
-    }).then(toDataOrError)
+    })
+        .catch((error) => {
+            console.warn(error)
+            return reject(error)
+        })
+        .then(toDataOrError)
 }
 
 const dropEmptyValues = (record) => {
@@ -88,6 +113,14 @@ const DefaultUpdateOptions = {
     dedupingInterval: 100
 }
 
+const deleteCacheBy = (key = "") => {
+    if (key) {
+        cache.delete(key)
+        cache.delete(`err@${key}`)
+        cache.delete(`req@${key}`)
+    }
+}
+
 export const useGet = (url, options = DefaultUpdateOptions) => {
     let fetchData = !!url
     let key = fetchData ? url : null
@@ -100,7 +133,7 @@ export const useGet = (url, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(key),
+        deleteCache: () => deleteCacheBy(key),
         clearCache: () => cache.clear()
     }
 }
@@ -122,7 +155,7 @@ export const usePostData = (url, data, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -155,7 +188,7 @@ export const usePostFormData = (
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -177,7 +210,7 @@ export const usePutData = (url, data, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -198,7 +231,7 @@ export const usePut = (url, settings, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -220,7 +253,7 @@ export const useDelete = (url, settings) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(key),
+        deleteCache: () => deleteCacheBy(key),
         clearCache: () => cache.clear()
     }
 }

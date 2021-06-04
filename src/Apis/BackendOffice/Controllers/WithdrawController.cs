@@ -35,7 +35,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Data = new WithdrawFormDetailViewModel
                 {
                     Id = formDetail.Id,
-                    PlayerCode = formDetail.PlayerCode,
+                    PlayerCode = formDetail.UserId,
                     UserName = formDetail.UserName,
                     BrandId = formDetail.BrandId,
                     BrandPaymentId = formDetail.BrandPaymentId,

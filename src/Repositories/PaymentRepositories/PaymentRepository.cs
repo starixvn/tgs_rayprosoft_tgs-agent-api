@@ -56,6 +56,7 @@ namespace TGS.Payment.Repositories
                     Amount = form.Amount,
                     ApplyInfo = form.ApplyInfo,
                     PaymentReturn = form.PaymentReturn,
+                    PromotionId = form.PromotionId,
                     CreatedOn = currentDate,
                     UpdatedOn = currentDate
                 })
@@ -68,12 +69,18 @@ namespace TGS.Payment.Repositories
         {
             var currentDate = DateTimeOffset.UtcNow;
 
+            var player = await _tgsRepository.Players
+                .FindAsync(form.UserId)
+                .ConfigureAwait(false);
+
             await _tgsRepository.WithdrawForms
                 .AddAsync(new WithdrawForm
                 {
                     Id = createFormId,
                     BrandId = form.BrandId,
-                    PlayerCode = form.PlayerCode,
+                    UserId = form.UserId,
+                    UserName = player.Username,
+                    UserType = 1,
                     BrandPaymentId = form.BrandPaymentId,
                     Amount = form.Amount,
                     BankInfoId = form.BankInfoId,
@@ -262,6 +269,7 @@ namespace TGS.Payment.Repositories
                             df.Status,
                             df.ApplyInfo,
                             df.PaymentReturn,
+                            df.PromotionId,
                             df.CreatedOn,
                             df.UpdatedOn);
 
@@ -288,15 +296,15 @@ namespace TGS.Payment.Repositories
         public ValueTask<WithdrawFormInfo> GetWithdrawFormByIdAsync(Guid formId)
         {
             var query = from df in _tgsRepository.WithdrawForms
-                            .Include(f => f.Player)
                             .Include(f => f.BrandPayment)
                             .ThenInclude(bp => bp.PaymentMethodChannel)
                             .AsAsyncEnumerable()
                         where df.Id == formId
                         select new WithdrawFormInfo(
                             df.Id,
-                            df.PlayerCode,
-                            df.Player.Username,
+                            df.UserId,
+                            (UserType)df.UserType,
+                            df.UserName,
                             df.BrandId,
                             df.Amount,
                             df.Status,

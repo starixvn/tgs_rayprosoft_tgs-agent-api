@@ -7,6 +7,7 @@ using Moq;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using TGS.Apis.FileService.Clients;
 using TGS.Clients.Promotion.Client;
@@ -44,6 +45,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1000M,
                     null,
                     1000,
+                    null,
                     null,
                     null,
                     DateTimeOffset.Now,
@@ -90,6 +92,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 command.BrandId,
                 command.BrandPaymentId,
                 command.Amount,
+                command.PromotionId,
                 serializer.Serialize(
                     new ManualDepositApplyInfo(
                         "ThisIsBankAccount",
@@ -160,6 +163,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 command.BrandId,
                 command.BrandPaymentId,
                 command.Amount,
+                command.PromotionId,
                 serializer.Serialize(
                     new LeePayDepositApplyInfo(
                             new LeePayDepositSettings(
@@ -216,6 +220,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1000M,
                     null,
                     1000,
+                    null,
                     null,
                     null,
                     DateTimeOffset.Now,
@@ -313,6 +318,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1000M,
                     null,
                     1000,
+                    null,
                     null,
                     null,
                     DateTimeOffset.Now,

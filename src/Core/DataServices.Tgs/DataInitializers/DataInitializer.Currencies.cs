@@ -119,5 +119,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
             }
         }
+
+        internal record HKDCurrency : BaseCodeMapper, ICurrency
+        {
+            public HKDCurrency(string externalCode = null)
+                : base("HKD", externalCode)
+            {
+            }
+        }
     }
 }
