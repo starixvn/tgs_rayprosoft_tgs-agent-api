@@ -13,6 +13,7 @@ using TGS.Apis.FileService.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
+using TGS.Services.Operations.Commands;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 
@@ -61,11 +62,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
             var moqPromotionClient = new Mock<IPromotionClient>();
+            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentRepository.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object);
+                moqPromotionClient.Object,
+                moqPlayerCommands.Object);
 
             var command = new CreateDepositFormCommand(
                 "ThisIsPlayerCode",
@@ -115,11 +118,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new LeePaySerializer(new JsonSerializationProvider());
             var moqPromotionClient = new Mock<IPromotionClient>();
+            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentRepository.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object);
+                moqPromotionClient.Object,
+                moqPlayerCommands.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(
@@ -337,11 +342,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqPaymentClient = new Mock<IPaymentClient>();
             var moqPromotionClient = new Mock<IPromotionClient>();
+            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentRepository.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object);
+                moqPromotionClient.Object,
+                moqPlayerCommands.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(
