@@ -13,6 +13,7 @@ namespace TGS.Clients.Promotion.Client.Models.Promotion
         public string PromotionType { get; set; }
         public decimal BonusAmountLimit { get; set; }
         public decimal AmountUsed { get; set; }
+        public bool AutoSentPlayerBonus { get; set; }
         public bool Unlimited { get; set; }
         public GameType? GameType { get; set; }
         public decimal Percentage { get; set; }
