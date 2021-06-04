@@ -196,15 +196,16 @@ const EditFormBody = () => {
     return <ExtendedDataField />
 }
 
-const AddDepositDialog = ({ title, brandId, dialog }) => {
+const AddDepositDialog = ({ title, brandId, dialog, onSubmitted }) => {
     let [formData, setSubmit] = useState()
     let { isLoading, result, error, deleteCache, mutate } =
         useAddDepositBrandPayment(formData)
 
-    const onSubmit = (data) => {
+    const onSubmit = ({ extendedData, ...data }) => {
         setSubmit({
             brandId,
-            ...data
+            ...data,
+            extendedData: parseJSON(extendedData)
         })
     }
 
@@ -226,6 +227,7 @@ const AddDepositDialog = ({ title, brandId, dialog }) => {
                 extendedData: JSON.stringify({})
             }}
             onSubmit={onSubmit}
+            onSubmitted={onSubmitted}
             isLoading={isLoading}
             result={result}
             error={error}

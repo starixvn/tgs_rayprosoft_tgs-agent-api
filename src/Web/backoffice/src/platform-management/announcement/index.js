@@ -233,15 +233,7 @@ const BodyContent = ({ brandId }) => {
                     )}
                 </TabPanel>
             </Tabs>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

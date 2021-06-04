@@ -321,7 +321,8 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                 shouldUnregister={true}
                 render={({
                     field: { onChange, onBlur, value, ref, ...props },
-                    fieldState: { invalid, isTouched, isDirty }
+                    fieldState: { invalid, isTouched, isDirty },
+                    formState
                 }) => {
                     useEffect(() => {
                         if (formState.isSubmitting && invalid) {
