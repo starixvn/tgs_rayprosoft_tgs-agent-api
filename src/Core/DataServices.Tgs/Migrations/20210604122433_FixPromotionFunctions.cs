@@ -12,6 +12,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             migrationBuilder.Sql(@"
                 drop procedure if exists dbo.promotion_update_amount_used;
+                drop function if exists dbo.promotion_revert_amount_used;
             ");
 
             migrationBuilder.SqlResource(assembly,
