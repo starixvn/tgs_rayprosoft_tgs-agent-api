@@ -17,18 +17,18 @@ namespace TGS.Workers.Schedulers.Jobs
     [Queue(Consts.Queue.Report)]
     public sealed class ArrearsEmailWorker : BaseWork<TgsResponse>
     {
-        private readonly IEmailClient _emailManager;
+        private readonly IEmailClient _emailClient;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _repository;
 
         public ArrearsEmailWorker(
             ITgsRepository repository,
-            IEmailClient emailManager,
+            IEmailClient emailClient,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _repository = repository;
             _jsonSerializationProvider = jsonSerializationProvider;
-            _emailManager = emailManager;
+            _emailClient = emailClient;
         }
 
         public override async Task<TgsResponse> ExecuteAsync(object context)
@@ -119,7 +119,7 @@ namespace TGS.Workers.Schedulers.Jobs
                         arrearsEmail.SettlementDay.Subject,
                         string.Format(arrearsEmail.SettlementDay.Content, brand.NetProfit));
 
-                    await _emailManager.SendAsync(mailMessage);
+                    await _emailClient.SendAsync(mailMessage);
                 }
                 else
                 {
@@ -128,7 +128,7 @@ namespace TGS.Workers.Schedulers.Jobs
                         brand.Subject,
                         string.Format(brand.Content, brand.NetProfit));
 
-                    await _emailManager.SendAsync(mailMessage);
+                    await _emailClient.SendAsync(mailMessage);
                 }
             }
 
@@ -140,7 +140,7 @@ namespace TGS.Workers.Schedulers.Jobs
                     arrearsEmail.Manager.Subject,
                     string.Format(arrearsEmail.Manager.Content, brandNetProfitStrings.JoinAsString("")));
 
-                await _emailManager.SendAsync(managerMailMessage);
+                await _emailClient.SendAsync(managerMailMessage);
             }
 
             return new();
