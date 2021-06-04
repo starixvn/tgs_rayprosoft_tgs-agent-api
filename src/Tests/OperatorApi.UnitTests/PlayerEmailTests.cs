@@ -19,12 +19,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Start_Set_Player_Email_Should_Send_Confirm_Mail()
         {
-            var fakeEmailManager = Substitute.For<IEmailManager>();
+            var fakeEmailClient = Substitute.For<IEmailClient>();
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
             var sut = new StartSetPlayerEmailCommandService(
-                fakeEmailManager,
+                fakeEmailClient,
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator);
 
@@ -51,18 +51,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Content = $"Your ID verification code is : {validateCode}"
             }.ToExpectedObject();
 
-            EmailPackage actual = null;
-            fakeEmailManager
-                .SendEmailAsync(Arg.Do<EmailPackage>(msg =>
+            SendEmailRequest actual = null;
+            fakeEmailClient
+                .SendAsync(Arg.Do<SendEmailRequest>(msg =>
                 {
                     actual = msg;
                 }))
-                .Returns(Task.CompletedTask);
+                .Returns(ValueTask.FromResult(new SendEmailResponse()));
             var actualSecurityKey = await sut.GetAsync(command);
 
-            _ = fakeEmailManager
+            _ = fakeEmailClient
                 .Received(1)
-                .SendEmailAsync(Arg.Any<EmailPackage>());
+                .SendAsync(Arg.Any<SendEmailRequest>());
 
             expected.ShouldMatch(actual);
             Assert.AreEqual(expectedSecurityKey, actualSecurityKey);

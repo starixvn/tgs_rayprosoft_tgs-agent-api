@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
-    <ProjectReference Include="..\..\Core\DataServices.Report\DataServices.Report.csproj" />
     <ProjectReference Include="..\..\Repositories\BackOffice.Repositories\BackOffice.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Promotion.Repositories\Promotion.Repositories.csproj" />

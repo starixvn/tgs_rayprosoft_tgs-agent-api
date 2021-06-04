@@ -101,6 +101,12 @@ namespace TGS.Workers.Schedulers
                 options.MongoConnectionString = config.GetValue<string>("GameProviders:ConnectionString");
             });
 
+            services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
+            {
+                var url = _configuration.GetSection("Email:Url");
+                c.BaseAddress = new(url.Value);
+            });
+
             services
                 .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")

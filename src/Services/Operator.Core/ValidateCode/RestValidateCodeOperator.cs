@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.Properties;
 using TGS.SmsService.Client;
-using TGS.Services.Operator.ValidateCode;
-using TGS.Services.Operator;
 
 namespace TGS.Services.Operator.ValidateCode
 {
@@ -14,16 +12,16 @@ namespace TGS.Services.Operator.ValidateCode
     {
         private readonly IValidateCodeServiceClient _validateCodeServiceClient;
         private readonly ISmsServiceClient _smsServiceClient;
-        private readonly IEmailManager _emailManager;
+        private readonly IEmailClient _emaiClient;
 
         public RestValidateCodeOperator(
             IValidateCodeServiceClient validateCodeServiceClient,
             ISmsServiceClient smsServiceClient,
-            IEmailManager emailManager)
+            IEmailClient emaiClient)
         {
             _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-            _emailManager = emailManager ?? throw new ArgumentNullException(nameof(emailManager));
+            _emaiClient = emaiClient ?? throw new ArgumentNullException(nameof(emaiClient));
         }
 
         public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
@@ -60,12 +58,12 @@ namespace TGS.Services.Operator.ValidateCode
                 Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), cultureInfo)!,
                 validateCode);
 
-            var mailMessage = new EmailPackage(
+            var mailMessage = new SendEmailRequest(
                 new[] { email },
                 mailSubject,
                 mailBody);
 
-            await _emailManager.SendEmailAsync(mailMessage).ConfigureAwait(false);
+            await _emaiClient.SendAsync(mailMessage).ConfigureAwait(false);
         }
     }
 }
