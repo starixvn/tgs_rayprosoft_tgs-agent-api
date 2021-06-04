@@ -9,7 +9,7 @@ namespace TGS.Shared.Game.Models.IMESports.Outgoing
         [JsonPropertyName("Provider")]
         public string Provider { get; init; }
 
-        [JsonPropertyName("GameID")]
+        [JsonPropertyName("GameId")]
         public string GameId { get; init; }
 
         [JsonPropertyName("BetId")]
