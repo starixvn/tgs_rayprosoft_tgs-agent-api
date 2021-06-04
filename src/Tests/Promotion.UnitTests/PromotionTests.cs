@@ -18,7 +18,7 @@ namespace Promotion.UnitTests
             var fakePromotionRepository = Substitute.For<IPromotionRepository>();
             var fakeServiceProvider = Substitute.For<IServiceProvider>();
             var checkerFactory = new PromotionCheckerFactory(
-                new Dictionary<string, Type> { ["TestPromotionType"] = typeof(IPromotionChecker) },
+                new Dictionary<string, Type> {["TestPromotionType"] = typeof(IPromotionChecker)},
                 fakeServiceProvider);
             var sut = new CheckCanJoinPromotionQueryService(fakePromotionRepository, checkerFactory);
 
@@ -31,8 +31,7 @@ namespace Promotion.UnitTests
                 .GetPromotionByIdAsync(query.PromotionId)
                 .Returns(new TGS.Core.DataServices.Tgs.Models.Promotion
                 {
-                    BrandId = query.BrandId,
-                    PromotionType = "TestPromotionType"
+                    BrandId = query.BrandId, PromotionType = "TestPromotionType"
                 });
 
             var fakeChecker = Substitute.For<IPromotionChecker>();
@@ -95,7 +94,7 @@ namespace Promotion.UnitTests
 
             fakePlayerService
                 .GetPlayerByPlayerCodeAsync(Arg.Any<string>())
-                .Returns(new Player { FirstDepositOn = null });
+                .Returns(new Player {FirstDepositOn = null});
 
             var actual = await sut.CheckAsync("ThisIsPlayerCode");
 
@@ -127,11 +126,20 @@ namespace Promotion.UnitTests
 
             var command = new RevertPromotionAmountCommand(Guid.NewGuid(), 1000M);
 
+            var percentage = 10M;
+            var bonusAmountLimit = 500M;
+            fakePromotionRepository.GetPromotionByIdAsync(command.PromotionId).Returns(
+                new TGS.Core.DataServices.Tgs.Models.Promotion
+                {
+                    Percentage = percentage, BonusAmountLimit = bonusAmountLimit
+                });
+
+            var amount = command.Amount * percentage / 100M;
             await sut.ExecuteAsync(command);
 
             _ = fakePromotionRepository
                 .Received(1)
-                .RevertPromotionAmountAsync(Arg.Is(command.PromotionId), Arg.Is(command.Amount));
+                .RevertPromotionAmountAsync(Arg.Is(command.PromotionId), Arg.Is(amount));
         }
     }
 }
