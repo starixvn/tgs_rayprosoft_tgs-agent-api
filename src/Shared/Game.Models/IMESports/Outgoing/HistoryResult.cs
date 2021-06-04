@@ -21,7 +21,7 @@ namespace TGS.Shared.Game.Models.IMESports.Outgoing
         [JsonConverter(typeof(StringToNumberConverter))]
         [JsonPropertyName("StakeAmount")]
         public decimal StakeAmount { get; init; }
-        
+
         [JsonConverter(typeof(StringToNumberConverter))]
         [JsonPropertyName("WinLoss")]
         public decimal WinLoss { get; init; }
@@ -59,7 +59,7 @@ namespace TGS.Shared.Game.Models.IMESports.Outgoing
 
         [JsonPropertyName("HomeTeamName")]
         public string HomeTeamName { get; init; }
-        
+
         [JsonPropertyName("AwayTeamName")]
         public string AwayTeamName { get; init; }
 
@@ -87,13 +87,13 @@ namespace TGS.Shared.Game.Models.IMESports.Outgoing
 
         [JsonPropertyName("Sportsname")]
         public string SportsName { get; init; }
-        
+
         [JsonPropertyName("EventID")]
         public string EventId { get; init; }
 
         [JsonPropertyName("Specifier")]
         public string Specifier { get; init; }
-        
+
         [JsonPropertyName("GameOrder")]
         public string GameOrder { get; init; }
 
@@ -102,7 +102,7 @@ namespace TGS.Shared.Game.Models.IMESports.Outgoing
 
         [JsonPropertyName("IsSettled")]
         public IsSettled IsSettled { get; init; }
-        
+
         [JsonPropertyName("IsResettled")]
         public IsResettled IsResettled { get; init; }
 
