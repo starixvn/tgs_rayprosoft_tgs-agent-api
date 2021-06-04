@@ -18,8 +18,13 @@ namespace TGS.Services.Promotion.Services
             RevertPromotionAmountCommand command,
             CancellationToken cancellationToken = default)
         {
+            var promotion = await _promotionRepository.GetPromotionAsync(x => x.Id == command.PromotionId);
+
+            var amount = promotion.Percentage * command.Amount / 100M;
+            amount = amount > promotion.BonusAmountLimit ? promotion.BonusAmountLimit : amount;
+
             _ = await _promotionRepository
-                .RevertPromotionAmountAsync(command.PromotionId, command.Amount)
+                .RevertPromotionAmountAsync(command.PromotionId, amount)
                 .ConfigureAwait(false);
         }
     }
