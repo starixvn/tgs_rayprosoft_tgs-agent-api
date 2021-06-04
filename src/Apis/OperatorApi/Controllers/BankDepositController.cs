@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment;
+using Tgs.Payment.ApplePay;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -73,6 +74,74 @@ namespace TGS.Apis.OperatorApi.Controllers
                 FormId = createdFormId,
                 PaymentUrl = ((PrimePayDepositSuccessResponse)applyInfo.Response).RedirectUrl.ToString()
             };
+        }
+
+        [HttpPost("applepay")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public async Task<ApplePayDepositFormCreatedResponse> SubmitApplePayDepositRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormDetail> getDepositFormService,
+            [FromServices] ApplePaySerializer serializer,
+            [FromBody] SubmitApplePayDepositRequest request
+            )
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.applepay.deposit",
+                request.PromotionId,
+                formId => serializer.Serialize(
+                    new ApplePayDepositSettings(
+                            brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
+                            brandPaymentInfo.RootElement.GetProperty("storeGuid").GetString(),
+                            formId,
+                            brandPaymentInfo.RootElement.GetProperty("type").GetString(),
+                            request.TransName)));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(playerTokenData.PlayerCode, createdFormId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<ApplePayDepositApplyInfo>(formData.ApplyInfo!);
+
+            if (applyInfo.Response.Result == 1)
+            {
+                return new ApplePayDepositFormCreatedResponse
+                {
+                    FormId = createdFormId,
+                    PaymentUrl = applyInfo.Response.ReceiveUrl.ToString(),
+                    ErrorMessage = string.Empty
+                };
+            }
+            else
+            {
+                return new ApplePayDepositFormCreatedResponse
+                {
+                    PaymentUrl = string.Empty,
+                    ErrorMessage = applyInfo.Response.Msg
+                };
+            }
         }
     }
 }

@@ -106,7 +106,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                             ExternalTransactionId = t.ExternalTransactionId,
                             ExternalTransactionReferenceId = externalId.ExternalTransactionId,
                             GameActionType = GetGameActionType(t.ActionType, t.Amount),
-                            RoundClosed = isSettle ? null : false,
+                            RoundClosed = GetRoundClosedFlag(t.ActionType),
                             CurrencyCode = t.Currency,
                             Timestamp = t.Timestamp
                         };
@@ -130,7 +130,6 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             return (batchBetData, notFoundTransactions);
         }
 
-
         IEnumerable<TransactionResponse> IIMESportsActionModelMapper.Response(BatchBetResult r)
         {
             var results = new List<TransactionResponse>();
@@ -142,7 +141,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 select new TransactionResponse
                 {
                     ExternalTransactionId = result.ExternalTransactionId,
-                    InternalTransactionId = result.InternalTransactionId.Value,
+                    InternalTransactionId = result.InternalTransactionId,
                     Balance = balance.Value
                 });
 
@@ -176,58 +175,61 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
                 Transactions = transactions
             };
 
-        private static GameActionType GetGameActionType(ActionType actionId, decimal amount)
-        {
-            switch (actionId)
+        private static GameActionType GetGameActionType(ActionType actionId, decimal amount) =>
+            actionId switch
             {
-                case SettleFT:
-                case SettleParlay: // settle
-                    return amount > 0 ? WinBet : LoseBet;
+                // settle
+                SettleFT or SettleParlay => amount > 0 ? WinBet : LoseBet,
 
                 // cancel placebet
-                case PlaceBetRefund:
-                case CancelFT:
-                case CancelSingleWager:
-                case CancelParlay:
+                PlaceBetRefund or CancelFT or CancelSingleWager or CancelParlay => CancelTransaction,
+
                 // cancel settlement
-                case UnsettleFT:
-                case UnsettleParlay:
+                UnsettleFT or UnsettleParlay => CancelTransaction,
+
                 // cancel cancel
-                case UncancelFT:
-                case UncancelSingleWager:
-                case UncancelParlay:
-                    return CancelTransaction;
+                UncancelFT or UncancelSingleWager or UncancelParlay => CancelTransaction,
 
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(actionId), $"unrecognized action type id: {actionId}");
-            }
-        }
+                _ => throw new ArgumentOutOfRangeException(nameof(actionId),
+                    $"unrecognized action type id: {actionId}")
+            };
 
-        private static GameActionType[] GetRefGameActionTypes(ActionType actionId)
-        {
-            switch (actionId)
+        private static GameActionType[] GetRefGameActionTypes(ActionType actionId) =>
+            actionId switch
             {
-                case SettleFT:
-                case SettleParlay:
-                case PlaceBetRefund:
-                case CancelFT:
-                case CancelSingleWager:
-                case CancelParlay:
-                    return new[] {GameActionType.PlaceBet};
+                // settle
+                SettleFT or SettleParlay => new[] {GameActionType.PlaceBet},
 
-                case UncancelFT:
-                case UncancelSingleWager:
-                case UncancelParlay:
-                    return new[] {CancelTransaction};
+                // cancel placebet
+                PlaceBetRefund or CancelFT or CancelSingleWager or CancelParlay => new[] {GameActionType.PlaceBet},
 
-                case UnsettleFT:
-                case UnsettleParlay:
-                    return new[] {WinBet, LoseBet};
+                // cancel settlement
+                UnsettleFT or UnsettleParlay => new[] {WinBet, LoseBet},
 
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(actionId), $"unrecognized action type id: {actionId}");
-            }
-        }
+                // cancel cancel
+                UncancelFT or UncancelSingleWager or UncancelParlay => new[] {CancelTransaction},
+
+                _ => throw new ArgumentOutOfRangeException(nameof(actionId),
+                    $"unrecognized action type id: {actionId}")
+            };
+
+        private static bool? GetRoundClosedFlag(ActionType actionId) =>
+            actionId switch
+            {
+                // settle
+                SettleFT or SettleParlay => null,
+
+                // cancel placebet
+                PlaceBetRefund or CancelFT or CancelSingleWager or CancelParlay => null,
+
+                // cancel settlement
+                UnsettleFT or UnsettleParlay => false,
+
+                // cancel cancel
+                UncancelFT or UncancelSingleWager or UncancelParlay => false,
+
+                _ => null
+            };
 
         #endregion Private Methods
     }
