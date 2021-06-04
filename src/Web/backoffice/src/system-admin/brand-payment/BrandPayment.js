@@ -242,15 +242,16 @@ const AddDepositDialog = ({ title, brandId, dialog, onSubmitted }) => {
     )
 }
 
-const AddWithdrawDialog = ({ title, brandId, dialog }) => {
+const AddWithdrawDialog = ({ title, brandId, dialog, onSubmitted }) => {
     let [formData, setSubmit] = useState()
     let { isLoading, result, error, deleteCache, mutate } =
         useAddWithdrawBrandPayment(formData)
 
-    const onSubmit = (data) => {
+    const onSubmit = ({ extendedData, ...data }) => {
         setSubmit({
             brandId,
-            ...data
+            ...data,
+            extendedData: parseJSON(extendedData)
         })
     }
 
@@ -272,6 +273,7 @@ const AddWithdrawDialog = ({ title, brandId, dialog }) => {
                 extendedData: JSON.stringify({})
             }}
             onSubmit={onSubmit}
+            onSubmitted={onSubmitted}
             isLoading={isLoading}
             result={result}
             error={error}
