@@ -1,5 +1,4 @@
-﻿DROP PROCEDURE IF EXISTS DBO.PROMOTION_UPDATE_AMOUNT_USED;
-CREATE OR REPLACE PROCEDURE DBO.PROMOTION_UPDATE_AMOUNT_USED(
+﻿CREATE OR REPLACE PROCEDURE DBO.PROMOTION_UPDATE_AMOUNT_USED(
 	_PROMOTION_ID UUID,
 	_AMOUNT decimal, 
 	INOUT _OUT boolean DEFAULT FALSE) 
@@ -11,7 +10,7 @@ declare
 	_total_amount_limit decimal;
 	_unlimited boolean;
 BEGIN
-	select total_amount_limit into _total_amount_limit,unlimited into _unlimited from dbo.promotions where id = _promotion_id;
+	select p.total_amount_limit,p.unlimited into _total_amount_limit, _unlimited from dbo.promotions p where p.id = _promotion_id;
 
 	set lock_timeout to 3000;
 
