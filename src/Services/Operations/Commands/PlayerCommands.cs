@@ -252,9 +252,12 @@ namespace TGS.Services.Operations.Commands
         {
             var player = await _repository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
-            player.FirstDepositOn = DateTimeOffset.UtcNow;
+            if (player.FirstDepositOn == null)
+            {
+                player.FirstDepositOn = DateTimeOffset.UtcNow;
 
-            await _repository.SaveChangesAsync().ConfigureAwait(false);
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
+            }
         }
 
         public Task UpdatePlayerIdNumberAsync(Player player)
