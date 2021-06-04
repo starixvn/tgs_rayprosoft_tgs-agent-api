@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Clients.Promotion.Client;
 using Tgs.Payment;
 using Tgs.Payment.Clients;
-using TGS.Clients.Promotion.Client;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Deposit
@@ -33,10 +33,13 @@ namespace TGS.Services.Operator.Services.Deposit
                 var canJoin = await _promotionClient.CheckCanJoinDepositPromotionAsync(
                     command.BrandId,
                     command.PlayerCode,
-                    command.PromotionId.Value).ConfigureAwait(false);
+                    command.PromotionId.Value,
+                    command.Amount).ConfigureAwait(false);
 
                 if (!canJoin)
+                {
                     throw new CannotJoinPromotionException();
+                }
             }
 
             var createFormId = Guid.NewGuid();
@@ -55,8 +58,8 @@ namespace TGS.Services.Operator.Services.Deposit
                 applyInfo);
 
             await _paymentRepository
-               .CreateDepositFormAsync(createFormId, form)
-               .ConfigureAwait(false);
+                .CreateDepositFormAsync(createFormId, form)
+                .ConfigureAwait(false);
 
             await _paymentRepository
                 .SubmitDepositFormStatusAsync(createFormId, PaymentFlowState.WaitPayment, null)

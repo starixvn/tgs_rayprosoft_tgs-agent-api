@@ -9,7 +9,7 @@ namespace TGS.Clients.Promotion.Client
     {
         Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request);
 
-        Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode, Guid promotionId);
+        Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode, Guid promotionId, decimal amount);
 
         Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request);
 

@@ -18,24 +18,20 @@ namespace Promotion.UnitTests
             var fakePromotionRepository = Substitute.For<IPromotionRepository>();
             var fakeServiceProvider = Substitute.For<IServiceProvider>();
             var checkerFactory = new PromotionCheckerFactory(
-                new Dictionary<string, Type>
-                {
-                    ["TestPromotionType"] = typeof(IPromotionChecker)
-                },
+                new Dictionary<string, Type> {["TestPromotionType"] = typeof(IPromotionChecker)},
                 fakeServiceProvider);
             var sut = new CheckCanJoinPromotionQueryService(fakePromotionRepository, checkerFactory);
 
             var query = new CheckCanJoinPromotionQuery(
                 Guid.NewGuid(),
                 "ThisIsPlayerCode",
-                Guid.NewGuid());
+                Guid.NewGuid(), 100);
 
             fakePromotionRepository
                 .GetPromotionByIdAsync(query.PromotionId)
                 .Returns(new TGS.Core.DataServices.Tgs.Models.Promotion
                 {
-                    BrandId = query.BrandId,
-                    PromotionType = "TestPromotionType"
+                    BrandId = query.BrandId, PromotionType = "TestPromotionType"
                 });
 
             var fakeChecker = Substitute.For<IPromotionChecker>();
@@ -47,6 +43,10 @@ namespace Promotion.UnitTests
             fakeServiceProvider
                 .GetService(Arg.Any<Type>())
                 .Returns(fakeChecker);
+
+            fakePromotionRepository
+                .UpdatePromotionAmountAsync(query.PromotionId, Arg.Any<decimal>())
+                .Returns(true);
 
             var actual = await sut.GetAsync(query);
 
@@ -94,10 +94,7 @@ namespace Promotion.UnitTests
 
             fakePlayerService
                 .GetPlayerByPlayerCodeAsync(Arg.Any<string>())
-                .Returns(new Player
-                {
-                    FirstDepositOn = null
-                });
+                .Returns(new Player {FirstDepositOn = null});
 
             var actual = await sut.CheckAsync("ThisIsPlayerCode");
 

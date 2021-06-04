@@ -32,17 +32,19 @@ namespace TGS.Apis.PromotionApi.Controllers
         public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, SwitchStatus status) =>
             _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
 
-        [HttpGet("{promotionId}/check/{brandId}/{playerCode}")]
+        [HttpGet("{promotionId}/check/{brandId}/{playerCode}/{amount}")]
         public async Task<bool> CheckCanJoinPromotionAsync(
             [FromServices] IGetService<CheckCanJoinPromotionQuery, bool> checkService,
             Guid promotionId,
             Guid brandId,
-            string playerCode)
+            string playerCode,
+            decimal amount)
         {
             var query = new CheckCanJoinPromotionQuery(
                 brandId,
                 playerCode,
-                promotionId);
+                promotionId,
+                amount);
 
             var result = await checkService.GetAsync(query).ConfigureAwait(false);
 

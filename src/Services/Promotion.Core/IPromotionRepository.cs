@@ -28,5 +28,8 @@ namespace TGS.Services.Promotion
             bool tracking = false);
 
         Task UpdatePromotionAsync(Core.DataServices.Tgs.Models.Promotion promotion, UpdatePromotionRequest request);
+
+        ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount);
+        ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount);
     }
 }

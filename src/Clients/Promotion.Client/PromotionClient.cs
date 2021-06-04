@@ -26,11 +26,11 @@ namespace TGS.Clients.Promotion.Client
         }
 
         public async Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode,
-            Guid promotionId)
+            Guid promotionId, decimal amount)
         {
             var prefix = $"Promotion.PromotionId.{promotionId}.CheckCanJoinDepositPromotion";
             return await ExecuteJsonRequestAsync<JoinPromotionRequest, bool>(HttpMethod.Get,
-                $"/api/promotion/{promotionId}/check/{brandId}/{playerCode}", null, logPrefix: prefix,
+                $"/api/promotion/{promotionId}/check/{brandId}/{playerCode}/{amount}", null, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
         }
 

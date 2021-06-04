@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -38,10 +42,12 @@
     <EmbeddedResource Include="SqlScripts\Functions\log_get_api_log.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_api_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_log_records.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_account_change_records.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_round_and_set_game_setting_aggregates.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_generate_round_aggregates.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\agent_wallet_update_wallet_balance.sql" />
+    <EmbeddedResource Include="SqlScripts\Procedures\promotion_update_amount_used.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\admin_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\api_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
