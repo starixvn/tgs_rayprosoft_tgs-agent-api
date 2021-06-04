@@ -118,7 +118,8 @@ namespace TGS.Promotion.Repositories
         public async ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount)
         {
             const string sql = "dbo.promotion_update_amount_used";
-            return await _repository.SqlQuerySingleAsync<bool>(
+            return await _repository
+                .SqlQuerySingleAsync<bool>(
                     sql,
                     parameters: new Dictionary<string, object> {{"_promotion_id", promotionId}, {"_amount", amount}})
                 .ConfigureAwait(false);

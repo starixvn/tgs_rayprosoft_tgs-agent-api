@@ -39,6 +39,7 @@ namespace TGS.Services.Promotion.Services
 
             var amount = promotionData.Percentage * query.Amount / 100M;
             amount = amount > promotionData.BonusAmountLimit ? promotionData.BonusAmountLimit : amount;
+
             return await _promotionRepository.UpdatePromotionAmountAsync(query.PromotionId, amount)
                 .ConfigureAwait(false);
         }
