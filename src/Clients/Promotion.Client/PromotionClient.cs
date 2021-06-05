@@ -11,10 +11,17 @@ namespace TGS.Clients.Promotion.Client
 {
     public class PromotionClient : BaseApiClient, IPromotionClient
     {
-        public PromotionClient(HttpClient client, IApiClientLogger logger,
-            IJsonSerializationProvider json)
-            : base(client, logger, json)
+        private readonly HttpClient _client;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+
+        public PromotionClient(
+            HttpClient client,
+            IApiClientLogger logger,
+            IJsonSerializationProvider jsonSerializationProvider)
+            : base(client, logger, jsonSerializationProvider)
         {
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request)
@@ -28,13 +35,15 @@ namespace TGS.Clients.Promotion.Client
         public async Task<bool> CheckCanJoinDepositPromotionAsync(Guid brandId, string playerCode,
             Guid promotionId, decimal amount)
         {
-            var prefix = $"Promotion.PromotionId.{promotionId}.CheckCanJoinDepositPromotion";
-            return await ExecuteJsonRequestAsync<JoinPromotionRequest, bool>(
-                HttpMethod.Get,
-                $"/api/promotion/{promotionId}/check/{brandId}/{playerCode}/{amount}",
-                null,
-                logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+            var response = await _client
+                .GetAsync($"/api/promotion/{promotionId}/check/{brandId}/{playerCode}/{amount}")
+                .ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            return _jsonSerializationProvider.DeserializeFromString<bool>(responseContent);
         }
 
         public async Task<MessageResponse> CreatePromotionAsync(CreatePromotionRequest request)
