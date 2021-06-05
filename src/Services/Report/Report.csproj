@@ -24,14 +24,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
-    <ProjectReference Include="..\..\Repositories\TgsTransaction.Repositories\TgsTransaction.Repositories.csproj" />
-    <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
+    <ProjectReference Include="..\..\Repositories\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj" />
+    <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\PluggableServices\PluggableServices.csproj" />
-    <ProjectReference Include="..\Promotion.Core\Promotion.Core.csproj" />
-    <ProjectReference Include="..\TgsTransaction.Core\TgsTransaction.Core.csproj" />
-    <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

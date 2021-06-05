@@ -134,6 +134,9 @@ namespace TGS.Promotion.Repositories
                 .ConfigureAwait(false);
         }
 
+        public Task UpdatePromotionsAsync(Core.DataServices.Tgs.Models.Promotion[] promotions) =>
+            UpdateEntitiesAsync(promotions);
+
         private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
             Core.DataServices.Tgs.Models.Promotion promotion,
             CreatePromotionRequest request)
