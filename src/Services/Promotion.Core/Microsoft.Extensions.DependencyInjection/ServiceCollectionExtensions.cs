@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit");
 
             services
-                .AddSingleton(
+                .AddScoped(
                     sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(sp, configuration.GetAllRegisterCheckerTypes()))
                 .AddTransient<IPlayerService, PlayerService>()
                 .AddTransient<ISettingsService, SettingsService>();
