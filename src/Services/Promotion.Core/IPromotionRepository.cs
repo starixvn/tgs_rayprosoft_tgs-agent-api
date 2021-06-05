@@ -31,5 +31,6 @@ namespace TGS.Services.Promotion
 
         ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount);
         ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount);
+        Task UpdatePromotionsAsync(Core.DataServices.Tgs.Models.Promotion[] promotions);
     }
 }

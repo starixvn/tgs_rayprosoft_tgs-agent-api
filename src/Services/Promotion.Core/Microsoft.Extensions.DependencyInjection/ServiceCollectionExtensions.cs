@@ -24,9 +24,12 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services
                 .AddScoped(
-                    sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(sp, configuration.GetAllRegisterCheckerTypes()))
+                    sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(sp,
+                        configuration.GetAllRegisterCheckerTypes()))
                 .AddTransient<IPlayerService, PlayerService>()
                 .AddTransient<ISettingsService, SettingsService>();
+
+            services.AddTgsTransactionRepositoriesServices();
 
             return configuration;
         }

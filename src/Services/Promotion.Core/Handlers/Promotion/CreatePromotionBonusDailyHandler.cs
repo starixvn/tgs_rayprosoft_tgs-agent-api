@@ -7,47 +7,43 @@ using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
-using TGS.Services.Promotion;
 using TGS.Services.Promotion.Models.PromotionBonus;
-using TGS.Services.Report.Infrastructure.DataService;
 using TGS.Services.TgsTransaction.Core;
 using TGS.Services.WalletService;
 
-namespace TGS.Services.Report.Application.Commands.Promotion
+namespace TGS.Services.Promotion.Handlers.Promotion
 {
     public class
         CreatePromotionBonusDailyQueryHandler : Handler<CreatePromotionBonusDailyRequest,
             MessageResponse>
     {
         private readonly IPlayerBucketRepository _playerBucketService;
-        private readonly IPlayerGameAggregateService _playerGameTypeAggregateService;
-        private readonly ITgsPlayerService _playerService;
         private readonly IPromotionBonusRepository _promotionBonusService;
-        private readonly ITgsPromotionService _promotionService;
+        private readonly IPromotionRepository _promotionRepository;
+        private readonly ITgsRepository _repository;
         private readonly ITgsTransactionRepository _transactionRepository;
         private readonly IWalletRepository _walletRepository;
 
         public CreatePromotionBonusDailyQueryHandler(IPromotionBonusRepository promotionBonusService,
-            IPlayerGameAggregateService playerGameTypeAggregateService,
-            ITgsPlayerService playerService,
-            ITgsPromotionService promotionService,
             IPlayerBucketRepository playerBucketService,
             IWalletRepository walletRepository,
             ITgsTransactionRepository transactionRepository,
+            ITgsRepository repository,
+            IPromotionRepository promotionRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _promotionBonusService = promotionBonusService;
-            _playerGameTypeAggregateService = playerGameTypeAggregateService;
-            _promotionService = promotionService;
             _playerBucketService = playerBucketService;
             _walletRepository = walletRepository;
-            _playerService = playerService;
+            _repository = repository;
+            _promotionRepository = promotionRepository;
             _transactionRepository = transactionRepository;
         }
 
@@ -65,7 +61,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                     result.Offset);
             }
 
-            var promotions = await _promotionService.GetPromotionQueries()
+            var promotions = await _promotionRepository.GetPromotionQueries()
                 .Include(x => x.PromotionGameProviders)
                 .Include(x => x.PromotionVipLevels)
                 .Include(x => x.PromotionParticipants)
@@ -88,11 +84,11 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
-            var playerGameRoundAggregate = await _playerGameTypeAggregateService.GetPlayerGameAggregateQueries()
+            var playerGameRoundAggregate = await _repository.PlayerGameAggregates
                 .Where(x => x.ReportDate == reportDate)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
-                .GroupJoin(_playerGameTypeAggregateService.Repository.BrandGames,
+                .GroupJoin(_repository.BrandGames,
                     aggregate => new {aggregate.BrandId, aggregate.GameId},
                     brandGame => new {brandGame.BrandId, brandGame.GameId},
                     (aggregate, brandGame) => new {aggregate, brandGame})
@@ -130,7 +126,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
             var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
 
-            var players = await _playerService.GetPlayerQueries()
+            var players = await _repository.Players
                 .Where(x => playerCodes.Contains(x.PlayerCode))
                 .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
                 .ToArrayAsync(cancellationToken);
@@ -155,7 +151,7 @@ namespace TGS.Services.Report.Application.Commands.Promotion
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            await _promotionService.UpdatePromotionsAsync(promotions).ConfigureAwait(false);
+            await _promotionRepository.UpdatePromotionsAsync(promotions).ConfigureAwait(false);
             await _promotionBonusService.CreatePromotionBonusAsync(promotionBonus).ConfigureAwait(false);
             await _playerBucketService.CreatePlayerBucketsAsync(playerBuckets.Select(x =>
                 new CreatePlayerBucketRequest(x.BrandId, x.PlayerCode, x.DefaultWalletId, x.BucketType,
@@ -203,6 +199,17 @@ namespace TGS.Services.Report.Application.Commands.Promotion
             {
                 "TurnoverRebate" => (promotion.PromotionParticipants.Select(p =>
                     {
+                        if (amount > promotion.TotalAmountLimit && !promotion.Unlimited)
+                        {
+                            return new PromotionBonusPlayerModel
+                            {
+                                PromotionBonusId = id,
+                                PlayerCode = p.PlayerCode,
+                                BonusAmount = 0M,
+                                PromotionType = promotion.PromotionType
+                            };
+                        }
+
                         var playerRebateAmount =
                             players.Where(pa => pa.PlayerCode == p.PlayerCode).Sum(s => s.Turnover) *
                             promotion.Percentage / 100;
@@ -212,12 +219,6 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                             : playerRebateAmount;
 
                         amount += playerRebateAmount;
-                        if (promotion.TotalAmountLimit < amount)
-                        {
-                            amount -= playerRebateAmount;
-                            playerRebateAmount = promotion.TotalAmountLimit - amount;
-                            amount += playerRebateAmount;
-                        }
 
                         return new PromotionBonusPlayerModel
                         {
@@ -230,6 +231,17 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                     .ToArray(), amount),
                 "ReliefMoneyDaily" => (promotion.PromotionParticipants.Select(p =>
                     {
+                        if (amount > promotion.TotalAmountLimit && !promotion.Unlimited)
+                        {
+                            return new PromotionBonusPlayerModel
+                            {
+                                PromotionBonusId = id,
+                                PlayerCode = p.PlayerCode,
+                                BonusAmount = 0M,
+                                PromotionType = promotion.PromotionType
+                            };
+                        }
+
                         var playerRebateAmount = players.Where(pa => pa.PlayerCode == p.PlayerCode)
                             .Sum(s => s.WinLoss) * promotion.Percentage / 100;
 
@@ -249,14 +261,8 @@ namespace TGS.Services.Report.Application.Commands.Promotion
                             : playerRebateAmount;
 
                         amount += playerRebateAmount;
-                        if (promotion.TotalAmountLimit < amount)
-                        {
-                            amount -= playerRebateAmount;
-                            playerRebateAmount = promotion.TotalAmountLimit - amount;
-                            amount += playerRebateAmount;
-                        }
 
-                        return new()
+                        return new PromotionBonusPlayerModel
                         {
                             PromotionBonusId = id,
                             PlayerCode = p.PlayerCode,
