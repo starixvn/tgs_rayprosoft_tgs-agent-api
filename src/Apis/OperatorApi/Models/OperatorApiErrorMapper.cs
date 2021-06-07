@@ -4,30 +4,37 @@ using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.Operator;
-using TGS.Services.Operator.ValidateCode;
 using TGS.Services.Operator.BrandPayment;
+using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Apis.OperatorApi.Models
 {
     public class OperatorApiErrorMapper : IErrorMapper
     {
-        private static readonly IReadOnlyDictionary<Type, TgsApiError> TgsApiErrorByException =
-            new Dictionary<Type, TgsApiError>
-            {
-                [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
-                [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
-                [typeof(EmailNotVerifyException)] = TgsApiError.EmailNotVerify,
-                [typeof(InsufficientBucketException)] = TgsApiError.InsufficientBucket
-            };
-
         private static readonly IReadOnlyDictionary<TgsApiError, int> HttpCodeByException =
             new Dictionary<TgsApiError, int>
             {
                 [TgsApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
                 [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
                 [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
-                [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest
+                [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest,
+                [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest
             };
+
+        private static readonly IReadOnlyDictionary<Type, TgsApiError> TgsApiErrorByException =
+            new Dictionary<Type, TgsApiError>
+            {
+                [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
+                [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
+                [typeof(EmailNotVerifyException)] = TgsApiError.EmailNotVerify,
+                [typeof(InsufficientBucketException)] = TgsApiError.InsufficientBucket,
+                [typeof(CannotJoinPromotionException)] = TgsApiError.PromotionCannotJoin
+            };
+
+        public bool CanProcess(Exception exception)
+        {
+            return TgsApiErrorByException.TryGetValue(exception.GetType(), out _);
+        }
 
         public int GetApiErrorByException(Exception exception)
         {
@@ -56,10 +63,5 @@ namespace TGS.Apis.OperatorApi.Models
 
         public string GetMessageByException(Exception exception) =>
             exception.Message;
-
-        public bool CanProcess(Exception exception)
-        {
-            return TgsApiErrorByException.TryGetValue(exception.GetType(), out _);
-        }
     }
 }

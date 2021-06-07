@@ -64,7 +64,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.AllowKickPlayer => false;
 
-            bool IGameProvider.TransferWallet => true;
+            bool IGameProvider.TransferWallet => false;
 
             ushort IGameProvider.UniqueId => 5;
 
