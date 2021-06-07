@@ -22,6 +22,7 @@
         DuplicateTransaction = 303,
         RoundIdNotFound = 304,
         InvalidAmount = 305,
+        TransferError = 306,
 
         InvalidArguments = 401,
         IncorrectFormat = 402,

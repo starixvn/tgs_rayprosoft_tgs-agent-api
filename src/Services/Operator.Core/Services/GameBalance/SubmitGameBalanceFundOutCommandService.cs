@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using TGS.Core.Models.Enums;
 using TGS.Services.PluggableServices;
 using TGS.Services.PluggableServices.Models;
 using TGS.ServiceUtility;
@@ -35,10 +36,10 @@ namespace TGS.Services.Operator.Services.GameBalance
             })
             .ConfigureAwait(false);
 
-            if (response.Error != 0)
+            if (response.Error != TgsApiError.None.GetHashCode())
             {
                 _logger.LogInformation("Pluggable Fund Out Has Error");
-                throw new Exception(response.ErrorMessage);
+                throw new TransferException(response.ErrorMessage);
             }
 
             _logger.LogInformation("Pluggable Fund Out OK");
