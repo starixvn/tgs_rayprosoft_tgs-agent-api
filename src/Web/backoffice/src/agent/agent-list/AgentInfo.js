@@ -201,8 +201,8 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                 <RebateBox
                                     label={
                                         <Trans
-                                            zh="真人返佣"
-                                            en="Live Dealer Rebate"
+                                            zh="真人分红"
+                                            en="Live Dealer Dividend"
                                         />
                                     }
                                 >
@@ -214,8 +214,8 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                 <RebateBox
                                     label={
                                         <Trans
-                                            zh="电子返佣"
-                                            en="EGame Rebate"
+                                            zh="电子分红"
+                                            en="EGame Dividend"
                                         />
                                     }
                                 >
@@ -227,8 +227,8 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                 <RebateBox
                                     label={
                                         <Trans
-                                            zh="棋牌返佣"
-                                            en="Card Game Rebate"
+                                            zh="棋牌分红"
+                                            en="Card Game Dividend"
                                         />
                                     }
                                 >
@@ -240,8 +240,8 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                 <RebateBox
                                     label={
                                         <Trans
-                                            zh="彩票返佣"
-                                            en="Lottery Rebate"
+                                            zh="彩票分红"
+                                            en="Lottery Dividend"
                                         />
                                     }
                                 >
@@ -253,8 +253,8 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                 <RebateBox
                                     label={
                                         <Trans
-                                            zh="体育返佣"
-                                            en="Sports Rebate"
+                                            zh="体育分红"
+                                            en="Sports Dividend"
                                         />
                                     }
                                 >
@@ -266,8 +266,8 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                 <RebateBox
                                     label={
                                         <Trans
-                                            zh="虚拟体育返佣"
-                                            en="Virtual Sports Rebate"
+                                            zh="虚拟体育分红"
+                                            en="Virtual Sports Dividend"
                                         />
                                     }
                                 >
@@ -320,33 +320,33 @@ const ViewPanel = ({ record, ...props }) => {
                 <BounsBox value={record?.dividendPercentage} />
 
                 <RebateBox
-                    label={<Trans zh="真人返佣" en="Live Dealer Rebate" />}
+                    label={<Trans zh="真人分红" en="Live Dealer Dividend" />}
                     value={record?.liveDealerRebatePercentage}
                 />
 
                 <RebateBox
-                    label={<Trans zh="电子返佣" en="Slot Rebate" />}
+                    label={<Trans zh="电子分红" en="Slot Dividend" />}
                     value={record?.slotRebatePercentage}
                 />
 
                 <RebateBox
-                    label={<Trans zh="棋牌返佣" en="Card Game Rebate" />}
+                    label={<Trans zh="棋牌分红" en="Card Game Dividend" />}
                     value={record?.cardGameRebatePercentage}
                 />
 
                 <RebateBox
-                    label={<Trans zh="彩票返佣" en="Lottery Rebate" />}
+                    label={<Trans zh="彩票分红" en="Lottery Dividend" />}
                     value={record?.lotteryRebatePercentage}
                 />
 
                 <RebateBox
-                    label={<Trans zh="体育返佣" en="Sports Rebate" />}
+                    label={<Trans zh="体育分红" en="Sports Dividend" />}
                     value={record?.sportsRebatePercentage}
                 />
 
                 <RebateBox
                     label={
-                        <Trans zh="虚拟体育返佣" en="Virtual Sports Rebate" />
+                        <Trans zh="虚拟体育分红" en="Virtual Sports Dividend" />
                     }
                     value={record?.virtualSportsRebatePercentage}
                 />

@@ -195,7 +195,7 @@ const BonusTrans = {
 
 const Rebate = "Rebate"
 const RebateTrans = {
-    zh: "返佣",
+    zh: "返水",
     en: "Rebate"
 }
 
