@@ -41,6 +41,11 @@ import { useUsername, useDeauth } from "./user/context"
 import { SWRConfig } from "swr"
 import { Trans, useLocale, Locales, useEnglish, useChinese } from "./i18n"
 import { AdminUserChangePasswordDialog } from "./system/admins/edit"
+import {
+    getHeaderBackground,
+    getHeaderButtonBackground,
+    getHeaderButtonColor
+} from "./env"
 
 function App() {
     let isUserAuthed = useUserIsAuthed()
@@ -125,7 +130,7 @@ const Header = () => {
 
     return (
         <>
-            <TopNav>
+            <TopNav background={getHeaderBackground()}>
                 <TopNav.Section>
                     <TopNav.Item href="/" fontWeight="semibold"></TopNav.Item>
                 </TopNav.Section>
@@ -148,7 +153,12 @@ const Header = () => {
                                 </>
                             }
                         >
-                            <Button variant="ghost" iconAfter="chevron-down">
+                            <Button
+                                variant="ghost"
+                                iconAfter="chevron-down"
+                                color={getHeaderButtonColor()}
+                                background={getHeaderButtonBackground()}
+                            >
                                 {usename}
                             </Button>
                         </DropdownMenu>
@@ -187,7 +197,12 @@ const LangItem = ({ ...props }) => {
                     </>
                 }
             >
-                <Button variant="ghost" iconAfter="chevron-down">
+                <Button
+                    variant="ghost"
+                    iconAfter="chevron-down"
+                    color={getHeaderButtonColor()}
+                    background={getHeaderButtonBackground()}
+                >
                     {locale === Locales.zh && chinese}
                     {locale === Locales.en && english}
                 </Button>

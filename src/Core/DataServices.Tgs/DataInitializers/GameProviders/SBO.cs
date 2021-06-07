@@ -92,7 +92,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-sbo") : new Uri("http://localhost:62330"),
                     CompanyKey = "34B2C4ED616F4E7B965EAE0861A3F92E",
-                    AgentPrefix = "PGSTG01",
+                    AgentPrefix = "STGTGS",
                     ApiUrl = new("https://ex-api-demo-yy.568win.com"),
                     EnableCancelFailedTransactionsJob = false,
                     DelaySecondsForPlaceBet = 0,
@@ -110,7 +110,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             Dictionary<string, string> IGameProvider.MarketTypes => new()
             {
-                {"ALL", "0"}, {"Handicap", "1"}, {"Odd_Even", "2"}, {"Over_Under", "3"}
+                {"ALL", "0"},
+                {"Handicap", "1"},
+                {"Odd_Even", "2"},
+                {"Over_Under", "3"}
             };
         }
 

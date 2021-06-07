@@ -7,8 +7,8 @@ namespace TGS.Shared.Game.Models.IMESports.Incoming
     {
         [JsonPropertyName("OperatorTransactionId")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public Guid InternalTransactionId { get; init; }
-        
+        public Guid? InternalTransactionId { get; init; }
+
         [JsonPropertyName("TransactionId")]
         public string ExternalTransactionId { get; init; }
     }

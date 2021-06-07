@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
@@ -113,6 +114,28 @@ namespace TGS.Promotion.Repositories
             await UpdateEntityAsync(promotion);
             await tran.CommitAsync();
         }
+
+        public async ValueTask<bool> UpdatePromotionAmountAsync(Guid promotionId, decimal amount)
+        {
+            const string sql = "dbo.promotion_update_amount_used";
+            return await _repository
+                .SqlQuerySingleAsync<bool>(
+                    sql,
+                    parameters: new Dictionary<string, object> {{"_promotion_id", promotionId}, {"_amount", amount}})
+                .ConfigureAwait(false);
+        }
+
+        public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
+        {
+            const string sql = "dbo.promotion_update_amount_used";
+            return await _repository.SqlQuerySingleAsync<bool>(
+                    sql,
+                    parameters: new Dictionary<string, object> {{"_promotion_id", promotionId}, {"_amount", amount}})
+                .ConfigureAwait(false);
+        }
+
+        public Task UpdatePromotionsAsync(Core.DataServices.Tgs.Models.Promotion[] promotions) =>
+            UpdateEntitiesAsync(promotions);
 
         private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
             Core.DataServices.Tgs.Models.Promotion promotion,

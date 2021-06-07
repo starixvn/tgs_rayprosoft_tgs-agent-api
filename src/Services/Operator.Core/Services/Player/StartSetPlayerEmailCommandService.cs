@@ -12,16 +12,16 @@ namespace TGS.Services.Operator.Services.Player
 {
     internal class StartSetPlayerEmailCommandService : IGetService<StartSetPlayerEmailCommand, string>
     {
-        private readonly IEmailManager _emailManager;
+        private readonly IEmailClient _emailClient;
         private readonly IValidateCodeGenerator _codeGenerator;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public StartSetPlayerEmailCommandService(
-            IEmailManager emailManager,
+            IEmailClient emailClient,
             IValidateCodeGenerator codeGenerator,
             IValidateCodeOperator validateCodeOperator)
         {
-            _emailManager = emailManager ?? throw new ArgumentNullException(nameof(emailManager));
+            _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
@@ -53,12 +53,12 @@ namespace TGS.Services.Operator.Services.Player
                 Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
                 saveResult.ValidateCode);
 
-            var mailMessage = new EmailPackage(
+            var mailMessage = new SendEmailRequest(
                 new[] { command.Email },
                 mailSubject,
                 mailBody);
 
-            await _emailManager.SendEmailAsync(mailMessage).ConfigureAwait(false);
+            await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
 
             return saveResult.SecurityKey;
         }

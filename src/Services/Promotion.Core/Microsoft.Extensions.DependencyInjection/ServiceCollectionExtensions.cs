@@ -23,10 +23,13 @@ namespace Microsoft.Extensions.DependencyInjection
                 .RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit");
 
             services
-                .AddSingleton(
-                    sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(sp, configuration.GetAllRegisterCheckerTypes()))
+                .AddScoped(
+                    sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(sp,
+                        configuration.GetAllRegisterCheckerTypes()))
                 .AddTransient<IPlayerService, PlayerService>()
                 .AddTransient<ISettingsService, SettingsService>();
+
+            services.AddTgsTransactionRepositoriesServices();
 
             return configuration;
         }

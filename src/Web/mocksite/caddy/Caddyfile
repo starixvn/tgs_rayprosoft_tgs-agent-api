@@ -34,6 +34,8 @@ rewrite @try_files {http.matchers.file.relative}
 
 # Enable the static file server.
 file_server
+templates
+encode gzip
 
 respond /healthcheck 200
 

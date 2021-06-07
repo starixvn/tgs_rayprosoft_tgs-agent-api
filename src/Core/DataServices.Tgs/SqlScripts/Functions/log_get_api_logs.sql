@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION log.log_get_api_logs(
 	_path text,
 	_method text,
 	_prefix text,
+	_server_name text,
 	_response_code integer,
 	_page_size integer,
 	_page_number integer, 
@@ -57,6 +58,7 @@ BEGIN
 	  and (_ip is null or a.ip = _ip)
       and ((_path is null or _path = '') or a.path ilike '%' || _path || '%')
 	  and ((_prefix is null or _prefix = '') or a.prefix ilike '%' || _prefix || '%')
+	  and ((_server_name is null or _server_name = '') or a.server_name ilike '%' || _server_name || '%')
       and (_method is null or a.method = _method)    
       and (_response_code is null or a.response_code = _response_code)    
     order by

@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             var brandId = player.BrandId;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
             var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<SexyGamingConfiguration>(SettingConsts.GameProviderConfigurations.SexyGaming);
-            var data = new SexyGamingGameUrlRequest()
+            var data = new SexyGamingLoginGameRequest()
             {
                 UserId = player.PlayerCode,
                 IsMobileLogin = request.Token.PlatformType == Core.Models.Enums.PlatformType.Mobile,
@@ -88,7 +88,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                     };
                     await _client.CreatePlayerAsync(configuration, createMemberRequest).ConfigureAwait(false);
 
-                    data = new SexyGamingGameUrlRequest()
+                    data = new SexyGamingLoginGameRequest()
                     {
                         UserId = player.PlayerCode,
                         IsMobileLogin = request.Token.PlatformType == Core.Models.Enums.PlatformType.Mobile,

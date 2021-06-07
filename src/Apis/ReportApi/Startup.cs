@@ -54,16 +54,6 @@ namespace TGS.Apis.ReportApi
                 .AddPlayerBucketRepositoriesServices();
 
             services
-                .AddPromotionCore()
-                .ConfigureWallet(config =>
-                {
-                    config
-                        .AddTgsWalletRepositories()
-                        .AddTgsAgentWalletRepositories();
-                })
-                .AddTgsPromotionRepositories();
-
-            services
                 .AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db");
 
@@ -72,7 +62,7 @@ namespace TGS.Apis.ReportApi
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() { Title = "TGS Report API", Version = "v1" });
+                c.SwaggerDoc("v1", new() {Title = "TGS Report API", Version = "v1"});
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 
@@ -87,7 +77,7 @@ namespace TGS.Apis.ReportApi
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
+            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();

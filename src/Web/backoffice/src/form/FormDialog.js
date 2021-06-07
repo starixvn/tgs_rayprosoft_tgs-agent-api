@@ -96,4 +96,9 @@ export const FormDialog = ({
     )
 }
 
+export const DeleteConfirmFormDialog = ({
+    submitText = <ConfirmText />,
+    ...props
+}) => <FormDialog submitText={submitText} {...props} />
+
 export default FormDialog

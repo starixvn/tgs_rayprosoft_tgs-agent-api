@@ -94,7 +94,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                             Turnover = playerAggregates.Sum(p => p.Turnover),
                             WinLossAmount = playerAggregates.Sum(p => p.WinLossAmount),
                             NetProfit = playerAggregates.Sum(p => p.NetProfit)
-                        }).GroupJoin(_playerAggregateService.Repository.PlayerGameAggregates
+                        }).GroupJoin(_playerAggregateService.Repository.PlayerGameAggregates.AsQueryable()
                             .Where(x => x.AgentId != null)
                             .Where(x => x.BrandId == brand.Id)
                             .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&

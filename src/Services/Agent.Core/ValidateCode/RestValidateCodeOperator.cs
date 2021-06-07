@@ -12,14 +12,14 @@ namespace TGS.Services.Agent.ValidateCode
     internal class RestValidateCodeOperator : IValidateCodeOperator
     {
         private readonly IValidateCodeServiceClient _validateCodeServiceClient;
-        private readonly IEmailManager _emailManager;
+        private readonly IEmailClient _emailClient;
 
         public RestValidateCodeOperator(
             IValidateCodeServiceClient validateCodeServiceClient,
-            IEmailManager emailManager)
+            IEmailClient emailClient)
         {
             _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
-            _emailManager = emailManager ?? throw new ArgumentNullException(nameof(emailManager));
+            _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
         }
 
         public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
@@ -51,12 +51,12 @@ namespace TGS.Services.Agent.ValidateCode
                 Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), cultureInfo)!,
                 validateCode);
 
-            var mailMessage = new EmailPackage(
+            var mailMessage = new SendEmailRequest(
                 new[] { email },
                 mailSubject,
                 mailBody);
 
-            await _emailManager.SendEmailAsync(mailMessage).ConfigureAwait(false);
+            await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
         }
     }
 }

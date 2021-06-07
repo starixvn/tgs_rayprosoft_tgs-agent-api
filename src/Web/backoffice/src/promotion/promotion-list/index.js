@@ -75,7 +75,7 @@ const BodyContent = ({ brandId }) => {
     }, [brandId])
 
     let { isLoading, data, error, mutate, deleteCache } = usePromotionList(
-        toApiParams(state)
+        brandId ? { ...toApiParams(state), sortby: "name" } : undefined
     )
 
     let columns = useColumns({ mutate, brandId, items: data?.items })
@@ -87,22 +87,12 @@ const BodyContent = ({ brandId }) => {
                     <SearchBar
                         status={state?.status}
                         name={state?.name}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                status: data?.status,
-                                name: data?.name
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    status: state?.status,
-                                    name: state?.name
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
@@ -122,15 +112,7 @@ const BodyContent = ({ brandId }) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

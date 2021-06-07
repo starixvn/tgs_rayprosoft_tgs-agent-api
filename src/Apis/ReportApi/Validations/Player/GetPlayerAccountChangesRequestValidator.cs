@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using TGS.Clients.Report.Client.Models.Player;
+using TGS.Services.Report.Application.Models.Player;
 
 namespace TGS.Apis.ReportApi.Validations.Player
 {

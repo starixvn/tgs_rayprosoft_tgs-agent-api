@@ -21,7 +21,10 @@ namespace TGS.Services.Report.Application.Extensions
             services.AddTransient<IRoundAggregateService, RoundAggregateService>();
             services.AddTransient<IPlayerRebateService, PlayerRebateService>();
 
-            services.AddTgsTransactionRepositoriesServices();
+            services.AddPlayerBucketRepositoriesServices();
+            services.AddWallet()
+                .AddTgsWalletRepositories()
+                .AddTgsAgentWalletRepositories();
 
             return services;
         }

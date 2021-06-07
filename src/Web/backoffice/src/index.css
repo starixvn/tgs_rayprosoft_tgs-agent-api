@@ -22,3 +22,10 @@ fieldset {
     margin: 0;
     padding: 0;
 }
+
+body .tox-tinymce-aux {
+    z-index: 19900420;
+}
+body.tox-fullscreen .tox.tox-tinymce-aux {
+    z-index: 19900420;
+}

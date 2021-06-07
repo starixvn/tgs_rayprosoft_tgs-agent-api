@@ -19,6 +19,8 @@ namespace TGS.Shared.Game.ApiClients.SexyGaming
         Task<SexyGamingCreateMemberResponse> CreatePlayerAsync(SexyGamingConfiguration configuration, SexyGamingCreateMemberRequest request);
 
         Task<SexyGamingGameUrlResponse> GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingGameUrlRequest request);
+
+        Task<SexyGamingGameUrlResponse> GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request);
     }
 
     public sealed class SexyGamingApiClient : BaseApiClient, ISexyGamingApiClient
@@ -32,18 +34,25 @@ namespace TGS.Shared.Game.ApiClients.SexyGaming
         }
 
 
-        public async Task<SexyGamingCreateMemberResponse> CreatePlayerAsync(SexyGamingConfiguration configuration, SexyGamingCreateMemberRequest request)
+        async Task<SexyGamingCreateMemberResponse> ISexyGamingApiClient.CreatePlayerAsync(SexyGamingConfiguration configuration, SexyGamingCreateMemberRequest request)
         {
             request.AgentId = configuration.AgentId;
             request.Cert = configuration.Cert;
             return await GetAPIAsync<SexyGamingCreateMemberRequest, SexyGamingCreateMemberResponse>(configuration, "/wallet/createMember", request, $"{_gameProvider}.CreatePlayerAsync").ConfigureAwait(false);
         }
 
-        public async Task<SexyGamingGameUrlResponse> GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingGameUrlRequest request)
+        async Task<SexyGamingGameUrlResponse> ISexyGamingApiClient.GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingGameUrlRequest request)
         {
             request.AgentId = configuration.AgentId;
             request.Cert = configuration.Cert;
             return await GetAPIAsync<SexyGamingGameUrlRequest, SexyGamingGameUrlResponse>(configuration, "/wallet/login", request, $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
+        }
+
+        async Task<SexyGamingGameUrlResponse> ISexyGamingApiClient.GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request)
+        {
+            request.AgentId = configuration.AgentId;
+            request.Cert = configuration.Cert;
+            return await GetAPIAsync<SexyGamingLoginGameRequest, SexyGamingGameUrlResponse>(configuration, "/wallet/doLoginAndLaunchGame", request, $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
         }
 
         private ValueTask<TResult> GetAPIAsync<TSource, TResult>(SexyGamingConfiguration configuration, string path, TSource source, string prefix)

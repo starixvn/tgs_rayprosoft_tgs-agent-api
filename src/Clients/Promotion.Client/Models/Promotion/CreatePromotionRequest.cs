@@ -20,5 +20,6 @@ namespace TGS.Clients.Promotion.Client.Models.Promotion
         public Guid[] GameProviderIds { get; set; }
         public int[] VipLevels { get; set; }
         public string EditorUsername { get; set; }
+        public bool AutoSentPlayerBonus { get; set; }
     }
 }

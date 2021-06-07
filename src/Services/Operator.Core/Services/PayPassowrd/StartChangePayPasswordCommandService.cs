@@ -16,18 +16,18 @@ namespace TGS.Services.Operator.Services.PayPassowrd
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidateCodeGenerator _codeGenerator;
         private readonly IValidateCodeOperator _validateCodeOperator;
-        private readonly IEmailManager _emailManager;
+        private readonly IEmailClient _emailClient;
 
         public StartChangePayPasswordCommandService(
             IPlayerOperations playerOperations,
             IValidateCodeGenerator codeGenerator,
             IValidateCodeOperator validateCodeOperator,
-            IEmailManager emailManager)
+            IEmailClient emailClient)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
-            _emailManager = emailManager ?? throw new ArgumentNullException(nameof(emailManager));
+            _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
         }
 
         public async ValueTask<string> GetAsync(StartChangePayPasswordCommand command, CancellationToken cancellationToken = default)
@@ -64,12 +64,12 @@ namespace TGS.Services.Operator.Services.PayPassowrd
                 Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
                 saveResult.ValidateCode);
 
-            var mailMessage = new EmailPackage(
+            var mailMessage = new SendEmailRequest(
                 new[] { player.Email },
                 mailSubject,
                 mailBody);
 
-            await _emailManager.SendEmailAsync(mailMessage).ConfigureAwait(false);
+            await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
 
             return saveResult.Token;
         }
