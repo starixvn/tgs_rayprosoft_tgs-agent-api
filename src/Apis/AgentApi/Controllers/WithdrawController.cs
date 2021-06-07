@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
+using TGS.Core.Models.Exceptions;
+using TGS.Services.Agent;
 using TGS.Services.Agent.Services.BrandPayments;
+using TGS.Services.Agent.Services.Withdraw;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
@@ -17,6 +21,43 @@ namespace TGS.Apis.AgentApi.Controllers
     [ApiController]
     public class WithdrawController : ControllerBase
     {
+        [HttpPost]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public async Task<Guid> CreateWithdrawRequestAsync(
+            [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
+            [FromServices] ICommandService<CheckWithdrawPayPasswordCommand> checkPasswordService,
+            CreateWithdrawRequest request)
+        {
+            try
+            {
+                var brandId = HttpContext.Items.GetBrandId();
+                var agentData = HttpContext.Items.GetAgentTokenData();
+
+                var checkPasswordCommand = new CheckWithdrawPayPasswordCommand(agentData.AgentId, request.PayPassword);
+                await checkPasswordService
+                    .ExecuteAsync(checkPasswordCommand)
+                    .ConfigureAwait(false);
+
+                if (!await checkPasswordCommand.ReturnSource.Task.ConfigureAwait(false))
+                    throw new OperationNotAllowedException();
+
+                var command = new CreateWithdrawFormCommand(
+                    agentData.AgentId,
+                    brandId,
+                    request.BankInfoId,
+                    request.Amount);
+
+                await createFormService.ExecuteAsync(command).ConfigureAwait(false);
+
+                return await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+            }
+            catch (InsufficientFundsException)
+            {
+                throw new PlayerHasInsufficientFundsException();
+            }
+        }
+
         [HttpGet]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]

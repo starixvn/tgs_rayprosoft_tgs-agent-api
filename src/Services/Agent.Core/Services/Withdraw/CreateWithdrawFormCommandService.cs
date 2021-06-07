@@ -6,18 +6,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tgs.Payment;
 using TGS.Core.Infrastructures.Json;
-using TGS.Services.Agent;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.Services.Withdraw
+namespace TGS.Services.Agent.Services.Withdraw
 {
     internal class CreateWithdrawFormCommandService : ICommandService<CreateWithdrawFormCommand>
     {
+        private readonly IAgentRepository _agentRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IPaymentRepository _paymentRepository;
-        private readonly IAgentRepository _agentRepository;
         private readonly IAgentWalletRepository _walletRepository;
 
         public CreateWithdrawFormCommandService(
@@ -85,7 +84,7 @@ namespace TGS.Services.Operator.Services.Withdraw
             }
 
             var bankInfo = await _paymentRepository
-                .GetBankInfoByIdAsync(command.BankInfoId)
+                .GetAgentBankInfoByIdAsync(command.BankInfoId)
                 .ConfigureAwait(false);
 
             var bankInfoData = new WithdrawBankInfo<JsonDocument>(

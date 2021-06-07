@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
-using System;
+﻿using System;
+using System.Threading.Tasks;
 
-namespace TGS.Services.Operator.Services.Withdraw
+namespace TGS.Services.Agent.Services.Withdraw
 {
     public record CheckWithdrawPayPasswordCommand(
-        string PlayerCode,
+        Guid AgentId,
         string PayPassword)
     {
         public TaskCompletionSource<bool> ReturnSource { get; } = new TaskCompletionSource<bool>();

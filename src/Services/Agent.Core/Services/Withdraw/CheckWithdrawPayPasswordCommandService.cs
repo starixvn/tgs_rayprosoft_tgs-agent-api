@@ -2,30 +2,33 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Security;
-using TGS.Services.Operations.Queries;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Withdraw;
 
-namespace TGS.Services.Operator.Services.Withdraw
+namespace TGS.Services.Agent.Services.Withdraw
 {
     internal class CheckWithdrawPayPasswordCommandService : ICommandService<CheckWithdrawPayPasswordCommand>
     {
+        private readonly IAgentRepository _agentRepository;
         private readonly IPasswordHandler _passwordHandler;
-        private readonly IPlayerQueries _playerQueries;
 
-        public CheckWithdrawPayPasswordCommandService(IPlayerQueries playerQueries, IPasswordHandler passwordHandler)
+        public CheckWithdrawPayPasswordCommandService(
+            IAgentRepository agentRepository,
+            IPasswordHandler passwordHandler)
         {
-            _playerQueries = playerQueries ?? throw new ArgumentNullException(nameof(playerQueries));
+            _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         }
 
         public async ValueTask ExecuteAsync(CheckWithdrawPayPasswordCommand command, CancellationToken cancellationToken = default)
         {
-            var (paySalt, payPassword) = await _playerQueries
-                .GetPaySaltAndPasswordByPlayerCodeAsync(command.PlayerCode)
+            var agentData = await _agentRepository
+                .GetAgentByIdAsync(command.AgentId)
                 .ConfigureAwait(false);
 
-            var isVaild = _passwordHandler.Verify(payPassword, paySalt, command.PayPassword);
+            var isVaild = _passwordHandler.Verify(
+                agentData.PayPassword,
+                agentData.PaySalt,
+                command.PayPassword);
 
             command.ReturnSource.SetResult(isVaild);
         }
