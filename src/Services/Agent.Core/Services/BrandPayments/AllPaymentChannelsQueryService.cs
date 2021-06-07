@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Tgs.Payment;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.Services.Deposit
+namespace TGS.Services.Agent.Services.BrandPayments
 {
     internal class AllPaymentChannelsQueryService : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>>
     {

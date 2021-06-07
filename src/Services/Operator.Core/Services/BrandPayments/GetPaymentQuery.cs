@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.Operator.Services.Deposit
+namespace TGS.Services.Operator.Services.BrandPayments
 {
     public record GetPaymentQuery(Guid PaymentId);
 }

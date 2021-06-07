@@ -7,17 +7,17 @@ using Tgs.Payment;
 using TGS.Services.Operator.BrandPayment.PaymentConditions;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.Services.Deposit
+namespace TGS.Services.Operator.Services.BrandPayments
 {
     internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, BrandPaymentInfo>
     {
         private readonly IPaymentRepository _paymentRepository;
-        private readonly IPlayerRepository _walletRepository;
+        private readonly IPlayerRepository _playerRepository;
 
-        public BrandPaymentsQueryService(IPaymentRepository paymentRepository, IPlayerRepository walletRepository)
+        public BrandPaymentsQueryService(IPaymentRepository paymentRepository, IPlayerRepository playerRepository)
         {
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
+            _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         }
 
         public async IAsyncEnumerable<BrandPaymentInfo> QueryAsync(
@@ -49,7 +49,7 @@ namespace TGS.Services.Operator.Services.Deposit
                 .ToLookupAsync(bv => bv.BrandPaymentId, bv => bv.VipLevelId)
                 .ConfigureAwait(false);
 
-            var playerInfo = await _walletRepository.GetPlayerInfoAsync(query.PlayerCode).ConfigureAwait(false);
+            var playerInfo = await _playerRepository.GetPlayerInfoAsync(query.PlayerCode).ConfigureAwait(false);
 
             var blockListCondition = new BlockListCondition(blockList);
             var whiteListCondition = new WhiteListCondition(whiteList);

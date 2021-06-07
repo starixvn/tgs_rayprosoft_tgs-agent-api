@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Tgs.Payment;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.Services.Deposit
+namespace TGS.Services.Agent.Services.BrandPayments
 {
     internal class GetPaymentQueryService : IGetService<GetPaymentQuery, PaymentInfo>
     {
@@ -16,8 +16,6 @@ namespace TGS.Services.Operator.Services.Deposit
         }
 
         public ValueTask<PaymentInfo> GetAsync(GetPaymentQuery query, CancellationToken cancellationToken = default)
-        {
-            return _paymentRepository.GetPaymentAsync(query.PaymentId);
-        }
+            => _paymentRepository.GetPaymentAsync(query.PaymentId);
     }
 }
