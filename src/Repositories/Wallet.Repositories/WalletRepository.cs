@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Services.WalletService;
 
@@ -82,12 +79,14 @@ namespace TGS.Wallet.Repositories
 
         public async ValueTask<decimal> GetBalanceAsync(Guid walletId, string playerCode)
         {
-            var playerWallet = await _tgsRepository.Wallets.AsAsyncEnumerable()
-                .Where(wallet => wallet.PlayerCode == playerCode)
-                .SingleAsync()
+            var playerWallet = await _tgsRepository.Wallets
+                .FindAsync(walletId)
                 .ConfigureAwait(false);
 
-            return playerWallet.Balance;
+            if (playerWallet.PlayerCode == playerCode)
+                return playerWallet.Balance;
+            else
+                throw new Exception("Can't find player wallet.");
         }
     }
 }

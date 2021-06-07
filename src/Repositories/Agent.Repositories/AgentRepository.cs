@@ -20,7 +20,7 @@ namespace TGS.Agent.Repositories
                 .FindAsync(id)
                 .ConfigureAwait(false);
 
-            return new AgentInfo(agent.Id, agent.Username);
+            return new AgentInfo(agent.Id, agent.Username, agent.DefaultWalletId);
         }
     }
 }

@@ -38,7 +38,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             fakeAgentRepository
                 .GetAgentByIdAsync(Arg.Is(agentId))
-                .Returns(new AgentInfo(agentId, "Tester"));
+                .Returns(new AgentInfo(agentId, "Tester", Guid.NewGuid()));
 
             await sut.ExecuteAsync(command);
 

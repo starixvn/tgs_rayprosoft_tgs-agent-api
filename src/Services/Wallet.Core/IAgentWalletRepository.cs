@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TGS.Services.WalletService;
 
-namespace TGS.Services.Wallet
+namespace TGS.Services.WalletService
 {
     public interface IAgentWalletRepository
     {
-        ValueTask<Guid> ExchangeAsync(
+        ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(
             Guid brandId,
             Guid walletId,
             Guid agentId,
@@ -14,6 +13,6 @@ namespace TGS.Services.Wallet
             decimal amount,
             string? description = null);
 
-        ValueTask<decimal> GetBalanceAsync(Guid walletId, string playerCode);
+        ValueTask<decimal> GetBalanceAsync(Guid walletId, Guid playerCode);
     }
 }

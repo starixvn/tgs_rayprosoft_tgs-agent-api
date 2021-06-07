@@ -92,18 +92,14 @@ namespace TGS.Payment.Repositories
         {
             var currentDate = DateTimeOffset.UtcNow;
 
-            var player = await _tgsRepository.Players
-                .FindAsync(form.UserId)
-                .ConfigureAwait(false);
-
             await _tgsRepository.WithdrawForms
                 .AddAsync(new WithdrawForm
                 {
                     Id = createFormId,
                     BrandId = form.BrandId,
                     UserId = form.UserId,
-                    UserName = player.Username,
-                    UserType = 1,
+                    UserName = form.UserName,
+                    UserType = (int)form.UserType,
                     BrandPaymentId = form.BrandPaymentId,
                     Amount = form.Amount,
                     BankInfoId = form.BankInfoId,

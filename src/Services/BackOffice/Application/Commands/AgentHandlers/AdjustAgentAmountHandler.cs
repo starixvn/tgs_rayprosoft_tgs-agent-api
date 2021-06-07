@@ -9,7 +9,6 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.AgentAdjust;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Wallet;
 using TGS.Services.WalletService;
 
 namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
