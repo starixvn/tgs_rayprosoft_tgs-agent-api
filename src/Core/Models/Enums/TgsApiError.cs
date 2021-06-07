@@ -30,6 +30,7 @@
         InvalidStatus = 404,
         ValidateCodeNotVerify = 405,
         EmailNotVerify = 406,
+        PromotionCannotJoin = 407,
 
         SystemError = 900,
         OperationNotAllowed = 901,

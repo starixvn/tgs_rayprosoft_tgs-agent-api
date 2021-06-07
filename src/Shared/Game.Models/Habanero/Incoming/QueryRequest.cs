@@ -20,7 +20,7 @@ namespace TGS.Shared.Game.Models.Habanero.Incoming
         public string RoundId { get; init; }
 
         [JsonPropertyName("friendlygameinstanceid")]
-        public int ClientRoundId { get; init; }
+        public long ClientRoundId { get; init; }
 
         [JsonPropertyName("token")]
         public string Token { get; init; }

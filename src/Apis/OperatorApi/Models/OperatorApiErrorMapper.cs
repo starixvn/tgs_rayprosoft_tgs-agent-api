@@ -11,16 +11,6 @@ namespace TGS.Apis.OperatorApi.Models
 {
     public class OperatorApiErrorMapper : IErrorMapper
     {
-        private static readonly IReadOnlyDictionary<Type, TgsApiError> TgsApiErrorByException =
-            new Dictionary<Type, TgsApiError>
-            {
-                [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
-                [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
-                [typeof(EmailNotVerifyException)] = TgsApiError.EmailNotVerify,
-                [typeof(InsufficientBucketException)] = TgsApiError.InsufficientBucket,
-                [typeof(TransferException)] = TgsApiError.TransferError
-            };
-
         private static readonly IReadOnlyDictionary<TgsApiError, int> HttpCodeByException =
             new Dictionary<TgsApiError, int>
             {
@@ -28,8 +18,25 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
                 [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
                 [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest,
+                [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest,
                 [TgsApiError.TransferError] = StatusCodes.Status400BadRequest
             };
+
+        private static readonly IReadOnlyDictionary<Type, TgsApiError> TgsApiErrorByException =
+            new Dictionary<Type, TgsApiError>
+            {
+                [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
+                [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
+                [typeof(EmailNotVerifyException)] = TgsApiError.EmailNotVerify,
+                [typeof(InsufficientBucketException)] = TgsApiError.InsufficientBucket,
+                [typeof(CannotJoinPromotionException)] = TgsApiError.PromotionCannotJoin,
+                [typeof(TransferException)] = TgsApiError.TransferError
+            };
+
+        public bool CanProcess(Exception exception)
+        {
+            return TgsApiErrorByException.TryGetValue(exception.GetType(), out _);
+        }
 
         public int GetApiErrorByException(Exception exception)
         {
@@ -58,10 +65,5 @@ namespace TGS.Apis.OperatorApi.Models
 
         public string GetMessageByException(Exception exception) =>
             exception.Message;
-
-        public bool CanProcess(Exception exception)
-        {
-            return TgsApiErrorByException.TryGetValue(exception.GetType(), out _);
-        }
     }
 }

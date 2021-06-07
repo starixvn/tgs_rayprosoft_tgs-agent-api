@@ -212,30 +212,9 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Cell: ({ value }) => <AgentStatusLabel value={value} />
             }),
             textColumn({
-                id: AgentDividendPercentage.Name,
-                accessor: (row) => row,
-                Header: <Trans zh="分红比例" en="Dividend Percentage" />,
-                disableSortBy: true,
-                Cell: ({ value }) => {
-                    let configRequired = isAgentConfigRequired(
-                        value?.agentStatus
-                    )
-                    if (configRequired) {
-                        return "-"
-                    }
-
-                    return (
-                        <FormattedNumberDecimal
-                            value={value?.dividendPercentage}
-                            postfix="%"
-                        />
-                    )
-                }
-            }),
-            textColumn({
                 id: AgentLiveDealerRebatePercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="真人返佣%" en="Live Dealer Rebate %" />,
+                Header: <Trans zh="真人分红%" en="Live Dealer Dividend %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -256,7 +235,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
             textColumn({
                 id: AgentEgameRebatePercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="电子返佣%" en="EGame Rebate %" />,
+                Header: <Trans zh="电子分红%" en="EGame Rebate Dividend %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -277,7 +256,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
             textColumn({
                 id: AgentCardGameRebatePercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="棋牌返佣%" en="Card Game Rebate %" />,
+                Header: <Trans zh="棋牌分红%" en="Card Game Dividend %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -298,7 +277,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
             textColumn({
                 id: AgentLotteryRebatePercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="彩票返佣%" en="Lottery Rebate %" />,
+                Header: <Trans zh="彩票分红%" en="Lottery Dividend %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -319,7 +298,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
             textColumn({
                 id: AgentSportsRebatePercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="体育返佣%" en="Sports Rebate %" />,
+                Header: <Trans zh="体育分红%" en="Sports Dividend %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let configRequired = isAgentConfigRequired(
@@ -341,7 +320,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 id: AgentVirtualSportsRebatePercentage.Name,
                 accessor: (row) => row,
                 Header: (
-                    <Trans zh="虚拟体育返佣%" en="Virtual Sports Rebate %" />
+                    <Trans zh="虚拟体育分红%" en="Virtual Sports Dividend %" />
                 ),
                 disableSortBy: true,
                 Cell: ({ value }) => {

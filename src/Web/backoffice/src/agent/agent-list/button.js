@@ -217,12 +217,12 @@ const FormBody = ({}) => {
                     )}
 
                     <NormalLabel required>
-                        <Trans zh="代理分红" en="Bonus" />
+                        <Trans zh="代理分红" en="Dividend" />
                     </NormalLabel>
                     <AgentDividendPercentageInputField />
 
                     <NormalLabel required>
-                        <Trans zh="真人返佣" en="Live Dealer Rebate" />
+                        <Trans zh="真人分红" en="Live Dealer Dividend" />
                     </NormalLabel>
                     <TwoColumns columns={["0.7fr"]}>
                         <Flex flex="1 50%">
@@ -231,7 +231,7 @@ const FormBody = ({}) => {
 
                         <FieldValues flex="1 50%">
                             <NormalLabel required>
-                                <Trans zh="彩票返佣" en="Lottery Rebate" />
+                                <Trans zh="彩票分红" en="Lottery Dividend" />
                             </NormalLabel>
 
                             <AgentLotteryRebatePercentageInputField />
@@ -239,7 +239,7 @@ const FormBody = ({}) => {
                     </TwoColumns>
 
                     <NormalLabel required>
-                        <Trans zh="电子返佣" en="EGame Rebate" />
+                        <Trans zh="电子分红" en="EGame Dividend" />
                     </NormalLabel>
                     <TwoColumns columns={["0.7fr"]}>
                         <Flex flex="1 50%">
@@ -248,7 +248,7 @@ const FormBody = ({}) => {
 
                         <FieldValues>
                             <NormalLabel required>
-                                <Trans zh="体育返佣" en="Sports Rebate" />
+                                <Trans zh="体育分红" en="Sports Dividend" />
                             </NormalLabel>
 
                             <AgentSportsRebatePercentageInputField />
@@ -256,7 +256,7 @@ const FormBody = ({}) => {
                     </TwoColumns>
 
                     <NormalLabel required>
-                        <Trans zh="棋牌返佣" en="Card Game Rebate" />
+                        <Trans zh="棋牌分红" en="Card Game Dividend" />
                     </NormalLabel>
                     <TwoColumns columns={["0.7fr"]}>
                         <Flex flex="1 50%">
@@ -266,8 +266,8 @@ const FormBody = ({}) => {
                         <FieldValues>
                             <NormalLabel required>
                                 <Trans
-                                    zh="虚拟体育返佣"
-                                    en="Virtual Sports Rebate"
+                                    zh="虚拟体育分红"
+                                    en="Virtual Sports Dividend"
                                 />
                             </NormalLabel>
 
@@ -346,32 +346,32 @@ const ConfigFormBody = ({ record }) => {
                     <AgentDividendPercentageInputField />
 
                     <NormalLabel required>
-                        <Trans zh="真人返佣" en="Live Dealer Rebate" />
+                        <Trans zh="真人分红" en="Live Dealer Dividend" />
                     </NormalLabel>
                     <AgentLiveDealerRebatePercentageInputField />
 
                     <NormalLabel required>
-                        <Trans zh="电子返佣" en="EGame Rebate" />
+                        <Trans zh="电子分红" en="EGame Dividend" />
                     </NormalLabel>
                     <AgentEgameRebatePercentageInputField />
 
                     <NormalLabel required>
-                        <Trans zh="棋牌返佣" en="Card Game Rebate" />
+                        <Trans zh="棋牌分红" en="Card Game Dividend" />
                     </NormalLabel>
                     <AgentCardGameRebatePercentageInputField />
 
                     <NormalLabel required>
-                        <Trans zh="彩票返佣" en="Lottery Rebate" />
+                        <Trans zh="彩票分红" en="Lottery Dividend" />
                     </NormalLabel>
                     <AgentLotteryRebatePercentageInputField />
 
                     <NormalLabel required>
-                        <Trans zh="体育返佣" en="Sportsbook Rebate" />
+                        <Trans zh="体育分红" en="Sportsbook Dividend" />
                     </NormalLabel>
                     <AgentSportsRebatePercentageInputField />
 
                     <NormalLabel required>
-                        <Trans zh="虚拟体育返佣" en="Virtual Sports Rebate" />
+                        <Trans zh="虚拟体育分红" en="Virtual Sports Dividend" />
                     </NormalLabel>
                     <AgentVirtualSportsRebatePercentageInputField />
                 </FieldValues>
