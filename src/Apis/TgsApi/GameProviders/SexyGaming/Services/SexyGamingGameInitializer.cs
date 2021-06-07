@@ -13,6 +13,7 @@ using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 using TGS.Shared.Game.Models.SexyGaming.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations.CodeMappers;
+using TGS.Core.Infrastructures.Security;
 
 namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
@@ -26,6 +27,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ISettingOperations _settingOperations;
         private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
+        private readonly ITokenProvider _tokenProvider;
 
         public SexyGamingGameInitializer(
             IBrandGameProviderOperations brandGameProviderOperations,
@@ -34,7 +36,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             ISexyGamingServices sexyGamingServices,
             IJsonSerializationProvider jsonSerializationProvider,
             ISettingOperations settingOperations,
-            IGameProviderCurrencyCodeMapper currencyCodeMapper
+            IGameProviderCurrencyCodeMapper currencyCodeMapper,
+            ITokenProvider tokenProvider
             )
         {
             _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
@@ -44,11 +47,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _currencyCodeMapper = currencyCodeMapper ?? throw new ArgumentNullException(nameof(currencyCodeMapper));
+            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
-
+            var token = request.Token;
+            var loginTokenId = token.LoginRecordId;
+            var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
             var gameProviderId = await _sexyGamingServices.GetGameProviderId().ConfigureAwait(false);
             var brandId = player.BrandId;
@@ -59,7 +65,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 UserId = player.PlayerCode,
                 IsMobileLogin = request.Token.PlatformType == Core.Models.Enums.PlatformType.Mobile,
                 Language = cultureCode,
-                Extension1 = _jsonSerializationProvider.SerializeToString(new { token = request.Token.LoginRecordId }),
+                Extension1 = _jsonSerializationProvider.SerializeToString(new { token = encryptedToken }),
             };
 
             var url = default(string);
