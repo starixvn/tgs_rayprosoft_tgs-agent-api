@@ -127,7 +127,7 @@ namespace TGS.Promotion.Repositories
 
         public async ValueTask<bool> RevertPromotionAmountAsync(Guid promotionId, decimal amount)
         {
-            const string sql = "dbo.promotion_update_amount_used";
+            const string sql = "dbo.promotion_revert_amount_used";
             return await _repository
                 .SqlQuerySingleAsync<bool>(
                     sql,
