@@ -9,6 +9,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Services.BrandPayments;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

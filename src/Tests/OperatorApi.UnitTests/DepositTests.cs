@@ -6,12 +6,12 @@ using ExpectedObjects;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Apis.FileService.Clients;
-using TGS.Clients.Promotion.Client;
-using TGS.Core.Infrastructures.Json;
 using Tgs.Payment;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
+using TGS.Apis.FileService.Clients;
+using TGS.Clients.Promotion.Client;
+using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Commands;
 using TGS.Services.Operator;
@@ -199,6 +199,33 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public void Daily_Second_Deposit_With_First_Deposit_Promotion_Should_Fail()
+        {
+            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqPaymentClient = new Mock<IPaymentClient>();
+            var moqPromotionClient = new Mock<IPromotionClient>();
+            var moqPlayerCommands = new Mock<IPlayerCommands>();
+
+            var sut = new CreateDepositFormCommandService(
+                moqPaymentRepository.Object,
+                moqPaymentClient.Object,
+                moqPromotionClient.Object,
+                moqPlayerCommands.Object);
+
+            var createFormId = Guid.NewGuid();
+            var command = new CreateDepositFormCommand(
+                "ThisIsPlayerCode",
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                1000M,
+                "tgs.payment.leepay",
+                Guid.NewGuid(),
+                _ => "{}");
+
+            Assert.ThrowsAsync<CannotJoinPromotionException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
         public async Task Get_Bank_Deposit_Form_By_Id_Should_Success()
         {
             var moqPaymentRepository = new Mock<IPaymentRepository>();
@@ -280,7 +307,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>(),
                     It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
                     It.IsAny<Stream>()))
-                .Returns(ValueTask.FromResult(new FileView {Id = "testFileId", ContentType = contentType}));
+                .Returns(ValueTask.FromResult(new FileView { Id = "testFileId", ContentType = contentType }));
 
             await sut.ExecuteAsync(command);
 
@@ -328,33 +355,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             _ = fakePaymentRepository
                 .Received(1)
                 .GetDepositFormByIdAsync(Arg.Is(query.FormId));
-        }
-
-        [Test]
-        public void Daily_Second_Deposit_With_First_Deposit_Promotion_Should_Fail()
-        {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
-            var moqPaymentClient = new Mock<IPaymentClient>();
-            var moqPromotionClient = new Mock<IPromotionClient>();
-            var moqPlayerCommands = new Mock<IPlayerCommands>();
-
-            var sut = new CreateDepositFormCommandService(
-                moqPaymentRepository.Object,
-                moqPaymentClient.Object,
-                moqPromotionClient.Object,
-                moqPlayerCommands.Object);
-
-            var createFormId = Guid.NewGuid();
-            var command = new CreateDepositFormCommand(
-                "ThisIsPlayerCode",
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                1000M,
-                "tgs.payment.leepay",
-                Guid.NewGuid(),
-                _ => "{}");
-
-            Assert.ThrowsAsync<CannotJoinPromotionException>(async () => await sut.ExecuteAsync(command));
         }
     }
 }

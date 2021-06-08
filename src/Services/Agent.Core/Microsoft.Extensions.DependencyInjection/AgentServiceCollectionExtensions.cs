@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Configuration;
+using TGS.Services.Agent.ValidateCode;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

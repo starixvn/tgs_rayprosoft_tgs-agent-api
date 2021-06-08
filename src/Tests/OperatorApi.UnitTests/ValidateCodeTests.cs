@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using NUnit.Framework;
-using TGS.Services.Operator;
 using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Tests.OperatorApi.UnitTests

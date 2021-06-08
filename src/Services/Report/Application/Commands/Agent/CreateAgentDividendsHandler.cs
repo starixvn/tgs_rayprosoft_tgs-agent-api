@@ -13,7 +13,6 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
 using TGS.Services.Report.Infrastructure.DataService;
-using TGS.Services.Wallet;
 using TGS.Services.WalletService;
 
 namespace TGS.Services.Report.Application.Commands.Agent
