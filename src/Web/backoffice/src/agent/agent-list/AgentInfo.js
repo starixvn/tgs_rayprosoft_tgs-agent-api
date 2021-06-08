@@ -26,21 +26,49 @@ import {
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
-import { FormProvider, useForm, useFormContext } from "react-hook-form"
+import {
+    FormProvider,
+    useForm,
+    useFormContext,
+    useWatch
+} from "react-hook-form"
 import { Input, InputField } from "../../input/Input"
 import { useAgent, useUpdateAgent } from "./client"
 import { AgentStatusLabel, AgentStatusSelect } from "../AgentStatus"
 import { AgentLevelLabel, AgentLevelSelect, isAgentHead } from "../AgentLevel"
-import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
+import {
+    AgentTypeLabel,
+    AgentTypeSelect,
+    isAgentTypeCash,
+    isAgentTypeCredit
+} from "../AgentType"
 import clone from "clone-deep"
 import Select from "../../select/Select"
 import { AgentDividendPercentageInputField } from "../AgentDividendPercentage"
-import { AgentLiveDealerRebatePercentageInputField } from "../AgentLiveDealerRebatePercentage"
-import { AgentEgameRebatePercentageInputField } from "../AgentEgameRebatePercentage"
-import { AgentCardGameRebatePercentageInputField } from "../AgentCardGameRebatePercentage"
-import { AgentLotteryRebatePercentageInputField } from "../AgentLotteryRebatePercentage"
-import { AgentSportsRebatePercentageInputField } from "../AgentSportsRebatePercentage"
-import { AgentVirtualSportsRebatePercentageInputField } from "../AgentVirtualSportsRebatePercentage"
+import {
+    AgentLiveDealerRebatePercentageInputField,
+    AgentLiveDealerRebateText
+} from "../AgentLiveDealerRebatePercentage"
+import {
+    AgentEgameRebatePercentageInputField,
+    AgentEgameRebateText
+} from "../AgentEgameRebatePercentage"
+import {
+    AgentCardGameRebatePercentageInputField,
+    AgentCardGameRebateText
+} from "../AgentCardGameRebatePercentage"
+import {
+    AgentLotteryRebatePercentageInputField,
+    AgentLotteryRebateText
+} from "../AgentLotteryRebatePercentage"
+import {
+    AgentSportsRebatePercentageInputField,
+    AgentSportsRebateText
+} from "../AgentSportsRebatePercentage"
+import {
+    AgentVirtualSportsRebatePercentageInputField,
+    AgentVirtualSportsRebateText
+} from "../AgentVirtualSportsRebatePercentage"
 import AgentLevel from "../AgentLevel"
 
 const Key = "AgentInfo"
@@ -62,6 +90,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
     let formMethods = useForm({
         defaultValues: clone(record)
     })
+    let { control } = formMethods
 
     let agentId = record?.id
     let [formData, setSubmit] = useState()
@@ -82,14 +111,23 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
         en: "Agent Username"
     })
 
+    const ParentUsernameFieldName = "parentUsername"
     let currentParentUsername = record.parentUsername
-    let parentUsername = formMethods.watch("parentUsername")
-    let changeParent =
+    let parentUsername = useWatch({
+        control,
+        name: ParentUsernameFieldName
+    })
+
+    let willChangeParent =
         currentParentUsername &&
         parentUsername &&
         currentParentUsername != parentUsername
 
-    let levelType = formMethods.watch("levelType")
+    const LevelTypeFieldName = "levelType"
+    let levelType = useWatch({
+        control,
+        name: LevelTypeFieldName
+    })
     let changeLevelType = levelType != record.levelType
     let displayParentUsername =
         changeLevelType && levelType == AgentLevel.Chief ? "none" : "block"
@@ -109,6 +147,12 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
     }
 
     let agentHead = isAgentHead(record?.levelType)
+
+    const AgentTypeField = "type"
+    let agentType = useWatch({
+        control,
+        name: AgentTypeField
+    })
     return (
         <TabPanel tabId={Key} {...props}>
             <FormProvider {...formMethods}>
@@ -123,7 +167,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
 
                             <AgentLevelBox>
                                 <AgentLevelSelect
-                                    name="levelType"
+                                    name={LevelTypeFieldName}
                                     disabled={agentHead}
                                 />
                             </AgentLevelBox>
@@ -139,7 +183,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                             display={displayParentUsername}
                                         >
                                             <Input
-                                                name="parentUsername"
+                                                name={ParentUsernameFieldName}
                                                 placeholder={
                                                     agentUsernamePlaceholder
                                                 }
@@ -150,7 +194,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                                         AgentLevel.Chief
                                                 }
                                             />
-                                            {changeParent && (
+                                            {willChangeParent && (
                                                 <ChangeParentWarning />
                                             )}
                                         </Set>
@@ -175,7 +219,7 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                     {!agentHead && (
                                         <>
                                             <AgentTypeSelect
-                                                name="type"
+                                                name={AgentTypeField}
                                                 value={record?.type}
                                                 display="none"
                                             />
@@ -186,90 +230,68 @@ const EditPanel = ({ record, onSubmitted, onClickClose, ...props }) => {
                                         </>
                                     )}
                                     {agentHead && (
-                                        <AgentTypeSelect name="type" />
+                                        <AgentTypeSelect
+                                            name={AgentTypeField}
+                                        />
                                     )}
                                 </Box>
                             </AgentTypeBox>
 
-                            {!changeParent && (
-                                <BounsBox>
+                            {!willChangeParent && (
+                                <DividendBox type={agentType}>
                                     <AgentDividendPercentageInputField />
-                                </BounsBox>
+                                </DividendBox>
                             )}
 
-                            {!changeParent && (
+                            {!willChangeParent && (
                                 <RebateBox
-                                    label={
-                                        <Trans
-                                            zh="真人分红"
-                                            en="Live Dealer Dividend"
-                                        />
-                                    }
+                                    label={<AgentLiveDealerRebateText />}
+                                    type={agentType}
                                 >
                                     <AgentLiveDealerRebatePercentageInputField />
                                 </RebateBox>
                             )}
 
-                            {!changeParent && (
+                            {!willChangeParent && (
                                 <RebateBox
-                                    label={
-                                        <Trans
-                                            zh="电子分红"
-                                            en="EGame Dividend"
-                                        />
-                                    }
+                                    label={<AgentEgameRebateText />}
+                                    type={agentType}
                                 >
                                     <AgentEgameRebatePercentageInputField />
                                 </RebateBox>
                             )}
 
-                            {!changeParent && (
+                            {!willChangeParent && (
                                 <RebateBox
-                                    label={
-                                        <Trans
-                                            zh="棋牌分红"
-                                            en="Card Game Dividend"
-                                        />
-                                    }
+                                    label={<AgentCardGameRebateText />}
+                                    type={agentType}
                                 >
                                     <AgentCardGameRebatePercentageInputField />
                                 </RebateBox>
                             )}
 
-                            {!changeParent && (
+                            {!willChangeParent && (
                                 <RebateBox
-                                    label={
-                                        <Trans
-                                            zh="彩票分红"
-                                            en="Lottery Dividend"
-                                        />
-                                    }
+                                    label={<AgentLotteryRebateText />}
+                                    type={agentType}
                                 >
                                     <AgentLotteryRebatePercentageInputField />
                                 </RebateBox>
                             )}
 
-                            {!changeParent && (
+                            {!willChangeParent && (
                                 <RebateBox
-                                    label={
-                                        <Trans
-                                            zh="体育分红"
-                                            en="Sports Dividend"
-                                        />
-                                    }
+                                    label={<AgentSportsRebateText />}
+                                    type={agentType}
                                 >
                                     <AgentSportsRebatePercentageInputField />
                                 </RebateBox>
                             )}
 
-                            {!changeParent && (
+                            {!willChangeParent && (
                                 <RebateBox
-                                    label={
-                                        <Trans
-                                            zh="虚拟体育分红"
-                                            en="Virtual Sports Dividend"
-                                        />
-                                    }
+                                    label={<AgentVirtualSportsRebateText />}
+                                    type={agentType}
                                 >
                                     <AgentVirtualSportsRebatePercentageInputField />
                                 </RebateBox>
@@ -317,38 +339,45 @@ const ViewPanel = ({ record, ...props }) => {
 
                 <AgentTypeBox value={record?.type} />
 
-                <BounsBox value={record?.dividendPercentage} />
+                <DividendBox
+                    value={record?.dividendPercentage}
+                    type={record?.type}
+                />
 
                 <RebateBox
-                    label={<Trans zh="真人分红" en="Live Dealer Dividend" />}
+                    label={<AgentLiveDealerRebateText />}
                     value={record?.liveDealerRebatePercentage}
+                    type={record?.type}
                 />
 
                 <RebateBox
-                    label={<Trans zh="电子分红" en="Slot Dividend" />}
+                    label={<AgentEgameRebateText />}
                     value={record?.slotRebatePercentage}
+                    type={record?.type}
                 />
 
                 <RebateBox
-                    label={<Trans zh="棋牌分红" en="Card Game Dividend" />}
+                    label={<AgentCardGameRebateText />}
                     value={record?.cardGameRebatePercentage}
+                    type={record?.type}
                 />
 
                 <RebateBox
-                    label={<Trans zh="彩票分红" en="Lottery Dividend" />}
+                    label={<AgentLotteryRebateText />}
                     value={record?.lotteryRebatePercentage}
+                    type={record?.type}
                 />
 
                 <RebateBox
-                    label={<Trans zh="体育分红" en="Sports Dividend" />}
+                    label={<AgentSportsRebateText />}
                     value={record?.sportsRebatePercentage}
+                    type={record?.type}
                 />
 
                 <RebateBox
-                    label={
-                        <Trans zh="虚拟体育分红" en="Virtual Sports Dividend" />
-                    }
+                    label={<AgentVirtualSportsRebateText />}
                     value={record?.virtualSportsRebatePercentage}
+                    type={record?.type}
                 />
             </FieldValues>
         </TabPanel>
@@ -469,10 +498,15 @@ const AgentTypeBox = ({ value, children }) => {
     )
 }
 
-const BounsBox = ({ value, children }) => {
+const DividendBox = ({ value, type, children }) => {
+    let isCash = isAgentTypeCash(type)
+    if (!isCash) {
+        return null
+    }
+
     return (
         <>
-            <Trans zh="分红比例" en="Bonus Percentage" />
+            <Trans zh="分红比例" en="Dividend Percentage" />
             {children ? (
                 children
             ) : (
@@ -484,7 +518,12 @@ const BounsBox = ({ value, children }) => {
     )
 }
 
-const RebateBox = ({ label, value, children }) => {
+const RebateBox = ({ label, value, type, children }) => {
+    let isCredit = isAgentTypeCredit(type)
+    if (!isCredit) {
+        return null
+    }
+
     return (
         <>
             {label}
