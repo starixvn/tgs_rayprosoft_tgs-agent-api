@@ -38,7 +38,7 @@ const VipLevelListDialog = ({ title = "", vipLevels = [], dialog }) => {
             {...dialog}
         >
             <List overflow="auto">
-                {vipLevels.map((vipLevel, index) => (
+                {vipLevels.sort().map((vipLevel, index) => (
                     <List.Item key={index}>
                         <VipLevelLabel value={vipLevel} />
                     </List.Item>
