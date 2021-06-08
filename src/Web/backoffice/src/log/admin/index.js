@@ -42,6 +42,7 @@ import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useAdminLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
 import { CopyTextBox } from "../../text/CopyTextBox"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -75,7 +76,11 @@ const Body = ({}) => {
         mutate,
         error,
         deleteCache
-    } = useAdminLogList(toApiParams(state))
+    } = useAdminLogList({
+        ...toApiParams(state),
+        sortby: "recordedOn",
+        orderby: SortOrder.Descending
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
 
@@ -91,7 +96,7 @@ const Body = ({}) => {
                     ip={state?.ip}
                     path={state?.path}
                     method={state?.method}
-                    search={({ start, end, ...data }) => {
+                    search={({ start, end, ...data } = {}) => {
                         setState({
                             pageIndex: 0,
                             from: start,
@@ -113,15 +118,7 @@ const Body = ({}) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

@@ -76,7 +76,7 @@ const Body = () => {
 }
 
 const includePayout = (record = {}, list = []) => {
-    return !!list.find(({ id }) => id === record?.id)
+    return !!list.find(({ playerCode }) => playerCode === record?.playerCode)
 }
 
 const BodyContent = ({ brandId }) => {
@@ -85,11 +85,7 @@ const BodyContent = ({ brandId }) => {
 
     const appendBatchPayout = (record) => {
         if (!includePayout(record, batchPayouts)) {
-            setBatchPayouts((batchPayouts = []) => {
-                let result = [...batchPayouts, record]
-                console.log("setBatchPayouts result", result)
-                return result
-            })
+            setBatchPayouts((batchPayouts = []) => [...batchPayouts, record])
         }
     }
 
@@ -323,14 +319,6 @@ const useColumns = ({
                 disableSortBy: true,
                 Cell: ({ value: record }) => {
                     let checked = includePayout(record, batchPayouts)
-                    console.log(
-                        "checked",
-                        checked,
-                        "record",
-                        record,
-                        "batchPayouts",
-                        batchPayouts
-                    )
                     return (
                         <Checkbox
                             checked={checked}
