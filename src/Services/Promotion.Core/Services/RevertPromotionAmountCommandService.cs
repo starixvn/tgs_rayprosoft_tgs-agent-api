@@ -30,9 +30,11 @@ namespace TGS.Services.Promotion.Services
 
             _logger.LogInformation($"Revert {amount}");
 
-            _ = await _promotionRepository
+            var result = await _promotionRepository
                 .RevertPromotionAmountAsync(command.PromotionId, amount)
                 .ConfigureAwait(false);
+
+            _logger.LogInformation($"Revert result: {result}");
         }
     }
 }
