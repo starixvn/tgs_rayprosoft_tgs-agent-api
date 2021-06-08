@@ -76,7 +76,11 @@ const Body = () => {
 }
 
 const includePayout = (record = {}, list = []) => {
-    return !!list.find(({ playerCode }) => playerCode === record?.playerCode)
+    return !!list.find(
+        ({ playerCode, promotionBonusId }) =>
+            playerCode === record?.playerCode &&
+            promotionBonusId === record?.promotionBonusId
+    )
 }
 
 const BodyContent = ({ brandId }) => {
