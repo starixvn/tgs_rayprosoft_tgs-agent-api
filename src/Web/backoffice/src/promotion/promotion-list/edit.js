@@ -57,6 +57,8 @@ import {
     PercentageNumberInputField
 } from "../../input/NumberInput"
 import { Switch } from "../../switch/Switch"
+import { PromotionContentDisclosure } from "./PromotionContent"
+import { useBrand } from "../../merchant/brands/client"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -240,7 +242,18 @@ const usePromotionFormData = (
     brandId,
     { from, to, gameProviderIds = [], vipLevels = [], ...record } = {}
 ) => {
-    let { data = {}, ...rest } = useBrandGameProviderList(
+    let {
+        isLoading: isLoadingBrand,
+        data: brand,
+        error: brandError
+    } = useBrand(brandId)
+
+    let {
+        data = {},
+        isLoading: isLoadingBrandGameProviderList,
+        error: brandGameProviderError,
+        ...rest
+    } = useBrandGameProviderList(
         brandId
             ? {
                   brandId,
@@ -259,6 +272,16 @@ const usePromotionFormData = (
             }
         }) ?? []
 
+    let languages = brand?.languages
+        ?.sort((a, b) => {
+            return a.cultureCode.localeCompare(b.cultureCode)
+        })
+        ?.map(({ brandCultureCode }) => {
+            return {
+                cultureCode: brandCultureCode
+            }
+        })
+
     let promotionTypeGroup = usePromotionGroupValueOf(record?.promotionType)
     let gameTypeGroup = useGameTypeGroupValueOf(record?.gameType)
 
@@ -267,6 +290,7 @@ const usePromotionFormData = (
     data = {
         ...record,
         vipLevels,
+        languages,
         gameProviders,
         promotionTypeGroup,
         gameTypeGroup,
@@ -275,6 +299,8 @@ const usePromotionFormData = (
     }
 
     return {
+        isLoading: isLoadingBrand || isLoadingBrandGameProviderList,
+        error: brandError || brandGameProviderError,
         ...rest,
         data
     }
@@ -417,7 +443,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
         control,
         name: PromotionTypeGroupFieldName
     })
-    let isDepositPromotion = promotionTypeGroup === PromotionTypeGroup.Deposit
+
     let isPromotionTypeTurnoverRelated =
         promotionTypeGroup === PromotionTypeGroup.Turnover ||
         promotionTypeGroup === PromotionTypeGroup.ReliefMoney
@@ -433,12 +459,6 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
         control,
         name: GameTypeGroupFieldName
     })
-
-    useEffect(() => {
-        if (isDepositPromotion) {
-            setValue(AutoSentPlayerBonusFieldName, true)
-        }
-    }, [isDepositPromotion])
 
     let disabled = readOnly
     let editable = !readOnly
@@ -541,19 +561,10 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                     <Trans zh="活动派发" en="Auto Bonus Payout" />
                 </NormalLabel>
                 <Box>
-                    {isDepositPromotion && (
-                        <AutoOrManualPayoutSwitch
-                            readOnly
-                            disabled
-                            checked={true}
-                        />
-                    )}
-                    {!isDepositPromotion && (
-                        <AutoOrManualPayoutSwitch
-                            readOnly={readOnly}
-                            disabled={disabled}
-                        />
-                    )}
+                    <AutoOrManualPayoutSwitch
+                        readOnly={readOnly}
+                        disabled={disabled}
+                    />
                 </Box>
 
                 <NormalLabel>
@@ -641,6 +652,13 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                         </Box>
                     </>
                 )}
+
+                {/* <NormalLabel>
+                    <Trans zh="活动内容" en="Content" />
+                </NormalLabel>
+                <Box>
+                    <PromotionContentDisclosure readOnly={readOnly} />
+                </Box> */}
             </FieldValues>
 
             <Separator />
