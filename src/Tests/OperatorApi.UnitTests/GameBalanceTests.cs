@@ -25,6 +25,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             // arrange
             var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
             var fakePluggableOperations = Substitute.For<IPluggableOperations>();
+            var fakeLogger = new NullLogger<SubmitGameBalanceFundInCommandService>();
 
             var gameProviderCode = "KY";
             var playerCode = "playerCode";
@@ -39,7 +40,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakePluggableOperations
                 .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
                 .Returns(fakeUri);
-            var sut = new SubmitGameBalanceFundInCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations);
+
+            fakePluggalbeGameProviderApiClient
+                .FundInAsync(fakeUri, Arg.Any<GameProviderWalletFundRequest>())
+                .Returns(new GameProviderWalletFundResponse()
+                {
+                    Error = 0,
+                    ErrorMessage = string.Empty
+                });
+
+            var sut = new SubmitGameBalanceFundInCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
 
             // act
             var command = new SubmitGameBalanceFundInCommand(gameProviderCode, playerCode, amount);
@@ -104,7 +114,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
             var fakePluggableOperations = Substitute.For<IPluggableOperations>();
-            var fakeLogger = new NullLogger<SubmitGameBalanceFundInCommandService>();
 
             var request = new GameProviderWalletGetBalanceRequest()
             {
@@ -115,16 +124,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakePluggableOperations
                 .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
                 .Returns(fakeUri);
-
             fakePluggalbeGameProviderApiClient
-                .FundInAsync(fakeUri, Arg.Any<GameProviderWalletFundRequest>())
-                .Returns(new GameProviderWalletFundResponse()
-                {
-                    Error = 0,
-                    ErrorMessage = string.Empty
-                });
+                .GetBalanceAsync(fakeUri, request)
+                .Returns(new GameProviderWalletGetBalanceResponse() { Balance = 1000 });
 
-            var sut = new SubmitGameBalanceFundInCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
+            var sut = new GetGameBalanceQueryService(
+                fakePluggalbeGameProviderApiClient,
+                fakePluggableOperations);
 
             // act
             var query = new GetGameBalanceQuery(playerCode, gameProviderCode);
