@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION log.log_get_admin_logs(
 	_path text,
 	_method text,
 	_server_name text,
+	_response_code integer,
 	_page_size integer,
 	_page_number integer, 
 	_sort_by text, 
@@ -58,7 +59,8 @@ BEGIN
 	  and (_ip is null or a.ip = _ip)
       and ((_path is null or _path = '') OR a.path ilike '%' || _path || '%')
 	  and ((_server_name is null or _server_name = '') OR a.server_name ilike '%' || _server_name || '%')
-      and (_method is null or a.method = _method)    
+      and (_method is null or a.method = _method) 
+	  and (_response_code is null or a.response_code = _response_code)
     order by
 			case when _is_desc = false AND _sort_by = 'RecordedOn'	then a.recorded_on	end asc,
 			case when _is_desc = false AND _sort_by = 'Method'		then a.method		end asc,
