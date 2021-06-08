@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
@@ -18,7 +19,7 @@ namespace Promotion.UnitTests
             var fakePromotionRepository = Substitute.For<IPromotionRepository>();
             var fakeServiceProvider = Substitute.For<IServiceProvider>();
             var checkerFactory = new PromotionCheckerFactory(
-                new Dictionary<string, Type> {["TestPromotionType"] = typeof(IPromotionChecker)},
+                new Dictionary<string, Type> { ["TestPromotionType"] = typeof(IPromotionChecker) },
                 fakeServiceProvider);
             var sut = new CheckCanJoinPromotionQueryService(fakePromotionRepository, checkerFactory);
 
@@ -31,7 +32,8 @@ namespace Promotion.UnitTests
                 .GetPromotionByIdAsync(query.PromotionId)
                 .Returns(new TGS.Core.DataServices.Tgs.Models.Promotion
                 {
-                    BrandId = query.BrandId, PromotionType = "TestPromotionType"
+                    BrandId = query.BrandId,
+                    PromotionType = "TestPromotionType"
                 });
 
             var fakeChecker = Substitute.For<IPromotionChecker>();
@@ -94,7 +96,7 @@ namespace Promotion.UnitTests
 
             fakePlayerService
                 .GetPlayerByPlayerCodeAsync(Arg.Any<string>())
-                .Returns(new Player {FirstDepositOn = null});
+                .Returns(new Player { FirstDepositOn = null });
 
             var actual = await sut.CheckAsync("ThisIsPlayerCode");
 
@@ -122,7 +124,9 @@ namespace Promotion.UnitTests
         {
             var fakePromotionRepository = Substitute.For<IPromotionRepository>();
 
-            var sut = new RevertPromotionAmountCommandService(fakePromotionRepository);
+            var sut = new RevertPromotionAmountCommandService(
+                fakePromotionRepository,
+                NullLogger<RevertPromotionAmountCommandService>.Instance);
 
             var command = new RevertPromotionAmountCommand(Guid.NewGuid(), 1000M);
 
@@ -131,7 +135,8 @@ namespace Promotion.UnitTests
             fakePromotionRepository.GetPromotionByIdAsync(command.PromotionId).Returns(
                 new TGS.Core.DataServices.Tgs.Models.Promotion
                 {
-                    Percentage = percentage, BonusAmountLimit = bonusAmountLimit
+                    Percentage = percentage,
+                    BonusAmountLimit = bonusAmountLimit
                 });
 
             var amount = command.Amount * percentage / 100M;
