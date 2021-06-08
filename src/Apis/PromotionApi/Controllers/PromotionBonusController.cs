@@ -20,20 +20,20 @@ namespace TGS.Apis.PromotionApi.Controllers
 
         [HttpPost("settleDataDaily")]
         [Description("settleDataDaily")]
-        public Task<MessageResponse> GetRoundsAsync(
+        public Task<MessageResponse> SettleDataDailyAsync(
             CreatePromotionBonusDailyRequest request) =>
             _mediator.Send(request);
 
 
         [HttpPost("settleDataWeekly")]
         [Description("settleDataWeekly")]
-        public Task<MessageResponse> GetAgentTeamInformationAsync(CreatePromotionBonusWeeklyRequest request) =>
+        public Task<MessageResponse> SettleDataWeeklyAsync(CreatePromotionBonusWeeklyRequest request) =>
             _mediator.Send(request);
 
         [HttpPost("settleDataMonthly")]
         [Description("settleDataMonthly")]
         public Task<MessageResponse>
-            GetAgentDividendsAsync(CreatePromotionBonusMonthlyRequest request) =>
+            SettleDataMonthlyAsync(CreatePromotionBonusMonthlyRequest request) =>
             _mediator.Send(request);
     }
 }
