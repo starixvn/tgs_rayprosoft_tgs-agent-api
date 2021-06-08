@@ -45,6 +45,7 @@ namespace TGS.Apis.BackendOffice.DataService.Repositories
                     {"_path", request.Path},
                     {"_method", request.Method},
                     {"_server_name", request.ServerName},
+                    {"_response_code", request.ResponseCode},
                     {"_page_size", request.ShowAll ? int.MaxValue : request.Rows},
                     {"_page_number", request.ShowAll ? 1 : request.Page},
                     {"_sort_by", request.SortBy},

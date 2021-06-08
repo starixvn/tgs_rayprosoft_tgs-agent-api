@@ -226,7 +226,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.CardGame:
                     return vip.CardGameRebatePercentage * roundAggregates.Where(a =>
-                            a.GameType == GameType.Sportsbook || a.GameType == GameType.CardGame)
+                            a.GameType == GameType.CardGame)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.Fishing:
                 case GameType.Arcade:

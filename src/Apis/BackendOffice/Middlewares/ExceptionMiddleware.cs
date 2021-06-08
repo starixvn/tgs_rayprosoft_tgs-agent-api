@@ -89,7 +89,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 _systemLogger.LogError(ex, "Error!");
 
                 adminLogEvent.exception = ex.Message.NoLongerThan(4000);
-                adminLogEvent.StackTrace = ex.StackTrace.NoLongerThan(4000);
+                adminLogEvent.StackTrace = ex.StackTrace;
                 adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
 
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
