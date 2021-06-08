@@ -24,11 +24,6 @@ namespace OperatorApi.UnitTests
 {
     public class PlayerPasswordTests
     {
-        [SetUp]
-        public void Setup()
-        {
-        }
-
         [Test]
         public async Task Change_Player_Password_Should_Success()
         {
@@ -160,6 +155,25 @@ namespace OperatorApi.UnitTests
         }
 
         [Test]
+        public void Reset_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        {
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+
+            var sut = new ResetPasswordCommandService(
+                fakePlayerOperations,
+                Substitute.For<IPasswordHandler>(),
+                fakeValidateCodeOperator);
+
+            var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "654321", "newPassword");
+
+            fakeValidateCodeOperator.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Any<string>(), Arg.Any<string>())
+                .Returns((ValidateCodeData)null);
+
+            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
         public async Task Reset_Password_Should_Success()
         {
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
@@ -186,23 +200,9 @@ namespace OperatorApi.UnitTests
                 .ChangePlayerPasswordAsync(Arg.Any<ChangePlayerPasswordData>());
         }
 
-        [Test]
-        public void Reset_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        [SetUp]
+        public void Setup()
         {
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-
-            var sut = new ResetPasswordCommandService(
-                fakePlayerOperations,
-                Substitute.For<IPasswordHandler>(),
-                fakeValidateCodeOperator);
-
-            var command = new ResetPasswordCommand("31B51623-2D9D-4A5B-B6F4-32924C5A91EB", "654321", "newPassword");
-
-            fakeValidateCodeOperator.GetValidateCodeDataAsync<ValidateCodeData>(Arg.Any<string>(), Arg.Any<string>())
-                .Returns((ValidateCodeData)null);
-
-            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
         }
     }
 }

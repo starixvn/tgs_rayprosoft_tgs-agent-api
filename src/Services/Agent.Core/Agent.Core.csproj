@@ -6,9 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.10.56">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
+    <PackageReference Include="Tgs.Payment.Core" Version="0.0.6-alpha" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
     <PackageReference Include="TGS.SmsServiceClient" Version="0.0.5-alpha" />
   </ItemGroup>
@@ -16,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\Operations\Operations.csproj" />
+    <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

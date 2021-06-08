@@ -7,6 +7,7 @@ using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
+using AgentBankInfo = TGS.Core.DataServices.Tgs.Models.AgentBankInfo;
 
 namespace TGS.Payment.Repositories
 {
@@ -17,6 +18,28 @@ namespace TGS.Payment.Repositories
         public PaymentRepository(ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        }
+
+        public async ValueTask CreateAgentBankInfoAsync(Tgs.Payment.AgentBankInfo agentBankInfo, string modifyUser)
+        {
+            var createTime = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.AgentBankInfos
+                .AddAsync(new AgentBankInfo
+                {
+                    Id = agentBankInfo.Id,
+                    AgentId = agentBankInfo.AgentId,
+                    BrandId = agentBankInfo.BrandId,
+                    PaymentChannelId = agentBankInfo.PaymentChannelId,
+                    BankType = agentBankInfo.BankType,
+                    Detail = agentBankInfo.Detail,
+                    CreatedByUsername = modifyUser,
+                    CreatedOn = createTime,
+                    UpdatedByUsername = modifyUser,
+                    UpdatedOn = createTime
+                }).ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async ValueTask CreateBankInfoAsync(BankInfo bankInfo, string modifyUser)
@@ -69,18 +92,14 @@ namespace TGS.Payment.Repositories
         {
             var currentDate = DateTimeOffset.UtcNow;
 
-            var player = await _tgsRepository.Players
-                .FindAsync(form.UserId)
-                .ConfigureAwait(false);
-
             await _tgsRepository.WithdrawForms
                 .AddAsync(new WithdrawForm
                 {
                     Id = createFormId,
                     BrandId = form.BrandId,
                     UserId = form.UserId,
-                    UserName = player.Username,
-                    UserType = 1,
+                    UserName = form.UserName,
+                    UserType = (int)form.UserType,
                     BrandPaymentId = form.BrandPaymentId,
                     Amount = form.Amount,
                     BankInfoId = form.BankInfoId,
@@ -96,6 +115,20 @@ namespace TGS.Payment.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public async ValueTask DeleteAgentBankInfoAsync(Guid agentId, Guid bankInfoId)
+        {
+            var bankInfo = await _tgsRepository.AgentBankInfos
+                .FindAsync(bankInfoId)
+                .ConfigureAwait(false);
+
+            if (bankInfo.AgentId == agentId)
+            {
+                _tgsRepository.AgentBankInfos.Remove(bankInfo);
+
+                await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
+
         public async ValueTask DeleteBankInfoAsync(string playerCode, Guid bankInfoId)
         {
             var bankInfo = await _tgsRepository.PlayerBankInfos
@@ -109,6 +142,32 @@ namespace TGS.Payment.Repositories
                 await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
             }
         }
+
+        public async ValueTask<Tgs.Payment.AgentBankInfo> GetAgentBankInfoByIdAsync(Guid id)
+        {
+            var bankInfo = await _tgsRepository.AgentBankInfos
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            return new Tgs.Payment.AgentBankInfo(
+                bankInfo.Id,
+                bankInfo.AgentId,
+                bankInfo.BrandId,
+                bankInfo.PaymentChannelId,
+                bankInfo.BankType,
+                bankInfo.Detail);
+        }
+
+        public IAsyncEnumerable<Tgs.Payment.AgentBankInfo> GetAgentBankInfosByAgentIdAsync(Guid agentId)
+            => _tgsRepository.AgentBankInfos.AsAsyncEnumerable()
+                .Where(info => info.AgentId == agentId)
+                .Select(info => new Tgs.Payment.AgentBankInfo(
+                    info.Id,
+                    info.AgentId,
+                    info.BrandId,
+                    info.PaymentChannelId,
+                    info.BankType,
+                    info.Detail));
 
         public IAsyncEnumerable<PaymentChannelInfo> GetAllPaymentChannelsAsync()
             => _tgsRepository.PaymentChannels.AsAsyncEnumerable()

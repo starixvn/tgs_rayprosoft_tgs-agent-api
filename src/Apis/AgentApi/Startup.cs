@@ -43,6 +43,45 @@ namespace TGS.Apis.AgentApi
             _env = env;
         }
 
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseGlobalExceptionHandler();
+
+            app.UseRequestLocalization(options =>
+            {
+                options.DefaultRequestCulture = new("en-US");
+                options.ApplyCurrentCultureToResponseHeaders = true;
+            });
+
+            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
+
+            app.UseRouting();
+
+            app.UseHttpMetrics();
+
+            app.UseCors();
+
+            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health", new()
+                {
+                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) =>
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                });
+                endpoints.MapMetrics();
+            });
+
+            if (!_env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Agent API"));
+            }
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -66,7 +105,16 @@ namespace TGS.Apis.AgentApi
                 .ConfigureAgentOptions<IConfiguration>((options, config) =>
                 {
                     config.GetSection("Agent").Bind(options);
-                });
+                })
+                .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("EmailSetting").Bind(options);
+                })
+                .AddPayment(configuration =>
+                {
+                    configuration.UseTgsPaymentRepository();
+                })
+                .AddTgsAgentRepository();
 
             services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
             {
@@ -142,45 +190,6 @@ namespace TGS.Apis.AgentApi
                             .SetIsOriginAllowed(_ => true);
                     });
             });
-        }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseGlobalExceptionHandler();
-
-            app.UseRequestLocalization(options =>
-            {
-                options.DefaultRequestCulture = new("en-US");
-                options.ApplyCurrentCultureToResponseHeaders = true;
-            });
-
-            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
-
-            app.UseRouting();
-
-            app.UseHttpMetrics();
-
-            app.UseCors();
-
-            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                });
-                endpoints.MapMetrics();
-            });
-
-            if (!_env.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Agent API"));
-            }
         }
     }
 }

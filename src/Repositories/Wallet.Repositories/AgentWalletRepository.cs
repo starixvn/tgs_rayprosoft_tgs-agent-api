@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
-using TGS.Services.Wallet;
 using TGS.Services.WalletService;
 
 namespace TGS.Wallet.Repositories
@@ -22,8 +19,13 @@ namespace TGS.Wallet.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<Guid> ExchangeAsync(Guid brandId, Guid walletId, Guid agentId,
-            TransactionTypes transactionType, decimal amount, string? description)
+        public async ValueTask<(Guid TransactionId, decimal PostBalance)> ExchangeAsync(
+            Guid brandId,
+            Guid walletId,
+            Guid agentId,
+            TransactionTypes transactionType,
+            decimal amount,
+            string? description)
         {
             const string sql = "dbo.agent_wallet_update_wallet_balance";
             var updatedOn = DateTimeOffset.UtcNow;
@@ -71,17 +73,19 @@ namespace TGS.Wallet.Repositories
 
             scope.Complete();
 
-            return transactionId;
+            return (transactionId, postBalance);
         }
 
-        public async ValueTask<decimal> GetBalanceAsync(Guid walletId, string playerCode)
+        public async ValueTask<decimal> GetBalanceAsync(Guid walletId, Guid agentId)
         {
-            var playerWallet = await _tgsRepository.Wallets.AsAsyncEnumerable()
-                .Where(wallet => wallet.PlayerCode == playerCode)
-                .SingleAsync()
+            var agentWallet = await _tgsRepository.AgentWallets
+                .FindAsync(walletId)
                 .ConfigureAwait(false);
 
-            return playerWallet.Balance;
+            if (agentWallet.AgentId == agentId)
+                return agentWallet.Balance;
+            else
+                throw new Exception("Can't find agent wallet.");
         }
     }
 }
