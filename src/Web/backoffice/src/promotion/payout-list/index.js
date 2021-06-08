@@ -84,8 +84,12 @@ const BodyContent = ({ brandId }) => {
     let [batchPayouts, setBatchPayouts] = useState([])
 
     const appendBatchPayout = (record) => {
-        if (!includePayout(record?.id, batchPayouts)) {
-            setBatchPayouts((batchPayouts = []) => [...batchPayouts, record])
+        if (!includePayout(record, batchPayouts)) {
+            setBatchPayouts((batchPayouts = []) => {
+                let result = [...batchPayouts, record]
+                console.log("setBatchPayouts result", result)
+                return result
+            })
         }
     }
 
@@ -160,28 +164,12 @@ const BodyContent = ({ brandId }) => {
                         name={state?.name}
                         start={state?.start}
                         end={state?.end}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                promotionGroup: data?.promotionGroup,
-                                username: data?.username,
-                                name: data?.name,
-                                start: data?.start,
-                                end: data?.end
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    promotionGroup: state?.promotionGroup,
-                                    username: state?.username,
-                                    name: state?.name,
-                                    start: state?.start,
-                                    end: state?.end
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
@@ -335,6 +323,14 @@ const useColumns = ({
                 disableSortBy: true,
                 Cell: ({ value: record }) => {
                     let checked = includePayout(record, batchPayouts)
+                    console.log(
+                        "checked",
+                        checked,
+                        "record",
+                        record,
+                        "batchPayouts",
+                        batchPayouts
+                    )
                     return (
                         <Checkbox
                             checked={checked}
