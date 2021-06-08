@@ -26,7 +26,7 @@ namespace PlayerBucket.Repositories
             _walletRepository = walletRepository;
         }
 
-        async Task IPlayerBucketRepository.CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] requests)
+        public async Task CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] requests)
         {
             var buckets = requests.Select(x => new TGS.Core.DataServices.Tgs.Models.PlayerBucket
             {
@@ -41,7 +41,7 @@ namespace PlayerBucket.Repositories
             await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        async Task IPlayerBucketRepository.FillInBucketAsync(FillInPlayerBucketsRequest request)
+        public async Task FillInBucketAsync(FillInPlayerBucketsRequest request)
         {
             var playerCodes = request.PlayerTurnovers.Select(x => x.PlayerCode).ToArray();
             var playerBuckets = await _repository.PlayerBuckets
@@ -95,7 +95,7 @@ namespace PlayerBucket.Repositories
             scope.Complete();
         }
 
-        async ValueTask<decimal> IPlayerBucketRepository.CreatePlayerBucketWithDepositAsync(
+        public async ValueTask<decimal> CreatePlayerBucketWithDepositAsync(
             CreatePlayerBucketWithDepositRequest request)
         {
             var bucketAmount = request.DepositAmount;
@@ -152,7 +152,7 @@ namespace PlayerBucket.Repositories
             return bucketAmount;
         }
 
-        async ValueTask<bool> IPlayerBucketRepository.IsBucketFullAsync(string playerCode) =>
+        public async ValueTask<bool> IsBucketFullAsync(string playerCode) =>
             await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode).AllAsync(x => x.IsFull);
     }
 }

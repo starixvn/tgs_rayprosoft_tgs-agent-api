@@ -15,8 +15,6 @@ namespace TGS.Services.BackOffice.Application.Models.AgentAdjust
 
         public decimal Amount { get; set; }
 
-        public decimal BucketAmount { get; set; } = 0;
-
         public string Remark { get; set; }
 
         public string TargetName { get; set; }
