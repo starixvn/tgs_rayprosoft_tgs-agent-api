@@ -6,6 +6,7 @@ using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
@@ -96,7 +97,7 @@ namespace PlayerBucket.Repositories
         }
 
         public async ValueTask<decimal> CreatePlayerBucketWithDepositAsync(
-            CreatePlayerBucketWithDepositRequest request)
+                CreatePlayerBucketWithDepositRequest request)
         {
             var bucketAmount = request.DepositAmount;
 
@@ -130,7 +131,7 @@ namespace PlayerBucket.Repositories
 
                 bucketAmount += bonusAmount;
 
-                var promotionBucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
+                var playerBucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
                 {
                     PlayerCode = request.PlayerCode,
                     BucketAmount = bonusAmount * promotion.TurnoverMultiple,
@@ -139,12 +140,60 @@ namespace PlayerBucket.Repositories
                     CreatedOn = DateTimeOffset.Now
                 };
 
-                await _repository.PlayerBuckets.AddAsync(promotionBucket).ConfigureAwait(false);
+                var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
+                var reportDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0,
+                    now.Offset);
 
-                await _repository.SaveChangesAsync().ConfigureAwait(false);
+                var bonusId = GuidExtensions.NewSequentialGuid();
+                var bonus = new PromotionBonus
+                {
+                    Id = bonusId,
+                    BrandId = request.BrandId,
+                    PromotionId = promotion.Id,
+                    From = reportDate,
+                    To = reportDate,
+                    PromotionType = promotion.PromotionType,
+                    TotalAmountLimit = promotion.TotalAmountLimit,
+                    GameType = promotion.GameType,
+                    Percentage = promotion.Percentage,
+                    BonusAmountLimit = promotion.BonusAmountLimit,
+                    TurnoverMultiple = promotion.TurnoverMultiple,
+                    CreatedOn = DateTimeOffset.Now,
+                    PromotionPlayers = new[]
+                    {
+                        new PromotionPlayer
+                        {
+                            PlayerCode = request.PlayerCode,
+                            PromotionBonusId = bonusId,
+                            BonusAmount = bonusAmount,
+                            SentOn = promotion.AutoSentPlayerBonus ? DateTimeOffset.Now : null
+                        }
+                    }.ToHashSet()
+                };
 
-                await _walletRepository.ExchangeAsync(request.BrandId, request.DefaultWalletId,
-                    request.PlayerCode, TransactionTypes.Promotion, bonusAmount);
+                await _repository.PromotionBonus.AddAsync(bonus).ConfigureAwait(false);
+
+                if (promotion.AutoSentPlayerBonus)
+                {
+                    await _repository.PlayerBuckets.AddAsync(playerBucket).ConfigureAwait(false);
+
+                    await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+                    var (transactionId, _) = await _walletRepository.ExchangeAsync(request.BrandId,
+                        request.DefaultWalletId,
+                        request.PlayerCode, TransactionTypes.Promotion, bonusAmount);
+
+                    var transactionPromotion = new TransactionPromotion
+                    {
+                        TransactionId = transactionId,
+                        PromotionId = promotion.Id,
+                        PromotionBonusId = bonusId,
+                        PromotionType = promotion.PromotionType
+                    };
+
+                    await _repository.TransactionPromotions.AddAsync(transactionPromotion).ConfigureAwait(false);
+                    await _repository.SaveChangesAsync().ConfigureAwait(false);
+                }
             }
 
             scope.Complete();

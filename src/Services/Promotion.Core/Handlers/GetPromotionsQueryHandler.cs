@@ -45,8 +45,8 @@ namespace TGS.Services.Promotion.Handlers
                     x => x.PromotionVipLevels.Count == 0 ||
                         x.PromotionVipLevels.Select(p => p.Level).Contains(player.Vip.Level))
                 .Where(
-                    request.CurrentDate, 
-                    x=> x.Status == SwitchStatus.Enabled
+                    request.CurrentDate,
+                    x => x.Status == SwitchStatus.Enabled
                         && x.From <= request.CurrentDate
                         && x.To > request.CurrentDate)
                 .Select(x => new PromotionModel
@@ -67,7 +67,7 @@ namespace TGS.Services.Promotion.Handlers
                     TotalAmountLimit = x.TotalAmountLimit,
                     TurnoverMultiple = x.TurnoverMultiple,
                     GameProviderIds = x.PromotionGameProviders.Select(g => g.GameProviderId).ToArray(),
-                    VipLevels = x.PromotionVipLevels.Select(v => v.Level).ToArray(),
+                    VipLevels = x.PromotionVipLevels.Select(v => v.Level).OrderBy(level => level).ToArray(),
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn,
                     CreatedByUsername = x.CreatedByUsername,

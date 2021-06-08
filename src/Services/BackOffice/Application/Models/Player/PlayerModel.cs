@@ -20,7 +20,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public string Email { get; init; }
         public string QQ { get; init; }
         public string WeChat { get; init; }
-
+        public decimal WageringRequirement { get; set; }
         public BankModel[] Banks { get; init; }
 
         public class BankModel

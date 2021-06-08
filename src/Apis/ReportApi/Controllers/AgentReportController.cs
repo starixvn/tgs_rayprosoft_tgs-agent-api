@@ -21,7 +21,7 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet("contribution")]
         [Description("Get agent contributions")]
-        public Task<PagedResponse<AgentContributionModel>> GetRoundsAsync(
+        public Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(
             [FromQuery] GetAgentContributionsRequest request) =>
             _mediator.Send(request);
 
