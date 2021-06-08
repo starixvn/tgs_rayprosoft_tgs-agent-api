@@ -5,6 +5,15 @@ import { PercentageNumberInputField } from "../input/NumberInput"
 
 export const Name = "virtualSportsRebatePercentage"
 
+const AgentVirtualSportsRebateMessages = {
+    zh: "虚拟体育返佣",
+    en: "Virtual Sports Rebate"
+}
+
+export const AgentVirtualSportsRebateText = () => (
+    <Trans {...AgentVirtualSportsRebateMessages} />
+)
+
 export const AgentVirtualSportsRebatePercentageInputField = ({
     name = Name,
     required = true,

@@ -204,7 +204,9 @@ const useAgentBonusColumns = ({ username = "", items = [] }) => {
 
             numberDecimalColumn({
                 accessor: "slotWinLoss",
-                Header: <Trans zh="电子输赢总金额" en="Slot Win Loss Amount" />,
+                Header: (
+                    <Trans zh="电子输赢总金额" en="EGame Win Loss Amount" />
+                ),
                 sumColumn: "slotWinLoss",
                 disableSortBy: true
             }),

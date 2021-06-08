@@ -18,7 +18,9 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
                 [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
                 [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest,
-                [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest
+                [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest,
+                [TgsApiError.GameBalanceFundInFailed] = StatusCodes.Status400BadRequest,
+                [TgsApiError.GameBalanceFundOutFailed] = StatusCodes.Status400BadRequest
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> TgsApiErrorByException =
@@ -28,7 +30,9 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
                 [typeof(EmailNotVerifyException)] = TgsApiError.EmailNotVerify,
                 [typeof(InsufficientBucketException)] = TgsApiError.InsufficientBucket,
-                [typeof(CannotJoinPromotionException)] = TgsApiError.PromotionCannotJoin
+                [typeof(CannotJoinPromotionException)] = TgsApiError.PromotionCannotJoin,
+                [typeof(GameBalanceFundInFailedException)] = TgsApiError.GameBalanceFundInFailed,
+                [typeof(GameBalanceFundOutFailedException)] = TgsApiError.GameBalanceFundOutFailed
             };
 
         public bool CanProcess(Exception exception)

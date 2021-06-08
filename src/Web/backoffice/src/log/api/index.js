@@ -65,6 +65,7 @@ const Body = ({}) => {
         ip: "",
         path: "",
         prefix: "",
+        serverName: "",
         method: ""
     })
 
@@ -91,6 +92,7 @@ const Body = ({}) => {
                     ip={state?.ip}
                     path={state?.path}
                     prefix={state?.prefix}
+                    serverName={state?.serverName}
                     method={state?.method}
                     search={({ start, end, ...data }) => {
                         setState({
@@ -184,6 +186,11 @@ const SearchBar = ({
                         name="prefix"
                         showEmptyFieldValueAddonAfter
                         placeholder="Prefix"
+                    />
+                    <InputField
+                        name="serverName"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Server Name"
                     />
                     <InputField
                         name="method"

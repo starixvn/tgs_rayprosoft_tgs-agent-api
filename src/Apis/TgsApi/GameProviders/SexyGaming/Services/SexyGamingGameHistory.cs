@@ -10,7 +10,7 @@ using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.Services.Services
+namespace TGS.Apis.TgsApi.GameProviders.Services
 {
     public sealed class SexyGamingGameHistory : BaseBetHistory
     {

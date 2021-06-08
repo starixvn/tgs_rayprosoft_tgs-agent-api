@@ -138,57 +138,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x =>
                     x.BrandId == request.BrandId && x.Username == request.ParentUsername);
             var operation = (AgentOperation)Enum.Parse(typeof(AgentOperation), request.UpdateType.ToString());
-
-                    switch (request.UpdateType)
-                    {
-                        case MemberUpdateType.Info:
-                            agent.RealName = request.RealName;
-                            agent.ParentAgentId = parentAgent?.Id;
-                            agent.Status = request.Status;
-                            agent.LevelType = request.ParentUsername.IsNullOrEmpty()
-                                ? AgentLevelType.Chief
-                                : AgentLevelType.Agent;
-                            agent.Type = request.Type;
-                            agent.CommissionPercentage =
-                                operation == AgentOperation.Agent ? -1 : request.CommissionPercentage;
-                            agent.DividendPercentage = operation == AgentOperation.Agent ? -1 : request.DividendPercentage;
-                            agent.LiveDealerRebatePercentage = operation == AgentOperation.Agent
-                                ? -1
-                                : request.LiveDealerRebatePercentage;
-                            agent.SlotRebatePercentage =
-                                operation == AgentOperation.Agent ? -1 : request.SlotRebatePercentage;
-                            agent.LotteryRebatePercentage = operation == AgentOperation.Agent
-                                ? -1
-                                : request.LotteryRebatePercentage;
-                            agent.CardGameRebatePercentage = operation == AgentOperation.Agent
-                                ? -1
-                                : request.CardGameRebatePercentage;
-                            agent.SportsRebatePercentage =
-                                operation == AgentOperation.Agent ? -1 : request.SportsRebatePercentage;
-                            agent.VirtualSportsRebatePercentage = operation == AgentOperation.Agent
-                                ? -1
-                                : request.VirtualSportsRebatePercentage;
-                            agent.AgentStatus = operation == AgentOperation.Agent
-                                    ? AgentConfigStatus.WaitForConfigurePercentage
-                                    : AgentConfigStatus.DoneForConfigurePercentage;
-                            break;
-                        case MemberUpdateType.Contact:
-                            agent.Phone = request.Phone;
-                            agent.Email = request.Email;
-                            agent.QQ = request.QQ;
-                            agent.Wechat = request.Wechat;
-                            break;
-                        case MemberUpdateType.Password:
-                            var (salt, pwd) = _passwordHandler.GenerateCredential(request.Password);
-                            agent.Password = pwd;
-                            agent.Salt = salt;
-                            break;
-                    }
+            if (request.ParentUsername.IsNotNullOrEmpty() && agent.ParentAgentId != parentAgent.Id)
+            {
+                operation = AgentOperation.Agent;
+            }
                     
-                    agent.UpdatedByUsername = request.EditorUsername;
-                    agent.UpdatedOn = DateTimeOffset.Now;
-                    agent.Remarks = request.Remarks;
-
             switch (request.UpdateType)
             {
                 case MemberUpdateType.Info:

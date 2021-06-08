@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.Models;
@@ -61,17 +62,27 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
             var fakePluggableOperations = Substitute.For<IPluggableOperations>();
+            var fakeLogger = new NullLogger<SubmitGameBalanceFundOutCommandService>();
 
             fakePluggableOperations
                 .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
                 .Returns(fakeUri);
+
+            fakePluggalbeGameProviderApiClient
+                .FundOutAsync(fakeUri, Arg.Any<GameProviderWalletFundRequest>())
+                .Returns(new GameProviderWalletFundResponse()
+                {
+                    Error = 0,
+                    ErrorMessage = string.Empty
+                });
+
             var request = new GameProviderWalletFundRequest()
             {
                 GameProviderCode = gameProviderCode,
                 PlayerCode = playerCode,
                 Amount = amount
             };
-            var sut = new SubmitGameBalanceFundOutCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations);
+            var sut = new SubmitGameBalanceFundOutCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
 
             // act
             var command = new SubmitGameBalanceFundOutCommand(gameProviderCode, playerCode, amount);
@@ -93,6 +104,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
             var fakePluggableOperations = Substitute.For<IPluggableOperations>();
+            var fakeLogger = new NullLogger<SubmitGameBalanceFundInCommandService>();
 
             var request = new GameProviderWalletGetBalanceRequest()
             {
@@ -103,13 +115,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakePluggableOperations
                 .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
                 .Returns(fakeUri);
-            fakePluggalbeGameProviderApiClient
-                .GetBalanceAsync(fakeUri, request)
-                .Returns(new GameProviderWalletGetBalanceResponse() { Balance = 1000 });
 
-            var sut = new GetGameBalanceQueryService(
-                fakePluggalbeGameProviderApiClient,
-                fakePluggableOperations);
+            fakePluggalbeGameProviderApiClient
+                .FundInAsync(fakeUri, Arg.Any<GameProviderWalletFundRequest>())
+                .Returns(new GameProviderWalletFundResponse()
+                {
+                    Error = 0,
+                    ErrorMessage = string.Empty
+                });
+
+            var sut = new SubmitGameBalanceFundInCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
 
             // act
             var query = new GetGameBalanceQuery(playerCode, gameProviderCode);
