@@ -17,7 +17,7 @@ namespace TGS.Shared.Game.Models.AsiaGaming.Outgoing
         public string Password { get; } = "password";
 
         [JsonPropertyName("oddtype")]
-        public string BetLimitId { get; init; } = "A";
+        public string BetLimitId { get; init; } = string.Empty;
 
         [JsonPropertyName("cur")]
         public string Currency { get; init; }
