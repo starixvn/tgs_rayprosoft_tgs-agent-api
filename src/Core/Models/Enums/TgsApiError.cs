@@ -16,13 +16,14 @@
         InsufficientFunds = 205,
         InvalidInvitationCode = 206,
         InsufficientBucket = 207,
+        GameBalanceFundInFailed = 208,
+        GameBalanceFundOutFailed = 209,
 
         InvalidGameAction = 301,
         TransactionIdNotFound = 302,
         DuplicateTransaction = 303,
         RoundIdNotFound = 304,
         InvalidAmount = 305,
-        TransferError = 306,
 
         InvalidArguments = 401,
         IncorrectFormat = 402,
