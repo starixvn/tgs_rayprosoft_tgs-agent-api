@@ -256,7 +256,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 .ConfigureAwait(false);
 
             var betData = await _map.VoidSettleAsync(gameProviderConfigurationData, playerCode, data.Transaction).ConfigureAwait(false);
-            await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+            await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
 
             return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
             {
