@@ -47,22 +47,45 @@ import { FieldValues, TwoColumns } from "../../layout/Grid"
 import { NormalLabel } from "../../form/Label"
 import Input, { InputField } from "../../input/Input"
 import { PasswordInputField } from "../../input/PasswordInput"
-import { useFormContext } from "react-hook-form"
+import { useFormContext, useWatch } from "react-hook-form"
 import AgentLevel, {
     AgentLevelLabel,
     AgentLevelSelect,
     isAgentParentRequired
 } from "../AgentLevel"
-import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
+import AgentType, {
+    AgentTypeLabel,
+    AgentTypeSelect,
+    isAgentTypeCash,
+    isAgentTypeCredit
+} from "../AgentType"
 import Textarea from "../../textarea"
 import AgentUpdateType from "./AgentUpdateType"
 import { AgentDividendPercentageInputField } from "../AgentDividendPercentage"
-import { AgentLiveDealerRebatePercentageInputField } from "../AgentLiveDealerRebatePercentage"
-import { AgentEgameRebatePercentageInputField } from "../AgentEgameRebatePercentage"
-import { AgentCardGameRebatePercentageInputField } from "../AgentCardGameRebatePercentage"
-import { AgentLotteryRebatePercentageInputField } from "../AgentLotteryRebatePercentage"
-import { AgentSportsRebatePercentageInputField } from "../AgentSportsRebatePercentage"
-import { AgentVirtualSportsRebatePercentageInputField } from "../AgentVirtualSportsRebatePercentage"
+import {
+    AgentLiveDealerRebatePercentageInputField,
+    AgentLiveDealerRebateText
+} from "../AgentLiveDealerRebatePercentage"
+import {
+    AgentEgameRebatePercentageInputField,
+    AgentEgameRebateText
+} from "../AgentEgameRebatePercentage"
+import {
+    AgentCardGameRebatePercentageInputField,
+    AgentCardGameRebateText
+} from "../AgentCardGameRebatePercentage"
+import {
+    AgentLotteryRebatePercentageInputField,
+    AgentLotteryRebateText
+} from "../AgentLotteryRebatePercentage"
+import {
+    AgentSportsRebatePercentageInputField,
+    AgentSportsRebateText
+} from "../AgentSportsRebatePercentage"
+import {
+    AgentVirtualSportsRebatePercentageInputField,
+    AgentVirtualSportsRebateText
+} from "../AgentVirtualSportsRebatePercentage"
 import clone from "clone-deep"
 import {
     AgentBalanceChangePanel,
@@ -121,6 +144,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog }) => {
         <FormDialog
             defaultValues={{
                 levelType: AgentLevel.Chief,
+                type: AgentType.Cash,
                 brandId
             }}
             onSubmit={onSubmit}
@@ -145,15 +169,30 @@ const AddDialog = ({ brandId, onSubmitted, dialog }) => {
 }
 
 const FormBody = ({}) => {
-    let { watch } = useFormContext()
+    let { control } = useFormContext()
 
-    let levelType = watch("levelType")
-    let password = watch("password")
-
+    const LevelTypeFieldName = "levelType"
+    let levelType = useWatch({
+        control,
+        name: LevelTypeFieldName
+    })
     let parentAgentRequired = isAgentParentRequired(levelType)
 
+    const PasswordFieldName = "password"
+    let password = useWatch({
+        control,
+        name: PasswordFieldName
+    })
+
+    const AgentTypeFieldName = "type"
+    let agentType = useWatch({
+        control,
+        name: AgentTypeFieldName
+    })
+    let isCash = isAgentTypeCash(agentType)
+    let isCredit = isAgentTypeCredit(agentType)
     return (
-        <Set orientation="vertical" isFilled>
+        <Set orientation="vertical" isFilled marginLeft="1rem">
             <Heading use="h5">
                 <Trans zh="基本资料" en="Basic info" />
             </Heading>
@@ -167,12 +206,12 @@ const FormBody = ({}) => {
                     <NormalLabel required>
                         <Trans zh="代理用户名" en="Username" />
                     </NormalLabel>
-                    <Input name="username" required />
+                    <Input name="username" required autoComplete="off" />
 
                     <NormalLabel required>
                         <Trans zh="登入密码" en="Password" />
                     </NormalLabel>
-                    <PasswordInputField name="password" />
+                    <PasswordInputField name={PasswordFieldName} />
 
                     <NormalLabel required>
                         <Trans zh="确认密码" en="Confirm password" />
@@ -186,7 +225,7 @@ const FormBody = ({}) => {
                         <Trans zh="代理种类" en="Level Type" />
                     </NormalLabel>
                     <AgentLevelSelect
-                        name="levelType"
+                        name={LevelTypeFieldName}
                         required
                         placeholder={false}
                     />
@@ -197,9 +236,8 @@ const FormBody = ({}) => {
                                 <Trans zh="代理类型" en="Agent Type" />
                             </NormalLabel>
                             <AgentTypeSelect
-                                name="type"
+                                name={AgentTypeFieldName}
                                 required
-                                placeholder={false}
                             />
                         </>
                     )}
@@ -216,64 +254,77 @@ const FormBody = ({}) => {
                         </>
                     )}
 
-                    <NormalLabel required>
-                        <Trans zh="代理分红" en="Bonus" />
-                    </NormalLabel>
-                    <AgentDividendPercentageInputField />
-
-                    <NormalLabel required>
-                        <Trans zh="真人返佣" en="Live Dealer Rebate" />
-                    </NormalLabel>
-                    <TwoColumns columns={["0.7fr"]}>
-                        <Flex flex="1 50%">
-                            <AgentLiveDealerRebatePercentageInputField />
-                        </Flex>
-
-                        <FieldValues flex="1 50%">
+                    {isCash && (
+                        <>
                             <NormalLabel required>
-                                <Trans zh="彩票返佣" en="Lottery Rebate" />
+                                <Trans zh="代理分红" en="Dividend" />
                             </NormalLabel>
+                            <AgentDividendPercentageInputField />
+                        </>
+                    )}
 
-                            <AgentLotteryRebatePercentageInputField />
-                        </FieldValues>
-                    </TwoColumns>
-
-                    <NormalLabel required>
-                        <Trans zh="电子返佣" en="EGame Rebate" />
-                    </NormalLabel>
-                    <TwoColumns columns={["0.7fr"]}>
-                        <Flex flex="1 50%">
-                            <AgentEgameRebatePercentageInputField />
-                        </Flex>
-
-                        <FieldValues>
+                    {isCredit && (
+                        <>
                             <NormalLabel required>
-                                <Trans zh="体育返佣" en="Sports Rebate" />
+                                <AgentLiveDealerRebateText />
                             </NormalLabel>
+                            <TwoColumns columns={["0.7fr"]}>
+                                <Flex flex="1 50%">
+                                    <AgentLiveDealerRebatePercentageInputField width="100%" />
+                                </Flex>
 
-                            <AgentSportsRebatePercentageInputField />
-                        </FieldValues>
-                    </TwoColumns>
+                                <FieldValues flex="1 50%">
+                                    <NormalLabel required>
+                                        <AgentLotteryRebateText />
+                                    </NormalLabel>
 
-                    <NormalLabel required>
-                        <Trans zh="棋牌返佣" en="Card Game Rebate" />
-                    </NormalLabel>
-                    <TwoColumns columns={["0.7fr"]}>
-                        <Flex flex="1 50%">
-                            <AgentCardGameRebatePercentageInputField />
-                        </Flex>
+                                    <AgentLotteryRebatePercentageInputField />
+                                </FieldValues>
+                            </TwoColumns>
+                        </>
+                    )}
 
-                        <FieldValues>
+                    {isCredit && (
+                        <>
                             <NormalLabel required>
-                                <Trans
-                                    zh="虚拟体育返佣"
-                                    en="Virtual Sports Rebate"
-                                />
+                                <AgentEgameRebateText />
                             </NormalLabel>
+                            <TwoColumns columns={["0.7fr"]}>
+                                <Flex flex="1 50%">
+                                    <AgentEgameRebatePercentageInputField width="100%" />
+                                </Flex>
 
-                            <AgentVirtualSportsRebatePercentageInputField />
-                        </FieldValues>
-                    </TwoColumns>
+                                <FieldValues>
+                                    <NormalLabel required>
+                                        <AgentSportsRebateText />
+                                    </NormalLabel>
+
+                                    <AgentSportsRebatePercentageInputField />
+                                </FieldValues>
+                            </TwoColumns>
+                        </>
+                    )}
+
+                    {isCredit && (
+                        <>
+                            <NormalLabel required>
+                                <AgentCardGameRebateText />
+                            </NormalLabel>
+                            <TwoColumns columns={["0.7fr"]}>
+                                <Flex flex="1 50%">
+                                    <AgentCardGameRebatePercentageInputField width="100%" />
+                                </Flex>
+
+                                <FieldValues>
+                                    <NormalLabel required>
+                                        <AgentVirtualSportsRebateText />
+                                    </NormalLabel>
+
+                                    <AgentVirtualSportsRebatePercentageInputField />
+                                </FieldValues>
+                            </TwoColumns>
+                        </>
+                    )}
 
                     <NormalLabel required>
                         <Trans zh="备注" en="Remarks" />
@@ -286,6 +337,9 @@ const FormBody = ({}) => {
 }
 
 const ConfigFormBody = ({ record }) => {
+    let isCash = isAgentTypeCash(record?.type)
+    let isCredit = isAgentTypeCredit(record?.type)
+
     return (
         <Set orientation="vertical" isFilled>
             <Set
@@ -340,40 +394,68 @@ const ConfigFormBody = ({ record }) => {
                         <AgentTypeLabel value={record?.type} />
                     </Text.Block>
 
-                    <NormalLabel required>
-                        <Trans zh="分红比例" en="Bonus" />
-                    </NormalLabel>
-                    <AgentDividendPercentageInputField />
+                    {isCash && (
+                        <>
+                            <NormalLabel required>
+                                <Trans zh="分红比例" en="Dividend %" />
+                            </NormalLabel>
+                            <AgentDividendPercentageInputField />
+                        </>
+                    )}
 
-                    <NormalLabel required>
-                        <Trans zh="真人返佣" en="Live Dealer Rebate" />
-                    </NormalLabel>
-                    <AgentLiveDealerRebatePercentageInputField />
+                    {isCredit && (
+                        <>
+                            <NormalLabel required>
+                                <AgentLiveDealerRebateText />
+                            </NormalLabel>
+                            <AgentLiveDealerRebatePercentageInputField />
+                        </>
+                    )}
 
-                    <NormalLabel required>
-                        <Trans zh="电子返佣" en="EGame Rebate" />
-                    </NormalLabel>
-                    <AgentEgameRebatePercentageInputField />
+                    {isCredit && (
+                        <>
+                            <NormalLabel required>
+                                <AgentEgameRebateText />
+                            </NormalLabel>
+                            <AgentEgameRebatePercentageInputField />
+                        </>
+                    )}
 
-                    <NormalLabel required>
-                        <Trans zh="棋牌返佣" en="Card Game Rebate" />
-                    </NormalLabel>
-                    <AgentCardGameRebatePercentageInputField />
+                    {isCredit && (
+                        <>
+                            <NormalLabel required>
+                                <AgentCardGameRebateText />
+                            </NormalLabel>
+                            <AgentCardGameRebatePercentageInputField />
+                        </>
+                    )}
 
-                    <NormalLabel required>
-                        <Trans zh="彩票返佣" en="Lottery Rebate" />
-                    </NormalLabel>
-                    <AgentLotteryRebatePercentageInputField />
+                    {isCredit && (
+                        <>
+                            <NormalLabel required>
+                                <AgentLotteryRebateText />
+                            </NormalLabel>
+                            <AgentLotteryRebatePercentageInputField />
+                        </>
+                    )}
 
-                    <NormalLabel required>
-                        <Trans zh="体育返佣" en="Sportsbook Rebate" />
-                    </NormalLabel>
-                    <AgentSportsRebatePercentageInputField />
+                    {isCredit && (
+                        <>
+                            <NormalLabel required>
+                                <AgentSportsRebateText />
+                            </NormalLabel>
+                            <AgentSportsRebatePercentageInputField />
+                        </>
+                    )}
 
-                    <NormalLabel required>
-                        <Trans zh="虚拟体育返佣" en="Virtual Sports Rebate" />
-                    </NormalLabel>
-                    <AgentVirtualSportsRebatePercentageInputField />
+                    {isCredit && (
+                        <>
+                            <NormalLabel required>
+                                <AgentVirtualSportsRebateText />
+                            </NormalLabel>
+                            <AgentVirtualSportsRebatePercentageInputField />
+                        </>
+                    )}
                 </FieldValues>
             </Set>
         </Set>

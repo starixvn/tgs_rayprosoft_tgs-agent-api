@@ -83,6 +83,7 @@ namespace TGS.Services.Operator.Services.Withdraw
                     createFormId,
                     new WithdrawFormCreateInfo(
                         command.PlayerCode,
+                        playerData.Username,
                         UserType.Player,
                         command.BrandId,
                         command.Amount,
@@ -110,6 +111,7 @@ namespace TGS.Services.Operator.Services.Withdraw
                     createFormId,
                 new WithdrawFormCreateInfo(
                         command.PlayerCode,
+                        playerData.Username,
                         UserType.Player,
                         command.BrandId,
                         command.Amount,

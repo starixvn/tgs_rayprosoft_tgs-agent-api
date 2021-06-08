@@ -41,6 +41,7 @@ import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useApiLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
 import { CopyTextBox } from "../../text/CopyTextBox"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -65,6 +66,7 @@ const Body = ({}) => {
         ip: "",
         path: "",
         prefix: "",
+        serverName: "",
         method: ""
     })
 
@@ -75,7 +77,11 @@ const Body = ({}) => {
         mutate,
         error,
         deleteCache
-    } = useApiLogList(toApiParams(state))
+    } = useApiLogList({
+        ...toApiParams(state),
+        sortby: "recordedOn",
+        orderby: SortOrder.Descending
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
 
@@ -91,8 +97,9 @@ const Body = ({}) => {
                     ip={state?.ip}
                     path={state?.path}
                     prefix={state?.prefix}
+                    serverName={state?.serverName}
                     method={state?.method}
-                    search={({ start, end, ...data }) => {
+                    search={({ start, end, ...data } = {}) => {
                         setState({
                             pageIndex: 0,
                             from: start,
@@ -184,6 +191,11 @@ const SearchBar = ({
                         name="prefix"
                         showEmptyFieldValueAddonAfter
                         placeholder="Prefix"
+                    />
+                    <InputField
+                        name="serverName"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Server Name"
                     />
                     <InputField
                         name="method"

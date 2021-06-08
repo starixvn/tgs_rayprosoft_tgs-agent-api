@@ -76,7 +76,11 @@ const Body = () => {
 }
 
 const includePayout = (record = {}, list = []) => {
-    return !!list.find(({ id }) => id === record?.id)
+    return !!list.find(
+        ({ playerCode, promotionBonusId }) =>
+            playerCode === record?.playerCode &&
+            promotionBonusId === record?.promotionBonusId
+    )
 }
 
 const BodyContent = ({ brandId }) => {
@@ -84,7 +88,7 @@ const BodyContent = ({ brandId }) => {
     let [batchPayouts, setBatchPayouts] = useState([])
 
     const appendBatchPayout = (record) => {
-        if (!includePayout(record?.id, batchPayouts)) {
+        if (!includePayout(record, batchPayouts)) {
             setBatchPayouts((batchPayouts = []) => [...batchPayouts, record])
         }
     }
@@ -160,28 +164,12 @@ const BodyContent = ({ brandId }) => {
                         name={state?.name}
                         start={state?.start}
                         end={state?.end}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                promotionGroup: data?.promotionGroup,
-                                username: data?.username,
-                                name: data?.name,
-                                start: data?.start,
-                                end: data?.end
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    promotionGroup: state?.promotionGroup,
-                                    username: state?.username,
-                                    name: state?.name,
-                                    start: state?.start,
-                                    end: state?.end
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />

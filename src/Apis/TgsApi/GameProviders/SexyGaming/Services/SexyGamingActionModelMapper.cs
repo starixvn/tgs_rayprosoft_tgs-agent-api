@@ -19,13 +19,13 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 
         Task<BetData> CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source);
 
-        Task<BetData> VoidSettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingVoidSettle[] source);
+        Task<BatchBetData> VoidSettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingVoidSettle[] source);
 
-        Task<BatchBetData> SettleAsync(Guid gameProviderId, SexyGamingSettle[] source, OppositeBetSetting[] oppositeBetSettings);
+        Task<BatchBetData> SettleAsync(GameProviderConfigurationData data, SexyGamingSettle[] source, OppositeBetSetting[] oppositeBetSettings);
 
-        Task<BatchBetData> UnsettleAsync(Guid gameProviderId, SexyGamingUnsettle[] source);
+        Task<BatchBetData> UnsettleAsync(GameProviderConfigurationData data, SexyGamingUnsettle[] source);
 
-        Task<BatchBetData> VoidBetAsync(Guid gameProviderId, SexyGamingVoidBett[] source);
+        Task<BatchBetData> VoidBetAsync(GameProviderConfigurationData data, SexyGamingVoidBett[] source);
 
     }
 
@@ -70,40 +70,40 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 
         async Task<BetData> ISexyGamingActionModelMapper.CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source)
         {
-            var transactionDatas = new List<TransactionData>();
+            var batchTransactionData = new List<TransactionData>();
             foreach (var order in source)
             {
                 var bet = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}").ConfigureAwait(false);
                 if (bet != null)
                 {
-                    transactionDatas.Add(new TransactionData()
+                    batchTransactionData.Add(new TransactionData()
                     {
                         Amount = 0,
                         Commission = 0,
                         ExternalGameId = order.GameCode,
                         ExternalBetId = bet.ExternalBetId,
                         ExternalRoundId = bet.ExternalRoundId,
-                        ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel",
+                        ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_bet",
                         ExternalTransactionReferenceId = order.PlatformTxId,
                         GameActionType = GameActionType.CancelTransaction,
-                        TimeStamp = DateTimeOffset.UtcNow,
-                        RoundDetail = _jsonSerializationProvider.SerializeToString(order.GameInfo)
+                        RoundClosed = true,
+                        TimeStamp = DateTimeOffset.UtcNow
                     });
                 }
             }
 
-            return GetBetData(data, playCode, transactionDatas.ToArray());
+            return GetBetData(data, playCode, batchTransactionData.ToArray());
         }
 
-        async Task<BatchBetData> ISexyGamingActionModelMapper.SettleAsync(Guid gameProviderId, SexyGamingSettle[] source, OppositeBetSetting[] oppositeBetSettings)
+        async Task<BatchBetData> ISexyGamingActionModelMapper.SettleAsync(GameProviderConfigurationData data, SexyGamingSettle[] source, OppositeBetSetting[] oppositeBetSettings)
         {
             var batchTransactionData = new List<BatchTransactionData>();
             foreach (var order in source)
             {
                 var brandId = await _services.GetBrandIdByPlayerCodeAsync(order.UserId).ConfigureAwait(false);
-                var gameProviderConfigurationId = await _services.GetGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
-                var settle = await _services.GetGameActionExternalIdAsync(gameProviderId, order.UserId, $"{ order.PlatformTxId}_settle").ConfigureAwait(false);
-                var settleCancel = await _services.GetGameActionExternalIdAsync(gameProviderId, order.UserId, $"{ order.PlatformTxId}_settle_cancel").ConfigureAwait(false);
+                var gameProviderConfigurationId = await _services.GetGameProviderConfigurationIdAsync(brandId, data.GameProviderId).ConfigureAwait(false);
+                var settle = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle").ConfigureAwait(false);
+                var settleCancel = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle_cancel").ConfigureAwait(false);
 
                 var externalTransactionId = $"{ order.PlatformTxId}_settle";
                 if (settle != null && settleCancel != null)
@@ -129,18 +129,18 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 });
             }
 
-            return GetBetData(gameProviderId, batchTransactionData.ToArray());
+            return GetBetData(data, batchTransactionData.ToArray());
         }
 
-        async Task<BatchBetData> ISexyGamingActionModelMapper.UnsettleAsync(Guid gameProviderId, SexyGamingUnsettle[] source)
+        async Task<BatchBetData> ISexyGamingActionModelMapper.UnsettleAsync(GameProviderConfigurationData data, SexyGamingUnsettle[] source)
         {
             var batchTransactionData = new List<BatchTransactionData>();
             foreach (var order in source)
             {
                 var brandId = await _services.GetBrandIdByPlayerCodeAsync(order.UserId).ConfigureAwait(false);
-                var gameProviderConfigurationId = await _services.GetGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
+                var gameProviderConfigurationId = await _services.GetGameProviderConfigurationIdAsync(brandId, data.GameProviderId).ConfigureAwait(false);
 
-                var settle = await _services.GetGameActionExternalIdAsync(gameProviderId, order.UserId, $"{ order.PlatformTxId}_settle").ConfigureAwait(false);
+                var settle = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle").ConfigureAwait(false);
                 if (settle != null)
                 {
                     batchTransactionData.Add(new BatchTransactionData()
@@ -157,18 +157,17 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 }
             }
 
-            return GetBetData(gameProviderId, batchTransactionData.ToArray());
+            return GetBetData(data, batchTransactionData.ToArray());
         }
 
-        async Task<BatchBetData> ISexyGamingActionModelMapper.VoidBetAsync(Guid gameProviderId, SexyGamingVoidBett[] source)
+        async Task<BatchBetData> ISexyGamingActionModelMapper.VoidBetAsync(GameProviderConfigurationData data, SexyGamingVoidBett[] source)
         {
             var batchTransactionData = new List<BatchTransactionData>();
             foreach (var order in source)
             {
-
                 var brandId = await _services.GetBrandIdByPlayerCodeAsync(order.UserId).ConfigureAwait(false);
-                var gameProviderConfigurationId = await _services.GetGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
-                var bet = await _services.GetGameActionExternalIdAsync(gameProviderId, order.UserId, $"{ order.PlatformTxId}").ConfigureAwait(false);
+                var gameProviderConfigurationId = await _services.GetGameProviderConfigurationIdAsync(brandId, data.GameProviderId).ConfigureAwait(false);
+                var bet = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}").ConfigureAwait(false);
                 if (bet != null)
                 {
                     batchTransactionData.Add(new BatchTransactionData()
@@ -178,7 +177,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         ExternalGameId = order.GameCode,
                         ExternalBetId = order.PlatformTxId.ToString(),
                         ExternalRoundId = order.RoundId.ToString(),
-                        ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_place_bet ",
+                        ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_void_bet",
                         ExternalTransactionReferenceId = bet.ExternalTransactionId,
                         GameActionType = GameActionType.CancelTransaction,
                         RoundClosed = true
@@ -186,31 +185,36 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 }
             }
 
-            return GetBetData(gameProviderId, batchTransactionData.ToArray());
+            return GetBetData(data, batchTransactionData.ToArray());
         }
 
-        async Task<BetData> ISexyGamingActionModelMapper.VoidSettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingVoidSettle[] source)
+        async Task<BatchBetData> ISexyGamingActionModelMapper.VoidSettleAsync(GameProviderConfigurationData data, string playCode, SexyGamingVoidSettle[] source)
         {
-            var transactionDatas = new List<TransactionData>();
+            var batchTransactionData = new List<BatchTransactionData>();
             foreach (var order in source)
             {
+                var brandId = await _services.GetBrandIdByPlayerCodeAsync(order.UserId).ConfigureAwait(false);
+                var gameProviderConfigurationId = await _services.GetGameProviderConfigurationIdAsync(brandId, data.GameProviderId).ConfigureAwait(false);
                 var settle = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle").ConfigureAwait(false);
                 if (settle != null)
                 {
-                    transactionDatas.Add(new TransactionData()
+                    batchTransactionData.Add(new BatchTransactionData()
                     {
+                        PlayerCode = order.UserId,
+                        GameProviderConfigurationId = gameProviderConfigurationId,
                         ExternalGameId = order.GameCode,
-                        ExternalBetId = settle.ExternalBetId,
-                        ExternalRoundId = settle.ExternalRoundId,
-                        ExternalTransactionId = $"{  order.PlatformTxId}_cancel_settle",
+                        ExternalBetId = order.PlatformTxId.ToString(),
+                        ExternalRoundId = order.RoundId.ToString(),
+                        ExternalTransactionId = $"{ settle.ExternalTransactionId}_cancel_void_settle",
                         ExternalTransactionReferenceId = settle.ExternalTransactionId,
                         GameActionType = GameActionType.CancelTransaction,
-                        TimeStamp = DateTimeOffset.UtcNow
+                        RoundClosed = true,
+                        Timestamp = DateTimeOffset.UtcNow
                     });
                 }
             }
 
-            return GetBetData(data, playCode, transactionDatas.ToArray());
+            return GetBetData(data, batchTransactionData.ToArray());
         }
 
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
@@ -235,12 +239,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
               }).ToArray()
           };
 
-        private static BatchBetData GetBetData(Guid gameProviderId, BatchTransactionData[] transactions)
+        private static BatchBetData GetBetData(GameProviderConfigurationData data, BatchTransactionData[] transactions)
             => new()
             {
-                GameProviderId = gameProviderId,
+                GameProviderId = data.GameProviderId,
                 GameProviderCode = GameProviderCode,
-                AutoCloseRound = false,
+                AutoCloseRound = data.AutoCloseRound,
                 ExternalBatchId = string.Empty,
                 AllowCancelCancelTransaction = false,
                 HasCurrencyFromGameProvider = false,
