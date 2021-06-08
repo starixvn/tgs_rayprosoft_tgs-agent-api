@@ -36,7 +36,7 @@ namespace TGS.Services.Operator.Services.GameBalance
             })
             .ConfigureAwait(false);
 
-            if (response.Error != TgsApiError.None.GetHashCode())
+            if (response.Error != (int)TgsApiError.None)
             {
                 _logger.LogInformation("Pluggable Fund In Has Error");
                 throw new GameBalanceFundInFailedException(response.ErrorMessage);
