@@ -75,7 +75,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
              * Void Settle : 當出現技術問題要將使用者單筆交易void時。 流程 : bet -> settle -> 技術問題需要void使用者單筆交易 -> void settle
              * Void bet : 當出現技術問題要將整局void時。 流程 : bet -> settle -> 技術問題需要void整局 -> unsettle -> void bet
              */
-            if (data.Action.IgnoreCaseEquals("getBalance") || data.Action.IgnoreCaseEquals("bet") || data.Action.IgnoreCaseEquals("cancelBet") || data.Action.IgnoreCaseEquals("voidSettle"))
+            if (data.Action.IgnoreCaseEquals("getBalance") || data.Action.IgnoreCaseEquals("bet") || data.Action.IgnoreCaseEquals("cancelBet"))
             {
                 var extension1 = form.GetValue<string>(SexyGamingConsts.Parameters.Extension1);
                 var extensionDir = JsonSerializer.Deserialize<Dictionary<string, string>>(extension1);
