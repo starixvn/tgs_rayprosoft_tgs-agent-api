@@ -65,7 +65,7 @@ namespace TGS.Payment.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormInfo form)
+        public async ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormCreateInfo form)
         {
             var currentDate = DateTimeOffset.UtcNow;
 
@@ -87,6 +87,7 @@ namespace TGS.Payment.Repositories
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
+
 
         public async ValueTask CreateWithdrawFormAsync(Guid createFormId, WithdrawFormCreateInfo form)
         {
@@ -307,7 +308,7 @@ namespace TGS.Payment.Repositories
                 .Select(v => new BrandPaymentVip(v.BrandPaymentId, v.VipLevelId));
         }
 
-        public ValueTask<DepositFormDetail> GetDepositFormByIdAsync(Guid id)
+        public ValueTask<DepositFormInfo> GetDepositFormByIdAsync(Guid id)
         {
             var query = from df in _tgsRepository.DepositForms
                             .Include(f => f.Player)
@@ -315,7 +316,7 @@ namespace TGS.Payment.Repositories
                             .ThenInclude(bp => bp.PaymentMethodChannel)
                             .AsAsyncEnumerable()
                         where df.Id == id
-                        select new DepositFormDetail(
+                        select new DepositFormInfo(
                             df.Id,
                             df.PlayerCode,
                             df.Player.Username,
@@ -323,7 +324,7 @@ namespace TGS.Payment.Repositories
                             df.BrandPaymentId,
                             df.BrandPayment.ChannelName,
                             df.BrandPayment.PaymentMethodChannel.MethodId,
-                            df.Amount,
+                            df.ActualAmount ?? df.Amount,
                             df.Remark,
                             df.Status,
                             df.ApplyInfo,

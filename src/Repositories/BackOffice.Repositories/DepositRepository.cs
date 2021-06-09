@@ -17,7 +17,7 @@ namespace TGS.BackOffice.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public ValueTask<DepositFormDetail> GetDepositFormDetailAsync(Guid formId)
+        public ValueTask<DepositFormInfo> GetDepositFormDetailAsync(Guid formId)
         {
             var query = from df in _tgsRepository.DepositForms
                             .Include(f => f.Player)
@@ -25,7 +25,7 @@ namespace TGS.BackOffice.Repositories
                             .ThenInclude(bp => bp.PaymentMethodChannel)
                             .AsAsyncEnumerable()
                         where df.Id == formId
-                        select new DepositFormDetail(
+                        select new DepositFormInfo(
                             df.Id,
                             df.PlayerCode,
                             df.Player.Username,

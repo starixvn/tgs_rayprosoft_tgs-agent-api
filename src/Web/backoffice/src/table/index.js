@@ -22,7 +22,9 @@ export const useTable = (initialState = {}) => {
     let [state, set] = useState({ ...DefaultState, ...initialState })
 
     const setPageIndex = (pageIndex) => {
-        set((prevState) => ({ ...prevState, pageIndex }))
+        set((prevState) => {
+            return { ...prevState, pageIndex }
+        })
     }
 
     const setPageSize = (pageSize) => {

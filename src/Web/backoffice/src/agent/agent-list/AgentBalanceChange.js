@@ -63,12 +63,12 @@ export const AgentBalanceChangePanel = ({ brandId, agentId, ...props }) => {
                     accountChangeType={accountChangeType}
                     start={from}
                     end={to}
-                    search={({ accountChangeType, start, end }) => {
+                    search={({ start, end, ...data } = {}) => {
                         setState({
                             pageIndex: 0,
-                            accountChangeType,
                             from: start,
-                            to: end
+                            to: end,
+                            ...data
                         })
                         mutate()
                     }}
@@ -81,18 +81,11 @@ export const AgentBalanceChangePanel = ({ brandId, agentId, ...props }) => {
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
                     initialState={state}
+                    controlledState={state}
                     isLoading={isLoading}
                 />
             </Stack>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </TabPanel>
     )
 }

@@ -342,7 +342,7 @@ const ViewDialog = ({ brandId, record, dialog, ...props }) => {
     }
 
     if (error) {
-        return <AlertDialog onClickClose={dialog.hide} />
+        return <AlertDialog {...error} onClickClose={dialog.hide} />
     }
 
     return (
@@ -443,6 +443,13 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
         control,
         name: PromotionTypeGroupFieldName
     })
+
+    let isDepositPromotion = promotionTypeGroup === PromotionTypeGroup.Deposit
+    useEffect(() => {
+        if (isDepositPromotion) {
+            setValue(AutoSentPlayerBonusFieldName, true)
+        }
+    }, [isDepositPromotion])
 
     let isPromotionTypeTurnoverRelated =
         promotionTypeGroup === PromotionTypeGroup.Turnover ||
@@ -561,10 +568,19 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                     <Trans zh="活动派发" en="Auto Bonus Payout" />
                 </NormalLabel>
                 <Box>
-                    <AutoOrManualPayoutSwitch
-                        readOnly={readOnly}
-                        disabled={disabled}
-                    />
+                    {isDepositPromotion && (
+                        <AutoOrManualPayoutSwitch
+                            readOnly
+                            disabled
+                            checked={true}
+                        />
+                    )}
+                    {!isDepositPromotion && (
+                        <AutoOrManualPayoutSwitch
+                            readOnly={readOnly}
+                            disabled={disabled}
+                        />
+                    )}
                 </Box>
 
                 <NormalLabel>

@@ -20,10 +20,6 @@ export const PlayerClearWageringRequirementDisclosure = ({
         en: "Clear Wagering Requirement"
     })
 
-    console.log(
-        "PlayerClearWageringRequirementDisclosure playerCode",
-        playerCode
-    )
     return (
         <>
             <Disclosure {...dialog}>{label}</Disclosure>

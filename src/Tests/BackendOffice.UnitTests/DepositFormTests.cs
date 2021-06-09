@@ -64,7 +64,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             moqPaymentRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == formId)))
-                .Returns(ValueTask.FromResult(new DepositFormDetail(
+                .Returns(ValueTask.FromResult(new DepositFormInfo(
                     Guid.NewGuid(),
                     "ThisIsPlayerCode",
                     "PlayerName",
