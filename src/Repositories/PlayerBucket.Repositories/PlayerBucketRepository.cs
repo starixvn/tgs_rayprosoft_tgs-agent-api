@@ -97,7 +97,7 @@ namespace PlayerBucket.Repositories
         }
 
         public async ValueTask<decimal> CreatePlayerBucketWithDepositAsync(
-                CreatePlayerBucketWithDepositRequest request)
+            CreatePlayerBucketWithDepositRequest request)
         {
             var bucketAmount = request.DepositAmount;
 
@@ -203,5 +203,18 @@ namespace PlayerBucket.Repositories
 
         public async ValueTask<bool> IsBucketFullAsync(string playerCode) =>
             await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode).AllAsync(x => x.IsFull);
+
+        public async ValueTask<decimal> ClearPlayerBucketsAsync(string playerCode)
+        {
+            await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode)
+                .ForEachAsync(x =>
+                {
+                    x.CurrentBucketAmount = x.BucketAmount;
+                    x.IsFull = true;
+                }).ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            return await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode && x.IsFull == true).SumAsync(x => x.BucketAmount - x.CurrentBucketAmount);
+        }
     }
 }
