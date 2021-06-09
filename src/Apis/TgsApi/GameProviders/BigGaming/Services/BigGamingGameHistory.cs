@@ -111,8 +111,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         {
             return JsonSerializer.Serialize(
                         new Dictionary<string, long>() {
-                        { "Dragon",value&0xFFFF},
-                        { "Tiger", (value&0xFFFF0000)>>16},
+                        { "dragon",value&0xFFFF},
+                        { "tiger", (value&0xFFFF0000)>>16},
                         });
         }
 
