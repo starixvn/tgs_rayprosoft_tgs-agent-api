@@ -6,6 +6,7 @@ using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -23,6 +24,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         private readonly IAgentService _agentService;
         private readonly IAgentWalletRepository _agentWalletRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ITgsLog _tgsLog;
         private readonly IPlayerService _playerService;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IWalletRepository _walletRepository;
@@ -33,7 +35,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             IPlayerService playerService,
             IPlayerBucketRepository playerBucketRepository,
             IJsonSerializationProvider jsonSerializationProvider,
-            IHttpContextAccessor accessor) : base(accessor)
+            IHttpContextAccessor accessor,
+            ITgsLog tgsLog) : base(accessor)
         {
             if (accessor is null)
             {
@@ -46,6 +49,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _tgsLog = tgsLog ?? throw new ArgumentNullException(nameof(tgsLog));
         }
 
         public override async Task<MessageResponse> Handle(CreatePlayerAdjustmentRequest request,
@@ -91,33 +95,41 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 request.Remark
             });
 
-            await _walletRepository.ExchangeAsync(
-                player.BrandId,
-                player.DefaultWalletId,
-                player.PlayerCode,
-                TransactionTypes.Adjust,
-                request.AdjustType == AdjustmentType.Subtract ? -request.Amount : request.Amount,
-                remark).ConfigureAwait(false);
-
-            await _playerBucketRepository
-                .CreatePlayerBucketsAsync(new[]{
-                    new CreatePlayerBucketRequest(
-                        player.BrandId,
-                        player.PlayerCode,
-                        player.DefaultWalletId,
-                        BucketType.Adjustment,
-                        request.BucketAmount)
-                    })
-                .ConfigureAwait(false);
-
-            if (isTransferToAgent)
+            if (request.Amount != 0M)
             {
-                await _agentWalletRepository.ExchangeAsync(
-                    targetAgent.BrandId,
-                    targetAgent.DefaultWalletId,
-                    targetAgent.Id,
+                await _walletRepository.ExchangeAsync(
+                    player.BrandId,
+                    player.DefaultWalletId,
+                    player.PlayerCode,
                     TransactionTypes.Adjust,
-                    request.Amount).ConfigureAwait(false);
+                    request.AdjustType == AdjustmentType.Subtract ? -request.Amount : request.Amount,
+                    remark).ConfigureAwait(false);
+
+                if (isTransferToAgent)
+                {
+                    await _agentWalletRepository.ExchangeAsync(
+                        targetAgent.BrandId,
+                        targetAgent.DefaultWalletId,
+                        targetAgent.Id,
+                        TransactionTypes.Adjust,
+                        request.Amount).ConfigureAwait(false);
+                }
+            }
+
+            if (request.BucketAmount > 0)
+            {
+                await _playerBucketRepository
+                    .CreatePlayerBucketsAsync(new[]{
+                        new CreatePlayerBucketRequest(
+                            player.BrandId,
+                            player.PlayerCode,
+                            player.DefaultWalletId,
+                            BucketType.Adjustment,
+                            request.BucketAmount)
+                            })
+                    .ConfigureAwait(false);
+
+                _tgsLog.LogInfo($"Adjust add bucket {player.PlayerCode}: {request.BucketAmount}");
             }
 
             tranScope.Complete();
