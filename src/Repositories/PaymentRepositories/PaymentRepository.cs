@@ -323,7 +323,7 @@ namespace TGS.Payment.Repositories
                             df.BrandPaymentId,
                             df.BrandPayment.ChannelName,
                             df.BrandPayment.PaymentMethodChannel.MethodId,
-                            df.Amount,
+                            df.ActualAmount ?? df.Amount,
                             df.Remark,
                             df.Status,
                             df.ApplyInfo,

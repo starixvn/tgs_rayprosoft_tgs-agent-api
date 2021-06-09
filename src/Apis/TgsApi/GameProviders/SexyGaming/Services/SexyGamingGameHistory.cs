@@ -66,7 +66,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Services
             "MX-LIVE-003" => GetBaccaratGameHistory(source.Result),//Baccarat Insurance
             "MX-LIVE-006" => GetDragontigerGameHistory(source.Result),//DragonTiger
             "MX-LIVE-007" => GetSicboGameHistory(source.Result),//SicBo
-            "MX-LIVE-009" => GetSicboGameHistory(source.Result),//Roulette
+            "MX-LIVE-009" => JsonSerializer.Serialize(source.Result),//Roulette
             "MX-LIVE-010" => JsonSerializer.Serialize(source.Result),//Red Blue Duel
             "MX-LIVE-011" => JsonSerializer.Serialize(source.Result),//Twenty
             "MX-LIVE-012" => JsonSerializer.Serialize(source.Result),//AndarBahar
@@ -74,13 +74,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Services
         };
 
 
-        private string GetSicboGameHistory(string[] values) =>
-            JsonSerializer.Serialize(
-                new Dictionary<string, string>() {
-                    { "dice1",values[0]},
-                    { "dice2",values[1]},
-                    { "dice3",values[2]}
-                });
+        private string GetSicboGameHistory(string[] values)
+        {
+            var split = values[0].Split(',');
+            return JsonSerializer.Serialize(
+                 new Dictionary<string, string>() {
+                    { "dice1",split[0]},
+                    { "dice2",split[1]},
+                    { "dice3",split[2]}
+                 });
+        }
 
         private string GetDragontigerGameHistory(string[] values) =>
             JsonSerializer.Serialize(
