@@ -66,7 +66,8 @@ const Body = ({}) => {
         trackingId: "",
         ip: "",
         path: "",
-        method: ""
+        method: "",
+        serverName: ""
     })
 
     let { pageIndex, pageSize } = state
@@ -96,6 +97,7 @@ const Body = ({}) => {
                     ip={state?.ip}
                     path={state?.path}
                     method={state?.method}
+                    serverName={state?.serverName}
                     search={({ start, end, ...data } = {}) => {
                         setState({
                             pageIndex: 0,
@@ -131,6 +133,7 @@ const SearchBar = ({
     ip,
     path,
     method,
+    serverName,
     search,
     isLoading,
     ...props
@@ -143,7 +146,8 @@ const SearchBar = ({
             trackingId,
             ip,
             path,
-            method
+            method,
+            serverName
         }
     })
 
@@ -178,6 +182,11 @@ const SearchBar = ({
                         name="method"
                         showEmptyFieldValueAddonAfter
                         placeholder="Method"
+                    />
+                    <InputField
+                        name="serverName"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Server Name"
                     />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
@@ -215,6 +224,12 @@ const useColumns = ({ items = [] } = {}) => {
                 Cell: ({ value = "" }) => (
                     <CopyTextBox value={value} alignX="left" textAlign="left" />
                 )
+            }),
+            textColumn({
+                accessor: "serverName",
+                Header: <Trans zh="Server Name" en="Server Name" />,
+                disableSortBy: true,
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "method",

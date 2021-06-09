@@ -22,7 +22,10 @@ export const useTable = (initialState = {}) => {
     let [state, set] = useState({ ...DefaultState, ...initialState })
 
     const setPageIndex = (pageIndex) => {
-        set((prevState) => ({ ...prevState, pageIndex }))
+        set((prevState) => {
+            console.log("setPageIndex", pageIndex, "prevState", prevState)
+            return { ...prevState, pageIndex }
+        })
     }
 
     const setPageSize = (pageSize) => {
@@ -109,7 +112,12 @@ export const Table = ({
             useControlledState: (state) => {
                 let pageIndex = controlledState?.pageIndex ?? state.pageIndex
                 let pageSize = controlledState?.pageSize ?? state.pageSize
-
+                console.log(
+                    "controlledState?.pageIndex",
+                    controlledState?.pageIndex,
+                    "state.pageIndex",
+                    state.pageIndex
+                )
                 return React.useMemo(
                     () => ({
                         ...state,

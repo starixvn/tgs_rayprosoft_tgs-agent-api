@@ -11,7 +11,8 @@ import { PlayerStatusLabel } from "../PlayerStatus"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
-    useUserBrandId
+    useUserBrandId,
+    useIsAdminUser
 } from "../../user/context"
 import { Code } from "./menu"
 import { PlayerStatusSelect } from "../PlayerStatus"
@@ -141,11 +142,24 @@ const useSearchInputPlaceHolder = () =>
     useTrans({ zh: "用户名输入框", en: "Input user name" })
 
 const useColumns = ({ mutate, items = [], brandId } = {}) => {
+    let isAdminUser = useIsAdminUser()
     let hasAnyMenu = useHasSubMenuByRoute()
 
     return useMemo(() => {
-        let columns = [
-            sequenceColumn(),
+        let columns = [sequenceColumn()]
+
+        if (isAdminUser) {
+            columns.push(
+                textColumn({
+                    Header: <Trans zh="Player Code" en="Player Code" />,
+                    accessor: "playerCode",
+                    disableSortBy: true
+                })
+            )
+        }
+
+        columns = [
+            ...columns,
             {
                 Header: <Trans zh="用户名" en="Username" />,
                 accessor: "username",

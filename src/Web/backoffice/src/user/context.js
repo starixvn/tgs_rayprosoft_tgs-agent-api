@@ -105,14 +105,20 @@ export const useUserRoleType = () => {
     return state?.userInfo?.roleType ?? ""
 }
 
-export const useUserIsRootAdmin = () => {
+export const useIsAdminUser = () => {
     let resellerId = useUserResellerId()
     let licenseeId = useUserLicenseeId()
     let brandId = useUserBrandId()
+
+    return !resellerId && !licenseeId && !brandId
+}
+
+export const useUserIsRootAdmin = () => {
+    let isAdmin = useIsAdminUser()
     let { state = {} } = useContext(Store)
     let isRoot = state?.userInfo?.isRoot
 
-    return !resellerId && !licenseeId && !brandId && isRoot
+    return isAdmin && isRoot
 }
 
 export const useUserRoleId = () => {

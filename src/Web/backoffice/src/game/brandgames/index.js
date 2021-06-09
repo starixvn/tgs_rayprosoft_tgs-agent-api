@@ -19,7 +19,7 @@ import {
     useHasSubMenuByRoute,
     useUserBrandId
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, Update, View } from "./menu"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
@@ -99,7 +99,7 @@ const BodyContent = ({ brandId }) => {
             }
         >
             <DataTable
-                state={state}
+                controlledState={state}
                 data={data}
                 pageSize={pageSize}
                 setPageIndex={setPageIndex}
@@ -107,20 +107,13 @@ const BodyContent = ({ brandId }) => {
                 mutate={mutate}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
 
 const DataTable = ({
+    controlledState,
     data,
     pageSize,
     setPageIndex,
@@ -187,6 +180,7 @@ const DataTable = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Stack spacing="major-1">
                     <Table
+                        controlledState={controlledState}
                         columns={columns}
                         data={items}
                         pageCount={pageCount(pageSize, data?.totalCount)}
@@ -260,7 +254,9 @@ const useColumns = ({
     setDisplayOrder
 }) => {
     let { register, getValues } = formMethods
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasViewAuth = useIsDisplayMenuByRoute([View])
+    let hasAnyMenu = hasUpdateAuth || hasViewAuth
 
     return useMemo(() => {
         let columns = [
@@ -288,7 +284,7 @@ const useColumns = ({
                             inputRef={inputRef}
                             type="number"
                             size="small"
-                            min="0"
+                            min="1"
                             minLength="1"
                             width="5em"
                             defaultValue={displayOrder}
@@ -481,7 +477,6 @@ const useColumns = ({
             }
         ]
 
-        //TODO: auth
         if (hasAnyMenu) {
             columns.push({
                 id: "actions",
