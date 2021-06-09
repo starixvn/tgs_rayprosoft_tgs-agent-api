@@ -104,12 +104,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 var brandId = await _services.GetBrandIdByPlayerCodeAsync(order.UserId).ConfigureAwait(false);
                 var gameProviderConfigurationId = await _services.GetGameProviderConfigurationIdAsync(brandId, data.GameProviderId).ConfigureAwait(false);
                 var settle = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle").ConfigureAwait(false);
-                var settleCancel = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle_cancel").ConfigureAwait(false);
-
                 var externalTransactionId = $"{ order.PlatformTxId}_settle";
-                if (settle != null && settleCancel != null)
+                if (settle != null)
                 {
-                    externalTransactionId = $"{ order.PlatformTxId}_resettle ";
+                    var settleCancel = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle_cancel").ConfigureAwait(false);
+                    if (settleCancel != null)
+                    {
+                        externalTransactionId = $"{ order.PlatformTxId}_resettle ";
+                    }
                 }
                 batchTransactionData.Add(new BatchTransactionData()
                 {
