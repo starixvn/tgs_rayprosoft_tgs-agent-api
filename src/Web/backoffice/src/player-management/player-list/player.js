@@ -28,7 +28,12 @@ import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
-import { FormProvider, useForm, useFormContext } from "react-hook-form"
+import {
+    FormProvider,
+    useForm,
+    useFormContext,
+    useWatch
+} from "react-hook-form"
 import Input from "../../input/Input"
 import clone from "clone-deep"
 import { VipLevelLabel } from "../../vip-levels/VipLevel"
@@ -108,11 +113,17 @@ const EditForm = ({
     onClickClose,
     ...props
 }) => {
-    let { setValue } = useFormContext()
+    let { control, setValue } = useFormContext()
     let isAdmin = useIsAdminUser()
     let agentUsernamePlaceholder = useTrans({
         zh: "代理用户名",
         en: "Agent Username"
+    })
+
+    const WageringRequirementFieldName = "wageringRequirement"
+    let wageringRequirement = useWatch({
+        control,
+        name: WageringRequirementFieldName
     })
     let { username = "", registeredOn, balance } = player
 
@@ -165,15 +176,14 @@ const EditForm = ({
                     <WageringRequirementLabel />
                 </Box>
                 <Set>
-                    <FormattedNumberDecimal
-                        value={player?.wageringRequirement}
-                    />
-                    {/* <PlayerClearWageringRequirementDisclosure
+                    <FormattedNumberDecimal value={wageringRequirement} />
+                    <Input type="hidden" name={WageringRequirementFieldName} />
+                    <PlayerClearWageringRequirementDisclosure
                         playerCode={player?.playerCode}
                         onSubmitted={() => {
-                            player.wageringRequirement = 0
+                            setValue(WageringRequirementFieldName, 0)
                         }}
-                    /> */}
+                    />
                 </Set>
 
                 <StatusLabel />

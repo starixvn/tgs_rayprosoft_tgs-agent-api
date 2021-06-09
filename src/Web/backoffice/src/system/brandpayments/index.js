@@ -188,15 +188,7 @@ const BodyContent = ({ brandId }) => {
                     )}
                 </TabPanel>
             </Tabs>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -327,7 +319,7 @@ const useColumns = ({
                         <Input
                             type="number"
                             size="small"
-                            min="0"
+                            min="1"
                             minLength="1"
                             width="5em"
                             defaultValue={displayOrder}

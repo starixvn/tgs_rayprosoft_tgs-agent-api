@@ -9,7 +9,7 @@ import {
     useUserBrandId
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
-import { Code } from "./menu"
+import { Code, View, Update } from "./menu"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useForm, FormProvider } from "react-hook-form"
@@ -144,7 +144,10 @@ const SearchBar = ({ status = "", name = "", search, isLoading }) => {
 }
 
 const useColumns = ({ brandId, items = [], mutate }) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasViewAuth = useIsDisplayMenuByRoute([View])
+    let hasAnyMenu = hasUpdateAuth || hasViewAuth
+
     return useMemo(() => {
         let columns = [
             textColumn({

@@ -392,7 +392,7 @@ const useColumns = ({
                               <Input
                                   type="number"
                                   size="small"
-                                  min="0"
+                                  min="1"
                                   minLength="1"
                                   width="5em"
                                   defaultValue={displayOrder}
