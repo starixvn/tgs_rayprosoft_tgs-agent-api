@@ -138,13 +138,41 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             var cacheKeys = new[]
             {
-                new CacheKey {CacheType = RedisCacheType.Brand, Key = brand.Id},
-                new CacheKey {CacheType = RedisCacheType.Currencies, Key = brand.Id},
-                new CacheKey {CacheType = RedisCacheType.Languages, Key = brand.Id},
-                new CacheKey {CacheType = RedisCacheType.BrandGameProviderConfiguration, Key = brand.Code},
-                new CacheKey {CacheType = RedisCacheType.BrandGameProviders, Key = brand.Id},
-                new CacheKey {CacheType = RedisCacheType.BrandGames, Key = brand.Id},
-                new CacheKey {CacheType = RedisCacheType.BrandDefaultBetLimit, Key = brand.Id}
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.Brand,
+                    Key = brand.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.Currencies,
+                    Key = brand.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.Languages,
+                    Key = brand.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.BrandGameProviderConfiguration,
+                    Key = brand.Code
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.BrandGameProviders,
+                    Key = brand.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.BrandGames,
+                    Key = brand.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.BrandDefaultBetLimit,
+                    Key = brand.Id
+                }
             };
 
             await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
@@ -164,20 +192,20 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .ToArrayAsync();
 
             var baseGameIds = baseGames.Select(x => x.Id).ToArray();
-
             var brandGameIds = brand.Games.Select(x => x.GameId).ToArray();
 
             var addList = baseGameIds.Except(brand.Games.Select(x => x.GameId)).ToArray();
             var delList = brandGameIds.Except(baseGameIds).ToArray();
 
-            var games = addList.Select((id, index) => new BrandGame
+            var games = addList.Select(id => new BrandGame
             {
                 BrandId = brand.Id,
                 GameId = id,
-                DisplayOrder = brand.Games.Count + 1 + index,
+                DisplayOrder = 99,
                 Rebate = true,
                 EffectiveBettingPercentage = 100M
             });
+
             var delGroupGames =
                 brand.BrandGroups.SelectMany(x => x.BrandGames.Where(g => delList.Contains(g.BrandGame.GameId)));
             var delBrandGames = brand.Games.Where(x => delList.Contains(x.GameId));
@@ -187,6 +215,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await DeleteEntitiesAsync(delGroupGames);
             await DeleteEntitiesAsync(delBrandGames);
             scope.Complete();
+
+            await _cacheManager.ClearCacheAsync(RedisCacheType.BrandGames, brand.Id, true);
         }
 
         private async Task<HashSet<BrandLanguage>> GenerateBrandLanguagesAsync(Brand brand, BrandRequest request)
@@ -209,13 +239,22 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var brandCurrencies = _repository.Currencies.AsQueryable()
                 .Where(x => request.CurrencyCodes.Contains(x.Code)).Select(x =>
-                    new BrandCurrency {BrandId = brand.Id, CurrencyCode = x.Code, BrandCurrencyCode = x.Code});
+                    new BrandCurrency
+                    {
+                        BrandId = brand.Id,
+                        CurrencyCode = x.Code,
+                        BrandCurrencyCode = x.Code
+                    });
             return new(brandCurrencies);
         }
 
         private HashSet<BrandDomain> GenerateBrandDomains(Brand brand, BrandRequest request)
         {
-            var brandDomains = request.Domains.Select(x => new BrandDomain {Url = x, BrandId = brand.Id});
+            var brandDomains = request.Domains.Select(x => new BrandDomain
+            {
+                Url = x,
+                BrandId = brand.Id
+            });
             return new(brandDomains);
         }
 
@@ -271,14 +310,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .Where(x => x.AvailableToBrand)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId)).ToArrayAsync();
 
-            var games = brandGames.Select((x, count) =>
+            var games = brandGames.Select(x =>
                 new BrandGame
                 {
                     Id = Guid.NewGuid(),
                     BrandId = brand.Id,
                     GameId = x.Id,
                     Game = x,
-                    DisplayOrder = count,
+                    DisplayOrder = 99,
                     Rebate = true,
                     EffectiveBettingPercentage = 100M
                 });
@@ -323,7 +362,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 var originBrandGame = brand.Games.FirstOrDefault(g => g.GameId == x.Id);
 
-                var brandGame = new BrandGame {BrandId = brand.Id, GameId = x.Id, Game = x};
+                var brandGame = new BrandGame
+                {
+                    BrandId = brand.Id,
+                    GameId = x.Id,
+                    Game = x
+                };
 
                 if (originBrandGame == null)
                 {
@@ -352,7 +396,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .Where(brandGameId => brandGamePoolIds.Contains(brandGameId)).Select(brandGameId =>
                     new BrandGroupGame
                     {
-                        BrandGroup = brandGroup, BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
+                        BrandGroup = brandGroup,
+                        BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
                     });
             return new(brandGroupGames);
         }
@@ -362,7 +407,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var brandGroupGames = brandGameIds.Select(brandGameId => new BrandGroupGame
             {
-                BrandGroupId = brandGroupId, BrandGame = brand.Games.First(g => g.GameId == brandGameId)
+                BrandGroupId = brandGroupId,
+                BrandGame = brand.Games.First(g => g.GameId == brandGameId)
             });
             return new(brandGroupGames);
         }
@@ -436,7 +482,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var brandGroupBetLimits = brand.BetLimits.Select(x =>
             {
-                var brandGroupBetLimit = new BrandGroupBetLimit {BrandGroup = brandGroup, BetLimitId = x.BetLimitId};
+                var brandGroupBetLimit = new BrandGroupBetLimit
+                {
+                    BrandGroup = brandGroup,
+                    BetLimitId = x.BetLimitId
+                };
                 brandGroupBetLimit.GameProviderBetLimits =
                     GenerateWithUpdateGameProviderBetLimits(brandGroupBetLimit, models);
 
@@ -499,7 +549,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .Select(x =>
                     new BrandGroupGameProviderBetLimit
                     {
-                        BrandGroupBetLimit = brandGroupBetLimit, GameProviderBetLimitId = x.GameProviderBetLimitId
+                        BrandGroupBetLimit = brandGroupBetLimit,
+                        GameProviderBetLimitId = x.GameProviderBetLimitId
                     });
 
             return new(brandGroupGameProviderBetLimits);
