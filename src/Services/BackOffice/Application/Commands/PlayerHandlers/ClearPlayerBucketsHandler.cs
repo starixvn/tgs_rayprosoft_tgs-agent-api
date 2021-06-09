@@ -9,7 +9,7 @@ using TGS.Services.PlayerBucket;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
-    public class ClearPlayerBucketsHandler : Handler<ClearPlayerBucketsRequest, MessageResponse>
+    public class ClearPlayerBucketsHandler : Handler<ClearPlayerBucketsRequest, ClearPlayerBucketsResponse>
     {
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerService _service;
@@ -22,19 +22,22 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             _playerBucketRepository = playerBucketRepository;
         }
 
-        public override async Task<MessageResponse> Handle(ClearPlayerBucketsRequest request,
+        public override async Task<ClearPlayerBucketsResponse> Handle(ClearPlayerBucketsRequest request,
             CancellationToken cancellationToken)
         {
             var player = await _service.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode).ConfigureAwait(false);
 
             if (player is null)
             {
-                return CreateInvalidResponse<MessageResponse>(Player.NotFound);
+                return CreateInvalidResponse<ClearPlayerBucketsResponse>(Player.NotFound);
             }
 
-            await _playerBucketRepository.ClearPlayerBucketsAsync(request.PlayerCode);
+            var wageringRequirement = await _playerBucketRepository.ClearPlayerBucketsAsync(request.PlayerCode);
 
-            return CreateValidResponse<MessageResponse>();
+            return new ClearPlayerBucketsResponse { 
+                Valid = true,
+                wageringRequirement = wageringRequirement
+            };
         }
     }
 }

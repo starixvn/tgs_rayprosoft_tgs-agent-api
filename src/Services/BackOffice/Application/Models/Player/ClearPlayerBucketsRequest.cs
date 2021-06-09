@@ -3,7 +3,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Models.Player
 {
-    public class ClearPlayerBucketsRequest : BaseRequest, IRequest<MessageResponse>
+    public class ClearPlayerBucketsRequest : BaseRequest, IRequest<ClearPlayerBucketsResponse>
     {
         public string PlayerCode { get; set; }
 

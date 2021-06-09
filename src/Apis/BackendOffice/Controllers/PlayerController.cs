@@ -67,7 +67,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPut("{playerCode}/clear")]
         [Description("Clear player buckets")]
-        public Task<MessageResponse> ClearPlayerBucketsAsync(string playerCode) =>
+        public Task<ClearPlayerBucketsResponse> ClearPlayerBucketsAsync(string playerCode) =>
             _mediator.Send(new ClearPlayerBucketsRequest(playerCode));
     }
 }
