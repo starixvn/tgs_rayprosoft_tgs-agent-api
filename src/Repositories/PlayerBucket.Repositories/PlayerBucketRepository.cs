@@ -99,7 +99,7 @@ namespace PlayerBucket.Repositories
         public async ValueTask<decimal> CreatePlayerBucketWithDepositAsync(
             CreatePlayerBucketWithDepositRequest request)
         {
-            var bucketAmount = request.DepositAmount;
+            var depositBonusAmount = request.DepositAmount;
 
             var bucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
             {
@@ -129,12 +129,12 @@ namespace PlayerBucket.Repositories
                     ? promotion.BonusAmountLimit
                     : bonusAmount;
 
-                bucketAmount += bonusAmount;
+                depositBonusAmount += bonusAmount;
 
                 var playerBucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
                 {
                     PlayerCode = request.PlayerCode,
-                    BucketAmount = bonusAmount * promotion.TurnoverMultiple,
+                    BucketAmount = depositBonusAmount * promotion.TurnoverMultiple,
                     BucketType = BucketType.Promotion,
                     IsFull = false,
                     CreatedOn = DateTimeOffset.Now
@@ -173,32 +173,29 @@ namespace PlayerBucket.Repositories
 
                 await _repository.PromotionBonus.AddAsync(bonus).ConfigureAwait(false);
 
-                if (promotion.AutoSentPlayerBonus)
+                await _repository.PlayerBuckets.AddAsync(playerBucket).ConfigureAwait(false);
+
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+                var (transactionId, _) = await _walletRepository.ExchangeAsync(request.BrandId,
+                    request.DefaultWalletId,
+                    request.PlayerCode, TransactionTypes.Promotion, bonusAmount);
+
+                var transactionPromotion = new TransactionPromotion
                 {
-                    await _repository.PlayerBuckets.AddAsync(playerBucket).ConfigureAwait(false);
+                    TransactionId = transactionId,
+                    PromotionId = promotion.Id,
+                    PromotionBonusId = bonusId,
+                    PromotionType = promotion.PromotionType
+                };
 
-                    await _repository.SaveChangesAsync().ConfigureAwait(false);
-
-                    var (transactionId, _) = await _walletRepository.ExchangeAsync(request.BrandId,
-                        request.DefaultWalletId,
-                        request.PlayerCode, TransactionTypes.Promotion, bonusAmount);
-
-                    var transactionPromotion = new TransactionPromotion
-                    {
-                        TransactionId = transactionId,
-                        PromotionId = promotion.Id,
-                        PromotionBonusId = bonusId,
-                        PromotionType = promotion.PromotionType
-                    };
-
-                    await _repository.TransactionPromotions.AddAsync(transactionPromotion).ConfigureAwait(false);
-                    await _repository.SaveChangesAsync().ConfigureAwait(false);
-                }
+                await _repository.TransactionPromotions.AddAsync(transactionPromotion).ConfigureAwait(false);
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
             }
 
             scope.Complete();
 
-            return bucketAmount;
+            return depositBonusAmount;
         }
 
         public async ValueTask<bool> IsBucketFullAsync(string playerCode) =>
