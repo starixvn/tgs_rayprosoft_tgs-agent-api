@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Tgs.Payment.LeePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
 
@@ -69,6 +71,44 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 FormId = createdFormId,
                 PaymentUrl = applyInfo.Response.PaymentUrl
+            };
+        }
+
+        [HttpGet("leepay/exchangerate/{brandPaymentId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public async Task<GetLeePayExchangeRateResponse> GetExchangeRateAsync(
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetLeePayExchangeQuery, LeePayExchangeRateInfo> getLeePayExchangeRateService,
+            [FromServices] LeePaySerializer serializer,
+            string brandPaymentId)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(new Guid(brandPaymentId)))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var query = new GetLeePayExchangeQuery(
+                "tgs.payment.leepay.queryexchangerate",
+                serializer.Serialize(
+                    new LeePayQueryExchangeRateSettings(
+                        brandPaymentInfo.RootElement.GetProperty("systemId").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("systemKey").GetString(),
+                        "CNY",
+                        "USDT")));
+
+            var info = await getLeePayExchangeRateService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            return new GetLeePayExchangeRateResponse
+            {
+                BuyPrice = info.BuyPrice.Value,
+                SellPrice = info.SellPrice.Value,
+                UpdateTime = info.BizTime
             };
         }
     }

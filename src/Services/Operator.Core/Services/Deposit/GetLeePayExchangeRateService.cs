@@ -1,0 +1,48 @@
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Tgs.Payment.Clients;
+using Tgs.Payment.LeePay;
+using Tgs.Payment.Protos;
+using TGS.Core.Models.Enums;
+using TGS.ServiceUtility;
+
+namespace TGS.Services.Operator.Services.Deposit
+{
+    internal class GetLeePayExchangeRateService : IGetService<GetLeePayExchangeQuery, LeePayExchangeRateInfo>
+    {
+        private readonly IPaymentClient _paymentClient;
+        private readonly LeePaySerializer _leePaySerializer;
+
+        public GetLeePayExchangeRateService(IPaymentClient paymentClient, LeePaySerializer leePaySerializer)
+        {
+            _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
+            _leePaySerializer = leePaySerializer ?? throw new ArgumentNullException(nameof(leePaySerializer));
+        }
+
+        public async ValueTask<LeePayExchangeRateInfo> GetAsync(GetLeePayExchangeQuery query, CancellationToken cancellationToken = default)
+        {
+            var response = await _paymentClient.AskAsync(query.Subject, query.LeePayQueryExchangeRateSettings);
+            var generalResponse = _leePaySerializer.Deserialize<GeneralResponse>(response);
+            var applyInfo = _leePaySerializer.Deserialize<LeePayQueryExchangeRateApplyInfo>(generalResponse.Result);
+
+            if (applyInfo.Response.Code == "00")
+            {
+                return new LeePayExchangeRateInfo()
+                {
+                    BuyPrice = applyInfo.Response.BuyPrice,
+                    SellPrice = applyInfo.Response.SellPrice,
+                    BizTime = applyInfo.Response.BizTime
+                };
+            }
+            else
+            {
+                return new LeePayExchangeRateInfo()
+                {
+                    Error = (int)TgsApiError.SystemError,
+                    ErrorMessage = ""
+                };
+            }
+        }
+    }
+}
