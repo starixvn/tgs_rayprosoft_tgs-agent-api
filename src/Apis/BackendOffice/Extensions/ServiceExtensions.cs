@@ -176,13 +176,16 @@ namespace TGS.Apis.BackendOffice.Extensions
                 .AddSingleton<ApplePaySerializer>()
                 .AddNatsMessageQueue(config =>
                 {
-                    config.ConfigQueueOptions((options, sp) =>
-                    {
-                        var configuration = sp.GetRequiredService<IConfiguration>();
+                    config
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var configuration = sp.GetRequiredService<IConfiguration>();
 
-                        options.Url = configuration.GetValue<string>("NatsSetting:Urls");
-                    });
-                });
+                            options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                        })
+                        .AddHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
+                })
+                ;
 
             return services;
         }

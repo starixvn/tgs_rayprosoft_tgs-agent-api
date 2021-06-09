@@ -53,7 +53,7 @@ namespace TGS.Services.Operator.Services.Deposit
                 .DepositAsync(command.Subject, command.Amount, settings)
                 .ConfigureAwait(false);
 
-            var form = new DepositFormInfo(
+            var form = new DepositFormCreateInfo(
                 command.PlayerCode,
                 command.BrandId,
                 command.BrandPaymentId,

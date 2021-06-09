@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -56,6 +57,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                     form.Id,
                     form.UserId,
                     form.UserName,
+                    (UserType)form.UserType,
                     form.BrandId,
                     form.BrandPaymentId,
                     form.BrandPayment?.ChannelName,

@@ -6,6 +6,6 @@ namespace TGS.Services.BackOffice.Domain
 {
     public interface IDepositRepository
     {
-        ValueTask<DepositFormDetail> GetDepositFormDetailAsync(Guid formId);
+        ValueTask<DepositFormInfo> GetDepositFormDetailAsync(Guid formId);
     }
 }

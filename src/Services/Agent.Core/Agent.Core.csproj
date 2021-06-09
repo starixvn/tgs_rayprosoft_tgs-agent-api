@@ -13,7 +13,7 @@
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
-    <PackageReference Include="Tgs.Payment.Core" Version="0.0.6-alpha" />
+    <PackageReference Include="Tgs.Payment.Core" Version="0.0.8-alpha" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
     <PackageReference Include="TGS.SmsServiceClient" Version="0.0.5-alpha" />
   </ItemGroup>

@@ -23,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<PrimePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormDetail> getDepositFormService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] PrimePaySerializer serializer,
             [FromBody] SubmitDepositRequest request)
         {
@@ -82,7 +82,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<ApplePayDepositFormCreatedResponse> SubmitApplePayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormDetail> getDepositFormService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
             [FromServices] ApplePaySerializer serializer,
             [FromBody] SubmitApplePayDepositRequest request
             )
