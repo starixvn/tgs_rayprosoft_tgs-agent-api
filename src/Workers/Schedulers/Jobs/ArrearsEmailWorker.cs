@@ -71,14 +71,14 @@ namespace TGS.Workers.Schedulers.Jobs
                             {
                                 Percentage = percentage,
                                 x.cn.NetProfit,
-                                calculatedNetProfit = percentage * x.cn.NetProfit / 100M
+                                CalculatedNetProfit = percentage * x.cn.NetProfit / 100M
                             })
-                        .OrderBy(o => o.calculatedNetProfit).ToArray();
+                        .OrderBy(o => o.CalculatedNetProfit).ToArray();
 
                     decimal? percentageKey = null;
                     foreach (var netProfit in netProfitList)
                     {
-                        if (x.bn.NetProfit < netProfit.calculatedNetProfit)
+                        if (x.bn.NetProfit < netProfit.CalculatedNetProfit)
                         {
                             percentageKey = netProfit.Percentage;
                             break;
