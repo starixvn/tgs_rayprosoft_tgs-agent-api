@@ -28,10 +28,12 @@ import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import AlertDialog from "../../dialog/Alert"
 import { SubmitCancel } from "../../button/ActionButtons"
 import { Tab as _Tab, TabPanel } from "../../tab"
-import { FormProvider, useForm } from "react-hook-form"
+import { FormProvider, useForm, useFormContext } from "react-hook-form"
 import Input from "../../input/Input"
 import clone from "clone-deep"
 import { VipLevelLabel } from "../../vip-levels/VipLevel"
+import { PlayerClearWageringRequirementDisclosure } from "./PlayerClearWageringRequirement"
+import { useIsAdminUser } from "../../user/context"
 
 export const Key = "player"
 
@@ -56,7 +58,7 @@ export const EditPanel = ({
     })
 
     let [submitData, setSubmit] = useState()
-    let { result, error, mutate, isLoading } = useEditPlayerInfo(
+    let { isLoading, result, error, mutate } = useEditPlayerInfo(
         playerCode,
         submitData
     )
@@ -84,6 +86,7 @@ export const EditPanel = ({
                 <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                     <EditForm
                         brandId={brandId}
+                        playerCode={playerCode}
                         player={player}
                         isLoading={isLoading}
                         onClickClose={() => {
@@ -99,11 +102,14 @@ export const EditPanel = ({
 
 const EditForm = ({
     brandId,
+    playerCode = "",
     player = {},
     isLoading,
     onClickClose,
     ...props
 }) => {
+    let { setValue } = useFormContext()
+    let isAdmin = useIsAdminUser()
     let agentUsernamePlaceholder = useTrans({
         zh: "代理用户名",
         en: "Agent Username"
@@ -113,6 +119,12 @@ const EditForm = ({
     return (
         <Stack spacing="major-1" margin="major-1">
             <FieldValues>
+                {isAdmin && (
+                    <>
+                        <Trans zh="Player Code" en="Player Code" />
+                        <Text>{player.playerCode}</Text>
+                    </>
+                )}
                 <UserNameLabel />
                 <Text>{username}</Text>
 
@@ -149,6 +161,21 @@ const EditForm = ({
                     <FormattedNumberDecimal value={balance} />
                 </Box>
 
+                <Box alignY="center">
+                    <WageringRequirementLabel />
+                </Box>
+                <Set>
+                    <FormattedNumberDecimal
+                        value={player?.wageringRequirement}
+                    />
+                    {/* <PlayerClearWageringRequirementDisclosure
+                        playerCode={player?.playerCode}
+                        onSubmitted={() => {
+                            player.wageringRequirement = 0
+                        }}
+                    /> */}
+                </Set>
+
                 <StatusLabel />
                 <Box>
                     <PlayerStatusSelect
@@ -169,6 +196,7 @@ const EditForm = ({
 }
 
 export const Panel = ({ player = {}, onSubmitted, ...props }) => {
+    let isAdmin = useIsAdminUser()
     let {
         username = "",
         realName = "",
@@ -181,6 +209,12 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
     return (
         <TabPanel tabId={Key} {...props}>
             <FieldValues spacing="major-2">
+                {isAdmin && (
+                    <>
+                        <Trans zh="Player Code" en="Player Code" />
+                        <Text>{player.playerCode}</Text>
+                    </>
+                )}
                 <UserNameLabel />
                 <Text>{username}</Text>
 
@@ -209,6 +243,15 @@ export const Panel = ({ player = {}, onSubmitted, ...props }) => {
                     <FormattedNumberDecimal value={balance} />
                 </Box>
 
+                <Box alignY="center">
+                    <WageringRequirementLabel />
+                </Box>
+                <Box>
+                    <FormattedNumberDecimal
+                        value={player?.wageringRequirement}
+                    />
+                </Box>
+
                 <StatusLabel />
                 <Box>
                     <PlayerStatusLabel value={status} />
@@ -229,5 +272,9 @@ const AgentUsernameLabel = () => <Trans zh="上级代理" en="Upper Level Agent"
 const RegistrationLabel = () => <Trans zh="注册时间" en="Registration" />
 
 const BalanceLabel = () => <Trans zh="余额" en="Balance" />
+
+const WageringRequirementLabel = () => (
+    <Trans zh="需滿足提款金額" en="Wagering requirement" />
+)
 
 const StatusLabel = () => <Trans zh="状态" en="Status" />

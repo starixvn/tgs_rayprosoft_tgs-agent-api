@@ -6,6 +6,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 {
     public class PlayerModel
     {
+        public string PlayerCode { get; init; }
         public string Username { get; init; }
         public string RealName { get; init; }
         public int? VipLevel { get; init; }

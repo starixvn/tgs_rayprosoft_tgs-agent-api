@@ -9,7 +9,7 @@ import React, {
 import { css, Global } from "@emotion/react"
 import { useForm, FormProvider, useFormContext } from "react-hook-form"
 import { Dialog, Button, Box } from "bumbag"
-import { CancelText, SubmitText } from "../button/ActionButtons"
+import { CancelText, ConfirmText, SubmitText } from "../button/ActionButtons"
 import AlertDialog from "../dialog/Alert"
 
 export const FormDialog = ({
@@ -96,9 +96,12 @@ export const FormDialog = ({
     )
 }
 
-export const DeleteConfirmFormDialog = ({
-    submitText = <ConfirmText />,
-    ...props
-}) => <FormDialog submitText={submitText} {...props} />
+export const DeleteConfirmFormDialog = ({ type = "danger", ...props }) => (
+    <FormDialog type={type} {...props} />
+)
+
+export const WarningConfirmFormDialog = ({ type = "warning", ...props }) => (
+    <FormDialog type={type} {...props} />
+)
 
 export default FormDialog

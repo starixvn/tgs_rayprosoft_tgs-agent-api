@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -47,6 +48,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                 Valid = true,
                 Player = new()
                 {
+                    PlayerCode = player.PlayerCode,
                     Username = player.Username,
                     RealName = player.RealName,
                     VipLevel = player.Vip?.Level,

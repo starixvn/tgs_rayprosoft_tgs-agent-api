@@ -79,13 +79,8 @@ export const PlayerAddBalanceDisclosure = ({
 
 const AddDialog = ({ brandId, username, playerCode, onSubmitted, dialog }) => {
     let [formData, setSubmit] = useState()
-    let {
-        result,
-        isLoading,
-        error,
-        mutate,
-        deleteCache
-    } = usePlayerAdjustBalance(playerCode, formData)
+    let { result, isLoading, error, mutate, deleteCache } =
+        usePlayerAdjustBalance(playerCode, formData)
 
     let title = useTrans({
         zh: "余额加分",
@@ -133,12 +128,17 @@ const AddDialog = ({ brandId, username, playerCode, onSubmitted, dialog }) => {
                 <Text.Block alignY="center">
                     <Trans zh="交易类型" en="Transaction Type" />
                 </Text.Block>
-                <PlayerAddBalanceTypeSelect name="transactionType" required />
+                <PlayerAddBalanceTypeSelect name="transactionType" />
 
                 <Text.Block alignY="center">
                     <Trans zh="交易金额" en="Amount" />
                 </Text.Block>
-                <NumberInputField name="amount" min="0" required />
+                <NumberInputField name="amount" min="0" />
+
+                <Text.Block alignY="center">
+                    <Trans zh="流水金额" en="Turnover Requirement Amount" />
+                </Text.Block>
+                <NumberInputField name="bucketAmount" min="0" />
 
                 <Text.Block alignY="center">
                     <Trans zh="备注" en="Remark" />
