@@ -34,18 +34,21 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         public GameType Type { get; init; }
 
         [JsonPropertyName("tag")]
-        public Tag Tag {get; init;}
+        public Tag Tag { get; init; }
+
+        [JsonIgnore]
+        public int DisplayOrder { get; init; }
     }
 
     public record Tag
     {
         [JsonPropertyName("new")]
-        public bool New { get; init;}
+        public bool New { get; init; }
 
         [JsonPropertyName("hot")]
-        public bool Hot { get; init;}
+        public bool Hot { get; init; }
 
         [JsonPropertyName("recommend")]
-        public bool Recommend { get; init;}
+        public bool Recommend { get; init; }
     }
 }

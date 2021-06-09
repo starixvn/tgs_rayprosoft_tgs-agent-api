@@ -78,8 +78,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SBOGameProvider(env), new HabaneroGameProvider(env), new PragmaticPlayGameProvider(env),
                 new AsiaGamingGameProvider(env), new SabaGameProvider(env), new KYGameProvider(env),
                 new VRGameProvider(env), new IMESportsGameProvider(env), new BigGamingGameProvider(env),
-                new JDBGameProvider(env),
-                new SexyGamingGameProvider(env)
+                new JDBGameProvider(env), new SexyGamingGameProvider(env)
             };
         }
 
@@ -140,15 +139,28 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Unlimited = false,
                     PromotionGameProviders =
                         _gameProviders.Select(g =>
-                                new PromotionGameProvider { PromotionId = promotionId, GameProviderId = g.Id })
+                                new PromotionGameProvider
+                                {
+                                    PromotionId = promotionId,
+                                    GameProviderId = g.Id
+                                })
                             .ToHashSet(),
                     PromotionVipLevels =
                         x.Value.VipLevels.Select(v =>
-                                new PromotionVipLevel { PromotionId = promotionId, VipLevelId = v.Id, Level = v.Level })
+                                new PromotionVipLevel
+                                {
+                                    PromotionId = promotionId,
+                                    VipLevelId = v.Id,
+                                    Level = v.Level
+                                })
                             .ToHashSet(),
                     PromotionParticipants =
                         x.Value.Players.Select(p =>
-                                new PromotionParticipant { PlayerCode = p.PlayerCode, PromotionId = promotionId })
+                                new PromotionParticipant
+                                {
+                                    PlayerCode = p.PlayerCode,
+                                    PromotionId = promotionId
+                                })
                             .ToHashSet(),
                     CreatedOn = DateTimeOffset.Now,
                     UpdatedOn = DateTimeOffset.Now
@@ -238,7 +250,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             var languages = new[]
                 {
-                    new {CultureCode = "en-US", LanguageCode = "en", Name = "English", LocalizedName = "English"},
+                    new
+                    {
+                        CultureCode = "en-US",
+                        LanguageCode = "en",
+                        Name = "English",
+                        LocalizedName = "English"
+                    },
                     new
                     {
                         CultureCode = "id-ID",
@@ -246,9 +264,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         Name = "Indonesian",
                         LocalizedName = "bahasa Indonesia"
                     },
-                    new {CultureCode = "ja-JP", LanguageCode = "ja", Name = "Japanese", LocalizedName = "日本語"},
-                    new {CultureCode = "ko-KR", LanguageCode = "ko", Name = "Korean", LocalizedName = "한국어 / 조선말"},
-                    new {CultureCode = "th-TH", LanguageCode = "th", Name = "Thai", LocalizedName = "ภาษาไทย"},
+                    new
+                    {
+                        CultureCode = "ja-JP",
+                        LanguageCode = "ja",
+                        Name = "Japanese",
+                        LocalizedName = "日本語"
+                    },
+                    new
+                    {
+                        CultureCode = "ko-KR",
+                        LanguageCode = "ko",
+                        Name = "Korean",
+                        LocalizedName = "한국어 / 조선말"
+                    },
+                    new
+                    {
+                        CultureCode = "th-TH",
+                        LanguageCode = "th",
+                        Name = "Thai",
+                        LocalizedName = "ภาษาไทย"
+                    },
                     new
                     {
                         CultureCode = "vi-VN",
@@ -502,7 +538,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             var relation = (from s in sports
                             let m = markets.First(m => m.GameProviderId == s.GameProviderId)
-                            select new SportMarketType { Id = Guid.NewGuid(), SportTypeId = s.Id, MarketTypeId = m.Id })
+                            select new SportMarketType
+                            {
+                                Id = Guid.NewGuid(),
+                                SportTypeId = s.Id,
+                                MarketTypeId = m.Id
+                            })
                 .ToArray();
 
             await _repository.SportTypes.AddRangeAsync(sports);
@@ -647,15 +688,31 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now,
                 Currencies =
                     reseller.Currencies.Select(curr =>
-                        new ResellerCurrency { ResellerId = reseller.Id, CurrencyCode = curr.Code }).ToHashSet(),
+                        new ResellerCurrency
+                        {
+                            ResellerId = reseller.Id,
+                            CurrencyCode = curr.Code
+                        }).ToHashSet(),
                 Languages =
                     reseller.Languages.Select(lang =>
-                        new ResellerLanguage { ResellerId = reseller.Id, CultureCode = lang.Code }).ToHashSet(),
+                        new ResellerLanguage
+                        {
+                            ResellerId = reseller.Id,
+                            CultureCode = lang.Code
+                        }).ToHashSet(),
                 Licensees = reseller.Licensees.Select(l => CreateLicenseeWithBrands(reseller, l)).ToHashSet(),
                 GameProviders =
                     gameProviders.Select(gp =>
-                        new ResellerGameProvider {GameProviderId = gp.Id, ResellerId = reseller.Id}).ToHashSet(),
-                BetLimits = _betLimits.Select(bl => new ResellerBetLimit {ResellerId = reseller.Id, BetLimitId = bl.Id})
+                        new ResellerGameProvider
+                        {
+                            GameProviderId = gp.Id,
+                            ResellerId = reseller.Id
+                        }).ToHashSet(),
+                BetLimits = _betLimits.Select(bl => new ResellerBetLimit
+                    {
+                        ResellerId = reseller.Id,
+                        BetLimitId = bl.Id
+                    })
                     .ToHashSet()
             };
         }
@@ -683,15 +740,31 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Description = string.Empty,
                 Currencies =
                     licensee.Currencies.Select(curr =>
-                        new LicenseeCurrency {LicenseeId = licensee.Id, CurrencyCode = curr.Code}).ToHashSet(),
+                        new LicenseeCurrency
+                        {
+                            LicenseeId = licensee.Id,
+                            CurrencyCode = curr.Code
+                        }).ToHashSet(),
                 Languages =
                     licensee.Languages.Select(lang =>
-                        new LicenseeLanguage {LicenseeId = licensee.Id, CultureCode = lang.Code}).ToHashSet(),
+                        new LicenseeLanguage
+                        {
+                            LicenseeId = licensee.Id,
+                            CultureCode = lang.Code
+                        }).ToHashSet(),
                 GameProviders =
                     gameProviders.Select(gp =>
-                        new LicenseeGameProvider {GameProviderId = gp.Id, LicenseeId = licensee.Id}).ToHashSet(),
+                        new LicenseeGameProvider
+                        {
+                            GameProviderId = gp.Id,
+                            LicenseeId = licensee.Id
+                        }).ToHashSet(),
                 Brands = licensee.Brands.Select(b => CreateBrand(reseller, licensee, b)).ToHashSet(),
-                BetLimits = _betLimits.Select(bl => new LicenseeBetLimit {LicenseeId = licensee.Id, BetLimitId = bl.Id})
+                BetLimits = _betLimits.Select(bl => new LicenseeBetLimit
+                    {
+                        LicenseeId = licensee.Id,
+                        BetLimitId = bl.Id
+                    })
                     .ToHashSet()
             };
         }
@@ -741,7 +814,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Status = GameStatus.Active,
                     Tag = GetGameTag(idx),
                     Rebate = true,
-                    EffectiveBettingPercentage = 100
+                    EffectiveBettingPercentage = 100,
+                    DisplayOrder = 99
                 }).ToHashSet();
 
             var betLimits = _betLimits.Select(bl => new BrandBetLimit
@@ -809,7 +883,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         UpdatedOn = Now,
                         Description = string.Empty,
                         BrandGames =
-                            games.Select(g => new BrandGroupGame {BrandGroupId = brandGroupId, BrandGameId = g.Id})
+                            games.Select(g => new BrandGroupGame
+                                {
+                                    BrandGroupId = brandGroupId,
+                                    BrandGameId = g.Id
+                                })
                                 .ToHashSet(),
                         BrandGroupBetLimits = betLimits.Select(b =>
                         {
@@ -933,7 +1011,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 "hank.wu", "lester.wei", "sam.chuang", "houdini.sheng", "rico.lin", "Paul.hsu", "Phoenix.chen",
                 "Gordon.hung", "andy.chu", "jj"
             };
-            string[] brandAccounts = { "aaron.xiao", "meg.chiu" };
+            string[] brandAccounts = {"aaron.xiao", "meg.chiu"};
             var users = new List<User>
             {
                 CreateUser("admin.disabled", UserStatus.Disabled, Roles.AdminRoleId,
