@@ -9,5 +9,6 @@ namespace TGS.Services.PlayerBucket
         Task CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] request);
         Task FillInBucketAsync(FillInPlayerBucketsRequest request);
         ValueTask<bool> IsBucketFullAsync(string playerCode);
+        Task ClearPlayerBucketsAsync(string playerCode);
     }
 }

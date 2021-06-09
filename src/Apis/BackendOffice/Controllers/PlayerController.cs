@@ -60,9 +60,14 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("accountChanges")]
         [Description("Get player account changes")]
-        public Task<PagedResponse<PlayerAccountChangeModel>> GetRoundsAsync(
+        public Task<PagedResponse<PlayerAccountChangeModel>> GetAccountChangesAsync(
             [FromServices] IReportClient client,
             [FromQuery] GetPlayerAccountChangesRequest request) =>
             client.GetPlayerAccountChangesAsync(request);
+
+        [HttpPut("{playerCode}/clear")]
+        [Description("Clear player buckets")]
+        public Task<MessageResponse> ClearPlayerBucketsAsync(string playerCode) =>
+            _mediator.Send(new ClearPlayerBucketsRequest(playerCode));
     }
 }
