@@ -28,7 +28,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// <returns></returns>
         [HttpGet("{brandId}/{formId}")]
         public async Task<GenericResponse<DepositFormDetailViewModel>> GetDepositFormDetailAsync(
-            [FromServices] IGetService<GetDepositFormDetailQuery, DepositFormDetail> getDepositFormService,
+            [FromServices] IGetService<GetDepositFormDetailQuery, DepositFormInfo> getDepositFormService,
             Guid brandId,
             Guid formId)
         {

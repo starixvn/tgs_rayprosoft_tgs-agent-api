@@ -35,7 +35,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             moqPaymentRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
-                .Returns(ValueTask.FromResult(new DepositFormDetail(
+                .Returns(ValueTask.FromResult(new DepositFormInfo(
                     Guid.NewGuid(),
                     "OtherPlayerCode",
                     "OtherPlayerName",
@@ -90,7 +90,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>()))
                 .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
 
-            var expected = new DepositFormInfo(
+            var expected = new DepositFormCreateInfo(
                 command.PlayerCode,
                 command.BrandId,
                 command.BrandPaymentId,
@@ -107,7 +107,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentRepository.Verify(
                 fake => fake.CreateDepositFormAsync(
                     It.IsAny<Guid>(),
-                    It.Is<DepositFormInfo>(form => expected.Matches(form))),
+                    It.Is<DepositFormCreateInfo>(form => expected.Matches(form))),
                 Times.Exactly(1));
         }
 
@@ -162,7 +162,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>()))
                 .Returns(ValueTask.FromResult(command.CreatePaymentSettings(Guid.NewGuid())));
 
-            var expected = new DepositFormInfo(
+            var expected = new DepositFormCreateInfo(
                 command.PlayerCode,
                 command.BrandId,
                 command.BrandPaymentId,
@@ -194,7 +194,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqPaymentRepository.Verify(
                 fake => fake.CreateDepositFormAsync(
                     It.IsAny<Guid>(),
-                    It.Is<DepositFormInfo>(form => expected.Matches(form))),
+                    It.Is<DepositFormCreateInfo>(form => expected.Matches(form))),
                 Times.Exactly(1));
         }
 
@@ -239,7 +239,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             moqPaymentRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == query.FormId)))
-                .Returns(ValueTask.FromResult(new DepositFormDetail(
+                .Returns(ValueTask.FromResult(new DepositFormInfo(
                     Guid.NewGuid(),
                     query.PlayerCode,
                     "PlayerName",
@@ -333,7 +333,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             fakePaymentRepository
                 .GetDepositFormByIdAsync(Arg.Is(query.FormId))
-                .Returns(new DepositFormDetail(
+                .Returns(new DepositFormInfo(
                     Guid.NewGuid(),
                     query.PlayerCode,
                     "UserName",

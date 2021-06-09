@@ -23,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task<ManualDepositFormResponse> GetDepositFormAsync(
-            [FromServices] IGetService<GetBankDepositFormQuery, DepositFormDetail> getBankDepositService,
+            [FromServices] IGetService<GetBankDepositFormQuery, DepositFormInfo> getBankDepositService,
             [FromServices] IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>> getAllPaymentChannelService,
             [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,

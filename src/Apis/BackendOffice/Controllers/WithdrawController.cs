@@ -37,6 +37,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Id = formDetail.Id,
                     PlayerCode = formDetail.UserId,
                     UserName = formDetail.UserName,
+                    UserType = formDetail.UserType.ToString(),
                     BrandId = formDetail.BrandId,
                     BrandPaymentId = formDetail.BrandPaymentId,
                     PaymentMethodId = formDetail.PaymentMethodId,

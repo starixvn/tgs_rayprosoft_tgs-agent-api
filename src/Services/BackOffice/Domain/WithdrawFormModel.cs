@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+using Tgs.Payment;
 
 namespace TGS.Services.BackOffice.Domain
 {
@@ -11,6 +7,7 @@ namespace TGS.Services.BackOffice.Domain
         Guid Id,
         string PlayerCode,
         string UserName,
+        UserType UserType,
         Guid BrandId,
         Guid? BrandPaymentId,
         string ChannelName,
