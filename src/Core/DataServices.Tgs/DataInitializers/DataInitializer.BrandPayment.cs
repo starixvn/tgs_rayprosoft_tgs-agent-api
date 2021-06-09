@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Threading.Channels;
 using System.Threading.Tasks;
+using JoyMoe.Common.Json;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -86,6 +86,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         Key = "018a716fafde1b7f",
                         IV = "2c956cdbfabc792a",
                         Currency = "RMB"
+                    })),
+            ["ApplePay"] = (
+                new Guid("14D139CA-951F-62D8-53EE-A4512F22E04B"),
+                JsonSerializer.Serialize(
+                    new
+                    {
+                        Type = "3",
+                        ApiKey = "EXgNMxsIxfAFuupt9QQa",
+                        StoreGuid = "2FF00CD295A47E70B1CFFFACAC6D02CA",
+                    },
+                    new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance,
+                        WriteIndented = false
                     }))
         };
 
@@ -305,8 +319,75 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             UpdatedOn = DateTimeOffset.Now
                                         };
 
+            var applepayBrandPayments = from brand in allBrands
+                                        from pmc in allPaymentMethodChannels
+                                        where pmc.PaymentId == _Payments["ApplePay"].Id
+                                            && pmc.ChannelId == _CustomChannelId
+                                        let brandPaymentId = GuidExtensions.NewSequentialGuid()
+                                        select new BrandPayment
+                                        {
+                                            Id = brandPaymentId,
+                                            DisplayOrder = 1,
+                                            BrandId = brand.Id,
+                                            PaymentMethodChannelId = pmc.Id,
+                                            TransferType = PaymentTransferType.Deposit,
+                                            ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                                $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                                $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).FirstOrDefault().Key ?? "Custom"}",
+                                            PaymentStatus = SwitchStatus.Enabled,
+                                            TransferLimitFrom = 100,
+                                            TransferLimitTo = 49999,
+                                            PlayerListCondition = PlayerListCondition.MatchAll,
+                                            AllPlayers = true,
+                                            IdentityAuthentication = false,
+                                            PhoneAuthentication = false,
+                                            DepositedAmountUnlimited = true,
+                                            DepositedAmountMin = 0M,
+                                            DepositedAmountMax = 0M,
+                                            Reason = "Reason",
+                                            FeePercentage = 0,
+                                            LowestFee = 0,
+                                            HighestFee = 0,
+                                            BrandPaymentPlayers = new[]
+                                            {
+                                                new BrandPaymentPlayer
+                                                {
+                                                    PlayerCode = _players[0].PlayerCode,
+                                                    ListType = PlayerListType.White,
+                                                    BrandPaymentId = brandPaymentId
+                                                },
+                                                new BrandPaymentPlayer
+                                                {
+                                                    PlayerCode = _players[1].PlayerCode,
+                                                    ListType = PlayerListType.Black,
+                                                    BrandPaymentId = brandPaymentId
+                                                }
+                                            },
+                                            VipLevels = new[]
+                                            {
+                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
+                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                            },
+                                            ExtendedData = JsonSerializer.Serialize(
+                                                new
+                                                {
+                                                    Type = "3",
+                                                    ApiKey = "EXgNMxsIxfAFuupt9QQa",
+                                                    StoreGuid = "2FF00CD295A47E70B1CFFFACAC6D02CA",
+                                                },
+                                                new JsonSerializerOptions
+                                                {
+                                                    PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance,
+                                                    WriteIndented = false
+                                                }),
+                                            CreatedByUsername = AdminUsername,
+                                            CreatedOn = DateTimeOffset.Now,
+                                            UpdatedByUsername = AdminUsername,
+                                            UpdatedOn = DateTimeOffset.Now
+                                        };
+
             await _repository.BrandPayments.AddRangeAsync(
-                manualDepositBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments));
+                manualDepositBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments).Concat(applepayBrandPayments));
 
             await _repository.SaveChangesAsync();
         }
@@ -395,7 +476,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                    UpdatedOn = DateTimeOffset.Now
                                };
 
-            await _repository.PaymentMethodChannels.AddRangeAsync(manualList.Concat(leepayList).Concat(primepayList));
+            var applepayList = from channel in _PaymentChannels
+                               where !(new[] { "ETHEREUM", "TRON", "CustomBank" }.Contains(channel.Key))
+                               select new PaymentMethodChannel
+                               {
+                                   Id = GuidExtensions.NewSequentialGuid(),
+                                   PaymentId = _Payments["ApplePay"].Id,
+                                   MethodId = _PaymentMethods["BankTransfer"].Id,
+                                   ChannelId = channel.Value,
+                                   CreatedByUsername = AdminUsername,
+                                   CreatedOn = DateTimeOffset.Now,
+                                   UpdatedByUsername = AdminUsername,
+                                   UpdatedOn = DateTimeOffset.Now
+                               };
+
+            await _repository.PaymentMethodChannels.AddRangeAsync(manualList.Concat(leepayList).Concat(primepayList).Concat(applepayList));
             await _repository.PaymentMethodChannels.AddAsync(new PaymentMethodChannel
             {
                 Id = GuidExtensions.NewSequentialGuid(),
@@ -652,8 +747,75 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             UpdatedOn = DateTimeOffset.Now
                                         };
 
+            var applepayBrandPayments = from brand in allBrands
+                                        from pmc in allPaymentMethodChannels
+                                        where pmc.PaymentId == _Payments["ApplePay"].Id
+                                            && pmc.ChannelId == _CustomChannelId
+                                        let brandPaymentId = GuidExtensions.NewSequentialGuid()
+                                        select new BrandPayment
+                                        {
+                                            Id = brandPaymentId,
+                                            DisplayOrder = 1,
+                                            BrandId = brand.Id,
+                                            PaymentMethodChannelId = pmc.Id,
+                                            TransferType = PaymentTransferType.Withdrawal,
+                                            ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                                $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
+                                                $"Custom",
+                                            PaymentStatus = SwitchStatus.Enabled,
+                                            TransferLimitFrom = 100,
+                                            TransferLimitTo = 49999,
+                                            PlayerListCondition = PlayerListCondition.MatchAll,
+                                            AllPlayers = true,
+                                            IdentityAuthentication = false,
+                                            PhoneAuthentication = false,
+                                            DepositedAmountUnlimited = true,
+                                            DepositedAmountMin = 0M,
+                                            DepositedAmountMax = 0M,
+                                            Reason = "Reason",
+                                            FeePercentage = 0,
+                                            LowestFee = 0,
+                                            HighestFee = 0,
+                                            BrandPaymentPlayers = new[]
+                                            {
+                                                new BrandPaymentPlayer
+                                                {
+                                                    PlayerCode = _players[0].PlayerCode,
+                                                    ListType = PlayerListType.White,
+                                                    BrandPaymentId = brandPaymentId
+                                                },
+                                                new BrandPaymentPlayer
+                                                {
+                                                    PlayerCode = _players[1].PlayerCode,
+                                                    ListType = PlayerListType.Black,
+                                                    BrandPaymentId = brandPaymentId
+                                                }
+                                            },
+                                            VipLevels = new[]
+                                            {
+                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
+                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                            },
+                                            ExtendedData = JsonSerializer.Serialize(
+                                                new
+                                                {
+                                                    Type = "3",
+                                                    ApiKey = "EXgNMxsIxfAFuupt9QQa",
+                                                    StoreGuid = "2FF00CD295A47E70B1CFFFACAC6D02CA",
+                                                },
+                                                new JsonSerializerOptions
+                                                {
+                                                    PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance,
+                                                    WriteIndented = false
+                                                }),
+                                            CreatedByUsername = AdminUsername,
+                                            CreatedOn = DateTimeOffset.Now,
+                                            UpdatedByUsername = AdminUsername,
+                                            UpdatedOn = DateTimeOffset.Now
+                                        };
+
             await _repository.BrandPayments.AddRangeAsync(
-                manualBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments));
+                manualBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments).Concat(applepayBrandPayments));
             await _repository.SaveChangesAsync();
         }
     }
