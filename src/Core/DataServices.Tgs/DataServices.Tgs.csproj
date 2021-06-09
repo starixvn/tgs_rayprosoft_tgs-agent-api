@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
+    <None Remove="SqlScripts\PaymentInitial\applepay.sql" />
   </ItemGroup>
 
   <ItemGroup>
@@ -70,6 +71,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_sub_games.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_games_for_cache.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_languages_by_external_code.sql" />
+    <EmbeddedResource Include="SqlScripts\PaymentInitial\applePay.sql" />
     <EmbeddedResource Include="SqlScripts\Procedures\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_languages_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_game_provider_for_cache.sql" />
