@@ -10,6 +10,7 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions;
+using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
@@ -121,11 +122,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                     ExternalRoundId = order.RoundId.ToString(),
                     ExternalTransactionId = externalTransactionId,
                     ExternalTransactionReferenceId = order.PlatformTxId,
-                    GameActionType = (order.WinAmount == Math.Abs(order.BetAmount)) ? GameActionType.TieBet : (order.WinAmount > 0) ? GameActionType.WinBet : GameActionType.LoseBet,
+                    GameActionType = ProcessingSettlement(order),
                     BetType = order.BetType,
                     Timestamp = DateTime.UtcNow,
                     RoundDetail = _jsonSerializationProvider.SerializeToString(order.GameInfo)
-
                 });
             }
 
@@ -217,7 +217,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             return GetBetData(data, batchTransactionData.ToArray());
         }
 
-        private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
+        private BetData GetBetData(GameProviderConfigurationData data, string playerCode,
           TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false,
           OppositeBetSetting[] oppositeBetSettings = null) =>
           new()
@@ -239,7 +239,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
               }).ToArray()
           };
 
-        private static BatchBetData GetBetData(GameProviderConfigurationData data, BatchTransactionData[] transactions)
+        private BatchBetData GetBetData(GameProviderConfigurationData data, BatchTransactionData[] transactions)
             => new()
             {
                 GameProviderId = data.GameProviderId,
@@ -250,5 +250,32 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 HasCurrencyFromGameProvider = false,
                 Transactions = transactions,
             };
+
+        private GameActionType ProcessingSettlement(SexyGamingSettle source)
+        {
+            if (source.Platform.IgnoreCaseEquals("SEXYBCRT") && source.GameType.IgnoreCaseEquals("LIVE"))
+            {
+                var gameInfo = _jsonSerializationProvider.DeserializeFromString<SexyGamingGameRecord>(_jsonSerializationProvider.SerializeToString(source.GameInfo));
+                return GetActionType(gameInfo.Status);
+            }
+            else
+            {
+                return GetActionType(source.WinAmount, source.BetAmount);
+            }
+
+        }
+
+        private GameActionType GetActionType(decimal settleAmount, decimal betamount)
+        {
+            return (settleAmount == Math.Abs(betamount)) ? GameActionType.TieBet : (settleAmount > 0) ? GameActionType.WinBet : GameActionType.LoseBet;
+        }
+
+        private GameActionType GetActionType(string status) => status.ToLower() switch
+        {
+            "win" => GameActionType.WinBet,
+            "lose" => GameActionType.LoseBet,
+            "tie" => GameActionType.TieBet,
+            _ => GameActionType.CancelTransaction
+        };
     }
 }
