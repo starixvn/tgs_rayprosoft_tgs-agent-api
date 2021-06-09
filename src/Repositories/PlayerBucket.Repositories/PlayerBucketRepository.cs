@@ -101,21 +101,7 @@ namespace PlayerBucket.Repositories
         {
             var depositBonusAmount = request.DepositAmount;
 
-            var bucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
-            {
-                PlayerCode = request.PlayerCode,
-                BucketAmount = request.DepositAmount,
-                BucketType = BucketType.Deposit,
-                IsFull = false,
-                CreatedOn = DateTimeOffset.Now
-            };
-
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            await _repository.PlayerBuckets
-                .AddAsync(bucket).ConfigureAwait(false);
-
-            await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             await _walletRepository.ExchangeAsync(request.BrandId, request.DefaultWalletId,
                 request.PlayerCode, TransactionTypes.Deposit, request.DepositAmount);
@@ -190,6 +176,22 @@ namespace PlayerBucket.Repositories
                 };
 
                 await _repository.TransactionPromotions.AddAsync(transactionPromotion).ConfigureAwait(false);
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
+            }
+            else
+            {
+                var bucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
+                {
+                    PlayerCode = request.PlayerCode,
+                    BucketAmount = request.DepositAmount,
+                    BucketType = BucketType.Deposit,
+                    IsFull = false,
+                    CreatedOn = DateTimeOffset.Now
+                };
+
+                await _repository.PlayerBuckets
+                    .AddAsync(bucket).ConfigureAwait(false);
+
                 await _repository.SaveChangesAsync().ConfigureAwait(false);
             }
 

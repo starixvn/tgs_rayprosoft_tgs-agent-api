@@ -5,10 +5,13 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
 using TGS.Services.Report.Application.Models.PlayerRebate;
 using TGS.Services.Report.Infrastructure.DataService;
 using TGS.Services.WalletService;
@@ -24,12 +27,13 @@ namespace TGS.Services.Report.Application.Commands.Player
         private readonly IPlayerRebateService _playerRebateService;
         private readonly ITgsPlayerService _playerService;
         private readonly IWalletRepository _walletRepository;
-
+        private readonly IPlayerBucketRepository _playerBucketRepository;
         public CreatePlayerVipRebatesHandler(ITgsBrandService brandService,
             IPlayerRebateService playerRebateService,
             IPlayerGameAggregateService playerGameAggregateService,
             IWalletRepository walletRepository,
             ITgsPlayerService playerService,
+            IPlayerBucketRepository playerBucketRepository,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _brandService = brandService;
@@ -37,6 +41,7 @@ namespace TGS.Services.Report.Application.Commands.Player
             _playerGameAggregateService = playerGameAggregateService;
             _walletRepository = walletRepository;
             _playerService = playerService;
+            _playerBucketRepository = playerBucketRepository;
         }
 
         public override async Task<MessageResponse> Handle(CreatePlayerRebateRequest request,
@@ -141,9 +146,10 @@ namespace TGS.Services.Report.Application.Commands.Player
 
             var brandIds = playerRebates.Select(x => x.BrandId);
             var brands = await _brandService.GetBrandQueries().Where(x => brandIds.Contains(x.Id))
+                .Select(x => new { x.Id, x.AutoSentPlayerBonus })
                 .ToArrayAsync(cancellationToken);
 
-            var playerBonuses = playerRebates
+            var autoSentPlayer = playerRebates
                 .Join(brands, p => p.BrandId, b => b.Id, (player, brand) => new {player, brand})
                 .Where(x => x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
@@ -152,19 +158,23 @@ namespace TGS.Services.Report.Application.Commands.Player
                 .Where(x => !x.brand.AutoSentPlayerBonus).Select(x => x.player).ToArray();
 
             var players = await _playerService.GetPlayerQueries()
-                .Where(x => playerBonuses.Select(p => p.PlayerCode).Contains(x.PlayerCode))
+                .Where(x => autoSentPlayer.Select(p => p.PlayerCode).Contains(x.PlayerCode))
                 .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
                 .ToArrayAsync(cancellationToken);
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-            await _playerRebateService.CreatePlayerRebatesAsync(playerBonuses, DateTimeOffset.Now);
+            await _playerRebateService.CreatePlayerRebatesAsync(autoSentPlayer, DateTimeOffset.Now);
 
             await _playerRebateService.CreatePlayerRebatesAsync(playerBonusesNotSend, null);
+            await _playerBucketRepository.CreatePlayerBucketsAsync(autoSentPlayer.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
+                (pb, p) => new { pb, p }).Select(x =>
+                new CreatePlayerBucketRequest(x.pb.BrandId, x.pb.PlayerCode, x.p.DefaultWalletId, BucketType.Vip,
+                    x.pb.RebateAmount)).ToArray()).ConfigureAwait(false);
 
-            foreach (var playerBonus in playerBonuses.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
+            foreach (var playerBonus in autoSentPlayer.Join(players, pb => pb.PlayerCode, p => p.PlayerCode,
                 (pb, p) => new {pb, p}))
             {
-                await _walletRepository.ExchangeAsync(playerBonus.pb.BrandId, playerBonus.p.DefaultWalletId,
+                var (transactionId, balance) = await _walletRepository.ExchangeAsync(playerBonus.pb.BrandId, playerBonus.p.DefaultWalletId,
                     playerBonus.pb.PlayerCode, TransactionTypes.Rebate,
                     playerBonus.pb.RebateAmount);
             }

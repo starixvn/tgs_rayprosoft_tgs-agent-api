@@ -139,7 +139,7 @@ namespace TGS.Workers.Schedulers.Jobs
 
             if (sendBrandList.Any())
             {
-                var brandNetProfitStrings = sendBrandList.Select(x => $"{x.Name}: {x.NetProfit}<br>").ToArray();
+                var brandNetProfitStrings = sendBrandList.Select(x => $"{x.Name}: {x.NetProfit} \r\n").ToArray();
                 var managerMailMessage = new SendEmailRequest(
                     new[] {arrearsEmail.Manager.Emails.JoinAsStringByComma()},
                     arrearsEmail.Manager.Subject,
