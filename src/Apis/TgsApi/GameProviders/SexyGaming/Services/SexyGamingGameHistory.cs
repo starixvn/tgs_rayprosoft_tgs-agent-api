@@ -67,12 +67,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Services
             "MX-LIVE-006" => GetDragontigerGameHistory(source.Result),//DragonTiger
             "MX-LIVE-007" => GetSicboGameHistory(source.Result),//SicBo
             "MX-LIVE-009" => JsonSerializer.Serialize(source.Result),//Roulette
-            "MX-LIVE-010" => JsonSerializer.Serialize(source.Result),//Red Blue Duel
+            "MX-LIVE-010" => GetRedBlueDuelGameHistory(source.Result),//Red Blue Duel
             "MX-LIVE-011" => JsonSerializer.Serialize(source.Result),//Twenty
             "MX-LIVE-012" => JsonSerializer.Serialize(source.Result),//AndarBahar
             _ => GetBaccaratGameHistory(source.Result)//百家樂相關
         };
 
+        private string GetRedBlueDuelGameHistory(string[] values)
+        {
+            var split = values[0].Split(',');
+            return JsonSerializer.Serialize(
+                 new Dictionary<string, string>() {
+                    { "red",split[0]},
+                    { "blue",split[1]}
+                 });
+        }
 
         private string GetSicboGameHistory(string[] values)
         {
