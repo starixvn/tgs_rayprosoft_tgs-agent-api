@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
-using CsvHelper;
-using JoyMoe.Common.Json;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs.Migrations;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -309,7 +306,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             CreatedOn = DateTimeOffset.Now,
                                             UpdatedByUsername = AdminUsername,
                                             UpdatedOn = DateTimeOffset.Now
-                                        };           
+                                        };
 
             await _repository.BrandPayments.AddRangeAsync(
                 manualDepositBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments));
@@ -399,7 +396,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                    CreatedOn = DateTimeOffset.Now,
                                    UpdatedByUsername = AdminUsername,
                                    UpdatedOn = DateTimeOffset.Now
-                               };       
+                               };
 
             await _repository.PaymentMethodChannels.AddRangeAsync(manualList.Concat(leepayList).Concat(primepayList));
             await _repository.PaymentMethodChannels.AddAsync(new PaymentMethodChannel
@@ -656,7 +653,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             CreatedOn = DateTimeOffset.Now,
                                             UpdatedByUsername = AdminUsername,
                                             UpdatedOn = DateTimeOffset.Now
-                                        };            
+                                        };
 
             await _repository.BrandPayments.AddRangeAsync(
                 manualBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments));
@@ -664,7 +661,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         }
 
         private async Task GenerateApplePayInitialData()
-        {            
+        {
             var assembly = Assembly.GetExecutingAssembly();
             using var stream = assembly.GetManifestResourceStream(string.Format(Consts.PaymentInitialSqlFormat, "applePay"));
             if (stream == null)
@@ -674,9 +671,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             using var reader = new StreamReader(stream);
             var cmdText = reader.ReadToEnd();
-
-            var conn =  _repository.GetDbConnection().ConnectionString;
-            await new NpgsqlCommand(cmdText,new NpgsqlConnection(conn)).ExecuteReaderAsync();
+            await _repository.ExecuteSqlCommandAsync(cmdText, System.Data.CommandType.Text);
         }
     }
 }
