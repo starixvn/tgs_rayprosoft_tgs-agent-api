@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -51,10 +52,11 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
             }
 
             return dataQuery
-                .ToAsyncEnumerable()
+                .ToAsyncEnumerable()    
                 .Select(form => new WithdrawFormModel(
                     form.Id,
                     form.UserId,
+                    (UserType)form.UserType,
                     form.UserName,
                     form.BrandId,
                     form.BrandPaymentId,

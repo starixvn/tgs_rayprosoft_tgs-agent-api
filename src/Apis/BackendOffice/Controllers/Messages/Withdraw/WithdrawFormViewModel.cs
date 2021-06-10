@@ -19,7 +19,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 
         public Guid? PaymentMethodId { get; init; }
 
-        public string PlayerCode { get; init; }
+        public string UserId { get; init; }
 
         public string Remark { get; init; }
 
@@ -28,5 +28,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
         public DateTimeOffset UpdatedOn { get; init; }
 
         public string UserName { get; init; }
+        public string UserType { get; init; }
     }
 }
