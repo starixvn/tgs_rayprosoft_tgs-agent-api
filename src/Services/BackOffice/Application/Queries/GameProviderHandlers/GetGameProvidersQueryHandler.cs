@@ -9,7 +9,7 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
 {
-    public class GetGameProvidersQueryHandler : Handler<GetGameProvidersRequest, PagedResponse<GameProviderModel>>
+    public class GetGameProvidersQueryHandler : Handler<GetGameProvidersRequest, PagedResponse<GameProviderBaseModel>>
     {
         private readonly IGameProviderService _service;
 
@@ -19,7 +19,7 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
             _service = service;
         }
 
-        public override Task<PagedResponse<GameProviderModel>> Handle(GetGameProvidersRequest request,
+        public override Task<PagedResponse<GameProviderBaseModel>> Handle(GetGameProvidersRequest request,
             CancellationToken cancellationToken) =>
             _service.GetGameProviderQueries(q => q
                     .Where(ResellerId, r => r.Resellers.Select(x => x.ResellerId).Contains(ResellerId.Value))
@@ -27,10 +27,9 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                     .Where(BrandId, b => b.Brands.Select(x => x.BrandId).Contains(BrandId.Value))
                     .Where(request.Code, g => g.Code == request.Code)
                     .Where(request.Name, g => g.Name == request.Name))
-                .Select(x => new GameProviderModel
+                .Select(x => new GameProviderBaseModel
                 {
                     Id = x.Id,
-                    UniqueId = x.UniqueId,
                     Name = x.Name,
                     Code = x.Code,
                     Status = x.Status,
