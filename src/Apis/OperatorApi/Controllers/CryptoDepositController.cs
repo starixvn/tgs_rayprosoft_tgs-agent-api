@@ -79,7 +79,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async Task<GetLeePayExchangeRateResponse> GetExchangeRateAsync(
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetLeePayExchangeQuery, LeePayExchangeRateInfo> getLeePayExchangeRateService,
+            [FromServices] IGetService<GetLeePayExchangeRateQuery, LeePayExchangeRateInfo> getLeePayExchangeRateService,
             [FromServices] LeePaySerializer serializer,
             string brandPaymentId)
         {
@@ -89,7 +89,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
-            var query = new GetLeePayExchangeQuery(
+            var query = new GetLeePayExchangeRateQuery(
                 "tgs.payment.leepay.queryexchangerate",
                 serializer.Serialize(
                     new LeePayQueryExchangeRateSettings(
