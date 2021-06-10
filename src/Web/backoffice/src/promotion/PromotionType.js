@@ -4,21 +4,9 @@ import { getTrans, Trans, useLocale, useTrans } from "../i18n"
 import Select from "../select/Select"
 import { usePromotionTypeList } from "./client"
 
-const FirstDeposit = "FirstDeposit"
-
-const SecondDeposit = "SecondDeposit"
-
 const Deposit = "Deposit"
 
-const TurnoverRebate = "TurnoverRebate"
-
 const Turnover = "Turnover"
-
-const ReliefMoneyDaily = "ReliefMoneyDaily"
-
-const ReliefMoneyWeekly = "ReliefMoneyWeekly"
-
-const ReliefMoneyMonthly = "ReliefMoneyMonthly"
 
 const ReliefMoney = "ReliefMoney"
 
