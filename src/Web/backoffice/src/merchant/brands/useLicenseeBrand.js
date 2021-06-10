@@ -9,6 +9,7 @@ import {
 } from "../../checkbox/mapChecked"
 import { useBrand } from "./client"
 import { useLicensee } from "../licensees/client"
+import { sortBy } from "lodash-es"
 
 export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
     let {
@@ -52,6 +53,7 @@ export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
         brand?.gameProviders ?? [],
         licensee?.gameProviders ?? []
     )
+    gameProviders = sortBy(gameProviders, ["name"])
 
     let betLimits = mapMergeChecked(
         (brandBetLimit, betLimit) => {

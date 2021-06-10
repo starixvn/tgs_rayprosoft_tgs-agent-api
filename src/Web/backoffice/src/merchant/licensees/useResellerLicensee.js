@@ -10,6 +10,7 @@ import {
 } from "../../checkbox/mapChecked"
 import { useReseller } from "../resellers/client"
 import { useLicensee } from "./client"
+import { sortBy } from "lodash-es"
 
 export const useResellerLicensee = ({ id = "", resellerId = "" }) => {
     let {
@@ -40,6 +41,7 @@ export const useResellerLicensee = ({ id = "", resellerId = "" }) => {
         licensee?.gameProviders ?? [],
         reseller?.gameProviders ?? []
     )
+    gameProviders = sortBy(gameProviders, ["name"])
 
     let betLimits = mapCheckedById(
         licensee?.betLimits,
