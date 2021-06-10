@@ -18,6 +18,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         private static readonly Dictionary<string, Guid> _PaymentChannels = new()
         {
+            ["建设银行"] = new Guid("2C0E6A1D-E7BA-1443-7699-D341A14FAF97"),
             ["上海浦东发展银行"] = new Guid("E761A2D3-5705-417F-8D97-43CB7AEA0142"),
             ["中信银行"] = new Guid("DC642A94-C2A3-4E89-A71D-891E69D2E3CA"),
             ["中国光大银行"] = new Guid("9BA8107A-F638-42DF-9550-97E6CF39635B"),
