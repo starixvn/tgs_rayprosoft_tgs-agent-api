@@ -112,6 +112,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await LogSeedingTimeAsync(GeneratePlayerSportsBetLimitsAsync, logBuilder);
             await LogSeedingTimeAsync(GenerateBetDataAsync, logBuilder);
             await LogSeedingTimeAsync(GeneratePromotionsAsync, logBuilder);
+            await LogSeedingTimeAsync(GenerateApplePayInitialData, logBuilder);
 
             timer.Stop();
 
