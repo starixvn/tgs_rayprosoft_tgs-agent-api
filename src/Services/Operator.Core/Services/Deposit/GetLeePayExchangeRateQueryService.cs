@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
-using TGS.Core.Models.Enums;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Deposit
@@ -35,11 +34,7 @@ namespace TGS.Services.Operator.Services.Deposit
             }
             else
             {
-                return new LeePayExchangeRateInfo()
-                {
-                    Error = (int)TgsApiError.ProviderApiError,
-                    ErrorMessage = ""
-                };
+                throw new LeePayApiException();
             }
         }
     }
