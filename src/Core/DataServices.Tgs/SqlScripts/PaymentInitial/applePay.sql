@@ -28,6 +28,15 @@ now(),
 
 --3.dbo.payment_channels 
 --Please check google document payment info for "Apple Pay", it only support few banks, not all banks.
+--建设银行
+insert
+    into
+    dbo.payment_channels (id,
+    code,
+    description)
+values('2c0e6a1d-e7ba-1443-7699-d341a14faf97'::uuid,
+'建设银行',
+'online payment channel');
 
 --4.dbo.payment_method_channels
 --中国光大银行
