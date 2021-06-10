@@ -22,5 +22,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal Turnover { get; set; }
         public decimal WinLossAmount { get; set; }
         public decimal NetProfit { get; set; }
+        public decimal AgentDividendPercentage { get; set; }
     }
 }
