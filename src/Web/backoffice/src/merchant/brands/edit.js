@@ -564,7 +564,7 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
                         <NormalLabel>
                             <Trans
                                 zh="代理分红周期"
-                                en="Agent Dividend Interval"
+                                en="Agent Profit Sharing Interval"
                             />
                         </NormalLabel>
                         <Box alignY="center">

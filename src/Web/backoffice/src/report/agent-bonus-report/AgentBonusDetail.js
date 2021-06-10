@@ -97,7 +97,7 @@ const ReportDialog = ({
 
     let title = useTrans({
         zh: "分红详情",
-        en: "Dividend Detail"
+        en: "Profit Sharing Detail"
     })
 
     if (isLoading) {
@@ -125,7 +125,7 @@ const ReportDialog = ({
                     <Trans zh="代理用户名" en="Agent Username" />
                     <Text.Block alignY="center">{username}</Text.Block>
 
-                    <Trans zh="分红金额" en="Dividend Amount" />
+                    <Trans zh="分红金额" en="Profit Sharing Amount" />
                     <Text.Block alignY="center">
                         {formatNumberDecimal(bonusAmount)}
                     </Text.Block>
@@ -244,13 +244,13 @@ const useAgentBonusColumns = ({ username = "", items = [] }) => {
 
             numberDecimalPercentageColumn({
                 accessor: "agentDividendPercentage",
-                Header: <Trans zh="分红比例" en="Dividend Percentaget" />,
+                Header: <Trans zh="分红比例" en="Profit Sharing Percentaget" />,
                 disableSortBy: true
             }),
 
             numberDecimalColumn({
                 accessor: "agentDividendAmount",
-                Header: <Trans zh="分红金额" en="Dividend Amount" />,
+                Header: <Trans zh="分红金额" en="Profit Sharing Amount" />,
                 sumColumn: "agentDividendAmount",
                 disableSortBy: true
             })

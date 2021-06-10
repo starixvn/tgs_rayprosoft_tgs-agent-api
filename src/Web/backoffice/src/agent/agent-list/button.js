@@ -257,7 +257,7 @@ const FormBody = ({}) => {
                     {isCash && (
                         <>
                             <NormalLabel required>
-                                <Trans zh="代理分红" en="Dividend" />
+                                <Trans zh="代理分红" en="Profit Sharing" />
                             </NormalLabel>
                             <AgentDividendPercentageInputField />
                         </>
@@ -397,7 +397,7 @@ const ConfigFormBody = ({ record }) => {
                     {isCash && (
                         <>
                             <NormalLabel required>
-                                <Trans zh="分红比例" en="Dividend %" />
+                                <Trans zh="分红比例" en="Profit Sharing %" />
                             </NormalLabel>
                             <AgentDividendPercentageInputField />
                         </>

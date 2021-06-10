@@ -212,7 +212,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
             textColumn({
                 id: AgentDividendPercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="分红比例" en="Dividend Percentage" />,
+                Header: <Trans zh="分红比例" en="Profit Sharing Percentage" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let isCash = isAgentTypeCash(value?.type)

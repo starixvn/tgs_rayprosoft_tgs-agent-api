@@ -146,7 +146,7 @@ const ReportContent = ({ brandId }) => {
                     }}
                 />
             }
-            title={<Trans zh="代理分红报表" en="Agent Dividend Report" />}
+            title={<Trans zh="代理分红报表" en="Agent Profit sharing Report" />}
         >
             {username && (
                 <Table
@@ -302,7 +302,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 accessor: (row) => row,
                 sumColumn: "agentDividendAmount",
                 toValue: (row) => row?.agentDividendAmount,
-                Header: <Trans zh="分红金额" en="Dividend Amount" />,
+                Header: <Trans zh="分红金额" en="Profit Sharing Amount" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     return (

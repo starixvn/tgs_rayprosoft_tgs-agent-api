@@ -506,7 +506,7 @@ const DividendBox = ({ value, type, children }) => {
 
     return (
         <>
-            <Trans zh="分红比例" en="Dividend Percentage" />
+            <Trans zh="分红比例" en="Profit Sharing Percentage" />
             {children ? (
                 children
             ) : (
