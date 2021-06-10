@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
-using Tgs.Payment.Protos;
 using TGS.Core.Models.Enums;
 using TGS.ServiceUtility;
 
@@ -23,8 +22,7 @@ namespace TGS.Services.Operator.Services.Deposit
         public async ValueTask<LeePayExchangeRateInfo> GetAsync(GetLeePayExchangeQuery query, CancellationToken cancellationToken = default)
         {
             var response = await _paymentClient.AskAsync(query.Subject, query.LeePayQueryExchangeRateSettings);
-            var generalResponse = _leePaySerializer.Deserialize<GeneralResponse>(response);
-            var applyInfo = _leePaySerializer.Deserialize<LeePayQueryExchangeRateApplyInfo>(generalResponse.Result);
+            var applyInfo = _leePaySerializer.Deserialize<LeePayQueryExchangeRateApplyInfo>(response);
 
             if (applyInfo.Response.Code == "00")
             {
@@ -39,7 +37,7 @@ namespace TGS.Services.Operator.Services.Deposit
             {
                 return new LeePayExchangeRateInfo()
                 {
-                    Error = (int)TgsApiError.SystemError,
+                    Error = (int)TgsApiError.ProviderApiError,
                     ErrorMessage = ""
                 };
             }

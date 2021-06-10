@@ -75,7 +75,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpGet("leepay/exchangerate/{brandPaymentId}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task<GetLeePayExchangeRateResponse> GetExchangeRateAsync(
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
@@ -83,8 +83,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] LeePaySerializer serializer,
             string brandPaymentId)
         {
-            var brandId = HttpContext.Items.GetBrandId();
-
             var brandPayment = await getBrandPaymentService
                 .GetAsync(new GetBrandPaymentQuery(new Guid(brandPaymentId)))
                 .ConfigureAwait(false);
@@ -106,8 +104,8 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return new GetLeePayExchangeRateResponse
             {
-                BuyPrice = info.BuyPrice.Value,
-                SellPrice = info.SellPrice.Value,
+                BuyPrice = info.BuyPrice.Value.ToString("#.#####"),
+                SellPrice = info.SellPrice.Value.ToString("#.#####"),
                 UpdateTime = info.BizTime
             };
         }

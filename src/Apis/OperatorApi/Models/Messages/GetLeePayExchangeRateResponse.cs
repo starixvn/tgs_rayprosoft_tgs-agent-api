@@ -9,12 +9,12 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         /// 交易所收購價格，建議用來充值使用
         /// </summary>
         [JsonPropertyName("buyprice")]
-        public decimal BuyPrice { get; init; }
+        public string BuyPrice { get; init; }
         /// <summary>
         /// 交易所賣出價格，建議用來出款使用
         /// </summary>
         [JsonPropertyName("sellprice")]
-        public decimal SellPrice { get; set; }
+        public string SellPrice { get; set; }
         /// <summary>
         /// 價格更新日期
         /// </summary>
