@@ -395,7 +395,7 @@ const AutoOrManualPayoutSwitch = ({
 
     let autoPayoutLabel = useTrans({
         zh: "自動",
-        en: "Auto"
+        en: "Automatic"
     })
     let manualPayoutLabel = useTrans({
         zh: "手动",
