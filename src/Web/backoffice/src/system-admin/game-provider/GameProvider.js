@@ -367,7 +367,7 @@ const FormBody = ({ readOnly, isAdd = false }) => {
                 <NormalLabel>
                     <Trans zh="Transfer Wallet" en="Transfer Wallet" />
                 </NormalLabel>
-                <Checkbox name="isTransferWallet " disabled={disabled} />
+                <Checkbox name="isTransferWallet" disabled={disabled} />
 
                 <NormalLabel>
                     <Trans zh="Support Test Player" en="Support Test Player" />

@@ -495,7 +495,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动时间" en="Promotion Time" />
+                    <Trans zh="活动时间" en="Promotion Period" />
                 </NormalLabel>
                 <Box alignY="center">
                     <DateInputRange
@@ -512,7 +512,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动用户群" en="Promotion VIP Levels" />
+                    <Trans zh="活动用户群" en="User Group" />
                 </NormalLabel>
                 <Box alignY="center">
                     <VipLevelCheckboxGroup
@@ -524,7 +524,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动类型" en="Promotion Type Group" />
+                    <Trans zh="活动类型" en="Promotion Type" />
                 </NormalLabel>
                 <Box alignY="center">
                     {editable && (
@@ -551,7 +551,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动子类型" en="Promotion Type" />
+                    <Trans zh="活动子类型" en="Promotion SubType" />
                 </NormalLabel>
                 <Box alignY="center">
                     {editable && (
@@ -577,7 +577,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动派发" en="Auto Bonus Payout" />
+                    <Trans zh="活动派发" en="Distribution Method" />
                 </NormalLabel>
                 <Box>
                     {isDepositPromotion && (
@@ -596,7 +596,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动费用" en="Total Amount Limit" />
+                    <Trans zh="活动费用" en="Promotion Funds" />
                 </NormalLabel>
                 <Set orientation="horizontal" alignY="center">
                     {unlimitedTotalAmount && (
@@ -627,7 +627,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动游戏类型" en="Game Type Group" />
+                            <Trans zh="活动游戏类型" en="Game Type" />
                         </NormalLabel>
                         <Box>
                             {editable && (
@@ -656,7 +656,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动游戏子类型" en="Game Type" />
+                            <Trans zh="活动游戏子类型" en="Game SubType" />
                         </NormalLabel>
                         <GameTypeSelect
                             name="gameType"
@@ -670,7 +670,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动厂商" en="Game Providers" />
+                            <Trans zh="活动厂商" en="GP Participation" />
                         </NormalLabel>
                         <Box>
                             <BrandGameProviderCheckboxGroupTable
@@ -692,12 +692,12 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
             <Separator />
 
             <Heading use="h5">
-                <Trans zh="活动规则" en="Rules" />
+                <Trans zh="活动规则" en="Promotion Rules" />
             </Heading>
 
             <FieldValues>
                 <NormalLabel>
-                    <Trans zh="彩金百分比" en="Percentage" />
+                    <Trans zh="彩金百分比" en="Bonus Percentage" />
                 </NormalLabel>
                 <PercentageNumberInputField
                     name="percentage"
@@ -706,7 +706,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 />
 
                 <NormalLabel>
-                    <Trans zh="彩金上限" en="Max Amount" />
+                    <Trans zh="彩金上限" en="Bonus Limit" />
                 </NormalLabel>
                 <NumberInput
                     name="bonusAmountLimit"
@@ -716,7 +716,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 />
 
                 <NormalLabel>
-                    <Trans zh="流水倍数" en="Turnover Multiple" />
+                    <Trans zh="流水倍数" en="Turnover Requirement" />
                 </NormalLabel>
                 <NumberInputField
                     name="turnoverMultiple"
@@ -725,7 +725,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                     disabled={disabled}
                     addonAfter={
                         <Button isStatic tabIndex="-1">
-                            <Trans zh="倍" en="X" />
+                            <Trans zh="倍" en="Multipliers" />
                         </Button>
                     }
                 />
