@@ -45,6 +45,7 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 BrandId = brandId,
                 AgentId = agentTokenData.AgentId,
+                IncludeAgents = true,
                 From = request.From,
                 To = request.To,
                 Page = request.Page,
