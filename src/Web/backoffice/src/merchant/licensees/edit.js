@@ -45,6 +45,7 @@ import useResellerLicensee from "./useResellerLicensee"
 import CurrencyBetLimitFieldsBox, {
     flatCheckedCurrencyBetLimitIds
 } from "../CurrencyBetLimitFieldsBox"
+import { sortBy } from "lodash-es"
 
 export const AddButton = ({ onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -90,6 +91,7 @@ const AddDialog = ({ onSubmitted, dialog }) => {
                 [],
                 reseller.gameProviders
             )
+            gameProviders = sortBy(gameProviders, ["name"])
 
             let betLimits = mapCheckedById([], reseller.betLimits)
             formMethods.reset({
