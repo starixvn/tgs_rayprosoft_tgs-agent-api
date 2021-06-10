@@ -37,6 +37,12 @@ export const AddDisclosure = forwardRef((props, ref) => (
     </Disclosure>
 ))
 
+export const NewDisclosure = forwardRef((props, ref) => (
+    <Disclosure ref={ref} {...props}>
+        <Trans zh="新增" en="New" />
+    </Disclosure>
+))
+
 export const DeleteDisclosure = forwardRef(
     ({ palette = "danger", variant = "outlined", ...props }, ref) => (
         <Disclosure ref={ref} palette={palette} variant={variant} {...props}>

@@ -69,7 +69,7 @@ export const PromotionTypeGroupSelect = ({ placeholder, ...props }) => {
     let locale = useLocale()
     let defaultPlaceholder = useTrans({
         zh: "活动类型",
-        en: "Promotion Type Group"
+        en: "Promotion Type"
     })
     placeholder = placeholder ?? defaultPlaceholder
 
@@ -108,7 +108,7 @@ export const PromotionTypeLabel = ({ value }) => {
 export const PromotionTypeSelect = ({ placeholder, group, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "活动子类型",
-        en: "Promotion Type"
+        en: "Promotion SubType"
     })
     placeholder = placeholder ?? defaultPlaceholder
 
