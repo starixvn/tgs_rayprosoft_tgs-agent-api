@@ -10,7 +10,6 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Report.Application.Models.Player;
 using TGS.Services.Report.Application.Models.Round;
-using EntityFrameworkQueryableExtensions = Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions;
 
 namespace TGS.Services.Report.Infrastructure.DataService
 {
