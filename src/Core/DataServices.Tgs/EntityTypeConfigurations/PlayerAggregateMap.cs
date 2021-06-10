@@ -59,6 +59,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(b => b.AgentDividendPercentage)
+                .HasPrecision(9, 6)
+                .IsRequired();
+
             builder.Property(b => b.ReportDate)
                 .IsRequired();
 

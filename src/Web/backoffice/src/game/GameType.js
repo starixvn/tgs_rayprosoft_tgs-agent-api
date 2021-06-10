@@ -168,7 +168,7 @@ const VirtualSportsGroupTrans = {
 
 const LotteryGroupTrans = {
     zh: "彩票",
-    en: "彩票"
+    en: "Lottery"
 }
 
 const AllTrans = [

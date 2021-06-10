@@ -98,7 +98,7 @@ export const PromotionContentDisclosure = ({
                     {readOnly && <ViewDisclosure {...dialog} />}
                     {editable && <EditDisclosure {...dialog} />}
                     {dialog.visible && (
-                        <PromotionContentTabsDialog
+                        <ContentDialog
                             value={value}
                             onChange={(data) => {
                                 setValue(name, data)
@@ -142,7 +142,7 @@ const ContentDialog = ({ value = {}, readOnly, onChange, dialog }) => {
                 width="80vw"
                 maxWidth="80vw"
             >
-                <TabsBody readOnly={readOnly} />
+                <FormBody readOnly={readOnly} />
             </FormDialog>
         </Backdrop>
     )
