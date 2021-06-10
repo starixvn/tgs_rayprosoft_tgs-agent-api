@@ -14,7 +14,7 @@ import {
     useUserBrandId,
     useIsAdminUser
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, View, Update } from "./menu"
 import { PlayerStatusSelect } from "../PlayerStatus"
 import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import { ViewButton, EditButton } from "./button"
@@ -99,9 +99,10 @@ const BodyContent = ({ brandId = "" }) => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
@@ -143,7 +144,10 @@ const useSearchInputPlaceHolder = () =>
 
 const useColumns = ({ mutate, items = [], brandId } = {}) => {
     let isAdminUser = useIsAdminUser()
-    let hasAnyMenu = useHasSubMenuByRoute()
+
+    let hasViewAuth = useIsDisplayMenuByRoute([View])
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasAnyMenu = hasViewAuth || hasUpdateAuth
 
     return useMemo(() => {
         let columns = [sequenceColumn()]
@@ -204,9 +208,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 cell: {
                     textAlign: "center"
                 },
-                accessor: (row) => {
-                    return row
-                },
+                accessor: (row) => row,
                 Cell: ({ value }) => {
                     return (
                         <Box alignX="center">

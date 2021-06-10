@@ -150,9 +150,10 @@ const ReportContent = ({ brandId }) => {
         >
             {username && (
                 <Table
-                    controlledState={state}
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
@@ -160,15 +161,7 @@ const ReportContent = ({ brandId }) => {
                     foot={data?.items?.length > 0}
                 />
             )}
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

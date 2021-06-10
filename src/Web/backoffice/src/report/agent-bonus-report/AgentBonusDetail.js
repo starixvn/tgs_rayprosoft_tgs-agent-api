@@ -132,9 +132,10 @@ const ReportDialog = ({
                 </FieldValues>
                 <Separator />
                 <Table
-                    controlledState={state}
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     // pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}

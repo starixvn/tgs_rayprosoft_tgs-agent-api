@@ -77,9 +77,8 @@ export const AddButton = ({ brandId, onSubmitted, ...props }) => {
 
 const AddDialog = ({ brandId, onSubmitted, dialog }) => {
     let [formData, setSubmit] = useState()
-    let { result, error, mutate, deleteCache, isLoading } = useAddVipLevel(
-        formData
-    )
+    let { result, error, mutate, deleteCache, isLoading } =
+        useAddVipLevel(formData)
 
     const onSubmit = (data) => {
         setSubmit({
@@ -431,7 +430,10 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                 </Set>
                 <Set orientation="vertical" isFilled flex="1">
                     <Heading use="h5">
-                        <Trans zh="VIP反水比例" en="VIP rebate percentage " />
+                        <Trans
+                            zh="VIP返水比例"
+                            en="VIP Commission Rebate（%）"
+                        />
                     </Heading>
                     <Set
                         orientation="vertical"
@@ -442,8 +444,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
                         <FieldValues>
                             <NormalLabel>
                                 <Trans
-                                    zh="真人反水比例（%）："
-                                    en="Live Dealer rebate （%）："
+                                    zh="真人返水比例（%）："
+                                    en="Live Dealer Commission Rebate（%）："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -462,8 +464,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="电子反水比例（%）："
-                                    en="EGame Rebate（%）："
+                                    zh="电子返水比例（%）："
+                                    en="EGame Commission Rebate（%）："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -482,8 +484,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="棋牌反水比例（%）："
-                                    en="Card Game rebate （%）："
+                                    zh="棋牌返水比例（%）："
+                                    en="Card Game Commission Rebate（%）："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -502,8 +504,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="体育反水比例（%）："
-                                    en="Sportsbook rebate （%）："
+                                    zh="体育返水比例（%）："
+                                    en="Sportsbook Commission Rebate（%）："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -522,8 +524,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="虚拟体育反水比例（%）："
-                                    en="VirtualSports rebate （%）："
+                                    zh="虚拟体育返水比例（%）："
+                                    en="VirtualSports Commission Rebate（%）："
                                 />
                             </NormalLabel>
                             {editable && (
@@ -542,8 +544,8 @@ const EditBody = ({ record, readonly = false, isAdd = false }) => {
 
                             <NormalLabel>
                                 <Trans
-                                    zh="彩票反水比例（%）："
-                                    en="Lottery Rebate（%）："
+                                    zh="彩票返水比例（%）："
+                                    en="Lottery Commission Rebate（%）："
                                 />
                             </NormalLabel>
                             {editable && (

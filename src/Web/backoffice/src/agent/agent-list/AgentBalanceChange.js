@@ -77,11 +77,11 @@ export const AgentBalanceChangePanel = ({ brandId, agentId, ...props }) => {
                 <Table
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
-                    initialState={state}
-                    controlledState={state}
                     isLoading={isLoading}
                 />
             </Stack>
@@ -181,7 +181,7 @@ const AdjustTrans = {
 const Dividend = "Dividend"
 const DividendTrans = {
     zh: "分紅",
-    en: "Dividend"
+    en: "Profit sharing"
 }
 
 const AgentTransactionTypeSelect = ({ placeholder, ...props }) => {

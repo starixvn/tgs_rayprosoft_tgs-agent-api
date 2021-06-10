@@ -28,7 +28,7 @@ const DepositTrans = {
 export const Dividend = "Dividend"
 const DividendTrans = {
     zh: "分紅",
-    en: "Dividend"
+    en: "Profit sharing"
 }
 
 export const Transfer = "Transfer"

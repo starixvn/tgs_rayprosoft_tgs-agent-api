@@ -322,7 +322,7 @@ const useResellerData = (id) => {
         error: languageError,
         mutate: muateLanguage,
         deleteCache: deleteLanguageCache
-    } = useLanguageList({ showAll: true })
+    } = useLanguageList({ showAll: true, sortby: "cultureCode" })
     let {
         data: currencyData,
         isLoading: isLoadingCurrency,
@@ -336,14 +336,14 @@ const useResellerData = (id) => {
         error: gameProviderError,
         mutate: muateGameProvider,
         deleteCache: deleteGameProviderCache
-    } = useGameProviderList({ showAll: true })
+    } = useGameProviderList({ showAll: true, sortby: "name" })
     let {
         data: betLimitData,
         isLoading: isLoadingBetLimit,
         error: betLimitError,
         mutate: muateBetLimit,
         deleteCache: deleteBetLimitCache
-    } = useBetLimitList({ showAll: true })
+    } = useBetLimitList({ showAll: true, sortby: "currencyCode" })
 
     let gameProviders = mapMergeChecked(
         (resellerGameProvider, gameProvider) =>

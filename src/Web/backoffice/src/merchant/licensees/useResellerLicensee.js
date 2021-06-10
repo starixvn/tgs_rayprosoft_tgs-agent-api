@@ -29,10 +29,12 @@ export const useResellerLicensee = ({ id = "", resellerId = "" }) => {
         licensee?.languages ?? [],
         reseller?.languages ?? []
     )
+
     let currencies = mapCheckedByCode(
         licensee?.currencies ?? [],
         reseller?.currencies ?? []
     )
+
     let gameProviders = mapCheckedByProp(
         "gameProviderId",
         licensee?.gameProviders ?? [],

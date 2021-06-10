@@ -75,7 +75,13 @@ const BodyContent = ({ brandId = "" }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, username } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = usePlayerList(
+    let {
+        data = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = usePlayerList(
         brandId
             ? {
                   ...toApiParams(state),
@@ -118,23 +124,16 @@ const BodyContent = ({ brandId = "" }) => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

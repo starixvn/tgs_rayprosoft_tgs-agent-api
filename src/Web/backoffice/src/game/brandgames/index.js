@@ -136,7 +136,8 @@ const DataTable = ({
     let {
         result,
         isLoading: isChangingDisplayOrder,
-        error
+        error,
+        deleteCache
     } = useChangeBrandGameOrders(submitData)
 
     const onSubmit = (formData) => {
@@ -180,14 +181,17 @@ const DataTable = ({
             <form onSubmit={formMethods.handleSubmit(onSubmit)}>
                 <Stack spacing="major-1">
                     <Table
-                        controlledState={controlledState}
                         columns={columns}
                         data={items}
+                        controlledState={controlledState}
                         pageCount={pageCount(pageSize, data?.totalCount)}
                         setPageIndex={setPageIndex}
                         setSortOrder={setSortOrder}
                         isLoading={isLoading}
                     />
+                    {error && (
+                        <AlertDialog {...error} onClickClose={deleteCache} />
+                    )}
                     <Dialog.Footer position="sticky" bottom="0">
                         <Button
                             isLoading={isChangingDisplayOrder}

@@ -66,11 +66,11 @@ export const AgentOperationListPanel = ({ agentId, record, ...props }) => {
                 <Table
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
-                    initialState={state}
-                    controlledState={state}
                     isLoading={isLoading}
                 />
             </Stack>

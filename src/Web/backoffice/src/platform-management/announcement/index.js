@@ -47,6 +47,7 @@ import {
 import AlertDialog from "../../dialog/Alert"
 import { ToggleButton as StatusToggleButton } from "./status"
 import BrandBar from "../../report/BrandBar"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -110,6 +111,8 @@ const BodyContent = ({ brandId }) => {
               }
             : toApiParams({
                   ...state,
+                  sortby: "updatedOn",
+                  orderby: SortOrder.Descending,
                   status: statusFrom(statusName)
               })
     )
@@ -258,10 +261,10 @@ const AsyncTable = ({
 
     return (
         <Table
-            initialState={state}
-            controlledState={state}
             columns={columns}
             data={data?.items}
+            initialState={state}
+            controlledState={state}
             pageCount={pageCount(pageSize, data?.totalCount)}
             setPageIndex={setPageIndex}
             setSortOrder={setSortOrder}
@@ -287,7 +290,8 @@ const EffectiveTable = ({
     let {
         result,
         isLoading: isChangingDisplayOrder,
-        error
+        error,
+        deleteCache
     } = useChangeAnnouncementOrders(submitData)
 
     const reset = () => {
@@ -325,15 +329,13 @@ const EffectiveTable = ({
     })
     return (
         <>
-            {error && (
-                <AlertDialog {...error} onClickClose={() => setSubmit(null)} />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
             <Stack spacing="minor-1">
                 <Table
-                    initialState={state}
-                    controlledState={state}
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}

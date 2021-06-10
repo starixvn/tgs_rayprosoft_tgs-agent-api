@@ -240,7 +240,14 @@ const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
 
 const usePromotionFormData = (
     brandId,
-    { from, to, gameProviderIds = [], vipLevels = [], ...record } = {}
+    {
+        from,
+        to,
+        gameProviderIds = [],
+        vipLevels = [],
+        contents = [],
+        ...record
+    } = {}
 ) => {
     let {
         isLoading: isLoadingBrand,
@@ -272,12 +279,17 @@ const usePromotionFormData = (
             }
         }) ?? []
 
-    let languages = brand?.languages
+    contents = brand?.languages
         ?.sort((a, b) => {
             return a.cultureCode.localeCompare(b.cultureCode)
         })
         ?.map(({ brandCultureCode }) => {
+            let content =
+                contents.find(
+                    (content) => content.cultureCode == brandCultureCode
+                ) ?? {}
             return {
+                ...content,
                 cultureCode: brandCultureCode
             }
         })
@@ -290,7 +302,7 @@ const usePromotionFormData = (
     data = {
         ...record,
         vipLevels,
-        languages,
+        contents,
         gameProviders,
         promotionTypeGroup,
         gameTypeGroup,

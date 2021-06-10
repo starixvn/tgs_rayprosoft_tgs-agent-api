@@ -66,26 +66,21 @@ const ReportDialog = ({ brandId, username, start, end, dialog }) => {
     })
 
     let { from, to } = state
-    let {
-        data,
-        isLoading,
-        error,
-        mutate,
-        deleteCache
-    } = usePlayerVipRebateList(username, {
-        ...toApiParams(state),
-        /*
+    let { data, isLoading, error, mutate, deleteCache } =
+        usePlayerVipRebateList(username, {
+            ...toApiParams(state),
+            /*
         sortby: "reportDate",
         */
-        from,
-        to: startOfNextDay(to)
-    })
+            from,
+            to: startOfNextDay(to)
+        })
 
     let columns = usePlayerVipRebateColumns({ items: data?.items })
 
     let title = useTrans({
         zh: "返水详情",
-        en: "Rebate Detail"
+        en: "Commission Rebate Detail"
     })
 
     if (isLoading) {
@@ -110,7 +105,6 @@ const ReportDialog = ({ brandId, username, start, end, dialog }) => {
         >
             <Stack>
                 <Table
-                    controlledState={state}
                     columns={columns}
                     data={data?.items}
                     // pageCount={pageCount(pageSize, data?.totalCount)}
@@ -140,20 +134,28 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
             numberDecimalPercentageColumn({
                 accessor: "liveDealerRebatePercentage",
-                Header: <Trans zh="真人反水比例" en="Live Dealer Rebate %" />,
+                Header: (
+                    <Trans
+                        zh="真人返水比例"
+                        en="Live Dealer Commission Rebate %"
+                    />
+                ),
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
             numberDecimalColumn({
                 accessor: "liveDealerTurnover",
-                Header: <Trans zh="真人投注金额" en="Live Dealer Turnove" />,
+                Header: <Trans zh="真人投注金额" en="Live Dealer Turnover" />,
                 sumColumn: "liveDealerTurnover",
                 disableSortBy: true
             }),
             numberDecimalColumn({
                 accessor: "liveDealerAmount",
                 Header: (
-                    <Trans zh="真人反水金额" en="Live Dealer Rebate Amount" />
+                    <Trans
+                        zh="真人返水金额"
+                        en="Live Dealer Commission Rebate Amount"
+                    />
                 ),
                 sumColumn: "liveDealerAmount",
                 disableSortBy: true
@@ -161,7 +163,9 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
 
             numberDecimalPercentageColumn({
                 accessor: "sportsRebatePercentage",
-                Header: <Trans zh="体育反水比例" en="Sports Rebate %" />,
+                Header: (
+                    <Trans zh="体育返水比例" en="Sports Commission Rebate %" />
+                ),
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
@@ -173,14 +177,21 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
             numberDecimalColumn({
                 accessor: "sportsAmount",
-                Header: <Trans zh="体育反水金额" en="Sports Rebate Amount" />,
+                Header: (
+                    <Trans
+                        zh="体育返水金额"
+                        en="Sports Commission Rebate Amount"
+                    />
+                ),
                 sumColumn: "sportsAmount",
                 disableSortBy: true
             }),
 
             numberDecimalPercentageColumn({
                 accessor: "slotRebatePercentage",
-                Header: <Trans zh="电子反水比例" en="Slot Rebate %" />,
+                Header: (
+                    <Trans zh="电子返水比例" en="Slot Commission Rebate %" />
+                ),
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
@@ -192,14 +203,24 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
             numberDecimalColumn({
                 accessor: "slotAmount",
-                Header: <Trans zh="电子反水金额" en="Slot Rebate Amount" />,
+                Header: (
+                    <Trans
+                        zh="电子返水金额"
+                        en="Slot Commission Rebate Amount"
+                    />
+                ),
                 sumColumn: "slotAmount",
                 disableSortBy: true
             }),
 
             numberDecimalPercentageColumn({
                 accessor: "cardGameRebatePercentage",
-                Header: <Trans zh="棋牌反水比例" en="Card Game Rebate %" />,
+                Header: (
+                    <Trans
+                        zh="棋牌返水比例"
+                        en="Card Game Commission Rebate %"
+                    />
+                ),
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
@@ -212,7 +233,10 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             numberDecimalColumn({
                 accessor: "cardGameAmount",
                 Header: (
-                    <Trans zh="棋牌反水金额" en="Card Game Rebate Amount" />
+                    <Trans
+                        zh="棋牌返水金额"
+                        en="Card Game Commission Rebate Amount"
+                    />
                 ),
                 sumColumn: "cardGameAmount",
                 disableSortBy: true
@@ -221,7 +245,10 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             numberDecimalPercentageColumn({
                 accessor: "virtualSportsRebatePercentage",
                 Header: (
-                    <Trans zh="虚体反水比例" en="Virtual Sports Rebate %" />
+                    <Trans
+                        zh="虚体返水比例"
+                        en="Virtual Sports Commission Rebate %"
+                    />
                 ),
                 Footer: () => <Box />,
                 disableSortBy: true
@@ -238,8 +265,8 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
                 accessor: "virtualSportsAmount",
                 Header: (
                     <Trans
-                        zh="虚体反水金额"
-                        en="Virtual Sports Rebate Amount"
+                        zh="虚体返水金额"
+                        en="Virtual Sports Commission Rebate Amount"
                     />
                 ),
                 sumColumn: "virtualSportsAmount",
@@ -248,7 +275,9 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
 
             numberDecimalPercentageColumn({
                 accessor: "lotteryRebatePercentage",
-                Header: <Trans zh="彩票反水比例" en="Lottery Rebate %" />,
+                Header: (
+                    <Trans zh="彩票返水比例" en="Lottery Commission Rebate %" />
+                ),
                 Footer: () => <Box />,
                 disableSortBy: true
             }),
@@ -260,7 +289,12 @@ const usePlayerVipRebateColumns = ({ items = [] }) => {
             }),
             numberDecimalColumn({
                 accessor: "lotteryAmount",
-                Header: <Trans zh="彩票反水金额" en="Lottery Rebate Amount" />,
+                Header: (
+                    <Trans
+                        zh="彩票返水金额"
+                        en="Lottery Commission Rebate Amount"
+                    />
+                ),
                 sumColumn: "lotteryAmount",
                 disableSortBy: true
             })

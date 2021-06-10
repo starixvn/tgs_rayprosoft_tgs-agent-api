@@ -85,14 +85,18 @@ const ReportContent = ({ brandId }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, from, to } = state
-    let { isLoading, data = {}, error, mutate, deleteCache } = useVipReportList(
-        {
-            ...toApiParams(state),
-            sortby: "username",
-            from,
-            to: startOfNextDay(to)
-        }
-    )
+    let {
+        isLoading,
+        data = {},
+        error,
+        mutate,
+        deleteCache
+    } = useVipReportList({
+        ...toApiParams(state),
+        sortby: "username",
+        from,
+        to: startOfNextDay(to)
+    })
 
     let DataRetentionDays = 180
     let minDate = subDays(dateRange.start, DataRetentionDays)
@@ -145,24 +149,17 @@ const ReportContent = ({ brandId }) => {
             title={<Trans zh="VIP报表" en="VIP Report" />}
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
                 foot={data?.items?.length > 0}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -271,7 +268,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 id: "rebateAmount",
                 accessor: (row) => row,
                 sumColumn: "rebateAmount",
-                Header: <Trans zh="返水金额" en="Rebate Amount" />,
+                Header: <Trans zh="返水金额" en="Commission Rebate Amount" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     return (

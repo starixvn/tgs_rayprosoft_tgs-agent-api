@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { useForm, useFormContext, Controller } from "react-hook-form"
 import { Locales, useLocale } from "../../i18n"
+import Textarea from "../../textarea"
+import FileUploadPath from "../../file/upload/FileUploadPath"
 
 const DefaultPlugin =
     "preview paste importcss searchreplace autolink code visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists imagetools textpattern noneditable charmap emoticons"
@@ -14,6 +16,8 @@ const DefaultToolbar = [
     "hr numlist bullist | link insertfile image preview anchor pagebreak insertdatetime media table | emoticons forecolor backcolor fullscreen "
 ]
 
+//TODO: images_upload_url required to change?
+//options refer to https://www.tiny.cloud/docs/configure/
 const toOptions = ({
     selector,
     height,
@@ -36,19 +40,33 @@ const toOptions = ({
     menu,
     toolbar,
     toolbar_mode: "sliding",
-    images_upload_url: "/fs/file/uploadFileS3",
+    images_upload_url: FileUploadPath,
     resize: false
 })
 
-//TODO: has disabled
-export const HtmlEditor = ({
-    name = "",
+export const HtmlEditor = ({ active = true, name, defaultValue, ...props }) => {
+    let { control } = useFormContext()
+    if (!active) {
+        return (
+            <Controller
+                name={name}
+                control={control}
+                defaultValue={defaultValue}
+                // render={({ field: { value, name, ref, ...fieldProps } }) => {
+                //     return null
+                // }}
+            />
+        )
+    }
+
+    return <EditorWrapper name={name} defaultValue={defaultValue} {...props} />
+}
+
+const EditorWrapper = ({
+    name,
     defaultValue,
     required,
     readOnly,
-    /*
-    disabled,
-    */
     height = 300,
     options = {},
     ...props
@@ -78,6 +96,7 @@ export const HtmlEditor = ({
                     }
 
                     let selector = `textarea[name='${name}'].${textareaRef.current.className}`
+                    //TODO: able to remove by target?
                     console.log("setupEditor by selector", selector)
                     tinymce.remove(selector)
 

@@ -100,7 +100,7 @@ const ReportDialog = ({
     }
 
     if (error) {
-        return <AlertDialog {...dialog} />
+        return <AlertDialog {...dialog} onClickClose={dialog.close} />
     }
 
     return (
@@ -127,9 +127,10 @@ const ReportDialog = ({
                 </FieldValues>
                 <Separator />
                 <Table
-                    controlledState={state}
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     // pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
@@ -165,7 +166,7 @@ const useAgentPlayerWinLossColumns = ({ items = [] }) => {
 
             numberDecimalColumn({
                 accessor: "sportsWinLossAmount",
-                Header: <Trans zh="体育反水金额" en="Sports Win Loss Amount" />,
+                Header: <Trans zh="体育输赢金额" en="Sports Win Loss Amount" />,
                 sumColumn: "sportsWinLossAmount",
                 disableSortBy: true
             }),

@@ -211,7 +211,8 @@ const DataTable = ({
     let {
         result,
         isLoading: isChangingDisplayOrder,
-        error
+        error,
+        deleteCache
     } = useChangeBrandPaymentOrders(submitData)
 
     const reset = () => {
@@ -246,11 +247,14 @@ const DataTable = ({
             <Table
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
             <Dialog.Footer position="sticky" bottom="0">
                 <Button
                     isLoading={isChangingDisplayOrder}

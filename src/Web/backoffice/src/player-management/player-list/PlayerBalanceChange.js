@@ -189,13 +189,13 @@ const BonusTrans = {
 const Rebate = "Rebate"
 const RebateTrans = {
     zh: "返水",
-    en: "Rebate"
+    en: "Commission Rebate"
 }
 
 const Dividend = "Dividend"
 const DividendTrans = {
     zh: "分紅",
-    en: "Dividend"
+    en: "Profit sharing"
 }
 
 const Promotion = "Promotion"

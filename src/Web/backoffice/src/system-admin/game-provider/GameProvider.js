@@ -365,6 +365,11 @@ const FormBody = ({ readOnly, isAdd = false }) => {
                 <Checkbox name="autoCloseRound" disabled={disabled} />
 
                 <NormalLabel>
+                    <Trans zh="Transfer Wallet" en="Transfer Wallet" />
+                </NormalLabel>
+                <Checkbox name="isTransferWallet " disabled={disabled} />
+
+                <NormalLabel>
                     <Trans zh="Support Test Player" en="Support Test Player" />
                 </NormalLabel>
                 <Checkbox name="supportTestPlayer" disabled={disabled} />
@@ -427,7 +432,7 @@ const useFormDataInit = (gameProviderId) => {
         data: languageData,
         isLoading: isLoadingLanguage,
         error: languageError
-    } = useLanguageList({ showAll: true })
+    } = useLanguageList({ showAll: true, sortby: "cultureCode" })
     let {
         data: currencyData,
         isLoading: isLoadingCurrency,
