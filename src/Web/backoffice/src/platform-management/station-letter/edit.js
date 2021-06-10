@@ -44,6 +44,7 @@ import Alert from "../../dialog/Alert"
 import Input from "../../input/Input"
 import FormDialog from "../../form/FormDialog"
 import Textarea from "../../textarea"
+import FileUploadPath from "../../file/upload/FileUploadPath"
 
 export const AddButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -186,7 +187,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                 "hr numlist bullist | link insertfile image preview anchor pagebreak insertdatetime media table | emoticons forecolor backcolor fullscreen "
             ],
             toolbar_mode: "sliding",
-            images_upload_url: "/fs/file/uploadFileS3",
+            images_upload_url: FileUploadPath,
             setup: (editor) => {
                 editor.on("Change", (event) => {
                     let content = event.target.getContent()

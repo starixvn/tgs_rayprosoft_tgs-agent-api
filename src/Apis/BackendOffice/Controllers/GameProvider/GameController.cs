@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Game;
-using TGS.Services.BackOffice.Application.Models.GameProvider;
 
 namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 {

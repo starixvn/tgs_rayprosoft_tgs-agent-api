@@ -63,12 +63,12 @@ export const AgentBalanceChangePanel = ({ brandId, agentId, ...props }) => {
                     accountChangeType={accountChangeType}
                     start={from}
                     end={to}
-                    search={({ accountChangeType, start, end }) => {
+                    search={({ start, end, ...data } = {}) => {
                         setState({
                             pageIndex: 0,
-                            accountChangeType,
                             from: start,
-                            to: end
+                            to: end,
+                            ...data
                         })
                         mutate()
                     }}
@@ -77,22 +77,15 @@ export const AgentBalanceChangePanel = ({ brandId, agentId, ...props }) => {
                 <Table
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
-                    initialState={state}
                     isLoading={isLoading}
                 />
             </Stack>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </TabPanel>
     )
 }
@@ -188,7 +181,7 @@ const AdjustTrans = {
 const Dividend = "Dividend"
 const DividendTrans = {
     zh: "分紅",
-    en: "Dividend"
+    en: "Profit sharing"
 }
 
 const AgentTransactionTypeSelect = ({ placeholder, ...props }) => {

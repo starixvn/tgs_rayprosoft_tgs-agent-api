@@ -10,7 +10,8 @@ export const LicenseeIdSelect = ({ placeholder, resellerId, ...props }) => {
 
     let { isLoading, data, error } = useLicenseeList({
         showAll: true,
-        resellerId
+        resellerId,
+        sortby: "code"
     })
     let options = data?.items.map((licensee) => ({
         label: licensee.code,

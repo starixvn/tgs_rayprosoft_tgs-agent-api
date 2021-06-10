@@ -188,15 +188,7 @@ const BodyContent = ({ brandId }) => {
                     )}
                 </TabPanel>
             </Tabs>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -219,7 +211,8 @@ const DataTable = ({
     let {
         result,
         isLoading: isChangingDisplayOrder,
-        error
+        error,
+        deleteCache
     } = useChangeBrandPaymentOrders(submitData)
 
     const reset = () => {
@@ -254,11 +247,14 @@ const DataTable = ({
             <Table
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
             <Dialog.Footer position="sticky" bottom="0">
                 <Button
                     isLoading={isChangingDisplayOrder}
@@ -327,7 +323,7 @@ const useColumns = ({
                         <Input
                             type="number"
                             size="small"
-                            min="0"
+                            min="1"
                             minLength="1"
                             width="5em"
                             defaultValue={displayOrder}

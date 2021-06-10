@@ -200,7 +200,7 @@ const EditBody = ({ record = {} }) => {
                         </Box>
 
                         <Label fontWeight="normal">
-                            <Trans zh="是否发放返水" en="Rebate" />
+                            <Trans zh="是否发放返水" en="Commission Rebate" />
                         </Label>
                         <Switch name="rebate" />
                     </FieldValues>

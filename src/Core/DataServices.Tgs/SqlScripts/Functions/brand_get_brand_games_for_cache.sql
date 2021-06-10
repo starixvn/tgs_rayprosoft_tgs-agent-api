@@ -5,7 +5,8 @@ RETURNS TABLE(
     "ExternalGameId" varchar, 
     "PlatformType" smallint, 
     "BrandGameStatus" smallint,
-    "Tag" smallint)
+    "Tag" smallint,
+    "DisplayOrder" int)
 LANGUAGE plpgsql
 AS $$
 BEGIN
@@ -16,7 +17,8 @@ BEGIN
     	g.external_id as "ExternalGameId",
     	g.platform_type as "PlatformType",
     	bg.status as "BrandGameStatus",
-    	bg.tag as "Tag"
+    	bg.tag as "Tag",
+        bg.display_order as "DisplayOrder"
     from dbo.brand_games as bg
     join dbo.games as g on bg.game_id = g.id
     where bg.brand_id = $1;

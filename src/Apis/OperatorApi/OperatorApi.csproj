@@ -40,7 +40,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.13" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.9.60">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.10.56">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -48,7 +48,7 @@
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="4.1.1" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
-    <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.2-alpha" />
+    <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.4-alpha" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.9-alpha" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.5" />
   </ItemGroup>

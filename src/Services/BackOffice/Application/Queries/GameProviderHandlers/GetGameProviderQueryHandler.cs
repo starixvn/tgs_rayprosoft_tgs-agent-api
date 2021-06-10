@@ -48,15 +48,18 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
                     AllowKickPlayer = gameProvider.AllowKickPlayer,
                     PlaceBetTimeout = gameProvider.PlaceBetTimeout,
                     SettleBetTimeout = gameProvider.SettleBetTimeout,
+                    IsTransferWallet = gameProvider.TransferWallet,
                     Currencies =
                         gameProvider.Currencies.Select(x => new GameProviderCurrencyModel
                         {
-                            Code = x.CurrencyCode, GameProviderCurrencyCode = x.GameProviderCurrencyCode
+                            Code = x.CurrencyCode,
+                            GameProviderCurrencyCode = x.GameProviderCurrencyCode
                         }).ToArray(),
                     Languages =
                         gameProvider.Languages.Select(x => new GameProviderLanguageModel
                         {
-                            CultureCode = x.CultureCode, GameProviderCultureCode = x.GameProviderCultureCode
+                            CultureCode = x.CultureCode,
+                            GameProviderCultureCode = x.GameProviderCultureCode
                         }).ToArray(),
                     BetLimits = gameProvider.BetLimits.Select(x => new GameProviderBetLimitModel
                     {

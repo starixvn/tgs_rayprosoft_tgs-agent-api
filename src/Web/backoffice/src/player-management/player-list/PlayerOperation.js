@@ -48,14 +48,14 @@ export const PlayerOperationPanel = ({ playerCode, ...props }) => {
                 <SearchBar
                     start={from}
                     end={to}
-                    search={({ start, end }) => {
-                        if (isSameDate(from, start) && isSameDate(to, end)) {
-                            mutate()
-                        }
+                    search={({ start, end, ...data } = {}) => {
                         setState({
+                            pageIndex: 0,
                             from: start,
-                            to: end
+                            to: end,
+                            ...data
                         })
+                        mutate()
                     }}
                     isLoading={isLoading}
                 />
@@ -66,18 +66,11 @@ export const PlayerOperationPanel = ({ playerCode, ...props }) => {
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
                     initialState={state}
+                    controlledState={state}
                     isLoading={isLoading}
                 />
             </Stack>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </TabPanel>
     )
 }

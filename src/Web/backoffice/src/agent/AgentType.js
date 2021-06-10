@@ -16,6 +16,15 @@ const CreditTrans = {
     en: "Credit"
 }
 
+export default {
+    Cash,
+    Credit
+}
+
+export const isAgentTypeCash = (value) => value == Cash
+
+export const isAgentTypeCredit = (value) => value == Credit
+
 export const AgentTypeSelect = ({ placeholder, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "代理类型",

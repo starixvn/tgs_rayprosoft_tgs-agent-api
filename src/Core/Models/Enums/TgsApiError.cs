@@ -16,6 +16,8 @@
         InsufficientFunds = 205,
         InvalidInvitationCode = 206,
         InsufficientBucket = 207,
+        GameBalanceFundInFailed = 208,
+        GameBalanceFundOutFailed = 209,
 
         InvalidGameAction = 301,
         TransactionIdNotFound = 302,
@@ -29,6 +31,7 @@
         InvalidStatus = 404,
         ValidateCodeNotVerify = 405,
         EmailNotVerify = 406,
+        PromotionCannotJoin = 407,
 
         SystemError = 900,
         OperationNotAllowed = 901,

@@ -21,7 +21,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpGet]
         [Description("Get game providers")]
-        public Task<PagedResponse<GameProviderModel>>
+        public Task<PagedResponse<GameProviderBaseModel>>
             GetGameProvidersAsync([FromQuery] GetGameProvidersRequest request) => _mediator.Send(request);
 
         [HttpGet("{id}")]

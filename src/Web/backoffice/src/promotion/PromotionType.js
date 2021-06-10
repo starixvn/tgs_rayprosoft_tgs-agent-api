@@ -4,21 +4,9 @@ import { getTrans, Trans, useLocale, useTrans } from "../i18n"
 import Select from "../select/Select"
 import { usePromotionTypeList } from "./client"
 
-const FirstDeposit = "FirstDeposit"
-
-const SecondDeposit = "SecondDeposit"
-
 const Deposit = "Deposit"
 
-const TurnoverRebate = "TurnoverRebate"
-
 const Turnover = "Turnover"
-
-const ReliefMoneyDaily = "ReliefMoneyDaily"
-
-const ReliefMoneyWeekly = "ReliefMoneyWeekly"
-
-const ReliefMoneyMonthly = "ReliefMoneyMonthly"
 
 const ReliefMoney = "ReliefMoney"
 
@@ -69,7 +57,7 @@ export const PromotionTypeGroupSelect = ({ placeholder, ...props }) => {
     let locale = useLocale()
     let defaultPlaceholder = useTrans({
         zh: "活动类型",
-        en: "Promotion Type Group"
+        en: "Promotion Type"
     })
     placeholder = placeholder ?? defaultPlaceholder
 
@@ -108,7 +96,7 @@ export const PromotionTypeLabel = ({ value }) => {
 export const PromotionTypeSelect = ({ placeholder, group, ...props }) => {
     let defaultPlaceholder = useTrans({
         zh: "活动子类型",
-        en: "Promotion Type"
+        en: "Promotion SubType"
     })
     placeholder = placeholder ?? defaultPlaceholder
 

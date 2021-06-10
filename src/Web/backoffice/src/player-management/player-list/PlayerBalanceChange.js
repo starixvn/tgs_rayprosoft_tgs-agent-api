@@ -79,18 +79,11 @@ export const PlayerBalanceChangePanel = ({ brandId, playerCode, ...props }) => {
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
                     initialState={state}
+                    controlledState={state}
                     isLoading={isLoading}
                 />
             </Stack>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </TabPanel>
     )
 }
@@ -195,14 +188,14 @@ const BonusTrans = {
 
 const Rebate = "Rebate"
 const RebateTrans = {
-    zh: "返佣",
-    en: "Rebate"
+    zh: "返水",
+    en: "Commission Rebate"
 }
 
 const Dividend = "Dividend"
 const DividendTrans = {
     zh: "分紅",
-    en: "Dividend"
+    en: "Profit Sharing"
 }
 
 const Promotion = "Promotion"

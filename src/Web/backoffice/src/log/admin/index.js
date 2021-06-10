@@ -42,6 +42,7 @@ import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useAdminLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
 import { CopyTextBox } from "../../text/CopyTextBox"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -65,7 +66,8 @@ const Body = ({}) => {
         trackingId: "",
         ip: "",
         path: "",
-        method: ""
+        method: "",
+        serverName: ""
     })
 
     let { pageIndex, pageSize } = state
@@ -75,7 +77,11 @@ const Body = ({}) => {
         mutate,
         error,
         deleteCache
-    } = useAdminLogList(toApiParams(state))
+    } = useAdminLogList({
+        ...toApiParams(state),
+        sortby: "recordedOn",
+        orderby: SortOrder.Descending
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
 
@@ -91,7 +97,8 @@ const Body = ({}) => {
                     ip={state?.ip}
                     path={state?.path}
                     method={state?.method}
-                    search={({ start, end, ...data }) => {
+                    serverName={state?.serverName}
+                    search={({ start, end, ...data } = {}) => {
                         setState({
                             pageIndex: 0,
                             from: start,
@@ -113,15 +120,7 @@ const Body = ({}) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -134,6 +133,7 @@ const SearchBar = ({
     ip,
     path,
     method,
+    serverName,
     search,
     isLoading,
     ...props
@@ -146,7 +146,8 @@ const SearchBar = ({
             trackingId,
             ip,
             path,
-            method
+            method,
+            serverName
         }
     })
 
@@ -181,6 +182,11 @@ const SearchBar = ({
                         name="method"
                         showEmptyFieldValueAddonAfter
                         placeholder="Method"
+                    />
+                    <InputField
+                        name="serverName"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Server Name"
                     />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
@@ -218,6 +224,12 @@ const useColumns = ({ items = [] } = {}) => {
                 Cell: ({ value = "" }) => (
                     <CopyTextBox value={value} alignX="left" textAlign="left" />
                 )
+            }),
+            textColumn({
+                accessor: "serverName",
+                Header: <Trans zh="Server Name" en="Server Name" />,
+                disableSortBy: true,
+                Cell: ({ value = "" }) => value
             }),
             textColumn({
                 accessor: "method",

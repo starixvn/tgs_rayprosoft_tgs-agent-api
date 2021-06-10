@@ -11,9 +11,10 @@ import { PlayerStatusLabel } from "../PlayerStatus"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
-    useUserBrandId
+    useUserBrandId,
+    useIsAdminUser
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, View, Update } from "./menu"
 import { PlayerStatusSelect } from "../PlayerStatus"
 import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import { ViewButton, EditButton } from "./button"
@@ -98,9 +99,10 @@ const BodyContent = ({ brandId = "" }) => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
@@ -141,11 +143,27 @@ const useSearchInputPlaceHolder = () =>
     useTrans({ zh: "用户名输入框", en: "Input user name" })
 
 const useColumns = ({ mutate, items = [], brandId } = {}) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let isAdminUser = useIsAdminUser()
+
+    let hasViewAuth = useIsDisplayMenuByRoute([View])
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasAnyMenu = hasViewAuth || hasUpdateAuth
 
     return useMemo(() => {
-        let columns = [
-            sequenceColumn(),
+        let columns = [sequenceColumn()]
+
+        if (isAdminUser) {
+            columns.push(
+                textColumn({
+                    Header: <Trans zh="Player Code" en="Player Code" />,
+                    accessor: "playerCode",
+                    disableSortBy: true
+                })
+            )
+        }
+
+        columns = [
+            ...columns,
             {
                 Header: <Trans zh="用户名" en="Username" />,
                 accessor: "username",
@@ -190,9 +208,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 cell: {
                     textAlign: "center"
                 },
-                accessor: (row) => {
-                    return row
-                },
+                accessor: (row) => row,
                 Cell: ({ value }) => {
                     return (
                         <Box alignX="center">

@@ -11,6 +11,7 @@ using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
+using TGS.Services.Operator.Services.BrandPayments;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -22,7 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async Task<ManualDepositFormResponse> GetDepositFormAsync(
-            [FromServices] IGetService<GetBankDepositFormQuery, DepositFormDetail> getBankDepositService,
+            [FromServices] IGetService<GetBankDepositFormQuery, DepositFormInfo> getBankDepositService,
             [FromServices] IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>> getAllPaymentChannelService,
             [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,

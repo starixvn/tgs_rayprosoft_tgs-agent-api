@@ -70,12 +70,14 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             Guid[] gameProviderIds;
             if (!string.IsNullOrEmpty(request.GameProviderCode))
             {
-                var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
-                gameProviderIds = new [] { gameProviderId };
+                var gameProviderId =
+                    await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
+                gameProviderIds = new[] {gameProviderId};
             }
             else
             {
-                gameProviderIds = (await _brandOperations.GetBrandGameProvidersAsync(brandId)).Select(x => x.GameProviderId).ToArray();
+                gameProviderIds = (await _brandOperations.GetBrandGameProvidersAsync(brandId))
+                    .Select(x => x.GameProviderId).ToArray();
             }
 
             var playerTokenData = _httpContext.Items.GetPlayerTokenData();
@@ -105,27 +107,34 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             foreach (var gameProviderId in gameProviderIds)
             {
                 var games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, playerType);
-                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, cultureCode);
+                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId,
+                    cultureCode);
 
                 var translatedGame = games
-                .Where(g => types.Length == 0 || types.Contains(g.Type))
-                .Select(g =>
-                {
-                    var key = g.Id.ToString();
-
-                    return g with
+                    .Where(g => types.Length == 0 || types.Contains(g.Type))
+                    .Select(g =>
                     {
-                        Name = _localizationOperations.Parse(store, key,
-                            Localization.GameName, g.Name),
-                        Description = _localizationOperations.Parse(store, key,
-                            Localization.GameDescription, g.Description)
-                    };
-                }).ToArray();
+                        var key = g.Id.ToString();
+
+                        return g with
+                        {
+                            Name = _localizationOperations.Parse(store, key,
+                                Localization.GameName, g.Name),
+                            Description = _localizationOperations.Parse(store, key,
+                                Localization.GameDescription, g.Description)
+                        };
+                    }).ToArray();
 
                 translatedGames.AddRange(translatedGame);
             }
 
-            return new() { Games = translatedGames.ToArray() };
+            return new()
+            {
+                Games = translatedGames
+                    .OrderBy(g => g.DisplayOrder)
+                    .ThenBy(g => g.Code)
+                    .ToArray()
+            };
         }
 
         private async Task<GameModel[]> GetGameModelsAsync(Guid brandId, Guid gameProviderId,
@@ -154,8 +163,8 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
             return (from bg in brandGames.Where(g => g.GameProviderId == gameProviderId)
                     join g in cachedGames on bg.GameId equals g.Id
-                    where g.AvailableToBrand 
-                    && (g.AvailableCurrencies.Length == 0 
+                    where g.AvailableToBrand
+                        && (g.AvailableCurrencies.Length == 0
                             || g.AvailableCurrencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase))
                     select new GameModel
                     {
@@ -172,8 +181,10 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                             New = bg.Tag.IsNew(),
                             Hot = bg.Tag.IsHot(),
                             Recommend = bg.Tag.IsRecommend()
-                        }
-                    }).ToArray();
+                        },
+                        DisplayOrder = bg.DisplayOrder
+                    })
+                .ToArray();
         }
 
         private static bool IsGameActive(Status[] statuses, Status gameProviderStatus, Status brandGameProviderStatus,

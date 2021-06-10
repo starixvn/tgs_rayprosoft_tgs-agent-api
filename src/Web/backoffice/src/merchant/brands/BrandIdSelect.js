@@ -8,7 +8,11 @@ export const BrandIdSelect = ({ placeholder, licenseeId, ...props }) => {
     let defaultPlaceholder = useBrandPlaceholder()
     placeholder = placeholder ?? defaultPlaceholder
 
-    let { isLoading, data, error } = useBrandList({ showAll: true, licenseeId })
+    let { isLoading, data, error } = useBrandList({
+        showAll: true,
+        licenseeId,
+        sortby: "code"
+    })
     let options = data?.items.map((brand) => ({
         label: brand.code,
         value: brand.id

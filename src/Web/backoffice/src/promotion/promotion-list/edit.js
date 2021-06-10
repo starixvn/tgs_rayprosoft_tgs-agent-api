@@ -18,6 +18,7 @@ import { useIsDisplayMenuByRoute } from "../../user/context"
 import {
     AddDisclosure,
     EditDisclosure,
+    NewDisclosure,
     ViewDisclosure
 } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
@@ -57,6 +58,8 @@ import {
     PercentageNumberInputField
 } from "../../input/NumberInput"
 import { Switch } from "../../switch/Switch"
+import { PromotionContentDisclosure } from "./PromotionContent"
+import { useBrand } from "../../merchant/brands/client"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -68,7 +71,7 @@ export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
 
     return (
         <>
-            <AddDisclosure {...dialog} />
+            <NewDisclosure {...dialog} />
             {dialog.visible && (
                 <AddDialog
                     brandId={brandId}
@@ -238,9 +241,27 @@ const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
 
 const usePromotionFormData = (
     brandId,
-    { from, to, gameProviderIds = [], vipLevels = [], ...record } = {}
+    {
+        from,
+        to,
+        gameProviderIds = [],
+        vipLevels = [],
+        contents = [],
+        ...record
+    } = {}
 ) => {
-    let { data = {}, ...rest } = useBrandGameProviderList(
+    let {
+        isLoading: isLoadingBrand,
+        data: brand,
+        error: brandError
+    } = useBrand(brandId)
+
+    let {
+        data = {},
+        isLoading: isLoadingBrandGameProviderList,
+        error: brandGameProviderError,
+        ...rest
+    } = useBrandGameProviderList(
         brandId
             ? {
                   brandId,
@@ -259,6 +280,21 @@ const usePromotionFormData = (
             }
         }) ?? []
 
+    contents = brand?.languages
+        ?.sort((a, b) => {
+            return a.cultureCode.localeCompare(b.cultureCode)
+        })
+        ?.map(({ brandCultureCode }) => {
+            let content =
+                contents.find(
+                    (content) => content.cultureCode == brandCultureCode
+                ) ?? {}
+            return {
+                ...content,
+                cultureCode: brandCultureCode
+            }
+        })
+
     let promotionTypeGroup = usePromotionGroupValueOf(record?.promotionType)
     let gameTypeGroup = useGameTypeGroupValueOf(record?.gameType)
 
@@ -267,6 +303,7 @@ const usePromotionFormData = (
     data = {
         ...record,
         vipLevels,
+        contents,
         gameProviders,
         promotionTypeGroup,
         gameTypeGroup,
@@ -275,6 +312,8 @@ const usePromotionFormData = (
     }
 
     return {
+        isLoading: isLoadingBrand || isLoadingBrandGameProviderList,
+        error: brandError || brandGameProviderError,
         ...rest,
         data
     }
@@ -316,7 +355,7 @@ const ViewDialog = ({ brandId, record, dialog, ...props }) => {
     }
 
     if (error) {
-        return <AlertDialog onClickClose={dialog.hide} />
+        return <AlertDialog {...error} onClickClose={dialog.hide} />
     }
 
     return (
@@ -356,7 +395,7 @@ const AutoOrManualPayoutSwitch = ({
 
     let autoPayoutLabel = useTrans({
         zh: "自動",
-        en: "Auto"
+        en: "Automatic"
     })
     let manualPayoutLabel = useTrans({
         zh: "手动",
@@ -417,7 +456,14 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
         control,
         name: PromotionTypeGroupFieldName
     })
+
     let isDepositPromotion = promotionTypeGroup === PromotionTypeGroup.Deposit
+    useEffect(() => {
+        if (isDepositPromotion) {
+            setValue(AutoSentPlayerBonusFieldName, true)
+        }
+    }, [isDepositPromotion])
+
     let isPromotionTypeTurnoverRelated =
         promotionTypeGroup === PromotionTypeGroup.Turnover ||
         promotionTypeGroup === PromotionTypeGroup.ReliefMoney
@@ -433,12 +479,6 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
         control,
         name: GameTypeGroupFieldName
     })
-
-    useEffect(() => {
-        if (isDepositPromotion) {
-            setValue(AutoSentPlayerBonusFieldName, true)
-        }
-    }, [isDepositPromotion])
 
     let disabled = readOnly
     let editable = !readOnly
@@ -456,7 +496,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动时间" en="Promotion Time" />
+                    <Trans zh="活动时间" en="Promotion Period" />
                 </NormalLabel>
                 <Box alignY="center">
                     <DateInputRange
@@ -473,7 +513,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动用户群" en="Promotion VIP Levels" />
+                    <Trans zh="活动用户群" en="User Group" />
                 </NormalLabel>
                 <Box alignY="center">
                     <VipLevelCheckboxGroup
@@ -485,7 +525,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动类型" en="Promotion Type Group" />
+                    <Trans zh="活动类型" en="Promotion Type" />
                 </NormalLabel>
                 <Box alignY="center">
                     {editable && (
@@ -512,7 +552,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动子类型" en="Promotion Type" />
+                    <Trans zh="活动子类型" en="Promotion SubType" />
                 </NormalLabel>
                 <Box alignY="center">
                     {editable && (
@@ -538,7 +578,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动派发" en="Auto Bonus Payout" />
+                    <Trans zh="活动派发" en="Distribution Method" />
                 </NormalLabel>
                 <Box>
                     {isDepositPromotion && (
@@ -557,7 +597,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动费用" en="Total Amount Limit" />
+                    <Trans zh="活动费用" en="Promotion Funds" />
                 </NormalLabel>
                 <Set orientation="horizontal" alignY="center">
                     {unlimitedTotalAmount && (
@@ -588,7 +628,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动游戏类型" en="Game Type Group" />
+                            <Trans zh="活动游戏类型" en="Game Type" />
                         </NormalLabel>
                         <Box>
                             {editable && (
@@ -617,7 +657,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动游戏子类型" en="Game Type" />
+                            <Trans zh="活动游戏子类型" en="Game SubType" />
                         </NormalLabel>
                         <GameTypeSelect
                             name="gameType"
@@ -631,7 +671,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动厂商" en="Game Providers" />
+                            <Trans zh="活动厂商" en="GP Participation" />
                         </NormalLabel>
                         <Box>
                             <BrandGameProviderCheckboxGroupTable
@@ -641,17 +681,24 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                         </Box>
                     </>
                 )}
+
+                {/* <NormalLabel>
+                    <Trans zh="活动内容" en="Content" />
+                </NormalLabel>
+                <Box>
+                    <PromotionContentDisclosure readOnly={readOnly} />
+                </Box> */}
             </FieldValues>
 
             <Separator />
 
             <Heading use="h5">
-                <Trans zh="活动规则" en="Rules" />
+                <Trans zh="活动规则" en="Promotion Rules" />
             </Heading>
 
             <FieldValues>
                 <NormalLabel>
-                    <Trans zh="彩金百分比" en="Percentage" />
+                    <Trans zh="彩金百分比" en="Bonus Percentage" />
                 </NormalLabel>
                 <PercentageNumberInputField
                     name="percentage"
@@ -660,7 +707,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 />
 
                 <NormalLabel>
-                    <Trans zh="彩金上限" en="Max Amount" />
+                    <Trans zh="彩金上限" en="Bonus Limit" />
                 </NormalLabel>
                 <NumberInput
                     name="bonusAmountLimit"
@@ -670,7 +717,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 />
 
                 <NormalLabel>
-                    <Trans zh="流水倍数" en="Turnover Multiple" />
+                    <Trans zh="流水倍数" en="Turnover Requirement" />
                 </NormalLabel>
                 <NumberInputField
                     name="turnoverMultiple"
@@ -679,7 +726,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                     disabled={disabled}
                     addonAfter={
                         <Button isStatic tabIndex="-1">
-                            <Trans zh="倍" en="X" />
+                            <Trans zh="倍" en="Multipliers" />
                         </Button>
                     }
                 />

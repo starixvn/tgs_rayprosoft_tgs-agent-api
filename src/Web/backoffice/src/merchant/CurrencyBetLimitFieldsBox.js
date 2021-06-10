@@ -148,11 +148,25 @@ const CurrencyBetLimitsRow = ({
                 <Table.Row key={currencyField._id}>
                     <Table.HeadCell>
                         <Box>
-                            <Checkbox
-                                name={currencyCheckedFieldName}
-                                defaultChecked={currencyField.checked}
-                                disabled={disabled}
-                            />
+                            {disabled && (
+                                <>
+                                    <Checkbox
+                                        checked={currencyField.checked}
+                                        disabled
+                                    />
+                                    <Checkbox
+                                        name={currencyCheckedFieldName}
+                                        checked={currencyField.checked}
+                                        display="none"
+                                    />
+                                </>
+                            )}
+                            {!disabled && (
+                                <Checkbox
+                                    name={currencyCheckedFieldName}
+                                    defaultChecked={currencyField.checked}
+                                />
+                            )}
                             <Input
                                 type="hidden"
                                 name={`${currencyFieldName}.${currencyFieldIndex}.code`}

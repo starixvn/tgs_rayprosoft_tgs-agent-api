@@ -49,21 +49,26 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 ShowAll = showAll
             };
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
+            var games = list.OrderByDescending(p => p.UpdatedOn)
+                .Select(g => (GameProviderBaseModel)g);
 
-            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
+            var expectedGames = showAll ? games.ToArray() : games.Skip(skip).Take(take).ToArray();
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetGameProvidersRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<GameProviderModel> {Valid = true, Items = expectedRoles});
+                .ReturnsAsync(new PagedResponse<GameProviderBaseModel>
+                {
+                    Valid = true,
+                    Items = expectedGames
+                });
 
             var response = await _controller.GetGameProvidersAsync(request);
             response.Valid.Should().BeTrue();
 
             for (var i = 0; i < response.Items.Length; i++)
             {
-                response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-                response.Items[i].Name.Should().Be(expectedRoles[i].Name);
+                response.Items[i].Id.Should().Be(expectedGames[i].Id);
+                response.Items[i].Name.Should().Be(expectedGames[i].Name);
             }
 
             _mediatorMock.Verify(x => x.Send(It.IsAny<GetGameProvidersRequest>(), It.IsAny<CancellationToken>()));
@@ -81,7 +86,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new CreateGamesResponse {Valid = false, Message = GameProvider.CodeExisted});
+                .ReturnsAsync(new CreateGamesResponse
+                {
+                    Valid = false,
+                    Message = GameProvider.CodeExisted
+                });
 
             var response = await _controller.CreateGameProviderAsync(request);
             response.Valid.Should().BeFalse();

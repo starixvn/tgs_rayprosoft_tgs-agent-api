@@ -61,6 +61,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.AllowKickPlayer = request.AllowKickPlayer;
             gameProvider.PlaceBetTimeout = request.PlaceBetTimeout;
             gameProvider.SettleBetTimeout = request.SettleBetTimeout;
+            gameProvider.TransferWallet = request.IsTransferWallet;
             gameProvider.Description = request.Description;
             gameProvider.UpdatedByUsername = request.EditorUsername;
             gameProvider.UpdatedOn = DateTimeOffset.Now;
@@ -81,14 +82,46 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             var cacheKeys = new[]
             {
-                new CacheKey {CacheType = RedisCacheType.Currencies, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.Languages, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.GameProvider, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.GameProviderIdByCode, Key = gameProvider.Code},
-                new CacheKey {CacheType = RedisCacheType.GameProviderConfiguration, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.GameProviderLanguages, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.GameProviderCurrencies, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.Localization, Key = gameProvider.Id}
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.Currencies,
+                    Key = gameProvider.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.Languages,
+                    Key = gameProvider.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.GameProvider,
+                    Key = gameProvider.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.GameProviderIdByCode,
+                    Key = gameProvider.Code
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.GameProviderConfiguration,
+                    Key = gameProvider.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.GameProviderLanguages,
+                    Key = gameProvider.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.GameProviderCurrencies,
+                    Key = gameProvider.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.Localization,
+                    Key = gameProvider.Id
+                }
             };
 
             await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
@@ -102,6 +135,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             gameProvider.UpdatedOn = DateTimeOffset.Now;
 
             await UpdateEntityAsync(gameProvider);
+
             await _cacheManager.ClearCacheAsync(RedisCacheType.GameProvider, gameProvider.Id);
         }
 
@@ -119,6 +153,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 AllowKickPlayer = request.AllowKickPlayer,
                 PlaceBetTimeout = request.PlaceBetTimeout,
                 SettleBetTimeout = request.SettleBetTimeout,
+                TransferWallet = request.IsTransferWallet,
                 UniqueId = (ushort)(maxUniqueId + 1),
                 Description = request.Description,
                 CreatedByUsername = request.EditorUsername,

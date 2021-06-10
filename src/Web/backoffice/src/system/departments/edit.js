@@ -25,7 +25,6 @@ import Input from "../../input/Input"
 import { nextRoleType, RoleTypeSelect, useRoleTypeOptions } from "../roles/type"
 import { MerchantIdSelect } from "../../merchant/MerchantSelect"
 import ResellerIdSelect from "../../merchant/resellers/ResellerIdSelect"
-import { useResellerList } from "../../merchant/resellers/client"
 import { useResellerLabel } from "../../merchant/resellers"
 import LicenseeIdSelect from "../../merchant/licensees/LicenseeIdSelect"
 import { useLicenseeLabel } from "../../merchant/licensees"
@@ -57,9 +56,8 @@ const AddDialog = ({ onSubmitted, dialog, ...props }) => {
     let userBrandId = useUserBrandId()
 
     let [submitData, setSubmit] = useState()
-    let { result, error, isLoading, mutate, deleteCache } = useAddDepartment(
-        submitData
-    )
+    let { result, error, isLoading, mutate, deleteCache } =
+        useAddDepartment(submitData)
 
     const onSubmit = (data) => {
         let base = {

@@ -38,19 +38,24 @@ import numberColumn, {
     numberDecimalPercentageColumn
 } from "../../table/column/numberColumn"
 import { AgentLevelLabel, AgentLevelSelect } from "../AgentLevel"
-import { AgentTypeLabel, AgentTypeSelect } from "../AgentType"
+import {
+    AgentTypeLabel,
+    AgentTypeSelect,
+    isAgentTypeCash,
+    isAgentTypeCredit
+} from "../AgentType"
 import {
     AgentConfigStatusLabel,
     isAgentConfigRequired,
     isAgentConfigDone
 } from "../AgentConfigStatus"
-import AgentDividendPercentage from "../AgentDividendPercentage"
 import AgentLiveDealerRebatePercentage from "../AgentLiveDealerRebatePercentage"
 import AgentEgameRebatePercentage from "../AgentEgameRebatePercentage"
 import AgentCardGameRebatePercentage from "../AgentCardGameRebatePercentage"
 import AgentLotteryRebatePercentage from "../AgentLotteryRebatePercentage"
 import AgentSportsRebatePercentage from "../AgentSportsRebatePercentage"
 import AgentVirtualSportsRebatePercentage from "../AgentVirtualSportsRebatePercentage"
+import AgentDividendPercentage from "../AgentDividendPercentage"
 
 export { Code }
 
@@ -119,7 +124,7 @@ const BodyContent = ({ brandId = "" }) => {
                 <Flex justifyContent="space-between">
                     <SearchBar
                         brandId={brandId}
-                        search={(data) => {
+                        search={(data = {}) => {
                             setState({
                                 pageIndex: 0,
                                 ...data
@@ -133,23 +138,16 @@ const BodyContent = ({ brandId = "" }) => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -214,9 +212,14 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
             textColumn({
                 id: AgentDividendPercentage.Name,
                 accessor: (row) => row,
-                Header: <Trans zh="分红比例" en="Dividend Percentage" />,
+                Header: <Trans zh="分红比例" en="Profit Sharing Percentage" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
+                    let isCash = isAgentTypeCash(value?.type)
+                    if (!isCash) {
+                        return "-"
+                    }
+
                     let configRequired = isAgentConfigRequired(
                         value?.agentStatus
                     )
@@ -238,6 +241,11 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Header: <Trans zh="真人返佣%" en="Live Dealer Rebate %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
+                    let isCredit = isAgentTypeCredit(value?.type)
+                    if (!isCredit) {
+                        return "-"
+                    }
+
                     let configRequired = isAgentConfigRequired(
                         value?.agentStatus
                     )
@@ -259,6 +267,11 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Header: <Trans zh="电子返佣%" en="EGame Rebate %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
+                    let isCredit = isAgentTypeCredit(value?.type)
+                    if (!isCredit) {
+                        return "-"
+                    }
+
                     let configRequired = isAgentConfigRequired(
                         value?.agentStatus
                     )
@@ -280,6 +293,11 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Header: <Trans zh="棋牌返佣%" en="Card Game Rebate %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
+                    let isCredit = isAgentTypeCredit(value?.type)
+                    if (!isCredit) {
+                        return "-"
+                    }
+
                     let configRequired = isAgentConfigRequired(
                         value?.agentStatus
                     )
@@ -301,6 +319,11 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Header: <Trans zh="彩票返佣%" en="Lottery Rebate %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
+                    let isCredit = isAgentTypeCredit(value?.type)
+                    if (!isCredit) {
+                        return "-"
+                    }
+
                     let configRequired = isAgentConfigRequired(
                         value?.agentStatus
                     )
@@ -322,6 +345,11 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 Header: <Trans zh="体育返佣%" en="Sports Rebate %" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
+                    let isCredit = isAgentTypeCredit(value?.type)
+                    if (!isCredit) {
+                        return "-"
+                    }
+
                     let configRequired = isAgentConfigRequired(
                         value?.agentStatus
                     )
@@ -345,6 +373,11 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 ),
                 disableSortBy: true,
                 Cell: ({ value }) => {
+                    let isCredit = isAgentTypeCredit(value?.type)
+                    if (!isCredit) {
+                        return "-"
+                    }
+
                     let configRequired = isAgentConfigRequired(
                         value?.agentStatus
                     )

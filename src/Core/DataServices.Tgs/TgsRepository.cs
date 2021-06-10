@@ -141,6 +141,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<AgentBank> AgentBanks { get; set; }
 
+        DbSet<AgentBankInfo> AgentBankInfos { get; set; }
+
         DbSet<AgentWallet> AgentWallets { get; set; }
 
         DbSet<AgentTransaction> AgentTransactions { get; set; }
@@ -350,6 +352,7 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<DepositForm> DepositForms { get; set; }
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
+        public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 

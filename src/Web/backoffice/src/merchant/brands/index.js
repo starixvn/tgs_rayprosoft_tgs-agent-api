@@ -54,9 +54,10 @@ const Body = () => {
     })
     let { pageIndex, pageSize, keyword } = state
 
-    let { isLoading, data, error, mutate, deleteCache } = useBrandList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useBrandList({
+        ...toApiParams(state),
+        sortby: "code"
+    })
 
     let columns = useColumns({ items: data?.items, mutate })
 
@@ -80,23 +81,16 @@ const Body = () => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

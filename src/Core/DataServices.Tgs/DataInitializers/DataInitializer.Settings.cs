@@ -168,14 +168,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new PromotionTypeGroup
                 {
                     Name = "Deposit",
-                    Trans = new() {Zh = "充值送", En = "Deposit Rebate"},
+                    Trans = new() {Zh = "充值送", En = "Deposit"},
                     Types = new[]
                     {
                         new PromotionType
                         {
                             Name = "FirstDeposit",
                             SettlementIntervalType = "Instantly",
-                            Trans = new() {Zh = "帳號首充", En = "First Deposit"}
+                            Trans = new() {Zh = "帳號首充", En = "Account First Deposit"}
                         },
                         new PromotionType
                         {
@@ -187,7 +187,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             Name = "DailySecondDeposit",
                             SettlementIntervalType = "Instantly",
-                            Trans = new() {Zh = "每日再充", En = "Daily Second Deposit"}
+                            Trans = new() {Zh = "每日再充", En = "Daily Re-Deposit"}
                         }
                     }
                 },
@@ -208,26 +208,26 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new PromotionTypeGroup
                 {
                     Name = "ReliefMoney",
-                    Trans = new() {Zh = "救援金", En = "Relief Money"},
+                    Trans = new() {Zh = "救援金", En = "SOS"},
                     Types = new[]
                     {
                         new PromotionType
                         {
                             Name = "ReliefMoneyDaily",
                             SettlementIntervalType = "Daily",
-                            Trans = new() {Zh = "每日救援金", En = "Daily Relief Money"}
+                            Trans = new() {Zh = "每日救援金", En = "Daily SOS"}
                         },
                         new PromotionType
                         {
                             Name = "ReliefMoneyWeekly",
                             SettlementIntervalType = "Weekly",
-                            Trans = new() {Zh = "每周救援金", En = "Weekly Relief Money"}
+                            Trans = new() {Zh = "每周救援金", En = "Weekly SOS"}
                         },
                         new PromotionType
                         {
                             Name = "ReliefMoneyMonthly",
                             SettlementIntervalType = "Monthly",
-                            Trans = new() {Zh = "每月救援金", En = "Monthly Relief Money"}
+                            Trans = new() {Zh = "每月救援金", En = "Monthly SOS"}
                         }
                     }
                 }

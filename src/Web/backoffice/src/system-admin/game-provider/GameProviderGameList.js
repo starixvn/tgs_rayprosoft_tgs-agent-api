@@ -122,6 +122,8 @@ const GameListDialog = ({ gameProviderId, dialog, ...props }) => {
                 <Table
                     columns={columns}
                     data={items}
+                    initialState={state}
+                    controlledState={state}
                     pageCount={pageCount(state.pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}

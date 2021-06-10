@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.DataServices.Tgs.Migrations;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
@@ -655,6 +658,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             await _repository.BrandPayments.AddRangeAsync(
                 manualBrandPayments.Concat(leepayBrandPayments).Concat(primepayBrandPayments));
             await _repository.SaveChangesAsync();
+        }
+
+        private async Task GenerateApplePayInitialData()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using var stream = assembly.GetManifestResourceStream(string.Format(Consts.PaymentInitialSqlFormat, "applePay"));
+            if (stream == null)
+            {
+                return;
+            }
+
+            using var reader = new StreamReader(stream);
+            var cmdText = reader.ReadToEnd();
+            await _repository.ExecuteSqlCommandAsync(cmdText, System.Data.CommandType.Text);
         }
     }
 }

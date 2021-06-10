@@ -24,6 +24,7 @@ import { useGameRoundList } from "../../game/round/client"
 import numberColumn, {
     numberDecimalColumn
 } from "../../table/column/numberColumn"
+import AlertDialog from "../../dialog/Alert"
 
 export const Key = "betting"
 
@@ -48,13 +49,23 @@ export const Panel = ({ playerCode, brandId, player, ...props }) => {
 
     let { pageIndex, pageSize, from, to, gameType, gameProviderId } = state
 
-    let { data = {}, isLoading, mutate } = useGameRoundList({
-        ...toApiParams(state),
-        sortby: "createdOn",
-        orderby: "descending",
-        brandId,
-        username: player.username
-    })
+    let {
+        isLoading,
+        data = {},
+        error,
+        mutate,
+        deleteCache
+    } = useGameRoundList(
+        isActive
+            ? {
+                  ...toApiParams(state),
+                  sortby: "createdOn",
+                  orderby: "descending",
+                  brandId,
+                  username: player.username
+              }
+            : undefined
+    )
 
     let columns = useColumns({ items: data?.items })
 
@@ -65,44 +76,25 @@ export const Panel = ({ playerCode, brandId, player, ...props }) => {
     return (
         <TabPanel tabId={Key} {...props}>
             <Stack spacing="major-2">
-                {isActive && (
-                    <SearchBar
-                        gameType={gameType}
-                        gameProviderId={gameProviderId}
-                        start={from}
-                        end={to}
-                        minDate={minDate}
-                        maxDate={dateRange.end}
-                        maxRangeDays={QueryMaxRangeDays}
-                        search={({ start, end, ...formData }) => {
-                            let newState = {
-                                pageIndex: 0,
-                                from: start,
-                                to: end,
-                                gameType: formData.gameType,
-                                gameProviderId: formData.gameProviderId
-                            }
-
-                            if (
-                                equals(newState, {
-                                    pageIndex,
-                                    from: state?.from,
-                                    to: state?.to,
-                                    gameType,
-                                    gameProviderId
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState({
-                                from: start,
-                                to: end,
-                                ...formData
-                            })
-                        }}
-                        isLoading={isLoading}
-                    />
-                )}
+                <SearchBar
+                    gameType={gameType}
+                    gameProviderId={gameProviderId}
+                    start={from}
+                    end={to}
+                    minDate={minDate}
+                    maxDate={dateRange.end}
+                    maxRangeDays={QueryMaxRangeDays}
+                    search={({ start, end, ...formData }) => {
+                        setState({
+                            pageIndex: 0,
+                            from: start,
+                            to: end,
+                            ...formData
+                        })
+                        mutate()
+                    }}
+                    isLoading={isLoading}
+                />
                 <Table
                     columns={columns}
                     data={data?.items}
@@ -110,9 +102,11 @@ export const Panel = ({ playerCode, brandId, player, ...props }) => {
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
                     initialState={state}
+                    controlledState={state}
                     isLoading={isLoading}
                     foot={data?.items?.length > 0}
                 />
+                {error && <AlertDialog {...error} onClickClose={deleteCache} />}
             </Stack>
         </TabPanel>
     )

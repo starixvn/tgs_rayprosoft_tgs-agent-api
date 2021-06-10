@@ -67,15 +67,20 @@ namespace TGS.Workers.Schedulers.Jobs
                 .Select(x =>
                 {
                     var netProfitList = x.cn.SendPercentages.Select(percentage =>
-                            new {x.cn.NetProfit, calculatedNetProfit = percentage * x.cn.NetProfit})
-                        .OrderBy(o => o.calculatedNetProfit).ToArray();
+                            new
+                            {
+                                Percentage = percentage,
+                                x.cn.NetProfit,
+                                CalculatedNetProfit = percentage * x.cn.NetProfit / 100M
+                            })
+                        .OrderBy(o => o.CalculatedNetProfit).ToArray();
 
                     decimal? percentageKey = null;
                     foreach (var netProfit in netProfitList)
                     {
-                        if (x.bn.NetProfit < -netProfit.calculatedNetProfit)
+                        if (x.bn.NetProfit < netProfit.CalculatedNetProfit)
                         {
-                            percentageKey = netProfit.NetProfit;
+                            percentageKey = netProfit.Percentage;
                             break;
                         }
                     }
@@ -107,7 +112,7 @@ namespace TGS.Workers.Schedulers.Jobs
                     x.brand.NetProfit,
                     x.email.Subject,
                     x.email.Content
-                });
+                }).ToArray();
 
             var now = DateTimeOffset.Now;
             foreach (var brand in sendBrandList)
@@ -117,7 +122,7 @@ namespace TGS.Workers.Schedulers.Jobs
                     var mailMessage = new SendEmailRequest(
                         new[] {brand.OperationalEmail},
                         arrearsEmail.SettlementDay.Subject,
-                        string.Format(arrearsEmail.SettlementDay.Content, brand.NetProfit));
+                        string.Format(arrearsEmail.SettlementDay.Content, brand.Name, brand.NetProfit));
 
                     await _emailClient.SendAsync(mailMessage);
                 }
@@ -126,7 +131,7 @@ namespace TGS.Workers.Schedulers.Jobs
                     var mailMessage = new SendEmailRequest(
                         new[] {brand.OperationalEmail},
                         brand.Subject,
-                        string.Format(brand.Content, brand.NetProfit));
+                        string.Format(brand.Content, brand.Name, brand.NetProfit));
 
                     await _emailClient.SendAsync(mailMessage);
                 }
@@ -134,7 +139,7 @@ namespace TGS.Workers.Schedulers.Jobs
 
             if (sendBrandList.Any())
             {
-                var brandNetProfitStrings = sendBrandList.Select(x => $"{x.Name}: {x.NetProfit}<br>").ToArray();
+                var brandNetProfitStrings = sendBrandList.Select(x => $"{x.Name}: {x.NetProfit} \r\n").ToArray();
                 var managerMailMessage = new SendEmailRequest(
                     new[] {arrearsEmail.Manager.Emails.JoinAsStringByComma()},
                     arrearsEmail.Manager.Subject,

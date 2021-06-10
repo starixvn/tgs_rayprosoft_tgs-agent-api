@@ -506,6 +506,20 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
                     )}
                 </Box>
 
+                {/* <NormalLabel>
+                    <Trans zh="微信号" en="WeChat" />
+                </NormalLabel>
+                <Box>
+                    <Input name="wechat" />
+                </Box>
+
+                <NormalLabel>
+                    <Trans zh="Telegram" en="Telegram" />
+                </NormalLabel>
+                <Box>
+                    <Input name="telegram" />
+                </Box> */}
+
                 <NormalLabel>
                     <Trans zh="品牌域名" en="Brand Domain" />
                 </NormalLabel>
@@ -550,7 +564,7 @@ const EditBody = ({ record, readonly, isAdd = false, businessType }) => {
                         <NormalLabel>
                             <Trans
                                 zh="代理分红周期"
-                                en="Agent Dividend Interval"
+                                en="Agent Profit Sharing Interval"
                             />
                         </NormalLabel>
                         <Box alignY="center">

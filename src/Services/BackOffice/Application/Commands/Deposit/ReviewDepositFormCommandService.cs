@@ -35,6 +35,9 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 .GetDepositFormByIdAsync(command.FormId)
                 .ConfigureAwait(false);
 
+            if (form.Status != 1000)
+                return;
+
             await _paymentRepository
                 .SignOffDepositFormAsync(command.FormId, command.Status, command.remark)
                 .ConfigureAwait(false);

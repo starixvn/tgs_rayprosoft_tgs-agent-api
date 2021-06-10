@@ -7,6 +7,7 @@ using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
+using AgentBankInfo = TGS.Core.DataServices.Tgs.Models.AgentBankInfo;
 
 namespace TGS.Payment.Repositories
 {
@@ -17,6 +18,28 @@ namespace TGS.Payment.Repositories
         public PaymentRepository(ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        }
+
+        public async ValueTask CreateAgentBankInfoAsync(Tgs.Payment.AgentBankInfo agentBankInfo, string modifyUser)
+        {
+            var createTime = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.AgentBankInfos
+                .AddAsync(new AgentBankInfo
+                {
+                    Id = agentBankInfo.Id,
+                    AgentId = agentBankInfo.AgentId,
+                    BrandId = agentBankInfo.BrandId,
+                    PaymentChannelId = agentBankInfo.PaymentChannelId,
+                    BankType = agentBankInfo.BankType,
+                    Detail = agentBankInfo.Detail,
+                    CreatedByUsername = modifyUser,
+                    CreatedOn = createTime,
+                    UpdatedByUsername = modifyUser,
+                    UpdatedOn = createTime
+                }).ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async ValueTask CreateBankInfoAsync(BankInfo bankInfo, string modifyUser)
@@ -42,7 +65,7 @@ namespace TGS.Payment.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormInfo form)
+        public async ValueTask CreateDepositFormAsync(Guid createFormId, DepositFormCreateInfo form)
         {
             var currentDate = DateTimeOffset.UtcNow;
 
@@ -65,13 +88,10 @@ namespace TGS.Payment.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+
         public async ValueTask CreateWithdrawFormAsync(Guid createFormId, WithdrawFormCreateInfo form)
         {
             var currentDate = DateTimeOffset.UtcNow;
-
-            var player = await _tgsRepository.Players
-                .FindAsync(form.UserId)
-                .ConfigureAwait(false);
 
             await _tgsRepository.WithdrawForms
                 .AddAsync(new WithdrawForm
@@ -79,8 +99,8 @@ namespace TGS.Payment.Repositories
                     Id = createFormId,
                     BrandId = form.BrandId,
                     UserId = form.UserId,
-                    UserName = player.Username,
-                    UserType = 1,
+                    UserName = form.UserName,
+                    UserType = (int)form.UserType,
                     BrandPaymentId = form.BrandPaymentId,
                     Amount = form.Amount,
                     BankInfoId = form.BankInfoId,
@@ -96,6 +116,20 @@ namespace TGS.Payment.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public async ValueTask DeleteAgentBankInfoAsync(Guid agentId, Guid bankInfoId)
+        {
+            var bankInfo = await _tgsRepository.AgentBankInfos
+                .FindAsync(bankInfoId)
+                .ConfigureAwait(false);
+
+            if (bankInfo.AgentId == agentId)
+            {
+                _tgsRepository.AgentBankInfos.Remove(bankInfo);
+
+                await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
+
         public async ValueTask DeleteBankInfoAsync(string playerCode, Guid bankInfoId)
         {
             var bankInfo = await _tgsRepository.PlayerBankInfos
@@ -109,6 +143,32 @@ namespace TGS.Payment.Repositories
                 await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
             }
         }
+
+        public async ValueTask<Tgs.Payment.AgentBankInfo> GetAgentBankInfoByIdAsync(Guid id)
+        {
+            var bankInfo = await _tgsRepository.AgentBankInfos
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            return new Tgs.Payment.AgentBankInfo(
+                bankInfo.Id,
+                bankInfo.AgentId,
+                bankInfo.BrandId,
+                bankInfo.PaymentChannelId,
+                bankInfo.BankType,
+                bankInfo.Detail);
+        }
+
+        public IAsyncEnumerable<Tgs.Payment.AgentBankInfo> GetAgentBankInfosByAgentIdAsync(Guid agentId)
+            => _tgsRepository.AgentBankInfos.AsAsyncEnumerable()
+                .Where(info => info.AgentId == agentId)
+                .Select(info => new Tgs.Payment.AgentBankInfo(
+                    info.Id,
+                    info.AgentId,
+                    info.BrandId,
+                    info.PaymentChannelId,
+                    info.BankType,
+                    info.Detail));
 
         public IAsyncEnumerable<PaymentChannelInfo> GetAllPaymentChannelsAsync()
             => _tgsRepository.PaymentChannels.AsAsyncEnumerable()
@@ -248,7 +308,7 @@ namespace TGS.Payment.Repositories
                 .Select(v => new BrandPaymentVip(v.BrandPaymentId, v.VipLevelId));
         }
 
-        public ValueTask<DepositFormDetail> GetDepositFormByIdAsync(Guid id)
+        public ValueTask<DepositFormInfo> GetDepositFormByIdAsync(Guid id)
         {
             var query = from df in _tgsRepository.DepositForms
                             .Include(f => f.Player)
@@ -256,7 +316,7 @@ namespace TGS.Payment.Repositories
                             .ThenInclude(bp => bp.PaymentMethodChannel)
                             .AsAsyncEnumerable()
                         where df.Id == id
-                        select new DepositFormDetail(
+                        select new DepositFormInfo(
                             df.Id,
                             df.PlayerCode,
                             df.Player.Username,
@@ -264,7 +324,7 @@ namespace TGS.Payment.Repositories
                             df.BrandPaymentId,
                             df.BrandPayment.ChannelName,
                             df.BrandPayment.PaymentMethodChannel.MethodId,
-                            df.Amount,
+                            df.ActualAmount ?? df.Amount,
                             df.Remark,
                             df.Status,
                             df.ApplyInfo,

@@ -21,17 +21,18 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet("contribution")]
         [Description("Get player contributions")]
-        public Task<PagedResponse<PlayerContributionModel>> GetRoundsAsync(
+        public Task<PagedResponse<PlayerContributionModel>> GetPlayerContributionsAsync(
             [FromQuery] GetPlayerContributionsRequest request) =>
             _mediator.Send(request);
 
         [HttpPost("rebates")]
         [Description("Create player rebates")]
-        public Task<MessageResponse> GetRoundsAsync(CreatePlayerRebateRequest request) => _mediator.Send(request);
+        public Task<MessageResponse> CreatePlayerRebatesAsync(CreatePlayerRebateRequest request) =>
+            _mediator.Send(request);
 
         [HttpGet("accountChanges")]
         [Description("Get player account changes")]
-        public Task<PagedResponse<PlayerAccountChangeModel>> GetRoundsAsync(
+        public Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
             [FromQuery] GetPlayerAccountChangesRequest request) =>
             _mediator.Send(request);
     }

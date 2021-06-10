@@ -16,10 +16,13 @@ COPY ["src/Core/DataServices.Tgs/DataServices.Tgs.csproj", "src/Core/DataService
 COPY ["src/Core/Models/Models.csproj", "src/Core/Models/"]
 COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructures/"]
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
+COPY ["src/Repositories/PaymentRepositories/PaymentRepositories.csproj", "src/Repositories/PaymentRepositories/"]
 COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
 COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
-COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
+COPY ["src/Repositories/Agent.Repositories/Agent.Repositories.csproj", "src/Repositories/Agent.Repositories/"]
 COPY ["src/Services/Agent.Core/Agent.Core.csproj", "src/Services/Agent.Core/"]
+COPY ["src/Services/Wallet.Core/Wallet.Core.csproj", "src/Services/Wallet.Core/"]
+COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
 RUN dotnet restore "src/Apis/AgentApi/AgentApi.csproj"
 COPY . .
 WORKDIR "/src/src/Apis/AgentApi"

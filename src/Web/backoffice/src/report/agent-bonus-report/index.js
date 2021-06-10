@@ -146,13 +146,14 @@ const ReportContent = ({ brandId }) => {
                     }}
                 />
             }
-            title={<Trans zh="代理分红报表" en="Agent Dividend Report" />}
+            title={<Trans zh="代理分红报表" en="Agent Profit sharing Report" />}
         >
             {username && (
                 <Table
-                    controlledState={state}
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
@@ -160,15 +161,7 @@ const ReportContent = ({ brandId }) => {
                     foot={data?.items?.length > 0}
                 />
             )}
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -309,7 +302,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 accessor: (row) => row,
                 sumColumn: "agentDividendAmount",
                 toValue: (row) => row?.agentDividendAmount,
-                Header: <Trans zh="分红金额" en="Dividend Amount" />,
+                Header: <Trans zh="分红金额" en="Profit Sharing Amount" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     return (

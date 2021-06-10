@@ -6,6 +6,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
 {
     public class PlayerModel
     {
+        public string PlayerCode { get; init; }
         public string Username { get; init; }
         public string RealName { get; init; }
         public int? VipLevel { get; init; }
@@ -20,7 +21,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public string Email { get; init; }
         public string QQ { get; init; }
         public string WeChat { get; init; }
-
+        public decimal WageringRequirement { get; set; }
         public BankModel[] Banks { get; init; }
 
         public class BankModel

@@ -37,6 +37,9 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                 .GetWithdrawFormByIdAsync(command.FormId)
                 .ConfigureAwait(false);
 
+            if (formData.Status != 1000)
+                return;
+
             if (command.Status == ReviewState.Approve)
             {
                 var brandPayment = await _paymentRepository

@@ -95,7 +95,7 @@ const label = ({ locale, code }) => {
             return getTrans(
                 {
                     zh: "代理分红报表",
-                    en: "Agent Bonus Report"
+                    en: "Agent Profit Sharing Report"
                 },
                 locale
             )

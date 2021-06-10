@@ -154,7 +154,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(new CachedPlayer
                 {
                     PlayerCode = command.PlayerCode,
-                    DefaultWalletId = Guid.NewGuid()
+                    DefaultWalletId = Guid.NewGuid(),
+                    Username = "ThisIsPlayerName"
                 });
 
             fakeWalletRepository
@@ -175,6 +176,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var expected = new WithdrawFormCreateInfo(
                 command.PlayerCode,
+                "ThisIsPlayerName",
                 UserType.Player,
                 command.BrandId,
                 command.Amount,
