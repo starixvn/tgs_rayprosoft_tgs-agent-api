@@ -121,6 +121,16 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
+    "TgsApi-Skywind": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "SW",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
@@ -228,8 +238,16 @@
         "GameProviderCode": "SG",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "publishAllPorts": true,
-      "useSSL": true
+      "Docker-Skywind": {
+        "commandName": "Docker",
+        "launchBrowser": true,
+        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+        "environmentVariables": {
+          "GameProviderCode": "SW",
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "publishAllPorts": true,
+        "useSSL": true
+      }
     }
-  }
 }
