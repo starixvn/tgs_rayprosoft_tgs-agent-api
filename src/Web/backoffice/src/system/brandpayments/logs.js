@@ -65,8 +65,6 @@ const LogsDialog = ({ record = {}, dialog, ...props }) => {
             <Table
                 columns={columns}
                 data={items}
-                initialState={state}
-                controlledState={state}
                 isLoading={isLoading}
                 usePagination={false}
                 maxHeight="65vh"

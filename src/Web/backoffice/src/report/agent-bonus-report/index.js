@@ -146,7 +146,7 @@ const ReportContent = ({ brandId }) => {
                     }}
                 />
             }
-            title={<Trans zh="代理分红报表" en="Agent Profit sharing Report" />}
+            title={<Trans zh="代理分红报表" en="Agent Profit Sharing Report" />}
         >
             {username && (
                 <Table
