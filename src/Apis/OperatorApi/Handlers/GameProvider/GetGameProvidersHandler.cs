@@ -28,6 +28,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
         private readonly HttpContext _httpContext;
         private readonly ILocalizationOperations _localizationOperations;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IValidStatus<Status> _validStatus;
 
         public GetGameProvidersHandler(
@@ -38,7 +39,8 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
             ILocalizationOperations localizationOperations,
             IBrandLanguageCodeMapper brandLanguageCodeMapper,
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
-            IValidStatus<Status> validStatus)
+            IValidStatus<Status> validStatus,
+            IValidStatus<GameStatus> validGameStatus)
         {
             _httpContext = httpContextAccessor.HttpContext;
             _brandOperations = brandOperations;
@@ -48,6 +50,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
             _brandLanguageCodeMapper = brandLanguageCodeMapper;
             _brandCurrencyCodeMapper = brandCurrencyCodeMapper;
             _validStatus = validStatus;
+            _validGameStatus = validGameStatus;
         }
 
         async Task<GetGameProvidersResponse> IRequestHandler<GetGameProvidersRequest, GetGameProvidersResponse>.Handle(
@@ -105,6 +108,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
         {
             var gameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId);
             var statuses = _validStatus.GetStatus(playerType);
+            var gameStatuses = _validGameStatus.GetStatus(playerType);
 
             var providers = new List<GameProviderModel>();
 
@@ -121,7 +125,8 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                 }
 
                 var gamePlatformTypes = platformType.ToGamePlatformTypes();
-                var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes);
+                var allGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes);
+                var games = allGames.Where(g => gameStatuses.Contains(g.Status)).ToArray();
 
                 if (games.Length == 0)
                 {
