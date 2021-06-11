@@ -26,7 +26,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 
         public JsonDocument PaymentReturn { get; init; }
 
-        public string PlayerCode { get; init; }
+        public string UserId { get; init; }
 
         public string Remark { get; init; }
 

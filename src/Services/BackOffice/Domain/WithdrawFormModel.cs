@@ -5,7 +5,8 @@ namespace TGS.Services.BackOffice.Domain
 {
     public record WithdrawFormModel(
         Guid Id,
-        string PlayerCode,
+        string UserId,
+        UserType UserType,
         string UserName,
         UserType UserType,
         Guid BrandId,
