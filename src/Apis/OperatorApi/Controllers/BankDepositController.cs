@@ -8,6 +8,7 @@ using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
 
@@ -136,11 +137,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
             else
             {
-                return new ApplePayDepositFormCreatedResponse
-                {
-                    PaymentUrl = string.Empty,
-                    ErrorMessage = applyInfo.Response.Msg
-                };
+                throw new ApplePayDepositException(applyInfo.Response.Msg);
             }
         }
     }
