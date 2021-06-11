@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.Skywind.Common
 {
-    public record SkywindSingleWalletRequest
+    public record SkywindSingleWalletResponse
     {
         [JsonPropertyName("error_code")]
         public int ErrorCode { get; set; }
@@ -22,7 +22,4 @@ namespace TGS.Shared.Game.Models.Skywind.Common
         [JsonPropertyName("messages")]
         public string[] Messages { get; set; }
     }
-
-
-   
 }

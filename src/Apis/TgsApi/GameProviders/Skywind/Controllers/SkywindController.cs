@@ -89,7 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
 
 
         [HttpPost("rollback")]
-        public async Task<SkywindSingleWalletResponse> UnsettleAsync(JsonDocument request)
+        public async Task<SkywindSingleWalletResponse> RollbackBetAsync(SkywindRollbackBetRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
