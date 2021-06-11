@@ -439,6 +439,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
         control,
         name: TotalAmountLimitFieldName
     })
+
     let UnlimitedFieldName = "unlimited"
     let unlimitedTotalAmount = useWatch({
         control,
@@ -597,18 +598,9 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动费用" en="Promotion Funds" />
+                    <Trans zh="活动总费用" en="Promotion Funds" />
                 </NormalLabel>
                 <Set orientation="horizontal" alignY="center">
-                    {unlimitedTotalAmount && (
-                        <Box>
-                            <Input
-                                name={TotalAmountLimitFieldName}
-                                type="hidden"
-                            />
-                            <Input value={totalAmountLimit} disabled />
-                        </Box>
-                    )}
                     {limitedTotalAmount && (
                         <>
                             <NumberInput
@@ -712,6 +704,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 <NumberInput
                     name="bonusAmountLimit"
                     min="0"
+                    max={limitedTotalAmount ? totalAmountLimit : undefined}
                     required
                     disabled={disabled}
                 />

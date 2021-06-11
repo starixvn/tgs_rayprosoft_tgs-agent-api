@@ -125,6 +125,15 @@ export const Trans = ({ en, zh }) => {
     }
 }
 
+export const FormattedDate = ({
+    format = DefaultDateFormat,
+    value,
+    placeholder = ""
+}) => {
+    let formatted = formatDateTime(format, value)
+    return <Text>{formatted ? formatted : placeholder}</Text>
+}
+
 export const FormattedDateTime = ({
     dateFormat = DefaultDateFormat,
     timeFormat = DefaultTimeFormat,
