@@ -8,7 +8,6 @@ namespace TGS.Services.BackOffice.Domain
         string UserId,
         UserType UserType,
         string UserName,
-        UserType UserType,
         Guid BrandId,
         Guid? BrandPaymentId,
         string ChannelName,
