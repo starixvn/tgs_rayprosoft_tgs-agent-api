@@ -12,7 +12,12 @@ import {
 } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
-import { FormattedNumberDecimal, Trans, useTrans } from "../../i18n"
+import {
+    FormattedDate,
+    FormattedNumberDecimal,
+    Trans,
+    useTrans
+} from "../../i18n"
 import {
     CloseButtonFooter,
     ConfirmButtonFooter
@@ -31,6 +36,8 @@ import { FieldValues } from "../../layout/Grid"
 import { formatNumberDecimal } from "../../number/format"
 import Separator from "../../layout/Separator"
 import { startOfNextDay } from "../../date/startOfNextDay"
+import { startOfPreviousDay } from "../../date/startOfPreviousDay"
+import { formatYearMonthDay } from "../../date/format"
 
 export const AgentWinLossDialogDisclosure = ({
     brandId,
@@ -78,12 +85,12 @@ const ReportDialog = ({
         showAll: true
     })
 
-    let { data, isLoading, error, mutate, deleteCache } = useAgentWinLossList(
+    let { isLoading, data, error, mutate, deleteCache } = useAgentWinLossList(
         agentId,
         {
             ...toApiParams(state),
             sortby: "username",
-            from: start,
+            from: startOfPreviousDay(start),
             to: startOfNextDay(end)
         }
     )

@@ -39,6 +39,8 @@ const reject = (error) => {
     let title = error?.message ?? error?.toString?.() ?? "Error"
     if (title == "Failed to fetch") {
         title = FailedToFetchTrans?.[locale] ?? FailedToFetchDefaultMessage
+    } else {
+        console.warn(error)
     }
     return Promise.reject({ title })
 }
