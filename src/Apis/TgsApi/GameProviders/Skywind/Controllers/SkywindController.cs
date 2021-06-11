@@ -15,6 +15,7 @@ using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Skywind.Common;
 using TGS.Shared.Game.Models.Skywind.Enums;
+using TGS.Shared.Game.Models.Skywind.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
 {
@@ -42,13 +43,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         }
 
         [HttpPost("get_balance")]
-        public async Task<SkywindSingleWalletRequest> GetBalanceAsync(JsonDocument request)
+        public async Task<SkywindSingleWalletResponse> GetBalanceAsync(SkywindBalanceRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
 
-            return new SkywindSingleWalletRequest()
+            return new SkywindSingleWalletResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
@@ -57,13 +58,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         }
 
         [HttpPost("debit")]
-        public async Task<SkywindSingleWalletRequest> BetAsync(JsonDocument request)
+        public async Task<SkywindSingleWalletResponse> BetAsync(SkywindBetRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
 
-            return new SkywindSingleWalletRequest()
+            return new SkywindSingleWalletResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
@@ -72,13 +73,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         }
 
         [HttpPost("credit")]
-        public async Task<SkywindSingleWalletRequest> SettleAsync(JsonDocument request)
+        public async Task<SkywindSingleWalletResponse> SettleAsync(SkywindSettleRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
 
-            return new SkywindSingleWalletRequest()
+            return new SkywindSingleWalletResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
@@ -88,13 +89,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
 
 
         [HttpPost("rollback")]
-        public async Task<SkywindSingleWalletRequest> UnsettleAsync(JsonDocument request)
+        public async Task<SkywindSingleWalletResponse> UnsettleAsync(JsonDocument request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
 
-            return new SkywindSingleWalletRequest()
+            return new SkywindSingleWalletResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
@@ -103,22 +104,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         }
 
         [HttpPost("validate_ticket")]
-        public async Task<SkywindSingleWalletRequest> VoidSettleAsync(JsonDocument request)
+        public async Task<SkywindValidateTicketResponse> ValidateTicketAsync(SkywindValidateTicketRequest request)
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
 
-            return new SkywindSingleWalletRequest()
+            return new SkywindValidateTicketResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
-                ErrorMsg = GameApiError.Success.Description(),
-                Balance = getBalance.Balance
+                ErrorMsg = GameApiError.Success.Description()
             };
         }
 
         [HttpPost("ping")]
-        public async Task<SkywindSingleWalletRequest> PingAsync() => new SkywindSingleWalletRequest()
+        public async Task<SkywindSingleWalletResponse> PingAsync() => new SkywindSingleWalletResponse()
         {
             ErrorCode = (int)GameApiError.Success,
             ErrorMsg = GameApiError.Success.Description(),
