@@ -58,7 +58,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                     form.UserId,
                     (UserType)form.UserType,
                     form.UserName,
-                    (UserType)form.UserType,
                     form.BrandId,
                     form.BrandPaymentId,
                     form.BrandPayment?.ChannelName,
