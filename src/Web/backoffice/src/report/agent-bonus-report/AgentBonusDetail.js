@@ -171,7 +171,7 @@ const useAgentBonusColumns = ({ username = "", items = [] }) => {
             textColumn({
                 id: "settlementInterval",
                 accessor: (row) => row,
-                Header: <Trans zh="结算区间" en="Settlement Interval" />,
+                Header: <Trans zh="结算区间" en="Settlement Period" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let format = "dd/MM/yyyy"
