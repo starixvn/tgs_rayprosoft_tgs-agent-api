@@ -363,6 +363,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             Set(SR.ExternalTransactionId, request.TransferId.ToString());
             Set(SR.ExternalRoundId, request.GameSequenceNo.ToString());
+            externalGameId = $"{Get<int>(SR.JDBGameType)}_{externalGameId}";
             Set(SR.ExternalGameId, externalGameId);
             Set(SR.PlaceBetRequest, request);
             Set(SR.Request, request);

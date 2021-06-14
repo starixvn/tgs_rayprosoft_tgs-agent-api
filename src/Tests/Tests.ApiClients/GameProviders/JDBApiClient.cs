@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 using TGS.Core.Infrastructures.ApiClient;
@@ -60,7 +61,7 @@ namespace TGS.Tests.ApiClients.GameProviders
                     .GameProviderConfigurations.JDB);
             
             var x = await _cryptoProvider.EncryptStringAsync(
-                jsonString, configuration.AESIv, configuration.AESKey);
+                jsonString, configuration.AESIv, configuration.AESKey, encoding: Encoding.UTF8);
             
             const string path = "api/jdb/entrance";
             return await ExecuteFormRequestAsync<BaseActionResponse>(

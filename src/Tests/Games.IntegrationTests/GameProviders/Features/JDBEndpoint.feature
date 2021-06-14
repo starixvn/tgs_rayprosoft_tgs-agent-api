@@ -56,25 +56,21 @@ Scenario: 02.d - Place mobile bet and lose
 
 @ChangeGameStatus
 Scenario: 02.e - Can't place desktop bet and settle if game is under maintenance
-	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 	And player having balance of $100
 	And set game type as "Slot"
 	And game "14023" has status set to "Maintenance"
 	When I place bet of $10 for game "14023" and win $20
-	Then I will receive system is maintenance response and balance of $100
-	And player wallet database record will be for $100
-	And there are no records in database
+	Then I will receive bet response of error "SystemIsMaintained"
 	
 @ChangeBrandStatus
 Scenario: 02.f - Can't place desktop bet and settle if brand is under maintenance
-	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
+	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 	And player having balance of $100
 	And set game type as "Slot"
 	And brand has status set to "Maintenance"
 	When I place bet of $10 for game "14023" and win $20
-	Then I will receive system is maintenance response and balance of $100
-	And player wallet database record will be for $100
-	And there are no records in database
+	Then I will receive bet response of error "SystemIsMaintained"
 	
 Scenario: 02.g - Place desktop bet and settle with insufficient balance
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
