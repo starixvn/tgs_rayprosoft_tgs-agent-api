@@ -22,12 +22,8 @@ namespace TGS.Tests.ApiClients.GameProviders
     public interface IJDBApiClient
     {
         ValueTask<BaseActionResponse> GetPlayerBalanceAsync(GetBalanceRequest request);
-        // ValueTask<PlaceBetResponse> PlaceBetAsync(PlaceBetRequest request);
-        // ValueTask<SettleBetResponse> SettleBetAsync(SettleBetRequest request);
-        // ValueTask<CancelBetResponse> CancelBetAsync(CancelBetRequest request);
-        // ValueTask<RollbackResponse> RollbackAsync(RollbackRequest request);
-        // ValueTask<GetBetStatusResponse> GetBetStatusAsync(GetBetStatusRequest request);
-        // ValueTask<BatchResponse> CancelTransactionsAsync(BatchRequest request);
+        ValueTask<BaseActionResponse> PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request);
+        ValueTask<BaseActionResponse> CancelTransactionsAsync(CancelTransactionRequest request);
     }
 
     public sealed class JDBApiClient : BaseApiClient, IJDBApiClient
@@ -51,29 +47,11 @@ namespace TGS.Tests.ApiClients.GameProviders
         ValueTask<BaseActionResponse> IJDBApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
             SendRequestAsync(Json.SerializeToString(request));
 
-        // ValueTask<PlaceBetResponse> ISBOBETApiClient.PlaceBetAsync(PlaceBetRequest request) =>
-        //     ExecuteJsonRequestAsync<PlaceBetRequest, PlaceBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Deduct",
-        //         request);
-        //
-        // ValueTask<SettleBetResponse> ISBOBETApiClient.SettleBetAsync(SettleBetRequest request) =>
-        //     ExecuteJsonRequestAsync<SettleBetRequest, SettleBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Settle",
-        //         request);
-        //
-        // ValueTask<CancelBetResponse> ISBOBETApiClient.CancelBetAsync(CancelBetRequest request) =>
-        //     ExecuteJsonRequestAsync<CancelBetRequest, CancelBetResponse>(HttpMethod.Post, $"{RoutePrefix}/Cancel",
-        //         request);
-        //
-        // ValueTask<RollbackResponse> ISBOBETApiClient.RollbackAsync(RollbackRequest request) =>
-        //     ExecuteJsonRequestAsync<RollbackRequest, RollbackResponse>(HttpMethod.Post, $"{RoutePrefix}/Rollback",
-        //         request);
-        //
-        // ValueTask<GetBetStatusResponse> ISBOBETApiClient.GetBetStatusAsync(GetBetStatusRequest request) =>
-        //     ExecuteJsonRequestAsync<GetBetStatusRequest, GetBetStatusResponse>(HttpMethod.Post,
-        //         $"{RoutePrefix}/GetBetStatus", request);
-        //
-        // ValueTask<BatchResponse> ISBOBETApiClient.CancelTransactionsAsync(BatchRequest request) =>
-        //     ExecuteJsonRequestAsync<BatchRequest, BatchResponse>(HttpMethod.Post, $"{RoutePrefix}/batch/transactions/cancel",
-        //         request);
+        ValueTask<BaseActionResponse> IJDBApiClient.PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request) =>
+            SendRequestAsync(Json.SerializeToString(request));
+        
+        ValueTask<BaseActionResponse> IJDBApiClient.CancelTransactionsAsync(CancelTransactionRequest request) =>
+            SendRequestAsync(Json.SerializeToString(request));
 
         private async ValueTask<BaseActionResponse> SendRequestAsync(string jsonString)
         {

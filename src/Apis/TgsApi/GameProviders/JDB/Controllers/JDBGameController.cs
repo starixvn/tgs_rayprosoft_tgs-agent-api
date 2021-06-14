@@ -98,6 +98,15 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
                 request.UserId,
                 request.TransferId.ToString());
 
+            if (gameActionExternalIds == null)
+            {
+                return new BaseActionResponse
+                {
+                    Status = GameApiStatus.DataDoesNotExist.Description(),
+                    ErrorMessage = "Transfer id not found."
+                };
+            }
+
             var betData = _map.Request(data, request, gameActionExternalIds.ExternalRoundId);
             var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return _map.Response(betResult);

@@ -87,6 +87,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
                 padding: PaddingMode.None);
 
             json = json.Replace("", string.Empty);
+            json = json.Replace("", string.Empty);
+            json = json.Replace("", string.Empty);
+            json = json.Replace("", string.Empty);
+            json = json.Replace("", string.Empty);
             return json.Replace("\0", string.Empty);
         }
     }
