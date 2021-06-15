@@ -72,7 +72,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             {
                 var gameProviderId =
                     await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
-                gameProviderIds = new[] {gameProviderId};
+                gameProviderIds = new[] { gameProviderId };
             }
             else
             {
@@ -160,6 +160,11 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, gamePlatformTypes);
             var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId);
+
+            cachedGames = cachedGames
+                .Where(g => g.Status != GameStatus.Inactive
+                    && g.Status != GameStatus.Archived)
+                .ToArray();
 
             return (from bg in brandGames.Where(g => g.GameProviderId == gameProviderId)
                     join g in cachedGames on bg.GameId equals g.Id
