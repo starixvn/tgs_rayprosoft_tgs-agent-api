@@ -1,8 +1,11 @@
 ﻿using System.Net.Mime;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
+using TGS.Services.Operator.Services.Announcement;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -11,16 +14,20 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AnnouncementController : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public AnnouncementController(IMediator mediator)
+        [HttpGet("announcement/list")]
+        public async Task<GetAnnouncementsResponse> GetAnnouncementsAsync(
+            [FromServices] IGetService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService)
         {
-            _mediator = mediator;
-        }
+            var brandId = HttpContext.Items.GetBrandId();
 
-        [HttpGet]
-        [Route("announcement/list")]
-        public Task<GetAnnouncementsResponse> GetAnnouncementsAsync() =>
-            _mediator.Send(new GetAnnouncementsRequest());
+            var query = new GetAnnouncementQuery(brandId);
+
+            var info = await getAnnouncementQueryService.GetAsync(query).ConfigureAwait(false);
+
+            return new GetAnnouncementsResponse()
+            {
+                Announcements = info.Announcements
+            };
+        }
     }
 }
