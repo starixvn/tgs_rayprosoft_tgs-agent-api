@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -24,12 +25,23 @@ namespace TGS.Apis.OperatorApi.Controllers
             var query = new GetAnnouncementQuery(brandId);
 
             var info = await getAnnouncementQueryService.QueryAsync(query)
-                .ToArrayAsync()
+                .ToListAsync()
                 .ConfigureAwait(false);
 
-            return new GetAnnouncementsResponse()
+            var announcements = new List<Announcement>();
+
+            info.ForEach(item => announcements.Add(
+                new Announcement()
+                {
+                    Content = item.Content,
+                    From = item.From,
+                    To = item.To,
+                    Subject = item.Subject
+                }));
+
+            return new GetAnnouncementsResponse
             {
-                Announcements = info
+                Announcements = announcements.ToArray()
             };
         }
     }
