@@ -1,4 +1,5 @@
-﻿using System.Net.Mime;
+﻿using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Extensions;
@@ -16,17 +17,19 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpGet("announcement/list")]
         public async Task<GetAnnouncementsResponse> GetAnnouncementsAsync(
-            [FromServices] IGetService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService)
+            [FromServices] IQueryService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
             var query = new GetAnnouncementQuery(brandId);
 
-            var info = await getAnnouncementQueryService.GetAsync(query).ConfigureAwait(false);
+            var info = await getAnnouncementQueryService.QueryAsync(query)
+                .ToArrayAsync()
+                .ConfigureAwait(false);
 
             return new GetAnnouncementsResponse()
             {
-                Announcements = info.Announcements
+                Announcements = info
             };
         }
     }

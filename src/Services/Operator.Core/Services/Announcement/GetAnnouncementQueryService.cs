@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Announcement
 {
-    internal class GetAnnouncementQueryService : IGetService<GetAnnouncementQuery, AnnouncementInfo>
+    internal class GetAnnouncementQueryService : IQueryService<GetAnnouncementQuery, AnnouncementInfo>
     {
         private readonly IBrandOperations _brandOperations;
 
@@ -16,22 +17,28 @@ namespace TGS.Services.Operator.Services.Announcement
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
         }
 
-        public async ValueTask<AnnouncementInfo> GetAsync(GetAnnouncementQuery query, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<AnnouncementInfo> QueryAsync(
+            GetAnnouncementQuery query,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var announcements = await _brandOperations.GetEffectiveAnnouncementsAsync(query.BrandId);
+            var announcements = await _brandOperations.GetEffectiveAnnouncementsAsync(query.BrandId).ConfigureAwait(false);
 
-            return new AnnouncementInfo()
+            var items = announcements
+                .OrderBy(a => a.From)
+                .ThenBy(a => a.To)
+                .Select(a => new AnnouncementInfo(
+                    a.Subject,
+                    a.Content,
+                    a.From.ToUnixTimeMilliseconds(),
+                    a.To.ToUnixTimeMilliseconds()));
+
+            foreach (var data in items)
             {
-                Announcements = announcements.OrderBy(a => a.From)
-                    .ThenBy(a => a.To)
-                    .Select(a => new Operator.Announcement
-                    {
-                        Subject = a.Subject,
-                        Content = a.Content,
-                        From = a.From.ToUnixTimeMilliseconds(),
-                        To = a.To.ToUnixTimeMilliseconds()
-                    }).ToArray()
-            };
+                yield return data;
+
+                if (cancellationToken.IsCancellationRequested)
+                    yield break;
+            }
         }
     }
 }
