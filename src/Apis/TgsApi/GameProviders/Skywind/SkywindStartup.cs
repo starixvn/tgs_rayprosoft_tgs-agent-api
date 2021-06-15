@@ -31,6 +31,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
                 _ => provider.GetRequiredService<TgsErrorMapper>()
             });
 
+            services.AddScoped<ISkywindServices, SkywindServices>();
+            services.AddScoped<ISkywindActionModelMapper, SkywindActionModelMapper>();
 
 
         }
