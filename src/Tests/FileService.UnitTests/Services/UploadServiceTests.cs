@@ -3,7 +3,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.FileService;
@@ -26,6 +25,7 @@ namespace TGS.Tests.FileService.UnitTests.Services
 
             var file = fileMock.Object;
             var expected = "https://aws/bucket/filepath";
+            const string prefix = "prefix";
 
             moqFileManager
                 .Setup(fake => fake.SaveAsync(
@@ -43,9 +43,9 @@ namespace TGS.Tests.FileService.UnitTests.Services
                     ExternalUrl = expected
                 }));
 
-            var url = await sut.UploadFileS3Async(file);
+            var fileMeta = await sut.UploadFileS3Async(prefix, file);
 
-            Assert.AreEqual(expected, url);
+            Assert.AreEqual(expected, fileMeta.ExternalUrl);
         }
     }
 }
