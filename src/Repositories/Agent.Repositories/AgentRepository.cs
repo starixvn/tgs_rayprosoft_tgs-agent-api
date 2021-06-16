@@ -24,8 +24,22 @@ namespace TGS.Agent.Repositories
                 agent.Id,
                 agent.Username,
                 agent.DefaultWalletId,
+                agent.Email,
                 agent.WithdrawPassword,
                 agent.WithdrawSalt);
+        }
+
+        public async ValueTask SetPayPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
+        {
+            var agent = await _tgsRepository.Agents
+                .FindAsync(agentId)
+                .ConfigureAwait(false);
+
+            agent.WithdrawPassword = newPassword;
+            agent.WithdrawSalt = newSalt;
+            agent.UpdatedOn = updatedOn;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
