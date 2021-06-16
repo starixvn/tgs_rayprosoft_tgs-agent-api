@@ -23,11 +23,13 @@ namespace TGS.Shared.Game.Models.Skywind.Incoming
         public bool TestCust { get; set; }
         [JsonPropertyName("country")]
         public string Country { get; set; }
+       /*可以不用帶入
         [JsonPropertyName("game_group")]
         public string GameGroup { get; set; }
         [JsonPropertyName("rci")]
         public int Rci { get; set; }
         [JsonPropertyName("rce")]
         public int Rce { get; set; }
+       */
     }
 }

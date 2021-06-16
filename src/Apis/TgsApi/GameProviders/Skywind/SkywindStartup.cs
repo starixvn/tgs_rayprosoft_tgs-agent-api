@@ -4,10 +4,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Skywind.Services;
-using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
-using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Skywind
@@ -24,17 +23,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-            new[] { typeof(SkywindErrorMapper) },
-            (provider, key) => key switch
-            {
-                GameProvider.Skywind => provider.GetRequiredService<SkywindErrorMapper>(),
-                _ => provider.GetRequiredService<TgsErrorMapper>()
-            });
+                new[] { typeof(SkywindErrorMapper) },
+                (provider, key) => key switch
+                {
+                    GameProvider.Skywind => provider.GetRequiredService<SkywindErrorMapper>(),
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
+                }
+            );
 
+            services.AddScoped<AuthorizeSkywindMiddleware>();
+            services.AddScoped<HandleSkywindExceptionMiddleware>();
             services.AddScoped<ISkywindServices, SkywindServices>();
             services.AddScoped<ISkywindActionModelMapper, SkywindActionModelMapper>();
-
-
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
@@ -44,6 +44,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
                 {
+                    builder.UseMiddleware<HandleSkywindExceptionMiddleware>();
+                    builder.UseMiddleware<AuthorizeSkywindMiddleware>();
                 });
         }
     }

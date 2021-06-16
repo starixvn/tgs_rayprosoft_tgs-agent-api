@@ -11,5 +11,8 @@ namespace TGS.Core.Models.GameProviders.Settings
         public Uri ApiUrl { get; init; }
         public string MerchId { get; init; }
         public string MerchPwd { get; init; }
+        public string SecretKey { get; init; }
+        public string Username { get; init; }
+        public string Password { get; init; }
     }
 }

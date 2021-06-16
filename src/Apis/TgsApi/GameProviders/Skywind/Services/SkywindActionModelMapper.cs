@@ -13,33 +13,42 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 {
     public interface ISkywindActionModelMapper
     {
-        BetData BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest source);
+        BetData BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest[] source);
 
         BetData SettleAsync(GameProviderConfigurationData data, string playCode, SkywindSettleRequest[] source);
+
+        Task<BetData> RollbackBetAsync(GameProviderConfigurationData data, string playCode, SkywindRollbackBetRequest[] source);
     }
 
     public class SkywindActionModelMapper : ISkywindActionModelMapper
     {
         private const string _gameProviderCode = Consts.GameProvider.Skywind;
 
-        BetData ISkywindActionModelMapper.BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest source)
+        private readonly ISkywindServices _services;
+
+        public SkywindActionModelMapper(ISkywindServices services)
+        {
+            _services = services ?? throw new ArgumentNullException(nameof(services));
+        }
+
+
+        BetData ISkywindActionModelMapper.BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest[] source)
         {
 
-            var transactions = new TransactionData()
-            {
-
-                Amount = Math.Abs(source.Amount),
-                ExternalTransactionId = source.EventId.ToString(),
-                ExternalRoundId = source.RoundId,
-                ExternalBetId = source.TrxId.ToString(),
-                ExternalGameActionGroupId = source.TrxId.ToString(),
-                ExternalGameId = source.GameCode.ToString(),
-                GameActionType = GameActionType.PlaceBet,
-                ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(source.Timestamp)).ToIso8601String(true),
-                TimeStamp = DateTimeOffset.UtcNow,
-                //BetType = order.BetType
-            };
-            return GetBetData(data, playCode, new[] { transactions });
+            var transactions = (from order in source
+                                select new TransactionData
+                                {
+                                    Amount = Math.Abs(order.Amount),
+                                    ExternalTransactionId = order.TrxId,
+                                    ExternalRoundId = order.RoundId,
+                                    ExternalBetId = order.TrxId.ToString(),
+                                    ExternalGameActionGroupId = order.TrxId.ToString(),
+                                    ExternalGameId = order.GameCode.ToString(),
+                                    GameActionType = GameActionType.PlaceBet,
+                                    ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(order.Timestamp)).ToIso8601String(true),
+                                    TimeStamp = DateTimeOffset.UtcNow,
+                                }).ToArray();
+            return GetBetData(data, playCode, transactions);
         }
 
         BetData ISkywindActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, SkywindSettleRequest[] source)
@@ -48,18 +57,43 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                                 select new TransactionData
                                 {
                                     Amount = Math.Abs(order.Amount),
-                                    ExternalTransactionId = order.EventId.ToString(),
+                                    ExternalTransactionId = $"{ order.TrxId}_settle",
                                     ExternalRoundId = order.RoundId,
                                     ExternalBetId = order.TrxId.ToString(),
                                     ExternalGameActionGroupId = order.TrxId.ToString(),
                                     ExternalGameId = order.GameCode.ToString(),
-                                    GameActionType = GameActionType.PlaceBet,
+                                    GameActionType = ProcessingSettlement(order),
                                     ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(order.Timestamp)).ToIso8601String(true),
                                     TimeStamp = DateTimeOffset.UtcNow,
-                                    //BetType = order.BetType
                                 }).ToArray();
 
             return GetBetData(data, playCode, transactions);
+        }
+
+        async Task<BetData> ISkywindActionModelMapper.RollbackBetAsync(GameProviderConfigurationData data, string playCode, SkywindRollbackBetRequest[] source)
+        {
+            var transactions = new List<TransactionData>();
+            foreach (var order in source)
+            {
+
+                var bet = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.CustId, $"{ order.TrxId}").ConfigureAwait(false);
+                if (bet != null)
+                {
+                    transactions.Add(new TransactionData()
+                    {
+
+                        ExternalGameId = order.GameCode,
+                        ExternalBetId = bet.ExternalBetId.ToString(),
+                        ExternalRoundId = bet.ExternalRoundId.ToString(),
+                        ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_bet",
+                        ExternalTransactionReferenceId = bet.ExternalTransactionId,
+                        GameActionType = GameActionType.CancelTransaction,
+                        RoundClosed = true
+                    });
+                }
+            }
+
+            return GetBetData(data, playCode, transactions.ToArray());
         }
 
         private BetData GetBetData(GameProviderConfigurationData data, string playerCode,
@@ -83,5 +117,25 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                    Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
                }).ToArray()
            };
+
+        private GameActionType ProcessingSettlement(SkywindSettleRequest source)
+        {
+            if (source.GameType.IgnoreCaseEquals("freegame") && source.GameType.IgnoreCaseEquals("bonusgame"))
+            {
+                return GameActionType.FreeBet;
+            }
+            else
+            {
+                if (source.Amount == 0)
+                {
+                    return GameActionType.LoseBet;
+                }
+                else
+                {
+                    return GameActionType.WinBet;
+                }
+            }
+        }
+
     }
 }

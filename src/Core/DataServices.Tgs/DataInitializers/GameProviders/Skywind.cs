@@ -77,9 +77,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-sg") : new("http://localhost:62330"),
-                    ApiUrl = new("https://tttint.onlinegames22.com/"),
-                    MerchId = "MerchId",
-                    MerchPwd = "MerchPwd",
+                    ApiUrl = new("https://api.gcpstg.m27613.com/v1"),
+                    MerchId = "sw_PG_merchant_stg",
+                    MerchPwd = "tm8jhMq2Sc5DdxJ5",
+                    SecretKey = "f841de30-a9eb-49d8-87c7-de878b571afe",
+                    Username = "PG_merchant_api_stg",
+                    Password = "3VSNMGFvbzBJacJT"
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

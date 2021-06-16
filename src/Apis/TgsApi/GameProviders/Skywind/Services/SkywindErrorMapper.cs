@@ -7,6 +7,7 @@ using TGS.Core.Models.Interfaces;
 using TGS.Shared.Game.Models.Skywind.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 using static TGS.Shared.Game.Models.Skywind.Enums.GameApiError;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 {

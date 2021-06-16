@@ -89,7 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.BetAsync(gameProviderConfigurationData, playerCode, request);
+            var betData = _map.BetAsync(gameProviderConfigurationData, playerCode, new[] { request });
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
@@ -104,8 +104,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         [HttpPost("credit")]
         public async Task<SkywindSingleWalletResponse> SettleAsync(SkywindSettleRequest request)
         {
-            var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind);
-
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
@@ -134,13 +132,32 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
+
+            var gameProviderConfigurationData = await _services
+                .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
+                .ConfigureAwait(false);
+
+            var betData = await _map.RollbackBetAsync(gameProviderConfigurationData, playerCode, new[] { request }).ConfigureAwait(false);
+            var balance = default(decimal);
+            if (betData.Transactions.Length > 0)
+            {
+                var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+                balance = betResult.Balance;
+            }
+            else
+            {
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+                balance = getBalance.Balance;
+            }
 
             return new SkywindSingleWalletResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                Balance = getBalance.Balance
+                Balance = balance
             };
         }
 
