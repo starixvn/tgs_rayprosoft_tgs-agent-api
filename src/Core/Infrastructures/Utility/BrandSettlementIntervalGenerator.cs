@@ -7,10 +7,20 @@ namespace TGS.Core.Infrastructures.Utility
     {
         public static (DateTimeOffset? BeforeFromDate, DateTimeOffset? BeforeToDate, DateTimeOffset? AfterFromDate,
             DateTimeOffset? AfterToDate) GetInterval(
-                SettlementIntervalType? type)
+                SettlementIntervalType? type, DateTimeOffset? startDate = null)
         {
-            var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month, DateTimeOffset.Now.Day, 0,
-                0, 0, new(8, 0, 0));
+            var timeSpan = new TimeSpan(8, 0, 0);
+            var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
+                DateTimeOffset.Now.Day, 0,
+                0, 0, timeSpan);
+
+            if (startDate != null)
+            {
+                var date = startDate.Value.ToOffset(timeSpan);
+                now = new(date.Year, date.Month,
+                    date.Day, 0,
+                    0, 0, timeSpan);
+            }
 
             switch (type)
             {
