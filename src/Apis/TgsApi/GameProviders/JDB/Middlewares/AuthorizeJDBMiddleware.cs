@@ -2,7 +2,6 @@
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.WebUtilities;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
@@ -73,24 +72,16 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Middlewares
         private async ValueTask<string> DecryptRequestStringToJsonAsync(string encrypted,
             string aseIv, string aesKey)
         {
-            // var value = encrypted.Replace("-", "+").Replace("_", "/");
-            // var paddingCount = (4 - value.Length % 4) % 4;
-            // for (var i = 0; i < paddingCount; i++)
-            // {
-            //     value += "=";
-            // }
-            
-            var t = WebEncoders.Base64UrlDecode(encrypted);
-            var value = Convert.ToBase64String(t);
+            var value = encrypted.Replace("-", "+").Replace("_", "/");
+            var paddingCount = (4 - value.Length % 4) % 4;
+            for (var i = 0; i < paddingCount; i++)
+            {
+                value += "=";
+            }
 
             var json = await _cryptoProvider.DecryptStringAsync(value, aseIv, aesKey,
                 padding: PaddingMode.None);
 
-            json = json.Replace("", string.Empty);
-            json = json.Replace("", string.Empty);
-            json = json.Replace("", string.Empty);
-            json = json.Replace("", string.Empty);
-            json = json.Replace("", string.Empty);
             return json.Replace("\0", string.Empty);
         }
     }

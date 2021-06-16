@@ -1,13 +1,13 @@
 ﻿// ReSharper disable InconsistentNaming
 // ReSharper disable IdentifierTypo
 
+using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using StackExchange.Redis;
+using Microsoft.AspNetCore.WebUtilities;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
@@ -29,14 +29,13 @@ namespace TGS.Tests.ApiClients.GameProviders
 
     public sealed class JDBApiClient : BaseApiClient, IJDBApiClient
     {
-        private static readonly string RoutePrefix = "api/jdb/entrance";
         private readonly ISymmetricCryptoProvider _cryptoProvider;
         private readonly ISettingOperations _settingOperations;
 
         public JDBApiClient(
-            HttpClient client, 
-            IApiClientLogger logger, 
-            IJsonSerializationProvider json, 
+            HttpClient client,
+            IApiClientLogger logger,
+            IJsonSerializationProvider json,
             ISymmetricCryptoProviderFactory cryptoProviderFactory,
             ISettingOperations settingOperations)
             : base(client, logger, json)
@@ -50,7 +49,7 @@ namespace TGS.Tests.ApiClients.GameProviders
 
         ValueTask<BaseActionResponse> IJDBApiClient.PlaceAndSettleBetAsync(PlaceAndSettleBetRequest request) =>
             SendRequestAsync(Json.SerializeToString(request));
-        
+
         ValueTask<BaseActionResponse> IJDBApiClient.CancelTransactionsAsync(CancelTransactionRequest request) =>
             SendRequestAsync(Json.SerializeToString(request));
 
@@ -59,20 +58,21 @@ namespace TGS.Tests.ApiClients.GameProviders
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
                     .GameProviderConfigurations.JDB);
-            
-            var x = await _cryptoProvider.EncryptStringAsync(
-                jsonString, configuration.AESIv, configuration.AESKey, encoding: Encoding.UTF8);
-            
+
+            var encryptedString = await _cryptoProvider.EncryptStringAsync(
+                jsonString, configuration.AESIv, configuration.AESKey, padding: PaddingMode.Zeros,
+                encoding: Encoding.UTF8);
+
             const string path = "api/jdb/entrance";
             return await ExecuteFormRequestAsync<BaseActionResponse>(
                 path,
-                new Dictionary<string, string> {{"x", ToUrlSafeAesEncryptedString(x)}});
-
+                new Dictionary<string, string> {{"x", ToUrlSafeAesEncryptedString(encryptedString)}});
         }
 
-        private string ToUrlSafeAesEncryptedString(string encryptedString)
+        private static string ToUrlSafeAesEncryptedString(string encryptedString)
         {
-            return encryptedString.TrimEnd(new[] {'='}).Replace('+', '-').Replace('/', '_');
+            var base64 = Convert.FromBase64String(encryptedString);
+            return WebEncoders.Base64UrlEncode(base64);
         }
     }
 }
