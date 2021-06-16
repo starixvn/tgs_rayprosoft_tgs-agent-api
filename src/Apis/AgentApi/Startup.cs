@@ -114,6 +114,10 @@ namespace TGS.Apis.AgentApi
                 {
                     configuration.UseTgsPaymentRepository();
                 })
+                .ConfigureWallet(config =>
+                {
+                    config.AddTgsAgentWalletRepositories();
+                })
                 .AddTgsAgentRepository();
 
             services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
