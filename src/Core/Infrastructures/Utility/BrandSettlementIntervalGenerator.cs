@@ -27,19 +27,20 @@ namespace TGS.Core.Infrastructures.Utility
                 case SettlementIntervalType.Daily:
                     return (now, now, now.AddDays(1), now.AddDays(1));
                 case SettlementIntervalType.Weekly:
-                    return (now.Subtract(new TimeSpan((int)now.DayOfWeek - 1, 0, 0, 0)),
+                    return (now,
                         now.Subtract(new TimeSpan((int)now.DayOfWeek - 7, 0, 0, 0)),
                         now.Subtract(new TimeSpan((int)now.DayOfWeek - 8, 0, 0, 0)),
                         now.Subtract(new TimeSpan((int)now.DayOfWeek - 14, 0, 0, 0)));
                 case SettlementIntervalType.Monthly:
-                    var nextMonth = DateTimeOffset.Now.AddMonths(1);
-                    var nextNextMonth = DateTimeOffset.Now.AddMonths(2);
-                    return (new(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month, 1, 0, 0, 0, new(8, 0, 0)),
-                        new(nextMonth.AddDays(-1).Year, nextMonth.AddDays(-1).Month, nextMonth.AddDays(-1).Day, 0, 0, 0,
-                            new(8, 0, 0)),
-                        new(nextMonth.Year, nextMonth.Month, 1, 0, 0, 0, new(8, 0, 0)),
-                        new(nextNextMonth.AddDays(-1).Year, nextNextMonth.AddDays(-1).Month,
-                            nextNextMonth.AddDays(-1).Day, 0, 0, 0, new(8, 0, 0)));
+                    var nextMonth = now.AddMonths(1);
+                    var nextNextMonth = now.AddMonths(2);
+                    var nextMonthFirstDay = new DateTimeOffset(nextMonth.Year, nextMonth.Month, 1, 0, 0, 0, timeSpan);
+                    var nextNextMonthFirstDay =
+                        new DateTimeOffset(nextNextMonth.Year, nextNextMonth.Month, 1, 0, 0, 0, timeSpan);
+                    return (now,
+                        nextMonthFirstDay.AddDays(-1),
+                        nextMonthFirstDay,
+                        nextNextMonthFirstDay.AddDays(-1));
                 default:
                     return (null, null, null, null);
             }
