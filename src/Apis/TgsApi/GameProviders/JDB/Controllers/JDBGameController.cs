@@ -1,14 +1,18 @@
-﻿using System.Net.Mime;
+﻿using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
+using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.JDB.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
 using TGS.Shared.Game.Models.JDB.Incoming;
@@ -26,6 +30,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
     {
         private readonly IGamePlayActions _actions;
         private readonly IGameActionQueries _gameActionQueries;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IJDBActionModelMapper _map;
         private readonly IJDBServices _services;
@@ -35,12 +40,14 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
             IJDBServices services,
             IJDBActionModelMapper map,
             IJsonSerializationProvider jsonSerializationProvider,
+            IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries)
         {
             _actions = actions;
             _services = services;
             _map = map;
             _jsonSerializationProvider = jsonSerializationProvider;
+            _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;
         }
 
@@ -83,6 +90,38 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
             var platformType = "Web".IgnoreCaseEquals(request.ClientType) ? PlatformType.Desktop : PlatformType.Mobile;
             var data = await _services.GetGameProviderConfigurationDataAsync(platformType)
                 .ConfigureAwait(false);
+
+            var gameProviderId = data.GameProviderId;
+            var externalGameId = $"{request.GameType}_{request.MachineType}";
+            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId)
+                .ConfigureAwait(false);
+
+            if (games.Length == 0)
+            {
+                throw new InvalidGameActionException($"Game '{externalGameId}' is not found.",
+                    InvalidGameActionErrorCode.GameNotFound);
+            }
+
+            var externalRoundId = request.GameSequenceNo.ToString();
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var gameActionData = await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId,
+                playerCode, externalRoundId, games[0].Id).ConfigureAwait(false);
+
+            if (gameActionData != null && gameActionData.Round.Status == RoundStatus.Closed)
+            {
+                var bet = gameActionData.GameActions.FirstOrDefault(t =>
+                    t.ExternalTransactionId == request.TransferId.ToString());
+
+                if (bet != null)
+                {
+                    return new()
+                    {
+                        Status = GameApiStatus.DuplicateTransactions.Description(),
+                        ErrorMessage = "Duplicate Transaction."
+                    };
+                }
+            }
+
             var betData = _map.Request(data, request, platformType);
 
             var betResult = await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
@@ -100,7 +139,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 
             if (gameActionExternalIds == null)
             {
-                return new BaseActionResponse
+                return new()
                 {
                     Status = GameApiStatus.DataDoesNotExist.Description(),
                     ErrorMessage = "Transfer id not found."
