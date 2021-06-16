@@ -189,8 +189,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                     ErrorMsg = GameApiError.Success.Description(),
                     CustId = player.PlayerCode,
                     CustSessionId = request.Ticket,
-                    CurrencyCode = currencyCode
-
+                    CurrencyCode = currencyCode,
+                    Country = "CN",
+                    TestCust = false
                 };
             }
 
