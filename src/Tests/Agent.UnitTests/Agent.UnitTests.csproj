@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Apis\AgentApi\AgentApi.csproj" />
     <ProjectReference Include="..\..\Services\Agent.Core\Agent.Core.csproj" />
   </ItemGroup>
 

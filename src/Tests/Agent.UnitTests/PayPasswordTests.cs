@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using ExpectedObjects;
 using FluentValidation.TestHelper;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Core.Infrastructures.Mail;
+using TGS.Apis.AgentApi.Models.Messages;
+using TGS.Apis.AgentApi.Validators;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.PayPassowrd;
@@ -196,7 +196,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var actualSecurityKey = await sut.GetAsync(command);
 
-
             _ = fakeValidateCodeOperator
                 .Received(1)
                 .SendEmailAsync(
@@ -230,6 +229,108 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidateCodeOperator);
 
             Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
+        }
+
+        [Test]
+        public void Verify_Change_Pay_Password_Input_Max_Length()
+        {
+            // arrange
+            var sut = new ChangePayPasswordRequestValidator();
+            var request = new ChangePayPasswordRequest()
+            {
+                NewPassword = "123456789012345678901"
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+        }
+
+        [Test]
+        public void Verify_Change_Pay_Password_Input_Min_Length()
+        {
+            // arrange
+            var sut = new ChangePayPasswordRequestValidator();
+            var request = new ChangePayPasswordRequest()
+            {
+                NewPassword = "12345"
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+        }
+
+        [Test]
+        public void Verify_Change_Pay_Password_Input_With_Empty()
+        {
+            // arrange
+            var sut = new ChangePayPasswordRequestValidator();
+            var request = new ChangePayPasswordRequest()
+            {
+                NewPassword = string.Empty
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+        }
+
+        [Test]
+        public void Verify_Set_Pay_Password_Input_Max_Length()
+        {
+            // arrange
+            var sut = new SetPayPasswordRequestValidator();
+            var request = new SetPayPasswordRequest()
+            {
+                Password = "123456789012345678901"
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.Password);
+        }
+
+        [Test]
+        public void Verify_Set_Pay_Password_Input_Min_Length()
+        {
+            // arrange
+            var sut = new SetPayPasswordRequestValidator();
+            var request = new SetPayPasswordRequest()
+            {
+                Password = "12345"
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.Password);
+        }
+
+        [Test]
+        public void Verify_Set_Pay_Password_Input_With_Empty()
+        {
+            // arrange
+            var sut = new SetPayPasswordRequestValidator();
+            var request = new SetPayPasswordRequest()
+            {
+                Password = string.Empty
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.Password);
         }
     }
 }
