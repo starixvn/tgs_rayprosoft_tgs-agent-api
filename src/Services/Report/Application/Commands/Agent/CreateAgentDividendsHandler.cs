@@ -79,13 +79,14 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     }
                 }
 
-                var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
-                    BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType);
+                var (_, _, nextFromDate, nextToDate) =
+                    BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType,
+                        brand.NextSettlementTo);
 
                 brand.PreviousSettlementFrom = brand.CurrentSettlementFrom;
                 brand.PreviousSettlementTo = brand.CurrentSettlementTo;
-                brand.CurrentSettlementFrom = currentFromDate;
-                brand.CurrentSettlementTo = currentToDate;
+                brand.CurrentSettlementFrom = brand.NextSettlementFrom;
+                brand.CurrentSettlementTo = brand.NextSettlementTo;
                 brand.NextSettlementFrom = nextFromDate;
                 brand.NextSettlementTo = nextToDate;
             }

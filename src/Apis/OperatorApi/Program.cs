@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Prometheus;
+using Microsoft.Extensions.Logging;
 
 namespace TGS.Apis.OperatorApi
 {
