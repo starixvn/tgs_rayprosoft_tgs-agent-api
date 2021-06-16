@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Services.Promotion;
 using TGS.Services.Promotion.Models.Promotion;
@@ -18,12 +22,15 @@ namespace TGS.Promotion.Repositories
 {
     public class PromotionRepository : BaseRepositoryOperations<ITgsRepository>, IPromotionRepository
     {
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _repository;
 
-        public PromotionRepository(ITgsRepository tgsRepository) : base(
+        public PromotionRepository(ITgsRepository tgsRepository,
+            IJsonSerializationProvider jsonSerializationProvider) : base(
             tgsRepository)
         {
             _repository = tgsRepository;
+            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         public Task ChangePromotionStatusAsync(Core.DataServices.Tgs.Models.Promotion promotion) =>
@@ -32,6 +39,30 @@ namespace TGS.Promotion.Repositories
         public async Task CreatePromotionAsync(CreatePromotionRequest request,
             PromotionType promotionTypeModel)
         {
+            var json = ToJsonString(request.Localization);
+
+            //JsonConvert.DeserializeObject<Dictionary<string, string>>(request.Localization);
+            //var root = request.Localization.RootElement;
+            //var localizationUtf8Json = JsonSerializer.SerializeToUtf8Bytes(request.Localization);
+            //Utf8JsonReader utf8Reader = new Utf8JsonReader(localizationUtf8Json);
+            //var localization = JsonSerializer.Deserialize<Dictionary<string, string>>(ref utf8Reader);
+            var currencies =
+                _jsonSerializationProvider.DeserializeFromString<Dictionary<string, Dictionary<string, string>>>(json);
+
+            foreach (var keyValuePair in currencies)
+            {
+                var d = keyValuePair.Key;
+                var v = keyValuePair.Value;
+            }
+            //var names = root.EnumerateArray().SelectMany(o => o.EnumerateObject())
+            //    .Select(p => p.Name).ToArray();
+            //var currencies = new Dictionary<string, string>();
+            //foreach (var name in names)
+            //{
+            //    root.TryGetProperty(name, out var columns);
+            //    currencies.Add(name, columns.ToString());
+            //}
+
             var promotion = new Core.DataServices.Tgs.Models.Promotion
             {
                 Id = Guid.NewGuid(),
@@ -156,6 +187,16 @@ namespace TGS.Promotion.Repositories
                 .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).Select(x =>
                     new PromotionVipLevel {PromotionId = promotion.Id, VipLevelId = x.Id, Level = x.Level});
             return new(promotionVipLevels);
+        }
+
+        public string ToJsonString(JsonDocument jdoc)
+        {
+            using var stream = new MemoryStream();
+            var writer = new Utf8JsonWriter(stream, new() {Indented = true});
+            jdoc.WriteTo(writer);
+            writer.Flush();
+
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
     }
 }

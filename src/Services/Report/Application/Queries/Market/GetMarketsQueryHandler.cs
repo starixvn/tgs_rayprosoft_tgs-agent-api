@@ -32,7 +32,7 @@ namespace TGS.Services.Report.Application.Queries.Market
             DateTimeOffset to = new(requestTo.Year, requestTo.Month, requestTo.Day, 0, 0, 0,
                 requestTo.Offset);
 
-            var dates = Enumerable.Range(0, 1 + to.Subtract(from).Days)
+            var dates = Enumerable.Range(0, to.Subtract(from).Days)
                 .Select(x => from.AddDays(x))
                 .ToArray();
 

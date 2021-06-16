@@ -1,17 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Amazon.S3.Model;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Core.Infrastructures.Nats.Model;
 
 namespace TGS.Apis.FileService.DataService.Services
 {
     public interface IUploadService
     {
-        Task<string> UploadFileS3Async(IFormFile formFile);
-
-        Task AddStationLetterFileAsync(ObjectFileEventModel model);
+        Task<string> UploadFileS3Async(string prefix, IFormFile formFile);
 
         ValueTask<string[]> GetObjectsAsync(string prefix = null);
+        Task CleanFilesAsync(string prefix);
     }
 }
