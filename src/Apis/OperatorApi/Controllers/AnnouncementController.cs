@@ -1,8 +1,13 @@
-﻿using System.Net.Mime;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
+using TGS.Services.Operator.Services.Announcement;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -11,16 +16,33 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AnnouncementController : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public AnnouncementController(IMediator mediator)
+        [HttpGet("announcement/list")]
+        public async Task<GetAnnouncementsResponse> GetAnnouncementsAsync(
+            [FromServices] IQueryService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService)
         {
-            _mediator = mediator;
-        }
+            var brandId = HttpContext.Items.GetBrandId();
 
-        [HttpGet]
-        [Route("announcement/list")]
-        public Task<GetAnnouncementsResponse> GetAnnouncementsAsync() =>
-            _mediator.Send(new GetAnnouncementsRequest());
+            var query = new GetAnnouncementQuery(brandId);
+
+            var info = await getAnnouncementQueryService.QueryAsync(query)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            var announcements = new List<Announcement>();
+
+            info.ForEach(item => announcements.Add(
+                new Announcement()
+                {
+                    Content = item.Content,
+                    From = item.From,
+                    To = item.To,
+                    Subject = item.Subject
+                }));
+
+            return new GetAnnouncementsResponse
+            {
+                Announcements = announcements.ToArray()
+            };
+        }
     }
 }
