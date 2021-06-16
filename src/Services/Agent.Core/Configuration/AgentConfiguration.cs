@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Tgs.Payment.Configuration;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Agent.Configuration
 {
@@ -42,6 +43,13 @@ namespace TGS.Services.Agent.Configuration
             Services
                 .AddOptions<EmailConfiguration>()
                 .Configure(configure);
+
+            return this;
+        }
+
+        public AgentConfiguration ConfigureWallet(Action<WalletConfiguration> configure)
+        {
+            configure(Services.AddWallet());
 
             return this;
         }
