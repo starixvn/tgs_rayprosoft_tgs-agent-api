@@ -17,7 +17,8 @@ namespace TGS.Apis.FileService.Clients
         public FileServiceClient(HttpClient httpClient, IJsonSerializationProvider jsonSerializationProvider)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _jsonSerializationProvider = jsonSerializationProvider ??
+                throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async ValueTask<FileView> FindFileByObjectIdAsync(string objectId)
@@ -32,22 +33,18 @@ namespace TGS.Apis.FileService.Clients
 
             var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
                 json,
-                new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                new() {PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
 
             return view;
         }
 
-        public async ValueTask<Stream> OpenFileReaderAsync(string path)
-        {
-            return await _httpClient
+        public async ValueTask<Stream> OpenFileReaderAsync(string path) =>
+            await _httpClient
                 .GetStreamAsync($"/api/fs/{path.TrimStart('/')}")
                 .ConfigureAwait(false);
-        }
 
-        public async ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType, Stream fileStream)
+        public async ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType,
+            Stream fileStream)
         {
             using var uploadContent = new MultipartFormDataContent();
 
@@ -68,10 +65,34 @@ namespace TGS.Apis.FileService.Clients
 
             var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
                 json,
-                new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                new() {PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
+
+            return view;
+        }
+
+        public async ValueTask<FileView> UploadPublicFileAsync(string prefix, string fileName,
+            MediaTypeHeaderValue contentType,
+            Stream fileStream)
+        {
+            using var uploadContent = new MultipartFormDataContent();
+
+            using var fileContent = new StreamContent(fileStream);
+
+            fileContent.Headers.ContentType = contentType;
+
+            uploadContent.Add(fileContent, "file", fileName);
+
+            var response = await _httpClient
+                .PostAsync($"/fs/file/upload/{prefix}", uploadContent)
+                .ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
+                json,
+                new() {PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
 
             return view;
         }

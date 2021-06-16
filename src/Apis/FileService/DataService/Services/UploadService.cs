@@ -24,15 +24,15 @@ namespace TGS.Apis.FileService.DataService.Services
             _fileManager = fileManager ?? throw new ArgumentNullException(nameof(fileManager));
         }
 
-        public async Task<string> UploadFileS3Async(string prefix, IFormFile formFile)
+        public async Task<FileMeta> UploadFileS3Async(string prefix, IFormFile formFile)
         {
             var randomFileName =
                 $"{StringGenerator.GenerateAlphanumericString(32)}{Path.GetExtension(formFile.FileName)}";
 
-            return (await _fileManager
+            return await _fileManager
                 .SaveAsync($"{prefix}/{randomFileName}", formFile.ContentType, formFile.Length,
                     formFile.OpenReadStream())
-                .ConfigureAwait(false)).ExternalUrl;
+                .ConfigureAwait(false);
         }
 
         public ValueTask<string[]> GetObjectsAsync(string prefix)
