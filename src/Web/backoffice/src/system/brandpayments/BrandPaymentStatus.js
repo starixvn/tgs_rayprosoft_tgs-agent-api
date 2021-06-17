@@ -5,7 +5,7 @@ import { Trans, useTrans } from "../../i18n"
 import AlertDialog from "../../dialog/Alert"
 import { useChangeBrandPaymentStatus } from "./client"
 import { Select } from "../../select/Select"
-import { useFormContext, Controller } from "react-hook-form"
+import { useFormContext, Controller, useWatch } from "react-hook-form"
 
 const Enabled = "Enabled"
 const EnabledTrans = {
@@ -59,8 +59,11 @@ export const BrandPaymentStatusSelect = ({ placeholder, ...props }) => {
 }
 
 export const BrandPaymentStatusButton = ({ name = "paymentStatus" }) => {
-    let { watch, setValue, control } = useFormContext()
-    let paymentStatus = watch(name)
+    let { setValue, control } = useFormContext()
+    let paymentStatus = useWatch({
+        control,
+        name
+    })
 
     return (
         <Controller

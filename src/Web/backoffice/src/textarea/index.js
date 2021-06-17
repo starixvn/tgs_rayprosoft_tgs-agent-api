@@ -2,26 +2,14 @@ import React, { useState, useEffect, useMemo, useRef, Children } from "react"
 import { css, Global } from "@emotion/react"
 import { useForm, useFormContext } from "react-hook-form"
 import {
-    Spinner,
-    Stack,
-    Flex,
-    Box,
-    Card,
-    Button,
-    Text,
-    Input,
-    Checkbox,
     FieldStack,
     FieldWrapper,
-    SelectField,
-    Table,
-    Select,
-    Group,
+    Box,
     Set,
-    useClassName,
     Textarea as _Textarea,
-    TextareaField as _TextareaField
+    TextareaField as BaseTextareaField
 } from "bumbag"
+import { LocalizationDialogDisclosure } from "../dialog/LocalizationDialog"
 
 export const Textarea = ({
     name,
@@ -78,6 +66,9 @@ export const TextareaField = ({
     textareaRef,
     resize = "none",
     validationText,
+    addonAfter,
+    brandId,
+    showLocalizationAddonAfter = false,
     ...props
 }) => {
     let formContext = useFormContext()
@@ -102,19 +93,42 @@ export const TextareaField = ({
     let state = error && "danger"
     validationText = validationText ?? error?.message
 
+    addonAfter =
+        addonAfter ??
+        (showLocalizationAddonAfter && (
+            <LocalizationDialogDisclosure
+                brandId={brandId}
+                localizationField={LocalizationTextareaField}
+                name={name}
+            />
+        ))
+
     return (
-        <_TextareaField
-            textareaRef={textareaRef}
-            state={state}
-            validationText={validationText}
-            css={css`
-                & textarea {
-                    resize: ${resize};
-                }
-            `}
-            {...formProps}
-            {...props}
-        />
+        <Set alignY="top" isFilled>
+            <BaseTextareaField
+                textareaRef={textareaRef}
+                state={state}
+                validationText={validationText}
+                flex="1"
+                css={css`
+                    & textarea {
+                        resize: ${resize};
+                    }
+                `}
+                {...formProps}
+                {...props}
+            />
+            {addonAfter}
+        </Set>
+    )
+}
+
+const LocalizationTextareaField = ({ code, ...props }) => {
+    return (
+        <Set isFilled alignY="center">
+            <Box>{code}</Box>
+            <TextareaField name={code} />
+        </Set>
     )
 }
 

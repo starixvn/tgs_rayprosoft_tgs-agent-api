@@ -38,6 +38,15 @@ export const getHeaderButtonColor = () =>
 export const getHeaderButtonBackground = () =>
     window?.env?.loginButtonBackground || "transparent"
 
+//TODO: init feature object
+window.enableFeature = (...features) => {
+    console.log("enableFeature", features)
+}
+
+export const isFeatureEnabled = (feature = "") => {
+    return window?.features?.[feature] ?? false
+}
+
 export default {
     Development,
     Production,
@@ -47,5 +56,6 @@ export default {
     getLoginButtonBackground,
     getHeaderBackground,
     getHeaderButtonColor,
-    getHeaderButtonBackground
+    getHeaderButtonBackground,
+    isFeatureEnabled
 }

@@ -79,7 +79,7 @@ const Body = ({}) => {
         deleteCache
     } = useAdminLogList({
         ...toApiParams(state),
-        sortby: "recordedOn",
+        sortby: "RecordedOn",
         orderby: SortOrder.Descending
     })
 

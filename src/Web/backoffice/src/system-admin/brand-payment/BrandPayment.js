@@ -308,9 +308,9 @@ const FormBody = ({ brandId }) => {
                                 label="Channel Name"
                                 flex="2"
                             />
-                            <FieldWrapper label="Status">
+                            {/* <FieldWrapper label="Status">
                                 <BrandPaymentStatusSelect name="paymentStatus" />
-                            </FieldWrapper>
+                            </FieldWrapper> */}
                         </FieldStack>
 
                         <PaymentMethodChannelIdSelect />

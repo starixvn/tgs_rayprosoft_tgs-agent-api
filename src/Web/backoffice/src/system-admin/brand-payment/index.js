@@ -22,7 +22,10 @@ import { BrandPaymentTransferTypeSelect } from "../../system/brandpayments/Brand
 import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
 import { PaymentChannelLabel } from "../../payment/channel/PaymentChannel"
-import { BrandPaymentStatusSelect } from "../../system/brandpayments/BrandPaymentStatus"
+import {
+    BrandPaymentStatusSelect,
+    BrandPaymentStatusToggleButton
+} from "../../system/brandpayments/BrandPaymentStatus"
 import {
     AddBrandPaymentDisclosure,
     EditBrandPaymentDisclosure
@@ -154,6 +157,20 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: "channelName",
                 Header: <Trans zh="通道名称" en="Channel Name" />,
                 disableSortBy: true
+            }),
+            textColumn({
+                id: "paymentStatus",
+                accessor: (record) => record,
+                Header: <Trans zh="状态" en="Status" />,
+                disableSortBy: true,
+                Cell: ({ value }) => {
+                    return (
+                        <BrandPaymentStatusToggleButton
+                            record={value}
+                            onSubmitted={mutate}
+                        />
+                    )
+                }
             })
         ]
 
