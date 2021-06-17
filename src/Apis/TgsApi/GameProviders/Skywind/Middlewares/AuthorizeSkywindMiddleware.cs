@@ -68,7 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             }
             else
             {
-                if (!context.Request.Path.Value.IgnoreCaseNotContains("api/sw/ping"))
+                if (!context.Request.Path.Value.IgnoreCaseContains("api/sw/ping"))
                 {
                     var playerCode = keyValuePairs["cust_id"].ToString();
                     var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
