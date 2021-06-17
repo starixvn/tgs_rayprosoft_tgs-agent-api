@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameProviders.Skywind.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
-using TGS.Shared.Game.Models.Skywind.Common;
 
 namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
 {
@@ -51,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
 
 
             var value = await context.Request.ReadAsStringAsync();
-            var keyValuePairs = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(_jsonSerializationProvider.SerializeToString(JsonDocument.Parse(value)));
+            var keyValuePairs = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(_jsonSerializationProvider.SerializeToString((JsonDocument.Parse(value))));
 
             if (keyValuePairs["merch_id"].ToString().IgnoreCaseNotEquals(configuration.MerchId) || keyValuePairs["merch_pwd"].ToString().IgnoreCaseNotEquals(configuration.MerchPwd))
             {
@@ -69,6 +65,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
                 context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
                 context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
                 context.Items.Add(Consts.ContextItems.PlatformType, platformType);
+            }
+            else
+            {
+                var playerCode = keyValuePairs["cust_id"].ToString();
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+                context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
             }
             await next(context);
         }

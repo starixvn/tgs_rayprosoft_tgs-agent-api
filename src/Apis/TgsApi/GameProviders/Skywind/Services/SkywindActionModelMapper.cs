@@ -57,11 +57,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                                 select new TransactionData
                                 {
                                     Amount = Math.Abs(order.Amount),
-                                    ExternalTransactionId = $"{ order.TrxId}_settle",
+                                    ExternalTransactionId = $"{order.TrxId}_settle",
                                     ExternalRoundId = order.RoundId,
                                     ExternalBetId = order.TrxId.ToString(),
                                     ExternalGameActionGroupId = order.TrxId.ToString(),
                                     ExternalGameId = order.GameCode.ToString(),
+                                    ExternalTransactionReferenceId = order.TrxId.ToString(),
                                     GameActionType = ProcessingSettlement(order),
                                     ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(order.Timestamp)).ToIso8601String(true),
                                     TimeStamp = DateTimeOffset.UtcNow,
