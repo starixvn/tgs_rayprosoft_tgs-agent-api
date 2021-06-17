@@ -27,6 +27,7 @@ namespace TGS.Core.Models
             public static readonly string IMESports = string.Format(Template, Consts.GameProvider.IMESports);
             public static readonly string BigGaming = string.Format(Template, Consts.GameProvider.BigGaming);
             public static readonly string SexyGaming = string.Format(Template, Consts.GameProvider.SexyGaming);
+            public static readonly string Skywind = string.Format(Template, Consts.GameProvider.Skywind);
         }
     }
 }
