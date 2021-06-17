@@ -52,7 +52,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
             }
 
             return dataQuery
-                .ToAsyncEnumerable()    
+                .ToAsyncEnumerable()
                 .Select(form => new WithdrawFormModel(
                     form.Id,
                     form.UserId,
