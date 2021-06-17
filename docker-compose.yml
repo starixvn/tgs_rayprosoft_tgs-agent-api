@@ -111,6 +111,7 @@ services:
       HEADER_BACKGROUND: "#f7f7fa"
       HEADER_BUTTON_COLOR: "#212121"
       HEADER_BUTTON_BACKGROUND: "transparent"
+      PromotionLocalization: "true"
     labels:
       - traefik.enable=true
       - traefik.http.routers.backoffice-site.rule=Host(`backoffice.localhost`)

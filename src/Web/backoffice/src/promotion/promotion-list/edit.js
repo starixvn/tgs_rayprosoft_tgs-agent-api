@@ -62,7 +62,7 @@ import { useBrand } from "../../merchant/brands/client"
 import { ImageUploadButton } from "../../file/upload/ImageUploadButton"
 import { HtmlEditor } from "../../text/editor/HtmlEditor"
 import Backdrop from "../../dialog/Backdrop"
-import { isFeatureEnabled } from "../../env"
+import { isFeatureEnabled, Features } from "../../env"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -499,7 +499,9 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                         <InputField
                             name="name"
                             brandId={brandId}
-                            showLocalizationAddonAfter={isFeatureEnabled()}
+                            showLocalizationAddonAfter={isFeatureEnabled(
+                                Features.PromotionLocalization
+                            )}
                         />
                     )}
                     {readOnly && (
@@ -686,7 +688,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 )}
             </FieldValues>
 
-            {isFeatureEnabled() && (
+            {isFeatureEnabled(Features.PromotionLocalization) && (
                 <>
                     <Separator />
 
@@ -701,7 +703,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                             <InputField
                                 name="subTitle"
                                 brandId={brandId}
-                                showLocalizationAddonAfter={isFeatureEnabled()}
+                                showLocalizationAddonAfter
                                 disabled={disabled}
                                 readOnly={readOnly}
                             />
