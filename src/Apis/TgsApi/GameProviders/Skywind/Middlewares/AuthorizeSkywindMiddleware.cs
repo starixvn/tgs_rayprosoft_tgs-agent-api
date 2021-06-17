@@ -68,11 +68,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             }
             else
             {
-                var playerCode = keyValuePairs["cust_id"].ToString();
-                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
-                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
-                context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
+                if (!context.Request.Path.Value.IgnoreCaseNotContains("api/sw/ping"))
+                {
+                    var playerCode = keyValuePairs["cust_id"].ToString();
+                    var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+                    var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+                    context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+                    context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
+                }
             }
             await next(context);
         }
