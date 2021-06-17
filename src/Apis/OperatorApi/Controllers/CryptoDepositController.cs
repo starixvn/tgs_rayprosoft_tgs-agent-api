@@ -7,6 +7,7 @@ using Tgs.Payment;
 using Tgs.Payment.LeePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
@@ -66,6 +67,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
             var applyInfo = serializer.Deserialize<LeePayDepositApplyInfo>(formData.ApplyInfo!);
+
+            if (applyInfo.Response.Code != "00")
+                throw new PaymentFailException(applyInfo.Response.Message);
 
             return new LeePayDepositFormCreatedResponse
             {

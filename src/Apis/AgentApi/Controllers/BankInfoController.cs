@@ -62,7 +62,7 @@ namespace TGS.Apis.AgentApi.Controllers
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public IAsyncEnumerable<BankInfoResponse> GetPlayerBankInfosAsync(
-            [FromServices] IQueryService<GetAgentBankInfosQuery, BankInfo> queryService)
+            [FromServices] IQueryService<GetAgentBankInfosQuery, AgentBankInfo> queryService)
         {
             var agentData = HttpContext.Items.GetAgentTokenData();
 

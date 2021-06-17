@@ -56,8 +56,8 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                 .Select(form => new WithdrawFormModel(
                     form.Id,
                     form.UserId,
-                    form.UserName,
                     (UserType)form.UserType,
+                    form.UserName,
                     form.BrandId,
                     form.BrandPaymentId,
                     form.BrandPayment?.ChannelName,

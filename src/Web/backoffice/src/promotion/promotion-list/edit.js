@@ -15,7 +15,7 @@ import {
 } from "bumbag"
 import { Update as UpdateMenu, View as ViewMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import {
+import Disclosure, {
     AddDisclosure,
     EditDisclosure,
     NewDisclosure,
@@ -58,8 +58,11 @@ import {
     PercentageNumberInputField
 } from "../../input/NumberInput"
 import { Switch } from "../../switch/Switch"
-import { PromotionContentDisclosure } from "./PromotionContent"
 import { useBrand } from "../../merchant/brands/client"
+import { ImageUploadButton } from "../../file/upload/ImageUploadButton"
+import { HtmlEditor } from "../../text/editor/HtmlEditor"
+import Backdrop from "../../dialog/Backdrop"
+import { isFeatureEnabled, Features } from "../../env"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -432,13 +435,15 @@ const AutoOrManualPayoutSwitch = ({
 
 const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
     let { start: startOfToday } = today()
-    let { control, setValue } = useFormContext()
+    let formMethods = useFormContext()
+    let { control, setValue } = formMethods
 
     let TotalAmountLimitFieldName = "totalAmountLimit"
     let totalAmountLimit = useWatch({
         control,
         name: TotalAmountLimitFieldName
     })
+
     let UnlimitedFieldName = "unlimited"
     let unlimitedTotalAmount = useWatch({
         control,
@@ -482,6 +487,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
 
     let disabled = readOnly
     let editable = !readOnly
+
     return (
         <FieldStack marginLeft="1rem">
             <FieldValues>
@@ -489,7 +495,15 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                     <Trans zh="活动名称" en="Promotion Name" />
                 </NormalLabel>
                 <Box alignY="center">
-                    {editable && <Input name="name" />}
+                    {editable && (
+                        <InputField
+                            name="name"
+                            brandId={brandId}
+                            showLocalizationAddonAfter={isFeatureEnabled(
+                                Features.PromotionLocalization
+                            )}
+                        />
+                    )}
                     {readOnly && (
                         <Text.Block alignY="center">{record?.name}</Text.Block>
                     )}
@@ -597,18 +611,9 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动费用" en="Promotion Funds" />
+                    <Trans zh="活动总费用" en="Promotion Funds" />
                 </NormalLabel>
                 <Set orientation="horizontal" alignY="center">
-                    {unlimitedTotalAmount && (
-                        <Box>
-                            <Input
-                                name={TotalAmountLimitFieldName}
-                                type="hidden"
-                            />
-                            <Input value={totalAmountLimit} disabled />
-                        </Box>
-                    )}
                     {limitedTotalAmount && (
                         <>
                             <NumberInput
@@ -681,14 +686,85 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                         </Box>
                     </>
                 )}
-
-                {/* <NormalLabel>
-                    <Trans zh="活动内容" en="Content" />
-                </NormalLabel>
-                <Box>
-                    <PromotionContentDisclosure readOnly={readOnly} />
-                </Box> */}
             </FieldValues>
+
+            {isFeatureEnabled(Features.PromotionLocalization) && (
+                <>
+                    <Separator />
+
+                    <Heading use="h5">
+                        <Trans zh="活动内容" en="Promotion Content" />
+                    </Heading>
+                    <FieldValues>
+                        <NormalLabel>
+                            <Trans zh="活动子标题" en="Promotion SubTitle" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <InputField
+                                name="subTitle"
+                                brandId={brandId}
+                                showLocalizationAddonAfter
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+
+                        <NormalLabel>
+                            <Trans
+                                zh="活动 Banner (PC)"
+                                en="Promotion Banner (PC)"
+                            />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <ImageUploadButton
+                                brandId={brandId}
+                                name="desktopBanner"
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+
+                        <NormalLabel>
+                            <Trans
+                                zh="活动 Banner (Mobile)"
+                                en="Promotion Banner (Mobile)"
+                            />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <ImageUploadButton
+                                brandId={brandId}
+                                name="mobileBanner"
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+
+                        <NormalLabel>
+                            <Trans zh="活动内容" en="Promotion Content" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <HtmlEditorDisclosure
+                                brandId={brandId}
+                                name="content"
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+
+                        <NormalLabel>
+                            <Trans zh="活动条款与条规" en="Promotion Rules" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <HtmlEditorDisclosure
+                                brandId={brandId}
+                                name="rules"
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+                    </FieldValues>
+                </>
+            )}
 
             <Separator />
 
@@ -712,6 +788,7 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 <NumberInput
                     name="bonusAmountLimit"
                     min="0"
+                    max={limitedTotalAmount ? totalAmountLimit : undefined}
                     required
                     disabled={disabled}
                 />
@@ -732,5 +809,75 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 />
             </FieldValues>
         </FieldStack>
+    )
+}
+
+const HtmlEditorDisclosure = ({ brandId, name, readOnly }) => {
+    let dialog = useModalState()
+
+    let editTitle = useTrans({
+        zh: "编辑",
+        en: "Edit"
+    })
+    let viewTitle = useTrans({
+        zh: "查看",
+        en: "View"
+    })
+    let title = readOnly ? viewTitle : editTitle
+    return (
+        <>
+            <Disclosure width="fit-content" {...dialog}>
+                {title}
+            </Disclosure>
+            {dialog.visible && (
+                <HtmlEditorDialog
+                    brandId={brandId}
+                    name={name}
+                    readOnly={readOnly}
+                    dialog={dialog}
+                    title={title}
+                />
+            )}
+        </>
+    )
+}
+
+const HtmlEditorDialog = ({
+    brandId,
+    name,
+    readOnly,
+    dialog,
+    title,
+    ...props
+}) => {
+    let { visible } = props
+    return (
+        <Backdrop {...dialog}>
+            <Dialog.Modal
+                {...dialog}
+                hideBackdrop
+                hideOnClickOutside={false}
+                showCloseButton
+                title={title}
+                width="max-content"
+                maxWidth="80vw"
+                css={css`
+                    .tox-fullscreen & {
+                        top: 0;
+                        left: 0;
+                        transform: none;
+                    }
+                `}
+            >
+                <HtmlEditor
+                    brandId={brandId}
+                    name={name}
+                    readOnly={readOnly}
+                    height={400}
+                    active={visible}
+                    showLocalizationAddonAfter
+                />
+            </Dialog.Modal>
+        </Backdrop>
     )
 }

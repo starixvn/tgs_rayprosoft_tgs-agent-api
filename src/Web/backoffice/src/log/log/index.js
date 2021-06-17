@@ -76,7 +76,7 @@ const Body = ({}) => {
         deleteCache
     } = useLogList({
         ...toApiParams(state),
-        sortby: "recordedOn",
+        sortby: "RecordedOn",
         orderby: SortOrder.Descending
     })
 

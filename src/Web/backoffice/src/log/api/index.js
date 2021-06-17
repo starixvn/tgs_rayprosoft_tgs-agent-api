@@ -79,7 +79,7 @@ const Body = ({}) => {
         deleteCache
     } = useApiLogList({
         ...toApiParams(state),
-        sortby: "recordedOn",
+        sortby: "RecordedOn",
         orderby: SortOrder.Descending
     })
 

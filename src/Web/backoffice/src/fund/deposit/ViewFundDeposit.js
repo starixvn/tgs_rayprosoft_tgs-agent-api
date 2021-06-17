@@ -80,16 +80,16 @@ const ViewFundDepositDialog = ({ brandId, formId, dialog, ...props }) => {
             hideOnClickOutside={false}
             {...dialog}
         >
-            <FormBody record={data} />
+            <FormBody record={data} readOnly={true} />
         </Dialog.Modal>
     )
 }
 
-export const FormBody = ({ brandId, record, readonly }) => {
+export const FormBody = ({ brandId, record, readOnly = false }) => {
     let hasAttachment = !!record?.paymentReturn?.manualReceiptFileId
     let attachmentUrl = `/api/fs/${record?.paymentReturn?.manualReceiptFileId}`
 
-    let disabled = readonly
+    let disabled = readOnly
     return (
         <>
             <FieldStack>
@@ -166,6 +166,7 @@ export const FormBody = ({ brandId, record, readonly }) => {
                 <TextareaField
                     name="remark"
                     label={<Trans zh="备注" en="Remark" />}
+                    value={record?.remark}
                     disabled={disabled}
                 />
             </FieldStack>
