@@ -18,7 +18,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
-        ValueTask<Guid> GetGameProviderId();
+        ValueTask<Guid> GetGameProviderIdAsync();
     }
 
     public class SkywindServices : ISkywindServices
@@ -68,7 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
         }
 
-        async ValueTask<Guid> ISkywindServices.GetGameProviderId()
+        async ValueTask<Guid> ISkywindServices.GetGameProviderIdAsync()
         {
             return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.SexyGaming).ConfigureAwait(false);
         }

@@ -76,7 +76,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SkywindConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new Uri("http://game-sg") : new("http://localhost:62330"),
+                        _env.IsDocker() ? new Uri("http://game-sw") : new("http://localhost:62330"),
                     ApiUrl = new("https://api.gcpstg.m27613.com/v1"),
                     MerchId = "sw_PG_merchant_stg",
                     MerchPwd = "tm8jhMq2Sc5DdxJ5",

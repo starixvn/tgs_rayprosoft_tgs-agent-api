@@ -20,7 +20,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             Func<string, IErrorMapper> mapper,
             ITgsLog log,
             IGamePlayActions action)
-            : base(mapper, Consts.GameProvider.SexyGaming, log, "skywind")
+            : base(mapper, Consts.GameProvider.Skywind, log, "skywind")
         {
             _action = action;
 
