@@ -6,6 +6,7 @@ namespace TGS.Services.Agent
         Guid Id,
         string UserName,
         Guid DefaultWalletId,
+        string Email,
         byte[] PayPassword,
         byte[] PaySalt);
 }
