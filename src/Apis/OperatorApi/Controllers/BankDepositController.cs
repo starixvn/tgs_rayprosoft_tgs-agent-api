@@ -85,7 +85,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("primepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
-        public async Task<PrimePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
+        public async Task<PrimePayDepositFormCreatedResponse> SubmitPrimePayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
