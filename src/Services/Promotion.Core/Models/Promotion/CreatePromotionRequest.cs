@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.Json;
 using MediatR;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -37,6 +36,5 @@ namespace TGS.Services.Promotion.Models.Promotion
         public bool Unlimited { get; set; }
 
         public int[] VipLevels { get; set; }
-        public JsonDocument Localization { get; set; }
     }
 }

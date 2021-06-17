@@ -39,7 +39,7 @@ namespace TGS.Apis.FileService.Controllers
         }
 
         [HttpPut("stationLetter/{id}")]
-        public async Task<IActionResult> AddStationLetterFileAsync(string id, [FromForm] UpdateFilesRequest request)
+        public async Task<IActionResult> UpdateStationLetterFileAsync(string id, [FromBody] UpdateFilesRequest request)
         {
             await _stationLetterService.AddStationLetterFileAsync(id, request.FileNames);
             await _uploadService.CleanFilesAsync(Consts.UploadFile.StationLetter);
@@ -47,7 +47,7 @@ namespace TGS.Apis.FileService.Controllers
         }
 
         [HttpPut("promotion/{id}")]
-        public async Task<IActionResult> AddPromotionFileAsync(string id, [FromForm] UpdateFilesRequest request)
+        public async Task<IActionResult> UpdatePromotionFileAsync(string id, [FromBody] UpdateFilesRequest request)
         {
             await _promotionService.AddPromotionFileAsync(id, request.FileNames);
             await _uploadService.CleanFilesAsync(Consts.UploadFile.Promotion);

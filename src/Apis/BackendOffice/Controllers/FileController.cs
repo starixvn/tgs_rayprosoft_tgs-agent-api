@@ -38,7 +38,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             string prefix,
             [FromForm(Name = "file")] IFormFile file)
         {
-            var category = Consts.UploadFile.Categories.FirstOrDefault(name => name == prefix);
+            var category = Consts.UploadFile.Types.FirstOrDefault(name => name == prefix);
 
             var contentType = file.ContentType;
             await using var fileStream = file.OpenReadStream();

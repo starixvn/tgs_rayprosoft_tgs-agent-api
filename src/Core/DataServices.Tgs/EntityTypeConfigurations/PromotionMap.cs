@@ -59,6 +59,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(c => c.Subject)
+                .HasMaxLength(512);
+
+            builder.Property(c => c.SubSubject)
+                .HasMaxLength(2048);
+
             builder.HasOne(p => p.Brand)
                 .WithMany()
                 .HasForeignKey(p => p.BrandId)

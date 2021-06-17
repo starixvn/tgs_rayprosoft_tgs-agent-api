@@ -120,10 +120,11 @@ namespace TGS.Core.Models
 
         public static class UploadFile
         {
+            public const string ImagePattern = @"\b(http(s?):)([/|:|.|\w|-])*\.(?:jpg|gif|png|jpeg)\b";
             public const string StationLetter = "stationLetter";
             public const string Promotion = "promotion";
 
-            public static readonly string[] Categories = {StationLetter, Promotion};
+            public static readonly string[] Types = {StationLetter, Promotion};
         }
     }
 }

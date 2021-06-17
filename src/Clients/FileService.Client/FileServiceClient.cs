@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Json;
@@ -95,6 +96,16 @@ namespace TGS.Apis.FileService.Clients
                 new() {PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
 
             return view;
+        }
+
+        public async Task UpdateStationLetterFileAsync(string uploadType, string id, UpdateFilesRequest request)
+        {
+            var httpContent = new StringContent(_jsonSerializationProvider.SerializeToString(request), Encoding.UTF8,
+                "application/json");
+
+            await _httpClient
+                .PutAsync($"/fs/file/{uploadType}/{id}", httpContent)
+                .ConfigureAwait(false);
         }
     }
 }

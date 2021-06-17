@@ -14,5 +14,6 @@ namespace TGS.Apis.FileService.Clients
         ValueTask<FileView> FindFileByObjectIdAsync(string objectId);
 
         ValueTask<Stream> OpenFileReaderAsync(string path);
+        Task UpdateStationLetterFileAsync(string uploadType, string id, UpdateFilesRequest request);
     }
 }

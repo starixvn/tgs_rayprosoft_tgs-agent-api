@@ -12,10 +12,12 @@ using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Services.Promotion;
 using TGS.Services.Promotion.Models.Promotion;
+using PromotionImage = TGS.Core.DataServices.Tgs.Models.PromotionImage;
 using PromotionType = TGS.Core.Models.Settings.PromotionType;
 
 namespace TGS.Promotion.Repositories
@@ -36,36 +38,13 @@ namespace TGS.Promotion.Repositories
         public Task ChangePromotionStatusAsync(Core.DataServices.Tgs.Models.Promotion promotion) =>
             UpdateEntityAsync(promotion);
 
-        public async Task CreatePromotionAsync(CreatePromotionRequest request,
+        public async ValueTask<Guid> CreatePromotionAsync(CreatePromotionRequest request,
             PromotionType promotionTypeModel)
         {
-            var json = ToJsonString(request.Localization);
-
-            //JsonConvert.DeserializeObject<Dictionary<string, string>>(request.Localization);
-            //var root = request.Localization.RootElement;
-            //var localizationUtf8Json = JsonSerializer.SerializeToUtf8Bytes(request.Localization);
-            //Utf8JsonReader utf8Reader = new Utf8JsonReader(localizationUtf8Json);
-            //var localization = JsonSerializer.Deserialize<Dictionary<string, string>>(ref utf8Reader);
-            var currencies =
-                _jsonSerializationProvider.DeserializeFromString<Dictionary<string, Dictionary<string, string>>>(json);
-
-            foreach (var keyValuePair in currencies)
-            {
-                var d = keyValuePair.Key;
-                var v = keyValuePair.Value;
-            }
-            //var names = root.EnumerateArray().SelectMany(o => o.EnumerateObject())
-            //    .Select(p => p.Name).ToArray();
-            //var currencies = new Dictionary<string, string>();
-            //foreach (var name in names)
-            //{
-            //    root.TryGetProperty(name, out var columns);
-            //    currencies.Add(name, columns.ToString());
-            //}
-
+            var promotionId = GuidExtensions.NewSequentialGuid();
             var promotion = new Core.DataServices.Tgs.Models.Promotion
             {
-                Id = Guid.NewGuid(),
+                Id = promotionId,
                 BrandId = request.BrandId,
                 Name = request.Name,
                 From = request.From,
@@ -91,6 +70,8 @@ namespace TGS.Promotion.Repositories
             promotion.PromotionVipLevels = GeneratePromotionVipLevels(promotion, request);
 
             await CreateEntityAsync(promotion);
+
+            return promotionId;
         }
 
         public Task<bool> ExistsAsync(
@@ -120,6 +101,7 @@ namespace TGS.Promotion.Repositories
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             await DeleteEntitiesAsync(promotion.PromotionGameProviders);
             await DeleteEntitiesAsync(promotion.PromotionVipLevels);
+            await DeleteEntitiesAsync(promotion.PromotionImages);
 
             promotion.Name = request.Name;
             promotion.From = request.From;
@@ -141,6 +123,15 @@ namespace TGS.Promotion.Repositories
                     .ToHashSet();
             promotion.UpdatedByUsername = request.EditorUsername;
             promotion.UpdatedOn = DateTimeOffset.Now;
+            promotion.Subject = request.Subject;
+            promotion.SubSubject = request.SubSubject;
+            promotion.Content = request.Content;
+            promotion.Terms = request.Terms;
+            promotion.PromotionImages = request.Images.Select(x => new PromotionImage
+            {
+                Url = x.Url, PlatformType = x.PlatformType, PromotionId = promotion.Id
+            }).ToHashSet();
+            promotion.Localization = ToJsonString(request.Localization);
 
             await UpdateEntityAsync(promotion);
             await tran.CommitAsync();
@@ -189,11 +180,11 @@ namespace TGS.Promotion.Repositories
             return new(promotionVipLevels);
         }
 
-        public string ToJsonString(JsonDocument jdoc)
+        private static string ToJsonString(JsonDocument jsonDocument)
         {
             using var stream = new MemoryStream();
             var writer = new Utf8JsonWriter(stream, new() {Indented = true});
-            jdoc.WriteTo(writer);
+            jsonDocument.WriteTo(writer);
             writer.Flush();
 
             return Encoding.UTF8.GetString(stream.ToArray());
