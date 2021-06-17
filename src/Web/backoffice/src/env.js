@@ -1,3 +1,4 @@
+import { set } from "lodash-es"
 /**
  * env =
  * {
@@ -38,13 +39,43 @@ export const getHeaderButtonColor = () =>
 export const getHeaderButtonBackground = () =>
     window?.env?.loginButtonBackground || "transparent"
 
-//TODO: init feature object
-window.enableFeature = (...features) => {
-    console.log("enableFeature", features)
+const PromotionLocalization = "PromotionLocalization" //TODO: also remove env.html -> env.features.PromotionLocalization
+export const Features = {
+    PromotionLocalization
+}
+
+const listFeatures = () => {
+    let features = Object.entries(Features ?? {})
+    if (features.length > 0) {
+        console.group("Features: ")
+        features.map(([feature]) => {
+            console.log(`${feature}`)
+        })
+        console.groupEnd()
+    }
+}
+
+const enableFeatures = (...features) => {
+    if (features.length > 0) {
+        console.group("Enable: ")
+        features.map((feature) => {
+            let path = `env.features.${feature}`
+            set(window, path, true)
+            console.log(path)
+        })
+        console.groupEnd()
+    }
+}
+
+window.featureX = {
+    list: listFeatures,
+    enable: {
+        promotionLocalization: () => enableFeatures(PromotionLocalization)
+    }
 }
 
 export const isFeatureEnabled = (feature = "") => {
-    return window?.features?.[feature] ?? false
+    return window?.env?.features?.[feature] ?? false
 }
 
 export default {
@@ -57,5 +88,6 @@ export default {
     getHeaderBackground,
     getHeaderButtonColor,
     getHeaderButtonBackground,
-    isFeatureEnabled
+    isFeatureEnabled,
+    Features
 }
