@@ -30,18 +30,15 @@ namespace TGS.Shared.Game.ApiClients.Skywind
 
         async ValueTask<SkywindGameUrlResponse> ISkywindApiClient.GetGameUrlAsync(SkywindConfiguration configuration, SkywindGameUrlRequest request)
         {
-            var path = $"/players/{request.PlayerCode}/games/{request.GameCode}";
+            var path = $"/players/{request.PlayerCode}/games/{request.GameCode}?ticket={request.Ticket}";
             var skywindUserLoginResponse = await GetUserLoginAsync(configuration).ConfigureAwait(false);
-            var source = new SkywindGameUrl
-            {
-                Ticket = request.Ticket
-            };
+
             var heard = new Dictionary<string, string> {
              { "X-ACCESS-TOKEN", skywindUserLoginResponse.AccessToken }
             };
 
 
-            return await ExecuteJsonRequestAsync<SkywindGameUrl, SkywindGameUrlResponse>(HttpMethod.Get, configuration.ApiUrl, path, source, heard, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
+            return await ExecuteJsonRequestAsync<SkywindGameUrl, SkywindGameUrlResponse>(HttpMethod.Get, configuration.ApiUrl, path, null, heard, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
         }
 
         private ValueTask<SkywindUserLoginResponse> GetUserLoginAsync(SkywindConfiguration configuration)
@@ -49,10 +46,10 @@ namespace TGS.Shared.Game.ApiClients.Skywind
             var source = new SkywindUserLoginRequest()
             {
                 SecretKey = configuration.SecretKey,
-                Username = configuration.Password,
+                Username = configuration.Username,
                 Password = configuration.Password
             };
-            return ExecuteJsonRequestAsync<SkywindUserLoginRequest, SkywindUserLoginResponse>(HttpMethod.Post, configuration.ApiUrl, " / login", source, logPrefix: $"{_gameProvider}.UserLogin");
+            return ExecuteJsonRequestAsync<SkywindUserLoginRequest, SkywindUserLoginResponse>(HttpMethod.Post, configuration.ApiUrl, " /login", source, logPrefix: $"{_gameProvider}.UserLogin");
         }
     }
 }

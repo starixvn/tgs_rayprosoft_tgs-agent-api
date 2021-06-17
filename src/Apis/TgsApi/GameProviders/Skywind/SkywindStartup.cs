@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Skywind.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Skywind
@@ -35,6 +37,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
             services.AddScoped<HandleSkywindExceptionMiddleware>();
             services.AddScoped<ISkywindServices, SkywindServices>();
             services.AddScoped<ISkywindActionModelMapper, SkywindActionModelMapper>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(SkywindGameInitializer) }, (provider, _) =>
+            provider.GetRequiredService<SkywindGameInitializer>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

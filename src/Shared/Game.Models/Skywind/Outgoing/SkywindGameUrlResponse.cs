@@ -13,8 +13,6 @@ namespace TGS.Shared.Game.Models.Skywind.Outgoing
         public int Code { get; set; }
         [JsonPropertyName("message")]
         public string Message { get; set; }
-        [JsonPropertyName("translateMessage")]
-        public string TranslateMessage { get; set; }
         [JsonPropertyName("url")]
         public string Url { get; set; }
         [JsonPropertyName("token")]
