@@ -44,7 +44,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                                     ExternalBetId = order.TrxId.ToString(),
                                     ExternalGameActionGroupId = order.TrxId.ToString(),
                                     ExternalGameId = order.GameCode.ToString(),
-                                    ExternalTransactionReferenceId = order.TrxId.ToString(),
                                     GameActionType = GameActionType.PlaceBet,
                                     ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(order.Timestamp)).ToIso8601String(true),
                                     TimeStamp = DateTimeOffset.UtcNow,
