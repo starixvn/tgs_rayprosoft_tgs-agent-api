@@ -21,7 +21,7 @@ import {
     useUserBrandId
 } from "../../user/context"
 import { Code } from "./menu"
-import { FormattedNumberDecimal, Trans, useTrans } from "../../i18n"
+import { Trans, useTrans } from "../../i18n"
 import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { InputField } from "../../input/Input"
@@ -46,6 +46,7 @@ import { Update } from "./menu"
 import { ViewFundWithdrawDisclosure } from "./ViewFundWithdraw"
 import { VerifyFundWithdrawDisclosure } from "./VerifyFundWithdraw"
 import { PaymentMethodSelect } from "../../payment/method/PaymentMethod"
+import { UserTypeLabel } from "./UserType"
 
 export { Code }
 
@@ -134,35 +135,12 @@ const BodyContent = ({ brandId }) => {
                     endCreateOn={endCreateOn}
                     beginUpdateOn={beginUpdateOn}
                     endUpdateOn={endUpdateOn}
-                    search={(data) => {
-                        let newState = {
-                            pageIndex: 0,
-                            username: data.username,
-                            channelName: data.channelName,
-                            status: data.status,
-                            beginCreateOn: data.beginCreateOn,
-                            endCreateOn: data.endCreateOn,
-                            beginUpdateOn: data.beginUpdateOn,
-                            endUpdateOn: data.endUpdateOn
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                username,
-                                channelName,
-                                status,
-                                beginCreateOn,
-                                endCreateOn,
-                                beginUpdateOn,
-                                endUpdateOn
-                            })
-                        ) {
-                            mutate()
-                        }
+                    search={(data = {}) => {
                         setState({
                             pageIndex: 0,
                             ...data
                         })
+                        mutate()
                     }}
                     isLoading={isLoading}
                 />
@@ -286,6 +264,11 @@ const useColumns = ({ brandId, items = [], mutate }) => {
                 accessor: "userName",
                 Header: <Trans zh="用户名" en="Username" />,
                 disableSortBy: true
+            }),
+            textColumn({
+                accessor: "userType",
+                Header: <Trans zh="用户类型" en="User Type" />,
+                Cell: ({ value }) => <UserTypeLabel value={value} />
             }),
             textColumn({
                 accessor: "id",
