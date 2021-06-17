@@ -46,21 +46,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind);
             var gameProviderId =
-                 await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.SexyGaming);
+                 await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind);
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
 
 
             var value = await context.Request.ReadAsStringAsync();
-            var keyValuePairs = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, string>>(_jsonSerializationProvider.SerializeToString(JsonDocument.Parse(value)));
+            var keyValuePairs = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(_jsonSerializationProvider.SerializeToString(JsonDocument.Parse(value)));
 
-            if (keyValuePairs["merch_id"].IgnoreCaseNotEquals(configuration.MerchId) || keyValuePairs["merch_pwd"].IgnoreCaseNotEquals(configuration.MerchPwd))
+            if (keyValuePairs["merch_id"].ToString().IgnoreCaseNotEquals(configuration.MerchId) || keyValuePairs["merch_pwd"].ToString().IgnoreCaseNotEquals(configuration.MerchPwd))
             {
                 throw new InvalidCredentialsException("empty token");
             }
 
             if (context.Request.Path.Value.IgnoreCaseContains("api/sw/get_balance") || context.Request.Path.Value.IgnoreCaseContains("api/sw/debit"))
             {
-                var loginRecord = await _services.DecryptTokenAsync(keyValuePairs["cust_session_id"]);
+                var loginRecord = await _services.DecryptTokenAsync(keyValuePairs["cust_session_id"].ToString());
                 var playerCode = loginRecord.PlayerCode;
                 var platformType = loginRecord.PlatformType;
                 var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
