@@ -7,8 +7,8 @@ using Tgs.Payment.ApplePay;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
 
@@ -18,65 +18,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class BankDepositController : ControllerBase
     {
-        [HttpPost("primepay")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public async Task<PrimePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
-            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
-            [FromServices] PrimePaySerializer serializer,
-            [FromBody] SubmitDepositRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var command = new CreateDepositFormCommand(
-                playerTokenData.PlayerCode,
-                brandId,
-                request.BrandPaymentId,
-                request.Amount,
-                "tgs.payment.primepay.deposit",
-                request.PromotionId,
-                formId => serializer.Serialize(
-                    new PrimePayDepositSettings(
-                            brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),
-                            brandPaymentInfo.RootElement.GetProperty("key").GetString(),
-                            brandPaymentInfo.RootElement.GetProperty("iv").GetString(),
-                            brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
-                            formId,
-                            "https://google.com",
-                            brandPaymentInfo.RootElement.TryGetProperty("paymentMethod", out var prop)
-                                ? prop.GetString()
-                                : null)));
-
-            await createDepositFormService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-
-            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
-
-            var getDepositFormQuery = new GetDepositFormQuery(playerTokenData.PlayerCode, createdFormId);
-
-            var formData = await getDepositFormService
-                .GetAsync(getDepositFormQuery)
-                .ConfigureAwait(false);
-
-            var applyInfo = serializer.Deserialize<PrimePayDepositApplyInfo>(formData.ApplyInfo!);
-
-            return new PrimePayDepositFormCreatedResponse
-            {
-                FormId = createdFormId,
-                PaymentUrl = ((PrimePayDepositSuccessResponse)applyInfo.Response).RedirectUrl.ToString()
-            };
-        }
-
         [HttpPost("applepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
@@ -106,11 +47,11 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.PromotionId,
                 formId => serializer.Serialize(
                     new ApplePayDepositSettings(
-                            brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
-                            brandPaymentInfo.RootElement.GetProperty("storeGuid").GetString(),
-                            formId,
-                            brandPaymentInfo.RootElement.GetProperty("type").GetString(),
-                            request.TransName)));
+                        brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("storeGuid").GetString(),
+                        formId,
+                        brandPaymentInfo.RootElement.GetProperty("type").GetString(),
+                        request.TransName)));
 
             await createDepositFormService
                 .ExecuteAsync(command)
@@ -137,7 +78,73 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
             else
             {
-                throw new ApplePayDepositException(applyInfo.Response.Msg);
+                throw new PaymentFailException(applyInfo.Response.Msg);
+            }
+        }
+
+        [HttpPost("primepay")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public async Task<PrimePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] PrimePaySerializer serializer,
+            [FromBody] SubmitDepositRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.primepay.deposit",
+                request.PromotionId,
+                formId => serializer.Serialize(
+                    new PrimePayDepositSettings(
+                        brandPaymentInfo.RootElement.GetProperty("merchantId").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("key").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("iv").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("currency").GetString(),
+                        formId,
+                        "https://google.com",
+                        brandPaymentInfo.RootElement.TryGetProperty("paymentMethod", out var prop)
+                            ? prop.GetString()
+                            : null)));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(playerTokenData.PlayerCode, createdFormId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<PrimePayDepositApplyInfo>(formData.ApplyInfo!);
+
+            if (applyInfo.Response is PrimePayDepositSuccessResponse response)
+                return new PrimePayDepositFormCreatedResponse
+                {
+                    FormId = createdFormId,
+                    PaymentUrl = ((PrimePayDepositSuccessResponse)applyInfo.Response).RedirectUrl.ToString()
+                };
+            else
+            {
+                var failResponse = (PrimePayDepositFailResponse)applyInfo.Response;
+
+                throw new PaymentFailException(failResponse.Errors);
             }
         }
     }
