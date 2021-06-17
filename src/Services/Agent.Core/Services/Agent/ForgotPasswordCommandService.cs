@@ -34,7 +34,8 @@ namespace TGS.Services.Agent.Services.Agent
             if (agent == null)
                 throw new AgentNotFoundException(command.Email);
 
-            var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
+            var saveResult = await Policy
+                .HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
                 .RetryAsync(5)
                 .ExecuteAsync(async () =>
                 {

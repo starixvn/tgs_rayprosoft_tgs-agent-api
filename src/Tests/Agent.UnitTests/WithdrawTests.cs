@@ -52,6 +52,7 @@ namespace Agent.UnitTests
                     command.AgentId,
                     "ThisIsAgentName",
                     Guid.NewGuid(),
+                    "test@gmail.com",
                     null,
                     null));
 

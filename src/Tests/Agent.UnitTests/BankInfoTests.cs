@@ -42,6 +42,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     agentId,
                     "Tester",
                     Guid.NewGuid(),
+                    "test@gmail.com",
                     null,
                     null));
 
