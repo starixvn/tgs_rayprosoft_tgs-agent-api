@@ -21,7 +21,7 @@ namespace TGS.Shared.Game.ApiClients.Skywind
 
     public sealed class SkywindApiClient : BaseApiClient, ISkywindApiClient
     {
-        private static readonly string _accessTokenCacheType = $"{ Consts.GameProvider.Skywind}:AccessToken";
+        private static readonly string _accessTokenCacheType = "AccessToken";
         private readonly string _gameProvider = Consts.GameProvider.Skywind;
         private readonly IRedisCacheManager _redisCacheManager;
         public SkywindApiClient(
@@ -37,10 +37,10 @@ namespace TGS.Shared.Game.ApiClients.Skywind
         async ValueTask<SkywindGameUrlResponse> ISkywindApiClient.GetGameUrlAsync(SkywindConfiguration configuration, SkywindGameUrlRequest request)
         {
             var path = $"/players/{request.PlayerCode}/games/{request.GameCode}?ticket={request.Ticket}";
-            var skywindUserLoginResponse = await GetUserLoginAsync(configuration).ConfigureAwait(false);
+            var getaccessToken = await GetAccessTokenAsync(configuration).ConfigureAwait(false);
 
             var heard = new Dictionary<string, string> {
-             { "X-ACCESS-TOKEN", skywindUserLoginResponse.AccessToken }
+             { "X-ACCESS-TOKEN", getaccessToken }
             };
 
 
@@ -53,15 +53,13 @@ namespace TGS.Shared.Game.ApiClients.Skywind
         /// </summary>
         /// <param name="configuration">The configuration.</param>
         /// <returns></returns>
-        private async ValueTask<SkywindUserLoginResponse> GetUserLoginAsync(SkywindConfiguration configuration)
+        private async ValueTask<string> GetAccessTokenAsync(SkywindConfiguration configuration)
         {
-            var cacheKey = _accessTokenCacheType;
+            var accessToken = default(string);
 
-            var response = default(SkywindUserLoginResponse);
+            accessToken = await _redisCacheManager.SafeGetAsync(_gameProvider, _accessTokenCacheType, () => Task.FromResult(default(string))).ConfigureAwait(false);
 
-            response = await _redisCacheManager.SafeGetAsync(_accessTokenCacheType, cacheKey, () => Task.FromResult(default(SkywindUserLoginResponse))).ConfigureAwait(false);
-
-            if (response == null)
+            if (string.IsNullOrEmpty(accessToken))
             {
                 var source = new SkywindUserLoginRequest()
                 {
@@ -69,13 +67,14 @@ namespace TGS.Shared.Game.ApiClients.Skywind
                     Username = configuration.Username,
                     Password = configuration.Password
                 };
-                response = await ExecuteJsonRequestAsync<SkywindUserLoginRequest, SkywindUserLoginResponse>(HttpMethod.Post, configuration.ApiUrl, " /login", source, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
+                var response = await ExecuteJsonRequestAsync<SkywindUserLoginRequest, SkywindUserLoginResponse>(HttpMethod.Post, configuration.ApiUrl, " /login", source, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(response.AccessToken))
                 {
-                    await _redisCacheManager.SafeCacheAsync(_accessTokenCacheType, cacheKey, TimeSpan.FromMinutes(45), response).ConfigureAwait(false);
+                    await _redisCacheManager.SafeCacheAsync(_gameProvider, _accessTokenCacheType, TimeSpan.FromMinutes(45), response.AccessToken).ConfigureAwait(false);
+                    accessToken = response.AccessToken;
                 }
             }
-            return response;
+            return accessToken;
         }
     }
 }
