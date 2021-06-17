@@ -4,14 +4,16 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
+using TGS.Apis.BackendOffice.Resources;
 using TGS.Apis.FileService.Clients;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
     [Route("api/fs")]
     [ApiController]
-    public class FileController : ControllerBase
+    public class FileController : BaseContextController
     {
         /// <summary>
         ///     Gets the file.
@@ -38,12 +40,17 @@ namespace TGS.Apis.BackendOffice.Controllers
             string prefix,
             [FromForm(Name = "file")] IFormFile file)
         {
-            var category = Consts.UploadFile.Types.FirstOrDefault(name => name == prefix);
+            var type = Consts.UploadFile.Types.FirstOrDefault(name => name == prefix);
+
+            if (type.IsNotNullOrEmpty())
+            {
+                return CreateInvalidResponse<UploadResponse>(StationLetter.TypeNotFound);
+            }
 
             var contentType = file.ContentType;
             await using var fileStream = file.OpenReadStream();
 
-            var fileView = await fileServiceClient.UploadPublicFileAsync(category, file.FileName,
+            var fileView = await fileServiceClient.UploadPublicFileAsync(type, file.FileName,
                 MediaTypeHeaderValue.Parse(contentType), fileStream);
             return new() {Valid = true, Location = fileView.ExternalUrl};
         }
