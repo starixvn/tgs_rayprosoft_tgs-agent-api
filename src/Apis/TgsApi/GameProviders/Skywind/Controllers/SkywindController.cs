@@ -15,6 +15,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -40,6 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IGamePlayActions _gamePlayActions;
         public SkywindController(
             IGamePlayActions actions,
             IJsonSerializationProvider jsonSerializationProvider,
@@ -48,7 +50,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             ISkywindServices services,
             IGameProviderOperations gameProviderOperations,
             IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
-            IPlayerOperations playerOperations)
+            IPlayerOperations playerOperations,
+            IGamePlayActions gamePlayActions)
         {
 
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
@@ -59,6 +62,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _gamePlayActions = gamePlayActions ?? throw new ArgumentNullException(nameof(gamePlayActions));
         }
 
         [HttpPost("get_balance")]
@@ -166,36 +170,24 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         {
 
             var loginRecord = await _services.DecryptTokenAsync(request.Ticket);
-            var player = await _playerOperations.GetCachedPlayerAsync(loginRecord.PlayerCode);
-            var gameProviderId =
-                   await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind);
-            var getCurrencyCodeMapper = await _gameProviderCurrencyCodeMapper.GetMapByExternalCodeAsync(gameProviderId);
 
-            var currencyCode = getCurrencyCodeMapper.Where(x => x.Key == player.DefaultWalletCurrencyCode).First().Value;
-
-            if (loginRecord == null)
+            var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
             {
-                return new SkywindValidateTicketResponse()
-                {
-                    ErrorCode = (int)GameApiError.GameTokenExpired,
-                    ErrorMsg = GameApiError.GameTokenExpired.Description()
-                };
-            }
-            else
+                PlayerCode = loginRecord.PlayerCode,
+                GameProviderCode = Consts.GameProvider.Skywind,
+                PlatformType = loginRecord.PlatformType
+            }).ConfigureAwait(false);
+
+            return new SkywindValidateTicketResponse()
             {
-                return new SkywindValidateTicketResponse()
-                {
-                    ErrorCode = (int)GameApiError.Success,
-                    ErrorMsg = GameApiError.Success.Description(),
-                    CustId = player.PlayerCode,
-                    CustSessionId = request.Ticket,
-                    CurrencyCode = currencyCode,
-                    Country = "CN",
-                    TestCust = false
-                };
-            }
-
-
+                ErrorCode = (int)GameApiError.Success,
+                ErrorMsg = GameApiError.Success.Description(),
+                CustId = loginRecord.PlayerCode,
+                CustSessionId = request.Ticket,
+                CurrencyCode = validationResult.GameProviderCurrencyCode,
+                Country = "CN",
+                TestCust = false
+            };
         }
 
         [HttpPost("ping")]
