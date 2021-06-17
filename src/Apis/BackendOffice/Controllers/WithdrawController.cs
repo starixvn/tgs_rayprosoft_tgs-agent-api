@@ -62,7 +62,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("{brandId}")]
         public async Task<PagedResponse<WithdrawFormViewModel>> QueryWithdrawFormsAsync(
-            [FromServices] IQueryService<WithdrawFormQuery, WithdrawFormInfo> queryWithdrawFormsService,
+            [FromServices] IQueryService<WithdrawFormQuery, WithdrawFormModel> queryWithdrawFormsService,
             [FromServices] IGetService<WithdrawFormQuery, int> countWithdrawFormsService,
             Guid brandId,
             [FromQuery] WithdrawFormRequest request,
