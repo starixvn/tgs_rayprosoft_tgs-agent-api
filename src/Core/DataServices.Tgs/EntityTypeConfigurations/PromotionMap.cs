@@ -65,6 +65,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.SubSubject)
                 .HasMaxLength(2048);
 
+            builder.Property(c => c.Localization)
+                .HasColumnType(ColumnTypes.Jsonb);
+
             builder.HasOne(p => p.Brand)
                 .WithMany()
                 .HasForeignKey(p => p.BrandId)

@@ -71,7 +71,12 @@ namespace TGS.Services.Promotion.Handlers
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn,
                     CreatedByUsername = x.CreatedByUsername,
-                    UpdatedByUsername = x.UpdatedByUsername
+                    UpdatedByUsername = x.UpdatedByUsername,
+                    Subject = x.Subject,
+                    SubSubject = x.SubSubject,
+                    Content = x.Content,
+                    Terms = x.Terms,
+                    Images = x.PromotionImages.Select(i => new PromotionImageModel(i.Url, i.PlatformType)).ToArray()
                 }).CreatePagedResponseAsync(request);
         }
     }

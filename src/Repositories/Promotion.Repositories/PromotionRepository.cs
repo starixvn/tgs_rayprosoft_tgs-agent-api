@@ -131,7 +131,7 @@ namespace TGS.Promotion.Repositories
             {
                 Url = x.Url, PlatformType = x.PlatformType, PromotionId = promotion.Id
             }).ToHashSet();
-            promotion.Localization = ToJsonString(request.Localization);
+            promotion.Localization = request.Localization != null ? ToJsonString(request.Localization) : null;
 
             await UpdateEntityAsync(promotion);
             await tran.CommitAsync();

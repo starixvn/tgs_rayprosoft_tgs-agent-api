@@ -9,6 +9,7 @@ namespace Infrastructures.UnitTests
     {
         [TestCase("https://test/com/pic_trulli.jpg")]
         [TestCase(@"<img src=""https://test/com/pic_trulli.jpg"" alt=""Italian Trulli"">")]
+        [TestCase("<img src=\"https://test/com/pic_trulli.jpg\" alt=\"Italian Trulli\">")]
         public void Can_Get_Image_NameTests(string url)
         {
             var imageName = url.GetMatchStrings(Consts.UploadFile.ImagePattern);

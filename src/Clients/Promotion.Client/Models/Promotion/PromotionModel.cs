@@ -26,5 +26,11 @@ namespace TGS.Clients.Promotion.Client.Models.Promotion
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }
+        public string Subject { get; set; }
+        public string SubSubject { get; set; }
+        public string Content { get; set; }
+        public string Terms { get; set; }
+        public string Localization { get; set; }
+        public PromotionImageModel[] Images { get; set; }
     }
 }

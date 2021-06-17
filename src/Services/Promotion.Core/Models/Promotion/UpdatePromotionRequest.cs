@@ -42,8 +42,6 @@ namespace TGS.Services.Promotion.Models.Promotion
         public string SubSubject { get; set; }
         public string Content { get; set; }
         public string Terms { get; set; }
-        public PromotionImage[] Images { get; set; }
+        public PromotionImageModel[] Images { get; set; }
     }
-
-    public record PromotionImage(string Url, PlatformType PlatformType);
 }
