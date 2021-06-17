@@ -51,7 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
 
 
             var value = await context.Request.ReadAsStringAsync();
-            var keyValuePairs = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(_jsonSerializationProvider.SerializeToString(JsonDocument.Parse(value)));
+            var keyValuePairs = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(_jsonSerializationProvider.SerializeToString((JsonDocument.Parse(value))));
 
             if (keyValuePairs["merch_id"].ToString().IgnoreCaseNotEquals(configuration.MerchId) || keyValuePairs["merch_pwd"].ToString().IgnoreCaseNotEquals(configuration.MerchPwd))
             {
@@ -69,6 +69,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
                 context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
                 context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
                 context.Items.Add(Consts.ContextItems.PlatformType, platformType);
+            }
+            else
+            {
+                var playerCode = keyValuePairs["cust_id"].ToString();
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+                context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
             }
             await next(context);
         }
