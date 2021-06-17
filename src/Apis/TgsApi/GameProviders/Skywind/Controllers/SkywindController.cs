@@ -191,11 +191,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         }
 
         [HttpPost("ping")]
-        public Task<SkywindSingleWalletResponse> Ping() => Task.FromResult(new SkywindSingleWalletResponse()
+        public SkywindSingleWalletResponse Ping() => new SkywindSingleWalletResponse()
         {
             ErrorCode = (int)GameApiError.Success,
             ErrorMsg = GameApiError.Success.Description(),
-        });
+        };
 
     }
 }
