@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -7,6 +8,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Resources;
 using TGS.Apis.FileService.Clients;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -42,15 +44,19 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             var type = Consts.UploadFile.Types.FirstOrDefault(name => name == prefix);
 
-            if (type.IsNotNullOrEmpty())
+            if (type.IsNullOrEmpty())
             {
                 return CreateInvalidResponse<UploadResponse>(StationLetter.TypeNotFound);
             }
 
             var contentType = file.ContentType;
             await using var fileStream = file.OpenReadStream();
+            var randomFileName =
+                $"{StringGenerator.GenerateAlphanumericString(32)}{Path.GetExtension(file.FileName)}";
 
-            var fileView = await fileServiceClient.UploadPublicFileAsync(type, file.FileName,
+            var path = $"/{type}/{randomFileName}";
+
+            var fileView = await fileServiceClient.UploadFileAsync(path,
                 MediaTypeHeaderValue.Parse(contentType), fileStream);
             return new() {Valid = true, Location = fileView.ExternalUrl};
         }

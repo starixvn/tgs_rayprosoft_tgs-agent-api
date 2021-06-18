@@ -71,33 +71,6 @@ namespace TGS.Apis.FileService.Clients
             return view;
         }
 
-        public async ValueTask<FileView> UploadPublicFileAsync(string prefix, string fileName,
-            MediaTypeHeaderValue contentType,
-            Stream fileStream)
-        {
-            using var uploadContent = new MultipartFormDataContent();
-
-            using var fileContent = new StreamContent(fileStream);
-
-            fileContent.Headers.ContentType = contentType;
-
-            uploadContent.Add(fileContent, "file", fileName);
-
-            var response = await _httpClient
-                .PostAsync($"/fs/file/upload/{prefix}", uploadContent)
-                .ConfigureAwait(false);
-
-            response.EnsureSuccessStatusCode();
-
-            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-            var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
-                json,
-                new() {PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
-
-            return view;
-        }
-
         public async Task UpdateStationLetterFileAsync(string uploadType, string id, UpdateFilesRequest request)
         {
             var httpContent = new StringContent(_jsonSerializationProvider.SerializeToString(request), Encoding.UTF8,

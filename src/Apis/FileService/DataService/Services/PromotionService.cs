@@ -9,25 +9,25 @@ namespace TGS.Apis.FileService.DataService.Services
 {
     public sealed class PromotionService : IPromotionService
     {
-        private readonly IMongoContext<PromotionFile> _stationLetterRepository;
+        private readonly IMongoContext<PromotionFile> _promotionRepository;
 
         public PromotionService(
-            IMongoContext<PromotionFile> stationLetterRepository)
+            IMongoContext<PromotionFile> promotionRepository)
         {
-            _stationLetterRepository = stationLetterRepository ??
-                throw new ArgumentNullException(nameof(stationLetterRepository));
+            _promotionRepository = promotionRepository ??
+                throw new ArgumentNullException(nameof(promotionRepository));
         }
 
         public async Task AddPromotionFileAsync(string id, string[] fileNames)
         {
             var filter = Builders<PromotionFile>.Filter.Eq(x => x.PromotionId, id);
-            var stationLetterFile = await _stationLetterRepository.GetByFilterAsync(filter);
+            var stationLetterFile = await _promotionRepository.GetByFilterAsync(filter);
             if (stationLetterFile != null)
             {
                 stationLetterFile.Files = fileNames;
                 stationLetterFile.UpdatedOn = DateTimeOffset.Now;
 
-                await _stationLetterRepository.UpdateAsync(stationLetterFile);
+                await _promotionRepository.UpdateAsync(stationLetterFile);
             }
             else
             {
@@ -40,7 +40,7 @@ namespace TGS.Apis.FileService.DataService.Services
                     UpdatedOn = DateTimeOffset.Now
                 };
 
-                await _stationLetterRepository.InsertAsync(stationLetterFile);
+                await _promotionRepository.InsertAsync(stationLetterFile);
             }
         }
     }

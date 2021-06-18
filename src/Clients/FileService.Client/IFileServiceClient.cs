@@ -8,9 +8,6 @@ namespace TGS.Apis.FileService.Clients
     {
         ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType, Stream fileStream);
 
-        ValueTask<FileView> UploadPublicFileAsync(string prefix, string fileName, MediaTypeHeaderValue contentType,
-            Stream fileStream);
-
         ValueTask<FileView> FindFileByObjectIdAsync(string objectId);
 
         ValueTask<Stream> OpenFileReaderAsync(string path);

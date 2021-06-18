@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.FileService.Controllers.Messages;
 using TGS.Apis.FileService.DataService.Services;
@@ -23,34 +22,22 @@ namespace TGS.Apis.FileService.Controllers
             _promotionService = promotionService;
         }
 
-        [HttpPost("upload/{prefix}")]
-        public async Task<FileViewModel> UploadFileAsync(string prefix, [FromForm(Name = "file")] IFormFile file)
+        [HttpPut("{relationType}/{id}")]
+        public async Task<IActionResult> UpdateRelationTypeFileAsync(string relationType, string id,
+            [FromBody] UpdateFilesRequest request)
         {
-            var meta = await _uploadService.UploadFileS3Async(prefix, file);
-            return new()
+            switch (relationType)
             {
-                Id = meta.Id,
-                FileName = meta.FileName,
-                ContentType = meta.ContentType,
-                FileLength = meta.FileLength,
-                CreatedOn = meta.CreatedOn,
-                ExternalUrl = meta.ExternalUrl
-            };
-        }
+                case Consts.UploadFile.Promotion:
+                    await _promotionService.AddPromotionFileAsync(id, request.FileNames);
+                    await _uploadService.CleanFilesAsync(Consts.UploadFile.Promotion, request.FileNames);
+                    break;
+                case Consts.UploadFile.StationLetter:
+                    await _stationLetterService.AddStationLetterFileAsync(id, request.FileNames);
+                    await _uploadService.CleanFilesAsync(Consts.UploadFile.StationLetter, request.FileNames);
+                    break;
+            }
 
-        [HttpPut("stationLetter/{id}")]
-        public async Task<IActionResult> UpdateStationLetterFileAsync(string id, [FromBody] UpdateFilesRequest request)
-        {
-            await _stationLetterService.AddStationLetterFileAsync(id, request.FileNames);
-            await _uploadService.CleanFilesAsync(Consts.UploadFile.StationLetter);
-            return new OkResult();
-        }
-
-        [HttpPut("promotion/{id}")]
-        public async Task<IActionResult> UpdatePromotionFileAsync(string id, [FromBody] UpdateFilesRequest request)
-        {
-            await _promotionService.AddPromotionFileAsync(id, request.FileNames);
-            await _uploadService.CleanFilesAsync(Consts.UploadFile.Promotion);
             return new OkResult();
         }
 

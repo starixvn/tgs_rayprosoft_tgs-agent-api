@@ -3,24 +3,18 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Apis.FileService.DataService.Model;
 using TGS.Core.Infrastructures.Utility;
 using TGS.FileService;
-using TGS.FileService.Repositories;
 
 namespace TGS.Apis.FileService.DataService.Services
 {
     public sealed class UploadService : IUploadService
     {
         private readonly IFileManager _fileManager;
-        private readonly IMongoContext<StationLetterFile> _stationLetterRepository;
 
         public UploadService(
-            IMongoContext<StationLetterFile> stationLetterRepository,
             IFileManager fileManager)
         {
-            _stationLetterRepository = stationLetterRepository ??
-                throw new ArgumentNullException(nameof(stationLetterRepository));
             _fileManager = fileManager ?? throw new ArgumentNullException(nameof(fileManager));
         }
 
@@ -40,14 +34,10 @@ namespace TGS.Apis.FileService.DataService.Services
                 .Select(meta => meta.FileName)
                 .ToArrayAsync();
 
-        public async Task CleanFilesAsync(string prefix)
+        public async Task CleanFilesAsync(string prefix, string[] names)
         {
-            var stationLetterFileNames =
-                _stationLetterRepository.GetQueries()
-                    .SelectMany(l => l.Files);
-
             var files = await _fileManager.FindExpiredFilesAsync($"/{prefix}/", DateTimeOffset.Now.AddHours(-24))
-                .Where(meta => !stationLetterFileNames.Contains(meta.FileName))
+                .Where(meta => !names.Contains(meta.FileName))
                 .ToArrayAsync()
                 .ConfigureAwait(false);
 

@@ -9,6 +9,6 @@ namespace TGS.Apis.FileService.DataService.Services
         Task<FileMeta> UploadFileS3Async(string prefix, IFormFile formFile);
 
         ValueTask<string[]> GetObjectsAsync(string prefix = null);
-        Task CleanFilesAsync(string prefix);
+        Task CleanFilesAsync(string prefix, string[] names);
     }
 }
