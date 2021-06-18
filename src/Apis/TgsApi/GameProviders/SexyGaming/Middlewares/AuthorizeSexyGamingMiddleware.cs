@@ -4,15 +4,18 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SexyGaming.Common;
+using TGS.Shared.Game.Models.SexyGaming.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
 {
@@ -24,13 +27,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ISexyGamingServices _services;
         public AuthorizeSexyGamingMiddleware(
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
             ITokenProvider tokenProvider,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IJsonSerializationProvider jsonSerializationProvider,
+            ISexyGamingServices services)
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -38,6 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
@@ -78,32 +84,75 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
             if (data.Action.IgnoreCaseEquals("getBalance") || data.Action.IgnoreCaseEquals("bet") || data.Action.IgnoreCaseEquals("cancelBet"))
             {
                 var extension1 = form.GetValue<string>(SexyGamingConsts.Parameters.Extension1);
-                var extensionDir = JsonSerializer.Deserialize<Dictionary<string, string>>(extension1);
-                var loginRecord = await DecryptTokenAsync(extensionDir["token"]);
+                var playerInfo = default(SexyGamingGetPlayerInfo);
+                if (extension1 != null)
+                {
+                    var extensionDir = JsonSerializer.Deserialize<Dictionary<string, string>>(extension1);
+                    playerInfo = await CheckingTokenAsync(gameProviderId, extensionDir["token"]).ConfigureAwait(false);
+                }
+                else
+                {
+                    var message = form.GetValue<string>(SexyGamingConsts.Parameters.Message);
+                    var jsonDocument = JsonDocument.Parse(message);
+                    JsonElement jsonElement = jsonDocument.RootElement;
+                    if (data.Action.IgnoreCaseEquals("getBalance"))
+                    {
+                        var userIds = _jsonSerializationProvider.DeserializeFromString<SexyGamingUserId>(_jsonSerializationProvider.SerializeToString(jsonDocument));
+                        playerInfo = await CheckingUserIdAsync(gameProviderId, userIds.UserId);
+                    }
+                    else
+                    {
+                        var userIds = _jsonSerializationProvider.DeserializeFromString<SexyGamingSingleWalletTxnsRequest<SexyGamingUserId>>(_jsonSerializationProvider.SerializeToString(jsonDocument));
+                        var userIdsGroup = userIds.Transaction.GroupBy(x => x.UserId).Select(x => x.Key).ToArray();
+                        if (userIdsGroup.Count() == 1)
+                        {
+                            playerInfo = await CheckingUserIdAsync(gameProviderId, userIdsGroup.First());
+                        }
+                        else
+                        {
+                            throw new MissingTokenException("empty token");
+                        }
 
-                var playerCode = loginRecord.PlayerCode;
-                var platformType = loginRecord.PlatformType;
-                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+                    }
 
+                    context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, playerInfo.GameProviderConfigurationId);
+                    context.Items.Add(Consts.ContextItems.PlayerCode, playerInfo.PlayerCode);
+                    context.Items.Add(Consts.ContextItems.PlatformType, playerInfo.PlatformType);
 
-                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
-                context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
-                context.Items.Add(Consts.ContextItems.PlatformType, platformType);
-
+                }
             }
             await next(context);
         }
 
-        private async Task<CachedPlayerLoginRecord> DecryptTokenAsync(string token)
-        {
-            if (token.IsNullOrEmpty())
-            {
-                throw new MissingTokenException("empty token");
-            }
 
-            var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
-            return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+        private async Task<SexyGamingGetPlayerInfo> CheckingTokenAsync(Guid gameProviderId, string token)
+        {
+            var loginRecord = await _services.DecryptTokenAsync(token);
+
+            var playerCode = loginRecord.PlayerCode;
+            var platformType = loginRecord.PlatformType;
+            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
+            return new SexyGamingGetPlayerInfo()
+            {
+                GameProviderConfigurationId = bgpc.GameProviderConfigurationId,
+                PlayerCode = playerCode,
+                PlatformType = platformType
+            };
+        }
+
+        private async Task<SexyGamingGetPlayerInfo> CheckingUserIdAsync(Guid gameProviderId, string userId)
+        {
+            var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(userId);
+            var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
+            return new SexyGamingGetPlayerInfo()
+            {
+                GameProviderConfigurationId = bgpc.GameProviderConfigurationId,
+                PlayerCode = userId,
+                PlatformType = PlatformType.Desktop
+            };
         }
     }
 }
