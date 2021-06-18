@@ -278,12 +278,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
         }
 
         [HttpPost("ping")]
-        public async Task<JsonDocument> PingAsync(JsonDocument request) => JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
+        public Task<JsonDocument> PingAsync(JsonDocument request)
         {
-            Status = ((int)GameApiError.Success).ToString("d4"),
-            Desc = GameApiError.Success.Description(),
-        }));
-
+            return Task.FromResult(JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingBaseResponse()
+            {
+                Status = ((int)GameApiError.Success).ToString("d4"),
+                Desc = GameApiError.Success.Description(),
+            })));
+        }
     }
 }
 
