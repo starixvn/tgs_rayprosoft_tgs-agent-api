@@ -20,7 +20,7 @@ using TGS.Shared.Game.Models.Skywind.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
 {
-    [Route("api/sw")]
+    [Route("sw/api")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]

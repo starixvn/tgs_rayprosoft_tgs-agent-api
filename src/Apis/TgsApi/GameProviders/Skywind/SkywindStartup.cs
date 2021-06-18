@@ -44,7 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            const string Route = "/api/sw";
+            const string Route = "/sw/api";
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
