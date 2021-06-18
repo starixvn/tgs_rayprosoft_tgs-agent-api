@@ -265,15 +265,18 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("ping")]
-        public async Task<BigGamingResponse> PingAsync(
-            BigGamingRequest baseRequest) =>
-            new()
+        public Task<BigGamingResponse> PingAsync(
+            BigGamingRequest baseRequest)
+        {
+            return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
-                Result = JsonDocument.Parse(
-                    JsonSerializer.Serialize($"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}")),
+                Result = JsonDocument.Parse(JsonSerializer.Serialize($"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}")),
                 Error = null,
                 Jsonrpc = baseRequest.Jsonrpc
-            };
+            }));
+        }
+
+
     }
 }
