@@ -21,17 +21,17 @@ namespace TGS.Apis.FileService.DataService.Services
         public async Task AddPromotionFileAsync(string id, string[] fileNames)
         {
             var filter = Builders<PromotionFile>.Filter.Eq(x => x.PromotionId, id);
-            var stationLetterFile = await _promotionRepository.GetByFilterAsync(filter);
-            if (stationLetterFile != null)
+            var promotionFile = await _promotionRepository.GetByFilterAsync(filter);
+            if (promotionFile != null)
             {
-                stationLetterFile.Files = fileNames;
-                stationLetterFile.UpdatedOn = DateTimeOffset.Now;
+                promotionFile.Files = fileNames;
+                promotionFile.UpdatedOn = DateTimeOffset.Now;
 
-                await _promotionRepository.UpdateAsync(stationLetterFile);
+                await _promotionRepository.UpdateAsync(promotionFile);
             }
             else
             {
-                stationLetterFile = new()
+                promotionFile = new()
                 {
                     Id = ObjectId.GenerateNewId().ToString(),
                     PromotionId = id,
@@ -40,7 +40,7 @@ namespace TGS.Apis.FileService.DataService.Services
                     UpdatedOn = DateTimeOffset.Now
                 };
 
-                await _promotionRepository.InsertAsync(stationLetterFile);
+                await _promotionRepository.InsertAsync(promotionFile);
             }
         }
     }
