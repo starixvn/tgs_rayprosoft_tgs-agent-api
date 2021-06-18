@@ -114,12 +114,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
                         }
 
                     }
-
-                    context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, playerInfo.GameProviderConfigurationId);
-                    context.Items.Add(Consts.ContextItems.PlayerCode, playerInfo.PlayerCode);
-                    context.Items.Add(Consts.ContextItems.PlatformType, playerInfo.PlatformType);
-
                 }
+                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, playerInfo.GameProviderConfigurationId);
+                context.Items.Add(Consts.ContextItems.PlayerCode, playerInfo.PlayerCode);
+                context.Items.Add(Consts.ContextItems.PlatformType, playerInfo.PlatformType);
             }
             await next(context);
         }
