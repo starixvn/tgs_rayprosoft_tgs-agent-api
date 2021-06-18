@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using TGS.Paging;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.StationLetters;
 using TGS.Services.Operator.StationLetters;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.StationLetters
 {
@@ -14,10 +13,12 @@ namespace TGS.Services.Operator.Services.StationLetters
 
         public GetStationLettersQueryService(IStationLetterRepository stationLetterRepository)
         {
-            _stationLetterRepository = stationLetterRepository ?? throw new ArgumentNullException(nameof(stationLetterRepository));
+            _stationLetterRepository = stationLetterRepository ??
+                throw new ArgumentNullException(nameof(stationLetterRepository));
         }
 
-        public IAsyncEnumerable<StationLetter> QueryAsync(GetStationLettersQuery query, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<StationLetter> QueryAsync(GetStationLettersQuery query,
+            CancellationToken cancellationToken = default)
         {
             if (query.Paging.ShowAll)
                 return _stationLetterRepository.QueryStationLettersAsync(query.PlayerCode);

@@ -4,16 +4,15 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
+using Tgs.Payment;
 using TGS.Services.Operator.BrandPayment;
-using TGS.Services.Operator.Services.Deposit;
+using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Withdraw;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.BrandPayments;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -34,7 +33,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var brandId = HttpContext.Items.GetBrandId();
                 var playerData = HttpContext.Items.GetPlayerTokenData();
 
-                var checkPasswordCommand = new CheckWithdrawPayPasswordCommand(playerData.PlayerCode, request.PayPassword);
+                var checkPasswordCommand =
+                    new CheckWithdrawPayPasswordCommand(playerData.PlayerCode, request.PayPassword);
                 await checkPasswordService
                     .ExecuteAsync(checkPasswordCommand)
                     .ConfigureAwait(false);
@@ -63,14 +63,15 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
             [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
-            [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+            [FromServices]
+            IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
             [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
             var paymentMethods = await getAllPaymentMethodService
-                .GetAsync(new AllPaymentMethodsQuery())
+                .GetAsync(new())
                 .ConfigureAwait(false);
 
             var query = new BrandPaymentsQuery(brandId, playerTokenData.PlayerCode);
@@ -95,13 +96,13 @@ namespace TGS.Apis.OperatorApi.Controllers
 
                 var paymentMethod = paymentMethods[bp.MethodId];
 
-                yield return new BrandPaymentResponse
+                yield return new()
                 {
                     Id = bp.Id,
                     ChannelId = bp.ChannelId,
                     ChannelName = bp.ChannelName,
                     ChannelCode = bp.ChannelCode,
-                    TransferLimit = new Models.ValueRange<decimal>
+                    TransferLimit = new()
                     {
                         From = bp.TransferLimit.From,
                         To = bp.TransferLimit.To
