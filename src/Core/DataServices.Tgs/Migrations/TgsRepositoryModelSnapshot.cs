@@ -3906,6 +3906,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
+                    b.Property<string>("Content")
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
                     b.Property<string>("CreatedByUsername")
                         .HasColumnType("text")
                         .HasColumnName("created_by_username");
@@ -3921,6 +3925,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<short?>("GameType")
                         .HasColumnType("smallint")
                         .HasColumnName("game_type");
+
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3945,6 +3953,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
                         .HasColumnName("status");
+
+                    b.Property<string>("SubSubject")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("sub_subject");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("subject");
+
+                    b.Property<string>("Terms")
+                        .HasColumnType("text")
+                        .HasColumnName("terms");
 
                     b.Property<DateTimeOffset>("To")
                         .HasColumnType("timestamp with time zone")
@@ -4078,6 +4100,36 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_promotion_game_provider_game_provider_id");
 
                     b.ToTable("promotion_game_providers");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("PlatformType")
+                        .HasColumnType("integer")
+                        .HasColumnName("platform_type");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("url");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_images");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_promotion_image_promotion_id");
+
+                    b.ToTable("promotion_images");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionParticipant", b =>
@@ -6293,6 +6345,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Promotion");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionImage", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
+                        .WithMany("PromotionImages")
+                        .HasForeignKey("PromotionId")
+                        .HasConstraintName("fk_promotion_image_promotion_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Promotion");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionParticipant", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
@@ -6864,6 +6928,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Promotion", b =>
                 {
                     b.Navigation("PromotionGameProviders");
+
+                    b.Navigation("PromotionImages");
 
                     b.Navigation("PromotionParticipants");
 

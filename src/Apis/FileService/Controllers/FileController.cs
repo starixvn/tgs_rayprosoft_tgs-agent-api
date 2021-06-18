@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.FileService.Controllers.Messages;
 using TGS.Apis.FileService.DataService.Services;
+using TGS.Core.Models;
 
 namespace TGS.Apis.FileService.Controllers
 {
@@ -9,34 +10,43 @@ namespace TGS.Apis.FileService.Controllers
     [Route("fs/[controller]")]
     public class FileController : ControllerBase
     {
+        private readonly IPromotionService _promotionService;
+        private readonly IStationLetterService _stationLetterService;
         private readonly IUploadService _uploadService;
 
-        public FileController(IUploadService uploadService)
+        public FileController(IUploadService uploadService, IStationLetterService stationLetterService,
+            IPromotionService promotionService)
         {
             _uploadService = uploadService;
+            _stationLetterService = stationLetterService;
+            _promotionService = promotionService;
         }
 
-        [HttpPost("uploadFileS3")]
-        public async Task<UploadResponse> UploadFileS3Async([FromForm] UploadRequest request)
+        [HttpPut("{relationType}/{id}")]
+        public async Task<IActionResult> UpdateRelationTypeFileAsync(string relationType, string id,
+            [FromBody] UpdateFilesRequest request)
         {
-            var url = await _uploadService.UploadFileS3Async(request.File);
-            return new UploadResponse
+            switch (relationType)
             {
-                Valid = true,
-                Location = url
-            };
+                case Consts.UploadFile.Promotion:
+                    await _promotionService.AddPromotionFileAsync(id, request.FileNames);
+                    await _uploadService.CleanFilesAsync(Consts.UploadFile.Promotion, request.FileNames);
+                    break;
+                case Consts.UploadFile.StationLetter:
+                    await _stationLetterService.AddStationLetterFileAsync(id, request.FileNames);
+                    await _uploadService.CleanFilesAsync(Consts.UploadFile.StationLetter, request.FileNames);
+                    break;
+            }
+
+            return new OkResult();
         }
 
-        [HttpGet()]
+        [HttpGet]
         public async Task<GetFileNamesResponse> GetFileNamesFromS3Async()
         {
             var keys = await _uploadService.GetObjectsAsync();
 
-            return new GetFileNamesResponse
-            {
-                Valid = true,
-                Names = keys
-            };
+            return new() {Valid = true, Names = keys};
         }
     }
 }

@@ -3,16 +3,14 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Messages;
-using TGS.Services.Operator;
-using TGS.ServiceUtility;
 using TGS.Services.Operator.Services.StationLetters;
 using TGS.Services.Operator.StationLetters;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -21,7 +19,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class StationLetterController : ControllerBase
     {
         /// <summary>
-        /// Gets the station letters.
+        ///     Gets the station letters.
         /// </summary>
         /// <param name="getStationLetterService">The list station letter service.</param>
         /// <param name="countStationLetterService">The count station letter service.</param>
@@ -50,7 +48,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var query = new GetStationLettersQuery(playerTokenData.PlayerCode, paging);
 
-            return new PagingResponse<StationLetterResponse>
+            return new()
             {
                 TotalCount = await countStationLetterService
                     .GetAsync(query)
@@ -69,7 +67,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Sets the letter have read.
+        ///     Sets the letter have read.
         /// </summary>
         /// <param name="setHaveReadService">The set have read service.</param>
         /// <param name="stationLetterIds">The station letter ids.</param>
@@ -84,7 +82,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             foreach (var id in stationLetterIds)
                 await setHaveReadService
-                    .ExecuteAsync(new SetHaveReadCommand(playerTokenData.PlayerCode, id))
+                    .ExecuteAsync(new(playerTokenData.PlayerCode, id))
                     .ConfigureAwait(false);
         }
     }

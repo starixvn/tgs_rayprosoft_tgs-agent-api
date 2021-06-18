@@ -1,40 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Services.Promotion;
 using TGS.Services.Promotion.Models.Promotion;
+using PromotionImage = TGS.Core.DataServices.Tgs.Models.PromotionImage;
 using PromotionType = TGS.Core.Models.Settings.PromotionType;
 
 namespace TGS.Promotion.Repositories
 {
     public class PromotionRepository : BaseRepositoryOperations<ITgsRepository>, IPromotionRepository
     {
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _repository;
 
-        public PromotionRepository(ITgsRepository tgsRepository) : base(
+        public PromotionRepository(ITgsRepository tgsRepository,
+            IJsonSerializationProvider jsonSerializationProvider) : base(
             tgsRepository)
         {
             _repository = tgsRepository;
+            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         public Task ChangePromotionStatusAsync(Core.DataServices.Tgs.Models.Promotion promotion) =>
             UpdateEntityAsync(promotion);
 
-        public async Task CreatePromotionAsync(CreatePromotionRequest request,
+        public async ValueTask<Guid> CreatePromotionAsync(CreatePromotionRequest request,
             PromotionType promotionTypeModel)
         {
+            var promotionId = GuidExtensions.NewSequentialGuid();
             var promotion = new Core.DataServices.Tgs.Models.Promotion
             {
-                Id = Guid.NewGuid(),
+                Id = promotionId,
                 BrandId = request.BrandId,
                 Name = request.Name,
                 From = request.From,
@@ -60,6 +70,8 @@ namespace TGS.Promotion.Repositories
             promotion.PromotionVipLevels = GeneratePromotionVipLevels(promotion, request);
 
             await CreateEntityAsync(promotion);
+
+            return promotionId;
         }
 
         public Task<bool> ExistsAsync(
@@ -89,6 +101,7 @@ namespace TGS.Promotion.Repositories
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             await DeleteEntitiesAsync(promotion.PromotionGameProviders);
             await DeleteEntitiesAsync(promotion.PromotionVipLevels);
+            await DeleteEntitiesAsync(promotion.PromotionImages);
 
             promotion.Name = request.Name;
             promotion.From = request.From;
@@ -110,6 +123,15 @@ namespace TGS.Promotion.Repositories
                     .ToHashSet();
             promotion.UpdatedByUsername = request.EditorUsername;
             promotion.UpdatedOn = DateTimeOffset.Now;
+            promotion.Subject = request.Subject;
+            promotion.SubSubject = request.SubSubject;
+            promotion.Content = request.Content;
+            promotion.Terms = request.Terms;
+            promotion.PromotionImages = request.Images.Select(x => new PromotionImage
+            {
+                Url = x.Url, PlatformType = x.PlatformType, PromotionId = promotion.Id
+            }).ToHashSet();
+            promotion.Localization = request.Localization != null ? ToJsonString(request.Localization) : null;
 
             await UpdateEntityAsync(promotion);
             await tran.CommitAsync();
@@ -156,6 +178,16 @@ namespace TGS.Promotion.Repositories
                 .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).Select(x =>
                     new PromotionVipLevel {PromotionId = promotion.Id, VipLevelId = x.Id, Level = x.Level});
             return new(promotionVipLevels);
+        }
+
+        private static string ToJsonString(JsonDocument jsonDocument)
+        {
+            using var stream = new MemoryStream();
+            var writer = new Utf8JsonWriter(stream, new() {Indented = true});
+            jsonDocument.WriteTo(writer);
+            writer.Flush();
+
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
     }
 }

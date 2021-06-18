@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,14 +8,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Prometheus;
 using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.Apis.FileService.Extensions;
-using TGS.Apis.FileService.Services;
 using TGS.Core.Infrastructures.Aws;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
@@ -41,15 +38,15 @@ namespace TGS.Apis.FileService
                 _configuration.GetSection("DatabaseSettings"));
 
             services.AddSingleton<IDatabaseSettings>(provider =>
-               provider.GetRequiredService<IOptions<DatabaseSettings>>().Value);
-             
+                provider.GetRequiredService<IOptions<DatabaseSettings>>().Value);
+
             services.AddSingleton<IMongoClient>(sp =>
             {
                 var settings = sp.GetRequiredService<IDatabaseSettings>();
                 return new MongoClient(settings.ConnectionString);
             });
 
-            services.AddTransient(c => 
+            services.AddTransient(c =>
                 c.GetService<IMongoClient>()?.StartSession());
 
             services
@@ -74,29 +71,30 @@ namespace TGS.Apis.FileService
                 });
 
             services.AddTransient<IMongoContext<StationLetterFile>, MongoContext<StationLetterFile>>();
+            services.AddTransient<IMongoContext<PromotionFile>, MongoContext<PromotionFile>>();
             services.AddTransient<IUploadService, UploadService>();
-            services.AddTransient<INatsMessageHandler, NatsMessageHandler>();
+            services.AddTransient<IStationLetterService, StationLetterService>();
+            services.AddTransient<IPromotionService, PromotionService>();
 
             services.AddControllers()
                 .AddFluentValidation(c => { c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()); });
 
             services
                 .AddHealthChecks()
-                .AddNats()
                 .AddMongoDb(_configuration, "DatabaseSettings")
                 .AddAwsS3()
                 .ForwardToPrometheus();
 
-            services.AddHostedService<NatsMessageService>();
-
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() { Title = "TGS FileService API", Version = "v1" });
+                c.SwaggerDoc("v1", new() {Title = "TGS FileService API", Version = "v1"});
 
-                var xml = $"TGS.Apis.FileService.xml";
+                var xml = "TGS.Apis.FileService.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);
                 if (File.Exists(path))
+                {
                     c.IncludeXmlComments(path);
+                }
             });
         }
 

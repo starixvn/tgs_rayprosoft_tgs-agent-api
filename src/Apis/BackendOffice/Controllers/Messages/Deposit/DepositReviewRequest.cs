@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Apis.BackendOffice.Controllers.Messages
+namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 {
     public record DepositReviewRequest
     {
