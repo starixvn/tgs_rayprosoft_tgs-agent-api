@@ -23,7 +23,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
     [Route("api/sw")]
     [ApiController]
     [Consumes(MediaTypeNames.Application.Json)]
-    [Produces("application/x-www-form-urlencoded")]
+    [Produces(MediaTypeNames.Application.Json)]
     [AllowAnonymous]
     [FeatureGate(Consts.GameProvider.Skywind)]
     public sealed class SkywindController : ControllerBase
