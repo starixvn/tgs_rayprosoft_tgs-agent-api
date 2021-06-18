@@ -4,7 +4,6 @@ using TGS.Apis.FileService.Clients;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Models;
 
 namespace TGS.Apis.BackendOffice.DataService.Services
@@ -18,14 +17,12 @@ namespace TGS.Apis.BackendOffice.DataService.Services
     public class StationLetterService : IStationLetterService
     {
         private readonly IFileServiceClient _fileServiceClient;
-        private readonly INatsManager _natsManager;
         private readonly ITgsRepository _repository;
 
-        public StationLetterService(ITgsRepository repository, INatsManager natsManager,
+        public StationLetterService(ITgsRepository repository,
             IFileServiceClient fileServiceClient)
         {
             _repository = repository;
-            _natsManager = natsManager;
             _fileServiceClient = fileServiceClient;
         }
 
