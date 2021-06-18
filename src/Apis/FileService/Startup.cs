@@ -81,7 +81,6 @@ namespace TGS.Apis.FileService
 
             services
                 .AddHealthChecks()
-                .AddNats()
                 .AddMongoDb(_configuration, "DatabaseSettings")
                 .AddAwsS3()
                 .ForwardToPrometheus();
