@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Models.Promotion;
@@ -14,15 +15,18 @@ namespace TGS.Services.Promotion.Handlers
     public class GetPromotionsQueryHandler : Handler<GetPromotionsRequest,
         PagedResponse<PromotionModel>>
     {
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerService _playerService;
         private readonly IPromotionRepository _service;
 
         public GetPromotionsQueryHandler(IPromotionRepository service, IPlayerService playerService,
+            IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor accessor) :
             base(accessor)
         {
             _service = service;
             _playerService = playerService;
+            _jsonSerializationProvider = jsonSerializationProvider;
         }
 
         public override async Task<PagedResponse<PromotionModel>> Handle(
@@ -72,12 +76,11 @@ namespace TGS.Services.Promotion.Handlers
                     UpdatedOn = x.UpdatedOn,
                     CreatedByUsername = x.CreatedByUsername,
                     UpdatedByUsername = x.UpdatedByUsername,
-                    Subject = x.Subject,
                     SubSubject = x.SubSubject,
                     Content = x.Content,
                     Terms = x.Terms,
-                    Images = x.PromotionImages.Select(i => new PromotionImageModel(i.Url, i.PlatformType)).ToArray()
-                }).CreatePagedResponseAsync(request);
+                    Localization = x.Localization
+                }).CreatePagedResponseAsync(request).ConfigureAwait(true);
         }
     }
 }

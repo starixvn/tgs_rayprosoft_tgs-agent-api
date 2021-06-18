@@ -23,5 +23,8 @@ namespace TGS.Clients.Promotion.Client.Models.Promotion
         public string EditorUsername { get; set; }
         public bool AutoSentPlayerBonus { get; set; }
         public JsonDocument Localization { get; set; }
+        public string SubSubject { get; set; }
+        public string Content { get; set; }
+        public string Terms { get; set; }
     }
 }

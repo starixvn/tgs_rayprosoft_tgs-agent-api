@@ -27,7 +27,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }
-        public string Subject { get; set; }
         public string SubSubject { get; set; }
         public string Content { get; set; }
         public string Terms { get; set; }
@@ -35,6 +34,5 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<PromotionGameProvider> PromotionGameProviders { get; set; }
         public virtual ICollection<PromotionVipLevel> PromotionVipLevels { get; set; }
         public virtual ICollection<PromotionParticipant> PromotionParticipants { get; set; }
-        public virtual ICollection<PromotionImage> PromotionImages { get; set; }
     }
 }
