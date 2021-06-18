@@ -34,5 +34,8 @@ namespace TGS.Apis.AgentApi.Models
 
         [JsonPropertyName("brandUrl")]
         public string BrandUrl { get; init; }
+
+        [JsonPropertyName("issetpaypassword")]
+        public bool IsSetPayPassword { get; init; }
     }
 }

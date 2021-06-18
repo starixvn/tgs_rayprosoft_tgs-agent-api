@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations.Queries;
@@ -54,7 +55,8 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
                     QQ = agent.QQ,
                     Wechat = agent.Wechat,
                     InvitationCode = agent.InvitationCode,
-                    BrandUrl = agent.Brand.Domains.FirstOrDefault()?.Url
+                    BrandUrl = agent.Brand.Domains.FirstOrDefault()?.Url,
+                    IsSetPayPassword = agent.WithdrawPassword.Length > 0
                 }
             };
         }
