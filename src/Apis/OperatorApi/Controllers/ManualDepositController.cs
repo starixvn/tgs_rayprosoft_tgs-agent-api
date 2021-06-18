@@ -4,14 +4,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using Tgs.Payment;
 using TGS.Payment.ManualDeposit;
+using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.BrandPayments;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -24,8 +24,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async Task<ManualDepositFormResponse> GetDepositFormAsync(
             [FromServices] IGetService<GetBankDepositFormQuery, DepositFormInfo> getBankDepositService,
-            [FromServices] IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>> getAllPaymentChannelService,
-            [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+            [FromServices]
+            IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>> getAllPaymentChannelService,
+            [FromServices]
+            IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] ManualDepositSerializer serializer,
             Guid id)
@@ -35,10 +37,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             var getBankDepositFormQuery = new GetBankDepositFormQuery(playerTokenData.PlayerCode, id);
 
             var paymentChannels = await getAllPaymentChannelService
-                .GetAsync(new AllPaymentChannelsQuery())
+                .GetAsync(new())
                 .ConfigureAwait(false);
             var paymentMethods = await getAllPaymentMethodService
-                .GetAsync(new AllPaymentMethodsQuery())
+                .GetAsync(new())
                 .ConfigureAwait(false);
 
             var form = await getBankDepositService
@@ -46,12 +48,12 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
             var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(form.BrandPaymentId))
+                .GetAsync(new(form.BrandPaymentId))
                 .ConfigureAwait(false);
 
             var bankInfo = serializer.Deserialize<ManualDepositApplyInfo>(form.ApplyInfo);
 
-            return new ManualDepositFormResponse
+            return new()
             {
                 MethodName = paymentMethods[brandPayment.MethodId].Name,
                 ChannelName = paymentChannels[brandPayment.ChannelId].Name,
@@ -66,14 +68,14 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public async ValueTask SubmitDepositFormAsync(
-            [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBandDepositFormCommandService,
+            [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBankDepositFormCommandService,
             Guid id,
             [FromForm(Name = "file")] IFormFile manualReceipt)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
             var contentType = manualReceipt.ContentType;
-            using var fileStream = manualReceipt.OpenReadStream();
+            await using var fileStream = manualReceipt.OpenReadStream();
 
             var command = new SubmitBankDepositFormCommand(
                 playerTokenData.PlayerCode,
@@ -81,7 +83,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 contentType,
                 fileStream);
 
-            await submitBandDepositFormCommandService.ExecuteAsync(command);
+            await submitBankDepositFormCommandService.ExecuteAsync(command);
         }
 
         [HttpPut]
@@ -97,7 +99,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandId = HttpContext.Items.GetBrandId();
 
             var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .GetAsync(new(request.BrandPaymentId))
                 .ConfigureAwait(false);
 
             var brandPaymentBankInfo = JsonDocument.Parse(brandPayment.ExtendedData);
@@ -111,9 +113,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.PromotionId,
                 _ => serializer.Serialize(
                     new ManualDepositApplyInfo(
-                            request.BankAccount,
-                            brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
-                            brandPaymentBankInfo.RootElement.GetProperty("name").GetString())));
+                        request.BankAccount,
+                        brandPaymentBankInfo.RootElement.GetProperty("bankAccount").GetString(),
+                        brandPaymentBankInfo.RootElement.GetProperty("name").GetString())));
 
             await createDepositFormService
                 .ExecuteAsync(command)
