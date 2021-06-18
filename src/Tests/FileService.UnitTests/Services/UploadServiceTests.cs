@@ -3,11 +3,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using TGS.Apis.FileService.DataService;
-using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.FileService;
-using TGS.FileService.Repositories;
 using TGS.Tests.FileService.UnitTests.Controllers;
 
 namespace TGS.Tests.FileService.UnitTests.Services
@@ -19,13 +16,13 @@ namespace TGS.Tests.FileService.UnitTests.Services
         {
             CreateFile();
 
-            var moqStationLetterRepository = new Mock<IMongoContext<StationLetterFile>>();
             var moqFileManager = new Mock<IFileManager>();
 
-            var sut = new UploadService(moqStationLetterRepository.Object, moqFileManager.Object);
+            var sut = new UploadService(moqFileManager.Object);
 
             var file = fileMock.Object;
             var expected = "https://aws/bucket/filepath";
+            const string prefix = "prefix";
 
             moqFileManager
                 .Setup(fake => fake.SaveAsync(
@@ -43,9 +40,9 @@ namespace TGS.Tests.FileService.UnitTests.Services
                     ExternalUrl = expected
                 }));
 
-            var url = await sut.UploadFileS3Async(file);
+            var fileMeta = await sut.UploadFileS3Async(prefix, file);
 
-            Assert.AreEqual(expected, url);
+            Assert.AreEqual(expected, fileMeta.ExternalUrl);
         }
     }
 }

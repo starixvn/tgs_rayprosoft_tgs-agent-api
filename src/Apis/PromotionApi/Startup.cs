@@ -83,6 +83,13 @@ namespace TGS.Apis.PromotionApi
                 })
                 .AddTgsPromotionRepositories();
 
+            services.AddFileServiceClient((sp, httpClient) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                httpClient.BaseAddress = new(config.GetValue<string>("File:FileServiceBaseUrl"));
+            });
+
             services
                 .AddHttpContextAccessor()
                 .AddRouting(options => options.LowercaseUrls = true);

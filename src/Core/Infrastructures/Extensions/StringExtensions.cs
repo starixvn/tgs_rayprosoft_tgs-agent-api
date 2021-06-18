@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TGS.Core.Infrastructures.Extensions
 {
@@ -87,7 +88,10 @@ namespace TGS.Core.Infrastructures.Extensions
                 {
                     var prev = prevChar.Value;
 
-                    if (char.IsLower(prev) && char.IsUpper(curr)) sb.Append(' ');
+                    if (char.IsLower(prev) && char.IsUpper(curr))
+                    {
+                        sb.Append(' ');
+                    }
                 }
 
                 sb.Append(curr);
@@ -154,5 +158,13 @@ namespace TGS.Core.Infrastructures.Extensions
 
         public static bool IgnoreCaseNotContains(this string str, string second) =>
             !str.IgnoreCaseContains(second);
+
+        public static string[] GetMatchStrings(this string str, string pattern)
+        {
+            var rgx = new Regex(pattern);
+
+            return rgx.Matches(str).Select(x =>
+                x.Value[(x.Value.LastIndexOf("/", StringComparison.Ordinal) + 1)..]).ToArray();
+        }
     }
 }

@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.FileService.Clients;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
@@ -12,16 +14,19 @@ namespace TGS.Services.Promotion.Handlers
 {
     public class UpdatePromotionHandler : Handler<UpdatePromotionRequest, MessageResponse>
     {
+        private readonly IFileServiceClient _fileServiceClient;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPromotionRepository _service;
         private readonly ISettingsService _settingsService;
 
         public UpdatePromotionHandler(IPromotionRepository service, ISettingsService settingsService,
-            IJsonSerializationProvider jsonSerializationProvider, IHttpContextAccessor accessor) : base(accessor)
+            IJsonSerializationProvider jsonSerializationProvider, IFileServiceClient fileServiceClient,
+            IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
             _settingsService = settingsService;
             _jsonSerializationProvider = jsonSerializationProvider;
+            _fileServiceClient = fileServiceClient;
         }
 
         public override async Task<MessageResponse> Handle(UpdatePromotionRequest request,
@@ -31,12 +36,12 @@ namespace TGS.Services.Promotion.Handlers
 
             if (promotion == null)
             {
-                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.NotFound);
+                return CreateInvalidResponse<MessageResponse>(Properties.Promotion.NotFound);
             }
 
             if (await _service.ExistsAsync(x => request.Id != x.Id && x.Name == request.Name))
             {
-                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.NameExisted);
+                return CreateInvalidResponse<MessageResponse>(Properties.Promotion.NameExisted);
             }
 
             var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
@@ -45,7 +50,7 @@ namespace TGS.Services.Promotion.Handlers
 
             if (promotionTypeGroups.SelectMany(x => x.Types).All(x => x.Name != request.PromotionType))
             {
-                return CreateInvalidResponse<MessageResponse>(TGS.Services.Promotion.Properties.Promotion.PromotionTypeNotFound);
+                return CreateInvalidResponse<MessageResponse>(Properties.Promotion.PromotionTypeNotFound);
             }
 
             var promotionType = promotionTypeGroups.SelectMany(x => x.Types)
@@ -53,7 +58,19 @@ namespace TGS.Services.Promotion.Handlers
 
             promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
 
+            var bannerImages = request.Images.SelectMany(x => x.Url.GetMatchStrings(Consts.UploadFile.ImagePattern))
+                .ToArray();
+            var contentImages = request.Content.GetMatchStrings(Consts.UploadFile.ImagePattern);
+            var images = bannerImages.Union(contentImages).ToArray();
+
             await _service.UpdatePromotionAsync(promotion, request);
+
+            if (images.Length > 0)
+            {
+                await _fileServiceClient.UpdateStationLetterFileAsync(Consts.UploadFile.Promotion,
+                    promotion.Id.ToString(),
+                    new(images));
+            }
 
             return CreateValidResponse<MessageResponse>();
         }
