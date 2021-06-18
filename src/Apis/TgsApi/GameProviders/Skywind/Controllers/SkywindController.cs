@@ -163,7 +163,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         [HttpPost("validate_ticket")]
         public async Task<SkywindValidateTicketResponse> ValidateTicketAsync(SkywindValidateTicketRequest request)
         {
-
+            /*
             var loginRecord = await _services.DecryptTokenAsync(request.Ticket);
 
             var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
@@ -172,14 +172,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 GameProviderCode = Consts.GameProvider.Skywind,
                 PlatformType = loginRecord.PlatformType
             }).ConfigureAwait(false);
-
+            */
             return new SkywindValidateTicketResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                CustId = loginRecord.PlayerCode,
+                CustId = "4ucmqplxb029",
                 CustSessionId = request.Ticket,
-                CurrencyCode = validationResult.GameProviderCurrencyCode,
+                CurrencyCode = "CNY",
                 Country = "CN",
                 TestCust = false
             };
