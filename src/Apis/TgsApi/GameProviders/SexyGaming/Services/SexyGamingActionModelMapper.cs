@@ -110,7 +110,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                     var settleCancel = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}_settle_cancel").ConfigureAwait(false);
                     if (settleCancel != null)
                     {
-                        externalTransactionId = $"{ order.PlatformTxId}_resettle ";
+                        externalTransactionId = $"{ order.PlatformTxId}_resettle";
                     }
                 }
                 batchTransactionData.Add(new BatchTransactionData()
@@ -150,11 +150,12 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         PlayerCode = order.UserId,
                         GameProviderConfigurationId = gameProviderConfigurationId,
                         ExternalGameId = order.GameCode,
-                        ExternalBetId = settle.ExternalRoundId.ToString(),
+                        ExternalBetId = settle.ExternalBetId.ToString(),
                         ExternalRoundId = settle.ExternalRoundId.ToString(),
                         ExternalTransactionId = $"{ settle.ExternalTransactionId}_cancel",
                         ExternalTransactionReferenceId = settle.ExternalTransactionId,
                         GameActionType = GameActionType.CancelTransaction,
+                        RoundClosed = false
                     });
                 }
             }
