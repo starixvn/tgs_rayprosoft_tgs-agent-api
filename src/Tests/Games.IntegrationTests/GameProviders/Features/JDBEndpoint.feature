@@ -63,8 +63,26 @@ Scenario: 02.e - Can't place desktop bet and settle if game is under maintenance
 	When I place bet of $10 for game "14023" and win $20
 	Then I will receive bet response of error "SystemIsMaintained"
 	
+@ChangeGameProviderStatus
+Scenario: 02.f - Can't place desktop bet and settle if game provider is under maintenance
+	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+	And player having balance of $100
+	And set game type as "Slot"
+	Given game provider has status set to "Maintenance"
+	When I place bet of $10 for game "14023" and win $20
+	Then I will receive bet response of error "SystemIsMaintained"
+	
+@ChangeGameProviderConfigurationStatus
+Scenario: 02.g - Can't place desktop bet and settle if game provider configuration is under maintenance
+	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+	And player having balance of $100
+	And set game type as "Slot"
+	Given game provider configuration has status set to "Maintenance"
+	When I place bet of $10 for game "14023" and win $20
+	Then I will receive bet response of error "SystemIsMaintained"
+	
 @ChangeBrandStatus
-Scenario: 02.f - Can't place desktop bet and settle if brand is under maintenance
+Scenario: 02.h - Can't place desktop bet and settle if brand is under maintenance
 	Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
 	And player having balance of $100
 	And set game type as "Slot"
@@ -72,24 +90,20 @@ Scenario: 02.f - Can't place desktop bet and settle if brand is under maintenanc
 	When I place bet of $10 for game "14023" and win $20
 	Then I will receive bet response of error "SystemIsMaintained"
 	
-Scenario: 02.g - Place desktop bet and settle with insufficient balance
+Scenario: 02.i - Place desktop bet and settle with insufficient balance
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 	And player having balance of $5
 	And set game type as "Slot"
 	When I place bet of $10 for game "14023" and win $20
 	Then I will receive bet response of error "BalanceNotEnough"
 	
-Scenario: 02.h - Place desktop bet and settle with duplicate transaction ID
+Scenario: 02.j - Place desktop bet and settle with duplicate transaction ID
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"
 	And player having balance of $100
 	And set game type as "Slot"
 	And I place bet of $10 for game "14023" and win $20
 	When  I resend the same bet
-	Then I will receive bet response of no error and balance of $110
-	And player wallet database record will be for $110
-	And game action will be recorded in the database of type "PlaceBet" for $-10
-	And game action will be recorded in the database of type "WinBet" for $20
-	And the round will be closed
+	Then I will receive bet response of error "DuplicateTransactions"
 	
 Scenario: 03.a - Void round
 	Given player "TP01cny" of brand "GPI" with "CNY" login via "Desktop"

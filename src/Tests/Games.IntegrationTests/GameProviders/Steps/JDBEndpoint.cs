@@ -2,7 +2,6 @@
 // ReSharper disable IdentifierTypo
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,8 +9,6 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Extensions;
 using TechTalk.SpecFlow;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -23,7 +20,6 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.JDB.Enums;
@@ -41,14 +37,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     {
         private const string GameProviderCode = Consts.GameProvider.JDB;
         private readonly ServiceProvider _serviceProvider;
-        private IHost _opApiHost;
-        private IHost _tgsApiHost;
 
         public JDBEndpoint(ScenarioContext context)
             : base(context)
         {
-            var currentDictionary = Directory.GetCurrentDirectory();
-
             var services = (IServiceCollection)new ServiceCollection();
 
 #if DEBUG
@@ -117,6 +109,14 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.ExternalGameId, externalGameId);
             return ChangeGameStatusAsync(_serviceProvider, GameProviderCode, externalGameId, gameStatus);
         }
+        
+        [Given(@"game provider has status set to ""(.*)""")]
+        public Task GivenGameProviderHasStatusSetToAsync(Status status) =>
+            ChangeGameProviderStatusAsync(_serviceProvider, GameProviderCode, status);
+        
+        [Given(@"game provider configuration has status set to ""(.*)""")]
+        public Task GivenGameProviderConfigurationHasStatusSetToAsync(Status status) =>
+            ChangeGameProviderConfigurationStatusAsync(_serviceProvider, GameProviderCode, status);
 
         [Given(@"brand has status set to ""(.*)""")]
         public Task GivenBrandHasStatusSetToAsync(Status status) =>
@@ -141,7 +141,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task WhenIRequestThePlayerBalanceAsync()
         {
             var playerCode = Get<string>(SR.PlayerCode);
-            var config = await GetConfigurationAsync();
 
             var client = _serviceProvider.GetRequiredService<IJDBApiClient>();
 
@@ -215,30 +214,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task ThenTheRoundWillBeClosedAsync() =>
             VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
         
-                
-        [Then(@"I will receive system is maintenance response and balance of \$(.*)")]
-
-        public void ThenIWillReceiveSystemIsMaintenanceResponseAndBaleanceOf(decimal expectedBalance)
-        {
-            var response = Get<BaseActionResponse>(SR.Response);
-
-            response.Should().NotBeNull();
-            response.Balance.Should().Be(expectedBalance);
-        }
-        
-        [Then(@"there are no records in database")]
-        public async Task ThenThereAreNoRecordsInDatabase()
-        {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-
-            var db = GetDb<ITgsRepository>(_serviceProvider);
-            var round = await (
-                from r in db.Rounds.AsQueryable()
-                where r.ExternalRoundId == externalRoundId
-                select r).AsNoTracking().FirstAsync();
-
-            round.Should().BeNull();
-        }
 
         [When("I resend the same bet")]
         public async Task WhenIResendTheSameBet()
@@ -293,11 +268,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             gameActions.Length.Should().Be(4);
         }
 
-
-        #region Private Classes
-
-        #endregion Private Classes
-
         #region After Scenario
 
         [After]
@@ -321,13 +291,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         #region Private Methods
 
-        private static string NewRoundId() =>
-            Guid.NewGuid().ToString();
-
-        private Task<JDBConfiguration> GetConfigurationAsync() =>
-            GetSettingAsync<JDBConfiguration>(_serviceProvider, SettingConsts.GameProviderConfigurations.JDB);
-
-        private async Task PlaceBetAndWinAsync(decimal amount, string externalGameId, decimal win, string externalRoundId = null)
+        private async Task PlaceBetAndWinAsync(decimal amount, string externalGameId, decimal win)
         {
             var playerCode = Get<string>(SR.PlayerCode);
 
