@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Clients.Promotion.Client.Models.Promotion
@@ -29,7 +30,7 @@ namespace TGS.Clients.Promotion.Client.Models.Promotion
         public string SubSubject { get; set; }
         public string Content { get; set; }
         public string Terms { get; set; }
-        public string Localization { get; set; }
+        public JsonDocument Localization { get; set; }
         public string DesktopBanner { get; set; }
         public string MobileBanner { get; set; }
     }
