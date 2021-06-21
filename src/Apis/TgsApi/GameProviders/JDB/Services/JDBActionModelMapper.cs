@@ -113,7 +113,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                     RoundClosed = true
                 }
             };
-
+            
             return GetBetData(request.UserId, null, data, transactions, null, false);
         }
 

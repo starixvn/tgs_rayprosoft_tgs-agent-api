@@ -268,6 +268,15 @@ namespace TGS.Tests.TestsCommon {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to JDBGameType.
+        /// </summary>
+        public static string JDBGameType {
+            get {
+                return ResourceManager.GetString("JDBGameType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to PlaceBetRequest.
         /// </summary>
         public static string PlaceBetRequest {
