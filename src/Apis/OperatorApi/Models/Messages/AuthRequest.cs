@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using MediatR;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record AuthRequest : IRequest<AuthResponse>
+    public record AuthRequest
     {
         [Required]
         [JsonPropertyName("client")]
-        public string ApiKey { get; init;}
+        public string ApiKey { get; init; }
 
         [Required]
         [JsonPropertyName("currency")]
