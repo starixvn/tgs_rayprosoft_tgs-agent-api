@@ -26,10 +26,10 @@ import { Trans, useTrans } from "../../i18n"
 import parseDate from "date-fns/fp/parseISO"
 import { CancelText } from "../../button/ActionButtons"
 import FormDialog from "../../form/FormDialog"
-import Input from "../../input/Input"
+import Input, { InputField } from "../../input/Input"
 import DateTimeInput from "../../date/DateTimeInput"
-import { useForm, useFormContext } from "react-hook-form"
-import Textarea from "../../textarea"
+import { useForm, useFormContext, useWatch } from "react-hook-form"
+import Textarea, { TextareaField } from "../../textarea"
 
 export const AddButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = Modal.useState()
@@ -80,6 +80,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     return (
         <FormDialog
             defaultValues={{
+                brandId,
                 subject: "",
                 from: null,
                 to: null,
@@ -96,7 +97,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
             placement="top"
             css={DialogCss}
         >
-            <EditBody isAdd={true} />
+            <EditBody />
         </FormDialog>
     )
 }
@@ -173,19 +174,12 @@ const ViewDialog = ({ record, dialog, ...props }) => {
                 </Box>
             }
         >
-            <VerifyBody readonly />
+            <VerifyBody readOnly />
         </FormDialog>
     )
 }
 
-const EditDialog = ({
-    brandId,
-    record,
-    onSubmitted,
-    dialog,
-    finalFocusRef,
-    ...props
-}) => {
+const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
     let { id } = record
     let [data, setSubmit] = useState()
     let { result, error, mutate, isLoading } = useEditAnnouncement(id, data)
@@ -199,7 +193,7 @@ const EditDialog = ({
         })
     }
 
-    const clearResult = () => {
+    const reset = () => {
         setSubmit(undefined)
     }
 
@@ -219,11 +213,10 @@ const EditDialog = ({
             isLoading={isLoading}
             result={result}
             error={error}
-            onCloseErrorAlert={clearResult}
+            onCloseErrorAlert={reset}
             onSubmitted={onSubmitted}
             title={title}
             dialog={dialog}
-            finalFocusRef={finalFocusRef}
             placement="top"
             css={DialogCss}
         >
@@ -232,19 +225,32 @@ const EditDialog = ({
     )
 }
 
-const EditBody = ({ readonly = false, isAdd = false } = {}) => {
-    const { getValues } = useFormContext()
-    let minDate = readonly ? undefined : getValues("from")
-    let maxDate = readonly ? undefined : getValues("to")
+const EditBody = ({ readOnly = false } = {}) => {
+    const { control, getValues } = useFormContext()
+    let brandId = getValues("brandId")
 
-    let required = !readonly
-    let textareaHeight = readonly ? "15vh" : "30vh"
+    let minDate = useWatch({
+        control,
+        name: "from"
+    })
+    let maxDate = useWatch({
+        control,
+        name: "to"
+    })
+
+    let required = !readOnly
+    let textareaHeight = readOnly ? "15vh" : "30vh"
     return (
         <FieldValues>
             <Label name="subject" required={required}>
                 <Trans zh="主题" en="Subject" />
             </Label>
-            <Input name="subject" required={required} disabled={readonly} />
+            <InputField
+                name="subject"
+                brandId={brandId}
+                required={required}
+                disabled={readOnly}
+            />
 
             <Label name="from" required={required}>
                 <Trans zh="开始时间" en="Start" />
@@ -254,7 +260,7 @@ const EditBody = ({ readonly = false, isAdd = false } = {}) => {
                     name="from"
                     maxDate={maxDate}
                     required={required}
-                    disabled={readonly}
+                    disabled={readOnly}
                 />
             </Box>
 
@@ -266,17 +272,18 @@ const EditBody = ({ readonly = false, isAdd = false } = {}) => {
                     name="to"
                     minDate={minDate}
                     required={required}
-                    disabled={readonly}
+                    disabled={readOnly}
                 />
             </Box>
 
             <Label name="content" required={required}>
                 <Trans zh="内容" en="Content" />
             </Label>
-            <Textarea
+            <TextareaField
                 name="content"
+                brandId={brandId}
                 required={required}
-                disabled={readonly}
+                disabled={readOnly}
                 height={textareaHeight}
                 css={css`
                     height: ${textareaHeight};
@@ -320,13 +327,7 @@ const DialogCss = css`
     min-width: 65vw;
 `
 
-const VerifyDialog = ({
-    record,
-    onSubmitted,
-    dialog,
-    finalFocusRef,
-    ...props
-}) => {
+const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
     let defaultValues = {
         ...record,
         from: parseDate(record.from),
@@ -395,10 +396,10 @@ const VerifyDialog = ({
     )
 }
 
-const VerifyBody = ({ readonly = false } = {}) => {
+const VerifyBody = ({ readOnly = false } = {}) => {
     return (
         <Stack spacing="major-2">
-            <EditBody readonly={true} />
+            <EditBody readOnly={true} />
             <Box
                 border="default"
                 height="1px"
@@ -410,15 +411,7 @@ const VerifyBody = ({ readonly = false } = {}) => {
                 <Label name="remarks">
                     <Trans zh="备注" en="Remarks" />
                 </Label>
-                <Textarea
-                    name="remarks"
-                    disabled={readonly}
-                    css={css`
-                        & textarea {
-                            resize: none;
-                        }
-                    `}
-                />
+                <Textarea name="remarks" disabled={readOnly} />
             </FieldValues>
         </Stack>
     )

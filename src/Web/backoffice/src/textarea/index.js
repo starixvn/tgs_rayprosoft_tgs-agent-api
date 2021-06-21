@@ -98,6 +98,8 @@ export const TextareaField = ({
         (showLocalizationAddonAfter && (
             <LocalizationDialogDisclosure
                 brandId={brandId}
+                readOnly={props?.readOnly}
+                disabled={props?.disabled}
                 localizationField={LocalizationTextareaField}
                 name={name}
             />
@@ -123,11 +125,15 @@ export const TextareaField = ({
     )
 }
 
-const LocalizationTextareaField = ({ code, ...props }) => {
+const LocalizationTextareaField = ({ code, readOnly, disabled, ...props }) => {
     return (
         <Set isFilled alignY="center">
             <Box>{code}</Box>
-            <TextareaField name={code} />
+            <TextareaField
+                name={code}
+                readOnly={readOnly}
+                disabled={disabled}
+            />
         </Set>
     )
 }

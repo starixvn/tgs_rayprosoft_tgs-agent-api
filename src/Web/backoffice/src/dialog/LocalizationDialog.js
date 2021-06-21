@@ -42,13 +42,16 @@ const toLocalizationFieldName = (code, name) =>
 export const LocalizationDialogDisclosure = ({
     brandId = "",
     localizationField = LocalizationInputField,
+    localizationFieldProps = {},
     name = "",
     readOnly,
     disabled,
     mode = LocalizationDialogMode.List,
     width,
     maxWidth,
-    height
+    height,
+    dialogProps = {},
+    ...props
 }) => {
     let { isLoading, data: brand, error } = useBrand(brandId)
     let codes =
@@ -73,6 +76,7 @@ export const LocalizationDialogDisclosure = ({
                 use={Button}
                 isLoading={isLoading}
                 disabled={isLoading || error}
+                flex="0"
                 {...dialog}
             >
                 <Icon icon={faLanguage} type="font-awesome" />
@@ -82,6 +86,7 @@ export const LocalizationDialogDisclosure = ({
                     readOnly={readOnly}
                     disabled={disabled}
                     localizationField={localizationField}
+                    localizationFieldProps={localizationFieldProps}
                     codes={codes}
                     record={record}
                     onChange={(data = {}) => {
@@ -98,9 +103,7 @@ export const LocalizationDialogDisclosure = ({
                     }}
                     dialog={dialog}
                     mode={mode}
-                    width={width}
-                    maxWidth={maxWidth}
-                    height={height}
+                    {...dialogProps}
                 />
             )}
         </>
@@ -111,6 +114,7 @@ const LocalizationDialog = ({
     readOnly,
     disabled,
     localizationField,
+    localizationFieldProps,
     codes = [],
     record = {},
     onChange,
@@ -140,6 +144,10 @@ const LocalizationDialog = ({
                     )
                 }
                 css={css`
+                    & .bb-DialogContent {
+                        max-height: 80vh;
+                    }
+
                     .tox-fullscreen & {
                         top: 0;
                         left: 0;
@@ -152,6 +160,7 @@ const LocalizationDialog = ({
                     readOnly={readOnly}
                     disabled={disabled}
                     localizationField={localizationField}
+                    localizationFieldProps={localizationFieldProps}
                     codes={codes}
                     mode={mode}
                 />
@@ -176,6 +185,7 @@ const Body = ({
     disabled,
     mode = LocalizationDialogMode.List,
     localizationField,
+    localizationFieldProps,
     codes = []
 }) => {
     switch (mode) {
@@ -185,6 +195,7 @@ const Body = ({
                     readOnly={readOnly}
                     disabled={disabled}
                     localizationField={localizationField}
+                    localizationFieldProps={localizationFieldProps}
                     codes={codes}
                 />
             )
@@ -194,13 +205,20 @@ const Body = ({
                     readOnly={readOnly}
                     disabled={disabled}
                     localizationField={localizationField}
+                    localizationFieldProps={localizationFieldProps}
                     codes={codes}
                 />
             )
     }
 }
 
-const TabsBody = ({ readOnly, disabled, localizationField, codes = [] }) => {
+const TabsBody = ({
+    readOnly,
+    disabled,
+    localizationField,
+    localizationFieldProps,
+    codes = []
+}) => {
     let selectedId = head(codes)
 
     let tab = useTabState({
@@ -221,6 +239,7 @@ const TabsBody = ({ readOnly, disabled, localizationField, codes = [] }) => {
                     key={code}
                     name={code}
                     localizationField={localizationField}
+                    localizationFieldProps={localizationFieldProps}
                     readOnly={readOnly}
                     disabled={disabled}
                     {...tab}
@@ -233,6 +252,7 @@ const TabsBody = ({ readOnly, disabled, localizationField, codes = [] }) => {
 const TabPanel = ({
     name,
     localizationField: LocalizationField,
+    localizationFieldProps = {},
     readOnly,
     disabled,
     ...props
@@ -240,12 +260,13 @@ const TabPanel = ({
     let { selectedId } = props
     let isActive = selectedId === name
     return (
-        <BaseTabPanel tabId={name} {...props}>
+        <BaseTabPanel tabId={name} {...props} height="100%">
             {isActive && (
                 <LocalizationField
                     code={name}
                     readOnly={readOnly}
                     disabled={disabled}
+                    {...localizationFieldProps}
                 />
             )}
         </BaseTabPanel>
@@ -254,6 +275,7 @@ const TabPanel = ({
 
 const ListBody = ({
     localizationField: LocalizationField,
+    localizationFieldProps = {},
     codes = [],
     readOnly,
     disabled
@@ -266,6 +288,7 @@ const ListBody = ({
                     code={code}
                     readOnly={readOnly}
                     disabled={disabled}
+                    {...localizationFieldProps}
                 />
             ))}
         </FieldStack>

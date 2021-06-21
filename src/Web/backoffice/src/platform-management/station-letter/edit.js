@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
-import { useForm, useFormContext, Controller } from "react-hook-form"
+import { useForm, useFormContext, Controller, useWatch } from "react-hook-form"
 import {
     Stack,
     Box,
@@ -18,13 +18,7 @@ import {
     Verify as VerifyMenu,
     View as ViewMenu
 } from "./menu"
-import {
-    useIsDisplayMenuByRoute,
-    useUserBrandId,
-    useUserLicenseeId,
-    useUserResellerId,
-    useUserRoleType
-} from "../../user/context"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
 import Disclosure from "../../dialog/Disclosure"
@@ -44,7 +38,8 @@ import Alert from "../../dialog/Alert"
 import Input from "../../input/Input"
 import FormDialog from "../../form/FormDialog"
 import Textarea from "../../textarea"
-import FileUploadPath from "../../file/upload/FileUploadPath"
+import { toFileUploadPath } from "../../file/upload/FileUploadPath"
+import { HtmlEditor } from "../../text/editor/HtmlEditor"
 
 export const AddButton = ({ brandId, onSubmitted, ...props }) => {
     let dialog = useModalState()
@@ -85,6 +80,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     return (
         <FormDialog
             defaultValues={{
+                brandId,
                 target: AllPlayers,
                 subject: "",
                 content: ""
@@ -93,7 +89,6 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
                 if (target === AllPlayers) {
                     data.assignedAllPlayers = true
                 }
-
                 setSubmit({
                     ...data,
                     brandId
@@ -109,7 +104,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
             placement="top"
             css={DialogCss}
         >
-            <EditBody isAdd dialog={dialog} />
+            <EditBody />
         </FormDialog>
     )
 }
@@ -129,17 +124,20 @@ const DialogCss = css`
     }
 `
 
-const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
-    let { setValue, control, watch, formState, ...formMethods } =
-        useFormContext()
-    let target = watch("target")
-    let playerUsernames = watch("playerUsernames")
+const EditBody = ({ readOnly = false } = {}) => {
+    let { setValue, control } = useFormContext()
+    let target = useWatch({
+        control,
+        name: "target"
+    })
 
-    let contentEditorRef = useRef()
-    let required = !readonly
-    let locale = useLocale()
-    let language = locale === Locales.zh ? "zh_CN" : ""
-    let [editor, setEditor] = useState()
+    let PlayerUsernamesFieldName = "playerUsernames"
+    let playerUsernames = useWatch({
+        control,
+        name: PlayerUsernamesFieldName
+    })
+
+    let required = !readOnly
     let uploadInputRef = useRef()
 
     let [formData, setFormData] = useState()
@@ -163,65 +161,17 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
         }
     }, [formData, result])
 
-    const setupEditor = () => {
-        if (!contentEditorRef.current) {
-            return
-        }
-
-        let selector = `textarea.${contentEditorRef.current.className}`
-        tinymce.remove(selector)
-
-        let options = {
-            selector,
-            readonly,
-            base_url: "/tinymce",
-            height: readonly ? 300 : 480,
-            plugins:
-                "preview paste importcss searchreplace autolink code visualchars fullscreen image link media codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists imagetools textpattern noneditable charmap emoticons",
-            menubar: "file edit insert view format table upload",
-            menu: {
-                upload: { title: "Upload", items: "image", icon: "upload" }
-            },
-            toolbar: [
-                "searchreplace | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent | undo redo | removeformat superscript subscript code codesample",
-                "hr numlist bullist | link insertfile image preview anchor pagebreak insertdatetime media table | emoticons forecolor backcolor fullscreen "
-            ],
-            toolbar_mode: "sliding",
-            images_upload_url: FileUploadPath,
-            setup: (editor) => {
-                editor.on("Change", (event) => {
-                    let content = event.target.getContent()
-                    setValue("content", content)
-                })
-            },
-            resize: false
-        }
-        if (language) {
-            options.language = language
-        }
-
-        tinymce.init(options).then(([instance]) => {
-            setEditor(instance)
-        })
-    }
-
-    useEffect(() => {
-        if (dialog.visible && contentEditorRef.current) {
-            setupEditor()
-        }
-    }, [dialog.visible, contentEditorRef.current])
-
     return (
         <FieldValues>
             <Label name="target" required={required}>
                 <Trans zh="对象" en="Target" />
             </Label>
             <Set>
-                <PlayerTargetSelect required={required} disabled={readonly} />
-                {!readonly && target === DesignatedPlayers && (
+                <PlayerTargetSelect required={required} disabled={readOnly} />
+                {!readOnly && target === DesignatedPlayers && (
                     <Controller
                         control={control}
-                        name="playerUsernames"
+                        name={PlayerUsernamesFieldName}
                         shouldUnregister={true}
                         render={({
                             field: { onChange, onBlur, value, name, ref },
@@ -283,7 +233,7 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
                         )}
                     />
                 )}
-                {readonly &&
+                {readOnly &&
                     target === DesignatedPlayers &&
                     playerUsernames.length > 0 && (
                         <Popover.State>
@@ -310,51 +260,15 @@ const EditBody = ({ readonly = false, isAdd = false, dialog } = {}) => {
             <Label name="subject" required={required}>
                 <Trans zh="主题" en="Subject" />
             </Label>
-            <Input name="subject" required={required} disabled={readonly} />
+            <Input name="subject" required={required} disabled={readOnly} />
 
             <Label name="content" required={required} flex="1 auto">
                 <Trans zh="内容" en="Content" />
             </Label>
-            <Controller
-                control={control}
+            <HtmlEditor
                 name="content"
-                rules={{ required }}
-                shouldUnregister={true}
-                render={({
-                    field: { onChange, onBlur, value, ref, ...props },
-                    fieldState: { invalid, isTouched, isDirty },
-                    formState
-                }) => {
-                    useEffect(() => {
-                        if (formState.isSubmitting && invalid) {
-                            editor?.focus()
-                        }
-                    }, [formState.isSubmitting])
-
-                    return (
-                        <>
-                            <Global
-                                styles={css`
-                                    body .tox-tinymce-aux {
-                                        z-index: 19900420;
-                                    }
-                                    body.tox-fullscreen .tox.tox-tinymce-aux {
-                                        z-index: 19900420;
-                                    }
-                                `}
-                            />
-                            <textarea
-                                id="content"
-                                ref={contentEditorRef}
-                                disabled={readonly}
-                                css={css`
-                                    display: none;
-                                `}
-                                defaultValue={value}
-                            ></textarea>
-                        </>
-                    )
-                }}
+                imagesUploadUrl={toFileUploadPath("stationLetter")}
+                readOnly={readOnly}
             />
         </FieldValues>
     )
@@ -493,24 +407,16 @@ const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
     )
 }
 
-const VerifyBody = ({ readonly = false, dialog }) => {
+const VerifyBody = ({ readOnly = false, dialog }) => {
     return (
         <Stack spacing="major-2">
-            <EditBody readonly={true} dialog={dialog} />
+            <EditBody readOnly={true} dialog={dialog} />
             <Box border="default" height="1px" width="100%"></Box>
             <FieldValues>
                 <Label name="remarks">
                     <Trans zh="备注" en="Remarks" />
                 </Label>
-                <Textarea
-                    name="remarks"
-                    disabled={readonly}
-                    css={css`
-                        & textarea {
-                            resize: none;
-                        }
-                    `}
-                />
+                <Textarea name="remarks" disabled={readOnly} />
             </FieldValues>
         </Stack>
     )

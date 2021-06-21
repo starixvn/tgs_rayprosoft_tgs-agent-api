@@ -62,7 +62,7 @@ import { useBrand } from "../../merchant/brands/client"
 import { ImageUploadButton } from "../../file/upload/ImageUploadButton"
 import { HtmlEditor } from "../../text/editor/HtmlEditor"
 import Backdrop from "../../dialog/Backdrop"
-import { isFeatureEnabled, Features } from "../../env"
+import { toFileUploadPath } from "../../file/upload/FileUploadPath"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -85,6 +85,13 @@ export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
         </>
     )
 }
+
+const DialogCss = css`
+    & .bb-DialogContent {
+        position: relative;
+        padding: 1.5rem 3rem;
+    }
+`
 
 const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     let [formData, setSubmit] = useState()
@@ -125,12 +132,7 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
             title={title}
             dialog={dialog}
             maxWidth="80vw"
-            css={css`
-                & .bb-DialogContent {
-                    position: relative;
-                    padding: 1.5rem 3rem;
-                }
-            `}
+            css={DialogCss}
         >
             <FormBody brandId={brandId} isAdd />
         </FormDialog>
@@ -230,12 +232,7 @@ const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
             title={title}
             dialog={dialog}
             maxWidth="80vw"
-            css={css`
-                & .bb-DialogContent {
-                    position: relative;
-                    padding: 1.5rem 3rem;
-                }
-            `}
+            css={DialogCss}
         >
             <FormBody brandId={brandId} />
         </FormDialog>
@@ -253,12 +250,6 @@ const usePromotionFormData = (
         ...record
     } = {}
 ) => {
-    let {
-        isLoading: isLoadingBrand,
-        data: brand,
-        error: brandError
-    } = useBrand(brandId)
-
     let {
         data = {},
         isLoading: isLoadingBrandGameProviderList,
@@ -283,21 +274,6 @@ const usePromotionFormData = (
             }
         }) ?? []
 
-    contents = brand?.languages
-        ?.sort((a, b) => {
-            return a.cultureCode.localeCompare(b.cultureCode)
-        })
-        ?.map(({ brandCultureCode }) => {
-            let content =
-                contents.find(
-                    (content) => content.cultureCode == brandCultureCode
-                ) ?? {}
-            return {
-                ...content,
-                cultureCode: brandCultureCode
-            }
-        })
-
     let promotionTypeGroup = usePromotionGroupValueOf(record?.promotionType)
     let gameTypeGroup = useGameTypeGroupValueOf(record?.gameType)
 
@@ -306,7 +282,6 @@ const usePromotionFormData = (
     data = {
         ...record,
         vipLevels,
-        contents,
         gameProviders,
         promotionTypeGroup,
         gameTypeGroup,
@@ -315,8 +290,8 @@ const usePromotionFormData = (
     }
 
     return {
-        isLoading: isLoadingBrand || isLoadingBrandGameProviderList,
-        error: brandError || brandGameProviderError,
+        isLoading: isLoadingBrandGameProviderList,
+        error: brandGameProviderError,
         ...rest,
         data
     }
@@ -369,14 +344,9 @@ const ViewDialog = ({ brandId, record, dialog, ...props }) => {
             footer={<CloseButtonFooter dialog={dialog} alignX="right" />}
             dialog={dialog}
             maxWidth="80vw"
-            css={css`
-                & .bb-DialogContent {
-                    position: relative;
-                    padding: 1.5rem 3rem;
-                }
-            `}
+            css={DialogCss}
         >
-            <FormBody brandId={brandId} record={record} readOnly={true} />
+            <FormBody brandId={brandId} readOnly={true} />
         </FormDialog>
     )
 }
@@ -433,7 +403,7 @@ const AutoOrManualPayoutSwitch = ({
     )
 }
 
-const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
+const FormBody = ({ brandId, readOnly = false, isAdd = false }) => {
     let { start: startOfToday } = today()
     let formMethods = useFormContext()
     let { control, setValue } = formMethods
@@ -495,18 +465,12 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                     <Trans zh="活动名称" en="Promotion Name" />
                 </NormalLabel>
                 <Box alignY="center">
-                    {editable && (
-                        <InputField
-                            name="name"
-                            brandId={brandId}
-                            showLocalizationAddonAfter={isFeatureEnabled(
-                                Features.PromotionLocalization
-                            )}
-                        />
-                    )}
-                    {readOnly && (
-                        <Text.Block alignY="center">{record?.name}</Text.Block>
-                    )}
+                    <InputField
+                        name="name"
+                        brandId={brandId}
+                        showLocalizationAddonAfter
+                        disabled={disabled}
+                    />
                 </Box>
 
                 <NormalLabel>
@@ -688,83 +652,78 @@ const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
                 )}
             </FieldValues>
 
-            {isFeatureEnabled(Features.PromotionLocalization) && (
-                <>
-                    <Separator />
+            <Separator />
 
-                    <Heading use="h5">
-                        <Trans zh="活动内容" en="Promotion Content" />
-                    </Heading>
-                    <FieldValues>
-                        <NormalLabel>
-                            <Trans zh="活动子标题" en="Promotion SubTitle" />
-                        </NormalLabel>
-                        <Box alignY="center">
-                            <InputField
-                                name="subTitle"
-                                brandId={brandId}
-                                showLocalizationAddonAfter
-                                disabled={disabled}
-                                readOnly={readOnly}
-                            />
-                        </Box>
+            <Heading use="h5">
+                <Trans zh="活动内容" en="Promotion Content" />
+            </Heading>
+            <FieldValues>
+                <NormalLabel>
+                    <Trans zh="活动子标题" en="Promotion SubTitle" />
+                </NormalLabel>
+                <Box alignY="center">
+                    <InputField
+                        name="subSubject"
+                        brandId={brandId}
+                        showLocalizationAddonAfter
+                        disabled={disabled}
+                        readOnly={readOnly}
+                    />
+                </Box>
 
-                        <NormalLabel>
-                            <Trans
-                                zh="活动 Banner (PC)"
-                                en="Promotion Banner (PC)"
-                            />
-                        </NormalLabel>
-                        <Box alignY="center">
-                            <ImageUploadButton
-                                brandId={brandId}
-                                name="desktopBanner"
-                                disabled={disabled}
-                                readOnly={readOnly}
-                            />
-                        </Box>
+                <NormalLabel>
+                    <Trans zh="活动 Banner (PC)" en="Promotion Banner (PC)" />
+                </NormalLabel>
+                <Box alignY="center">
+                    <ImageUploadButton
+                        brandId={brandId}
+                        name="desktopBanner"
+                        prefix="promotion"
+                        disabled={disabled}
+                        readOnly={readOnly}
+                    />
+                </Box>
 
-                        <NormalLabel>
-                            <Trans
-                                zh="活动 Banner (Mobile)"
-                                en="Promotion Banner (Mobile)"
-                            />
-                        </NormalLabel>
-                        <Box alignY="center">
-                            <ImageUploadButton
-                                brandId={brandId}
-                                name="mobileBanner"
-                                disabled={disabled}
-                                readOnly={readOnly}
-                            />
-                        </Box>
+                <NormalLabel>
+                    <Trans
+                        zh="活动 Banner (Mobile)"
+                        en="Promotion Banner (Mobile)"
+                    />
+                </NormalLabel>
+                <Box alignY="center">
+                    <ImageUploadButton
+                        brandId={brandId}
+                        name="mobileBanner"
+                        prefix="promotion"
+                        disabled={disabled}
+                        readOnly={readOnly}
+                    />
+                </Box>
 
-                        <NormalLabel>
-                            <Trans zh="活动内容" en="Promotion Content" />
-                        </NormalLabel>
-                        <Box alignY="center">
-                            <HtmlEditorDisclosure
-                                brandId={brandId}
-                                name="content"
-                                disabled={disabled}
-                                readOnly={readOnly}
-                            />
-                        </Box>
+                <NormalLabel>
+                    <Trans zh="活动内容" en="Promotion Content" />
+                </NormalLabel>
+                <Box alignY="center">
+                    <HtmlEditorDisclosure
+                        brandId={brandId}
+                        name="content"
+                        disabled={disabled}
+                        readOnly={readOnly}
+                    />
+                </Box>
 
-                        <NormalLabel>
-                            <Trans zh="活动条款与条规" en="Promotion Rules" />
-                        </NormalLabel>
-                        <Box alignY="center">
-                            <HtmlEditorDisclosure
-                                brandId={brandId}
-                                name="rules"
-                                disabled={disabled}
-                                readOnly={readOnly}
-                            />
-                        </Box>
-                    </FieldValues>
-                </>
-            )}
+                <NormalLabel>
+                    <Trans zh="活动条款与条规" en="Promotion Rules" />
+                </NormalLabel>
+                <Box alignY="center">
+                    <HtmlEditorDisclosure
+                        brandId={brandId}
+                        name="terms"
+                        disabled={disabled}
+                        readOnly={readOnly}
+                    />
+                </Box>
+            </FieldValues>
 
             <Separator />
 
@@ -852,16 +811,28 @@ const HtmlEditorDialog = ({
 }) => {
     let { visible } = props
     return (
-        <Backdrop {...dialog}>
+        <Backdrop
+            {...dialog}
+            css={css`
+                .tox-fullscreen & {
+                    top: 0;
+                    left: 0;
+                    transform: none;
+                }
+            `}
+        >
             <Dialog.Modal
                 {...dialog}
                 hideBackdrop
                 hideOnClickOutside={false}
                 showCloseButton
                 title={title}
-                width="max-content"
+                width="70vw"
                 maxWidth="80vw"
                 css={css`
+                    & .bb-DialogContent {
+                        max-height: 80vh;
+                    }
                     .tox-fullscreen & {
                         top: 0;
                         left: 0;
@@ -872,8 +843,9 @@ const HtmlEditorDialog = ({
                 <HtmlEditor
                     brandId={brandId}
                     name={name}
+                    imagesUploadUrl={toFileUploadPath("promotion")}
                     readOnly={readOnly}
-                    height={400}
+                    height="480"
                     active={visible}
                     showLocalizationAddonAfter
                 />

@@ -2,9 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from "react"
 import { css, Global } from "@emotion/react"
 import { useForm, useFormContext, Controller, useWatch } from "react-hook-form"
 import { Locales, useLocale } from "../../i18n"
-import Textarea from "../../textarea"
 import { Set, Box } from "bumbag"
-import FileUploadPath from "../../file/upload/FileUploadPath"
 import {
     LocalizationDialogDisclosure,
     LocalizationDialogMode
@@ -32,23 +30,27 @@ const toOptions = ({
     plugins = DefaultPlugin,
     menubar = DefaultMenubar,
     menu = DefaultMenu,
-    toolbar = DefaultToolbar
-}) => ({
-    selector,
-    width,
-    height,
-    language,
-    readonly: readOnly,
-    setup,
-    base_url: "/tinymce",
-    plugins,
-    menubar,
-    menu,
-    toolbar,
-    toolbar_mode: "sliding",
-    images_upload_url: FileUploadPath,
-    resize: false
-})
+    toolbar = DefaultToolbar,
+    imagesUploadUrl
+}) => {
+    let result = {
+        selector,
+        width,
+        height,
+        language,
+        readonly: readOnly,
+        setup,
+        base_url: "/tinymce",
+        plugins,
+        menubar,
+        menu,
+        toolbar,
+        toolbar_mode: "sliding",
+        images_upload_url: imagesUploadUrl,
+        resize: false
+    }
+    return result
+}
 
 export const HtmlEditor = ({
     active = true,
@@ -56,6 +58,7 @@ export const HtmlEditor = ({
     height = 300,
     name,
     defaultValue,
+    imagesUploadUrl,
     readOnly,
     shouldUnregister = false,
     addonAfter,
@@ -71,44 +74,77 @@ export const HtmlEditor = ({
     })
 
     if (!active) {
-        return null
-        // return <Controller name={name} control={control} defaultValue={value} />
+        return <Controller name={name} control={control} defaultValue={value} />
     }
 
+    addonAfter =
+        addonAfter ??
+        (showLocalizationAddonAfter && (
+            <LocalizationDialogDisclosure
+                brandId={brandId}
+                localizationField={LocalizationHtmlEditorField}
+                localizationFieldProps={{
+                    imagesUploadUrl
+                }}
+                name={name}
+                readOnly={readOnly}
+                mode={LocalizationDialogMode.Tab}
+                dialogProps={{
+                    width: "70vw",
+                    maxWidth: "80vw"
+                }}
+            />
+        ))
+
     return (
-        <Set alignY="top" isFilled orientation="horizontal">
+        <Set
+            alignY="top"
+            isFilled
+            orientation="horizontal"
+            width="100%"
+            height="100%"
+            flex="1"
+            css={css`
+                & .tox-tinymce {
+                    flex: 1;
+                    height: 100%;
+                }
+
+                & .tox.tox-tinymce.tox-fullscreen {
+                    margin: 0;
+                }
+            `}
+        >
             <Body
                 name={name}
                 readOnly={readOnly}
                 shouldUnregister={shouldUnregister}
                 width={width}
                 height={height}
+                imagesUploadUrl={imagesUploadUrl}
                 {...props}
             />
-            {addonAfter ??
-                (showLocalizationAddonAfter && (
-                    <LocalizationDialogDisclosure
-                        brandId={brandId}
-                        localizationField={LocalizationHtmlEditorField}
-                        name={name}
-                        readOnly={readOnly}
-                        mode={LocalizationDialogMode.Tab}
-                        width="70vw"
-                        maxWidth="80vw"
-                        height="80vh"
-                    />
-                ))}
+            {addonAfter}
         </Set>
     )
 }
 
-const LocalizationHtmlEditorField = ({ code, ...props }) => {
-    return <HtmlEditor name={code} width="100%" />
+const LocalizationHtmlEditorField = ({ code, readOnly, ...props }) => {
+    return (
+        <HtmlEditor
+            name={code}
+            readOnly={readOnly}
+            width="100%"
+            height="480"
+            {...props}
+        />
+    )
 }
 
 const Body = ({
     name,
     defaultValue,
+    imagesUploadUrl,
     required,
     readOnly,
     shouldUnregister = false,
@@ -148,6 +184,7 @@ const Body = ({
                     tinymce
                         .init(
                             toOptions({
+                                imagesUploadUrl,
                                 selector,
                                 width,
                                 height,

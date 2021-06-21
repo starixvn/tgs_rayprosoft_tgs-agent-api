@@ -24,12 +24,13 @@ fieldset {
 }
 
 body .tox-tinymce-aux {
-    z-index: 19900420;
+    z-index: 19900520;
 }
 body.tox-fullscreen .tox.tox-tinymce-aux {
-    z-index: 19900420;
+    z-index: 19900520;
 }
-.tox-fullscreen {
+
+body.tox-fullscreen .tox-fullscreen {
     top: 0;
     left: 0;
     transform: none;

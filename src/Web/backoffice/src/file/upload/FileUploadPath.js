@@ -1,3 +1,3 @@
-export const FileUploadPath = "/fs/file/uploadFileS3"
+//export const FileUploadPath = "/fs/file/uploadFileS3"
 
-export default FileUploadPath
+export const toFileUploadPath = (prefix) => `/api/fs/upload/${prefix}`

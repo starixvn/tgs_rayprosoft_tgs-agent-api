@@ -30,6 +30,7 @@ import { CancelText, SubmitText } from "../../button/ActionButtons"
 import Backdrop from "../../dialog/Backdrop"
 import FormDialog from "../../form/FormDialog"
 import Disclosure from "../../dialog/Disclosure"
+import PaymentMethodBankType from "../../payment/method/PaymentMethodBankType"
 
 const Key = "AgentBankInfo"
 
@@ -49,7 +50,7 @@ const EditPanel = ({ record, onSubmitted, ...props }) => {
         <TabPanel tabId={Key} {...props}>
             <TwoColumns>
                 {record?.banks?.map?.((bank, index) => (
-                    <Bank key={index} bank={bank} onSubmitted={onSubmitted} />
+                    <Bank key={index} record={bank} onSubmitted={onSubmitted} />
                 ))}
             </TwoColumns>
             <AddBank record={record} onSubmitted={onSubmitted} />
@@ -62,18 +63,21 @@ const ViewPanel = ({ record = {}, ...props }) => {
         <TabPanel tabId={Key} {...props}>
             <TwoColumns>
                 {record?.banks?.map?.((bank, index) => (
-                    <Bank key={index} bank={bank} readonly />
+                    <Bank key={index} record={bank} readOnly />
                 ))}
             </TwoColumns>
         </TabPanel>
     )
 }
 
-const Bank = ({ agent, bank, readonly = false, onSubmitted }) => {
+const Bank = ({ record = {}, readOnly = false, onSubmitted }) => {
+    let { bankType = "" } = record
     let deleteDialog = useModalState()
     let editDialog = useModalState()
 
-    let editable = !readonly
+    let editable = !readOnly
+    let isBank = PaymentMethodBankType.isBank(bankType)
+    let isCrypto = PaymentMethodBankType.isCrypto(bankType)
     return (
         <Card>
             {editable && (
@@ -91,7 +95,7 @@ const Bank = ({ agent, bank, readonly = false, onSubmitted }) => {
                     </Disclosure>
                     {deleteDialog.visible && (
                         <DeleteDialog
-                            bank={bank}
+                            bank={record}
                             onSubmitted={onSubmitted}
                             dialog={deleteDialog}
                         />
@@ -101,7 +105,7 @@ const Bank = ({ agent, bank, readonly = false, onSubmitted }) => {
                     </Disclosure>
                     {editDialog.visible && (
                         <EditDialog
-                            bank={bank}
+                            bank={record}
                             onSubmitted={onSubmitted}
                             dialog={editDialog}
                         />
@@ -110,13 +114,13 @@ const Bank = ({ agent, bank, readonly = false, onSubmitted }) => {
             )}
             <FieldValues>
                 <Trans zh="真实姓名" en="Real name" />
-                <Text>{bank?.realName ?? ""}</Text>
+                <Text>{record?.realName ?? ""}</Text>
 
                 <Trans zh="银行" en="Bank" />
-                <Text>{bank?.bankName ?? ""}</Text>
+                <Text>{record?.bankName ?? ""}</Text>
 
                 <Trans zh="银行卡号" en="Bank Account" />
-                <Text>{bank?.bankAccount ?? ""}</Text>
+                <Text>{record?.bankAccount ?? ""}</Text>
             </FieldValues>
         </Card>
     )
@@ -238,9 +242,8 @@ const EditBody = ({}) => {
 
 const DeleteDialog = ({ bank, onSubmitted, dialog }) => {
     let [id, setDeleteId] = useState()
-    let { result, isLoading, error, deleteCache, mutate } = useDeleteAgentBank(
-        id
-    )
+    let { result, isLoading, error, deleteCache, mutate } =
+        useDeleteAgentBank(id)
 
     useEffect(() => {
         if (result && !error) {
