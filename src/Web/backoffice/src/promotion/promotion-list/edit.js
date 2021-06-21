@@ -63,6 +63,7 @@ import { ImageUploadButton } from "../../file/upload/ImageUploadButton"
 import { HtmlEditor } from "../../text/editor/HtmlEditor"
 import Backdrop from "../../dialog/Backdrop"
 import { toFileUploadPath } from "../../file/upload/FileUploadPath"
+import { parseJSON } from "../../text/json"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -246,7 +247,7 @@ const usePromotionFormData = (
         to,
         gameProviderIds = [],
         vipLevels = [],
-        contents = [],
+        localization,
         ...record
     } = {}
 ) => {
@@ -285,6 +286,7 @@ const usePromotionFormData = (
         gameProviders,
         promotionTypeGroup,
         gameTypeGroup,
+        localization: parseJSON(localization),
         from: parseISO(from),
         to: parseISO(to)
     }
