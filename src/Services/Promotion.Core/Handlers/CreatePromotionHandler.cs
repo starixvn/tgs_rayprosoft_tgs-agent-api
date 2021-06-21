@@ -52,8 +52,8 @@ namespace TGS.Services.Promotion.Handlers
                 .First(x => x.Name == request.PromotionType);
 
             var bannerImages = request.Localization.ToJson().GetMatchStrings(Consts.UploadFile.ImagePattern);
-            var contentImages = request.Content.GetMatchStrings(Consts.UploadFile.ImagePattern);
-            var images = bannerImages.Union(contentImages).ToArray();
+            var contentImages = request.Content?.GetMatchStrings(Consts.UploadFile.ImagePattern);
+            var images = contentImages is null ? bannerImages : bannerImages.Union(contentImages).ToArray();
 
             var promotionId = await _service.CreatePromotionAsync(request, promotionType);
 
