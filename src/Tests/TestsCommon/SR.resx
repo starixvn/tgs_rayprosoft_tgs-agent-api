@@ -225,4 +225,7 @@
   <data name="UserBalance" xml:space="preserve">
     <value>UserBalance</value>
   </data>
+  <data name="JDBGameType" xml:space="preserve">
+    <value>JDBGameType</value>
+  </data>
 </root>
