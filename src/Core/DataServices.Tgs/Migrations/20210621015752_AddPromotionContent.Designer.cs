@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210618075624_AddPromotionContent")]
+    [Migration("20210621015752_AddPromotionContent")]
     partial class AddPromotionContent
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3920,6 +3920,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<string>("DesktopBanner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("desktop_banner");
+
                     b.Property<DateTimeOffset>("From")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
@@ -3931,6 +3936,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Localization")
                         .HasColumnType("jsonb")
                         .HasColumnName("localization");
+
+                    b.Property<string>("MobileBanner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("mobile_banner");
 
                     b.Property<string>("Name")
                         .IsRequired()

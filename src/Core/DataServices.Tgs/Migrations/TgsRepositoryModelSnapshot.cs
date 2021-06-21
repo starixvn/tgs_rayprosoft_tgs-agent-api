@@ -3918,6 +3918,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<string>("DesktopBanner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("desktop_banner");
+
                     b.Property<DateTimeOffset>("From")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
@@ -3929,6 +3934,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Localization")
                         .HasColumnType("jsonb")
                         .HasColumnName("localization");
+
+                    b.Property<string>("MobileBanner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("mobile_banner");
 
                     b.Property<string>("Name")
                         .IsRequired()

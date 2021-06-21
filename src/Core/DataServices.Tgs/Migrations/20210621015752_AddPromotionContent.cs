@@ -14,10 +14,26 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
+                name: "desktop_banner",
+                schema: "dbo",
+                table: "promotions",
+                type: "character varying(128)",
+                maxLength: 128,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
                 name: "localization",
                 schema: "dbo",
                 table: "promotions",
                 type: "jsonb",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "mobile_banner",
+                schema: "dbo",
+                table: "promotions",
+                type: "character varying(128)",
+                maxLength: 128,
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
@@ -44,7 +60,17 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 table: "promotions");
 
             migrationBuilder.DropColumn(
+                name: "desktop_banner",
+                schema: "dbo",
+                table: "promotions");
+
+            migrationBuilder.DropColumn(
                 name: "localization",
+                schema: "dbo",
+                table: "promotions");
+
+            migrationBuilder.DropColumn(
+                name: "mobile_banner",
                 schema: "dbo",
                 table: "promotions");
 

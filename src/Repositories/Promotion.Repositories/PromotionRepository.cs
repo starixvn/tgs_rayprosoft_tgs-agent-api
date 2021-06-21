@@ -59,6 +59,8 @@ namespace TGS.Promotion.Repositories
                 SubSubject = request.SubSubject,
                 Content = request.Content,
                 Terms = request.Terms,
+                DesktopBanner = request.DesktopBanner,
+                MobileBanner = request.MobileBanner,
                 Localization = request.Localization?.ToJson()
             };
 
@@ -121,6 +123,8 @@ namespace TGS.Promotion.Repositories
             promotion.SubSubject = request.SubSubject;
             promotion.Content = request.Content;
             promotion.Terms = request.Terms;
+            promotion.DesktopBanner = request.DesktopBanner;
+            promotion.MobileBanner = request.MobileBanner;
             promotion.Localization = request.Localization?.ToJson();
 
             await UpdateEntityAsync(promotion);

@@ -26,5 +26,7 @@ namespace TGS.Clients.Promotion.Client.Models.Promotion
         public string SubSubject { get; set; }
         public string Content { get; set; }
         public string Terms { get; set; }
+        public string DesktopBanner { get; set; }
+        public string MobileBanner { get; set; }
     }
 }

@@ -79,6 +79,8 @@ namespace TGS.Services.Promotion.Handlers
                     SubSubject = x.SubSubject,
                     Content = x.Content,
                     Terms = x.Terms,
+                    DesktopBanner = x.DesktopBanner,
+                    MobileBanner = x.MobileBanner,
                     Localization = x.Localization
                 }).CreatePagedResponseAsync(request).ConfigureAwait(true);
         }
