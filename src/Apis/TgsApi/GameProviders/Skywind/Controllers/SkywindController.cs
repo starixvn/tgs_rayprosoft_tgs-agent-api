@@ -185,6 +185,31 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             };
         }
 
+        [HttpPost("validate_terminal_ticket")]
+        public async Task<SkywindValidateTicketResponse> ValidateTerminalTicketAsync(SkywindValidateTicketRequest request)
+        {
+            /*
+            var loginRecord = await _services.DecryptTokenAsync(request.Ticket);
+
+            var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
+            {
+                PlayerCode = loginRecord.PlayerCode,
+                GameProviderCode = Consts.GameProvider.Skywind,
+                PlatformType = loginRecord.PlatformType
+            }).ConfigureAwait(false);
+            */
+            return new SkywindValidateTicketResponse()
+            {
+                ErrorCode = (int)GameApiError.Success,
+                ErrorMsg = GameApiError.Success.Description(),
+                CustId = "4ucmqplxb029",
+                CustSessionId = request.Ticket,
+                CurrencyCode = "CNY",
+                Country = "CN",
+                TestCust = false
+            };
+        }
+
         [HttpPost("ping")]
         public SkywindSingleWalletResponse Ping() => new SkywindSingleWalletResponse()
         {

@@ -57,8 +57,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var data = new SkywindGameUrlRequest()
             {
                 PlayerCode = player.PlayerCode,
-                //GameCode = "sw_ro_a01bac",
-                GameCode = "sw_bac",
+                GameCode = "sw_ro_a01bac",
+                //GameCode = "sw_bac",
                 Ticket = encryptedToken,
                 Language = cultureCode
             };
