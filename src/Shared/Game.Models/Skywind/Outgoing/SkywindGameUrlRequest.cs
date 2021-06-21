@@ -10,5 +10,7 @@ namespace TGS.Shared.Game.Models.Skywind.Outgoing
         public string GameCode { get; set; }
         [JsonPropertyName("ticket")]
         public string Ticket { get; set; }
+        [JsonPropertyName("language")]
+        public string Language { get; set; } = "zh-cn";
     }
 }

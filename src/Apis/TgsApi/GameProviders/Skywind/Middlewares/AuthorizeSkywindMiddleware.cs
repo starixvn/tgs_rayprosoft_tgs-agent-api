@@ -55,7 +55,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
                 throw new InvalidCredentialsException("empty token");
             }
 
-            if (context.Request.Path.Value.IgnoreCaseContains("api/sw/get_balance") || context.Request.Path.Value.IgnoreCaseContains("api/sw/debit"))
+            if (context.Request.Path.Value.IgnoreCaseContains("sw/api/get_balance") || context.Request.Path.Value.IgnoreCaseContains("sw/api/debit"))
             {
                 //var loginRecord = await _services.DecryptTokenAsync(keyValuePairs["cust_session_id"].ToString());
                 var playerCode = "4ucmqplxb029";//loginRecord.PlayerCode;
