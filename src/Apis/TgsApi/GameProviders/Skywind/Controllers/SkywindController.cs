@@ -156,7 +156,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                Balance = balance
+                Balance = balance,
+                TrxId = request.TrxId
             };
         }
 
