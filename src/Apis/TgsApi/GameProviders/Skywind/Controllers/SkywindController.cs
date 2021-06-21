@@ -88,7 +88,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.BetAsync(gameProviderConfigurationData, playerCode, new[] { request });
+            var betData = _map.Bet(gameProviderConfigurationData, playerCode, new[] { request });
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()

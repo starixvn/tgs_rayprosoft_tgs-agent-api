@@ -13,7 +13,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 {
     public interface ISkywindActionModelMapper
     {
-        BetData BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest[] source);
+        BetData Bet(GameProviderConfigurationData data, string playCode, SkywindBetRequest[] source);
 
         BetData SettleAsync(GameProviderConfigurationData data, string playCode, SkywindSettleRequest[] source);
 
@@ -32,7 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         }
 
 
-        BetData ISkywindActionModelMapper.BetAsync(GameProviderConfigurationData data, string playCode, SkywindBetRequest[] source)
+        BetData ISkywindActionModelMapper.Bet(GameProviderConfigurationData data, string playCode, SkywindBetRequest[] source)
         {
 
             var transactions = (from order in source
