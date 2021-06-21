@@ -15,9 +15,8 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AuthController : ControllerBase
     {
-        [HttpPost]
+        [HttpPost("jwt")]
         [AllowAnonymous]
-        [Route("jwt")]
         public async Task<AuthResponse> AuthenticateAsync(
             [FromServices] IGetService<GetAuthQuery, AuthInfo> getAuthQueryService,
             [FromBody] AuthRequest request)
