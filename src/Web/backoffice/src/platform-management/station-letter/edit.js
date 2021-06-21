@@ -319,7 +319,7 @@ const ViewDialog = ({ record, dialog, ...props }) => {
                 </Box>
             }
         >
-            <VerifyBody readonly={true} dialog={dialog} />
+            <VerifyBody readOnly={true} dialog={dialog} />
         </FormDialog>
     )
 }
@@ -402,7 +402,7 @@ const VerifyDialog = ({ record, onSubmitted, dialog, ...props }) => {
             css={DialogCss}
             dialog={dialog}
         >
-            <VerifyBody dialog={dialog} readonly={false} />
+            <VerifyBody dialog={dialog} readOnly={false} />
         </FormDialog>
     )
 }
