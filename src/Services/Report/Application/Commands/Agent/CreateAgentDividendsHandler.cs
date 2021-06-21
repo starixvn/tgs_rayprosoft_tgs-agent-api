@@ -69,14 +69,10 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 {
                     var agentDividends = await GetAgentDividends(brand);
 
-                    if (brand.AutoSentAgentBonus)
-                    {
-                        createAutoSendModels.AddRange(agentDividends);
-                    }
-                    else
-                    {
-                        createModels.AddRange(agentDividends);
-                    }
+                    createAutoSendModels.AddRange(agentDividends.Where(x =>
+                        brand.AutoSentAgentBonus && x.AgentDividendAmount > 0));
+                    createModels.AddRange(agentDividends.Where(x =>
+                        !brand.AutoSentAgentBonus && x.AgentDividendAmount < 0));
                 }
 
                 var (_, _, nextFromDate, nextToDate) =
@@ -125,7 +121,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     (a, list) => new {a.Id, a.ParentAgentId})
                 .ToArrayAsync();
 
-            var agentBonus = await _playerAggregateService.GetPlayerAggregateQueries()
+            var agentDividendGroup = await _playerAggregateService.GetPlayerAggregateQueries()
                 .Where(x => x.AgentId != null)
                 .Where(x => x.BrandId == brand.Id)
                 .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
@@ -169,7 +165,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         playerGameAggregate
                     }).ToArrayAsync();
 
-            return agentBonus
+            var agentDividends = agentDividendGroup
                 .GroupBy(
                     x => new
                     {
@@ -285,7 +281,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         AgentDividendAmount = models.Sum(m => m.AgentDividendAmount) +
                             agents.Where(a => a.ParentAgentId == x.AgentId).Sum(child =>
                             {
-                                var childAgentPlayers = agentBonus
+                                var childAgentPlayers = agentDividendGroup
                                     .Where(a =>
                                         a.AgentId == child.Id).GroupBy(
                                         g => new {g.AgentId, g.BrandId, g.AgentDividendPercentage, g.NetProfit},
@@ -306,7 +302,22 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                 return amount;
                             }),
                         CreatedOn = DateTimeOffset.Now
-                    }).ToList();
+                    }).ToArray();
+
+            var agentIds = agentDividends.Where(x => x.AgentDividendAmount > 0).Select(x => x.AgentId).ToArray();
+
+            var negativeDividends = await _agentDividendService.GetAgentDividendQueries()
+                .Where(x => agentIds.Contains(x.AgentId) && x.SentOn == null).ToArrayAsync().ConfigureAwait(false);
+
+            foreach (var agent in agentDividends)
+            {
+                var agentNegativeDividend = negativeDividends.Where(x => x.AgentId == agent.AgentId)
+                    .Sum(x => x.AgentDividendAmount);
+
+                //agent.AgentDividendAmount
+            }
+
+            return agentDividends.ToList();
         }
     }
 }

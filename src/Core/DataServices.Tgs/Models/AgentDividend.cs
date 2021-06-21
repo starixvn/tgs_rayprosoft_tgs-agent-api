@@ -7,6 +7,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public int Id { get; set; }
         public Guid AgentId { get; set; }
         public Guid BrandId { get; set; }
+        public int? AgentDividendId { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
         public decimal DepositAmount { get; set; }
