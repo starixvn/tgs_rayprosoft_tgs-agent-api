@@ -21,6 +21,7 @@ using TGS.Core.Models.Services.Data;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.IMESports.Common;
+using TGS.Shared.Game.Models.IMESports.Enums;
 using TGS.Shared.Game.Models.IMESports.Incoming;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
@@ -35,11 +36,11 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
     public sealed class IMESportsGameController : ControllerBase
     {
         private readonly IGamePlayActions _actions;
-        private readonly IIMESportsActionModelMapper _map;
-        private readonly IIMESportsServices _services;
         private readonly IBrandOperations _brandOperations;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IRedisCacheManager _cacheManager;
+        private readonly IIMESportsActionModelMapper _map;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IIMESportsServices _services;
         private readonly ISettingOperations _settingOperations;
 
         public IMESportsGameController(
@@ -61,7 +62,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
         }
 
         [HttpPost]
-        [Route("GetBalance")]
+        [Route("getbalance")]
         public async ValueTask<GetBalanceResponse> GetBalanceAsync(GetBalanceRequest request)
         {
             var playerCode = await _services.GetPlayerCodeAsync(request.PlayerCode);
@@ -72,7 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
         }
 
         [HttpPost]
-        [Route("PlaceBet")]
+        [Route("placebet")]
         public async ValueTask<BetResponse> PlaceBetAsync(BetRequest request)
         {
             var items = HttpContext.Items;
@@ -83,81 +84,92 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
 
             var redisKey = _services.GetRedisCacheKey(playerCode, transaction.ExternalGameId);
             var sessionToken = await ValidateSessionTokenAsync(redisKey, request.SessionToken);
-            
+
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
             var gameProviderConfigurationId = bgpc.GameProviderConfigurationId;
-            var platformType = transaction.Platform.IgnoreCaseEquals(PlatformType.Mobile.ToString()) ? PlatformType.Mobile : PlatformType.Desktop;
+            var platformType = transaction.Platform.IgnoreCaseEquals(PlatformType.Mobile.ToString())
+                ? PlatformType.Mobile
+                : PlatformType.Desktop;
 
             var data = await _services
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.Request(data, request, playerCode, allowPlaceBetWithDifferentPlatformToken: true);
+            var betData = _map.Request(data, request, playerCode, true);
             var r = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
-            
-            await _cacheManager.SetKeyExpirationInAsync(IMESportsConsts.RedisKey.SessionToken, 
+
+            await _cacheManager.SetKeyExpirationInAsync(IMESportsConsts.RedisKey.SessionToken,
                 redisKey, TimeSpan.FromSeconds(sessionToken.TimeToLeave));
 
             return _map.Response(r);
         }
 
         [HttpPost]
-        [Route("SettleBet")]
+        [Route("settle")]
         public async ValueTask<BetResponse> BatchAsync(BetRequest request)
         {
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            
+
             var config =
                 await _settingOperations.GetValueFromJsonByKeyAsync<IMESportsConfiguration>(SettingConsts
                     .GameProviderConfigurations.IMESports);
             var data = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, config, request.Transactions)
                 .ConfigureAwait(false);
-            
+
             var externalIds = await _services.GetValidGameActionExternalIdsAsync(gameProviderId, request.Transactions);
-            
-            var settleBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIds, isSettle: true);
-            var cancelBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIds, isSettle: false);
+
+            var settleBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIds, true);
+            var cancelBatchResult = await ExecuteBatchAsync(request, gameProviderId, data, externalIds, false);
 
             var results = new List<TransactionResponse>();
             results.AddRange(settleBatchResult);
             results.AddRange(cancelBatchResult);
-            
-            return new BetResponse
-            {
-                Results = results.ToArray()
-            };
+
+            return new() {Results = results.ToArray()};
         }
 
         [HttpPost]
-        [Route("FreezeWithdrawal")]
-        public ValueTask<BaseResponse> FreezeAsync(FreezeRequest request)
-        {
-            return new (new BaseResponse());
-        }
+        [Route("freezewithdrawal")]
+        public ValueTask<BaseResponse> FreezeAsync(FreezeRequest request) =>
+            new(new BaseResponse());
 
-        private async Task<IEnumerable<TransactionResponse>> ExecuteBatchAsync(BetRequest request, Guid gameProviderId, 
-            Dictionary<string, (Guid, string)> data, 
+        private async Task<IEnumerable<TransactionResponse>> ExecuteBatchAsync(BetRequest request, Guid gameProviderId,
+            Dictionary<string, (Guid, string)> data,
             IDictionary<string, IEnumerable<GameActionExternalIds>> externalIds, bool isSettle)
         {
-            var betData = _map.Request(gameProviderId, data, externalIds, request, isSettle);
-            
-            if (betData.Transactions.Any())
-            {
-                var result = isSettle ? 
-                    await _actions.SettleBatchAsync(betData).ConfigureAwait(false) : 
-                    await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
+            var (batchBetData, notFoundTransactions) =
+                _map.Request(gameProviderId, data, externalIds, request, isSettle);
 
-                return _map.Response(result);
+            var transactionResponse = new List<TransactionResponse>();
+
+            if (batchBetData.Transactions.Any())
+            {
+                var result = isSettle
+                    ? await _actions.SettleBatchAsync(batchBetData).ConfigureAwait(false)
+                    : await _actions.CancelBatchAsync(batchBetData).ConfigureAwait(false);
+
+                transactionResponse.AddRange(_map.Response(result));
             }
 
-            return Array.Empty<TransactionResponse>();
+            var notFounds = notFoundTransactions.ToArray();
+            if (notFounds.Length > 0)
+            {
+                transactionResponse.AddRange(notFounds.Select(transactionId => new TransactionResponse
+                {
+                    ErrorCode = (int)GameApiError.TransactionIdNotFound,
+                    ErrorMessage = "TransactionId is not found",
+                    ExternalTransactionId = transactionId
+                }));
+            }
+
+            return transactionResponse.ToArray();
         }
-        
-        private async Task<Dictionary<string, (Guid, string)>> GetPlayerGameProviderConfigurationIdsAsync(Guid gameProviderId, 
-            IMESportsConfiguration config, TransactionRequest[] transactions)
+
+        private async Task<Dictionary<string, (Guid, string)>> GetPlayerGameProviderConfigurationIdsAsync(
+            Guid gameProviderId, IMESportsConfiguration config, TransactionRequest[] transactions)
         {
             var map = new Dictionary<string, (Guid, string)>();
 
@@ -184,17 +196,18 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Controllers
 
         private async Task<IMSessionToken> ValidateSessionTokenAsync(string redisKey, string sessionToken)
         {
-            var sessionTokenInRedis = await _cacheManager.SafeGetAsync(IMESportsConsts.RedisKey.SessionToken, 
+            var sessionTokenInRedis = await _cacheManager.SafeGetAsync(IMESportsConsts.RedisKey.SessionToken,
                 redisKey, () => Task.FromResult(default(IMSessionToken)));
 
             if (sessionTokenInRedis?.SessionToken == null)
             {
-                throw new PlayerLoginExpiredException($"SessionToken in redis is empty");
+                throw new PlayerLoginExpiredException("SessionToken in redis is empty");
             }
-            
+
             if (sessionTokenInRedis.SessionToken.IgnoreCaseNotContains(sessionToken))
             {
-                throw new PlayerLoginExpiredException($"SessionToken {sessionToken} in request different to SessionToken {sessionTokenInRedis.SessionToken} in redis");
+                throw new PlayerLoginExpiredException(
+                    $"SessionToken {sessionToken} in request different to SessionToken {sessionTokenInRedis.SessionToken} in redis");
             }
 
             return sessionTokenInRedis;

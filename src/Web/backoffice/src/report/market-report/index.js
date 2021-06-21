@@ -100,23 +100,14 @@ const ReportContent = ({ brandId }) => {
                     maxDate={maxDate}
                     maxRangeDays={QueryMaxRangeDays}
                     isLoading={isLoading}
-                    search={({ start, end }) => {
-                        let newState = {
+                    search={({ start, end, ...rest }) => {
+                        setState({
                             pageIndex: 0,
                             from: start,
-                            to: end
-                        }
-
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                from: state?.from,
-                                to: state?.to
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                            to: end,
+                            ...rest
+                        })
+                        mutate()
                     }}
                 />
             }
@@ -127,24 +118,17 @@ const ReportContent = ({ brandId }) => {
             // }}
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
                 foot={data?.items?.length > 0}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

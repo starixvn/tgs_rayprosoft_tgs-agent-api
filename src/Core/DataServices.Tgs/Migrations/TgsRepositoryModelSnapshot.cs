@@ -373,6 +373,76 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_banks");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentBankInfo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<string>("BankType")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bank_type");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Detail")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("detail");
+
+                    b.Property<Guid>("PaymentChannelId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_channel_id");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_bank_infos");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_bank_infos_agent_id");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_agent_bank_infos_brand_id");
+
+                    b.HasIndex("PaymentChannelId")
+                        .HasDatabaseName("ix_agent_bank_infos_payment_channel_id");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_agent_bank_infos_player_code");
+
+                    b.ToTable("agent_bank_infos");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividend", b =>
                 {
                     b.Property<int>("Id")
@@ -771,9 +841,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("Path")
                         .IsRequired()
-                        .HasMaxLength(256)
                         .IsUnicode(true)
-                        .HasColumnType("character varying(256)")
+                        .HasColumnType("text")
                         .HasColumnName("path");
 
                     b.Property<string>("Prefix")
@@ -930,11 +999,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<DateTimeOffset>("CurrentSettlementFrom")
+                    b.Property<DateTimeOffset?>("CurrentSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_from");
 
-                    b.Property<DateTimeOffset>("CurrentSettlementTo")
+                    b.Property<DateTimeOffset?>("CurrentSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_to");
 
@@ -953,11 +1022,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<DateTimeOffset>("NextSettlementFrom")
+                    b.Property<DateTimeOffset?>("NextSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_settlement_from");
 
-                    b.Property<DateTimeOffset>("NextSettlementTo")
+                    b.Property<DateTimeOffset?>("NextSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_settlement_to");
 
@@ -966,11 +1035,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("operational_email");
 
-                    b.Property<DateTimeOffset>("PreviousSettlementFrom")
+                    b.Property<DateTimeOffset?>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_from");
 
-                    b.Property<DateTimeOffset>("PreviousSettlementTo")
+                    b.Property<DateTimeOffset?>("PreviousSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_to");
 
@@ -980,7 +1049,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("secret_key");
 
-                    b.Property<int>("SettlementIntervalType")
+                    b.Property<int?>("SettlementIntervalType")
                         .HasColumnType("integer")
                         .HasColumnName("settlement_interval_type");
 
@@ -3180,6 +3249,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("adjustment_amount");
 
+                    b.Property<decimal>("AgentDividendPercentage")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("agent_dividend_percentage");
+
                     b.Property<Guid?>("AgentId")
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
@@ -3388,36 +3462,83 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("bucket_amount");
 
-                    b.Property<int>("BucketType")
-                        .HasColumnType("integer")
+                    b.Property<short>("BucketType")
+                        .HasColumnType("smallint")
                         .HasColumnName("bucket_type");
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<decimal>("CurrentBucketAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("current_bucket_amount");
+
                     b.Property<bool>("IsFull")
                         .HasColumnType("boolean")
                         .HasColumnName("is_full");
 
                     b.Property<string>("PlayerCode")
-                        .HasColumnType("text")
-                        .HasColumnName("player_code");
-
-                    b.Property<string>("PlayerCode1")
+                        .IsRequired()
                         .HasColumnType("character varying(16)")
-                        .HasColumnName("player_code1");
+                        .HasColumnName("player_code");
 
                     b.HasKey("Id")
                         .HasName("pk_player_buckets");
 
-                    b.HasIndex("PlayerCode1")
-                        .HasDatabaseName("ix_player_buckets_player_code1");
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_player_buckets_player_code");
 
                     b.ToTable("player_buckets");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameTypeAggregate", b =>
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBucketHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<DateTimeOffset>("From")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("from");
+
+                    b.Property<int>("Hour")
+                        .HasColumnType("integer")
+                        .HasColumnName("hour");
+
+                    b.Property<int>("Minute")
+                        .HasColumnType("integer")
+                        .HasColumnName("minute");
+
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("text")
+                        .HasColumnName("player_code");
+
+                    b.Property<DateTimeOffset>("To")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("to");
+
+                    b.Property<decimal>("Turnover")
+                        .HasColumnType("numeric")
+                        .HasColumnName("turnover");
+
+                    b.HasKey("Id")
+                        .HasName("pk_player_bucket_histories");
+
+                    b.HasIndex("PlayerCode")
+                        .HasDatabaseName("ix_player_bucket_histories_player_code");
+
+                    b.ToTable("player_bucket_histories");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameAggregate", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -3441,6 +3562,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
 
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uuid")
@@ -3518,18 +3643,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("win_loss");
 
                     b.HasKey("Id")
-                        .HasName("pk_player_game_type_rebate_aggregates_id");
+                        .HasName("pk_player_game_rebate_aggregates_id");
 
                     b.HasIndex("BrandId", "ReportDate")
-                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date");
+                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date");
 
                     b.HasIndex("BrandId", "ReportDate", "AgentId")
-                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_agent_id");
+                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_agent_id");
 
                     b.HasIndex("BrandId", "ReportDate", "PlayerCode")
-                        .HasDatabaseName("ix_player_game_type_rebate_aggregates_brand_id_report_date_player_code");
+                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_player_code");
 
-                    b.ToTable("player_game_type_rebate_aggregates", "report");
+                    b.ToTable("player_game_rebate_aggregates", "report");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
@@ -3781,6 +3906,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("brand_id");
 
+                    b.Property<string>("Content")
+                        .HasColumnType("text")
+                        .HasColumnName("content");
+
                     b.Property<string>("CreatedByUsername")
                         .HasColumnType("text")
                         .HasColumnName("created_by_username");
@@ -3796,6 +3925,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<short?>("GameType")
                         .HasColumnType("smallint")
                         .HasColumnName("game_type");
+
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3820,6 +3953,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
                         .HasColumnName("status");
+
+                    b.Property<string>("SubSubject")
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("sub_subject");
+
+                    b.Property<string>("Subject")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)")
+                        .HasColumnName("subject");
+
+                    b.Property<string>("Terms")
+                        .HasColumnType("text")
+                        .HasColumnName("terms");
 
                     b.Property<DateTimeOffset>("To")
                         .HasColumnType("timestamp with time zone")
@@ -3953,6 +4100,36 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_promotion_game_provider_game_provider_id");
 
                     b.ToTable("promotion_game_providers");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("PlatformType")
+                        .HasColumnType("integer")
+                        .HasColumnName("platform_type");
+
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)")
+                        .HasColumnName("url");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_images");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_promotion_image_promotion_id");
+
+                    b.ToTable("promotion_images");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionParticipant", b =>
@@ -4297,6 +4474,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(10)")
                         .HasColumnName("currency_code");
 
+                    b.Property<decimal?>("EffectiveBettingPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("effective_betting_percentage");
+
                     b.Property<DateTimeOffset?>("ExternalClosedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("external_closed_on");
@@ -4422,6 +4604,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
 
                     b.Property<Guid>("GameProviderId")
                         .HasColumnType("uuid")
@@ -5163,11 +5349,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("payment_return");
 
-                    b.Property<string>("PlayerCode")
-                        .IsRequired()
-                        .HasColumnType("character varying(16)")
-                        .HasColumnName("player_code");
-
                     b.Property<string>("Remark")
                         .HasColumnType("text")
                         .HasColumnName("remark");
@@ -5184,6 +5365,20 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("updated_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("text")
+                        .HasColumnName("user_name");
+
+                    b.Property<int>("UserType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("user_type");
+
                     b.HasKey("Id")
                         .HasName("pk_withdraw_forms");
 
@@ -5192,9 +5387,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("BrandPaymentId")
                         .HasDatabaseName("ix_withdraw_froms_brand_payment_id");
-
-                    b.HasIndex("PlayerCode")
-                        .HasDatabaseName("ix_withdraw_forms_player_code");
 
                     b.ToTable("withdraw_forms");
                 });
@@ -5240,6 +5432,34 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Agent");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentBankInfo", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_agent_bank_infos_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.PaymentChannel", "PaymentChannel")
+                        .WithMany()
+                        .HasForeignKey("PaymentChannelId")
+                        .HasConstraintName("fk_agent_bank_infos_payment_channels_payment_channel_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_agent_bank_infos_players_player_code");
+
+                    b.Navigation("Brand");
+
+                    b.Navigation("PaymentChannel");
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentLoginRecord", b =>
@@ -6023,10 +6243,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerBucket", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
                         .WithMany("PlayerBuckets")
-                        .HasForeignKey("PlayerCode1")
-                        .HasConstraintName("fk_player_buckets_players_player_code1");
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_player_buckets_players_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
@@ -6117,6 +6341,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("GameProvider");
+
+                    b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionImage", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
+                        .WithMany("PromotionImages")
+                        .HasForeignKey("PromotionId")
+                        .HasConstraintName("fk_promotion_image_promotion_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Promotion");
                 });
@@ -6480,18 +6716,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasForeignKey("BrandPaymentId")
                         .HasConstraintName("fk_withdraw_forms_brand_payments_brand_payment_id");
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
-                        .WithMany()
-                        .HasForeignKey("PlayerCode")
-                        .HasConstraintName("fk_withdraw_forms_players_player_code")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Brand");
 
                     b.Navigation("BrandPayment");
-
-                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
@@ -6701,6 +6928,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Promotion", b =>
                 {
                     b.Navigation("PromotionGameProviders");
+
+                    b.Navigation("PromotionImages");
 
                     b.Navigation("PromotionParticipants");
 

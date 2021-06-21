@@ -1,21 +1,18 @@
 using System;
 using Hangfire;
-using Hangfire.Console;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Prometheus;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Filters;
-using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Transactions;
@@ -49,7 +46,7 @@ namespace TGS.Workers.Schedulers
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseHangfireScheduler(new[] { Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report });
+            app.UseHangfireScheduler(new[] {Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report});
 
             app.UseRouting();
 
@@ -67,7 +64,7 @@ namespace TGS.Workers.Schedulers
                 endpoints.MapMetrics();
 
                 endpoints.MapHangfireDashboard("/hangfire",
-                    new() { Authorization = new[] { new IgnoreHangfireAuthorizationFilter() } });
+                    new() {Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}});
             });
         }
 
@@ -93,7 +90,8 @@ namespace TGS.Workers.Schedulers
                 .AddHangfireScheduler(
                     _configuration,
                     jobProvider: new JobProvider(),
-                    typesToUseManagementPage: GetModuleTypes());
+                    typesToUseManagementPage: GetModuleTypes())
+                .AddMail(_configuration);
 
             services.AddControllers();
 
@@ -101,6 +99,12 @@ namespace TGS.Workers.Schedulers
             {
                 var config = sp.GetRequiredService<IConfiguration>();
                 options.MongoConnectionString = config.GetValue<string>("GameProviders:ConnectionString");
+            });
+
+            services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
+            {
+                var url = _configuration.GetSection("Email:Url");
+                c.BaseAddress = new(url.Value);
             });
 
             services
@@ -121,9 +125,14 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IPromotionSettlementDailyWorkerService, PromotionSettlementDailyWorkerService>();
             services.AddTransient<IPromotionSettlementWeeklyWorkerService, PromotionSettlementWeeklyWorkerService>();
             services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
+            services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
         }
 
         private static Type[] GetModuleTypes() =>
-            new[] { typeof(JobManagement), typeof(PromotionJobManagement) };
+            new[]
+            {
+                typeof(AggregateJobManagement), typeof(RebateAndDividendJobManagement),
+                typeof(PromotionJobManagement)
+            };
     }
 }

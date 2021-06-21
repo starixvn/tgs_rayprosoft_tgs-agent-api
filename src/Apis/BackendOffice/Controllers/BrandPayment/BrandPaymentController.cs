@@ -1,14 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
-using TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;
-using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Extensions;
@@ -16,11 +15,6 @@ using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.Queries.BrandPayment;
-using TGS.Services.BackOffice.Application.Queries.PaymentChannel;
-using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
-using TGS.Services.Payment;
-using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -54,79 +48,19 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
             return CreateValidResponse<MessageResponse>();
         }
 
-        [HttpPost]
-        [Description("Create a Payment")]
-        public async Task<CreateUpdateBrandPaymentResponse> CreateBrandPaymentAsync(CreateBrandPaymentRequest request)
+        [HttpPost("deposit")]
+        [HttpPost()]
+        [Description("Create a Deposit Payment")]
+        public async Task<CreateUpdateBrandPaymentResponse> CreateDepositBrandPaymentAsync(CreateBrandPaymentRequest request)
         {
-            if (request.Whitelist != null && request.Blacklist != null)
-            {
-                var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
-                if (duplicatePlayers.Any())
-                {
-                    return new()
-                    {
-                        Valid = false,
-                        Message = Resources.BrandPayment.WhiteSameAsBlack,
-                        DuplicatePlayers = duplicatePlayers
-                    };
-                }
-            }
-
-            await _brandPaymentService.CreatePaymentAsync(request, Username);
-            return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
+            return await CreateBrandPaymentAsync(PaymentTransferType.Deposit, request);
         }
 
-        [HttpGet("pmc")]
-        [Description("Get All Brand PaymentMethodChannels")]
-        public async Task<GenericResponse<AllPaymentMethodChannelsResponse>> GetAllPaymentMethodChannelsAsync(
-            [FromServices] IQueryService<AllPaymentMethodChannelQuery, PaymentMethodChannelInfo> queryService,
-            [FromServices] IQueryService<PaymentMethodQuery, PaymentMethodInfo> paymentMethodQueryService,
-            [FromServices] IQueryService<PaymentChannelQuery, PaymentChannelInfo> paymentChannelQueryService)
+        [HttpPost("withdraw")]
+        [Description("Create a Withdraw Payment")]
+        public async Task<CreateUpdateBrandPaymentResponse> CreateWithdrawBrandPaymentAsync(CreateBrandPaymentRequest request)
         {
-            var allPaymentMethodChannels = queryService.QueryAsync(new AllPaymentMethodChannelQuery());
-            var allPaymentMethods = await paymentMethodQueryService
-                .QueryAsync(new PaymentMethodQuery())
-                .ToDictionaryAsync(pm => pm.Id)
-                .ConfigureAwait(false);
-            var allPaymentChannels = await paymentChannelQueryService
-                .QueryAsync(new PaymentChannelQuery())
-                .ToDictionaryAsync(pc => pc.Id)
-                .ConfigureAwait(false);
-
-            return new GenericResponse<AllPaymentMethodChannelsResponse>
-            {
-                Valid = true,
-                Data = new AllPaymentMethodChannelsResponse
-                {
-                    AllData = allPaymentMethodChannels
-                        .Select(pmc => new PaymentMethodChannelResponse
-                        {
-                            Id = pmc.Id,
-                            PaymentId = pmc.PaymentId,
-                            MethodId = pmc.MethodId,
-                            ChannelId = pmc.ChannelId
-                        })
-                        .ToEnumerable(),
-                    Methods = allPaymentMethodChannels
-                        .GroupBy(pmc => pmc.MethodId)
-                        .SelectAwait(async g => await g.FirstAsync().ConfigureAwait(false))
-                        .Select(pmc => new PaymentMethodModel
-                        {
-                            Id = pmc.MethodId,
-                            Code = allPaymentMethods[pmc.MethodId].Name
-                        })
-                        .ToEnumerable(),
-                    Channels = allPaymentMethodChannels
-                        .GroupBy(pmc => pmc.ChannelId)
-                        .SelectAwait(async g => await g.FirstAsync().ConfigureAwait(false))
-                        .Select(pmc => new PaymentChannelModel
-                        {
-                            Id = pmc.ChannelId,
-                            Code = allPaymentChannels[pmc.ChannelId].Name
-                        })
-                        .ToEnumerable(),
-                }
-            };
+            return await CreateBrandPaymentAsync(PaymentTransferType.Withdrawal, request);
         }
 
         [HttpGet("{id}/handingFee")]
@@ -149,9 +83,8 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpGet]
         [Description("Get brand payments")]
-        public Task<PagedResponse<BrandPaymentModel>>
-            GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request) =>
-            _brandPaymentService.GetPaymentQueries()
+        public Task<PagedResponse<BrandPaymentModel>> GetBrandPaymentsAsync([FromQuery] GetBrandPaymentsRequest request)
+            => _brandPaymentService.GetPaymentQueries()
                 .Include(p => p.BrandPaymentPlayers)
                 .ThenInclude(pp => pp.Player)
                 .Include(p => p.VipLevels)
@@ -181,7 +114,7 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     PaymentMethodChannelId = x.PaymentMethodChannel.Id,
                     TransferType = x.TransferType,
                     ChannelName = x.ChannelName,
-                    ExtendedData = x.ExtendedData,
+                    ExtendedData = JsonDocument.Parse(x.ExtendedData, new JsonDocumentOptions()),
                     PlayerListCondition = x.PlayerListCondition,
                     AllPlayers = x.AllPlayers,
                     DepositedAmountMin = x.DepositedAmountMin,
@@ -225,7 +158,8 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 
         [HttpPut("{brandPaymentId:guid}")]
         [Description("Update a Payment")]
-        public async Task<CreateUpdateBrandPaymentResponse> UpdateBrandPaymentAsync(Guid brandPaymentId,
+        public async Task<CreateUpdateBrandPaymentResponse> UpdateBrandPaymentAsync(
+            Guid brandPaymentId,
             UpdateBrandPaymentRequest request)
         {
             if (request.Whitelist != null && request.Blacklist != null)
@@ -310,7 +244,29 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
                     x => x.Player.PhoneAuthentication)
                 .Where(isAll && brandPayment.VipLevels.Any(),
                     x => x.Player.VipId != null && vipLevelIds.Contains(x.Player.VipId.Value))
-                .Select(x => x.Player.RealName).ToArray();
+                .Select(x => x.Player.Username).ToArray();
+        }
+
+        private async Task<CreateUpdateBrandPaymentResponse> CreateBrandPaymentAsync(
+            PaymentTransferType transferType,
+            CreateBrandPaymentRequest request)
+        {
+            if (request.Whitelist != null && request.Blacklist != null)
+            {
+                var duplicatePlayers = request.Whitelist.Intersect(request.Blacklist).ToArray();
+                if (duplicatePlayers.Any())
+                {
+                    return new()
+                    {
+                        Valid = false,
+                        Message = Resources.BrandPayment.WhiteSameAsBlack,
+                        DuplicatePlayers = duplicatePlayers
+                    };
+                }
+            }
+
+            await _brandPaymentService.CreatePaymentAsync(request, transferType, Username);
+            return CreateValidResponse<CreateUpdateBrandPaymentResponse>();
         }
     }
 }

@@ -64,11 +64,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
         [ResolveRequest(Type = typeof(GetBalanceRequest))]
         public async ValueTask<GetBalanceResponse> GetPlayerBalanceAsync(GetBalanceRequest request)
         {
-            var playerCode = request.Body.PlayerCode;
-            var r = await _actions.GetBalanceAsync(GameProviderCode, request.Body.PlayerCode)
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var r = await _actions.GetBalanceAsync(GameProviderCode, playerCode)
                 .ConfigureAwait(false);
 
-            return _map.Response(playerCode, r);
+            return _map.Response(request.Body.UserId, r);
         }
 
         [HttpPost]
@@ -85,7 +85,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 
             await CacheLockAmountAsync(betData.Transactions);
 
-            return _map.Response(playerCode, request.Body, r);
+            return _map.Response(request.Body, r);
         }
 
         [HttpPost]
@@ -102,7 +102,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 
             await CacheLockAmountAsync(betData.Transactions);
 
-            return _map.Response(playerCode, request.Body, r);
+            return _map.Response(request.Body, r);
         }
 
         [HttpPost]
@@ -127,7 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             await RemoveLockAmountCacheAsync(transactions).ConfigureAwait(false);
             await CacheExternalRoundIdMapAsync(transactions).ConfigureAwait(false);
 
-            return _map.Response(playerCode, request.Body, r);
+            return _map.Response(request.Body, r);
         }
 
         [HttpPost]
@@ -158,7 +158,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             await RemoveLockAmountCacheAsync(transactions).ConfigureAwait(false);
             await CacheExternalRoundIdMapAsync(transactions).ConfigureAwait(false);
 
-            return _map.Response(playerCode, request.Body, r);
+            return _map.Response(request.Body, r);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 
             await RemoveLockAmountCacheAsync(betData.Transactions).ConfigureAwait(false);
 
-            return _map.Response(playerCode, request.Body, r);
+            return _map.Response(request.Body, r);
         }
 
         [Route("settle")]
@@ -190,10 +190,17 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             var autoCloseRound =
                 await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
 
-            var transactions = request.Body.Transactions.Select(t => new SettleTransaction(
-                t.PlayerCode, t.ExternalTransactionId.ToString(),
-                t.UpdateTime, t.SettleDate, SabaConsts.GameActionTypeMap[t.Status],
-                t.Payout)).ToArray();
+            var isTestEnv = HttpContext.Items.Get(SabaConsts.ContextItems.IsTestEnvironment, false);
+
+            var transactions = request.Body.Transactions.Select(t =>
+            {
+                var playerCode = _services.GetPlayerCode(t.UserId, isTestEnv);
+
+                return new SettleTransaction(
+                    playerCode, t.ExternalTransactionId.ToString(),
+                    t.UpdateTime, t.SettleDate, SabaConsts.GameActionTypeMap[t.Status],
+                    t.Payout);
+            }).ToArray();
 
             var playerConfigurationIds = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, transactions)
                 .ConfigureAwait(false);
@@ -237,8 +244,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             var autoCloseRound =
                 await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
 
-            var transactions = request.Body.Transactions.Select(t => new TransactionInfo(
-                t.PlayerCode, t.ExternalTransactionId.ToString(), t.UpdateTime)).ToArray();
+            var isTestEnv = HttpContext.Items.Get(SabaConsts.ContextItems.IsTestEnvironment, false);
+
+            var transactions = request.Body.Transactions.Select(t =>
+            {
+                var playerCode = _services.GetPlayerCode(t.UserId, isTestEnv);
+
+                return new TransactionInfo(
+                    playerCode, t.ExternalTransactionId.ToString(), t.UpdateTime);
+            }).ToArray();
 
             var playerConfigurationIds = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, transactions)
                 .ConfigureAwait(false);
@@ -262,10 +276,17 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
             var autoCloseRound =
                 await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
 
-            var transactions = request.Body.Transactions.Select(t => new SettleTransaction(
-                t.PlayerCode, t.ExternalTransactionId.ToString(),
-                t.UpdateTime, t.SettleDate, SabaConsts.GameActionTypeMap[t.Status],
-                t.Payout)).ToArray();
+            var isTestEnv = HttpContext.Items.Get(SabaConsts.ContextItems.IsTestEnvironment, false);
+
+            var transactions = request.Body.Transactions.Select(t =>
+            {
+                var playerCode = _services.GetPlayerCode(t.UserId, isTestEnv);
+
+                return new SettleTransaction(
+                    playerCode, t.ExternalTransactionId.ToString(),
+                    t.UpdateTime, t.SettleDate, SabaConsts.GameActionTypeMap[t.Status],
+                    t.Payout);
+            }).ToArray();
 
             var playerConfigurationIds = await GetPlayerGameProviderConfigurationIdsAsync(gameProviderId, transactions)
                 .ConfigureAwait(false);

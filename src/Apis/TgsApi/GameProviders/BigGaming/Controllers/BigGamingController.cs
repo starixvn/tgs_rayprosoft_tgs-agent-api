@@ -97,12 +97,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var balance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
 
             return new()
             {
                 Id = baseRequest.Id,
-                Result = JsonDocument.Parse(JsonSerializer.Serialize(balance)),
+                Result = JsonDocument.Parse(JsonSerializer.Serialize(getBalance.Balance)),
                 Error = null,
                 Jsonrpc = baseRequest.Jsonrpc
             };
@@ -125,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 .ConfigureAwait(false);
 
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                await _settingOperations.GetValueFromJsonByKeyAsync<BigGamingConfiguration>(
                     SettingConsts.GameProviderConfigurations.BigGaming);
 
             var betData = _map.Request(gameProviderConfigurationData, data, configuration.OppositeBets);
@@ -166,29 +166,31 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 .ConfigureAwait(false);
 
             var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<AsiaGamingConfiguration>(
+                await _settingOperations.GetValueFromJsonByKeyAsync<BigGamingConfiguration>(
                     SettingConsts.GameProviderConfigurations.BigGaming);
 
-            decimal balance;
+            var balance = default(decimal);
             if (data.Recalc == "1")
             {
                 var resettleResponse = await _map
                     .ResettleAsync(gameProviderConfigurationData, data, playerCode, configuration.OppositeBets)
                     .ConfigureAwait(false);
-                var betDataResult = await _actions.CancelTransactionAsync(resettleResponse.BeforeCancel)
-                    .ConfigureAwait(false);
 
-                balance = betDataResult.Balance;
+                if (resettleResponse.BeforeCancel.Transactions.Length > 0)
+                {
+                    var betDataResult = await _actions.CancelTransactionAsync(resettleResponse.BeforeCancel).ConfigureAwait(false);
+                    balance = betDataResult.Balance;
+                }
+
                 if (resettleResponse.SettleBetData.Transactions.Length > 0)
                 {
-                    betDataResult = await _actions.SettleBetAsync(resettleResponse.SettleBetData).ConfigureAwait(false);
+                    var betDataResult = await _actions.SettleBetAsync(resettleResponse.SettleBetData).ConfigureAwait(false);
                     balance = betDataResult.Balance;
                 }
 
                 if (resettleResponse.CancelBetData.Transactions.Length > 0)
                 {
-                    betDataResult = await _actions.CancelTransactionAsync(resettleResponse.CancelBetData)
-                        .ConfigureAwait(false);
+                    var betDataResult = await _actions.CancelTransactionAsync(resettleResponse.CancelBetData).ConfigureAwait(false);
                     balance = betDataResult.Balance;
                 }
             }
@@ -197,12 +199,16 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 var settleResponse = await _map
                     .SettleAsync(gameProviderConfigurationData, data, playerCode, configuration.OppositeBets)
                     .ConfigureAwait(false);
-                var betDataResult = await _actions.SettleBetAsync(settleResponse.SettleBetData).ConfigureAwait(false);
-                balance = betDataResult.Balance;
+
+                if (settleResponse.SettleBetData.Transactions.Length > 0)
+                {
+                    var betDataResult = await _actions.SettleBetAsync(settleResponse.SettleBetData).ConfigureAwait(false);
+                    balance = betDataResult.Balance;
+                }
+
                 if (settleResponse.CancelBetData.Transactions.Length > 0)
                 {
-                    betDataResult = await _actions.CancelTransactionAsync(settleResponse.CancelBetData)
-                        .ConfigureAwait(false);
+                    var betDataResult = await _actions.CancelTransactionAsync(settleResponse.CancelBetData).ConfigureAwait(false);
                     balance = betDataResult.Balance;
                 }
             }
@@ -259,15 +265,18 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("ping")]
-        public async Task<BigGamingResponse> PingAsync(
-            BigGamingRequest baseRequest) =>
-            new()
+        public Task<BigGamingResponse> PingAsync(
+            BigGamingRequest baseRequest)
+        {
+            return Task.FromResult((new BigGamingResponse()
             {
                 Id = baseRequest.Id,
-                Result = JsonDocument.Parse(
-                    JsonSerializer.Serialize($"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}")),
+                Result = JsonDocument.Parse(JsonSerializer.Serialize($"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}")),
                 Error = null,
                 Jsonrpc = baseRequest.Jsonrpc
-            };
+            }));
+        }
+
+
     }
 }

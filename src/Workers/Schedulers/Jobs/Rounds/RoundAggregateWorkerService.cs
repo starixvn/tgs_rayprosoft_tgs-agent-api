@@ -22,13 +22,13 @@ namespace TGS.Workers.Schedulers.Jobs.Rounds
 
         async Task<TgsResponse> IRoundAggregateWorkerService.ExecutionAsync()
         {
-            var response = await _client.CreateUpdateRoundAggregateAsync(new()).ConfigureAwait(false);
+            var response = await _client.CreateRoundAggregateAsync(new()).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
 
         async Task<TgsResponse> IRoundAggregateWorkerService.ManualExecutionAsync(string date, int hour)
         {
-            var response = await _client.ManualCreateUpdateRoundAggregateAsync(new(date, hour)).ConfigureAwait(false);
+            var response = await _client.ManualCreateRoundAggregateAsync(new(date, hour)).ConfigureAwait(false);
             return new() {ErrorMessage = response.Message};
         }
     }

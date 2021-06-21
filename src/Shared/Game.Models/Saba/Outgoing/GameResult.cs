@@ -5,7 +5,7 @@ namespace TGS.Shared.Game.Models.Saba.Outgoing
     public record GameResult
     {
         [JsonPropertyName("trans_id")]
-        public string ExternalTransactionId { get; init; }
+        public long ExternalTransactionId { get; init; }
 
         [JsonPropertyName("vendor_member_id")]
         public string PlayerCode { get; init; }
@@ -77,7 +77,7 @@ namespace TGS.Shared.Game.Models.Saba.Outgoing
         public string OddsInfo { get; init; }
 
         [JsonPropertyName("isLucky")]
-        public bool IsLucky { get; init; }
+        public string IsLucky { get; init; }
 
         [JsonPropertyName("parlay_type")]
         public string ParlayType { get; init; }

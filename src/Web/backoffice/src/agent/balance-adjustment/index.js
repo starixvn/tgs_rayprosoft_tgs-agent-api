@@ -83,7 +83,13 @@ const BodyContent = ({ brandId = "" }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, status, levelType, type, username } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = useAgentList({
+    let {
+        data = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = useAgentList({
         ...toApiParams(state),
         sortby: "username",
         brandId
@@ -99,28 +105,11 @@ const BodyContent = ({ brandId = "" }) => {
                     <SearchBar
                         brandId={brandId}
                         search={(data) => {
-                            let newState = {
-                                pageIndex: 0,
-                                status: data.status,
-                                levelType: data.levelType,
-                                type: data.type,
-                                username: data.username
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex,
-                                    status,
-                                    levelType,
-                                    type,
-                                    username
-                                })
-                            ) {
-                                mutate()
-                            }
                             setState({
                                 pageIndex: 0,
                                 ...data
                             })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
@@ -129,23 +118,16 @@ const BodyContent = ({ brandId = "" }) => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

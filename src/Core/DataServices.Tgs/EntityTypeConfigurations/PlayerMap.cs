@@ -80,6 +80,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDefaultValue(0)
                 .IsRequired();
 
+            builder.Property(p => p.FirstDepositOn);
+
             builder.HasOne(p => p.Brand)
                 .WithMany(p => p.Players)
                 .HasForeignKey(p => p.BrandId)

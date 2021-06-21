@@ -9,6 +9,8 @@ namespace TGS.Core.Models
         public const string Vip = "Vip";
         public const string SuperLicenseeCodes = "SuperLicenseeCodes";
         public const string PromotionType = "PromotionTypes";
+        public const string CurrencyNetProfit = "CurrencyNetProfit";
+        public const string ArrearsEmail = "ArrearsEmail";
 
         public static class GameProviderConfigurations
         {
@@ -23,6 +25,9 @@ namespace TGS.Core.Models
             public static readonly string KY = string.Format(Template, Consts.GameProvider.KY);
             public static readonly string VR = string.Format(Template, Consts.GameProvider.VR);
             public static readonly string IMESports = string.Format(Template, Consts.GameProvider.IMESports);
-            public static readonly string BigGaming = string.Format(Template, Consts.GameProvider.BigGaming);        }
+            public static readonly string BigGaming = string.Format(Template, Consts.GameProvider.BigGaming);
+            public static readonly string SexyGaming = string.Format(Template, Consts.GameProvider.SexyGaming);
+            public static readonly string Skywind = string.Format(Template, Consts.GameProvider.Skywind);
+        }
     }
 }

@@ -10,7 +10,7 @@ import { Trans, useTrans } from "../../i18n"
 import { FieldValues } from "../../layout/Grid"
 import Label from "../../form/Label"
 import FormDialog from "../../form/FormDialog"
-import { GameTypeLabel } from "../GameType"
+import { GameTypeLabel, isLobbyGameType, notLobbyGameType } from "../GameType"
 import { GamePlatformLabel } from "../games/GamePlatform"
 import { useFormContext } from "react-hook-form"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
@@ -119,9 +119,10 @@ const EditBody = ({ record = {} }) => {
         platform,
         supportHtml5
     } = record
-    let { register, watch } = useFormContext()
+
+    let notLobbyGame = notLobbyGameType(gameType)
     return (
-        <Stack orientation="vertical" width="500px">
+        <Stack orientation="vertical" minWidth="40vw" marginLeft="1rem">
             <Heading use="h5" marginBottom="major-1">
                 <Trans zh="基本资料" en="Basic Information" />
             </Heading>
@@ -182,25 +183,29 @@ const EditBody = ({ record = {} }) => {
                 </Stack>
             </Stack>
 
-            <Heading use="h5" marginBottom="major-1">
-                <Trans zh="特殊处理" en="Special Processing" />
-            </Heading>
-            <FieldValues>
-                <Label fontWeight="normal">
-                    <Trans
-                        zh="有效投注比例"
-                        en="Effective Betting Proportion"
-                    />
-                </Label>
-                <Box alignY="center">
-                    <PercentageNumberInputField name="effectiveBettingPercentage" />
-                </Box>
+            {notLobbyGame && (
+                <>
+                    <Heading use="h5" marginBottom="major-1">
+                        <Trans zh="特殊处理" en="Special Processing" />
+                    </Heading>
+                    <FieldValues>
+                        <Label fontWeight="normal">
+                            <Trans
+                                zh="有效投注比例"
+                                en="Effective Betting Proportion"
+                            />
+                        </Label>
+                        <Box alignY="center">
+                            <PercentageNumberInputField name="effectiveBettingPercentage" />
+                        </Box>
 
-                <Label fontWeight="normal">
-                    <Trans zh="是否发放返水" en="Rebate" />
-                </Label>
-                <Switch name="rebate" />
-            </FieldValues>
+                        <Label fontWeight="normal">
+                            <Trans zh="是否发放返水" en="Commission Rebate" />
+                        </Label>
+                        <Switch name="rebate" />
+                    </FieldValues>
+                </>
+            )}
         </Stack>
     )
 }

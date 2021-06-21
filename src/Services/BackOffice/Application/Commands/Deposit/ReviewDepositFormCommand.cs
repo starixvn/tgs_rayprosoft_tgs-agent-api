@@ -1,5 +1,5 @@
 ﻿using System;
-using TGS.Services.Payment;
+using Tgs.Payment;
 
 namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {

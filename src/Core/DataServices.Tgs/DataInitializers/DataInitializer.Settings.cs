@@ -13,7 +13,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         private async Task GenerateSettingsAsync()
         {
-            var options = new JsonSerializerOptions { WriteIndented = false };
+            var options = new JsonSerializerOptions {WriteIndented = false};
 
             var commonSettings = new[]
             {
@@ -25,7 +25,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     "Super Licensee Codes"),
                 CreateSetting(SettingConsts.PromotionType,
                     _jsonSerializationProvider.SerializeToString(GetPromotionTypes(), options),
-                    "Promotion Types")
+                    "Promotion Types"),
+                CreateSetting(SettingConsts.CurrencyNetProfit,
+                    _jsonSerializationProvider.SerializeToString(GetCurrencyNetProfits(), options),
+                    "Currency NetProfit"),
+                CreateSetting(SettingConsts.ArrearsEmail,
+                    _jsonSerializationProvider.SerializeToString(GetArrearsEmail(), options),
+                    "Arrears Email")
             };
 
             var gameProviderSettings = _gameProviders.Select(gp =>
@@ -54,20 +60,122 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now
             };
 
+        private static ArrearsEmail GetArrearsEmail() =>
+            new()
+            {
+                Manager = new()
+                {
+                    Emails = new[] {"rico.lin@rayprosoft.com"},
+                    Subject = "Manager",
+                    Content =
+                        "HI Manager, \r\n '{0}'."
+                },
+                SettlementDay = new()
+                {
+                    Subject = "settlementDay",
+                    Content =
+                        "settlementDay hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                },
+                Daily = new[]
+                {
+                    new()
+                    {
+                        Subject = "60%",
+                        SendPercentage = 60.0M,
+                        Content =
+                            "60% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    },
+                    new ArrearsEmailInfoDaily
+                    {
+                        Subject = "70%",
+                        SendPercentage = 70.0M,
+                        Content =
+                            "70% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    },
+                    new ArrearsEmailInfoDaily
+                    {
+                        Subject = "80%",
+                        SendPercentage = 80.0M,
+                        Content =
+                            "80% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    },
+                    new ArrearsEmailInfoDaily
+                    {
+                        Subject = "90%",
+                        SendPercentage = 90.0M,
+                        Content =
+                            "90% hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'. \r\n hi please pay for arrears '{0}'."
+                    }
+                }
+            };
+
+        private static CurrencyNetProfit[] GetCurrencyNetProfits() =>
+            new[]
+            {
+                new()
+                {
+                    CurrencyCode = "RMB",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "IDR",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "IDR1000",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "MYR",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "THB",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "VND",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "VND1000",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                },
+                new CurrencyNetProfit
+                {
+                    CurrencyCode = "USD",
+                    NetProfit = 100000.00M,
+                    SendPercentages = new[] {60.0M, 70.0M, 80.0M, 90.0M, 100.0M}
+                }
+            };
+
         private static PromotionTypeGroup[] GetPromotionTypes() =>
             new[]
             {
                 new PromotionTypeGroup
                 {
                     Name = "Deposit",
-                    Trans = new() {Zh = "充值送", En = "Deposit Rebate"},
+                    Trans = new() {Zh = "充值送", En = "Deposit"},
                     Types = new[]
                     {
                         new PromotionType
                         {
                             Name = "FirstDeposit",
                             SettlementIntervalType = "Instantly",
-                            Trans = new() {Zh = "帳號首充", En = "First Deposit"}
+                            Trans = new() {Zh = "帳號首充", En = "Account First Deposit"}
                         },
                         new PromotionType
                         {
@@ -79,7 +187,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             Name = "DailySecondDeposit",
                             SettlementIntervalType = "Instantly",
-                            Trans = new() {Zh = "每日再充", En = "Daily Second Deposit"}
+                            Trans = new() {Zh = "每日再充", En = "Daily Re-Deposit"}
                         }
                     }
                 },
@@ -100,26 +208,26 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new PromotionTypeGroup
                 {
                     Name = "ReliefMoney",
-                    Trans = new() {Zh = "救援金", En = "Relief Money"},
+                    Trans = new() {Zh = "救援金", En = "SOS"},
                     Types = new[]
                     {
                         new PromotionType
                         {
                             Name = "ReliefMoneyDaily",
                             SettlementIntervalType = "Daily",
-                            Trans = new() {Zh = "每日救援金", En = "Daily Relief Money"}
+                            Trans = new() {Zh = "每日救援金", En = "Daily SOS"}
                         },
                         new PromotionType
                         {
                             Name = "ReliefMoneyWeekly",
                             SettlementIntervalType = "Weekly",
-                            Trans = new() {Zh = "每周救援金", En = "Weekly Relief Money"}
+                            Trans = new() {Zh = "每周救援金", En = "Weekly SOS"}
                         },
                         new PromotionType
                         {
                             Name = "ReliefMoneyMonthly",
                             SettlementIntervalType = "Monthly",
-                            Trans = new() {Zh = "每月救援金", En = "Monthly Relief Money"}
+                            Trans = new() {Zh = "每月救援金", En = "Monthly SOS"}
                         }
                     }
                 }
@@ -137,15 +245,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("Update"),
-                                new MenuSetting("View"), new MenuSetting("Verify")
+                                new MenuSetting("View"), new MenuSetting("Create"),
+                                new MenuSetting("Update"), new MenuSetting("Verify")
                             }
                         },
                         new MenuSetting("StationLetter")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("View"),
+                                new MenuSetting("View"), new MenuSetting("Create"),
                                 new MenuSetting("Verify")
                             }
                         },
@@ -153,7 +261,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("View"),
+                                new MenuSetting("View"), new MenuSetting("Create"),
                                 new MenuSetting("Update")
                             }
                         }
@@ -163,8 +271,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("PromotionList") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("PayoutList") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("PromotionList")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("PayoutList")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("PlayerManagement")
@@ -175,7 +289,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("BalanceAdjustment")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("AgentManagement")
@@ -186,15 +303,24 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("BalanceAdjustment") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("BalanceAdjustment")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("Game")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("BrandProviders") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("BrandGames") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("BrandProviders")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("BrandGames")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("Report")
@@ -219,17 +345,32 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Resellers") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Licensees") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Brands") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("Resellers")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Licensees")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Brands")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("FundManagement")
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("Deposit") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}},
-                        new MenuSetting("Withdraw") {SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}}
+                        new MenuSetting("Deposit")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Withdraw")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("System")
@@ -238,22 +379,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     {
                         new MenuSetting("Admins")
                         {
-                            SubMenus = new[] {new MenuSetting("Create"), new MenuSetting("Update")}
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"), new MenuSetting("Create"),
+                                new MenuSetting("Update")
+                            }
                         },
                         new MenuSetting("Roles")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("Update"),
-                                new MenuSetting("Delete"), new MenuSetting("Copy")
+                                new MenuSetting("View"), new MenuSetting("Create"),
+                                new MenuSetting("Update"), new MenuSetting("Delete"),
+                                new MenuSetting("Copy")
                             }
                         },
                         new MenuSetting("Departments")
                         {
                             SubMenus = new[]
                             {
-                                new MenuSetting("Create"), new MenuSetting("Update"),
-                                new MenuSetting("Delete")
+                                new MenuSetting("View"), new MenuSetting("Create"),
+                                new MenuSetting("Update"), new MenuSetting("Delete")
                             }
                         },
                         new MenuSetting("BrandPayments")
@@ -266,11 +412,30 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
-                        new MenuSetting("GameProviders") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Language") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Currency") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("BetLimit") {SubMenus = new[] {new MenuSetting("Update")}},
-                        new MenuSetting("Settings") {SubMenus = new[] {new MenuSetting("Update")}}
+                        new MenuSetting("GameProviders")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("BrandPayments")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Language")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Currency")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("BetLimit")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("Settings")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        }
                     }
                 },
                 new MenuSetting("Log")

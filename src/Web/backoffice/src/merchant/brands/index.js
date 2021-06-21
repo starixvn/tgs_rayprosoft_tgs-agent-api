@@ -9,7 +9,11 @@ import {
 import { Code, Update as UpdateMenu } from "./menu"
 import { Trans, useTrans } from "../../i18n"
 import { Table, toApiParams, useTable, pageCount } from "../../table"
-import { useBrandList, useChangeBrandStatus } from "./client"
+import {
+    useBrandList,
+    useChangeBrandStatus,
+    useSyncBrandGameList
+} from "./client"
 import sequenceColumn from "../../table/column/sequence"
 import dateTimeColumn from "../../table/column/dateTime"
 import { AddButton, EditButton, ViewButton } from "./edit"
@@ -20,6 +24,7 @@ import equals from "fast-deep-equal"
 import { MerchantStatusMenu } from "../status"
 import { EditBrandBetLimitGameProviderBetLimit } from "./BrandBetLimitGameProviderBetLimitDialog"
 import AlertDialog from "../../dialog/Alert"
+import textColumn from "../../table/column/textColumn"
 
 export { Code }
 
@@ -49,9 +54,10 @@ const Body = () => {
     })
     let { pageIndex, pageSize, keyword } = state
 
-    let { isLoading, data, error, mutate, deleteCache } = useBrandList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useBrandList({
+        ...toApiParams(state),
+        sortby: "code"
+    })
 
     let columns = useColumns({ items: data?.items, mutate })
 
@@ -61,15 +67,12 @@ const Body = () => {
             actionBar={
                 <>
                     <SearchForm
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                keyword: data?.keyword
-                            }
-                            if (equals(newState, { pageIndex, keyword })) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
@@ -78,23 +81,16 @@ const Body = () => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -136,45 +132,21 @@ const useColumns = ({ items = [], mutate }) => {
     return useMemo(() => {
         let columns = [
             sequenceColumn(),
-            {
+            textColumn({
                 accessor: "licenseeName",
                 Header: <Trans zh="所属公司" en="Licensee Name" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
-                cell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 accessor: "code",
                 Header: <Trans zh="品牌代码" en="Code" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
-                cell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                }
-            },
-            {
+                disableSortBy: true
+            }),
+            textColumn({
                 accessor: "name",
                 Header: <Trans zh="品牌名称" en="Name" />,
-                disableSortBy: true,
-                headCell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                },
-                cell: {
-                    textAlign: "center",
-                    whiteSpace: "nowrap"
-                }
-            },
+                disableSortBy: true
+            }),
             {
                 accessor: "description",
                 Header: <Trans zh="品牌简介" en="Description" />,
@@ -199,17 +171,11 @@ const useColumns = ({ items = [], mutate }) => {
                     textAlign: "center"
                 }
             },
-            {
+            textColumn({
                 id: "status",
                 accessor: (record) => record,
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                },
                 Cell: ({ value }) => {
                     return (
                         <Box alignX="center">
@@ -221,7 +187,7 @@ const useColumns = ({ items = [], mutate }) => {
                         </Box>
                     )
                 }
-            },
+            }),
             dateTimeColumn({
                 Header: <Trans zh="创建时间" en="Created Time" />,
                 accessor: "createdOn",
@@ -235,32 +201,29 @@ const useColumns = ({ items = [], mutate }) => {
         ]
 
         if (hasAnyMenu) {
-            columns.push({
-                id: "actions",
-                disableSortBy: true,
-                Header: <Trans zh="操作" en="Actions" />,
-                headCell: {
-                    textAlign: "center"
-                },
-                cell: {
-                    textAlign: "center"
-                },
-                accessor: (row) => {
-                    return row
-                },
-                Cell: ({ value }) => {
-                    return (
-                        <Set orientation="vertical" alignX="center">
-                            <ViewButton record={value} />
-                            <EditButton record={value} onSubmitted={mutate} />
-                            <EditBrandBetLimitGameProviderBetLimit
-                                record={value}
-                                onSubmitted={mutate}
-                            />
-                        </Set>
-                    )
-                }
-            })
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    disableSortBy: true,
+                    Header: <Trans zh="操作" en="Actions" />,
+                    accessor: (row) => row,
+                    Cell: ({ value }) => {
+                        return (
+                            <Set orientation="horizontal" alignX="center">
+                                <ViewButton record={value} />
+                                <EditButton
+                                    record={value}
+                                    onSubmitted={mutate}
+                                />
+                                <EditBrandBetLimitGameProviderBetLimit
+                                    record={value}
+                                    onSubmitted={mutate}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
         }
         return columns
     }, [JSON.stringify(items)])

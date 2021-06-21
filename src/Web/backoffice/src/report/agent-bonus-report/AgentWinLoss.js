@@ -12,7 +12,12 @@ import {
 } from "bumbag"
 import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure from "../../dialog/Disclosure"
-import { FormattedNumberDecimal, Trans, useTrans } from "../../i18n"
+import {
+    FormattedDate,
+    FormattedNumberDecimal,
+    Trans,
+    useTrans
+} from "../../i18n"
 import {
     CloseButtonFooter,
     ConfirmButtonFooter
@@ -31,6 +36,8 @@ import { FieldValues } from "../../layout/Grid"
 import { formatNumberDecimal } from "../../number/format"
 import Separator from "../../layout/Separator"
 import { startOfNextDay } from "../../date/startOfNextDay"
+import { startOfPreviousDay } from "../../date/startOfPreviousDay"
+import { formatYearMonthDay } from "../../date/format"
 
 export const AgentWinLossDialogDisclosure = ({
     brandId,
@@ -78,12 +85,12 @@ const ReportDialog = ({
         showAll: true
     })
 
-    let { data, isLoading, error, mutate, deleteCache } = useAgentWinLossList(
+    let { isLoading, data, error, mutate, deleteCache } = useAgentWinLossList(
         agentId,
         {
             ...toApiParams(state),
             sortby: "username",
-            from: start,
+            from: startOfPreviousDay(start),
             to: startOfNextDay(end)
         }
     )
@@ -100,7 +107,9 @@ const ReportDialog = ({
     }
 
     if (error) {
-        return <AlertDialog {...dialog} />
+        return (
+            <AlertDialog {...error} {...dialog} onClickClose={dialog.close} />
+        )
     }
 
     return (
@@ -127,9 +136,10 @@ const ReportDialog = ({
                 </FieldValues>
                 <Separator />
                 <Table
-                    controlledState={state}
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     // pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
@@ -165,7 +175,7 @@ const useAgentPlayerWinLossColumns = ({ items = [] }) => {
 
             numberDecimalColumn({
                 accessor: "sportsWinLossAmount",
-                Header: <Trans zh="体育反水金额" en="Sports Win Loss Amount" />,
+                Header: <Trans zh="体育输赢金额" en="Sports Win Loss Amount" />,
                 sumColumn: "sportsWinLossAmount",
                 disableSortBy: true
             }),

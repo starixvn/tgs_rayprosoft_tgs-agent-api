@@ -9,7 +9,7 @@ import {
     useUserBrandId
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
-import { Code } from "./menu"
+import { Code, View, Update } from "./menu"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useForm, FormProvider } from "react-hook-form"
@@ -75,7 +75,7 @@ const BodyContent = ({ brandId }) => {
     }, [brandId])
 
     let { isLoading, data, error, mutate, deleteCache } = usePromotionList(
-        toApiParams(state)
+        brandId ? { ...toApiParams(state), sortby: "name" } : undefined
     )
 
     let columns = useColumns({ mutate, brandId, items: data?.items })
@@ -87,22 +87,12 @@ const BodyContent = ({ brandId }) => {
                     <SearchBar
                         status={state?.status}
                         name={state?.name}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                status: data?.status,
-                                name: data?.name
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    status: state?.status,
-                                    name: state?.name
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
@@ -114,23 +104,16 @@ const BodyContent = ({ brandId }) => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(state?.pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -162,12 +145,15 @@ const SearchBar = ({ status = "", name = "", search, isLoading }) => {
 }
 
 const useColumns = ({ brandId, items = [], mutate }) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasViewAuth = useIsDisplayMenuByRoute([View])
+    let hasAnyMenu = hasUpdateAuth || hasViewAuth
+
     return useMemo(() => {
         let columns = [
             textColumn({
                 accessor: "name",
-                Header: <Trans zh="活动名称" en="Name" />,
+                Header: <Trans zh="活动名称" en="Promotion Name" />,
                 disableSortBy: true
             }),
             textColumn({
@@ -183,14 +169,14 @@ const useColumns = ({ brandId, items = [], mutate }) => {
             }),
             textColumn({
                 accessor: "promotionType",
-                Header: <Trans zh="活动子类型" en="Promotion Subtype" />,
+                Header: <Trans zh="活动子类型" en="Promotion SubType" />,
                 disableSortBy: true,
                 Cell: ({ value }) => <PromotionTypeLabel value={value} />
             }),
             textColumn({
                 id: "promotionTime",
                 accessor: (row) => row,
-                Header: <Trans zh="活动时间" en="Promotion Time" />,
+                Header: <Trans zh="活动时间" en="Promotion Period" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let from = formatDayMonthYear(value?.from)
@@ -201,7 +187,7 @@ const useColumns = ({ brandId, items = [], mutate }) => {
             textColumn({
                 id: "gameTypeGroup",
                 accessor: (row) => row,
-                Header: <Trans zh="游戏类型" en="Game Type Group" />,
+                Header: <Trans zh="游戏类型" en="Game Type" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let group = useGameTypeGroupLabelOf(value?.gameType) ?? ""
@@ -210,18 +196,18 @@ const useColumns = ({ brandId, items = [], mutate }) => {
             }),
             textColumn({
                 accessor: "gameType",
-                Header: <Trans zh="游戏子类型" en="Game Type" />,
+                Header: <Trans zh="游戏子类型" en="Game SubType" />,
                 disableSortBy: true,
                 Cell: ({ value }) => <GameTypeLabel value={value} />
             }),
             textColumn({
                 accessor: "gameProviderIds",
-                Header: <Trans zh="活动厂商" en="Game Providers" />,
+                Header: <Trans zh="活动厂商" en="GP Participation" />,
                 disableSortBy: true,
                 Cell: ({ value: gameProviderIds }) => {
                     let dialogTitle = useTrans({
                         zh: "活动厂商",
-                        en: "Game Providers"
+                        en: "GP Participation"
                     })
 
                     if (!gameProviderIds || gameProviderIds?.length == 0) {
@@ -238,12 +224,12 @@ const useColumns = ({ brandId, items = [], mutate }) => {
             }),
             textColumn({
                 accessor: "vipLevels",
-                Header: <Trans zh="活动用户群" en="VIP Levels" />,
+                Header: <Trans zh="活动用户群" en="User Group" />,
                 disableSortBy: true,
                 Cell: ({ value: vipLevels }) => {
                     let dialogTitle = useTrans({
                         zh: "活动用户群",
-                        en: "VIP Levels"
+                        en: "User Group"
                     })
 
                     if (!vipLevels || vipLevels?.length === 0) {
@@ -261,7 +247,7 @@ const useColumns = ({ brandId, items = [], mutate }) => {
             textColumn({
                 id: "amounts",
                 accessor: (row) => row,
-                Header: <Trans zh="活动费用" en="Amount" />,
+                Header: <Trans zh="活动费用" en="Promotion Fund" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     let unlimited = value?.unlimited
@@ -294,7 +280,7 @@ const useColumns = ({ brandId, items = [], mutate }) => {
             columns.push(
                 textColumn({
                     id: "actions",
-                    Header: <Trans zh="操作" en="Actions" />,
+                    Header: <Trans zh="操作" en="Action" />,
                     accessor: (row) => row,
                     disableSortBy: true,
                     Cell: ({ value: record }) => {

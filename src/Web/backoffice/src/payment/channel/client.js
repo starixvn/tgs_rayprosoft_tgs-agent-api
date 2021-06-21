@@ -8,7 +8,7 @@ import {
 
 let API = "/api/PaymentChannel"
 
-const CodeTranPairs = []
+const CodeTranPairs = [["CustomBank", { zh: "自订银行", en: "Custom Bank" }]]
 
 export const usePaymentChannelList = () => {
     let { data, ...rest } = useGet(API)

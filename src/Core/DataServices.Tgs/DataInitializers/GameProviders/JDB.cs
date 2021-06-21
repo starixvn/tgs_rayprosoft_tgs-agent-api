@@ -81,6 +81,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     AESIv = "756edb2fc85fe908",
                     AESKey = "4f09f467e6a8fb9f",
                     ClientDomain = "VB3",
+                    TimezoneHour = +8,
                     Agents = new JDBAgent[]
                     {
                         new()

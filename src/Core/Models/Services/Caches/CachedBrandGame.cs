@@ -11,5 +11,6 @@ namespace TGS.Core.Models.Services.Caches
         public GamePlatformType PlatformType { get; init; }
         public GameStatus BrandGameStatus { get; init; }
         public GameTag Tag { get; init; }
+        public int DisplayOrder { get; init; }
     }
 }

@@ -48,6 +48,7 @@ import BrandBar from "../../report/BrandBar"
 import textColumn from "../../table/column/textColumn"
 import { PaymentProviderLabel } from "../../payment/PaymentProvider"
 import { PaymentMethodLabel } from "../../payment/method/PaymentMethod"
+import { PaymentChannelLabel } from "../../payment/channel/PaymentChannel"
 
 export { Code }
 
@@ -127,15 +128,8 @@ const BodyContent = ({ brandId }) => {
                 <Level>
                     <SearchBar
                         search={(newState) => {
-                            if (
-                                equals(newState, {
-                                    paymentStatus: state.paymentStatus,
-                                    keyword: state.keyword
-                                })
-                            ) {
-                                mutate()
-                            }
                             setState({ pageIndex: 0, ...newState })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
@@ -194,15 +188,7 @@ const BodyContent = ({ brandId }) => {
                     )}
                 </TabPanel>
             </Tabs>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -225,7 +211,8 @@ const DataTable = ({
     let {
         result,
         isLoading: isChangingDisplayOrder,
-        error
+        error,
+        deleteCache
     } = useChangeBrandPaymentOrders(submitData)
 
     const reset = () => {
@@ -260,11 +247,14 @@ const DataTable = ({
             <Table
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
             <Dialog.Footer position="sticky" bottom="0">
                 <Button
                     isLoading={isChangingDisplayOrder}
@@ -333,7 +323,7 @@ const useColumns = ({
                         <Input
                             type="number"
                             size="small"
-                            min="0"
+                            min="1"
                             minLength="1"
                             width="5em"
                             defaultValue={displayOrder}
@@ -364,9 +354,10 @@ const useColumns = ({
                 Cell: ({ value }) => <PaymentMethodLabel value={value} />
             }),
             textColumn({
-                accessor: "paymentChannelName",
+                accessor: "paymentChannelId",
                 Header: <Trans zh="支付通道" en="Payment Channel" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => <PaymentChannelLabel value={value} />
             }),
             textColumn({
                 accessor: "channelName",

@@ -42,6 +42,7 @@ import { useLogList } from "./client"
 import LogLevel, { LogLevelSelect } from "./LogLevel"
 import { LogMessageDialogDisclosure } from "../LogMessageDialog"
 import { LogExceptionDialogDisclosure } from "../LogExceptionDialog"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -67,9 +68,17 @@ const Body = ({}) => {
     })
 
     let { pageIndex, pageSize } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = useLogList(
-        toApiParams(state)
-    )
+    let {
+        data = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = useLogList({
+        ...toApiParams(state),
+        sortby: "RecordedOn",
+        orderby: SortOrder.Descending
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
 
@@ -83,26 +92,14 @@ const Body = ({}) => {
                     trackingId={state?.trackingId}
                     serverName={state?.serverName}
                     level={state?.level}
-                    search={({ start, end, ...data }) => {
-                        let newState = {
+                    search={({ start, end, ...data } = {}) => {
+                        setState({
                             pageIndex: 0,
                             from: start,
                             to: end,
                             ...data
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                from: state?.from,
-                                to: state?.to,
-                                trackingId: state?.trackingId,
-                                serverName: state?.serverName,
-                                level: state?.level
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                        })
+                        mutate()
                     }}
                     isLoading={isLoading}
                 />
@@ -117,15 +114,7 @@ const Body = ({}) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }

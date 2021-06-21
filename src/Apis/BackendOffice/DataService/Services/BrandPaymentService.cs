@@ -15,26 +15,6 @@ using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Apis.BackendOffice.DataService.Services
 {
-    public interface IBrandPaymentService
-    {
-        Task<BrandPayment> GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
-            Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery = null, bool tracking = false);
-
-        IQueryable<BrandPayment> GetPaymentQueries(bool tracking = false);
-
-        Task CreatePaymentAsync(CreateBrandPaymentRequest request, string username);
-
-        Task UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request, string username);
-
-        Task ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username);
-
-        Task<bool> ExistsAsync(Expression<Func<BrandPayment, bool>> predicate);
-
-        Task UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request, string username);
-
-        Task ChangeOrderAsync(ChangeOrderRequest request);
-    }
-
     public class BrandPaymentService : IBrandPaymentService
     {
         private readonly ITgsRepository _repository;
@@ -44,7 +24,53 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository = repository;
         }
 
-        public async Task CreatePaymentAsync(CreateBrandPaymentRequest request, string username)
+        public async Task ChangeOrderAsync(ChangeOrderRequest request)
+        {
+            var ids = request.Orders.Select(q => q.Id);
+            var payments = await _repository.BrandPayments.AsQueryable()
+                .Where(q => ids.Contains(q.Id)).ToListAsync();
+
+            payments.ForEach(p =>
+            {
+                var item = request.Orders.FirstOrDefault(x => x.Id == p.Id);
+
+                if (item != null)
+                {
+                    p.DisplayOrder = item.DisplayOrder;
+                }
+            });
+
+            _repository.BrandPayments.UpdateRange(payments);
+            await _repository.SaveChangesAsync();
+        }
+
+        public Task ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
+        {
+            var beforePayment = new BrandPayment
+            {
+                ChannelName = payment.ChannelName,
+                PaymentStatus = payment.PaymentStatus,
+                TransferLimitFrom = payment.TransferLimitFrom,
+                TransferLimitTo = payment.TransferLimitTo,
+                PlayerListCondition = payment.PlayerListCondition,
+                AllPlayers = payment.AllPlayers,
+                IdentityAuthentication = payment.IdentityAuthentication,
+                PhoneAuthentication = payment.PhoneAuthentication,
+                DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
+                DepositedAmountMin = payment.DepositedAmountMin,
+                DepositedAmountMax = payment.DepositedAmountMax
+            };
+
+            payment.PaymentStatus = status;
+            payment.UpdatedOn = DateTimeOffset.Now;
+            payment.UpdatedByUsername = username;
+
+            _repository.Entry(payment).State = EntityState.Modified;
+            _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
+            return _repository.SaveChangesAsync();
+        }
+
+        public async Task CreatePaymentAsync(CreateBrandPaymentRequest request, PaymentTransferType transferType, string username)
         {
             var paymentId = Guid.NewGuid();
             var payment = new BrandPayment
@@ -54,6 +80,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 DisplayOrder = 99,
                 PaymentMethodChannelId = request.PaymentMethodChannelId,
                 ChannelName = request.ChannelName,
+                TransferType = transferType,
                 ExtendedData = JsonSerializer.Serialize(request.ExtendedData),
                 TransferLimitFrom = request.TransferLimitFrom,
                 TransferLimitTo = request.TransferLimitTo,
@@ -96,8 +123,27 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await _repository.SaveChangesAsync();
         }
 
+        public Task<bool> ExistsAsync(Expression<Func<BrandPayment, bool>> predicate) =>
+            _repository.BrandPayments.AnyAsync(predicate);
+
+        public Task<BrandPayment> GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
+            Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery, bool tracking)
+        {
+            var payment = tracking
+                ? _repository.BrandPayments
+                : _repository.BrandPayments.AsNoTracking();
+            preQuery ??= c => c;
+
+            return preQuery(payment).FirstOrDefaultAsync(predicate);
+        }
+
+        public IQueryable<BrandPayment> GetPaymentQueries(bool tracking) =>
+            tracking
+                ? _repository.BrandPayments
+                : _repository.BrandPayments.AsNoTracking();
+
         public async Task UpdatePaymentAsync(BrandPayment payment, UpdateBrandPaymentRequest request,
-            string username)
+                                    string username)
         {
             var beforePayment = new BrandPayment
             {
@@ -164,25 +210,6 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await tran.CommitAsync();
         }
 
-        public Task<BrandPayment> GetPaymentAsync(Expression<Func<BrandPayment, bool>> predicate,
-            Func<IQueryable<BrandPayment>, IQueryable<BrandPayment>> preQuery, bool tracking)
-        {
-            var payment = tracking
-                ? _repository.BrandPayments
-                : _repository.BrandPayments.AsNoTracking();
-            preQuery ??= c => c;
-
-            return preQuery(payment).FirstOrDefaultAsync(predicate);
-        }
-
-        public IQueryable<BrandPayment> GetPaymentQueries(bool tracking) =>
-            tracking
-                ? _repository.BrandPayments
-                : _repository.BrandPayments.AsNoTracking();
-
-        public Task<bool> ExistsAsync(Expression<Func<BrandPayment, bool>> predicate) =>
-            _repository.BrandPayments.AnyAsync(predicate);
-
         public Task UpdatePaymentHandlingFeeAsync(BrandPayment payment, UpdatePaymentFeeRequest request,
             string username)
         {
@@ -192,81 +219,6 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository.Entry(payment).State = EntityState.Modified;
             return _repository.SaveChangesAsync();
         }
-
-        public async Task ChangeOrderAsync(ChangeOrderRequest request)
-        {
-            var ids = request.Orders.Select(q => q.Id);
-            var payments = await _repository.BrandPayments.AsQueryable()
-                .Where(q => ids.Contains(q.Id)).ToListAsync();
-
-            payments.ForEach(p =>
-            {
-                var item = request.Orders.FirstOrDefault(x => x.Id == p.Id);
-
-                if (item != null)
-                {
-                    p.DisplayOrder = item.DisplayOrder;
-                }
-            });
-
-            _repository.BrandPayments.UpdateRange(payments);
-            await _repository.SaveChangesAsync();
-        }
-
-        public Task ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
-        {
-            var beforePayment = new BrandPayment
-            {
-                ChannelName = payment.ChannelName,
-                PaymentStatus = payment.PaymentStatus,
-                TransferLimitFrom = payment.TransferLimitFrom,
-                TransferLimitTo = payment.TransferLimitTo,
-                PlayerListCondition = payment.PlayerListCondition,
-                AllPlayers = payment.AllPlayers,
-                IdentityAuthentication = payment.IdentityAuthentication,
-                PhoneAuthentication = payment.PhoneAuthentication,
-                DepositedAmountUnlimited = payment.DepositedAmountUnlimited,
-                DepositedAmountMin = payment.DepositedAmountMin,
-                DepositedAmountMax = payment.DepositedAmountMax
-            };
-
-            payment.PaymentStatus = status;
-            payment.UpdatedOn = DateTimeOffset.Now;
-            payment.UpdatedByUsername = username;
-
-            _repository.Entry(payment).State = EntityState.Modified;
-            _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
-            return _repository.SaveChangesAsync();
-        }
-
-        private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerListAsync(Guid paymentId, string[] list,
-            PlayerListType playerListType)
-        {
-            var playerWhitelist = list != null
-                ? await _repository.Players.AsQueryable()
-                    .Where(x => list.Contains(x.Username)).ToArrayAsync()
-                : Array.Empty<Player>();
-            return playerWhitelist.Select(player => new BrandPaymentPlayer
-            {
-                ListType = playerListType,
-                BrandPaymentId = paymentId,
-                PlayerCode = player.PlayerCode,
-                Player = player
-            }).ToArray();
-        }
-
-        private BrandPaymentAuditLog GeneratePaymentAuditLog(BrandPayment payment, BrandPayment beforePayment) =>
-            new()
-            {
-                Id = Guid.NewGuid(),
-                BrandPaymentId = payment.Id,
-                Before = JsonSerializer.Serialize(ExchangeBrandPaymentData(beforePayment)),
-                After = JsonSerializer.Serialize(ExchangeBrandPaymentData(payment)),
-                Reason = payment.Reason,
-                CreatedOn = payment.UpdatedOn,
-                CreatedByUsername = payment.UpdatedByUsername,
-                Operation = BrandPaymentOperation.Update
-            };
 
         private BrandPaymentAuditData ExchangeBrandPaymentData(BrandPayment payment) =>
             new(
@@ -281,5 +233,34 @@ namespace TGS.Apis.BackendOffice.DataService.Services
                 payment.DepositedAmountMin,
                 payment.DepositedAmountMax,
                 payment.DepositedAmountUnlimited);
+
+        private BrandPaymentAuditLog GeneratePaymentAuditLog(BrandPayment payment, BrandPayment beforePayment) =>
+            new()
+            {
+                Id = Guid.NewGuid(),
+                BrandPaymentId = payment.Id,
+                Before = JsonSerializer.Serialize(ExchangeBrandPaymentData(beforePayment)),
+                After = JsonSerializer.Serialize(ExchangeBrandPaymentData(payment)),
+                Reason = payment.Reason,
+                CreatedOn = payment.UpdatedOn,
+                CreatedByUsername = payment.UpdatedByUsername,
+                Operation = BrandPaymentOperation.Update
+            };
+
+        private async Task<BrandPaymentPlayer[]> GeneratePaymentPlayerListAsync(Guid paymentId, string[] list,
+                            PlayerListType playerListType)
+        {
+            var playerWhitelist = list != null
+                ? await _repository.Players.AsQueryable()
+                    .Where(x => list.Contains(x.Username)).ToArrayAsync()
+                : Array.Empty<Player>();
+            return playerWhitelist.Select(player => new BrandPaymentPlayer
+            {
+                ListType = playerListType,
+                BrandPaymentId = paymentId,
+                PlayerCode = player.PlayerCode,
+                Player = player
+            }).ToArray();
+        }
     }
 }

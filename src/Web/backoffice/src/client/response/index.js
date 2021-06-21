@@ -21,27 +21,32 @@ export const toDataOrError = (response) => {
                     })
                 })
                 .then((data) => {
-                    let { title, message, errors = [], ...rest } = data
+                    let { title, message, errors = {}, ...rest } = data
+                    errors = Object.values(errors)
                     return Promise.reject({
                         title: title ?? message ?? errorTitle(response),
                         errors:
-                            errors?.length > 0
-                                ? Object.values(errors)
-                                : [JSON.stringify(rest)]
+                            errors?.length > 0 ? errors : [JSON.stringify(rest)]
                     })
                 })
         }
     }
 
-    return response.json().then((data) => {
-        if (!data?.valid && data?.message) {
-            return Promise.reject({
-                title: data.message
-            })
-        }
+    return response
+        .json()
+        .then((data) => {
+            if (!data?.valid && data?.message) {
+                return Promise.reject({
+                    title: data.message
+                })
+            }
 
-        return data
-    })
+            return data
+        })
+        .catch((error) => {
+            console.warn(error)
+            return Promise.reject(error)
+        })
 }
 
 const BadRequest = 400

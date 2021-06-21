@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Properties;
@@ -28,7 +29,8 @@ namespace TGS.Services.Promotion.Handlers
             GetPromotionsRequest request,
             CancellationToken cancellationToken)
         {
-            var player = await _playerService.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode);
+            var player = await _playerService.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode)
+                .ConfigureAwait(false);
 
             if (player is null && request.PlayerCode.IsNotNullOrEmpty())
             {
@@ -42,6 +44,11 @@ namespace TGS.Services.Promotion.Handlers
                 .Where(request.PlayerCode,
                     x => x.PromotionVipLevels.Count == 0 ||
                         x.PromotionVipLevels.Select(p => p.Level).Contains(player.Vip.Level))
+                .Where(
+                    request.CurrentDate,
+                    x => x.Status == SwitchStatus.Enabled
+                        && x.From <= request.CurrentDate
+                        && x.To > request.CurrentDate)
                 .Select(x => new PromotionModel
                 {
                     Id = x.Id,
@@ -60,11 +67,16 @@ namespace TGS.Services.Promotion.Handlers
                     TotalAmountLimit = x.TotalAmountLimit,
                     TurnoverMultiple = x.TurnoverMultiple,
                     GameProviderIds = x.PromotionGameProviders.Select(g => g.GameProviderId).ToArray(),
-                    VipLevels = x.PromotionVipLevels.Select(v => v.Level).ToArray(),
+                    VipLevels = x.PromotionVipLevels.Select(v => v.Level).OrderBy(level => level).ToArray(),
                     CreatedOn = x.CreatedOn,
                     UpdatedOn = x.UpdatedOn,
                     CreatedByUsername = x.CreatedByUsername,
-                    UpdatedByUsername = x.UpdatedByUsername
+                    UpdatedByUsername = x.UpdatedByUsername,
+                    Subject = x.Subject,
+                    SubSubject = x.SubSubject,
+                    Content = x.Content,
+                    Terms = x.Terms,
+                    Images = x.PromotionImages.Select(i => new PromotionImageModel(i.Url, i.PlatformType)).ToArray()
                 }).CreatePagedResponseAsync(request);
         }
     }

@@ -97,6 +97,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to External id existed already..
+        /// </summary>
+        public static string ExternalIdExisted {
+            get {
+                return ResourceManager.GetString("ExternalIdExisted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Game in use for brands..
         /// </summary>
         public static string GameInUse {

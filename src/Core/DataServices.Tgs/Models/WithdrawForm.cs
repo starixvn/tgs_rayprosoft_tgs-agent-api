@@ -4,38 +4,40 @@ namespace TGS.Core.DataServices.Tgs.Models
 {
     public class WithdrawForm
     {
-        public Guid Id { get; set; }
-
-        public string PlayerCode { get; set; }
-
-        public Guid BrandId { get; set; }
+        public decimal? ActualAmount { get; set; }
 
         public decimal Amount { get; set; }
 
-        public decimal? ActualAmount { get; set; }
-
-        public Guid? BrandPaymentId { get; set; }
-
-        public int Status { get; set; }
-
-        public string Remark { get; set; }
-
-        public Guid BankInfoId { get; set; }
+        public string ApplyInfo { get; set; }
 
         public string BankInfo { get; set; }
 
-        public string ApplyInfo { get; set; }
-
-        public string PaymentReturn { get; set; }
-
-        public DateTimeOffset CreatedOn { get; set; }
-
-        public DateTimeOffset UpdatedOn { get; set; }
-
-        public virtual Player Player { get; set; }
+        public Guid BankInfoId { get; set; }
 
         public virtual Brand Brand { get; set; }
 
+        public Guid BrandId { get; set; }
+
         public virtual BrandPayment BrandPayment { get; set; }
+
+        public Guid? BrandPaymentId { get; set; }
+
+        public DateTimeOffset CreatedOn { get; set; }
+
+        public Guid Id { get; set; }
+
+        public string PaymentReturn { get; set; }
+
+        public string UserId { get; set; }
+
+        public string Remark { get; set; }
+
+        public int Status { get; set; }
+
+        public DateTimeOffset UpdatedOn { get; set; }
+
+        public string UserName { get; set; }
+
+        public int UserType { get; set; }
     }
 }

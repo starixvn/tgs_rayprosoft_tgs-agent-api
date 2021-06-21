@@ -152,8 +152,19 @@ Scenario: 04.d - Lose bet
     Then I will receive bet response of OK and balance of $90
         And player wallet database record will be for $90
         And game action will be recorded in the database of type "LoseBet" for $0
+        
+Scenario: 04.e - Lose bet with 2 transactions
+    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "AGIN_DSP_BAC"
+        And I place bet of $10 for game "AGIN_DSP_BAC" for the same round
+        And balance now being $80
+    When I settle bet for win amount $-20
+    Then I will receive bet response of OK and balance of $80
+        And player wallet database record will be for $80
+        And 2 game actions will be recorded in the database of type "LoseBet" for $0
 
-Scenario: 04.e - Settle bet with duplicate transaction ID
+Scenario: 04.f - Settle bet with duplicate transaction ID
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I place bet of $10 for game "AGIN_DSP_BAC"
@@ -164,7 +175,7 @@ Scenario: 04.e - Settle bet with duplicate transaction ID
         And player wallet database record will be for $115
         And game action will be recorded in the database of type "WinBet" for $25
         
-Scenario: 04.f - Settle bet for ROU game
+Scenario: 04.g - Settle bet for ROU game
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
         And player having balance of $100
         And I place bet of $10 for game "AGIN_DSP_ROU"
@@ -180,6 +191,24 @@ Scenario: 04.f - Settle bet for ROU game
     Then I will receive bet response of OK and balance of $102
         And player wallet database record will be for $102
         And game action id contains 101 will be recorded in the database of type "WinBet" for $12
+        And game action id contains 103 will be recorded in the database of type "LoseBet" for $0
+
+Scenario: 04.h - Settle all lose bet for ROU game
+    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "AGIN_DSP_ROU"
+        And balance now being $90
+        And I send bet response
+		| PlayType | Amount | Val |
+		| 101      | 4      | 1   |
+		| 103      | 6      |     |
+    When I settle bet
+		| PlayType | WinAmount | RoundFinish |
+		| 101      | -4        | false       |
+		| 103      | -6        | true        |
+    Then I will receive bet response of OK and balance of $90
+        And player wallet database record will be for $90
+        And game action id contains 101 will be recorded in the database of type "LoseBet" for $0
         And game action id contains 103 will be recorded in the database of type "LoseBet" for $0
         
 Scenario: 05.a - Cancel transaction
@@ -210,4 +239,16 @@ Scenario: 05.c - Cancel non-existent transaction
         And player having balance of $100
     When I cancel non-existent transaction for game "AGIN_DSP_BAC"
     Then I will receive bet response of INVALID_TRANSACTION and balance of $100
+
+Scenario: 05.d - Cancel transaction for ROU game
+    Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
+        And player having balance of $100
+        And I place bet of $10 for game "AGIN_DSP_ROU"
+        And balance now being $90
+        And player logout
+    When I cancel transaction
+    Then I will receive bet response of OK and balance of $100
+        And player wallet database record will be for $100
+        And game action will be recorded in the database of type "CancelTransaction" for $10
+        And the round will be closed
 	

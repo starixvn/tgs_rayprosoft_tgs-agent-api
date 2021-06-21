@@ -41,21 +41,16 @@ export const PlayerBalanceChangePanel = ({ brandId, playerCode, ...props }) => {
     })
 
     let { pageSize, accountChangeType, from, to } = state
-    let {
-        isLoading,
-        data,
-        error,
-        mutate,
-        deleteCache
-    } = usePlayerBalanceChanges(
-        isActive
-            ? toApiParams({
-                  ...state,
-                  sortby: "recordedOn",
-                  orderby: Descending
-              })
-            : undefined
-    )
+    let { isLoading, data, error, mutate, deleteCache } =
+        usePlayerBalanceChanges(
+            isActive
+                ? toApiParams({
+                      ...state,
+                      sortby: "recordedOn",
+                      orderby: Descending
+                  })
+                : undefined
+        )
 
     let columns = useColumns({ items: data?.items })
 
@@ -84,18 +79,11 @@ export const PlayerBalanceChangePanel = ({ brandId, playerCode, ...props }) => {
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
                     initialState={state}
+                    controlledState={state}
                     isLoading={isLoading}
                 />
             </Stack>
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </TabPanel>
     )
 }
@@ -200,14 +188,14 @@ const BonusTrans = {
 
 const Rebate = "Rebate"
 const RebateTrans = {
-    zh: "返佣",
-    en: "Rebate"
+    zh: "返水",
+    en: "Commission Rebate"
 }
 
 const Dividend = "Dividend"
 const DividendTrans = {
     zh: "分紅",
-    en: "Dividend"
+    en: "Profit Sharing"
 }
 
 const Promotion = "Promotion"
@@ -228,10 +216,10 @@ const GameProviderFundOutTrans = {
     en: "Fund Out"
 }
 
-const Other = "Other"
-const OtherTrans = {
-    zh: "其他",
-    en: "Other"
+const CancelWithdrawal = "CancelWithdrawal"
+const CancelWithdrawalTrans = {
+    zh: "取消提款",
+    en: "Cancel Withdrawal"
 }
 
 const PlayerTransactionTypeSelect = ({ placeholder, ...props }) => {
@@ -249,6 +237,10 @@ const PlayerTransactionTypeSelect = ({ placeholder, ...props }) => {
         {
             label: useTrans(WithdrawalTrans),
             value: Withdrawal
+        },
+        {
+            label: useTrans(CancelWithdrawalTrans),
+            value: CancelWithdrawal
         },
         {
             label: useTrans(AdjustTrans),
@@ -277,10 +269,6 @@ const PlayerTransactionTypeSelect = ({ placeholder, ...props }) => {
         {
             label: useTrans(GameProviderFundInTrans),
             value: GameProviderFundIn
-        },
-        {
-            label: useTrans(OtherTrans),
-            value: Other
         },
         {
             label: useTrans(PlaceBetTrans),
@@ -343,8 +331,8 @@ const PlayerTransactionTypeLabel = ({ value = "" }) => {
             return <Trans {...GameProviderFundOutTrans} />
         case GameProviderFundIn:
             return <Trans {...GameProviderFundInTrans} />
-        case Other:
-            return <Trans {...OtherTrans} />
+        case CancelWithdrawal:
+            return <Trans {...CancelWithdrawalTrans} />
         default:
             return value
     }

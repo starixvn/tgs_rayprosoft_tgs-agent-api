@@ -48,7 +48,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
 
             var tgsPlayers = request.Level == null
                 ? null
-                : brandPlayers.Where(x => x.Vip.Level == request.Level)
+                : brandPlayers.Where(x => x.Vip?.Level == request.Level)
                     .Select(x => x.PlayerCode).ToArray();
 
             var vips = await _service.GetPlayerAggregateQueries()
@@ -69,7 +69,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                         WinLossAmount = players.Sum(m => m.WinLossAmount),
                         NetProfit = players.Sum(m => m.NetProfit)
                     })
-                .GroupJoin(_service.Repository.PlayerGameTypeAggregates
+                .GroupJoin(_service.Repository.PlayerGameAggregates.AsQueryable()
                         .Where(x => x.BrandId == request.BrandId)
                         .Where(x => x.ReportDate >= from && x.ReportDate < to)
                         .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode),

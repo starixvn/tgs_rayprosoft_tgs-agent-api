@@ -14,16 +14,10 @@ namespace TGS.Services.Promotion
             Expression<Func<Player, bool>> predicate,
             Func<IQueryable<Player>, IQueryable<Player>>? preQuery = null);
 
-        Task<Player?> GetPlayerByPlayerCodeAsync(string playerCode);
-
-        IQueryable<PlayerAuditLog> GetPlayerOperationQueries(
-            Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>>? preQuery = null,
-            bool tracking = false);
+        Task<Player> GetPlayerByPlayerCodeAsync(string playerCode);
 
         IQueryable<Player> GetPlayerQueries(
             Func<IQueryable<Player>, IQueryable<Player>>? preQuery = null,
             bool tracking = false);
-
-        Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
     }
 }

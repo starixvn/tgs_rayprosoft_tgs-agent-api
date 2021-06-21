@@ -18,7 +18,8 @@ namespace TGS.Core.Infrastructures.Utility
                 {
                     var value = propertyInfo.GetValue(obj);
 
-                    if (propertyInfo.PropertyType == typeof(DateTimeOffset))
+                    if (propertyInfo.PropertyType == typeof(DateTimeOffset)
+                        || propertyInfo.PropertyType == typeof(DateTimeOffset?))
                     {
                         value = ((DateTimeOffset?)value)?.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.sssZ");
                     }

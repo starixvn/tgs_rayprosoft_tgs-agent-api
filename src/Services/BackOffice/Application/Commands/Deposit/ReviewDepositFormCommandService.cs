@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.BackOffice.Domain;
+using Tgs.Payment;
+using TGS.Clients.Promotion.Client;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Payment;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
 using TGS.ServiceUtility;
@@ -14,16 +14,19 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
     {
         private readonly IPaymentRepository _paymentRepository;
         private readonly IPlayerBucketRepository _playerBucketRepository;
+        private readonly IPromotionClient _promotionClient;
         private readonly IPlayerService _playerService;
 
         public ReviewDepositFormCommandService(
             IPaymentRepository paymentRepository,
             IPlayerService playerService,
-            IPlayerBucketRepository playerBucketRepository)
+            IPlayerBucketRepository playerBucketRepository,
+            IPromotionClient promotionClient)
         {
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
+            _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
         }
 
         public async ValueTask ExecuteAsync(ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
@@ -31,6 +34,9 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
             var form = await _paymentRepository
                 .GetDepositFormByIdAsync(command.FormId)
                 .ConfigureAwait(false);
+
+            if (form.Status != 1000)
+                return;
 
             await _paymentRepository
                 .SignOffDepositFormAsync(command.FormId, command.Status, command.remark)
@@ -45,7 +51,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 var actualAmount = await _playerBucketRepository
                     .CreatePlayerBucketWithDepositAsync(new CreatePlayerBucketWithDepositRequest(
                         command.BrandId,
-                        null,
+                        form.PromotionId,
                         player.PlayerCode,
                         player.DefaultWalletId,
                         form.Amount))
@@ -54,6 +60,13 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 await _playerService
                     .TopUpAccumulatedDepositAsync(form.PlayerCode, form.Amount)
                     .ConfigureAwait(false);
+            }
+            else
+            {
+                if (form.PromotionId != null)
+                    await _promotionClient
+                        .RevertPromotionAsync(form.PromotionId.Value, form.Amount)
+                        .ConfigureAwait(false);
             }
         }
     }

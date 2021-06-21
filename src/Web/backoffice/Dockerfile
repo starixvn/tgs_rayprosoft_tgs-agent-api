@@ -1,4 +1,4 @@
-FROM node:14.15.1-stretch-slim AS build
+FROM node:14.17.0-stretch-slim AS build
 
 WORKDIR /dest
 
@@ -17,7 +17,7 @@ COPY ./src/Web/backoffice/ .
 RUN npm run build
 
 # Copy build to caddy server
-FROM caddy:2.1.1-alpine
+FROM caddy:2.4.1-alpine
 
 # Debug Tool
 # RUN apk --no-cache add curl

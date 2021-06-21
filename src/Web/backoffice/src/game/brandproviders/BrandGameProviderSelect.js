@@ -16,7 +16,8 @@ export const BrandGameProviderSelect = ({ brandId, placeholder, ...props }) => {
     brandId = userBrandId ?? brandId
     let { data, isLoading } = useBrandGameProviderList({
         showAll: true,
-        brandId
+        brandId,
+        sortby: "gameProviderName"
     })
 
     let options = data?.items?.map((gameProvider) => ({

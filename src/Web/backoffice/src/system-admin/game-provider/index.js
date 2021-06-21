@@ -8,7 +8,7 @@ import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, Update } from "./menu"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
 import { SearchButton } from "../../button/SearchButton"
@@ -16,10 +16,16 @@ import equals from "fast-deep-equal"
 import { FormProvider, useForm } from "react-hook-form"
 import { InputField } from "../../input/Input"
 import { useGameProviderList } from "../../game/providers/client"
-import { AddGameProviderButton, EditButton } from "./edit"
+import {
+    AddGameProviderButton,
+    EditGameProviderButton,
+    ViewGameProviderDisclosure
+} from "./GameProvider"
 import { GameProviderStatusMenu } from "./GameProviderStatus"
 import textColumn from "../../table/column/textColumn"
 import { GameProviderGameListDisclosure } from "./GameProviderGameList"
+import { GameProviderConfigListDisclosure } from "./GameProviderConfigList"
+import AlertDialog from "../../dialog/Alert"
 
 export { Code }
 
@@ -41,7 +47,10 @@ const Body = () => {
         sortby: "code"
     })
     let { pageIndex, pageSize, name } = state
-    let { data, isLoading, mutate } = useGameProviderList(toApiParams(state))
+    let { isLoading, data, error, mutate, deleteCache } = useGameProviderList({
+        ...toApiParams(state),
+        sortby: "code"
+    })
 
     let columns = useColumns({ items: data?.items, mutate })
 
@@ -65,11 +74,14 @@ const Body = () => {
             <Table
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -126,7 +138,8 @@ const SearchBar = ({
 }
 
 const useColumns = ({ items = [], mutate }) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasAnyMenu = hasUpdateAuth
 
     return useMemo(() => {
         let columns = [
@@ -150,13 +163,12 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: (row) => row,
                 Header: <Trans zh="状态" en="Status" />,
                 disableSortBy: true,
-                Cell: ({ value }) => {
-                    return (
-                        <Box alignX="center">
-                            <GameProviderStatusMenu record={value} />
-                        </Box>
-                    )
-                }
+                Cell: ({ value }) => (
+                    <GameProviderStatusMenu
+                        record={value}
+                        onSubmitted={mutate}
+                    />
+                )
             }),
             dateTimeColumn({
                 accessor: "updatedOn",
@@ -180,9 +192,15 @@ const useColumns = ({ items = [], mutate }) => {
                     Cell: ({ value }) => {
                         return (
                             <Set orientation="vertical" alignX="center">
-                                <EditButton
-                                    record={value}
+                                <ViewGameProviderDisclosure
+                                    gameProviderId={value?.id}
+                                />
+                                <EditGameProviderButton
+                                    gameProviderId={value?.id}
                                     onSubmitted={mutate}
+                                />
+                                <GameProviderConfigListDisclosure
+                                    gameProviderId={value?.id}
                                 />
                                 <GameProviderGameListDisclosure
                                     gameProviderId={value?.id}

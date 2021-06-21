@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -28,13 +29,23 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
     {
         private const string GameProviderCode = Consts.GameProvider.BigGaming;
         private readonly IBigGamingServices _services;
+        private readonly Dictionary<string, decimal> _bullBullOddsMapper;
 
         public BigGamingActionModelMapper(
             IBigGamingServices services
         )
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            _bullBullOddsMapper = new Dictionary<string, decimal>() {
+                {"0xD0000001",1 } //下注闲1平倍
+                ,{"0xD0000002",5 }//下注闲1翻倍
+                ,{"0xD0000004",1 }//下注闲2平倍
+                ,{"0xD0000008",5 }//下注闲2翻倍
+                ,{"0xD0000010",1 }//下注闲3平倍
+                ,{"0xD0000020",5 }//下注闲3翻倍
+            };
         }
+
 
         BetData IBigGamingModelActionMapper.Request(GameProviderConfigurationData data, BigGamingBetRequest request,
             OppositeBetSetting[] oppositeBetSettings)
@@ -42,7 +53,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var transactions = (from order in request.Orders
                                 select new TransactionData
                                 {
-                                    Amount = Math.Abs(order.Amount),
+                                    Amount = GetAmount(order.ExternalGameId, GetBetType(order.PlayId), Math.Abs(order.Amount)),
                                     ExternalTransactionId = order.OrderId.ToString(),
                                     ExternalRoundId = order.IssueId,
                                     ExternalBetId = order.OrderId.ToString(),
@@ -50,7 +61,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                                     ExternalGameId = order.ExternalGameId.ToString(),
                                     GameActionType = GameActionType.PlaceBet,
                                     TimeStamp = DateTimeOffset.UtcNow,
-                                    BetType = order.PlayId
+                                    BetType = GetBetType(order.PlayId)
                                 }).ToArray();
 
             return GetBetData(data, request.LoginId, transactions, oppositeBetSettings: oppositeBetSettings);
@@ -116,6 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     });
                 }
 
+
                 var gameActionType = GetGameAction(order.OrderStatus);
 
                 if (gameActionType != GameActionType.CancelTransaction)
@@ -152,6 +164,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 .ConfigureAwait(false);
 
             var gameActionType = GetGameAction(order.OrderStatus);
+
+            //牛牛特殊案例
+            if (order.Amount > 0 && gameActionExternal.ExternalGameId == "13")
+            {
+                gameActionType = GameActionType.WinBet;
+            }
 
             var mark = !resettle
                 ? gameActionType != GameActionType.CancelTransaction ? "settle" : "cancel"
@@ -218,8 +236,19 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }).ToArray()
             };
 
+        private decimal GetAmount(int externalGameId, string playId, decimal amount)
+        {
+            if (externalGameId == 13)
+            {
+                var Odds = _bullBullOddsMapper.Where(x => x.Key.IgnoreCaseEquals(playId)).First().Value;
+                return amount * Odds;
+            }
+            return amount;
+        }
 
 
+        private string GetBetType(string playId) =>
+            $"0x{Convert.ToString(Convert.ToInt64(playId), 16).ToUpper()}";
         #endregion
     }
 }

@@ -3,6 +3,8 @@ import { css, Global } from "@emotion/react"
 import { useForm, useFormContext } from "react-hook-form"
 import { Input as _Input, InputField as _InputField, Button } from "bumbag"
 import { useTrans } from "../i18n"
+import { LocalizationDialogDisclosure } from "../dialog/LocalizationDialog"
+import { faLanguage } from "@fortawesome/free-solid-svg-icons"
 
 export const Input = ({
     name,
@@ -43,6 +45,9 @@ export const InputField = ({
     name,
     addonAfter,
     showEmptyFieldValueAddonAfter = false,
+    brandId,
+    localizationField,
+    showLocalizationAddonAfter = false,
     register,
     registerOptions = {},
     inputRef,
@@ -74,8 +79,23 @@ export const InputField = ({
 
     addonAfter =
         addonAfter ??
-        (showEmptyFieldValueAddonAfter && (
-            <Button onClick={() => formContext?.setValue(name, "")}>X</Button>
+        ((showEmptyFieldValueAddonAfter || showLocalizationAddonAfter) && (
+            <>
+                {showEmptyFieldValueAddonAfter && (
+                    <Button onClick={() => formContext?.setValue(name, "")}>
+                        X
+                    </Button>
+                )}
+                {showLocalizationAddonAfter && (
+                    <LocalizationDialogDisclosure
+                        brandId={brandId}
+                        readOnly={props?.readOnly}
+                        disabled={props?.disabled}
+                        localizationField={localizationField}
+                        name={name}
+                    />
+                )}
+            </>
         ))
 
     return (

@@ -28,9 +28,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
-    <ProjectReference Include="..\..\Core\DataServices.Report\DataServices.Report.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
+    <ProjectReference Include="..\..\Repositories\Agent.Repositories\Agent.Repositories.csproj" />
+    <ProjectReference Include="..\..\Repositories\PaymentRepositories\PaymentRepositories.csproj" />
+    <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\Agent.Core\Agent.Core.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />
     <ProjectReference Include="..\..\Services\PluggableServices\PluggableServices.csproj" />

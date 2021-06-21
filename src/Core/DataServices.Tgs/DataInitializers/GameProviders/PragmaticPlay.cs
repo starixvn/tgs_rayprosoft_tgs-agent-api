@@ -74,7 +74,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 ProviderId = "PragmaticPlay",
                 ApiUrl = new("https://api.prerelease-env.biz"),
                 GameUrlQueryStringTemplate =
-                    "token={TOKEN}&symbol={EXTERNALGAMEID}&technology={TECHNOLOGY}&platform={PLATFORM}&language={CULTURE}&style",
+                    "token={TOKEN}&symbol={EXTERNALGAMEID}&technology={TECHNOLOGY}&platform={PLATFORM}&language={CULTURE}",
                 DelaySecondsForPlaceBet = 0
             };
         }

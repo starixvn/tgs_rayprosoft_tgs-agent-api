@@ -19,7 +19,7 @@
         "GameProviderCode": "SBO",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:62330"
+      "applicationUrl": "http://localhost:62330;http://+:62330"
     },
     "TgsApi-Habanero": {
       "commandName": "Project",
@@ -107,6 +107,26 @@
       "launchUrl": "health",
       "environmentVariables": {
         "GameProviderCode": "JDB",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
+    "TgsApi-SexyGaming": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "SG",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
+    "TgsApi-Skywind": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "SW",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:62330"
@@ -209,6 +229,26 @@
       },
       "publishAllPorts": true,
       "useSSL": true
+    },
+    "Docker-SexyGaming": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+      "environmentVariables": {
+        "GameProviderCode": "SG",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "Docker-Skywind": {
+        "commandName": "Docker",
+        "launchBrowser": true,
+        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+        "environmentVariables": {
+          "GameProviderCode": "SW",
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "publishAllPorts": true,
+        "useSSL": true
+      }
     }
   }
 }

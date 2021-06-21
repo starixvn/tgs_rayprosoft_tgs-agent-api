@@ -107,10 +107,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException("Authentication encryption failed");
-            }
+            CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             return new(true, player);
         }
@@ -125,15 +122,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException(request.Sign);
-            }
+            CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
+            /*
+            var sum = request.Orders.Select(x => new { Amount = (x.ExternalGameId == 13) ? x.Amount * 5 : x.Amount }).Sum(x => x.Amount);
 
-            if (decimal.Parse(request.Amount) != request.Orders.Sum(x => x.Amount))
+            if (decimal.Parse(request.Amount) != sum)
             {
                 throw new InvalidAmountException($"The total amount ({decimal.Parse(request.Amount)}) does not match the order amount ({request.Orders.Sum(x => x.Amount)})");
             }
+            */
 
             return new(true, player);
         }
@@ -147,16 +144,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException(request.Sign);
-            }
-
-            if (decimal.Parse(request.Amount) != request.Orders.Sum(x => x.Amount))
+            CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
+            /*
+            var sum = request.Orders.Select(x => new { Amount = (x.ExternalGameId == 13) ? x.OrderAmount - x.OrderAmount * 5 + x.Amount : x.Amount }).Sum(x => x.Amount);
+            if (decimal.Parse(request.Amount) != sum)
             {
                 throw new InvalidAmountException($"The total amount ({decimal.Parse(request.Amount)}) does not match the order amount ({request.Orders.Sum(x => x.Amount)})");
             }
-
+            */
             return new(true, player);
         }
 
@@ -172,10 +167,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            if (_hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5) != request.Sign)
-            {
-                throw new MissingTokenException(request.Sign);
-            }
+            CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             return new(true, null);
         }
@@ -188,6 +180,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 throw new PlayerLoginExpiredException();
             }
             return player;
+        }
+
+        private void CheckingSign(string sourceSign, string Sign)
+        {
+            if (sourceSign.IgnoreCaseNotEquals(Sign))
+            {
+                throw new MissingTokenException($"Authentication encryption failed({sourceSign})");
+            }
         }
     }
 }

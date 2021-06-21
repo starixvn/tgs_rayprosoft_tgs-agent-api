@@ -29,6 +29,22 @@ export const urlWith = (searchParams = {}, url) => {
 
 const stringOf = (value) => value?.toISOString?.() ?? value
 
+const FailedToFetchDefaultMessage = "Failed to fetch"
+const FailedToFetchTrans = {
+    zh: "获取数据失败",
+    en: FailedToFetchDefaultMessage
+}
+const reject = (error) => {
+    let locale = getAcceptLang()
+    let title = error?.message ?? error?.toString?.() ?? "Error"
+    if (title == "Failed to fetch") {
+        title = FailedToFetchTrans?.[locale] ?? FailedToFetchDefaultMessage
+    } else {
+        console.warn(error)
+    }
+    return Promise.reject({ title })
+}
+
 export const get = (
     url = "",
     { searchParams = {}, headers = {}, ...options } = {}
@@ -37,7 +53,13 @@ export const get = (
     if (!headers["Accept-Language"]) {
         headers["Accept-Language"] = getAcceptLangCulture()
     }
-    return fetch(url, { headers, ...options }).then(toDataOrError)
+
+    return fetch(url, { headers, ...options })
+        .catch((error) => {
+            console.warn(error)
+            return reject(error)
+        })
+        .then(toDataOrError)
 }
 
 export const put = (url, options) => fetchApi("PUT", url, options)
@@ -65,7 +87,12 @@ const fetchApi = (
         headers,
         body: body ?? JSON.stringify(dropEmptyValues(data)),
         ...options
-    }).then(toDataOrError)
+    })
+        .catch((error) => {
+            console.warn(error)
+            return reject(error)
+        })
+        .then(toDataOrError)
 }
 
 const dropEmptyValues = (record) => {
@@ -84,7 +111,19 @@ const dropEmptyValues = (record) => {
     }, {})
 }
 
-export const useGet = (url, options) => {
+const DefaultUpdateOptions = {
+    dedupingInterval: 100
+}
+
+const deleteCacheBy = (key = "") => {
+    if (key) {
+        cache.delete(key)
+        cache.delete(`err@${key}`)
+        cache.delete(`req@${key}`)
+    }
+}
+
+export const useGet = (url, options = DefaultUpdateOptions) => {
     let fetchData = !!url
     let key = fetchData ? url : null
     const { data, error, isValidating, mutate } = useSWR(key, get, options)
@@ -96,23 +135,20 @@ export const useGet = (url, options) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(key),
+        deleteCache: () => deleteCacheBy(key),
         clearCache: () => cache.clear()
     }
-}
-
-const DefaultUpdateOptions = {
-    dedupingInterval: 100
 }
 
 export const usePostData = (url, data, options = DefaultUpdateOptions) => {
     let fetchData = !!url && data !== undefined
     let keys = fetchData ? [url, data] : null
-    let { data: result, error, isValidating, mutate } = useSWR(
-        keys,
-        (url, data) => post(url, { data }),
-        options
-    )
+    let {
+        data: result,
+        error,
+        isValidating,
+        mutate
+    } = useSWR(keys, (url, data) => post(url, { data }), options)
 
     return {
         result,
@@ -121,7 +157,7 @@ export const usePostData = (url, data, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -133,7 +169,12 @@ export const usePostFormData = (
 ) => {
     let fetchData = !!url && !!formData
     let keys = fetchData ? [url, formData] : null
-    let { data: result, error, isValidating, mutate } = useSWR(
+    let {
+        data: result,
+        error,
+        isValidating,
+        mutate
+    } = useSWR(
         keys,
         (url, formData) =>
             post(url, {
@@ -149,7 +190,7 @@ export const usePostFormData = (
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -157,11 +198,12 @@ export const usePostFormData = (
 export const usePutData = (url, data, options = DefaultUpdateOptions) => {
     let fetchData = !!url && !!data
     let keys = fetchData ? [url, data] : null
-    let { data: result, error, isValidating, mutate } = useSWR(
-        keys,
-        (url, data) => put(url, { data }),
-        options
-    )
+    let {
+        data: result,
+        error,
+        isValidating,
+        mutate
+    } = useSWR(keys, (url, data) => put(url, { data }), options)
 
     return {
         result,
@@ -170,18 +212,19 @@ export const usePutData = (url, data, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
 
 export const usePut = (url, settings, options = DefaultUpdateOptions) => {
     let keys = url ? [url, settings] : null
-    let { data: result, error, isValidating, mutate } = useSWR(
-        keys,
-        put,
-        options
-    )
+    let {
+        data: result,
+        error,
+        isValidating,
+        mutate
+    } = useSWR(keys, put, options)
 
     return {
         result,
@@ -190,7 +233,7 @@ export const usePut = (url, settings, options = DefaultUpdateOptions) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(keys),
+        deleteCache: () => deleteCacheBy(keys),
         clearCache: () => cache.clear()
     }
 }
@@ -198,9 +241,12 @@ export const usePut = (url, settings, options = DefaultUpdateOptions) => {
 export const useDelete = (url, settings) => {
     let fetchData = !!url
     let key = fetchData ? url : null
-    const { data: result, error, isValidating, mutate } = useSWR(key, (url) =>
-        fetchApi("DELETE", url, settings)
-    )
+    const {
+        data: result,
+        error,
+        isValidating,
+        mutate
+    } = useSWR(key, (url) => fetchApi("DELETE", url, settings))
 
     return {
         result,
@@ -209,7 +255,7 @@ export const useDelete = (url, settings) => {
         error,
         isError: error,
         mutate,
-        deleteCache: () => cache.delete(key),
+        deleteCache: () => deleteCacheBy(key),
         clearCache: () => cache.clear()
     }
 }

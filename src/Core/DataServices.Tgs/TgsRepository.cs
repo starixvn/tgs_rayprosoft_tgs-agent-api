@@ -141,6 +141,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<AgentBank> AgentBanks { get; set; }
 
+        DbSet<AgentBankInfo> AgentBankInfos { get; set; }
+
         DbSet<AgentWallet> AgentWallets { get; set; }
 
         DbSet<AgentTransaction> AgentTransactions { get; set; }
@@ -168,7 +170,8 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
         DbSet<RoundAggregate> RoundAggregates { get; set; }
         DbSet<PlayerAggregate> PlayerAggregates { get; set; }
-        DbSet<PlayerGameTypeAggregate> PlayerGameTypeAggregates { get; set; }
+        DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
+        DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
         DbSet<ApiLog> ApiLogs { get; set; }
 
         DbSet<LogRecord> LogRecords { get; set; }
@@ -334,7 +337,9 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<FailedGameRecordOperation> FailedGameRecordOperations { get; set; }
         public DbSet<RoundAggregate> RoundAggregates { get; set; }
         public DbSet<PlayerAggregate> PlayerAggregates { get; set; }
-        public DbSet<PlayerGameTypeAggregate> PlayerGameTypeAggregates { get; set; }
+        public DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
+        public DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
+
         public DbSet<ApiLog> ApiLogs { get; set; }
 
         public DbSet<LogRecord> LogRecords { get; set; }
@@ -347,6 +352,7 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<DepositForm> DepositForms { get; set; }
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
+        public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 

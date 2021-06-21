@@ -33,18 +33,18 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
     public class VRController : ControllerBase
     {
         private static readonly string _gameProvider = Consts.GameProvider.VR;
-        private readonly IVRApiClient _client;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IBrandOperations _brandOperations;
+        private readonly IVRApiClient _client;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameRoundsProcessor _gameRoundsProcessor;
-        private Dictionary<string, Player> _players;
-        private Dictionary<int, CachedGame> _gameIds;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly ISettingOperations _settingOperations;
         private int _count;
-        private int _successCount;
         private int _failCount;
+        private Dictionary<int, CachedGame> _gameIds;
         private DateTimeOffset? _lastGameRecordTime;
+        private Dictionary<string, Player> _players;
+        private int _successCount;
 
         public VRController(
             IVRApiClient client,
@@ -53,36 +53,36 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
             IBrandOperations brandOperations,
             IGameProviderOperations gameProviderOperations,
             IGameRoundsProcessor gameRoundsProcessor
-          )
+        )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _gameProviderOperations =
+                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _gameRoundsProcessor = gameRoundsProcessor ?? throw new ArgumentNullException(nameof(gameRoundsProcessor));
         }
+
         [HttpPost("GameRecord")]
         public async ValueTask<VRGPGameRecordResponse> GameRecordAsync(VRGPGameRecordRequest request)
         {
-
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<VRConfiguration>(SettingConsts
-                .GameProviderConfigurations.VR);
+                    .GameProviderConfigurations.VR);
 
-            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(request.BrandCode) && x.Status).FirstOrDefault();
+            var brandMerchant = configuration.BrandMerchants
+                .Where(x => x.BrandCode.IgnoreCaseEquals(request.BrandCode) && x.Status).FirstOrDefault();
             if (brandMerchant == null)
             {
-                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
+                brandMerchant = configuration.BrandMerchants
+                    .Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
             }
 
 
             if (brandMerchant == null)
             {
-                return new VRGPGameRecordResponse()
-                {
-                    Success = false
-                };
+                return new VRGPGameRecordResponse {Success = false};
             }
 
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProvider);
@@ -95,7 +95,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
             var unsettled = await GetGameRoundAsync(request, brandMerchant, gameProviderId, false);
             if (!unsettled)
             {
-                return new VRGPGameRecordResponse()
+                return new VRGPGameRecordResponse
                 {
                     Success = false,
                     SuccessCount = _successCount,
@@ -103,10 +103,11 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                     Count = _count
                 };
             }
+
             var settled = await GetGameRoundAsync(request, brandMerchant, gameProviderId, true);
             if (!settled)
             {
-                return new VRGPGameRecordResponse()
+                return new VRGPGameRecordResponse
                 {
                     Success = false,
                     LastGameRecorTime = _lastGameRecordTime,
@@ -116,7 +117,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                 };
             }
 
-            return new VRGPGameRecordResponse()
+            return new VRGPGameRecordResponse
             {
                 Success = true,
                 LastGameRecorTime = _lastGameRecordTime,
@@ -127,20 +128,20 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
         }
 
         /// <summary>
-        /// Gets the game round asynchronous.
+        ///     Gets the game round asynchronous.
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="brandMerchant">The brand merchant.</param>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <param name="isUpdateTime">if set to <c>true</c> [is update time].</param>
-        private async Task<bool> GetGameRoundAsync(VRGPGameRecordRequest request, VRBrandMerchant brandMerchant, Guid gameProviderId, bool isUpdateTime)
+        private async Task<bool> GetGameRoundAsync(VRGPGameRecordRequest request, VRBrandMerchant brandMerchant,
+            Guid gameProviderId, bool isUpdateTime)
         {
             var page = 0;
             var rows = 500;
             while (true)
             {
-
-                var data = new VRGameRecordRequest()
+                var data = new VRGameRecordRequest
                 {
                     StartTime = request.StartTime.ToString("yyyy-MM-ddTHH:mm:ssZ"),
                     EndTime = request.EndTime.ToString("yyyy-MM-ddTHH:mm:ssZ"),
@@ -149,12 +150,15 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                     Rows = rows
                 };
 
-                var response = await _client.GetAPIAsync<VRGameRecordRequest, VRGameRecordResponse>(brandMerchant, GPAction.GameRecord, data);
+                var response =
+                    await _client.GetAPIAsync<VRGameRecordRequest, VRGameRecordResponse>(brandMerchant,
+                        GPAction.GameRecord, data);
 
                 if (response.Records.Length == 0)
                 {
                     return true;
                 }
+
                 page++;
                 if (response.Records.Length > 0)
                 {
@@ -175,29 +179,38 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                         }
 
                         #region Get Player
-                        if (_players.TryGetValue(PlayerCode, out Player player))
+
+                        if (_players.TryGetValue(PlayerCode, out var player))
                         {
-                            gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
+                            gameProviderConfigurationId =
+                                await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId,
+                                    gameProviderId);
                         }
                         else
                         {
                             player = await _playerOperations.GetPlayerByCodeAsync(PlayerCode);
                             if (player != null)
                             {
-                                gameProviderConfigurationId = await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId);
+                                gameProviderConfigurationId =
+                                    await _brandOperations.GetBrandGameProviderConfigurationIdAsync(player.BrandId,
+                                        gameProviderId);
                                 _players.Add(PlayerCode, player);
                             }
                         }
+
                         #endregion
 
                         #region Get Game
-                        if (_gameIds.TryGetValue(recordBet.ChannelId, out CachedGame game))
+
+                        if (_gameIds.TryGetValue(recordBet.ChannelId, out var game))
                         {
                             gameId = game.Id;
                         }
                         else
                         {
-                            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, recordBet.ChannelId.ToString()).ConfigureAwait(false);
+                            var games = await _gameProviderOperations
+                                .GetCachedGamesAsync(gameProviderId, recordBet.ChannelId.ToString())
+                                .ConfigureAwait(false);
 
                             if (games != null && games.Length > 0)
                             {
@@ -206,6 +219,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
                                 _gameIds.Add(recordBet.ChannelId, game);
                             }
                         }
+
                         #endregion
 
                         if (player == null || game == null || !gameProviderConfigurationId.HasValue)
@@ -221,79 +235,79 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Controllers
 
                         try
                         {
-                            var result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
+                            var result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData
                             {
                                 ExternalRoundId = recordBet.SerialNumber,
                                 GameProviderId = gameProviderId,
                                 GameProviderCode = _gameProvider,
-                                PlayerCode = (player == null) ? string.Empty : player.PlayerCode,
+                                PlayerCode = player == null ? string.Empty : player.PlayerCode,
                                 GameId = gameId.GetValueOrDefault(-1),
                                 ExternalId = recordBet.ChannelId.ToString(),
-                                CurrencyCode = (player == null) ? string.Empty : player.DefaultWalletCurrencyCode,
+                                CurrencyCode = player == null ? string.Empty : player.DefaultWalletCurrencyCode,
                                 Status = GetRoundStatus(recordBet.State),
                                 GameProviderConfigurationId = gameProviderConfigurationId.GetValueOrDefault(),
-                                WalletId = (player == null) ? Guid.Empty : player.DefaultWalletId,
+                                WalletId = player == null ? Guid.Empty : player.DefaultWalletId,
                                 CreatedOn = sysDateTimeOffset,
                                 ClosedOn = sysDateTimeOffset,
                                 UpdatedOn = sysDateTimeOffset,
-                                BrandId = (player == null) ? Guid.Empty : player.BrandId,
+                                BrandId = player == null ? Guid.Empty : player.BrandId,
                                 ExternalCreatedOn = recordBet.CreateTime,
                                 ExternalClosedOn = recordBet.UpdateTime,
                                 BetAmount = recordBet.Cost,
-                                ValidBetAmount = (recordBet.State == 1) ? 0 : recordBet.Cost,
-                                PlayerWinLoss = (recordBet.State == 1) ? 0 : (GetRoundStatus(recordBet.State) == RoundStatus.Closed) ? recordBet.PlayerPrize - recordBet.Cost : null,
+                                ValidBetAmount = recordBet.State == 1 ? 0 : recordBet.Cost,
+                                PlayerWinLoss =
+                                    recordBet.State == 1
+                                        ? 0
+                                        :
+                                        GetRoundStatus(recordBet.State) == RoundStatus.Closed
+                                            ?
+                                            recordBet.PlayerPrize - recordBet.Cost
+                                            : null,
                                 Commission = 0,
-                                Turnover = (recordBet.State == 1) ? 0 : recordBet.Cost,
+                                Turnover = recordBet.State == 1 ? 0 : recordBet.Cost,
                                 SettleAmount = recordBet.PlayerPrize,
                                 TieBetAdjustment = null,
                                 ClientStatus = GetClientRound(recordBet.State),
                                 AdditionalData = JsonSerializer.Serialize(recordBet),
                                 Success = success
-                            }); ;
+                            });
+                            ;
                         }
                         catch
                         {
                             return false;
                         }
-
-
                     }
-
                 }
             }
-
         }
 
         /// <summary>
-        /// Gets the round status.
+        ///     Gets the round status.
         /// </summary>
         /// <param name="state">The state.</param>
         /// <returns></returns>
-        private RoundStatus GetRoundStatus(int state)
-        {
-            return state switch
+        private RoundStatus GetRoundStatus(int state) =>
+            state switch
             {
                 1 => RoundStatus.Closed,
                 2 => RoundStatus.Closed,
                 3 => RoundStatus.Closed,
                 _ => RoundStatus.Open
             };
-        }
 
         /// <summary>
-        /// Gets the client round.
+        ///     Gets the client round.
         /// </summary>
         /// <param name="state">The state.</param>
         /// <returns></returns>
-        private ClientRoundStatus GetClientRound(int state)
-        {
-            return state switch
+        private ClientRoundStatus GetClientRound(int state) =>
+            state switch
             {
                 1 => ClientRoundStatus.Void,
                 2 => ClientRoundStatus.Loss,
                 3 => ClientRoundStatus.Win,
                 _ => ClientRoundStatus.Open
             };
-        }
     }
 }

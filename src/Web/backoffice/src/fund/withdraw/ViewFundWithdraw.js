@@ -57,6 +57,7 @@ import {
 } from "../../system/brandpayments/client"
 import { parseJSON } from "../../text/json"
 import Input from "../../input/Input"
+import BrandPaymentStatus from "../../system/brandpayments/BrandPaymentStatus"
 
 export const ViewFundWithdrawDisclosure = ({ brandId, formId, ...props }) => {
     let dialog = useModalState()
@@ -239,6 +240,7 @@ const PayerInfo = ({ brandId, record, disabled }) => {
                         name="brandPaymentId"
                         brandId={brandId}
                         transferType={BrandPaymentTransferType.Withdrawal}
+                        paymentStatus={BrandPaymentStatus.Enabled}
                         paymentChannelId={record?.bankInfo?.paymentChannelId}
                         required
                         disabled={disabled}

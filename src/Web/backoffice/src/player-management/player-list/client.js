@@ -70,3 +70,8 @@ export const usePlayerBalanceChanges = (searchParams) => {
     let url = searchParams ? urlWith(searchParams, `${API}/accountChanges`) : ""
     return useGet(url)
 }
+
+export const useClearPlayerWageringRequirement = (playerCode) => {
+    let url = playerCode ? `${API}/${playerCode}/clear` : ""
+    return usePutData(url, true)
+}

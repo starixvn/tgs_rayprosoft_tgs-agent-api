@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Json;
@@ -17,7 +18,8 @@ namespace TGS.Apis.FileService.Clients
         public FileServiceClient(HttpClient httpClient, IJsonSerializationProvider jsonSerializationProvider)
         {
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _jsonSerializationProvider = jsonSerializationProvider ??
+                throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async ValueTask<FileView> FindFileByObjectIdAsync(string objectId)
@@ -32,22 +34,18 @@ namespace TGS.Apis.FileService.Clients
 
             var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
                 json,
-                new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                new() {PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
 
             return view;
         }
 
-        public async ValueTask<Stream> OpenFileReaderAsync(string path)
-        {
-            return await _httpClient
+        public async ValueTask<Stream> OpenFileReaderAsync(string path) =>
+            await _httpClient
                 .GetStreamAsync($"/api/fs/{path.TrimStart('/')}")
                 .ConfigureAwait(false);
-        }
 
-        public async ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType, Stream fileStream)
+        public async ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType,
+            Stream fileStream)
         {
             using var uploadContent = new MultipartFormDataContent();
 
@@ -68,12 +66,19 @@ namespace TGS.Apis.FileService.Clients
 
             var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
                 json,
-                new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
+                new() {PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
 
             return view;
+        }
+
+        public async Task UpdateStationLetterFileAsync(string uploadType, string id, UpdateFilesRequest request)
+        {
+            var httpContent = new StringContent(_jsonSerializationProvider.SerializeToString(request), Encoding.UTF8,
+                "application/json");
+
+            await _httpClient
+                .PutAsync($"/fs/file/{uploadType}/{id}", httpContent)
+                .ConfigureAwait(false);
         }
     }
 }

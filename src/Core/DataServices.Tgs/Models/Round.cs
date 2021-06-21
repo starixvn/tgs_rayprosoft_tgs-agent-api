@@ -33,5 +33,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual RoundDetail RoundDetail { get; set; }
         public decimal? ReopenTurnoverAdjustment { get; set; }
         public DateTimeOffset? ReopenedOn { get; set; }
+        public decimal? EffectiveBettingPercentage { get; set; }
     }
 }

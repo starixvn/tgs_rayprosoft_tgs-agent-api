@@ -32,7 +32,7 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { InputField } from "../../input/Input"
 import AlertDialog from "../../dialog/Alert"
-import textColumn from "../../table/column/textColumn"
+import textColumn, { ellipsisTextColumn } from "../../table/column/textColumn"
 import numberColumn, {
     numberDecimalColumn,
     numberDecimalPercentageColumn
@@ -41,6 +41,8 @@ import { today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useAdminLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
+import { CopyTextBox } from "../../text/CopyTextBox"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -64,7 +66,8 @@ const Body = ({}) => {
         trackingId: "",
         ip: "",
         path: "",
-        method: ""
+        method: "",
+        serverName: ""
     })
 
     let { pageIndex, pageSize } = state
@@ -74,7 +77,11 @@ const Body = ({}) => {
         mutate,
         error,
         deleteCache
-    } = useAdminLogList(toApiParams(state))
+    } = useAdminLogList({
+        ...toApiParams(state),
+        sortby: "RecordedOn",
+        orderby: SortOrder.Descending
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
 
@@ -90,7 +97,8 @@ const Body = ({}) => {
                     ip={state?.ip}
                     path={state?.path}
                     method={state?.method}
-                    search={({ start, end, ...data }) => {
+                    serverName={state?.serverName}
+                    search={({ start, end, ...data } = {}) => {
                         setState({
                             pageIndex: 0,
                             from: start,
@@ -112,15 +120,7 @@ const Body = ({}) => {
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -133,6 +133,7 @@ const SearchBar = ({
     ip,
     path,
     method,
+    serverName,
     search,
     isLoading,
     ...props
@@ -145,7 +146,8 @@ const SearchBar = ({
             trackingId,
             ip,
             path,
-            method
+            method,
+            serverName
         }
     })
 
@@ -181,6 +183,11 @@ const SearchBar = ({
                         showEmptyFieldValueAddonAfter
                         placeholder="Method"
                     />
+                    <InputField
+                        name="serverName"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Server Name"
+                    />
                     <SearchButton isLoading={isLoading} disabled={isLoading} />
                 </Set>
             </form>
@@ -195,25 +202,33 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "trackingId",
                 Header: <Trans zh="Tracking Id" en="Tracking Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "path",
                 Header: <Trans zh="Path" en="Path" />,
                 disableSortBy: true,
                 textAlign: "left",
+                Cell: ({ value = "" }) => (
+                    <CopyTextBox value={value} alignX="left" textAlign="left" />
+                )
+            }),
+            textColumn({
+                accessor: "serverName",
+                Header: <Trans zh="Server Name" en="Server Name" />,
+                disableSortBy: true,
                 Cell: ({ value = "" }) => value
             }),
             textColumn({

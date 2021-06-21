@@ -8,7 +8,10 @@ export const ResellerIdSelect = ({ placeholder, ...props }) => {
     let defaultPlaceholder = useResellerPlaceholder()
     placeholder = placeholder ?? defaultPlaceholder
 
-    let { isLoading, data, error } = useResellerList({ showAll: true })
+    let { isLoading, data, error } = useResellerList({
+        showAll: true,
+        sortby: "code"
+    })
     let options = data?.items.map((reseller) => ({
         label: reseller.code,
         value: reseller.id

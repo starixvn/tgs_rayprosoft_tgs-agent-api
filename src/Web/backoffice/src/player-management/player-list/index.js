@@ -11,9 +11,10 @@ import { PlayerStatusLabel } from "../PlayerStatus"
 import {
     useIsDisplayMenuByRoute,
     useHasSubMenuByRoute,
-    useUserBrandId
+    useUserBrandId,
+    useIsAdminUser
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, View, Update } from "./menu"
 import { PlayerStatusSelect } from "../PlayerStatus"
 import { VipLevelSelect } from "../../vip-levels/VipLevelSelect"
 import { ViewButton, EditButton } from "./button"
@@ -67,7 +68,13 @@ const BodyContent = ({ brandId = "" }) => {
     }, [brandId])
 
     let { pageIndex, pageSize, status, vipId, username = "" } = state
-    let { data = {}, isLoading, mutate, error, deleteCache } = usePlayerList({
+    let {
+        data = {},
+        isLoading,
+        mutate,
+        error,
+        deleteCache
+    } = usePlayerList({
         ...toApiParams(state),
         sortby: "username",
         brandId
@@ -80,50 +87,28 @@ const BodyContent = ({ brandId = "" }) => {
             actionBar={
                 <SearchBar
                     brandId={brandId}
-                    search={(data) => {
-                        let newState = {
-                            pageIndex: 0,
-                            status: data.status,
-                            vipId: data.vipId,
-                            username: data.username
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                status,
-                                vipId,
-                                username
-                            })
-                        ) {
-                            mutate()
-                        }
+                    search={(data = {}) => {
                         setState({
                             pageIndex: 0,
                             ...data
                         })
+                        mutate()
                     }}
                     isLoading={isLoading}
                 />
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -158,11 +143,27 @@ const useSearchInputPlaceHolder = () =>
     useTrans({ zh: "用户名输入框", en: "Input user name" })
 
 const useColumns = ({ mutate, items = [], brandId } = {}) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let isAdminUser = useIsAdminUser()
+
+    let hasViewAuth = useIsDisplayMenuByRoute([View])
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasAnyMenu = hasViewAuth || hasUpdateAuth
 
     return useMemo(() => {
-        let columns = [
-            sequenceColumn(),
+        let columns = [sequenceColumn()]
+
+        if (isAdminUser) {
+            columns.push(
+                textColumn({
+                    Header: <Trans zh="Player Code" en="Player Code" />,
+                    accessor: "playerCode",
+                    disableSortBy: true
+                })
+            )
+        }
+
+        columns = [
+            ...columns,
             {
                 Header: <Trans zh="用户名" en="Username" />,
                 accessor: "username",
@@ -207,9 +208,7 @@ const useColumns = ({ mutate, items = [], brandId } = {}) => {
                 cell: {
                     textAlign: "center"
                 },
-                accessor: (row) => {
-                    return row
-                },
+                accessor: (row) => row,
                 Cell: ({ value }) => {
                     return (
                         <Box alignX="center">

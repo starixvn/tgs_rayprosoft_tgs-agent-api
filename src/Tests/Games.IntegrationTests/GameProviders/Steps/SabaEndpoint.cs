@@ -108,7 +108,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Body = new()
                 {
                     Action = "getbalance",
-                    PlayerCode = playerCode
+                    UserId = playerCode
                 }
             };
 
@@ -142,7 +142,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Body = new()
                 {
                     Action = "bet",
-                    PlayerCode = playerCode,
+                    UserId = playerCode,
                     CurrencyCode = Convert.ToInt32(gameProviderCurrencyCode),
                     BetAmount = amount,
                     ActualAmount = amount,

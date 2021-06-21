@@ -1,12 +1,11 @@
 ﻿using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator.Services.Player;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Player;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -15,7 +14,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class PlayerPhoneController : ControllerBase
     {
         /// <summary>
-        /// Starts the change phone.
+        ///     Starts the change phone.
         /// </summary>
         /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
         /// <param name="request">The request.</param>
@@ -28,13 +27,14 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var command = new StartSetPlayerPhoneCommand(playerTokenData.PlayerCode, request.Phone, CultureInfo.CurrentUICulture);
+            var command = new StartSetPlayerPhoneCommand(playerTokenData.PlayerCode, request.Phone,
+                CultureInfo.CurrentUICulture);
 
             return startSetPlayerPhoneService.GetAsync(command);
         }
 
         /// <summary>
-        /// Submits the change phone.
+        ///     Submits the change phone.
         /// </summary>
         /// <param name="commitPlayerPhoneService">The commit player phone service.</param>
         /// <param name="request">The request.</param>
@@ -48,7 +48,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var command = new CommitSetPlayerPhoneCommand(playerTokenData.PlayerCode, request.SecurityKey, request.ValidateCode);
+            var command = new CommitSetPlayerPhoneCommand(
+                playerTokenData.PlayerCode,
+                request.SecurityKey,
+                request.ValidateCode);
 
             return commitPlayerPhoneService.ExecuteAsync(command);
         }

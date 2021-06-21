@@ -67,7 +67,7 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
             var agent = await _agentQueries.GetAgentAsync(x => x.BrandId == brandId && x.Username == username);
             if (agent is null)
             {
-                throw new PlayerNotFoundException(username, Resources.Agent.NotFound);
+                throw new AgentNotFoundException(username, Resources.Agent.NotFound);
             }
 
             if (!_passwordHandler.Verify(agent.Password, agent.Salt, request.Password))

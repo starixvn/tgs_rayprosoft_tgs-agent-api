@@ -21,7 +21,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
         private readonly IGamePlayActions _action;
         private readonly IHabaneroActionModelMapper _map;
 
-        private readonly Dictionary<Type, Func<HttpContext, GameApiError, string, Task<object>>> _responseGenerator;
+        private readonly Dictionary<Type, Func<HttpContext, GameApiError, string, ValueTask<object>>>
+            _responseGenerator;
 
         public HandleHabaneroExceptionMiddleware(
             Func<string, IErrorMapper> mapper,
@@ -61,13 +62,28 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
 
         #region Private Method
 
-        private Task<object> GetAuthorizePlayerResponseAsync(HttpContext context, GameApiError error, string message)
+        private async ValueTask<object> GetAuthorizePlayerResponseAsync(HttpContext context, GameApiError error,
+            string message)
         {
-            var response = _map.Response(error, message);
-            return Task.FromResult((object)response);
+            if (error is not GameApiError.AuthorizationFailed)
+            {
+                return _map.Response(error, message);
+            }
+
+            try
+            {
+                var playerCode = context.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+                var result = await _action.GetBalanceAsync(Consts.GameProvider.Habanero, playerCode);
+                return _map.Response(playerCode, result);
+            }
+            catch (Exception e)
+            {
+                return _map.Response(GameApiError.Uncategorized, e.Message);
+            }
         }
 
-        private async Task<object> GetFundTransferResponseAsync(HttpContext context, GameApiError error, string message)
+        private async ValueTask<object> GetFundTransferResponseAsync(HttpContext context, GameApiError error,
+            string message)
         {
             GetBalanceResult result = null;
 
@@ -81,10 +97,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             return _map.Response(error, message, request, result);
         }
 
-        private Task<object> GetQueryResponseAsync(HttpContext context, GameApiError error, string message)
+        private ValueTask<object> GetQueryResponseAsync(HttpContext context, GameApiError error, string message)
         {
             var response = _map.Response(false);
-            return Task.FromResult((object)response);
+            return ValueTask.FromResult((object)response);
         }
 
         #endregion

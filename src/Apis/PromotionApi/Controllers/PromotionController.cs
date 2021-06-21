@@ -28,21 +28,23 @@ namespace TGS.Apis.PromotionApi.Controllers
             _mediator.Send(new CreatePromotionParticipantRequest(promotionId, playerCode));
 
         [HttpPut("{promotionId}/{status}")]
-        [Description("Add player to promotion")]
+        [Description("Change promotion status")]
         public Task<MessageResponse> ChangePromotionStatusAsync(Guid promotionId, SwitchStatus status) =>
             _mediator.Send(new ChangePromotionStatusRequest(promotionId, status));
 
-        [HttpGet("{promotionId}/check/{brandId}/{playerCode}")]
+        [HttpGet("{promotionId}/check/{brandId}/{playerCode}/{amount}")]
         public async Task<bool> CheckCanJoinPromotionAsync(
             [FromServices] IGetService<CheckCanJoinPromotionQuery, bool> checkService,
             Guid promotionId,
             Guid brandId,
-            string playerCode)
+            string playerCode,
+            decimal amount)
         {
             var query = new CheckCanJoinPromotionQuery(
                 brandId,
                 playerCode,
-                promotionId);
+                promotionId,
+                amount);
 
             var result = await checkService.GetAsync(query).ConfigureAwait(false);
 
@@ -69,6 +71,20 @@ namespace TGS.Apis.PromotionApi.Controllers
         [Description("Get promotions")]
         public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request) =>
             _mediator.Send(request);
+
+        [HttpDelete("{promotionId}/{amount}")]
+        public async Task RevertPromotionAsync(
+            [FromServices] ICommandService<RevertPromotionAmountCommand> revertService,
+            Guid promotionId,
+            decimal amount)
+        {
+            if (amount <= 0)
+                return;
+
+            var command = new RevertPromotionAmountCommand(promotionId, amount);
+
+            await revertService.ExecuteAsync(command).ConfigureAwait(false);
+        }
 
         [HttpPut("{id}")]
         [Description("Update a promotion")]

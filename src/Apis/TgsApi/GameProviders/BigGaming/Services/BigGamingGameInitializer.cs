@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
@@ -71,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         Sn = brandMerchant.SecretCode,
                         LoginId = player.PlayerCode,
                         Locale = cultureCode,
-                        IsMobileUrl = 0,
+                        IsMobileUrl = Convert.ToInt32(request.Token.PlatformType == PlatformType.Mobile),
                         IsHttpsUrl = 0,
                         ReturnUrl = string.Empty,
                         FromIp = string.Empty,
@@ -87,6 +88,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     {
                         throw new GameProviderApiErrorException(responseGameUrl.Error.Message);
                     }
+                }
+                else
+                {
+                    throw new GameProviderApiErrorException(responseGameUrl.Error.Message);
                 }
 
             }

@@ -15,14 +15,15 @@ import {
 } from "bumbag"
 import { Update as UpdateMenu, View as ViewMenu } from "./menu"
 import { useIsDisplayMenuByRoute } from "../../user/context"
-import {
+import Disclosure, {
     AddDisclosure,
     EditDisclosure,
+    NewDisclosure,
     ViewDisclosure
 } from "../../dialog/Disclosure"
 import FormDialog from "../../form/FormDialog"
 import { Trans, useTrans } from "../../i18n"
-import { useForm, useFormContext } from "react-hook-form"
+import { useForm, useFormContext, useWatch } from "react-hook-form"
 import { InputField, Input } from "../../input/Input"
 import clone from "clone-deep"
 import { useAddPromotion, useUpdatePromotion } from "./client"
@@ -57,6 +58,11 @@ import {
     PercentageNumberInputField
 } from "../../input/NumberInput"
 import { Switch } from "../../switch/Switch"
+import { useBrand } from "../../merchant/brands/client"
+import { ImageUploadButton } from "../../file/upload/ImageUploadButton"
+import { HtmlEditor } from "../../text/editor/HtmlEditor"
+import Backdrop from "../../dialog/Backdrop"
+import { isFeatureEnabled, Features } from "../../env"
 
 export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
     let dialog = useModalState()
@@ -68,7 +74,7 @@ export const AddPromotionDisclosure = ({ brandId, onSubmitted }) => {
 
     return (
         <>
-            <AddDisclosure {...dialog} />
+            <NewDisclosure {...dialog} />
             {dialog.visible && (
                 <AddDialog
                     brandId={brandId}
@@ -238,13 +244,32 @@ const EditDialog = ({ brandId, record, onSubmitted, dialog, ...props }) => {
 
 const usePromotionFormData = (
     brandId,
-    { from, to, gameProviderIds = [], vipLevels = [], ...record } = {}
+    {
+        from,
+        to,
+        gameProviderIds = [],
+        vipLevels = [],
+        contents = [],
+        ...record
+    } = {}
 ) => {
-    let { data = {}, ...rest } = useBrandGameProviderList(
+    let {
+        isLoading: isLoadingBrand,
+        data: brand,
+        error: brandError
+    } = useBrand(brandId)
+
+    let {
+        data = {},
+        isLoading: isLoadingBrandGameProviderList,
+        error: brandGameProviderError,
+        ...rest
+    } = useBrandGameProviderList(
         brandId
             ? {
                   brandId,
-                  showAll: true
+                  showAll: true,
+                  sortby: "gameProviderName"
               }
             : undefined
     )
@@ -258,6 +283,21 @@ const usePromotionFormData = (
             }
         }) ?? []
 
+    contents = brand?.languages
+        ?.sort((a, b) => {
+            return a.cultureCode.localeCompare(b.cultureCode)
+        })
+        ?.map(({ brandCultureCode }) => {
+            let content =
+                contents.find(
+                    (content) => content.cultureCode == brandCultureCode
+                ) ?? {}
+            return {
+                ...content,
+                cultureCode: brandCultureCode
+            }
+        })
+
     let promotionTypeGroup = usePromotionGroupValueOf(record?.promotionType)
     let gameTypeGroup = useGameTypeGroupValueOf(record?.gameType)
 
@@ -266,6 +306,7 @@ const usePromotionFormData = (
     data = {
         ...record,
         vipLevels,
+        contents,
         gameProviders,
         promotionTypeGroup,
         gameTypeGroup,
@@ -274,6 +315,8 @@ const usePromotionFormData = (
     }
 
     return {
+        isLoading: isLoadingBrand || isLoadingBrandGameProviderList,
+        error: brandError || brandGameProviderError,
         ...rest,
         data
     }
@@ -315,7 +358,7 @@ const ViewDialog = ({ brandId, record, dialog, ...props }) => {
     }
 
     if (error) {
-        return <AlertDialog onClickClose={dialog.hide} />
+        return <AlertDialog {...error} onClickClose={dialog.hide} />
     }
 
     return (
@@ -333,17 +376,79 @@ const ViewDialog = ({ brandId, record, dialog, ...props }) => {
                 }
             `}
         >
-            <FormBody brandId={brandId} record={record} readonly />
+            <FormBody brandId={brandId} record={record} readOnly={true} />
         </FormDialog>
     )
 }
 
-const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
-    let { start: startOfToday } = today()
-    let { watch } = useFormContext()
+const AutoSentPlayerBonusFieldName = "autoSentPlayerBonus"
+const AutoOrManualPayoutSwitch = ({
+    name = AutoSentPlayerBonusFieldName,
+    readOnly = false,
+    disabled,
+    ...props
+}) => {
+    let { control, setValue } = useFormContext()
 
-    let totalAmountLimit = watch("totalAmountLimit")
-    let unlimitedTotalAmount = watch("unlimited")
+    let checked = useWatch({
+        control,
+        name: AutoSentPlayerBonusFieldName,
+        defaultValue: props.checked ?? props?.defaultValue
+    })
+
+    let autoPayoutLabel = useTrans({
+        zh: "自動",
+        en: "Automatic"
+    })
+    let manualPayoutLabel = useTrans({
+        zh: "手动",
+        en: "Manual"
+    })
+    let label = checked ? autoPayoutLabel : manualPayoutLabel
+
+    if (readOnly || disabled) {
+        return (
+            <>
+                <Switch label={label} checked={checked} disabled={disabled} />
+                <Switch
+                    name={name}
+                    label={label}
+                    checked={checked}
+                    display="none"
+                />
+            </>
+        )
+    }
+
+    return (
+        <Switch
+            name={name}
+            label={label}
+            checked={checked}
+            onChange={(event) => {
+                let checked = event.target.checked
+                setValue(name, checked)
+            }}
+        />
+    )
+}
+
+const FormBody = ({ brandId, record, readOnly = false, isAdd = false }) => {
+    let { start: startOfToday } = today()
+    let formMethods = useFormContext()
+    let { control, setValue } = formMethods
+
+    let TotalAmountLimitFieldName = "totalAmountLimit"
+    let totalAmountLimit = useWatch({
+        control,
+        name: TotalAmountLimitFieldName
+    })
+
+    let UnlimitedFieldName = "unlimited"
+    let unlimitedTotalAmount = useWatch({
+        control,
+        name: UnlimitedFieldName
+    })
     let limitedTotalAmount = !unlimitedTotalAmount
 
     let unlimiteTotalAmountLabel = useTrans({
@@ -351,26 +456,37 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
         en: "Unlimited"
     })
 
-    let promotionTypeGroup = watch("promotionTypeGroup")
+    let PromotionTypeGroupFieldName = "promotionTypeGroup"
+    let promotionTypeGroup = useWatch({
+        control,
+        name: PromotionTypeGroupFieldName
+    })
+
+    let isDepositPromotion = promotionTypeGroup === PromotionTypeGroup.Deposit
+    useEffect(() => {
+        if (isDepositPromotion) {
+            setValue(AutoSentPlayerBonusFieldName, true)
+        }
+    }, [isDepositPromotion])
+
     let isPromotionTypeTurnoverRelated =
         promotionTypeGroup === PromotionTypeGroup.Turnover ||
         promotionTypeGroup === PromotionTypeGroup.ReliefMoney
-    let gameTypeGroup = watch("gameTypeGroup")
 
-    let promotionType = watch("promotionType")
-
-    let autoSentPlayerBonus = watch("autoSentPlayerBonus")
-    let autoPayoutLabel = useTrans({
-        zh: "自動",
-        en: "Auto"
-    })
-    let manualPayoutLabel = useTrans({
-        zh: "手动",
-        en: "Manual"
+    let PromotionTypeFieldName = "promotionType"
+    let promotionType = useWatch({
+        control,
+        name: PromotionTypeFieldName
     })
 
-    let disabled = readonly
-    let editable = !readonly
+    let GameTypeGroupFieldName = "gameTypeGroup"
+    let gameTypeGroup = useWatch({
+        control,
+        name: GameTypeGroupFieldName
+    })
+
+    let disabled = readOnly
+    let editable = !readOnly
 
     return (
         <FieldStack marginLeft="1rem">
@@ -379,14 +495,22 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     <Trans zh="活动名称" en="Promotion Name" />
                 </NormalLabel>
                 <Box alignY="center">
-                    {editable && <Input name="name" />}
-                    {readonly && (
+                    {editable && (
+                        <InputField
+                            name="name"
+                            brandId={brandId}
+                            showLocalizationAddonAfter={isFeatureEnabled(
+                                Features.PromotionLocalization
+                            )}
+                        />
+                    )}
+                    {readOnly && (
                         <Text.Block alignY="center">{record?.name}</Text.Block>
                     )}
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动时间" en="Promotion Time" />
+                    <Trans zh="活动时间" en="Promotion Period" />
                 </NormalLabel>
                 <Box alignY="center">
                     <DateInputRange
@@ -403,7 +527,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动用户群" en="Promotion VIP Levels" />
+                    <Trans zh="活动用户群" en="User Group" />
                 </NormalLabel>
                 <Box alignY="center">
                     <VipLevelCheckboxGroup
@@ -415,16 +539,21 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动类型" en="Promotion Type Group" />
+                    <Trans zh="活动类型" en="Promotion Type" />
                 </NormalLabel>
                 <Box alignY="center">
                     {editable && (
-                        <PromotionTypeGroupSelect name="promotionTypeGroup" />
+                        <PromotionTypeGroupSelect
+                            name={PromotionTypeGroupFieldName}
+                            onChange={(event) => {
+                                setValue(PromotionTypeFieldName, "")
+                            }}
+                        />
                     )}
                     {disabled && (
                         <>
                             <PromotionTypeGroupSelect
-                                name="promotionTypeGroup"
+                                name={PromotionTypeGroupFieldName}
                                 value={promotionTypeGroup}
                                 display="none"
                             />
@@ -437,12 +566,12 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动子类型" en="Promotion Type" />
+                    <Trans zh="活动子类型" en="Promotion SubType" />
                 </NormalLabel>
                 <Box alignY="center">
                     {editable && (
                         <PromotionTypeSelect
-                            name="promotionType"
+                            name={PromotionTypeFieldName}
                             group={promotionTypeGroup}
                             required
                         />
@@ -450,7 +579,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     {disabled && (
                         <>
                             <PromotionTypeSelect
-                                name="promotionType"
+                                name={PromotionTypeFieldName}
                                 value={promotionType}
                                 display="none"
                             />
@@ -463,41 +592,39 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动派发" en="Auto Bonus Payout" />
+                    <Trans zh="活动派发" en="Distribution Method" />
                 </NormalLabel>
                 <Box>
-                    <Switch
-                        name="autoSentPlayerBonus"
-                        label={
-                            autoSentPlayerBonus
-                                ? autoPayoutLabel
-                                : manualPayoutLabel
-                        }
-                        disabled={disabled}
-                    />
+                    {isDepositPromotion && (
+                        <AutoOrManualPayoutSwitch
+                            readOnly
+                            disabled
+                            checked={true}
+                        />
+                    )}
+                    {!isDepositPromotion && (
+                        <AutoOrManualPayoutSwitch
+                            readOnly={readOnly}
+                            disabled={disabled}
+                        />
+                    )}
                 </Box>
 
                 <NormalLabel>
-                    <Trans zh="活动费用" en="Total Amount Limit" />
+                    <Trans zh="活动总费用" en="Promotion Funds" />
                 </NormalLabel>
                 <Set orientation="horizontal" alignY="center">
-                    {unlimitedTotalAmount && (
-                        <Box>
-                            <Input name="totalAmountLimit" type="hidden" />
-                            <Input value={totalAmountLimit} disabled />
-                        </Box>
-                    )}
                     {limitedTotalAmount && (
                         <>
                             <NumberInput
-                                name="totalAmountLimit"
+                                name={TotalAmountLimitFieldName}
                                 required
                                 disabled={disabled}
                             />
                         </>
                     )}
                     <Checkbox
-                        name="unlimited"
+                        name={UnlimitedFieldName}
                         label={unlimiteTotalAmountLabel}
                         disabled={disabled}
                     />
@@ -506,19 +633,19 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动游戏类型" en="Game Type Group" />
+                            <Trans zh="活动游戏类型" en="Game Type" />
                         </NormalLabel>
                         <Box>
                             {editable && (
                                 <GameTypeGroupSelect
-                                    name="gameTypeGroup"
+                                    name={GameTypeGroupFieldName}
                                     disabled={disabled}
                                 />
                             )}
                             {disabled && (
                                 <>
                                     <GameTypeGroupSelect
-                                        name="gameTypeGroup"
+                                        name={GameTypeGroupFieldName}
                                         value={gameTypeGroup}
                                         display="none"
                                     />
@@ -535,7 +662,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动游戏子类型" en="Game Type" />
+                            <Trans zh="活动游戏子类型" en="Game SubType" />
                         </NormalLabel>
                         <GameTypeSelect
                             name="gameType"
@@ -549,7 +676,7 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 {isPromotionTypeTurnoverRelated && (
                     <>
                         <NormalLabel>
-                            <Trans zh="活动厂商" en="Game Providers" />
+                            <Trans zh="活动厂商" en="GP Participation" />
                         </NormalLabel>
                         <Box>
                             <BrandGameProviderCheckboxGroupTable
@@ -561,15 +688,93 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 )}
             </FieldValues>
 
+            {isFeatureEnabled(Features.PromotionLocalization) && (
+                <>
+                    <Separator />
+
+                    <Heading use="h5">
+                        <Trans zh="活动内容" en="Promotion Content" />
+                    </Heading>
+                    <FieldValues>
+                        <NormalLabel>
+                            <Trans zh="活动子标题" en="Promotion SubTitle" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <InputField
+                                name="subTitle"
+                                brandId={brandId}
+                                showLocalizationAddonAfter
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+
+                        <NormalLabel>
+                            <Trans
+                                zh="活动 Banner (PC)"
+                                en="Promotion Banner (PC)"
+                            />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <ImageUploadButton
+                                brandId={brandId}
+                                name="desktopBanner"
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+
+                        <NormalLabel>
+                            <Trans
+                                zh="活动 Banner (Mobile)"
+                                en="Promotion Banner (Mobile)"
+                            />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <ImageUploadButton
+                                brandId={brandId}
+                                name="mobileBanner"
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+
+                        <NormalLabel>
+                            <Trans zh="活动内容" en="Promotion Content" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <HtmlEditorDisclosure
+                                brandId={brandId}
+                                name="content"
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+
+                        <NormalLabel>
+                            <Trans zh="活动条款与条规" en="Promotion Rules" />
+                        </NormalLabel>
+                        <Box alignY="center">
+                            <HtmlEditorDisclosure
+                                brandId={brandId}
+                                name="rules"
+                                disabled={disabled}
+                                readOnly={readOnly}
+                            />
+                        </Box>
+                    </FieldValues>
+                </>
+            )}
+
             <Separator />
 
             <Heading use="h5">
-                <Trans zh="活动规则" en="Rules" />
+                <Trans zh="活动规则" en="Promotion Rules" />
             </Heading>
 
             <FieldValues>
                 <NormalLabel>
-                    <Trans zh="彩金百分比" en="Percentage" />
+                    <Trans zh="彩金百分比" en="Bonus Percentage" />
                 </NormalLabel>
                 <PercentageNumberInputField
                     name="percentage"
@@ -578,17 +783,18 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                 />
 
                 <NormalLabel>
-                    <Trans zh="彩金上限" en="Max Amount" />
+                    <Trans zh="彩金上限" en="Bonus Limit" />
                 </NormalLabel>
                 <NumberInput
                     name="bonusAmountLimit"
                     min="0"
+                    max={limitedTotalAmount ? totalAmountLimit : undefined}
                     required
                     disabled={disabled}
                 />
 
                 <NormalLabel>
-                    <Trans zh="流水倍数" en="Turnover Multiple" />
+                    <Trans zh="流水倍数" en="Turnover Requirement" />
                 </NormalLabel>
                 <NumberInputField
                     name="turnoverMultiple"
@@ -597,11 +803,81 @@ const FormBody = ({ brandId, record, readonly = false, isAdd = false }) => {
                     disabled={disabled}
                     addonAfter={
                         <Button isStatic tabIndex="-1">
-                            <Trans zh="倍" en="X" />
+                            <Trans zh="倍" en="Multipliers" />
                         </Button>
                     }
                 />
             </FieldValues>
         </FieldStack>
+    )
+}
+
+const HtmlEditorDisclosure = ({ brandId, name, readOnly }) => {
+    let dialog = useModalState()
+
+    let editTitle = useTrans({
+        zh: "编辑",
+        en: "Edit"
+    })
+    let viewTitle = useTrans({
+        zh: "查看",
+        en: "View"
+    })
+    let title = readOnly ? viewTitle : editTitle
+    return (
+        <>
+            <Disclosure width="fit-content" {...dialog}>
+                {title}
+            </Disclosure>
+            {dialog.visible && (
+                <HtmlEditorDialog
+                    brandId={brandId}
+                    name={name}
+                    readOnly={readOnly}
+                    dialog={dialog}
+                    title={title}
+                />
+            )}
+        </>
+    )
+}
+
+const HtmlEditorDialog = ({
+    brandId,
+    name,
+    readOnly,
+    dialog,
+    title,
+    ...props
+}) => {
+    let { visible } = props
+    return (
+        <Backdrop {...dialog}>
+            <Dialog.Modal
+                {...dialog}
+                hideBackdrop
+                hideOnClickOutside={false}
+                showCloseButton
+                title={title}
+                width="max-content"
+                maxWidth="80vw"
+                css={css`
+                    .tox-fullscreen & {
+                        top: 0;
+                        left: 0;
+                        transform: none;
+                    }
+                `}
+            >
+                <HtmlEditor
+                    brandId={brandId}
+                    name={name}
+                    readOnly={readOnly}
+                    height={400}
+                    active={visible}
+                    showLocalizationAddonAfter
+                />
+            </Dialog.Modal>
+        </Backdrop>
     )
 }

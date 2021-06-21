@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -54,8 +55,9 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                 .ToAsyncEnumerable()
                 .Select(form => new WithdrawFormModel(
                     form.Id,
-                    form.PlayerCode,
-                    form.Player.Username,
+                    form.UserId,
+                    (UserType)form.UserType,
+                    form.UserName,
                     form.BrandId,
                     form.BrandPaymentId,
                     form.BrandPayment?.ChannelName,
@@ -71,13 +73,12 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
         private IQueryable<WithdrawForm> MakeQuery(WithdrawFormQuery query)
         {
             var dataQuery = _tgsRepository.WithdrawForms
-                .Include(f => f.Player)
                 .Include(f => f.BrandPayment)
                 .ThenInclude(bp => bp.PaymentMethodChannel)
                 .Where(form => form.BrandId == query.BrandId);
 
             if (!string.IsNullOrWhiteSpace(query.UserName))
-                dataQuery = dataQuery.Where(form => form.Player.Username == query.UserName);
+                dataQuery = dataQuery.Where(form => form.UserName == query.UserName);
 
             if (!string.IsNullOrWhiteSpace(query.ChannelName))
                 dataQuery = dataQuery.Where(form => form.BrandPayment.ChannelName == query.ChannelName);

@@ -26,15 +26,15 @@ namespace TGS.Tests.ApiClients.GameProviders
         }
 
         ValueTask<GetBalanceResponse> IIMESportsApiClient.GetPlayerBalanceAsync(GetBalanceRequest request) =>
-            ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post, $"{RoutePrefix}/GetBalance",
+            ExecuteJsonRequestAsync<GetBalanceRequest, GetBalanceResponse>(HttpMethod.Post, $"{RoutePrefix}/getbalance",
                 request);
 
         ValueTask<BetResponse> IIMESportsApiClient.PlaceBetAsync(BetRequest request) =>
-            ExecuteJsonRequestAsync<BetRequest, BetResponse>(HttpMethod.Post, $"{RoutePrefix}/PlaceBet",
+            ExecuteJsonRequestAsync<BetRequest, BetResponse>(HttpMethod.Post, $"{RoutePrefix}/placebet",
                 request);
 
         ValueTask<BetResponse> IIMESportsApiClient.SettleAndCancelBetAsync(BetRequest request) =>
-            ExecuteJsonRequestAsync<BetRequest, BetResponse>(HttpMethod.Post, $"{RoutePrefix}/SettleBet",
+            ExecuteJsonRequestAsync<BetRequest, BetResponse>(HttpMethod.Post, $"{RoutePrefix}/settle",
                 request);
     }
 }

@@ -41,11 +41,16 @@ namespace TGS.Apis.OperatorApi.Controllers
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
                 SortBy = request.SortBy,
-                ShowAll = request.ShowAll
+                ShowAll = request.ShowAll,
+                CurrentDate = DateTimeOffset.Now
             };
             var response = await _client.GetPromotionsAsync(promotionsRequest);
 
-            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<PromotionModel>()
+            };
         }
 
         [HttpPost("{id}/join")]
@@ -58,7 +63,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var response = await _client.JoinAsync(new(id, playerTokenData.PlayerCode));
 
-            return new() {Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty};
+            return new() { Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty };
         }
     }
 }

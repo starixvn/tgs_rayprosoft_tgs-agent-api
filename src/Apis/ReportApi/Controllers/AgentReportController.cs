@@ -21,15 +21,19 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet("contribution")]
         [Description("Get agent contributions")]
-        public Task<PagedResponse<AgentContributionModel>> GetRoundsAsync(
+        public Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(
             [FromQuery] GetAgentContributionsRequest request) =>
             _mediator.Send(request);
 
 
         [HttpGet("{id}/teamInfo")]
         [Description("Get agent team Information")]
-        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id) =>
-            _mediator.Send(new GetAgentTeamInfoRequest(id));
+        public Task<PagedResponse<TeamInfoModel>> GetAgentTeamInformationAsync(Guid id,
+            [FromQuery] GetAgentTeamInfoRequest request)
+        {
+            request.AgentId = id;
+            return _mediator.Send(request);
+        }
 
         [HttpGet("dividends")]
         [Description("Get agent dividends report")]

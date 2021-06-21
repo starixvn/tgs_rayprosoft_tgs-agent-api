@@ -8,7 +8,7 @@ import {
     useUserRoleId
 } from "../../user/context"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
-import { Code } from "./menu"
+import { Code, Update } from "./menu"
 import textColumn from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import { useForm, FormProvider } from "react-hook-form"
@@ -40,9 +40,10 @@ const Body = () => {
         name: ""
     })
 
-    let { isLoading, data, error, mutate, deleteCache } = useLanguageList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useLanguageList({
+        ...toApiParams(state),
+        sortby: "cultureCode"
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
     return (
@@ -53,22 +54,12 @@ const Body = () => {
                     <SearchBar
                         cultureCode={state?.cultureCode}
                         languageCode={state?.languageCode}
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                cultureCode: data?.cultureCode,
-                                languageCode: data?.languageCode
-                            }
-                            if (
-                                equals(newState, {
-                                    pageIndex: state?.pageIndex,
-                                    cultureCode: state?.cultureCode,
-                                    languageCode: state?.languageCode
-                                })
-                            ) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isLoading={isLoading}
                     />
@@ -77,23 +68,16 @@ const Body = () => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(state?.pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -130,8 +114,9 @@ const SearchBar = ({
 }
 
 const useColumns = ({ items = [], mutate }) => {
-    return useMemo(
-        () => [
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    return useMemo(() => {
+        let columns = [
             textColumn({
                 accessor: "cultureCode",
                 Header: <Trans zh="Culture Code" en="Culture Code" />,
@@ -171,24 +156,30 @@ const useColumns = ({ items = [], mutate }) => {
                 accessor: "updatedByUsername",
                 Header: <Trans zh="更新人" en="Updated By" />,
                 disableSortBy: true
-            }),
-            textColumn({
-                id: "actions",
-                Header: <Trans zh="操作" en="Actions" />,
-                accessor: (row) => row,
-                disableSortBy: true,
-                Cell: ({ value: record }) => {
-                    return (
-                        <Set orientation="horizontal">
-                            <EditLangDisclosure
-                                record={record}
-                                onSubmitted={mutate}
-                            />
-                        </Set>
-                    )
-                }
             })
-        ],
-        [JSON.stringify(items)]
-    )
+        ]
+
+        if (hasUpdateAuth) {
+            columns.push(
+                textColumn({
+                    id: "actions",
+                    Header: <Trans zh="操作" en="Actions" />,
+                    accessor: (row) => row,
+                    disableSortBy: true,
+                    Cell: ({ value: record }) => {
+                        return (
+                            <Set orientation="horizontal">
+                                <EditLangDisclosure
+                                    record={record}
+                                    onSubmitted={mutate}
+                                />
+                            </Set>
+                        )
+                    }
+                })
+            )
+        }
+
+        return columns
+    }, [JSON.stringify(items)])
 }

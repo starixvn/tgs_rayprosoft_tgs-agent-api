@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Payment;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Withdraw;
 using TGS.Apis.BackendOffice.Extensions;
@@ -10,7 +11,6 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.Payment;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -35,8 +35,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Data = new WithdrawFormDetailViewModel
                 {
                     Id = formDetail.Id,
-                    PlayerCode = formDetail.PlayerCode,
+                    UserId = formDetail.UserId,
                     UserName = formDetail.UserName,
+                    UserType = formDetail.UserType.ToString(),
                     BrandId = formDetail.BrandId,
                     BrandPaymentId = formDetail.BrandPaymentId,
                     PaymentMethodId = formDetail.PaymentMethodId,
@@ -96,8 +97,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                     .Select(form => new WithdrawFormViewModel
                     {
                         Id = form.Id,
-                        PlayerCode = form.PlayerCode,
+                        UserId = form.UserId,
                         UserName = form.UserName,
+                        UserType = form.UserType.ToString(),
                         BrandId = form.BrandId,
                         BrandPaymentId = form.BrandPaymentId,
                         PaymentMethodId = form.PaymentMethodId,

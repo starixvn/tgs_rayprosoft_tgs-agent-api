@@ -37,6 +37,7 @@ import AlertDialog from "../../dialog/Alert"
 import textColumn from "../../table/column/textColumn"
 import VipLevelSelect from "../../vip-levels/VipLevelSelect"
 import { usePlayerContributionList } from "./client"
+import { VipLevelLabel } from "../../vip-levels/VipLevel"
 
 export { Code }
 
@@ -121,51 +122,31 @@ const ReportContent = ({ brandId }) => {
                     maxDate={maxDate}
                     maxRangeDays={QueryMaxRangeDays}
                     isLoading={isLoading}
-                    search={({ username, level, start, end }) => {
-                        let newState = {
+                    search={({ start, end, ...rest }) => {
+                        setState({
                             pageIndex: 0,
-                            username,
-                            level,
                             from: start,
-                            to: end
-                        }
-
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                username: state?.username,
-                                level: state?.level,
-                                from: state?.from,
-                                to: state?.to
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                            to: end,
+                            ...rest
+                        })
+                        mutate()
                     }}
                 />
             }
             title={<Trans zh="玩家贡献报表" en="Player Contribution Report" />}
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
                 foot={data?.items?.length > 0}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -254,9 +235,9 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
             textColumn({
                 accessor: "level",
                 Header: <Trans zh="VIP 等级" en="VIP Level" />,
-                Cell: ({ value }) => <Text.Block>VIP {value}</Text.Block>,
-                Footer: () => <Box />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value }) => <VipLevelLabel value={value} />,
+                Footer: () => <Box />
             }),
             numberDecimalColumn({
                 accessor: "depositAmount",

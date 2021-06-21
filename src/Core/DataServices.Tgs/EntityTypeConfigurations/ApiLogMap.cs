@@ -25,7 +25,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsUnicode();
 
             builder.Property(c => c.Path)
-                .HasMaxLength(256)
                 .IsRequired()
                 .IsUnicode();
 

@@ -4,12 +4,12 @@
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyName>Promotion.Core</AssemblyName>
     <RootNamespace>TGS.Services.Promotion</RootNamespace>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.9.60">
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.10.56">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -17,10 +17,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Clients\FileService.Client\FileService.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
+    <ProjectReference Include="..\..\Repositories\TgsTransaction.Repositories\TgsTransaction.Repositories.csproj" />
     <ProjectReference Include="..\Bucket\PlayerBucket.Core.csproj" />
-    <ProjectReference Include="..\TgsTransaction.Core\TgsTransaction.Core.csproj" />
     <ProjectReference Include="..\Wallet.Core\Wallet.Core.csproj" />
   </ItemGroup>
 

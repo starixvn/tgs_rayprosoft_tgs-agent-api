@@ -14,9 +14,11 @@ import {
     Dialog,
     Card
 } from "bumbag"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure, {
     AddDisclosure,
-    EditDisclosure
+    EditDisclosure,
+    ViewDisclosure
 } from "../../dialog/Disclosure"
 import {
     useForm,
@@ -28,12 +30,9 @@ import FormDialog from "../../form/FormDialog"
 import { Trans, useLocale, useTrans } from "../../i18n"
 import Backdrop from "../../dialog/Backdrop"
 import {
-    useAddGameProviderGame,
-    useGameProvider,
-    useUpdateGameProvider,
-    useUpdateGameProviderGame,
-    useUploadGameProviderGames
-} from "../../game/providers/client"
+    useAddGameProviderGameList,
+    useUpdateGameProviderGame
+} from "../../game/games/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
@@ -48,18 +47,67 @@ import {
     GamePlatformTypeSelectField
 } from "../../game/games/GamePlatform"
 import { useDropzone } from "react-dropzone"
+import { View, Update } from "./menu"
+import { CloseButtonFooter } from "../../form/ConfirmButtonFooter"
 
-export const GameProviderGameDisclosure = ({ record, onSubmitted }) => {
+export const ViewGameProviderGameDisclosure = ({ record }) => {
     let dialog = useModalState()
 
-    let isCreate = !record?.id
-    let isEdit = !isCreate
+    let isDisplay = useIsDisplayMenuByRoute([View])
+    if (!isDisplay) {
+        return null
+    }
+
     return (
         <>
-            {isCreate && <AddDisclosure {...dialog} />}
-            {isEdit && <EditDisclosure {...dialog} />}
+            <ViewDisclosure {...dialog} />
+            {dialog.visible && <ViewDialog record={record} dialog={dialog} />}
+        </>
+    )
+}
+
+const ViewDialog = ({ record, dialog }) => {
+    let title = useTrans({
+        zh: "View Game",
+        en: "View Game"
+    })
+
+    return (
+        <Backdrop {...dialog}>
+            <FormDialog
+                defaultValues={clone(record)}
+                title={title}
+                hideBackdrop
+                title={title}
+                dialog={dialog}
+                footer={<CloseButtonFooter dialog={dialog} alignX="right" />}
+                showActionButtons={false}
+                width="60vw"
+                css={css`
+                    & .bb-DialogContent {
+                        position: relative;
+                    }
+                `}
+            >
+                <GameProviderGameFormBody readOnly />
+            </FormDialog>
+        </Backdrop>
+    )
+}
+
+export const EditGameProviderGameDisclosure = ({ record, onSubmitted }) => {
+    let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
+
+    return (
+        <>
+            <EditDisclosure {...dialog} />
             {dialog.visible && (
-                <GameProviderGameDialog
+                <EditGameDialog
                     record={record}
                     onSubmitted={onSubmitted}
                     dialog={dialog}
@@ -74,6 +122,11 @@ export const AddGameProviderGameDisclosure = ({
     onSubmitted
 }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>
@@ -97,10 +150,13 @@ const AddGameDialog = ({ gameProviderId, onSubmitted, dialog }) => {
     let [formData, setSubmit] = useState()
 
     let { isLoading, result, error, mutate, deleteCache } =
-        useAddGameProviderGame(gameProviderId, formData)
+        useAddGameProviderGameList(formData)
 
     const onSubmit = (data) => {
-        setSubmit(data)
+        setSubmit({
+            gameProviderId,
+            games: [data]
+        })
     }
 
     const reset = () => {
@@ -130,18 +186,13 @@ const AddGameDialog = ({ gameProviderId, onSubmitted, dialog }) => {
                     }
                 `}
             >
-                <FormBody />
+                <GameProviderGameFormBody />
             </FormDialog>
         </Backdrop>
     )
 }
 
-export const GameProviderGameDialog = ({
-    record,
-    onChange,
-    onSubmitted,
-    dialog
-}) => {
+const EditGameDialog = ({ record, onSubmitted, dialog }) => {
     let title = useTrans({
         zh: "Edit Game",
         en: "Edit Game"
@@ -150,6 +201,10 @@ export const GameProviderGameDialog = ({
 
     let { isLoading, result, error, mutate, deleteCache } =
         useUpdateGameProviderGame(record?.id, formData)
+
+    const onSubmit = (data) => {
+        setSubmit(data)
+    }
 
     const reset = () => {
         deleteCache()
@@ -161,15 +216,7 @@ export const GameProviderGameDialog = ({
             <FormDialog
                 defaultValues={clone(record)}
                 title={title}
-                onSubmit={(data) => {
-                    if (!record?.id && onChange) {
-                        onChange(data)
-                        reset()
-                        dialog.hide()
-                    } else {
-                        setSubmit(data)
-                    }
-                }}
+                onSubmit={onSubmit}
                 onSubmitted={onSubmitted}
                 result={result}
                 isLoading={isLoading}
@@ -186,19 +233,19 @@ export const GameProviderGameDialog = ({
                     }
                 `}
             >
-                <FormBody />
+                <GameProviderGameFormBody />
             </FormDialog>
         </Backdrop>
     )
 }
 
-//TODO: required InputField not work?
-const FormBody = ({}) => {
+export const GameProviderGameFormBody = ({ readOnly = false }) => {
     let { watch, getValues } = useFormContext()
     let id = getValues("id")
 
     let isCreate = !id
     let isEdit = !isCreate
+    let disabled = readOnly
     return (
         <FieldStack>
             <FieldStack orientation="horizontal">
@@ -210,34 +257,81 @@ const FormBody = ({}) => {
                         label="Id"
                     />
                 )}
-                <InputField name="externalId" required label="External Id" />
+                <InputField
+                    name="externalId"
+                    required
+                    readOnly={readOnly}
+                    label="External Id"
+                />
             </FieldStack>
             <FieldStack orientation="horizontal">
-                <InputField name="code" required label="Code" />
-                <InputField name="name" required label="Name" />
+                <InputField
+                    name="code"
+                    required
+                    readOnly={readOnly}
+                    label="Code"
+                />
+                <InputField
+                    name="name"
+                    required
+                    readOnly={readOnly}
+                    label="Name"
+                />
             </FieldStack>
-            <InputField name="description" label="Description" />
+            <InputField
+                name="description"
+                readOnly={readOnly}
+                label="Description"
+            />
             <FieldStack orientation="horizontal">
-                <GameStatusSelectField name="status" required label="Status" />
-                <GameTypeSelectField name="type" required label="Type" />
+                <GameStatusSelectField
+                    name="status"
+                    required
+                    disabled={disabled}
+                    label="Status"
+                />
+                <GameTypeSelectField
+                    name="type"
+                    required
+                    disabled={disabled}
+                    label="Type"
+                />
                 <GamePlatformTypeSelectField
                     name="platformType"
                     required
+                    disabled={disabled}
                     label="Platform Type"
                 />
             </FieldStack>
-            <InputField name="endpointPath" label="Endpoint Path" />
-            <InputField name="ruleUrl" label="Rule Url" />
+            <InputField
+                name="endpointPath"
+                readOnly={readOnly}
+                label="Endpoint Path"
+            />
+            <InputField name="ruleUrl" readOnly={readOnly} label="Rule Url" />
             <FieldStack orientation="horizontal">
-                <CheckboxField name="subGame" label="Sub Game" />
+                <CheckboxField
+                    name="subGame"
+                    disabled={disabled}
+                    label="Sub Game"
+                />
+                <CheckboxField
+                    name="availableToBrand"
+                    disabled={disabled}
+                    label="Available To Brand"
+                />
+            </FieldStack>
+            <FieldStack orientation="horizontal">
                 <CheckboxField
                     name="hasTurnoverOnTieBet"
+                    disabled={disabled}
                     label="Turnover On Tie Bet"
                 />
-                <CheckboxField name="html5" label="Html5" />
+                <CheckboxField name="html5" disabled={disabled} label="Html5" />
             </FieldStack>
             <InputField
                 name="availableCurrencies"
+                readOnly={readOnly}
                 label="Available Currencies"
             />
         </FieldStack>

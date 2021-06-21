@@ -1,14 +1,16 @@
 ﻿using System;
-using System.Data;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
-using TGS.Services.WalletService;
-using TGS.Services.PlayerBucket.Models;
 using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
+using TGS.Services.WalletService;
 
 namespace PlayerBucket.Repositories
 {
@@ -25,7 +27,7 @@ namespace PlayerBucket.Repositories
             _walletRepository = walletRepository;
         }
 
-        async Task IPlayerBucketRepository.CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] requests)
+        public async Task CreatePlayerBucketsAsync(CreatePlayerBucketRequest[] requests)
         {
             var buckets = requests.Select(x => new TGS.Core.DataServices.Tgs.Models.PlayerBucket
             {
@@ -40,26 +42,66 @@ namespace PlayerBucket.Repositories
             await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        async ValueTask<decimal> IPlayerBucketRepository.CreatePlayerBucketWithDepositAsync(
-                    CreatePlayerBucketWithDepositRequest request)
+        public async Task FillInBucketAsync(FillInPlayerBucketsRequest request)
         {
-            var bucketAmount = request.DepositAmount;
+            var playerCodes = request.PlayerTurnovers.Select(x => x.PlayerCode).ToArray();
+            var playerBuckets = await _repository.PlayerBuckets
+                .Where(x => playerCodes.Contains(x.PlayerCode) && !x.IsFull).ToArrayAsync();
+            var playerBucketHistories = new List<PlayerBucketHistory>();
 
-            var bucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
+            foreach (var player in request.PlayerTurnovers)
             {
-                PlayerCode = request.PlayerCode,
-                BucketAmount = request.DepositAmount,
-                BucketType = BucketType.Deposit,
-                IsFull = false,
-                CreatedOn = DateTimeOffset.Now
-            };
+                var turnover = player.Turnover;
+                var buckets = playerBuckets.Where(x => x.PlayerCode == player.PlayerCode).ToArray();
+
+                foreach (var playerBucket in buckets)
+                {
+                    if (turnover <= 0)
+                    {
+                        break;
+                    }
+
+                    var amount = 0.0M;
+                    if (turnover - (playerBucket.BucketAmount - playerBucket.CurrentBucketAmount) >= 0.0M)
+                    {
+                        amount = playerBucket.BucketAmount - playerBucket.CurrentBucketAmount;
+                        turnover -= amount;
+                        playerBucket.IsFull = true;
+                        playerBucket.CurrentBucketAmount = playerBucket.BucketAmount;
+                    }
+                    else
+                    {
+                        amount = turnover;
+                        playerBucket.CurrentBucketAmount += turnover;
+                        turnover = 0;
+                    }
+
+                    playerBucketHistories.Add(new()
+                    {
+                        PlayerCode = player.PlayerCode,
+                        Turnover = amount,
+                        From = request.From,
+                        To = request.To,
+                        CreatedOn = DateTimeOffset.Now
+                    });
+                }
+            }
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            await _repository.PlayerBuckets
-                .AddAsync(bucket).ConfigureAwait(false);
-
+            _repository.PlayerBuckets.UpdateRange(playerBuckets);
+            _repository.PlayerBucketHistories.UpdateRange(playerBucketHistories);
             await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            scope.Complete();
+        }
+
+        public async ValueTask<decimal> CreatePlayerBucketWithDepositAsync(
+            CreatePlayerBucketWithDepositRequest request)
+        {
+            var depositBonusAmount = request.DepositAmount;
+
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
             await _walletRepository.ExchangeAsync(request.BrandId, request.DefaultWalletId,
                 request.PlayerCode, TransactionTypes.Deposit, request.DepositAmount);
@@ -73,31 +115,105 @@ namespace PlayerBucket.Repositories
                     ? promotion.BonusAmountLimit
                     : bonusAmount;
 
-                bucketAmount += bonusAmount;
+                depositBonusAmount += bonusAmount;
 
-                var promotionBucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
+                var playerBucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
                 {
                     PlayerCode = request.PlayerCode,
-                    BucketAmount = bonusAmount,
+                    BucketAmount = depositBonusAmount * promotion.TurnoverMultiple,
                     BucketType = BucketType.Promotion,
                     IsFull = false,
                     CreatedOn = DateTimeOffset.Now
                 };
 
-                await _repository.PlayerBuckets.AddAsync(promotionBucket).ConfigureAwait(false);
+                var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
+                var reportDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0,
+                    now.Offset);
+
+                var bonusId = GuidExtensions.NewSequentialGuid();
+                var bonus = new PromotionBonus
+                {
+                    Id = bonusId,
+                    BrandId = request.BrandId,
+                    PromotionId = promotion.Id,
+                    From = reportDate,
+                    To = reportDate,
+                    PromotionType = promotion.PromotionType,
+                    TotalAmountLimit = promotion.TotalAmountLimit,
+                    GameType = promotion.GameType,
+                    Percentage = promotion.Percentage,
+                    BonusAmountLimit = promotion.BonusAmountLimit,
+                    TurnoverMultiple = promotion.TurnoverMultiple,
+                    CreatedOn = DateTimeOffset.Now,
+                    PromotionPlayers = new[]
+                    {
+                        new PromotionPlayer
+                        {
+                            PlayerCode = request.PlayerCode,
+                            PromotionBonusId = bonusId,
+                            BonusAmount = bonusAmount,
+                            SentOn = promotion.AutoSentPlayerBonus ? DateTimeOffset.Now : null
+                        }
+                    }.ToHashSet()
+                };
+
+                await _repository.PromotionBonus.AddAsync(bonus).ConfigureAwait(false);
+
+                await _repository.PlayerBuckets.AddAsync(playerBucket).ConfigureAwait(false);
 
                 await _repository.SaveChangesAsync().ConfigureAwait(false);
 
-                await _walletRepository.ExchangeAsync(request.BrandId, request.DefaultWalletId,
+                var (transactionId, _) = await _walletRepository.ExchangeAsync(request.BrandId,
+                    request.DefaultWalletId,
                     request.PlayerCode, TransactionTypes.Promotion, bonusAmount);
+
+                var transactionPromotion = new TransactionPromotion
+                {
+                    TransactionId = transactionId,
+                    PromotionId = promotion.Id,
+                    PromotionBonusId = bonusId,
+                    PromotionType = promotion.PromotionType
+                };
+
+                await _repository.TransactionPromotions.AddAsync(transactionPromotion).ConfigureAwait(false);
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
+            }
+            else
+            {
+                var bucket = new TGS.Core.DataServices.Tgs.Models.PlayerBucket
+                {
+                    PlayerCode = request.PlayerCode,
+                    BucketAmount = request.DepositAmount,
+                    BucketType = BucketType.Deposit,
+                    IsFull = false,
+                    CreatedOn = DateTimeOffset.Now
+                };
+
+                await _repository.PlayerBuckets
+                    .AddAsync(bucket).ConfigureAwait(false);
+
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
             }
 
             scope.Complete();
 
-            return bucketAmount;
+            return depositBonusAmount;
         }
 
-        async ValueTask<bool> IPlayerBucketRepository.IsBucketFullAsync(string playerCode) =>
-            await _repository.PlayerBuckets.AllAsync(x => x.PlayerCode == playerCode && x.IsFull);
+        public async ValueTask<bool> IsBucketFullAsync(string playerCode) =>
+            await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode).AllAsync(x => x.IsFull);
+
+        public async ValueTask<decimal> ClearPlayerBucketsAsync(string playerCode)
+        {
+            await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode)
+                .ForEachAsync(x =>
+                {
+                    x.CurrentBucketAmount = x.BucketAmount;
+                    x.IsFull = true;
+                }).ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            return await _repository.PlayerBuckets.Where(x => x.PlayerCode == playerCode && x.IsFull == true).SumAsync(x => x.BucketAmount - x.CurrentBucketAmount);
+        }
     }
 }

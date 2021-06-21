@@ -6,7 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
-using PlayerBucket.Repositories;
+using Tgs.Payment;
+using TGS.Clients.Promotion.Client;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
@@ -15,10 +16,8 @@ using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Payment;
-using TGS.Services.WalletService;
-using TGS.Services.PlayerBucket.Models;
 using TGS.Services.PlayerBucket;
+using TGS.Services.PlayerBucket.Models;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -50,11 +49,13 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var moqPaymentRepository = new Mock<IPaymentRepository>();
             var moqPlayerService = new Mock<IPlayerService>();
             var moqPlayerBucketRepository = new Mock<IPlayerBucketRepository>();
+            var moqPromotionClient = new Mock<IPromotionClient>();
 
             var sut = new ReviewDepositFormCommandService(
                 moqPaymentRepository.Object,
                 moqPlayerService.Object,
-                moqPlayerBucketRepository.Object);
+                moqPlayerBucketRepository.Object,
+                moqPromotionClient.Object);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();
@@ -63,7 +64,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             moqPaymentRepository
                 .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == formId)))
-                .Returns(ValueTask.FromResult(new DepositFormDetail(
+                .Returns(ValueTask.FromResult(new DepositFormInfo(
                     Guid.NewGuid(),
                     "ThisIsPlayerCode",
                     "PlayerName",
@@ -74,6 +75,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     1000M,
                     null,
                     1000,
+                    null,
                     null,
                     null,
                     DateTimeOffset.UtcNow,

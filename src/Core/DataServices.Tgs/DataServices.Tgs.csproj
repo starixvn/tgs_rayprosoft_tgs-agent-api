@@ -6,7 +6,11 @@
     <RootNamespace>TGS.Core.DataServices.Tgs</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>  </ItemGroup>
+  <ItemGroup>
+    <None Remove="DataInitializers\Games\SW.csv" />
+    <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
+    <None Remove="SqlScripts\PaymentInitial\applepay.sql" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="appsettings.json">
@@ -26,7 +30,10 @@
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\SG.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\SW.csv" />
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
+    <EmbeddedResource Include="Migrations\RefactorWithdrawForm.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_provider_configuration_for_cache.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_transaction_id.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_referenced_game_action_exists.sql" />
@@ -38,9 +45,12 @@
     <EmbeddedResource Include="SqlScripts\Functions\log_get_api_log.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_api_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_log_records.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\report_get_player_account_change_records.sql" />
-    <EmbeddedResource Include="SqlScripts\Functions\report_get_round_aggregates.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\report_get_round_and_set_game_setting_aggregates.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\report_generate_round_aggregates.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\agent_wallet_update_wallet_balance.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\promotion_update_amount_used.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\admin_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\api_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
@@ -63,6 +73,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_sub_games.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_games_for_cache.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_languages_by_external_code.sql" />
+    <EmbeddedResource Include="SqlScripts\PaymentInitial\applePay.sql" />
     <EmbeddedResource Include="SqlScripts\Procedures\usp_GameProvider_GetGameProviderBetLimitCode.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_languages_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_game_provider_for_cache.sql" />
@@ -80,12 +91,12 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_external_code.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_provider_get_currencies_by_internal_code.sql" />
     <EmbeddedResource Include="SqlScripts\Views\vw_valid_game_actions.sql" />
-    <None Remove="DataInitializers\Games\JDB.csv" />
     <EmbeddedResource Include="DataInitializers\Games\JDB.csv" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="26.1.0" />
+    <PackageReference Include="JoyMoe.Common.Json" Version="0.5.156242" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

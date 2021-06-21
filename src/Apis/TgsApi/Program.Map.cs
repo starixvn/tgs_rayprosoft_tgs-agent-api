@@ -11,6 +11,8 @@ using TGS.Apis.TgsApi.GameProviders.Saba;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Apis.TgsApi.GameProviders.VR;
 using TGS.Core.Models;
+using TGS.Apis.TgsApi.GameProviders.SexyGaming;
+using TGS.Apis.TgsApi.GameProviders.Skywind;
 
 namespace TGS.Apis.TgsApi
 {
@@ -29,7 +31,9 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.KY, typeof(KYStartup)},
             {Consts.GameProvider.VR, typeof(VRStartup)},
             {Consts.GameProvider.IMESports, typeof(IMESportsStartup)},
-            {Consts.GameProvider.BigGaming, typeof(BigGamingStartup)}
+            {Consts.GameProvider.BigGaming, typeof(BigGamingStartup)},
+            {Consts.GameProvider.SexyGaming, typeof(SexyGamingStartup)},
+             {Consts.GameProvider.Skywind, typeof(SkywindStartup)}
         };
 
         private static readonly IReadOnlyDictionary<string, string> ConfigFileMap = new Dictionary<string, string>
@@ -43,7 +47,9 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.KY, "KY/ky.json"},
             {Consts.GameProvider.VR, "VR/vr.json"},
             {Consts.GameProvider.BigGaming, "BigGaming/biggaming.json"},
-            {Consts.GameProvider.IMESports, "IMESports/imesports.json"}
+            {Consts.GameProvider.IMESports, "IMESports/imesports.json"},
+            {Consts.GameProvider.SexyGaming, "SexyGaming/sexygaming.json"},
+            {Consts.GameProvider.Skywind, "Skywind/skywind.json"}
         };
     }
 }

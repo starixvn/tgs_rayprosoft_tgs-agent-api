@@ -49,6 +49,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AgentId = model.AgentId,
                 GameProviderId = model.GameProviderId,
                 PlayerCode = model.PlayerCode,
+                GameId = model.GameId,
                 GameType = model.GameType,
                 Hour = model.Hour,
                 Minute = model.Minute,
@@ -85,10 +86,10 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
             var playerAggregates = await _tgsRepository.Players.Include(x => x.Agent)
                 .GroupJoin(_tgsRepository.Transactions, p => p.PlayerCode, t => t.Wallet.PlayerCode,
-                    (p, t) => new {p.BrandId, Player = p, transaction = t})
+                    (p, t) => new { p.BrandId, Player = p, transaction = t })
                 .SelectMany(x => x.transaction.DefaultIfEmpty(),
-                    (x, transaction) => new {x.BrandId, x.Player, transaction})
-                .GroupBy(x => new {x.BrandId, x.Player.AgentId, x.Player.PlayerCode},
+                    (x, transaction) => new { x.BrandId, x.Player, transaction })
+                .GroupBy(x => new { x.BrandId, x.Player.AgentId,x.Player.Agent.DividendPercentage, x.Player.PlayerCode },
                     (x, players) =>
                         new PlayerAggregateModel
                         {
@@ -129,6 +130,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             PromotionAmount = players.Where(p =>
                                 p.transaction.Type == TransactionType.Promotion && p.transaction.RecordedOn >= start &&
                                 p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
+                            AgentDividendPercentage = x.DividendPercentage,
                             CreatedOn = DateTimeOffset.Now
                         }).ToArrayAsync();
 
@@ -154,13 +156,14 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     _tgsRepository.Players.Include(x => x.Agent).Include(x => x.Vip),
                     r => r.PlayerCode, p => p.PlayerCode, (r, p) => new {r, p = p.DefaultIfEmpty()})
                 .SelectMany(x => x.p.Select(player => player),
-                    (x, player) => new {x.r, x.p, player.Vip, player.Agent})
+                    (x, player) => new {x.r, x.p, player.Vip, player.Agent })
                 .GroupBy(x => new
                     {
                         x.r.BrandId,
                         x.r.AgentId,
                         x.r.PlayerCode,
                         x.r.GameProviderId,
+                        x.r.GameId,
                         x.r.GameType,
                         x.Vip,
                         x.Agent
@@ -174,6 +177,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             PlayerCode = x.PlayerCode,
                             VipLevel = x.Vip?.Level,
                             GameProviderId = x.GameProviderId,
+                            GameId = x.GameId,
                             GameType = x.GameType,
                             Hour = start.Hour,
                             VipSportsRebatePercentage = x.Vip?.SportsRebatePercentage ?? 0M,
@@ -194,6 +198,13 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             ReportDate = reportDate
                         };
                     }).ToArray();
+
+            var players = playerAggregateByGameType.Select(x => x.PlayerCode).ToArray();
+
+            playerAggregates = playerAggregates.Where(x =>
+                x.RegisteredCount != 0 || x.FirstFundInCount != 0 || x.DepositAmount != 0 || x.WithdrawalAmount != 0 ||
+                x.AdjustmentAmount != 0 || x.BonusAmount != 0 || x.BetAmount != 0 || x.Turnover != 0 ||
+                x.WinLossAmount != 0 || x.NetProfit != 0 || players.Contains(x.PlayerCode)).ToArray();
 
             return (playerAggregates, playerAggregateByGameType);
         }
@@ -218,7 +229,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.CardGame:
                     return vip.CardGameRebatePercentage * roundAggregates.Where(a =>
-                            a.GameType == GameType.Sportsbook || a.GameType == GameType.CardGame)
+                            a.GameType == GameType.CardGame)
                         .Sum(a => a.Turnover) / 100M;
                 case GameType.Fishing:
                 case GameType.Arcade:

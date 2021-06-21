@@ -10,7 +10,7 @@ namespace TGS.Core.Models
         public const string DefaultCultureCode = "en-US";
         public const string Default = "default";
 
-        public static readonly GameType[] Sports = { GameType.Sportsbook, GameType.VirtualSports, GameType.ESports };
+        public static readonly GameType[] Sports = {GameType.Sportsbook, GameType.VirtualSports, GameType.ESports};
 
         public static readonly GamePlatformType[] AllGamePlatformTypes =
         {
@@ -25,8 +25,8 @@ namespace TGS.Core.Models
                 {HealthStatus.Degraded, StatusCodes.Status500InternalServerError}
             };
 
-        public static GameType[] SportsGroup = { GameType.Sportsbook, GameType.ESports };
-        public static GameType[] SlotGroup = { GameType.Fishing, GameType.Arcade, GameType.Slot, GameType.TableGame };
+        public static GameType[] SportsGroup = {GameType.Sportsbook, GameType.ESports};
+        public static GameType[] SlotGroup = {GameType.Fishing, GameType.Arcade, GameType.Slot, GameType.TableGame};
 
         public static class CachePrefix
         {
@@ -72,6 +72,8 @@ namespace TGS.Core.Models
             public const string VR = "VR";
             public const string IMESports = "IMES";
             public const string BigGaming = "BG";
+            public const string SexyGaming = "SG";
+            public const string Skywind = "SW";
         }
 
         public static class EnvironmentVariable
@@ -115,6 +117,15 @@ namespace TGS.Core.Models
                 public static string BrandKey = "Brand";
                 public static string PortalKey = "Portal";
             }
+        }
+
+        public static class UploadFile
+        {
+            public const string ImagePattern = @"\b(http(s?):)([/|:|.|\w|-])*\.(?:jpg|gif|png|jpeg)\b";
+            public const string StationLetter = "stationLetter";
+            public const string Promotion = "promotion";
+
+            public static readonly string[] Types = {StationLetter, Promotion};
         }
     }
 }

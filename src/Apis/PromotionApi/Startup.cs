@@ -31,8 +31,8 @@ namespace TGS.Apis.PromotionApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
-            app.UseGlobalExceptionHandler();
+            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
+            app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
 
@@ -83,6 +83,13 @@ namespace TGS.Apis.PromotionApi
                 })
                 .AddTgsPromotionRepositories();
 
+            services.AddFileServiceClient((sp, httpClient) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                httpClient.BaseAddress = new(config.GetValue<string>("File:FileServiceBaseUrl"));
+            });
+
             services
                 .AddHttpContextAccessor()
                 .AddRouting(options => options.LowercaseUrls = true);
@@ -93,7 +100,7 @@ namespace TGS.Apis.PromotionApi
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() { Title = "TGS Promotion API", Version = "v1" });
+                c.SwaggerDoc("v1", new() {Title = "TGS Promotion API", Version = "v1"});
 
                 var xml = "TGS.Apis.Promotion.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);

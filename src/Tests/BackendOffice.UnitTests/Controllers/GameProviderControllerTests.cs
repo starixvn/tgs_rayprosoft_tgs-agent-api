@@ -9,6 +9,7 @@ using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.GameProvider;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
 using TGS.Services.BackOffice.Application.Resources;
 
@@ -22,7 +23,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
-            _controller = new GameProviderController(
+            _controller = new(
                 _mediatorMock.Object);
         }
 
@@ -48,16 +49,17 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 ShowAll = showAll
             };
             var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.UpdatedOn);
+            var games = list.OrderByDescending(p => p.UpdatedOn)
+                .Select(g => (GameProviderBaseModel)g);
 
-            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
+            var expectedGames = showAll ? games.ToArray() : games.Skip(skip).Take(take).ToArray();
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetGameProvidersRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<GameProviderModel>
+                .ReturnsAsync(new PagedResponse<GameProviderBaseModel>
                 {
                     Valid = true,
-                    Items = expectedRoles
+                    Items = expectedGames
                 });
 
             var response = await _controller.GetGameProvidersAsync(request);
@@ -65,8 +67,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             for (var i = 0; i < response.Items.Length; i++)
             {
-                response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-                response.Items[i].Name.Should().Be(expectedRoles[i].Name);
+                response.Items[i].Id.Should().Be(expectedGames[i].Id);
+                response.Items[i].Name.Should().Be(expectedGames[i].Name);
             }
 
             _mediatorMock.Verify(x => x.Send(It.IsAny<GetGameProvidersRequest>(), It.IsAny<CancellationToken>()));
@@ -84,7 +86,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GameProviderResponse {Valid = false, Message = GameProvider.CodeExisted});
+                .ReturnsAsync(new CreateGamesResponse
+                {
+                    Valid = false,
+                    Message = GameProvider.CodeExisted
+                });
 
             var response = await _controller.CreateGameProviderAsync(request);
             response.Valid.Should().BeFalse();
@@ -100,7 +106,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GameProviderResponse {Valid = true});
+                .ReturnsAsync(new CreateGamesResponse {Valid = true});
 
             var response = await _controller.CreateGameProviderAsync(request);
             response.Valid.Should().BeTrue();
@@ -116,7 +122,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GameProviderResponse {Valid = true});
+                .ReturnsAsync(new CreateGamesResponse {Valid = true});
 
             var response = await _controller.UpdateGameProviderAsync(brand.Id, request);
 
@@ -128,7 +134,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<GameProviderModel>(u => u
-                .With(s => s.Games, new GameProviderGameModel[] { })
                 .With(s => s.Languages, new GameProviderLanguageModel[] { })
                 .With(s => s.Currencies, new GameProviderCurrencyModel[] { }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());

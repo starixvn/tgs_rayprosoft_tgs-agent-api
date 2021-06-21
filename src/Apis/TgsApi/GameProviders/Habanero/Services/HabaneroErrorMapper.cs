@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using TGS.Apis.TgsApi.GameProviders.Habanero.Exceptions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
@@ -24,6 +25,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 {typeof(PlayerDisabledException), AuthorizationFailed},
                 {typeof(PlayerNotFoundException), AuthorizationFailed},
                 {typeof(PlayerLoginExpiredException), AuthorizationFailed},
+                {typeof(InvalidTokenException), AuthorizationFailed},
                 {typeof(PlayerHasInsufficientFundsException), InsufficientFunds}
             };
 

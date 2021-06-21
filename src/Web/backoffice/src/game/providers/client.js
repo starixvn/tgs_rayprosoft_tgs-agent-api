@@ -28,22 +28,7 @@ export const useAddGameProvider = (data) => {
     return usePostData(API, data)
 }
 
-export const useAddGameProviderGame = (gameProviderId, data) => {
-    console.warn("useAddGameProviderGame not impl yet")
-    return usePostData(API, data)
-}
-
-export const useAddGameProviderGameList = (gameProviderId, data) => {
-    console.warn("useAddGameProviderGameList not impl yet")
-    return usePostData(API, data)
-}
-
 export const useUpdateGameProvider = (id, data) => {
-    let url = id ? `${API}/${id}` : ""
-    return usePutData(url, data)
-}
-
-export const useUpdateGameProviderGame = (id, data) => {
     let url = id ? `${API}/${id}` : ""
     return usePutData(url, data)
 }
@@ -51,9 +36,4 @@ export const useUpdateGameProviderGame = (id, data) => {
 export const useChangeGameProviderStatus = (id, status) => {
     let url = id && status ? `${API}/${id}/${status}` : ""
     return usePut(url)
-}
-
-export const useUploadGameProviderGames = (body) => {
-    let url = body ? `${API}/upload` : undefined
-    return usePostFormData(url, body)
 }

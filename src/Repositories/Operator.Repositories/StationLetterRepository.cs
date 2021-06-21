@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.Paging;
-using TGS.Services.Operator;
+using TGS.Services.Operator.StationLetters;
 
 namespace TGS.Operator.Repositories
 {
@@ -36,6 +36,7 @@ namespace TGS.Operator.Repositories
             var query = from letterPlayer in _tgsRepository.StationLetterPlayers
                             .Include(letterPlayer => letterPlayer.StationLetter)
                             .AsAsyncEnumerable()
+                            .OrderByDescending(x => x.StationLetter.CreatedOn)
                         where letterPlayer.PlayerCode == playerCode
                             && letterPlayer.StationLetter.Status == StationLetterStatus.Published
                         select new StationLetter(

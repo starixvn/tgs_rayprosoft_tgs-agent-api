@@ -1,11 +1,10 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
-using TGS.Services.Operator.Wallet;
+using TGS.Services.Operator.Services.Wallet;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -15,7 +14,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class WalletController : ControllerBase
     {
         /// <summary>
-        /// Gets the balance information.
+        ///     Gets the balance information.
         /// </summary>
         /// <param name="getBalanceService">The get balance service.</param>
         /// <returns></returns>
@@ -32,10 +31,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            return new BalanceInfoResponse
-            {
-                Main = info.Main
-            };
+            return new() {Main = info.Main};
         }
     }
 }

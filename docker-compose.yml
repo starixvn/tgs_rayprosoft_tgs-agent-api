@@ -98,6 +98,20 @@ services:
       dockerfile: ./src/Web/backoffice/Dockerfile
     image: backoffice-site
     container_name: backoffice-site
+    environment:
+      #MODE: "production"
+      #LOGIN_BUTTON_COLOR: "#ffffff"
+      #LOGIN_BUTTON_BACKGROUND: "#1e417b"
+      #HEADER_BACKGROUND: "#1e417b"
+      #HEADER_BUTTON_COLOR: "#ffffff"
+      #HEADER_BUTTON_BACKGROUND: "transparent"
+      MODE: "development"
+      LOGIN_BUTTON_COLOR: "#212121"
+      LOGIN_BUTTON_BACKGROUND: "#f7f7fa"
+      HEADER_BACKGROUND: "#f7f7fa"
+      HEADER_BUTTON_COLOR: "#212121"
+      HEADER_BUTTON_BACKGROUND: "transparent"
+      PromotionLocalization: "true"
     labels:
       - traefik.enable=true
       - traefik.http.routers.backoffice-site.rule=Host(`backoffice.localhost`)

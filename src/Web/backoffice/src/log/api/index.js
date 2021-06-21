@@ -31,7 +31,7 @@ import SearchButton from "../../button/SearchButton"
 import equals from "fast-deep-equal"
 import { InputField } from "../../input/Input"
 import AlertDialog from "../../dialog/Alert"
-import textColumn from "../../table/column/textColumn"
+import textColumn, { ellipsisTextColumn } from "../../table/column/textColumn"
 import numberColumn, {
     numberDecimalColumn,
     numberDecimalPercentageColumn
@@ -40,6 +40,8 @@ import { today } from "../../date/range"
 import DateTimeRangeInput from "../../date/DateTimeRangeInput"
 import { useApiLogList } from "./client"
 import { LogDetailDialogDisclosure } from "../LogDetailDialog"
+import { CopyTextBox } from "../../text/CopyTextBox"
+import { SortOrder } from "../../table/order"
 
 export { Code }
 
@@ -63,6 +65,8 @@ const Body = ({}) => {
         trackingId: "",
         ip: "",
         path: "",
+        prefix: "",
+        serverName: "",
         method: ""
     })
 
@@ -73,7 +77,11 @@ const Body = ({}) => {
         mutate,
         error,
         deleteCache
-    } = useApiLogList(toApiParams(state))
+    } = useApiLogList({
+        ...toApiParams(state),
+        sortby: "RecordedOn",
+        orderby: SortOrder.Descending
+    })
 
     let columns = useColumns({ mutate, items: data?.items })
 
@@ -88,28 +96,17 @@ const Body = ({}) => {
                     trackingId={state?.trackingId}
                     ip={state?.ip}
                     path={state?.path}
+                    prefix={state?.prefix}
+                    serverName={state?.serverName}
                     method={state?.method}
-                    search={({ start, end, ...data }) => {
-                        let newState = {
+                    search={({ start, end, ...data } = {}) => {
+                        setState({
                             pageIndex: 0,
                             from: start,
                             to: end,
                             ...data
-                        }
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                from: state?.from,
-                                to: state?.to,
-                                trackingId: state?.trackingId,
-                                ip: state?.ip,
-                                path: state?.path,
-                                method: state?.method
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                        })
+                        mutate()
                     }}
                     isLoading={isLoading}
                 />
@@ -144,6 +141,7 @@ const SearchBar = ({
     trackingId,
     ip,
     path,
+    prefix,
     method,
     search,
     isLoading,
@@ -157,6 +155,7 @@ const SearchBar = ({
             trackingId,
             ip,
             path,
+            prefix,
             method
         }
     })
@@ -189,6 +188,16 @@ const SearchBar = ({
                         placeholder="Path"
                     />
                     <InputField
+                        name="prefix"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Prefix"
+                    />
+                    <InputField
+                        name="serverName"
+                        showEmptyFieldValueAddonAfter
+                        placeholder="Server Name"
+                    />
+                    <InputField
                         name="method"
                         showEmptyFieldValueAddonAfter
                         placeholder="Method"
@@ -207,27 +216,33 @@ const useColumns = ({ items = [] } = {}) => {
                 accessor: "id",
                 Header: <Trans zh="Id" en="Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "trackingId",
                 Header: <Trans zh="Tracking Id" en="Tracking Id" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             textColumn({
                 accessor: "ip",
                 Header: <Trans zh="Ip" en="Ip" />,
                 disableSortBy: true,
-                Cell: ({ value = "" }) => value
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
-            textColumn({
+            ellipsisTextColumn({
                 accessor: "path",
                 Header: <Trans zh="Path" en="Path" />,
                 disableSortBy: true,
-                wordBreak: "break-word",
                 textAlign: "left",
-                Cell: ({ value = "" }) => value
+                maxWidth: "20rem",
+                Cell: ({ value = "" }) => (
+                    <CopyTextBox
+                        value={value}
+                        whiteSpace="normal"
+                        textAlign="left"
+                    />
+                )
             }),
             textColumn({
                 accessor: "method",

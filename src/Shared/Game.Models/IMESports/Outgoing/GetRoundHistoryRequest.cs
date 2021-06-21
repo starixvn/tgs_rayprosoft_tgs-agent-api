@@ -18,7 +18,8 @@ namespace TGS.Shared.Game.Models.IMESports.Outgoing
         [JsonPropertyName("ProductWallet")]
         public int ProductWallet { get; init; }
 
-        [JsonPropertyName("DateFilterType")] public int DateFilterType => 1;
+        [JsonPropertyName("DateFilterType")]
+        public int DateFilterType => 1;
 
         [JsonPropertyName("Language")]
         public string Language { get; init; }

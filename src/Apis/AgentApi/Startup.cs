@@ -20,6 +20,7 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
@@ -40,6 +41,45 @@ namespace TGS.Apis.AgentApi
         {
             _configuration = configuration;
             _env = env;
+        }
+
+        public void Configure(IApplicationBuilder app)
+        {
+            app.UseGlobalExceptionHandler();
+
+            app.UseRequestLocalization(options =>
+            {
+                options.DefaultRequestCulture = new("en-US");
+                options.ApplyCurrentCultureToResponseHeaders = true;
+            });
+
+            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
+
+            app.UseRouting();
+
+            app.UseHttpMetrics();
+
+            app.UseCors();
+
+            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health", new()
+                {
+                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                    ResponseWriter = (httpContext, result) =>
+                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                });
+                endpoints.MapMetrics();
+            });
+
+            if (!_env.IsProduction())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Agent API"));
+            }
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -69,7 +109,22 @@ namespace TGS.Apis.AgentApi
                 .ConfigureEmailConfiguration<IConfiguration>((options, config) =>
                 {
                     config.GetSection("EmailSetting").Bind(options);
-                });
+                })
+                .AddPayment(configuration =>
+                {
+                    configuration.UseTgsPaymentRepository();
+                })
+                .ConfigureWallet(config =>
+                {
+                    config.AddTgsAgentWalletRepositories();
+                })
+                .AddTgsAgentRepository();
+
+            services.AddHttpClient<IEmailClient, EmailClient>((sp, c) =>
+            {
+                var url = _configuration.GetSection("Email:Url");
+                c.BaseAddress = new(url.Value);
+            });
 
             services.AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
@@ -139,45 +194,6 @@ namespace TGS.Apis.AgentApi
                             .SetIsOriginAllowed(_ => true);
                     });
             });
-        }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseGlobalExceptionHandler();
-
-            app.UseRequestLocalization(options =>
-            {
-                options.DefaultRequestCulture = new("en-US");
-                options.ApplyCurrentCultureToResponseHeaders = true;
-            });
-
-            app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
-
-            app.UseRouting();
-
-            app.UseHttpMetrics();
-
-            app.UseCors();
-
-            app.UseVerifyJwtTokenMiddlewares(Consts.DefaultBypassRouting);
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                });
-                endpoints.MapMetrics();
-            });
-
-            if (!_env.IsProduction())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS Agent API"));
-            }
         }
     }
 }

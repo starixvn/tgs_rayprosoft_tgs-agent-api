@@ -16,8 +16,10 @@ import {
     Spinner,
     Alert
 } from "bumbag"
+import { useIsDisplayMenuByRoute } from "../../user/context"
 import Disclosure, {
     AddDisclosure,
+    ConfigIconDisclosure,
     EditDisclosure
 } from "../../dialog/Disclosure"
 import {
@@ -30,11 +32,9 @@ import FormDialog from "../../form/FormDialog"
 import { Trans, useLocale, useTrans } from "../../i18n"
 import Backdrop from "../../dialog/Backdrop"
 import {
-    useGameProvider,
-    useUpdateGameProvider,
     useUploadGameProviderGames,
     useAddGameProviderGameList
-} from "../../game/providers/client"
+} from "../../game/games/client"
 import LoadingBackdrop from "../../dialog/LoadingBackdrop"
 import AlertDialog from "../../dialog/Alert"
 import clone from "clone-deep"
@@ -44,18 +44,23 @@ import { InputField, Input } from "../../input/Input"
 import { CheckboxField } from "../../checkbox/Checkbox"
 import GameStatus, { GameStatusSelectField } from "../../game/games/GameStatus"
 import { GameTypeSelectField } from "../../game/GameType"
-import {
-    GamePlatformLabel,
-    GamePlatformTypeSelectField
-} from "../../game/games/GamePlatform"
+import { GamePlatformLabel } from "../../game/games/GamePlatform"
 import { useDropzone } from "react-dropzone"
-import { GameProviderGameDialog } from "./GameProviderGame"
+import { GameProviderGameFormBody } from "./GameProviderGame"
+import { ConfirmText } from "../../button/ActionButtons"
+import sequenceColumn from "../../table/column/sequence"
+import { Update } from "./menu"
 
 export const BatchAddGameProviderGameListDisclosure = ({
     gameProviderId,
     onSubmitted
 }) => {
     let dialog = useModalState()
+
+    let isDisplay = useIsDisplayMenuByRoute([Update])
+    if (!isDisplay) {
+        return null
+    }
 
     return (
         <>
@@ -73,28 +78,53 @@ export const BatchAddGameProviderGameListDisclosure = ({
     )
 }
 
+const GameListFieldName = "games"
 const BatchAddGameListDialog = ({ gameProviderId, onSubmitted, dialog }) => {
     let title = useTrans({
         zh: "批量新增游戏",
         en: "Batch Create Games"
     })
 
-    let [games, setGames] = useState([])
+    let formMethods = useForm()
+    let { control, setValue, watch } = formMethods
+
+    let { fields, append, remove, ...fieldArray } = useFieldArray({
+        control,
+        name: GameListFieldName,
+        keyName: "_id",
+        shouldUnregister: true
+    })
+    let gameListFieldArray = watch(GameListFieldName)
+    //TODO: merge by keyName or index is fine?
+    let items = fields.map((field, index) => {
+        return {
+            ...field,
+            ...gameListFieldArray[index]
+        }
+    })
+
+    let [formData, setSubmit] = useState()
     let { isLoading, result, error, mutate, deleteCache } =
-        useAddGameProviderGameList(gameProviderId, games)
+        useAddGameProviderGameList(formData)
+
+    let columns = useColumns({ items, formMethods })
+    const onSubmit = ({ games = [], ...rest }) => {
+        setSubmit({ gameProviderId, games })
+    }
 
     const reset = () => {
         deleteCache()
         mutate(undefined, false)
-        setGames([])
+        setSubmit(undefined)
     }
 
-    let uploadRequired = !games || games.length == 0
+    let uploadRequired = fields.length == 0
     return (
         <Backdrop {...dialog}>
             <FormDialog
+                formMethods={formMethods}
+                onSubmit={onSubmit}
                 title={title}
-                showActionButtons={false}
                 isLoading={isLoading}
                 result={result}
                 error={error}
@@ -102,23 +132,140 @@ const BatchAddGameListDialog = ({ gameProviderId, onSubmitted, dialog }) => {
                 onSubmitted={onSubmitted}
                 dialog={dialog}
                 hideBackdrop
-                width="60vw"
+                width="80vw"
+                maxWidth="80vw"
+                placement="top"
             >
                 {uploadRequired && (
                     <UploadGameListCard
                         gameProviderId={gameProviderId}
-                        onChange={(uploadedGames) => {
-                            setGames(uploadedGames)
+                        onUploaded={(uploadedGames = []) => {
+                            setValue(GameListFieldName, uploadedGames)
                         }}
                     />
                 )}
-                {JSON.stringify(games)}
+                {fields.length > 0 && <Table columns={columns} data={items} />}
             </FormDialog>
         </Backdrop>
     )
 }
 
-const UploadGameListCard = ({ gameProviderId, onChange }) => {
+const useColumns = ({ items = [], formMethods }) => {
+    return useMemo(() => {
+        let columns = [
+            textColumn({
+                id: "index",
+                accessor: (row, rowIndex) => rowIndex + 1,
+                Header: <Trans zh="序" en="Sequence" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "externalId",
+                Header: <Trans zh="External Id" en="External Id" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "code",
+                Header: <Trans zh="游戏代码" en="Code" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "name",
+                Header: <Trans zh="游戏名称" en="Name" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "status",
+                Header: <Trans zh="Status" en="Status" />,
+                disableSortBy: true
+            }),
+            textColumn({
+                accessor: "type",
+                Header: <Trans zh="Type" en="Type" />,
+                disableSortBy: true,
+                Cell: ({ value }) => <GamePlatformLabel value={value} />
+            }),
+            textColumn({
+                id: "actions",
+                accessor: (row) => row,
+                Header: <Trans zh="操作" en="Actions" />,
+                disableSortBy: true,
+                Cell: ({ value: record, row }) => {
+                    let index = row.index
+                    return (
+                        <Set orientation="horizontal" alignX="center">
+                            <EditGameDisclosure
+                                record={record}
+                                onChange={(game) => {
+                                    formMethods?.setValue(
+                                        `${GameListFieldName}.${index}`,
+                                        game
+                                    )
+                                }}
+                            />
+                        </Set>
+                    )
+                }
+            })
+        ]
+
+        return columns
+    }, [JSON.stringify(items)])
+}
+
+const EditGameDisclosure = ({ record, onChange }) => {
+    let dialog = useModalState()
+    return (
+        <>
+            <EditDisclosure {...dialog} />
+            {dialog.visible && (
+                <EditGameDialog
+                    record={record}
+                    submitText={<ConfirmText />}
+                    onChange={onChange}
+                    dialog={dialog}
+                />
+            )}
+        </>
+    )
+}
+
+const EditGameDialog = ({ record, onChange, dialog }) => {
+    let title = useTrans({
+        zh: "Edit Game",
+        en: "Edit Game"
+    })
+
+    const onSubmit = (data) => {
+        onChange?.(data)
+        dialog.hide()
+    }
+
+    return (
+        <Backdrop {...dialog}>
+            <FormDialog
+                defaultValues={clone(record)}
+                submitText={<ConfirmText />}
+                title={title}
+                onSubmit={onSubmit}
+                stopPropagation
+                hideBackdrop
+                title={title}
+                dialog={dialog}
+                width="60vw"
+                css={css`
+                    & .bb-DialogContent {
+                        position: relative;
+                    }
+                `}
+            >
+                <GameProviderGameFormBody />
+            </FormDialog>
+        </Backdrop>
+    )
+}
+
+const UploadGameListCard = ({ gameProviderId, onUploaded }) => {
     let [formData, setSubmit] = useState()
     const {
         acceptedFiles,
@@ -145,19 +292,14 @@ const UploadGameListCard = ({ gameProviderId, onChange }) => {
         useUploadGameProviderGames(formData)
 
     useEffect(() => {
-        let games = result?.games?.map((game) => ({
-            ...clone(game),
-            status: GameStatus.Active
-        }))
-        onChange?.(games)
-    }, [result])
-
-    useEffect(() => {
-        if (error) {
-            //TODO: remain error msg?
-            reset()
+        if (result) {
+            let games = result?.games?.map((game) => ({
+                ...clone(game),
+                status: GameStatus.Active
+            }))
+            onUploaded?.(games)
         }
-    }, [error])
+    }, [result])
 
     const reset = () => {
         deleteCache()
@@ -167,7 +309,7 @@ const UploadGameListCard = ({ gameProviderId, onChange }) => {
 
     let notSelectFile = !formData?.file
     return (
-        <>
+        <FieldStack>
             {notSelectFile && (
                 <Card
                     {...getRootProps({
@@ -178,33 +320,23 @@ const UploadGameListCard = ({ gameProviderId, onChange }) => {
                     <p>
                         <Trans zh="选择档案" en="Select File" />
                     </p>
-                    {error && (
-                        <Alert type="danger">{JSON.stringify(error)}</Alert>
-                    )}
                 </Card>
             )}
             {isLoading && (
-                <Card>
+                <Card alignX="center">
                     <Spinner />
                 </Card>
             )}
-        </>
-    )
-}
-
-export const GameProviderBatchGameDisclosure = ({ record, onChange }) => {
-    let dialog = useModalState()
-
-    return (
-        <>
-            <EditDisclosure {...dialog} />
-            {dialog.visible && (
-                <GameProviderGameDialog
-                    record={record}
-                    onChange={onChange}
-                    dialog={dialog}
-                />
+            {error && (
+                <Alert
+                    type="danger"
+                    title={error?.title ?? "Error"}
+                    showCloseButton
+                    onClickClose={reset}
+                >
+                    {JSON.stringify(error)}
+                </Alert>
             )}
-        </>
+        </FieldStack>
     )
 }

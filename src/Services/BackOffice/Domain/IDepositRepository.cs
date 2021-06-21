@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TGS.Services.Payment;
+using Tgs.Payment;
 
 namespace TGS.Services.BackOffice.Domain
 {
     public interface IDepositRepository
     {
-        ValueTask<DepositFormDetail> GetDepositFormDetailAsync(Guid formId);
+        ValueTask<DepositFormInfo> GetDepositFormDetailAsync(Guid formId);
     }
 }

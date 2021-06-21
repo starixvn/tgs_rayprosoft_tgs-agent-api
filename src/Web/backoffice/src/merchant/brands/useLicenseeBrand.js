@@ -9,6 +9,7 @@ import {
 } from "../../checkbox/mapChecked"
 import { useBrand } from "./client"
 import { useLicensee } from "../licensees/client"
+import { sortBy } from "lodash-es"
 
 export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
     let {
@@ -16,7 +17,8 @@ export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
         isLoading: isLoadingBrand,
         error: brandError,
         mutate: mutateBrand,
-        deleteCache: deleteBrandCache
+        deleteCache: deleteBrandCache,
+        clearCache
     } = useBrand(brandId)
 
     let {
@@ -51,6 +53,7 @@ export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
         brand?.gameProviders ?? [],
         licensee?.gameProviders ?? []
     )
+    gameProviders = sortBy(gameProviders, ["name"])
 
     let betLimits = mapMergeChecked(
         (brandBetLimit, betLimit) => {
@@ -77,10 +80,13 @@ export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
         (brandLang, licenseeLang) => {
             return brandLang.cultureCode === licenseeLang.cultureCode
         },
-        (brandLang = { brandCultureCode: "" }, licenseeLang = {}) => {
+        (brandLang = {}, licenseeLang = {}) => {
+            let brandCultureCode =
+                brandLang.brandCultureCode ?? licenseeLang.cultureCode
             return {
                 ...licenseeLang,
-                ...brandLang
+                ...brandLang,
+                brandCultureCode
             }
         },
         brand?.languages ?? [],
@@ -102,7 +108,8 @@ export const useLicenseeBrand = ({ brandId = "", licenseeId = "" }) => {
         isLoading: isLoadingBrand || isLoadingLicensee,
         error: brandError || licenseeError,
         mutateBrand,
-        deleteBrandCache
+        deleteBrandCache,
+        clearCache
     }
 }
 

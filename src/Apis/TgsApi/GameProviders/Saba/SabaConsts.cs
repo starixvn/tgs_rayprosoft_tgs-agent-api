@@ -27,5 +27,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
             public static readonly string LockAmount = "SabaLockAmount";
             public static readonly string SabaTxIdMap = "SabaTxIdMap";
         }
+
+        public static class ContextItems
+        {
+            public static readonly string IsTestEnvironment = "IsTestEnv";
+        }
     }
 }

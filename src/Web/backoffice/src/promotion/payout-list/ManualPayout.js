@@ -148,10 +148,10 @@ const FormBody = ({ record }) => {
                 <Trans zh="活动名称 " en="Promotion Name" />
                 <Box alignY="center">{record?.promotionName}</Box>
 
-                <Trans zh="活动类型  " en="Promotion Type Group" />
+                <Trans zh="活动类型  " en="Promotion Type" />
                 <Box alignY="center">{promotionTypeGroup}</Box>
 
-                <Trans zh="活动子类型  " en="Promotion Type" />
+                <Trans zh="活动子类型  " en="Promotion SubType" />
                 <Box alignY="center">
                     <PromotionTypeLabel value={record?.promotionType} />
                 </Box>

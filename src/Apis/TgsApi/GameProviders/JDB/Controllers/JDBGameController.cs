@@ -11,6 +11,7 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
@@ -20,7 +21,7 @@ using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
 {
-    [Route("api/jdb/entrance")]
+    [Route("api/jdb")]
     [ApiController]
     [Consumes("application/x-www-form-urlencoded")]
     [Produces(MediaTypeNames.Application.Json)]
@@ -34,6 +35,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IJDBActionModelMapper _map;
         private readonly IJDBServices _services;
+        private readonly ISettingOperations _settingOperations;
 
         public JDBGameController(
             IGamePlayActions actions,
@@ -41,7 +43,8 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
             IJDBActionModelMapper map,
             IJsonSerializationProvider jsonSerializationProvider,
             IGameProviderOperations gameProviderOperations,
-            IGameActionQueries gameActionQueries)
+            IGameActionQueries gameActionQueries,
+            ISettingOperations settingOperations)
         {
             _actions = actions;
             _services = services;
@@ -49,10 +52,12 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
             _jsonSerializationProvider = jsonSerializationProvider;
             _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;
+            _settingOperations = settingOperations;
         }
 
         [HttpPost]
-        public async Task<BaseActionResponse> TransferFundsAsync(
+        [Route("entrance")]
+        public async Task<BaseActionResponse> ExecuteGameActionAsync(
             [FromForm(Name = "action")] ActionType actionType,
             [FromForm(Name = "value")] string json) =>
             actionType switch
@@ -122,7 +127,11 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Controllers
                 }
             }
 
-            var betData = _map.Request(data, request, platformType);
+            var configuration =
+                await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
+                    .GameProviderConfigurations.JDB);
+
+            var betData = _map.Request(data, request, platformType, configuration.TimezoneHour);
 
             var betResult = await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
             return _map.Response(betResult);

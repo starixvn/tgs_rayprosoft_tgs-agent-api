@@ -23,13 +23,13 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string SecretKey { get; set; }
 
         public string ApiKey { get; set; }
-        public SettlementIntervalType SettlementIntervalType { get; set; }
-        public DateTimeOffset PreviousSettlementFrom { get; set; }
-        public DateTimeOffset PreviousSettlementTo { get; set; }
-        public DateTimeOffset CurrentSettlementFrom { get; set; }
-        public DateTimeOffset CurrentSettlementTo { get; set; }
-        public DateTimeOffset NextSettlementFrom { get; set; }
-        public DateTimeOffset NextSettlementTo { get; set; }
+        public SettlementIntervalType? SettlementIntervalType { get; set; }
+        public DateTimeOffset? PreviousSettlementFrom { get; set; }
+        public DateTimeOffset? PreviousSettlementTo { get; set; }
+        public DateTimeOffset? CurrentSettlementFrom { get; set; }
+        public DateTimeOffset? CurrentSettlementTo { get; set; }
+        public DateTimeOffset? NextSettlementFrom { get; set; }
+        public DateTimeOffset? NextSettlementTo { get; set; }
         public bool AutoSentPlayerBonus { get; set; }
         public bool AutoSentAgentBonus { get; set; }
         public virtual ICollection<Player> Players { get; set; }

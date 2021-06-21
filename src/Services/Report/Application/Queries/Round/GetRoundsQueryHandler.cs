@@ -9,7 +9,7 @@ using TGS.Services.Report.Infrastructure.DataService;
 
 namespace TGS.Services.Report.Application.Queries.Round
 {
-    internal class GetRoundsQueryHandler : Handler<GetRoundsRequest, PagedResponse<RoundModel>>
+    public class GetRoundsQueryHandler : Handler<GetRoundsRequest, PagedResponse<RoundModel>>
     {
         private readonly ITgsRoundService _service;
 
@@ -62,6 +62,28 @@ namespace TGS.Services.Report.Application.Queries.Round
                         x.detail,
                         gameProvider
                     })
+                .GroupJoin(_service.TgsRepository.BrandGames,
+                    roundGroup => new {roundGroup.round.BrandId, roundGroup.round.GameId},
+                    brandGame => new {brandGame.BrandId, brandGame.GameId},
+                    (roundGroup, brandGame) => new
+                    {
+                        roundGroup.round,
+                        roundGroup.player,
+                        roundGroup.game,
+                        roundGroup.gameProvider,
+                        roundGroup.detail,
+                        brandGame
+                    })
+                .SelectMany(x => x.brandGame.DefaultIfEmpty(),
+                    (x, brandGame) => new
+                    {
+                        x.round,
+                        x.player,
+                        x.game,
+                        x.gameProvider,
+                        x.detail,
+                        brandGame
+                    })
                 .Select(combine => new RoundModel
                 {
                     Id = combine.round.Id,
@@ -81,11 +103,14 @@ namespace TGS.Services.Report.Application.Queries.Round
                     ClosedOn = combine.round.ClosedOn,
                     CurrencyCode = combine.round.CurrencyCode,
                     BetAmount = combine.round.BetAmount,
-                    ValidBetAmount = combine.round.Turnover,
+                    ValidBetAmount =
+                        combine.round.Turnover * (combine.round.EffectiveBettingPercentage ??
+                            (combine.brandGame == null ? 100M : combine.brandGame.EffectiveBettingPercentage)) / 100M,
                     SettleAmount = combine.round.SettleAmount,
                     WinLoss = -combine.round.WinLoss,
                     AdditionalData = combine.detail.AdditionalData
                 })
+                .OrderByDescending(x => x.CreatedOn)
                 .CreatePagedResponseAsync(request);
     }
 }

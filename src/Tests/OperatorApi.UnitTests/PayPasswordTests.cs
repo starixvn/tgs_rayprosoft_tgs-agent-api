@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Net.Mail;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using FluentValidation.TestHelper;
@@ -13,7 +12,8 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
-using TGS.Services.Operator.PayPassowrd;
+using TGS.Services.Operator.Services.PayPassowrd;
+using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -21,152 +21,43 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class PayPasswordTests
     {
         [Test]
-        public async Task Set_Pay_Password_Should_Success()
+        public void Change_Pay_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
         {
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-
-            var sut = new SetFirstPayPasswordCommandService(
-                fakePlayerOperations,
-                fakePasswordHandler);
-
-            var playerCode = "testPlayerCode";
-            var password = "123456";
-            var command = new SetFirstPayPasswordCommand(playerCode, password);
-
-            fakePlayerOperations
-                .GetPlayerByCodeAsync(Arg.Is(playerCode))
-                .Returns(new Player
-                {
-                    PlayerCode = playerCode,
-                    Username = "Tester",
-                    WithdrawPassword = Array.Empty<byte>()
-                });
-
-            await sut.ExecuteAsync(command);
-
-            fakePasswordHandler.Received(1).GenerateCredential(Arg.Is(password));
-            _ = fakePlayerOperations
-                .Received(1)
-                .SetPayPasswordAsync(Arg.Is(playerCode), Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Any<DateTimeOffset>());
-        }
-
-        [Test]
-        public void If_Already_Set_Pay_Password_Will_Throw_Exception()
-        {
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-
-            var sut = new SetFirstPayPasswordCommandService(
-                fakePlayerOperations,
-                fakePasswordHandler);
-
-            var playerCode = "testPlayerCode";
-            var password = "123456";
-            var command = new SetFirstPayPasswordCommand(playerCode, password);
-
-            fakePlayerOperations
-                .GetPlayerByCodeAsync(Arg.Is(playerCode))
-                .Returns(new Player
-                {
-                    PlayerCode = playerCode,
-                    Username = "Tester",
-                    WithdrawPassword = new byte[] { 1, 2, 3 }
-                });
-
-            Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
-        }
-
-        [Test]
-        public void Start_Change_Pay_Password_Should_Verify_Email()
-        {
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var playerCode = "abcdef123456";
-            var player = new Player
-            {
-                PlayerCode = playerCode,
-                Username = "Tester",
-                BrandId = Guid.NewGuid(),
-                DefaultWalletCurrencyCode = "CNY"
-            };
-            fakePlayerOperations.GetPlayerByCodeAsync(playerCode).Returns(player);
-            var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-            var fakeEmailManager = Substitute.For<IEmailManager>();
 
-            var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
-
-            var sut = new StartChangePayPasswordCommandService(
+            var sut = new ChangePayPasswordCommandService(
                 fakePlayerOperations,
-                fakeValidateCodeGenerator,
-                fakeValidateCodeOperator,
-                fakeEmailManager);
+                fakePasswordHandler,
+                fakeValidateCodeOperator);
 
-            Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
-        }
-
-        [Test]
-        public async Task Start_Change_Pay_Password_Should_Send_Confirm_Email()
-        {
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
-            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-            var fakeEmailManager = Substitute.For<IEmailManager>();
-
-            var sut = new StartChangePayPasswordCommandService(
-                fakePlayerOperations,
-                fakeValidateCodeGenerator,
-                fakeValidateCodeOperator,
-                fakeEmailManager);
-
-            var email = "email@test.com";
             var player = new Player
             {
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                Email = email,
+                Phone = "0988123456",
+                PhoneAuthentication = true,
                 DefaultWalletCurrencyCode = "CNY"
             };
 
-            var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
-
+            var newPassword = "newPassword";
             var validateCode = "123456";
-            var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var token = "99CFACE4-03FE-42A2-B1DB-57C93A7BCD2E";
+
+            var command = new ChangePayPasswordCommand(
+                player.PlayerCode,
+                newPassword,
+                validateCode,
+                token);
 
             fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
-
-            fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
-
             fakeValidateCodeOperator
-                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<ValidateCodeData>())
-                .Returns(true);
+                .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
+                .Returns((ValidateCodeData)null);
 
-            var expected = new
-            {
-                To = new MailAddressCollection() {
-                    new MailAddress(email)
-                },
-                Subject = "Verification Code",
-                Content = $"Your ID verification code is : {validateCode}"
-            }.ToExpectedObject();
-
-            EmailPackage actual = null;
-            fakeEmailManager
-                .SendEmailAsync(Arg.Do<EmailPackage>(msg =>
-                {
-                    actual = msg;
-                }))
-                .Returns(Task.CompletedTask);
-            var actualSecurityKey = await sut.GetAsync(command);
-
-            _ = fakeEmailManager
-                .Received(1)
-                .SendEmailAsync(Arg.Any<EmailPackage>());
-
-            expected.ShouldMatch(actual);
-            Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
+            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
         }
 
         [Test]
@@ -215,104 +106,160 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Change_Pay_Password_If_Not_Verify_ValidateCode_Should_Throw_Exception()
+        public void If_Already_Set_Pay_Password_Will_Throw_Exception()
         {
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
 
-            var sut = new ChangePayPasswordCommandService(
+            var sut = new SetFirstPayPasswordCommandService(
                 fakePlayerOperations,
-                fakePasswordHandler,
-                fakeValidateCodeOperator);
+                fakePasswordHandler);
 
+            var playerCode = "testPlayerCode";
+            var password = "123456";
+            var command = new SetFirstPayPasswordCommand(playerCode, password);
+
+            fakePlayerOperations
+                .GetPlayerByCodeAsync(Arg.Is(playerCode))
+                .Returns(new Player
+                {
+                    PlayerCode = playerCode,
+                    Username = "Tester",
+                    WithdrawPassword = new byte[] { 1, 2, 3 }
+                });
+
+            Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
+        public async Task Set_Pay_Password_Should_Success()
+        {
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+
+            var sut = new SetFirstPayPasswordCommandService(
+                fakePlayerOperations,
+                fakePasswordHandler);
+
+            var playerCode = "testPlayerCode";
+            var password = "123456";
+            var command = new SetFirstPayPasswordCommand(playerCode, password);
+
+            fakePlayerOperations
+                .GetPlayerByCodeAsync(Arg.Is(playerCode))
+                .Returns(new Player
+                {
+                    PlayerCode = playerCode,
+                    Username = "Tester",
+                    WithdrawPassword = Array.Empty<byte>()
+                });
+
+            await sut.ExecuteAsync(command);
+
+            fakePasswordHandler.Received(1).GenerateCredential(Arg.Is(password));
+            _ = fakePlayerOperations
+                .Received(1)
+                .SetPayPasswordAsync(Arg.Is(playerCode), Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Any<DateTimeOffset>());
+        }
+
+        [Test]
+        public async Task Start_Change_Pay_Password_Should_Send_Confirm_Email()
+        {
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeEmailClient = Substitute.For<IEmailClient>();
+
+            var sut = new StartChangePayPasswordCommandService(
+                fakePlayerOperations,
+                fakeValidateCodeGenerator,
+                fakeValidateCodeOperator,
+                fakeEmailClient);
+
+            var email = "email@test.com";
             var player = new Player
             {
                 PlayerCode = "abcdef123456",
                 Username = "Tester",
                 BrandId = Guid.NewGuid(),
-                Phone = "0988123456",
-                PhoneAuthentication = true,
+                Email = email,
                 DefaultWalletCurrencyCode = "CNY"
             };
 
-            var newPassword = "newPassword";
-            var validateCode = "123456";
-            var token = "99CFACE4-03FE-42A2-B1DB-57C93A7BCD2E";
+            var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
 
-            var command = new ChangePayPasswordCommand(
-                player.PlayerCode,
-                newPassword,
-                validateCode,
-                token);
+            var validateCode = "123456";
+            var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
             fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
+
+            fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
+            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
+
             fakeValidateCodeOperator
-                .GetValidateCodeDataAsync<ValidateCodeData>(Arg.Is(validateCode), Arg.Is(token))
-                .Returns((ValidateCodeData)null);
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<ValidateCodeData>())
+                .Returns(true);
 
-            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
-        }
-
-        [Test]
-        public void Verify_Set_Pay_Password_Input_With_Empty()
-        {
-            // arrange
-            var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
+            var expected = new
             {
-                Password = string.Empty
-            };
+                Receivers = new[] { email },
+                Subject = "Verification Code",
+                Content = $"Your ID verification code is : {validateCode}"
+            }.ToExpectedObject();
 
-            // act
-            var actual = sut.TestValidate(request);
+            SendEmailRequest actual = null;
+            fakeEmailClient
+                .SendAsync(Arg.Do<SendEmailRequest>(msg =>
+                {
+                    actual = msg;
+                }))
+                .Returns(ValueTask.FromResult(new SendEmailResponse()));
+            var actualSecurityKey = await sut.GetAsync(command);
 
-            // assert
-            actual.ShouldHaveValidationErrorFor(request => request.Password);
+            _ = fakeEmailClient
+                .Received(1)
+                .SendAsync(Arg.Any<SendEmailRequest>());
+
+            expected.ShouldMatch(actual);
+            Assert.AreEqual(expectedSecurityKey, actualSecurityKey);
         }
 
         [Test]
-        public void Verify_Set_Pay_Password_Input_Min_Length()
+        public void Start_Change_Pay_Password_Should_Verify_Email()
         {
-            // arrange
-            var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var playerCode = "abcdef123456";
+            var player = new Player
             {
-                Password = "12345"
+                PlayerCode = playerCode,
+                Username = "Tester",
+                BrandId = Guid.NewGuid(),
+                DefaultWalletCurrencyCode = "CNY"
             };
+            fakePlayerOperations.GetPlayerByCodeAsync(playerCode).Returns(player);
+            var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeEmailClient = Substitute.For<IEmailClient>();
 
-            // act
-            var actual = sut.TestValidate(request);
+            var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
 
-            // assert
-            actual.ShouldHaveValidationErrorFor(request => request.Password);
+            var sut = new StartChangePayPasswordCommandService(
+                fakePlayerOperations,
+                fakeValidateCodeGenerator,
+                fakeValidateCodeOperator,
+                fakeEmailClient);
+
+            Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
         }
 
         [Test]
-        public void Verify_Set_Pay_Password_Input_Max_Length()
-        {
-            // arrange
-            var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
-            {
-                Password = "123456789012345678901"
-            };
-
-            // act
-            var actual = sut.TestValidate(request);
-
-            // assert
-            actual.ShouldHaveValidationErrorFor(request => request.Password);
-        }
-
-        [Test]
-        public void Verify_Change_Pay_Password_Input_With_Empty()
+        public void Verify_Change_Pay_Password_Input_Max_Length()
         {
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
             var request = new ChangePayPasswordRequest()
             {
-                NewPassword = string.Empty
+                NewPassword = "123456789012345678901"
             };
 
             // act
@@ -340,13 +287,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Verify_Change_Pay_Password_Input_Max_Length()
+        public void Verify_Change_Pay_Password_Input_With_Empty()
         {
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
             var request = new ChangePayPasswordRequest()
             {
-                NewPassword = "123456789012345678901"
+                NewPassword = string.Empty
             };
 
             // act
@@ -354,6 +301,57 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // assert
             actual.ShouldHaveValidationErrorFor(request => request.NewPassword);
+        }
+
+        [Test]
+        public void Verify_Set_Pay_Password_Input_Max_Length()
+        {
+            // arrange
+            var sut = new SetPayPasswordRequestValidator();
+            var request = new SetPayPasswordRequest()
+            {
+                Password = "123456789012345678901"
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.Password);
+        }
+
+        [Test]
+        public void Verify_Set_Pay_Password_Input_Min_Length()
+        {
+            // arrange
+            var sut = new SetPayPasswordRequestValidator();
+            var request = new SetPayPasswordRequest()
+            {
+                Password = "12345"
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.Password);
+        }
+
+        [Test]
+        public void Verify_Set_Pay_Password_Input_With_Empty()
+        {
+            // arrange
+            var sut = new SetPayPasswordRequestValidator();
+            var request = new SetPayPasswordRequest()
+            {
+                Password = string.Empty
+            };
+
+            // act
+            var actual = sut.TestValidate(request);
+
+            // assert
+            actual.ShouldHaveValidationErrorFor(request => request.Password);
         }
     }
 }

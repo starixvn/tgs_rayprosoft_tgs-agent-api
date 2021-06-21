@@ -14,7 +14,7 @@ import {
     useUserRoleId,
     useUserIsRootAdmin
 } from "../../user/context"
-import { Code } from "./menu"
+import { Code, Update, Copy, Delete } from "./menu"
 import { useRoleList } from "./client"
 import { useTable, Table, pageCount, toApiParams } from "../../table"
 import { Trans, useTrans } from "../../i18n"
@@ -42,9 +42,10 @@ const Body = () => {
         name: ""
     })
     let { pageIndex, pageSize, name } = state
-    let { isLoading, data, error, mutate, deleteCache } = useRoleList(
-        toApiParams(state)
-    )
+    let { isLoading, data, error, mutate, deleteCache } = useRoleList({
+        ...toApiParams(state),
+        sortby: "name"
+    })
     let isRootAdmin = useUserIsRootAdmin()
     let userRoleId = useUserRoleId()
     let items = data?.items?.filter(({ id }) => {
@@ -62,15 +63,12 @@ const Body = () => {
             actionBar={
                 <>
                     <SearchBar
-                        search={(data) => {
-                            let newState = {
+                        search={(data = {}) => {
+                            setState({
                                 pageIndex: 0,
-                                name: data?.name
-                            }
-                            if (equals(newState, { pageIndex, name })) {
-                                mutate()
-                            }
-                            setState(newState)
+                                ...data
+                            })
+                            mutate()
                         }}
                         isPending={isLoading}
                     />
@@ -79,23 +77,16 @@ const Body = () => {
             }
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -128,7 +119,10 @@ const useSearchInputPlaceHolder = () =>
     })
 
 const useColumns = ({ mutate, items = [] }) => {
-    let hasAnyMenu = useHasSubMenuByRoute()
+    let hasUpdateAuth = useIsDisplayMenuByRoute([Update])
+    let hasCopyAuth = useIsDisplayMenuByRoute([Copy])
+    let hasDeleteAuth = useIsDisplayMenuByRoute([Delete])
+    let hasAnyMenu = hasUpdateAuth || hasCopyAuth || hasDeleteAuth
 
     return useMemo(() => {
         let columns = [

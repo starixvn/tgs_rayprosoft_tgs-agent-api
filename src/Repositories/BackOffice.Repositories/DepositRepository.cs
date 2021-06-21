@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Tgs.Payment;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Domain;
-using TGS.Services.Payment;
 
 namespace TGS.BackOffice.Repositories
 {
@@ -18,7 +17,7 @@ namespace TGS.BackOffice.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public ValueTask<DepositFormDetail> GetDepositFormDetailAsync(Guid formId)
+        public ValueTask<DepositFormInfo> GetDepositFormDetailAsync(Guid formId)
         {
             var query = from df in _tgsRepository.DepositForms
                             .Include(f => f.Player)
@@ -26,7 +25,7 @@ namespace TGS.BackOffice.Repositories
                             .ThenInclude(bp => bp.PaymentMethodChannel)
                             .AsAsyncEnumerable()
                         where df.Id == formId
-                        select new DepositFormDetail(
+                        select new DepositFormInfo(
                             df.Id,
                             df.PlayerCode,
                             df.Player.Username,
@@ -39,6 +38,7 @@ namespace TGS.BackOffice.Repositories
                             df.Status,
                             df.ApplyInfo,
                             df.PaymentReturn,
+                            df.PromotionId,
                             df.CreatedOn,
                             df.UpdatedOn);
 

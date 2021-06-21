@@ -1,0 +1,58 @@
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using TGS.Core.Infrastructures.Security;
+using TGS.Services.Operations;
+using TGS.Services.Operations.Models.Services;
+using TGS.ServiceUtility;
+using TGS.Services.Agent.ValidateCode;
+using TGS.Services.Agent.Services.Agent;
+
+namespace TGS.Services.Agent.Services.Agent
+{
+    internal class ResetPasswordCommandService : ICommandService<ResetPasswordCommand>
+    {
+        private readonly IAgentOperations _agentOperations;
+        private readonly IPasswordHandler _passwordHandler;
+        private readonly IValidateCodeOperator _validateCodeOperator;
+
+        public ResetPasswordCommandService(
+            IAgentOperations agentOperations,
+            IPasswordHandler passwordHandler,
+            IValidateCodeOperator validateCodeOperator)
+        {
+            _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
+            _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+        }
+
+        public async ValueTask ExecuteAsync(ResetPasswordCommand command, CancellationToken cancellationToken = default)
+        {
+            var result = await _validateCodeOperator
+                .GetValidateCodeDataAsync<ValidateCodeData>(command.ValidateCode, command.SecurityKey)
+                .ConfigureAwait(false);
+
+            if (result == null)
+                throw new ValidateCodeNotVerifyException();
+
+            var agentId = new Guid(result.Id);
+
+            var username = await _agentOperations
+                .GetAgentAsync(agentId)
+                .ConfigureAwait(false);
+            var updatedOn = DateTimeOffset.UtcNow;
+
+            var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);
+            await _agentOperations
+                .ChangeAgentPasswordAsync(new ChangeAgentPasswordData()
+                {
+                    Username = username.Username,
+                    Id = agentId,
+                    Salt = newSalt,
+                    Password = newPassword,
+                    UpdatedOn = updatedOn
+                })
+                .ConfigureAwait(false);
+        }
+    }
+}

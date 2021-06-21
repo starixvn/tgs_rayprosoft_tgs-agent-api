@@ -19,10 +19,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class PlayerReportTests
     {
         [Test]
-        public async Task Player_Report_Should_Order_Desc_By_CreateOn()
+        public async Task Player_Report_Should_Call_Report_Api_Success()
         {
             // arrange
             var fakeReportClient = Substitute.For<IReportClient>();
+            var playerCode = "playerCode";
+            var fakeHttpContext = new DefaultHttpContext();
+            var brandId = Guid.NewGuid();
+            fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData
+            {
+                PlayerCode = playerCode
+            });
 
             var playerRoundRequest = new GetPlayerRoundReportRequest()
             {
@@ -35,43 +43,22 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 ShowAll = false
             };
 
-            var playerCode = "playerCode";
-            var fakeHttpContext = new DefaultHttpContext();
-            var brandId = Guid.NewGuid();
-            fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData
-            {
-                PlayerCode = playerCode
-            });
+            var roundList = new List<RoundModel>();
+            roundList.Add(new RoundModel());
 
-            var roundModels = new List<RoundModel>
+            var rounds = roundList.ToArray();
+
+            var resp = new PagedResponse<RoundModel>()
             {
-                new RoundModel()
-                {
-                    Id = Guid.NewGuid(),
-                    CreatedOn = new DateTimeOffset(new DateTime(2021, 4, 19))
-                },
-                new RoundModel()
-                {
-                    Id = Guid.NewGuid(),
-                    CreatedOn = new DateTimeOffset(new DateTime(2021, 5, 10))
-                },
-                new RoundModel()
-                {
-                    Id = Guid.NewGuid(),
-                    CreatedOn = new DateTimeOffset(new DateTime(2021, 5, 19))
-                }
+                Message = string.Empty,
+                TotalCount = rounds.Length,
+                Items = rounds
             };
 
             fakeReportClient
                 .GetRoundsAsync(Arg.Any<GetRoundsRequest>())
-                .Returns(new PagedResponse<RoundModel>
-                {
-                    Items = roundModels.ToArray(),
-                    TotalCount = roundModels.Count,
-                    Message = string.Empty,
-                    Valid = false
-                });
+                .Returns(resp);
+
             var sut = new PlayerReportController(fakeReportClient);
             sut.ControllerContext = new ControllerContext()
             {
@@ -79,10 +66,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             };
 
             // act
-            var r = await sut.GetRoundsAsync(playerRoundRequest);
+            await sut.GetRoundsAsync(playerRoundRequest);
 
             // assert
-            Assert.That(r.Items, Is.Ordered.Descending.By("CreatedOn"));
+            _ = fakeReportClient.Received(1)
+                .GetRoundsAsync(Arg.Any<GetRoundsRequest>());
         }
     }
 }

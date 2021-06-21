@@ -17,12 +17,14 @@ import { Select, SelectField } from "../../select/Select"
 export const BrandPaymentSelect = ({
     brandId,
     transferType,
+    paymentStatus,
     paymentChannelId,
     ...props
 }) => {
     let { isLoading, data, error, deleteCache, mutate } = useBrandPaymentList({
         brandId,
         transferType,
+        paymentStatus,
         sortby: "number",
         showAll: true
     })

@@ -7,7 +7,7 @@ import { usePaymentChannelList } from "./client"
 export const PaymentChannelSelect = ({
     placeholder,
     isLoadingRange,
-    range = [],
+    range,
     ...props
 }) => {
     let defaultPlaceholder = useTrans({
@@ -25,7 +25,7 @@ export const PaymentChannelSelect = ({
 
     let options = data
         ?.filter((item) => {
-            if (range?.length > 0) {
+            if (range) {
                 return range.includes(item.id)
             }
             return true

@@ -49,8 +49,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public SBOBETEndpoint(ScenarioContext context)
             : base(context)
         {
-            var currentDictionary = Directory.GetCurrentDirectory();
-
             var services = (IServiceCollection)new ServiceCollection();
 
 #if DEBUG
@@ -334,7 +332,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 PlayerCode = playerCode,
                 GameType = betRequest.GameType,
                 ProductType = betRequest.ProductType,
-                ExternalTransactionId = betRequest.ExternalTransactionId
+                ExternalRoundId = betRequest.ExternalRoundId
             };
 
             var response = await client.RollbackAsync(request);
@@ -362,7 +360,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 PlayerCode = playerCode,
                 GameType = betRequest.GameType,
                 ProductType = betRequest.ProductType,
-                ExternalTransactionId = betRequest.ExternalTransactionId
+                ExternalRoundId = betRequest.ExternalRoundId
             };
 
             var response = await client.RollbackAsync(request);
@@ -862,7 +860,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 PlayerCode = playerCode,
                 GameType = gameType,
                 ProductType = productType,
-                ExternalTransactionId = betRequest.ExternalTransactionId,
+                ExternalRoundId = betRequest.ExternalRoundId,
                 WinLoss = amount,
                 Result = result,
                 SettleTime = DateTimeOffset.Now

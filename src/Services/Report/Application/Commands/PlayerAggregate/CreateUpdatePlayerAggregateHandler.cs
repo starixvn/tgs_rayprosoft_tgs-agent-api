@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Models.Messages;
@@ -15,11 +16,11 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
             MessageResponse>
     {
         private readonly IPlayerAggregateService _playerAggregateService;
-        private readonly IPlayerGameTypeAggregateService _playerGameTypeAggregateService;
+        private readonly IPlayerGameAggregateService _playerGameTypeAggregateService;
         private readonly IRoundAggregateService _roundAggregateService;
 
         public CreateUpdatePlayerAggregateHandler(IPlayerAggregateService playerAggregateService,
-            IPlayerGameTypeAggregateService playerGameTypeAggregateService,
+            IPlayerGameAggregateService playerGameTypeAggregateService,
             IRoundAggregateService roundAggregateService,
             IHttpContextAccessor accessor) : base(accessor)
         {
@@ -65,6 +66,8 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
                 var (aggregates, aggregatesByGameType) =
                     await _roundAggregateService.GetPlayerAggregatesAsync(start, end);
 
+                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
                 if (aggregates.Length > 0)
                 {
                     await _playerAggregateService.CreatePlayerAggregatesAsync(aggregates);
@@ -72,8 +75,10 @@ namespace TGS.Services.Report.Application.Commands.PlayerAggregate
 
                 if (aggregatesByGameType.Length > 0)
                 {
-                    await _playerGameTypeAggregateService.CreatePlayerGameTypeAggregatesAsync(aggregatesByGameType);
+                    await _playerGameTypeAggregateService.CreatePlayerGameAggregatesAsync(aggregatesByGameType);
                 }
+
+                scope.Complete();
             }
 
             return new() {Valid = true};

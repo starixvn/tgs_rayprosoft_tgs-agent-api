@@ -15,7 +15,10 @@ export const GameProviderSelect = ({
     })
     placeholder = placeholder ?? defaultPlaceholder
 
-    let { data, isLoading, error } = useGameProviderList({ showAll: true })
+    let { data, isLoading, error } = useGameProviderList({
+        showAll: true,
+        sortby: "name"
+    })
     let options = data?.items.map((item) => ({
         label: item.name,
         value: item[valueField]

@@ -72,6 +72,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Commission)
                 .HasPrecision(18, 6);
 
+            builder.Property(c => c.EffectiveBettingPercentage)
+                .HasPrecision(18, 6);
+
             builder.Property(c => c.ClientStatus)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();

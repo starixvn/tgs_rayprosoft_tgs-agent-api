@@ -122,37 +122,25 @@ const ReportContent = ({ brandId }) => {
                     maxDate={maxDate}
                     maxRangeDays={QueryMaxRangeDays}
                     isLoading={isLoading}
-                    search={({ username, type, start, end }) => {
-                        let newState = {
+                    search={({ start, end, ...data }) => {
+                        setState( {
                             pageIndex: 0,
-                            username,
-                            type,
                             from: start,
-                            to: end
-                        }
-
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                username: state?.username,
-                                type: state?.type,
-                                from: state?.from,
-                                to: state?.to
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                            to: end,
+                            ...data
+                        })
+                        mutate()
                     }}
                 />
             }
-            title={<Trans zh="代理分红报表" en="Agent Dividend Report" />}
+            title={<Trans zh="代理分红报表" en="Agent Profit Sharing Report" />}
         >
             {username && (
                 <Table
-                    controlledState={state}
                     columns={columns}
                     data={data?.items}
+                    initialState={state}
+                    controlledState={state}
                     pageCount={pageCount(pageSize, data?.totalCount)}
                     setPageIndex={setPageIndex}
                     setSortOrder={setSortOrder}
@@ -160,15 +148,7 @@ const ReportContent = ({ brandId }) => {
                     foot={data?.items?.length > 0}
                 />
             )}
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -309,7 +289,7 @@ const useColumns = ({ brandId, start, end, items = [] }) => {
                 accessor: (row) => row,
                 sumColumn: "agentDividendAmount",
                 toValue: (row) => row?.agentDividendAmount,
-                Header: <Trans zh="分红金额" en="Dividend Amount" />,
+                Header: <Trans zh="分红金额" en="Profit Sharing Amount" />,
                 disableSortBy: true,
                 Cell: ({ value }) => {
                     return (

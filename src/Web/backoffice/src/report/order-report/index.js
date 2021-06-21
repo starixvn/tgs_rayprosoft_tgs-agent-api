@@ -17,7 +17,7 @@ import { Code } from "./menu"
 import BrandBar from "../BrandBar"
 import { today, yesterday } from "../../date/range"
 import { startOfNextDay } from "../../date/startOfNextDay"
-import { textColumn } from "../../table/column/textColumn"
+import { ellipsisTextColumn, textColumn } from "../../table/column/textColumn"
 import dateTimeColumn from "../../table/column/dateTime"
 import numberColumn, {
     numberDecimalColumn
@@ -32,6 +32,7 @@ import GameProviderSelect from "../../game/providers/GameProviderSelect"
 import { useGameRoundList } from "../../game/round/client"
 import { GameRoundButton } from "./button"
 import AlertDialog from "../../dialog/Alert"
+import { CopyTextBox } from "../../text/CopyTextBox"
 
 export { Code }
 
@@ -90,15 +91,19 @@ const ReportContent = ({ brandId }) => {
         gameProviderId
     } = state
 
-    let { isLoading, data = {}, error, mutate, deleteCache } = useGameRoundList(
-        {
-            ...toApiParams(state),
-            sortby: "createdOn",
-            orderby: "descending",
-            from,
-            to: startOfNextDay(to)
-        }
-    )
+    let {
+        isLoading,
+        data = {},
+        error,
+        mutate,
+        deleteCache
+    } = useGameRoundList({
+        ...toApiParams(state),
+        sortby: "createdOn",
+        orderby: "descending",
+        from,
+        to: startOfNextDay(to)
+    })
 
     let DataRetentionDays = 180
     let minDate = subDays(dateRange.start, DataRetentionDays)
@@ -118,54 +123,30 @@ const ReportContent = ({ brandId }) => {
                     maxDate={dateRange.end}
                     maxRangeDays={QueryMaxRangeDays}
                     isLoading={isLoading}
-                    search={({ start, end, ...formData }) => {
-                        let newState = {
+                    search={({ start, end, ...rest }) => {
+                        setState({
                             pageIndex: 0,
                             from: start,
                             to: end,
-                            username: formData.username,
-                            roundId: formData.roundId,
-                            status: formData.status,
-                            gameProviderId: formData.gameProviderId
-                        }
-
-                        if (
-                            equals(newState, {
-                                pageIndex,
-                                from: state?.from,
-                                to: state?.to,
-                                username,
-                                roundId,
-                                status,
-                                gameProviderId
-                            })
-                        ) {
-                            mutate()
-                        }
-                        setState(newState)
+                            ...rest
+                        })
+                        mutate()
                     }}
                 />
             }
             title={<Trans zh="订单查询" en="Order Tracking" />}
         >
             <Table
-                controlledState={state}
                 columns={columns}
                 data={data?.items}
+                initialState={state}
+                controlledState={state}
                 pageCount={pageCount(pageSize, data?.totalCount)}
                 setPageIndex={setPageIndex}
                 setSortOrder={setSortOrder}
                 isLoading={isLoading}
             />
-            {error && (
-                <AlertDialog
-                    {...error}
-                    onClickClose={() => {
-                        deleteCache()
-                        mutate({ data: undefined }, false)
-                    }}
-                />
-            )}
+            {error && <AlertDialog {...error} onClickClose={deleteCache} />}
         </PageContent>
     )
 }
@@ -243,17 +224,22 @@ const useColumns = ({ items = [] }) => {
             textColumn({
                 accessor: "playerName",
                 Header: <Trans zh="用户名" en="Player Name" />,
-                disableSortBy: true
+                disableSortBy: true,
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
-            textColumn({
+            ellipsisTextColumn({
                 accessor: "externalRoundId",
                 Header: <Trans zh="三方订单ID" en="External Id" />,
-                disableSortBy: true
+                disableSortBy: true,
+                maxWidth: "8rem",
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
-            textColumn({
+            ellipsisTextColumn({
                 accessor: "id",
                 Header: <Trans zh="订单ID" en="Id" />,
-                disableSortBy: true
+                disableSortBy: true,
+                maxWidth: "8rem",
+                Cell: ({ value = "" }) => <CopyTextBox value={value} />
             }),
             dateTimeColumn({
                 accessor: "createdOn",

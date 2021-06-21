@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Infrastructure.DataService;
-using TGS.Services.Payment;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
 
@@ -36,6 +36,9 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
             var formData = await _paymentRepository
                 .GetWithdrawFormByIdAsync(command.FormId)
                 .ConfigureAwait(false);
+
+            if (formData.Status != 1000)
+                return;
 
             if (command.Status == ReviewState.Approve)
             {
@@ -76,13 +79,13 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                     .ConfigureAwait(false);
 
                 var player = await _playerService
-                    .GetPlayerAsync(x => x.PlayerCode == formData.PlayerCode)
+                    .GetPlayerAsync(x => x.PlayerCode == formData.UserId)
                     .ConfigureAwait(false);
 
                 await _walletRepository.ExchangeAsync(
                     formData.BrandId,
                     player.DefaultWalletId,
-                    formData.PlayerCode,
+                    formData.UserId,
                     TransactionTypes.CancelWithdrawal,
                     formData.Amount).ConfigureAwait(false);
             }
