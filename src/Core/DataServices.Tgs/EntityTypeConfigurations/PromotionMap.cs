@@ -59,11 +59,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(c => c.Subject)
-                .HasMaxLength(512);
-
             builder.Property(c => c.SubSubject)
                 .HasMaxLength(2048);
+
+            builder.Property(e => e.DesktopBanner)
+                .HasMaxLength(128);
+
+            builder.Property(e => e.MobileBanner)
+                .HasMaxLength(128);
 
             builder.Property(c => c.Localization)
                 .HasColumnType(ColumnTypes.Jsonb);

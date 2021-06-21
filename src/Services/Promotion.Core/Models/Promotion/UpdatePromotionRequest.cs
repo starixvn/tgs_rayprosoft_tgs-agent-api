@@ -38,10 +38,10 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public int[] VipLevels { get; set; }
         public JsonDocument Localization { get; set; }
-        public string Subject { get; set; }
         public string SubSubject { get; set; }
         public string Content { get; set; }
         public string Terms { get; set; }
-        public PromotionImageModel[] Images { get; set; }
+        public string DesktopBanner { get; set; }
+        public string MobileBanner { get; set; }
     }
 }

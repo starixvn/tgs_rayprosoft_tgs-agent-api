@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210617072202_AddPromotionContent")]
+    [Migration("20210621015752_AddPromotionContent")]
     partial class AddPromotionContent
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3920,6 +3920,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<string>("DesktopBanner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("desktop_banner");
+
                     b.Property<DateTimeOffset>("From")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
@@ -3931,6 +3936,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Localization")
                         .HasColumnType("jsonb")
                         .HasColumnName("localization");
+
+                    b.Property<string>("MobileBanner")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("mobile_banner");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3960,11 +3970,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(2048)
                         .HasColumnType("character varying(2048)")
                         .HasColumnName("sub_subject");
-
-                    b.Property<string>("Subject")
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)")
-                        .HasColumnName("subject");
 
                     b.Property<string>("Terms")
                         .HasColumnType("text")
@@ -4102,36 +4107,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_promotion_game_provider_game_provider_id");
 
                     b.ToTable("promotion_game_providers");
-                });
-
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionImage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<int>("PlatformType")
-                        .HasColumnType("integer")
-                        .HasColumnName("platform_type");
-
-                    b.Property<Guid>("PromotionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("promotion_id");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasMaxLength(2048)
-                        .HasColumnType("character varying(2048)")
-                        .HasColumnName("url");
-
-                    b.HasKey("Id")
-                        .HasName("pk_promotion_images");
-
-                    b.HasIndex("PromotionId")
-                        .HasDatabaseName("ix_promotion_image_promotion_id");
-
-                    b.ToTable("promotion_images");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionParticipant", b =>
@@ -6347,18 +6322,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Promotion");
                 });
 
-            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionImage", b =>
-                {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
-                        .WithMany("PromotionImages")
-                        .HasForeignKey("PromotionId")
-                        .HasConstraintName("fk_promotion_image_promotion_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Promotion");
-                });
-
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionParticipant", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
@@ -6930,8 +6893,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Promotion", b =>
                 {
                     b.Navigation("PromotionGameProviders");
-
-                    b.Navigation("PromotionImages");
 
                     b.Navigation("PromotionParticipants");
 

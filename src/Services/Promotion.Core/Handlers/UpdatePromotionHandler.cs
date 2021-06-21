@@ -58,8 +58,7 @@ namespace TGS.Services.Promotion.Handlers
 
             promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
 
-            var bannerImages = request.Images.SelectMany(x => x.Url.GetMatchStrings(Consts.UploadFile.ImagePattern))
-                .ToArray();
+            var bannerImages = request.Localization.ToJson().GetMatchStrings(Consts.UploadFile.ImagePattern);
             var contentImages = request.Content.GetMatchStrings(Consts.UploadFile.ImagePattern);
             var images = bannerImages.Union(contentImages).ToArray();
 
