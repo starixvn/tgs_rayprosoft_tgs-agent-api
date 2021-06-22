@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Withdraw
 {
     internal class DeleteBankInfoCommandService : ICommandService<DeleteBankInfoCommand>
     {
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public DeleteBankInfoCommandService(IPaymentRepository paymentRepository)
+        public DeleteBankInfoCommandService(IPaymentServiceClient paymentServiceClient)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public ValueTask ExecuteAsync(DeleteBankInfoCommand command, CancellationToken cancellationToken = default)
-            => _paymentRepository.DeleteBankInfoAsync(command.PlayerCode, command.BankInfoId);
+            => _paymentServiceClient.DeletePlayerBankInfoAsync(command.PlayerCode, command.BankInfoId);
     }
 }

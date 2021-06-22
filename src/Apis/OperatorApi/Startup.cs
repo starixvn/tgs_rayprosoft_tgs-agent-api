@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +15,7 @@ using Microsoft.OpenApi.Models;
 using Prometheus;
 using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
+using Tgs.Payment.LeePay;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
@@ -113,16 +116,22 @@ namespace TGS.Apis.OperatorApi
                 .AddTransactions();
 
             services
+                .AddPaymentServiceClient((options, sp) =>
+                {
+                    options.JsonSerializerOptions = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        Converters = {
+                            new JsonStringEnumConverter()
+                        }
+                    };
+                })
                 .AddOperatorApiCore()
                 .ConfigureOperatorOptions<IConfiguration>((options, config) =>
                 {
                     config.GetSection("Operator").Bind(options);
                 })
                 .UseOperatorRepositories()
-                .ConfigurePayment(config =>
-                {
-                    config.UseTgsPaymentRepository();
-                })
                 .ConfigureWallet(config =>
                 {
                     config.AddTgsWalletRepositories();
@@ -130,7 +139,8 @@ namespace TGS.Apis.OperatorApi
                 .Services
                 .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>()
                 .AddSingleton<PrimePaySerializer>()
-                .AddSingleton<ApplePaySerializer>();
+                .AddSingleton<ApplePaySerializer>()
+                .AddSingleton<LeePaySerializer>();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()

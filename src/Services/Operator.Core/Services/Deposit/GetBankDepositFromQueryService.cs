@@ -1,27 +1,27 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Deposit
 {
     internal class GetBankDepositFromQueryService : IGetService<GetBankDepositFormQuery, DepositFormInfo>
     {
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public GetBankDepositFromQueryService(IPaymentRepository paymentRepository)
+        public GetBankDepositFromQueryService(IPaymentServiceClient paymentServiceClient)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public async ValueTask<DepositFormInfo> GetAsync(GetBankDepositFormQuery query, CancellationToken cancellationToken = default)
         {
-            var form = await _paymentRepository
-                .GetDepositFormByIdAsync(query.FormId)
+            var form = await _paymentServiceClient
+                .GetDepositFormAsync(query.BrandId, query.FormId)
                 .ConfigureAwait(false);
 
-            if (form.PlayerCode != query.PlayerCode)
+            if (form == null || form.PlayerCode != query.PlayerCode)
                 throw new UltraViresException();
 
             return form;

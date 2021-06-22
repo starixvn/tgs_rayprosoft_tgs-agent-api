@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using Tgs.Payment.Configuration;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.StationLetters;
 using TGS.Services.WalletService.Configuration;
@@ -30,13 +29,6 @@ namespace TGS.Services.Operator.Configuration
             Services
                 .AddOptions<OperatorOptions>()
                 .Configure(configure);
-
-            return this;
-        }
-
-        public OperatorConfiguration ConfigurePayment(Action<PaymentConfiguration> configure)
-        {
-            configure(Services.AddPayment());
 
             return this;
         }

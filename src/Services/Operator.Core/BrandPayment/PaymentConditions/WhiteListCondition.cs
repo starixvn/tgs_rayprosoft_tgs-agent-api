@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 
 namespace TGS.Services.Operator.BrandPayment.PaymentConditions
 {

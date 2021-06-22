@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -60,7 +61,10 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
-            var getDepositFormQuery = new GetDepositFormQuery(playerTokenData.PlayerCode, createdFormId);
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
 
             var formData = await getDepositFormService
                 .GetAsync(getDepositFormQuery)
@@ -83,7 +87,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         public async Task<GetLeePayExchangeRateResponse> GetExchangeRateAsync(
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetLeePayExchangeRateQuery, LeePayExchangeRateInfo> getLeePayExchangeRateService,
+            [FromServices] IGetService<GetLeePayExchangeRateQuery, string> getLeePayExchangeRateService,
             [FromServices] LeePaySerializer serializer,
             string brandPaymentId)
         {
@@ -102,16 +106,25 @@ namespace TGS.Apis.OperatorApi.Controllers
                         "CNY",
                         "USDT")));
 
-            var info = await getLeePayExchangeRateService
+            var response = await getLeePayExchangeRateService
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            return new GetLeePayExchangeRateResponse
+            var applyInfo = serializer.Deserialize<LeePayQueryExchangeRateApplyInfo>(response);
+
+            if (applyInfo.Response.Code == "00")
             {
-                BuyPrice = info.BuyPrice.Value.ToString("#.#####"),
-                SellPrice = info.SellPrice.Value.ToString("#.#####"),
-                UpdateTime = info.BizTime
-            };
+                return new GetLeePayExchangeRateResponse
+                {
+                    BuyPrice = applyInfo.Response.BuyPrice.Value.ToString("#.#####"),
+                    SellPrice = applyInfo.Response.SellPrice.Value.ToString("#.#####"),
+                    UpdateTime = applyInfo.Response.BizTime
+                };
+            }
+            else
+            {
+                throw new LeePayApiException();
+            }
         }
     }
 }
