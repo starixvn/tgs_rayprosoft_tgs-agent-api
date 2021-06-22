@@ -2,14 +2,8 @@
 
 namespace TGS.Shared.Game.Models.AllBet.Incoming
 {
-    public record BalanceResponse
+    public record BalanceResponse : ErrorResponse
     {
-        [JsonPropertyName("resultCode")]
-        public int ErrorCode { get; init; }
-
-        [JsonPropertyName("message")]
-        public string ErrorMessage { get; init; } = "Success";
-
         [JsonPropertyName("balance")]
         public decimal? Balance { get; init; }
 

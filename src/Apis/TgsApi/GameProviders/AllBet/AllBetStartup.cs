@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares;
+using TGS.Apis.TgsApi.GameProviders.AllBet.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
 
 namespace TGS.Apis.TgsApi.GameProviders.AllBet
@@ -20,6 +21,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers();
+
+            services.AddSingleton<IAllBetActionModelMapper, AllBetActionModelMapper>();
 
             services.AddScoped<AuthorizeAllBetMiddleware>();
             services.AddScoped<HandleAllBetExceptionMiddleware>();

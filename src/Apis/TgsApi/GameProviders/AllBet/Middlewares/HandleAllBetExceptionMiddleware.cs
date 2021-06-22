@@ -5,6 +5,7 @@ using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
+using TGS.Shared.Game.Models.AllBet.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
 {
@@ -16,7 +17,17 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
         {
         }
 
-        protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
-            Exception exception) => throw new NotImplementedException();
+        protected override Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
+            Exception exception)
+        {
+            var response = new ErrorResponse
+            {
+                ErrorCode = errorCode,
+                ErrorMessage = ErrorMapper.GetMessageByException(exception)
+            };
+
+            context.Response.StatusCode = statusCode;
+            return context.Response.WriteAsJsonAsync(response);
+        }
     }
 }
