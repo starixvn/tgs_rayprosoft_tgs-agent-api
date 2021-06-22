@@ -34,7 +34,7 @@ export const ImageUploadButton = ({
                     readOnly={readOnly}
                 />
             </Group>
-            <OpenLinkButton name={name} />
+            <OpenLinkButton name={name} disabled={disabled} />
         </Set>
     )
 }
@@ -67,12 +67,14 @@ const OpenLinkButton = ({ name, disabled }) => {
             <Link href={url} target="_blank">
                 <Trans zh="查看图片" en="View Image" />
             </Link>
-            <Button.Close
-                onClick={(event) => {
-                    setValue(name, "")
-                }}
-                disabled={disabled}
-            />
+            {!disabled && (
+                <Button.Close
+                    onClick={(event) => {
+                        setValue(name, "")
+                    }}
+                    disabled={disabled}
+                />
+            )}
         </StaticButton>
     )
 }
