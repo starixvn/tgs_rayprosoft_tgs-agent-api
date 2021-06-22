@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.AllBet;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -18,7 +19,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             private const int UniqueId = 13;
 
-            //private static readonly string EndpointPath = "/forwardGame.do?params={PARAS}&key={KEY}";
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
 
@@ -52,15 +52,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VND1000Currency("VND2"),
-                new IDR1000Currency("IDR2"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new MYRCurrency("MYR"),
-                new THBCurrency("THB"), new GBPCurrency("GBP")
+                new CNYCurrency("CNY"),
+                new USDCurrency("USD"),
+                new VND1000Currency("VND2"),
+                new IDR1000Currency("IDR2"),
+                new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"),
+                new THBCurrency("THB"),
+                new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("zh_CN"), new IDLanguage("id"), new JPLanguage("ja"),
-                new KRLanguage("ko"), new THLanguage("th"), new VNLanguage("vi"), new TWLanguage("zh_TW")
+                new USLanguage("en"),
+                new CNLanguage("zh_CN"),
+                new IDLanguage("id"),
+                new JPLanguage("ja"),
+                new KRLanguage("ko"),
+                new THLanguage("th"),
+                new VNLanguage("vi"),
+                new TWLanguage("zh_TW")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -76,7 +88,28 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-ab") : new("http://localhost:62330"),
-                    ApiUrl = new("https://swapi.etwlt.com")
+                    ApiUrl = new("https://swapi.etwlt.com"),
+                    BrandMerchants = new AllBetBrandMerchant[]
+                    {
+                        new()
+                        {
+                            BrandCode = "Default",
+                            Agents = new AllBetAgent[]
+                            {
+                                new()
+                                {
+                                    PropertyId = "4222910",
+                                    AgentId = "ygpg1a",
+                                    CurrencyCode = "CNY",
+                                    AllBetApiKey =
+                                        "VO5ajdrJrayBQwaEjlMMVmYsME1n38q8Mo5COHKLdymAxP0TQ8Rmq2KdWwly6SlOPKbz4GBM0EDtnE+c6DtVrA==",
+                                    PartnerApiKey =
+                                        "wqRXtqmTssY6dsMb6y7janayZosdF2+KIOZx8G0UWeNOIl+B1+hn56y/unBBR2OUBhgyvxo7sdD9RQt5C9TDkg==",
+                                    Suffix = "mkb"
+                                }
+                            }
+                        }
+                    }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();
