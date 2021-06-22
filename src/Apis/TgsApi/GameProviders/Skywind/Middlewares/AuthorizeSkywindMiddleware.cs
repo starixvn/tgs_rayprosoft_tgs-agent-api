@@ -55,11 +55,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
                 throw new InvalidCredentialsException("empty token");
             }
 
-            if (context.Request.Path.Value.IgnoreCaseContains("sw/api/get_balance") || context.Request.Path.Value.IgnoreCaseContains("sw/api/debit"))
+            if (context.Request.Path.Value.IgnoreCaseContains("sw/api/get_balance") 
+                || context.Request.Path.Value.IgnoreCaseContains("sw/api/debit")
+                || context.Request.Path.Value.IgnoreCaseContains("sw/api/validate_ticket")
+                || context.Request.Path.Value.IgnoreCaseContains("sw/api/validate_terminal_ticket"))
             {
-                //var loginRecord = await _services.DecryptTokenAsync(keyValuePairs["cust_session_id"].ToString());
-                var playerCode = "4ucmqplxb029";//loginRecord.PlayerCode;
-                var platformType = PlatformType.Desktop;//loginRecord.PlatformType;
+                var loginRecord = await _services.DecryptTokenAsync(keyValuePairs["cust_session_id"].ToString());
+                var playerCode = loginRecord.PlayerCode;
+                var platformType = loginRecord.PlatformType;
                 var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
                 var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
@@ -69,12 +72,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             }
             else
             {
-                if (!context.Request.Path.Value.IgnoreCaseContains("api/sw/ping"))
+                if (!context.Request.Path.Value.IgnoreCaseContains("sw/api/ping"))
                 {
-
-                    var playerCode = "4ucmqplxb029"; //keyValuePairs["cust_id"].ToString();
+                    var playerCode = keyValuePairs["cust_id"].ToString();
                     var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
                     var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
                     context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
                     context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
                 }
