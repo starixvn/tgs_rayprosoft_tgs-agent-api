@@ -35,7 +35,7 @@ namespace TGS.Shared.Game.Models.Skywind.Incoming
         public string EventType { get; set; }
         [Required]
         [JsonPropertyName("event_id")]
-        public int EventId { get; set; }
+        public long EventId { get; set; }
         [Required]
         [JsonPropertyName("timestamp")]
         public int Timestamp { get; set; }
