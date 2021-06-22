@@ -118,6 +118,9 @@ namespace TGS.Apis.OperatorApi
             services
                 .AddPaymentServiceClient((options, sp) =>
                 {
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.PaymentServiceBaseUrl = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
