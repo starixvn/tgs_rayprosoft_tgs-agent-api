@@ -61,7 +61,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var url = default(string);
             if (request.GameId == 0)
             {
-                url = $"{configuration.LiveLobbyUrl}/ticket/{encryptedToken}?lang={cultureCode}";
+                url = $"{configuration.LiveLobbyUrl}#/ticket/{encryptedToken}?lang={cultureCode}";
             }
             else
             {
