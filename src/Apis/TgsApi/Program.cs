@@ -1,11 +1,9 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using TGS.Core.Infrastructures.Prometheus;
 using TGS.Core.Models;
 
@@ -28,18 +26,18 @@ namespace TGS.Apis.TgsApi
             return Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(config =>
                 {
-                    if (!ConfigFileMap.TryGetValue(gpCode, out var filePath))
+                    if (!_ConfigFileMap.TryGetValue(gpCode, out var filePath))
                     {
-                        filePath = ConfigFileMap.Values.ElementAt(0);
+                        throw new ArgumentException($"No configuration file mapping is found of '{gpCode}'");
                     }
 
-                    config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", true);
+                    config.AddJsonFile($"{Directory.GetCurrentDirectory()}/GameProviders/{filePath}", false);
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    if (!StartupMap.TryGetValue(gpCode, out var startup))
+                    if (!_StartupMap.TryGetValue(gpCode, out var startup))
                     {
-                        startup = StartupMap.Values.ElementAt(0);
+                        throw new InvalidOperationException($"No startup configuration is found of '{gpCode}'");
                     }
 
                     webBuilder.UseStartup(startup)
