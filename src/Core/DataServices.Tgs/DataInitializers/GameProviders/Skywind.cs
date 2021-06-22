@@ -78,6 +78,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-sw") : new("http://localhost:62330"),
                     ApiUrl = new("https://api.gcpstg.m27613.com/v1"),
+                    LiveLobbyUrl = new("https://2rkp4pb7-lobby.ss211208.com"),
                     MerchId = "sw_PG_merchant_stg",
                     MerchPwd = "tm8jhMq2Sc5DdxJ5",
                     SecretKey = "f841de30-a9eb-49d8-87c7-de878b571afe",
