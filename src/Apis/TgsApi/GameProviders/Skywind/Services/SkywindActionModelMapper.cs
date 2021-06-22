@@ -123,17 +123,25 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         {
             if (source.GameType.IgnoreCaseEquals("freegame") && source.GameType.IgnoreCaseEquals("bonusgame"))
             {
-                return GameActionType.FreeBet;
-            }
-            else
-            {
-                if (source.Amount == 0)
+                if (source.GameType.IgnoreCaseEquals("freegame"))
                 {
-                    return GameActionType.LoseBet;
+                    return GameActionType.FreeBet;
                 }
                 else
                 {
+                    return GameActionType.WinJackpot;
+
+                }
+            }
+            else
+            {
+                if (source.EventType.IgnoreCaseEquals("win"))
+                {
                     return GameActionType.WinBet;
+                }
+                else
+                {
+                    return GameActionType.LoseBet;
                 }
             }
         }
