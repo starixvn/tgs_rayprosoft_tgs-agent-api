@@ -92,7 +92,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             {
                 Status = ((int)GameApiError.Success).ToString("d4"),
                 Desc = GameApiError.Success.Description(),
-                Balance = DecimalExtensions.Truncate(getBalance.Balance, 3),
+                Balance = getBalance.Balance.Truncate(3),
                 BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
             }));
         }
@@ -120,7 +120,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             {
                 Status = ((int)GameApiError.Success).ToString("d4"),
                 Desc = GameApiError.Success.Description(),
-                Balance = DecimalExtensions.Truncate(betResult.Balance, 3),
+                Balance = betResult.Balance.Truncate(3),
                 BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
             }));
         }
@@ -153,7 +153,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             {
                 Status = ((int)GameApiError.Success).ToString("d4"),
                 Desc = GameApiError.Success.Description(),
-                Balance = DecimalExtensions.Truncate(balance, 3),
+                Balance = balance.Truncate(3),
                 BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
             }));
         }
