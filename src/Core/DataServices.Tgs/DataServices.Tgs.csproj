@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DataInitializers\Games\AB.csv" />
     <None Remove="DataInitializers\Games\SW.csv" />
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <None Remove="SqlScripts\PaymentInitial\applepay.sql" />
@@ -21,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\AB.csv" />
     <EmbeddedResource Include="DataInitializers\Games\IMES.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\BG.csv" />
