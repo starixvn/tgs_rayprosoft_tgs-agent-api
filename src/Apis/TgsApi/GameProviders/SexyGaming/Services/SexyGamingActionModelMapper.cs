@@ -8,7 +8,6 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Games;
-using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions;
 using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 
@@ -35,17 +34,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private const string GameProviderCode = Consts.GameProvider.SexyGaming;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ISexyGamingServices _services;
-        private readonly IBrandOperations _brandOperations;
 
         public SexyGamingActionModelMapper(
             ISexyGamingServices services,
-            IJsonSerializationProvider jsonSerializationProvider,
-            IBrandOperations brandOperations
+            IJsonSerializationProvider jsonSerializationProvider
             )
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
         }
 
 
