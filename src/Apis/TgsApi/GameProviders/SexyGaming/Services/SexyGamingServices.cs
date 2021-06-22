@@ -21,6 +21,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
         ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
+        decimal GetBalanceFormat(decimal? balance = null);
     }
     internal sealed class SexyGamingServices : ISexyGamingServices
     {
@@ -85,6 +86,16 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId).ConfigureAwait(false);
+        }
+
+        public decimal GetBalanceFormat(decimal? balance = null)
+        {
+            var balanceFormat = default(decimal);
+            if (balance.HasValue)
+            {
+                balanceFormat = (Math.Floor(balance.Value * 1000) / 1000);
+            }
+            return decimal.Parse((balanceFormat).ToString("0.000"));
         }
     }
 }
