@@ -10,6 +10,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 
 namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
@@ -60,7 +61,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
                 || context.Request.Path.Value.IgnoreCaseContains("sw/api/validate_ticket")
                 || context.Request.Path.Value.IgnoreCaseContains("sw/api/validate_terminal_ticket"))
             {
-                var loginRecord = await _services.DecryptTokenAsync(keyValuePairs["cust_session_id"].ToString());
+                var loginRecord = default(CachedPlayerLoginRecord);
+                if (context.Request.Path.Value.IgnoreCaseContains("sw/api/validate_ticket")
+                || context.Request.Path.Value.IgnoreCaseContains("sw/api/validate_terminal_ticket"))
+                {
+                    loginRecord = await _services.DecryptTokenAsync(keyValuePairs["ticket"].ToString());
+                }
+                else
+                {
+                    loginRecord= await _services.DecryptTokenAsync(keyValuePairs["cust_session_id"].ToString());
+                }
                 var playerCode = loginRecord.PlayerCode;
                 var platformType = loginRecord.PlatformType;
                 var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
