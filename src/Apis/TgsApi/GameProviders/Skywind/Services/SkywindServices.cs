@@ -70,7 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
         async ValueTask<Guid> ISkywindServices.GetGameProviderIdAsync()
         {
-            return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.SexyGaming).ConfigureAwait(false);
+            return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind).ConfigureAwait(false);
         }
     }
 }

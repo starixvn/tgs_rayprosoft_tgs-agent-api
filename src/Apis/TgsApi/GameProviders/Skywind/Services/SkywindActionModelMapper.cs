@@ -135,7 +135,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             }
             else
             {
-                if (source.EventType.IgnoreCaseEquals("win"))
+                if (source.Amount > 0)
                 {
                     return GameActionType.WinBet;
                 }

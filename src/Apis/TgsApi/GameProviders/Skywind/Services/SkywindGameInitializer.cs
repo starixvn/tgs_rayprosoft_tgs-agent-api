@@ -61,7 +61,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var url = default(string);
             if (request.GameId == 0)
             {
-                url = $" https://2rkp4pb7-lobby.ss211208.com/ticket/{encryptedToken}?lang={cultureCode}";
+                url = $"{configuration.LiveLobbyUrl}/ticket/{encryptedToken}?lang={cultureCode}";
             }
             else
             {
