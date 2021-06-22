@@ -96,16 +96,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             BrandCode = "Default",
                             Agents = new AllBetAgent[]
                             {
+                                //new()
+                                //{
+                                //    PropertyId = "4222910",
+                                //    AgentId = "ygpg1a",
+                                //    CurrencyCode = "CNY",
+                                //    AllBetApiKey =
+                                //        "VO5ajdrJrayBQwaEjlMMVmYsME1n38q8Mo5COHKLdymAxP0TQ8Rmq2KdWwly6SlOPKbz4GBM0EDtnE+c6DtVrA==",
+                                //    PartnerApiKey =
+                                //        "wqRXtqmTssY6dsMb6y7janayZosdF2+KIOZx8G0UWeNOIl+B1+hn56y/unBBR2OUBhgyvxo7sdD9RQt5C9TDkg==",
+                                //    Suffix = "mkb"
+                                //}
                                 new()
                                 {
-                                    PropertyId = "4222910",
+                                    PropertyId = "1234567",
                                     AgentId = "ygpg1a",
                                     CurrencyCode = "CNY",
                                     AllBetApiKey =
                                         "VO5ajdrJrayBQwaEjlMMVmYsME1n38q8Mo5COHKLdymAxP0TQ8Rmq2KdWwly6SlOPKbz4GBM0EDtnE+c6DtVrA==",
                                     PartnerApiKey =
-                                        "wqRXtqmTssY6dsMb6y7janayZosdF2+KIOZx8G0UWeNOIl+B1+hn56y/unBBR2OUBhgyvxo7sdD9RQt5C9TDkg==",
-                                    Suffix = "mkb"
+                                        "dyLMTVzuBp1wWgqq8yyNabBL9tHMLpuk3cIJ5MkG3juqUsNTstrRTLabLz==",
+                                    Suffix = "sw2"
                                 }
                             }
                         }
