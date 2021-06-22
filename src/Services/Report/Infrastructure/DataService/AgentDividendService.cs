@@ -17,6 +17,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             bool tracking = false);
 
         Task CreateAgentDividendsAsync(CreateAgentDividendModel[] request, DateTimeOffset? sentOn);
+        Task UpdateAgentDividendsAsync(AgentDividend[] agentDividends);
     }
 
     public class AgentDividendService : BaseRepositoryOperations<ITgsRepository>, IAgentDividendService
@@ -34,6 +35,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
             CreateAgentDividendsAsync(CreateAgentDividendModel[] models, DateTimeOffset? sentOn) =>
             CreateEntitiesAsync(models.Select(model => new AgentDividend
             {
+                Id = model.Id.Value,
                 BrandId = model.BrandId,
                 AgentId = model.AgentId,
                 From = model.From,
@@ -59,12 +61,17 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 VirtualSportsWinLoss = model.VirtualSportsWinLoss,
                 AgentDividendAmount = model.AgentDividendAmount,
                 CreatedOn = model.CreatedOn,
-                SentOn = sentOn
+                SentOn = sentOn,
+                BeforeDividendAmount = model.BeforeDividendAmount,
+                AgentDividendId = model.AgentDividendId
             }).ToArray());
 
         IQueryable<AgentDividend> IAgentDividendService.GetAgentDividendQueries(
             Func<IQueryable<AgentDividend>, IQueryable<AgentDividend>> preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
+
+        Task IAgentDividendService.UpdateAgentDividendsAsync(AgentDividend[] agentDividends) =>
+            UpdateEntitiesAsync(agentDividends);
     }
 }

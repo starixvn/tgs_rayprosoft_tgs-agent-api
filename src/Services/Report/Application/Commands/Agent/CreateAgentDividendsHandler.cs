@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -26,7 +25,6 @@ namespace TGS.Services.Report.Application.Commands.Agent
         private readonly ITgsAgentService _agentService;
         private readonly ITgsBrandService _brandService;
         private readonly IPlayerAggregateService _playerAggregateService;
-        private readonly ITransactionManager _transactionManager;
         private readonly IAgentWalletRepository _walletRepository;
 
         public CreateAgentDividendsHandler(
@@ -35,7 +33,6 @@ namespace TGS.Services.Report.Application.Commands.Agent
             ITgsBrandService brandService,
             IAgentDividendService agentDividendService,
             IAgentWalletRepository walletRepository,
-            ITransactionManager transactionManager,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _agentService = agentService;
@@ -43,7 +40,6 @@ namespace TGS.Services.Report.Application.Commands.Agent
             _playerAggregateService = playerAggregateService;
             _agentDividendService = agentDividendService;
             _walletRepository = walletRepository;
-            _transactionManager = transactionManager;
         }
 
         public override async Task<MessageResponse> Handle(CreateAgentDividendsRequest request,
@@ -59,6 +55,11 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 .ToArrayAsync(cancellationToken);
             var createModels = new List<CreateAgentDividendModel>();
             var createAutoSendModels = new List<CreateAgentDividendModel>();
+            var updateAgentDividends = new List<AgentDividend>();
+
+
+            var maxNumber = await _agentDividendService.GetAgentDividendQueries()
+                .MaxAsync(x => (int?)x.Id, cancellationToken) ?? 0;
 
             foreach (var brand in brands)
             {
@@ -67,30 +68,32 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         x => x.BrandId == brand.Id && brand.CurrentSettlementFrom == x.From &&
                             brand.CurrentSettlementTo == x.To, cancellationToken))
                 {
-                    var agentDividends = await GetAgentDividends(brand);
+                    var (autoSendDividends, manuelOrNegativeDividends, agentDividends) =
+                        await GetAgentDividends(brand, maxNumber);
 
-                    createAutoSendModels.AddRange(agentDividends.Where(x =>
-                        brand.AutoSentAgentBonus && x.AgentDividendAmount > 0));
-                    createModels.AddRange(agentDividends.Where(x =>
-                        !brand.AutoSentAgentBonus && x.AgentDividendAmount < 0));
+                    maxNumber += autoSendDividends.Count() + manuelOrNegativeDividends.Count();
+
+                    createAutoSendModels.AddRange(autoSendDividends);
+                    createModels.AddRange(manuelOrNegativeDividends);
+                    updateAgentDividends.AddRange(agentDividends);
                 }
 
-                var (_, _, nextFromDate, nextToDate) =
+                var (currentFrom, currentTo, _, _) =
                     BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType,
-                        brand.NextSettlementTo);
+                        brand.NextSettlementTo.Value.AddDays(1));
 
                 brand.PreviousSettlementFrom = brand.CurrentSettlementFrom;
                 brand.PreviousSettlementTo = brand.CurrentSettlementTo;
                 brand.CurrentSettlementFrom = brand.NextSettlementFrom;
                 brand.CurrentSettlementTo = brand.NextSettlementTo;
-                brand.NextSettlementFrom = nextFromDate;
-                brand.NextSettlementTo = nextToDate;
+                brand.NextSettlementFrom = currentFrom;
+                brand.NextSettlementTo = currentTo;
             }
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
             await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray(), null);
-
+            await _agentDividendService.UpdateAgentDividendsAsync(updateAgentDividends.ToArray());
             await _agentDividendService.CreateAgentDividendsAsync(
                 createAutoSendModels.ToArray(),
                 DateTimeOffset.Now);
@@ -113,7 +116,8 @@ namespace TGS.Services.Report.Application.Commands.Agent
             return CreateValidResponse<MessageResponse>();
         }
 
-        private async Task<List<CreateAgentDividendModel>> GetAgentDividends(Brand brand)
+        private async Task<(List<CreateAgentDividendModel>, List<CreateAgentDividendModel>, List<AgentDividend>)>
+            GetAgentDividends(Brand brand, int idNumber)
         {
             var agents = await _agentService
                 .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id && x.ParentAgentId != null))
@@ -301,23 +305,48 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                     100M);
                                 return amount;
                             }),
-                        CreatedOn = DateTimeOffset.Now
+                        CreatedOn = DateTimeOffset.Now,
+                        AutoSend = brand.AutoSentAgentBonus
                     }).ToArray();
 
-            var agentIds = agentDividends.Where(x => x.AgentDividendAmount > 0).Select(x => x.AgentId).ToArray();
+            var agentIds = agentDividends.Where(x => x.AgentDividendAmount > 0M).Select(x => x.AgentId).ToArray();
 
-            var negativeDividends = await _agentDividendService.GetAgentDividendQueries()
+            var noSendDividends = await _agentDividendService.GetAgentDividendQueries()
                 .Where(x => agentIds.Contains(x.AgentId) && x.SentOn == null).ToArrayAsync().ConfigureAwait(false);
 
-            foreach (var agent in agentDividends)
+            foreach (var dividend in agentDividends)
             {
-                var agentNegativeDividend = negativeDividends.Where(x => x.AgentId == agent.AgentId)
-                    .Sum(x => x.AgentDividendAmount);
+                dividend.Id = idNumber += 1;
 
-                //agent.AgentDividendAmount
+                var agentNoSendDividends = noSendDividends.Where(x => x.AgentId == dividend.AgentId).ToArray();
+
+                var agentNoSendDividend = agentNoSendDividends.Sum(x => x.AgentDividendAmount);
+
+                if (agentNoSendDividend < 0)
+                {
+                    if (dividend.AgentDividendAmount + agentNoSendDividend > 0M)
+                    {
+                        dividend.BeforeDividendAmount = dividend.AgentDividendAmount;
+                        dividend.AgentDividendAmount += agentNoSendDividend;
+
+                        foreach (var negativeDividend in agentNoSendDividends)
+                        {
+                            negativeDividend.AgentDividendId = dividend.Id;
+                            negativeDividend.SentOn = DateTimeOffset.Now;
+                        }
+                    }
+                    else
+                    {
+                        dividend.AutoSend = false;
+                    }
+                }
             }
 
-            return agentDividends.ToList();
+            return (agentDividends.Where(x =>
+                    x.AgentDividendAmount > 0 && x.AutoSend).ToList(),
+                agentDividends.Where(x =>
+                    x.AgentDividendAmount < 0 || !x.AutoSend).ToList(),
+                noSendDividends.Where(x => x.AgentDividendId is not null).ToList());
         }
     }
 }

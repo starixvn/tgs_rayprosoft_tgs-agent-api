@@ -30,6 +30,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal VirtualSportsWinLoss { get; set; }
         public decimal AgentDividendPercentage { get; set; }
         public decimal AgentDividendAmount { get; set; }
+        public decimal? BeforeDividendAmount { get; set; }
         public DateTimeOffset? SentOn { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
     }
