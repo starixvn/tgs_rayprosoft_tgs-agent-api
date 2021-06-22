@@ -33,7 +33,7 @@ export const tryStringifyJSON = (value) => {
 export const parseJSON = (value = "") => {
     let result = value
     try {
-        if (typeof value === "string") {
+        if (typeof value === "string" && value !== "") {
             result = JSON.parse(value)
         }
     } catch (error) {
