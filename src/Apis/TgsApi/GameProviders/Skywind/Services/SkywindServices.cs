@@ -19,6 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
         ValueTask<Guid> GetGameProviderIdAsync();
+        string GetExternalRoundId(string roundId, long eventId);
     }
 
     public class SkywindServices : ISkywindServices
@@ -72,5 +73,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         {
             return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind).ConfigureAwait(false);
         }
+
+        string ISkywindServices.GetExternalRoundId(string roundId, long eventId) => $"{roundId}_{eventId}";
     }
 }

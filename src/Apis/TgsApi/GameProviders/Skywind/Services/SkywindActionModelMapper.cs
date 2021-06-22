@@ -40,7 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                                 {
                                     Amount = Math.Abs(order.Amount),
                                     ExternalTransactionId = order.TrxId,
-                                    ExternalRoundId = order.RoundId,
+                                    ExternalRoundId = _services.GetExternalRoundId(order.RoundId, order.EventId),
                                     ExternalBetId = order.TrxId.ToString(),
                                     ExternalGameActionGroupId = order.TrxId.ToString(),
                                     ExternalGameId = order.GameCode.ToString(),
@@ -58,7 +58,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                                 {
                                     Amount = Math.Abs(order.Amount),
                                     ExternalTransactionId = $"{order.TrxId}_settle",
-                                    ExternalRoundId = order.RoundId,
+                                    ExternalRoundId = _services.GetExternalRoundId(order.RoundId, order.EventId),
                                     ExternalBetId = order.TrxId.ToString(),
                                     ExternalGameActionGroupId = order.TrxId.ToString(),
                                     ExternalGameId = order.GameCode.ToString(),
