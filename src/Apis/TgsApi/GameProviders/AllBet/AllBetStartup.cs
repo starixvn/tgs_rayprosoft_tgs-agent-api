@@ -22,10 +22,11 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet
         {
             services.AddErrorMappers();
 
-            services.AddSingleton<IAllBetActionModelMapper, AllBetActionModelMapper>();
-
             services.AddScoped<AuthorizeAllBetMiddleware>();
             services.AddScoped<HandleAllBetExceptionMiddleware>();
+
+            services.AddScoped<IAllBetActionModelMapper, AllBetActionModelMapper>();
+            services.AddScoped<IAllBetServices, AllBetServices>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

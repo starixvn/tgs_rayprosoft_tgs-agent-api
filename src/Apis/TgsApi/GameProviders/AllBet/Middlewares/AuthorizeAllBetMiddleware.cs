@@ -40,15 +40,21 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
                 throw new InvalidOperatorIdException();
             }
 
-            var path = GetEndPath(context.Request.Path);
-            var computedSignature = ComputeSignature(headers, context.Request.Method, path, agent.PartnerApiKey);
+            var bypassSignatureVerify = bool.Parse(GetHeaderValue(headers, "BypassSignatureVerify", bool.FalseString));
 
-            if (signature.NotEquals(computedSignature))
+            if (!bypassSignatureVerify)
             {
-                throw new InvalidCredentialsException(
-                    $"Signature is mismatched. The signature in the request is {signature}, which is different from {computedSignature} as computed.");
+                var path = GetEndPath(context.Request.Path);
+                var computedSignature = ComputeSignature(headers, context.Request.Method, path, agent.PartnerApiKey);
+
+                if (signature.NotEquals(computedSignature))
+                {
+                    throw new InvalidCredentialsException(
+                        $"Signature is mismatched. The signature in the request is {signature}, which is different from {computedSignature} as computed.");
+                }
             }
 
+            context.Items.Add(AllBetConsts.ContextItems.Agent, agent);
             //var json = await context.Request.ReadAsStringAsync();
             //var doc = JsonDocument.Parse(json);
             await next(context);
