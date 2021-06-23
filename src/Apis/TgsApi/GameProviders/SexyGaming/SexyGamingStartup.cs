@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
-using TGS.Apis.TgsApi.GameProviders.Services;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
