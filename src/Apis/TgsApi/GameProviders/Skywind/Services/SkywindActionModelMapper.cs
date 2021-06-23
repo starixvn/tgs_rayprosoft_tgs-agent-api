@@ -74,7 +74,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
             string externalRoundId = _services.GetExternalRoundId(source.RoundId, source.EventId);
             var autoCloseRound = data.AutoCloseRound;
-            var gameActionType = ProcessingSettlement(source);
+            var gameActionType = ProcessingSettlement(source, cachedGame.Type);
             var externalTransactionId = $"{source.TrxId}_settle";
             var externalGameActionGroupId = source.TrxId.ToString();
             if (cachedGame.Type == GameType.LiveDealer)
@@ -97,7 +97,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                 ExternalTransactionReferenceId = externalGameActionGroupId,
                 GameActionType = gameActionType,
                 ExtraData = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(source.Timestamp)).ToIso8601String(true),
-                TimeStamp = DateTimeOffset.UtcNow,
+                TimeStamp = DateTimeOffset.UtcNow
             };
 
             return GetBetData(data, playCode, transactions, autoCloseRound);
@@ -121,7 +121,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             {
                 transactions = new TransactionData()
                 {
-
                     ExternalGameId = source.GameCode,
                     ExternalBetId = bet.ExternalBetId.ToString(),
                     ExternalRoundId = bet.ExternalRoundId.ToString(),
@@ -158,7 +157,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                }).ToArray()
            };
 
-        private GameActionType ProcessingSettlement(SkywindSettleRequest source)
+        private GameActionType ProcessingSettlement(SkywindSettleRequest source, GameType gameType)
         {
             if (source.GameType.IgnoreCaseEquals("freegame") && source.GameType.IgnoreCaseEquals("bonusgame"))
             {
@@ -174,7 +173,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             }
             else
             {
-                if (source.GameType.IgnoreCaseEquals("normal") && source.GameStatus.IgnoreCaseEquals("freegame"))
+                if (source.GameType.IgnoreCaseEquals("normal") && source.GameStatus.IgnoreCaseEquals("freegame") && gameType == GameType.LiveDealer)
                 {
                     return GameActionType.FreeBet;
                 }
