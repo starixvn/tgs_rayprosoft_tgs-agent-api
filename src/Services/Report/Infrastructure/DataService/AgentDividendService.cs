@@ -63,7 +63,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 CreatedOn = model.CreatedOn,
                 SentOn = sentOn,
                 BeforeDividendAmount = model.BeforeDividendAmount,
-                AgentDividendId = model.AgentDividendId
+                ReferencedAgentDividendId = model.ReferencedAgentDividendId
             }).ToArray());
 
         IQueryable<AgentDividend> IAgentDividendService.GetAgentDividendQueries(

@@ -460,9 +460,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("agent_dividend_amount");
 
-                    b.Property<int?>("AgentDividendId")
+                    b.Property<int?>("ReferencedAgentDividendId")
                         .HasColumnType("integer")
-                        .HasColumnName("agent_dividend_id");
+                        .HasColumnName("referenced_agent_dividend_id");
 
                     b.Property<decimal>("AgentDividendPercentage")
                         .HasPrecision(9, 6)

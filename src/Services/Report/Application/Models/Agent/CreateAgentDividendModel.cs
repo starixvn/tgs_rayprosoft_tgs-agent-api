@@ -5,7 +5,7 @@ namespace TGS.Services.Report.Application.Models.Agent
     public class CreateAgentDividendModel
     {
         public int? Id { get; set; }
-        public int? AgentDividendId { get; set; }
+        public int? ReferencedAgentDividendId { get; set; }
         public Guid AgentId { get; set; }
         public Guid BrandId { get; set; }
         public DateTimeOffset From { get; set; }

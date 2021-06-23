@@ -331,7 +331,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
                         foreach (var negativeDividend in agentNoSendDividends)
                         {
-                            negativeDividend.AgentDividendId = dividend.Id;
+                            negativeDividend.ReferencedAgentDividendId = dividend.Id;
                             negativeDividend.SentOn = DateTimeOffset.Now;
                         }
                     }
@@ -346,7 +346,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     x.AgentDividendAmount > 0 && x.AutoSend).ToList(),
                 agentDividends.Where(x =>
                     x.AgentDividendAmount < 0 || !x.AutoSend).ToList(),
-                noSendDividends.Where(x => x.AgentDividendId is not null).ToList());
+                noSendDividends.Where(x => x.ReferencedAgentDividendId is not null).ToList());
         }
     }
 }

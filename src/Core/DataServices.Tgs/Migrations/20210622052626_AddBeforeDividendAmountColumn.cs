@@ -7,7 +7,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                "agent_dividend_id",
+                "referenced_agent_dividend_id",
                 schema: "dbo",
                 table: "agent_dividends",
                 type: "integer",
@@ -26,7 +26,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                "agent_dividend_id",
+                "referenced_agent_dividend_id",
                 schema: "dbo",
                 table: "agent_dividends");
 
