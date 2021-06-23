@@ -17,6 +17,7 @@ namespace TGS.Shared.Game.ApiClients.Skywind
     public interface ISkywindApiClient
     {
         ValueTask<SkywindGameUrlResponse> GetGameUrlAsync(SkywindConfiguration configuration, SkywindGameUrlRequest request);
+        ValueTask<SkywindGamHistoryRoundDetailsResponse> GetGamHistoryRoundDetailsAsync(SkywindConfiguration configuration, SkywindGamHistoryRoundDetailsRequest request);
     }
 
     public sealed class SkywindApiClient : BaseApiClient, ISkywindApiClient
@@ -45,6 +46,19 @@ namespace TGS.Shared.Game.ApiClients.Skywind
 
 
             return await ExecuteJsonRequestAsync<SkywindGameUrl, SkywindGameUrlResponse>(HttpMethod.Get, configuration.ApiUrl, path, null, heard, logPrefix: $"{_gameProvider}.UserLogin").ConfigureAwait(false);
+        }
+
+        async ValueTask<SkywindGamHistoryRoundDetailsResponse> ISkywindApiClient.GetGamHistoryRoundDetailsAsync(SkywindConfiguration configuration, SkywindGamHistoryRoundDetailsRequest request)
+        {
+            var path = $"/history/game/{request.RoundId}/image?language={request.Language}";
+            var getaccessToken = await GetAccessTokenAsync(configuration).ConfigureAwait(false);
+
+            var heard = new Dictionary<string, string> {
+             { "X-ACCESS-TOKEN", getaccessToken }
+            };
+
+
+            return await ExecuteJsonRequestAsync<SkywindGamHistoryRoundDetailsRequest, SkywindGamHistoryRoundDetailsResponse>(HttpMethod.Get, configuration.ApiUrl, path, null, heard, logPrefix: $"{_gameProvider}.GamHistoryRoundDetails").ConfigureAwait(false);
         }
 
         /// <summary>
