@@ -7,6 +7,7 @@ using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.AllBet.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.AllBet
 {
@@ -20,7 +21,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
-            services.AddErrorMappers();
+            services.AddErrorMappers(new[]
+                {
+                    typeof(AllBetErrorMapper)
+                },
+                (provider, key) => key switch
+                {
+                    GameProvider.AllBet => provider.GetRequiredService<AllBetErrorMapper>(),
+                    _                   => provider.GetRequiredService<TgsErrorMapper>()
+                });
 
             services.AddScoped<AuthorizeAllBetMiddleware>();
             services.AddScoped<HandleAllBetExceptionMiddleware>();

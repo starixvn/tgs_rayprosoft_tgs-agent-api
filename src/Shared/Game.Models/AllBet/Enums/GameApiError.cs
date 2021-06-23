@@ -7,12 +7,12 @@
         InvalidSignature = 10001,
         UserIdNotFound = 10003,
         LoginProhibited = 10005,
-        TransactionNotFound = 10006,
+        TransactionIsNotFound = 10006,
         InvalidGameActionOperation = 10007,
         PlaceBetProhibited = 10100,
         InsufficientFunds = 10101,
         UnderMaintenance = 10200,
         InvalidArgument = 40000,
-        ServerError = 50000
+        SystemError = 50000
     }
 }

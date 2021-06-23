@@ -40,11 +40,11 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
                 throw new InvalidOperatorIdException();
             }
 
+            var path = GetEndPath(context.Request.Path);
             var bypassSignatureVerify = bool.Parse(GetHeaderValue(headers, "BypassSignatureVerify", bool.FalseString));
 
             if (!bypassSignatureVerify)
             {
-                var path = GetEndPath(context.Request.Path);
                 var computedSignature = ComputeSignature(headers, context.Request.Method, path, agent.PartnerApiKey);
 
                 if (signature.NotEquals(computedSignature))
@@ -55,8 +55,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
             }
 
             context.Items.Add(AllBetConsts.ContextItems.Agent, agent);
-            //var json = await context.Request.ReadAsStringAsync();
-            //var doc = JsonDocument.Parse(json);
+
+            if (path.Contains("Transfer"))
+            {
+                //var json = await context.Request.ReadAsStringAsync();
+                //var doc = JsonDocument.Parse(json);
+            }
+
             await next(context);
         }
 
