@@ -14,7 +14,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
 {
     [Route("api/ab")]
     [ApiController]
-    [Consumes(MediaTypeNames.Application.Json)]
     [Produces(MediaTypeNames.Application.Json)]
     [AllowAnonymous]
     [FeatureGate(Consts.GameProvider.AllBet)]
@@ -45,5 +44,19 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
 
             return _map.Response(result);
         }
+
+        [HttpPost]
+        [Route("Transfer")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public ValueTask TransferAsync() => ValueTask.CompletedTask;
+
+        /// <summary>
+        ///     Use to cancel place bet
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("CancelTransfer")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public ValueTask CancelTransferAsync() => ValueTask.CompletedTask;
     }
 }
