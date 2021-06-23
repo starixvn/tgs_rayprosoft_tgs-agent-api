@@ -122,7 +122,8 @@ const AddDialog = ({ brandId, onSubmitted, dialog, ...props }) => {
     return (
         <FormDialog
             defaultValues={{
-                autoSentPlayerBonus: true
+                autoSentPlayerBonus: true,
+                localization: {}
             }}
             onSubmit={onSubmit}
             isLoading={isLoading}
@@ -247,7 +248,7 @@ const usePromotionFormData = (
         to,
         gameProviderIds = [],
         vipLevels = [],
-        localization,
+        localization = {},
         ...record
     } = {}
 ) => {
