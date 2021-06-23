@@ -1,9 +1,11 @@
 ﻿using System.Net.Mime;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
+using TGS.Services.Operator.Services.Auth;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -13,17 +15,27 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AuthController : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public AuthController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
-        [HttpPost]
+        [HttpPost("jwt")]
         [AllowAnonymous]
-        [Route("jwt")]
-        public Task<AuthResponse> AuthenticateAsync(AuthRequest request) =>
-            _mediator.Send(request);
+        public async Task<AuthResponse> AuthenticateAsync(
+            [FromServices] IGetService<GetAuthQuery, AuthInfo> getAuthQueryService,
+            [FromBody] AuthRequest request)
+        {
+            var query = new GetAuthQuery(
+                request.ApiKey,
+                Consts.ClaimName.Currency,
+                request.Currency,
+                Consts.Site);
+
+            var info = await getAuthQueryService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            return new AuthResponse()
+            {
+                Token = info.Token,
+                ExpiredOn = info.ExpiredOn
+            };
+        }
     }
 }
