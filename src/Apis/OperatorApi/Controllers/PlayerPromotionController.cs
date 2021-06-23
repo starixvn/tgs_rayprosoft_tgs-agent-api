@@ -9,6 +9,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
+using GetPromotionsRequest = TGS.Apis.OperatorApi.Models.Messages.GetPromotionsRequest;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -30,14 +31,15 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<PagingResponse<PromotionModel>> GetPlayerPromotionsAsync(
-            [FromQuery] PagingRequest request)
+            [FromQuery] GetPromotionsRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var promotionsRequest = new GetPromotionsRequest
+            var promotionsRequest = new Clients.Promotion.Client.Models.Promotion.GetPromotionsRequest
             {
                 BrandId = brandId,
+                Language = request.Language,
                 PlayerCode = playerTokenData.PlayerCode,
                 CurrentDate = DateTimeOffset.Now,
                 Page = request.Page,
@@ -49,7 +51,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var response = await _client.GetPromotionsAsync(promotionsRequest);
 
-            return new() { TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>() };
+            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
         }
     }
 }

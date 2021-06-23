@@ -9,6 +9,7 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
+using GetPromotionsRequest = TGS.Apis.OperatorApi.Models.Messages.GetPromotionsRequest;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -30,13 +31,14 @@ namespace TGS.Apis.OperatorApi.Controllers
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async ValueTask<PagingResponse<PromotionModel>> GetPromotionsAsync(
-            [FromQuery] PagingRequest request)
+            [FromQuery] GetPromotionsRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
-            var promotionsRequest = new GetPromotionsRequest
+            var promotionsRequest = new Clients.Promotion.Client.Models.Promotion.GetPromotionsRequest
             {
                 BrandId = brandId,
+                Language = request.Language,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
@@ -46,11 +48,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
             var response = await _client.GetPromotionsAsync(promotionsRequest);
 
-            return new()
-            {
-                TotalCount = response.TotalCount,
-                Items = response.Items ?? Array.Empty<PromotionModel>()
-            };
+            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
         }
 
         [HttpPost("{id}/join")]
@@ -63,7 +61,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var response = await _client.JoinAsync(new(id, playerTokenData.PlayerCode));
 
-            return new() { Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty };
+            return new() {Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty};
         }
     }
 }

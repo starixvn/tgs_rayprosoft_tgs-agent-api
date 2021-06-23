@@ -18,5 +18,6 @@ namespace TGS.Services.Promotion.Models.Promotion
         public string Type { get; set; }
 
         public DateTimeOffset? CurrentDate { get; set; }
+        public string Language { get; set; }
     }
 }

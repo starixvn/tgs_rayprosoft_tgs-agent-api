@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,7 +90,18 @@ namespace TGS.Services.Promotion.Handlers
             {
                 if (promotionsItem.LocalizationString is not null)
                 {
-                    promotionsItem.Localization = JsonDocument.Parse(promotionsItem.LocalizationString);
+                    if (request.Language is not null)
+                    {
+                        var localization = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(
+                            promotionsItem
+                                .LocalizationString);
+                        localization.TryGetValue(request.Language, out var languageObject);
+                        promotionsItem.LocalizationString = languageObject?.ToString();
+                    }
+
+                    promotionsItem.Localization = promotionsItem.LocalizationString.IsNullOrEmpty()
+                        ? null
+                        : JsonDocument.Parse(promotionsItem.LocalizationString!);
                 }
             }
 
