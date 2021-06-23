@@ -113,7 +113,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.BetAsync(gameProviderConfigurationData, playerCode, data.Transaction);
+            var betData = _map.Bet(gameProviderConfigurationData, playerCode, data.Transaction);
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
             return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()

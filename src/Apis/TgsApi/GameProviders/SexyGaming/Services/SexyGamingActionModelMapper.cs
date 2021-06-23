@@ -15,7 +15,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
     public interface ISexyGamingActionModelMapper
     {
-        BetData BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source);
+        BetData Bet(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source);
 
         Task<BetData> CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source);
 
@@ -45,7 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         }
 
 
-        BetData ISexyGamingActionModelMapper.BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source)
+        BetData ISexyGamingActionModelMapper.Bet(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source)
         {
             var transactions = (from order in source
                                 select new TransactionData
@@ -78,12 +78,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         Amount = 0,
                         Commission = 0,
                         ExternalGameId = order.GameCode,
-                        ExternalBetId = bet.ExternalBetId,
-                        ExternalRoundId = bet.ExternalRoundId,
-                        ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_bet",
+                        ExternalBetId = order.PlatformTxId,
+                        ExternalRoundId = order.RoundId,
+                        ExternalTransactionId = $"{order.PlatformTxId}_cancel_bet",
                         ExternalTransactionReferenceId = order.PlatformTxId,
                         GameActionType = GameActionType.CancelTransaction,
-                        RoundClosed = true,
                         TimeStamp = DateTimeOffset.UtcNow
                     });
                 }
