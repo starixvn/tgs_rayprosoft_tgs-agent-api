@@ -14,7 +14,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class WalletController : ControllerBase
     {
         /// <summary>
-        ///     Gets the balance information.
+        /// Gets the balance information.
         /// </summary>
         /// <param name="getBalanceService">The get balance service.</param>
         /// <returns></returns>
