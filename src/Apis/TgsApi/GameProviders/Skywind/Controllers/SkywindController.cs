@@ -70,7 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.Bet(gameProviderConfigurationData, playerCode, new[] { request });
+            var betData = await _map.BetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
@@ -95,7 +95,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.SettleAsync(gameProviderConfigurationData, playerCode, new[] { request });
+            var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
             var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
@@ -121,7 +121,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = await _map.RollbackBetAsync(gameProviderConfigurationData, playerCode, new[] { request }).ConfigureAwait(false);
+            var betData = await _map.RollbackBetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
             decimal balance;
             if (betData.Transactions.Length > 0)
             {
