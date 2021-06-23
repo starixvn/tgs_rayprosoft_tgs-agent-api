@@ -59,14 +59,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind);
 
             var url = default(string);
-            if (request.GameId == 0)
+
+            var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
+
+            if (cachedGame.ExternalId.IgnoreCaseContains("SWLobby"))
             {
                 url = $"{configuration.LiveLobbyUrl}#/ticket/{encryptedToken}?lang={cultureCode}";
             }
             else
             {
-                var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
-
                 var data = new SkywindGameUrlRequest()
                 {
                     PlayerCode = player.PlayerCode,
@@ -85,6 +86,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                     url = responseGameUrl.Url;
                 }
             }
+
             return new() { Url = url };
         }
     }
