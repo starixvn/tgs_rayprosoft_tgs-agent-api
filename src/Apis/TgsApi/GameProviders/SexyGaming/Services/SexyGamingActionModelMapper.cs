@@ -207,6 +207,19 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         ExternalTransactionId = $"{ settle.ExternalTransactionId}_cancel_void_settle",
                         ExternalTransactionReferenceId = settle.ExternalTransactionId,
                         GameActionType = GameActionType.CancelTransaction,
+                        RoundClosed = false,
+                        Timestamp = DateTimeOffset.UtcNow
+                    });
+                    batchTransactionData.Add(new BatchTransactionData()
+                    {
+                        PlayerCode = order.UserId,
+                        GameProviderConfigurationId = gameProviderConfigurationId,
+                        ExternalGameId = order.GameCode,
+                        ExternalBetId = order.PlatformTxId.ToString(),
+                        ExternalRoundId = order.RoundId.ToString(),
+                        ExternalTransactionId = $"{ settle.ExternalReferencedTransactionId}_cancel_void_bet",
+                        ExternalTransactionReferenceId = settle.ExternalReferencedTransactionId,
+                        GameActionType = GameActionType.CancelTransaction,
                         RoundClosed = true,
                         Timestamp = DateTimeOffset.UtcNow
                     });
