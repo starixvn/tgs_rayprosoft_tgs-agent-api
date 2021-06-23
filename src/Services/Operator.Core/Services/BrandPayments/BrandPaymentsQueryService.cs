@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.Operator.BrandPayment.PaymentConditions;
 using TGS.ServiceUtility;
 
@@ -11,12 +11,14 @@ namespace TGS.Services.Operator.Services.BrandPayments
 {
     internal class BrandPaymentsQueryService : IQueryService<BrandPaymentsQuery, BrandPaymentInfo>
     {
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IPlayerRepository _playerRepository;
 
-        public BrandPaymentsQueryService(IPaymentRepository paymentRepository, IPlayerRepository playerRepository)
+        public BrandPaymentsQueryService(
+            IPaymentServiceClient paymentServiceClient,
+            IPlayerRepository playerRepository)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         }
 
@@ -24,12 +26,13 @@ namespace TGS.Services.Operator.Services.BrandPayments
             BrandPaymentsQuery query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var brandPayments = await _paymentRepository
+            var brandPayments = await _paymentServiceClient
                 .GetBrandPaymentsAsync(query.BrandId)
                 .ToArrayAsync()
-                .ConfigureAwait(false);
-            var acls = await _paymentRepository
-                .GetBrandPaymentAclsAsync(brandPayments.Select(bp => bp.Id), query.PlayerCode)
+                .ConfigureAwait(false)!;
+
+            var acls = await _paymentServiceClient
+                .GetBrandPaymentAclsAsync(query.PlayerCode, brandPayments.Select(bp => bp.Id))
                 .ToArrayAsync()
                 .ConfigureAwait(false);
 
@@ -45,7 +48,8 @@ namespace TGS.Services.Operator.Services.BrandPayments
                 .Distinct()
                 .ToArray();
 
-            var brandPaymentVipLevels = await _paymentRepository.GetBrandPaymentVipListAsync(brandPayments.Select(bp => bp.Id))
+            var brandPaymentVipLevels = await _paymentServiceClient
+                .GetBrandPaymentVipsAsync(brandPayments.Select(bp => bp.Id))
                 .ToLookupAsync(bv => bv.BrandPaymentId, bv => bv.VipLevelId)
                 .ConfigureAwait(false);
 

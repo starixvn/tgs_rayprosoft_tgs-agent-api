@@ -2,5 +2,5 @@
 
 namespace TGS.Services.Operator.Services.Deposit
 {
-    public record GetBankDepositFormQuery(string PlayerCode, Guid FormId);
+    public record GetBankDepositFormQuery(string PlayerCode, Guid FormId, Guid BrandId);
 }

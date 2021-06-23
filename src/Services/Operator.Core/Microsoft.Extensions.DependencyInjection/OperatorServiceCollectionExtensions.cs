@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Tgs.Payment.LeePay;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
@@ -47,7 +46,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
                 .AddPaymentClient()
                 .AddSingleton<ManualDepositSerializer>()
-                .AddSingleton<LeePaySerializer>()
                 .AddNatsMessageQueue(config =>
                 {
                     config.ConfigQueueOptions((options, sp) =>

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
@@ -61,7 +62,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public IAsyncEnumerable<BankInfoResponse> GetPlayerBankInfosAsync(
-            [FromServices] IQueryService<GetPlayerBankInfosQuery, BankInfo> queryService)
+            [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> queryService)
         {
             var playerData = HttpContext.Items.GetPlayerTokenData();
 
@@ -73,7 +74,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Id = info.Id,
                     PaymentChannelId = info.PaymentChannelId,
                     BankType = info.BankType,
-                    Detail = JsonDocument.Parse(info.Detail)
+                    Detail = info.Detail
                 });
         }
     }

@@ -12,6 +12,7 @@ using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
+using Tgs.Payment.Clients;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -33,8 +34,12 @@ namespace TGS.Apis.OperatorApi.Controllers
             Guid id)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
 
-            var getBankDepositFormQuery = new GetBankDepositFormQuery(playerTokenData.PlayerCode, id);
+            var getBankDepositFormQuery = new GetBankDepositFormQuery(
+                playerTokenData.PlayerCode,
+                id,
+                brandId);
 
             var paymentChannels = await getAllPaymentChannelService
                 .GetAsync(new())

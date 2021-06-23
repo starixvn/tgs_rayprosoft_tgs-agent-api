@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operations;
 using TGS.Services.Operator.BrandPayment;
@@ -18,21 +18,21 @@ namespace TGS.Services.Operator.Services.Withdraw
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly JsonSerializerOptions _jsonSerializerOptions;
-        private readonly IPaymentRepository _paymentRepository;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IWalletRepository _walletRepository;
 
         public CreateWithdrawFormCommandService(
+            IPaymentServiceClient paymentServiceClient,
             IWalletRepository walletRepository,
-            IPaymentRepository paymentRepository,
             IPlayerOperations playerOperations,
             IPlayerBucketRepository playerBucketRepository,
             IJsonSerializationProvider jsonSerializationProvider,
             IOptions<JsonOptions> jsonOptionsAccessor)
         {
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
@@ -59,7 +59,18 @@ namespace TGS.Services.Operator.Services.Withdraw
             if (balance - command.Amount < 0)
                 throw new InsufficientFundsException();
 
-            var createFormId = Guid.NewGuid();
+            var createFormId = await _paymentServiceClient
+                .CreateWithdrawFormAsync(
+                    new WithdrawFormCreateInfo
+                    {
+                        Amount = command.Amount,
+                        BrandId = command.BrandId,
+                        BankInfoId = command.BankInfoId,
+                        UserId = command.PlayerCode,
+                        UserName = playerData.Username,
+                        UserType = UserType.Player
+                    })
+                .ConfigureAwait(false);
 
             var result = await _walletRepository
                 .ExchangeAsync(
@@ -79,46 +90,21 @@ namespace TGS.Services.Operator.Services.Withdraw
                     TransactionTypes.Deposit,
                     command.Amount).ConfigureAwait(false);
 
-                await _paymentRepository.CreateWithdrawFormAsync(
-                    createFormId,
-                    new WithdrawFormCreateInfo(
-                        command.PlayerCode,
-                        playerData.Username,
-                        UserType.Player,
-                        command.BrandId,
-                        command.Amount,
-                        7000,
-                        null,
-                        command.BankInfoId)).ConfigureAwait(false);
+                await _paymentServiceClient
+                    .SubmitWithdrawFormStatusAsync(
+                        createFormId,
+                        PaymentFlowState.Reject)
+                    .ConfigureAwait(false);
 
                 command.ReturnFormIdSource.SetResult(createFormId);
 
                 throw new InsufficientFundsException();
             }
 
-            var bankInfo = await _paymentRepository
-                .GetBankInfoByIdAsync(command.BankInfoId)
-                .ConfigureAwait(false);
-
-            var bankInfoData = new WithdrawBankInfo<JsonDocument>(
-                bankInfo.Id,
-                bankInfo.PaymentChannelId,
-                bankInfo.BankType,
-                _jsonSerializationProvider.DeserializeFromString<JsonDocument>(bankInfo.Detail));
-
-            await _paymentRepository
-                .CreateWithdrawFormAsync(
+            await _paymentServiceClient
+                .SubmitDepositFormStatusAsync(
                     createFormId,
-                new WithdrawFormCreateInfo(
-                        command.PlayerCode,
-                        playerData.Username,
-                        UserType.Player,
-                        command.BrandId,
-                        command.Amount,
-                        1000,
-                        null,
-                        command.BankInfoId,
-                        BankInfo: _jsonSerializationProvider.SerializeToString(bankInfoData, _jsonSerializerOptions)))
+                    PaymentFlowState.WaitApprove)
                 .ConfigureAwait(false);
 
             command.ReturnFormIdSource.SetResult(createFormId);

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.Operator.Services.Withdraw;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -14,9 +15,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Player_Can_Create_BankInfo()
         {
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-            var sut = new CreateBankInfoCommandService(fakePaymentRepository);
+            var sut = new CreateBankInfoCommandService(fakePaymentServiceClient);
 
             var brandId = Guid.NewGuid();
             var playerCode = "ThisIsPlayerCode";
@@ -31,17 +32,20 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakePaymentRepository
+            _ = fakePaymentServiceClient
                 .Received(1)
-                .CreateBankInfoAsync(Arg.Is<BankInfo>(info => info.PaymentChannelId == paymentChannelId), Arg.Is(playerCode));
+                .CreatePlayerBankInfoAsync(
+                    Arg.Is(brandId),
+                    Arg.Is(playerCode),
+                    Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
         }
 
         [Test]
         public async Task Player_Can_Delete_BankInfo()
         {
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-            var sut = new DeleteBankInfoCommandService(fakePaymentRepository);
+            var sut = new DeleteBankInfoCommandService(fakePaymentServiceClient);
 
             var playerCode = "ThisIsPlayerCode";
             var bankInfoId = Guid.NewGuid();
@@ -49,25 +53,24 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakePaymentRepository
+            _ = fakePaymentServiceClient
                 .Received(1)
-                .DeleteBankInfoAsync(Arg.Is(playerCode), Arg.Is(bankInfoId));
+                .DeletePlayerBankInfoAsync(Arg.Is(playerCode), Arg.Is(bankInfoId));
         }
 
         [Test]
         public void Player_Can_List_Self_BankInfos()
         {
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-            var sut = new GetPlayerBankInfosQueryService(fakePaymentRepository);
+            var sut = new GetPlayerBankInfosQueryService(fakePaymentServiceClient);
 
             var playerCode = "ThisIsPlayerCode";
 
             sut.QueryAsync(new GetPlayerBankInfosQuery(playerCode));
 
-            _ = fakePaymentRepository
-                .Received(1)
-                .GetBankInfosByPlayerCodeAsync(Arg.Is(playerCode));
+            _ = fakePaymentServiceClient.Received(1)
+                .GetPlayerBankInfosAsync(Arg.Is(playerCode));
         }
     }
 }
