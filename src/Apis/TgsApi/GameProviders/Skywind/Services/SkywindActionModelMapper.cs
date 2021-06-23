@@ -42,7 +42,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         {
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, source.GameCode).ConfigureAwait(false);
 
-            var cachedGame = cachedGames.Where(x => x.ExternalId == source.GameCode).First();
+            var cachedGame = cachedGames.First();
 
             string externalRoundId = _services.GetExternalRoundId(source.RoundId, source.EventId);
             string externalTransactionId = source.TrxId;
@@ -70,7 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         async ValueTask<BetData> ISkywindActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, SkywindSettleRequest source)
         {
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, source.GameCode).ConfigureAwait(false);
-            var cachedGame = cachedGames.Where(x => x.ExternalId == source.GameCode).First();
+            var cachedGame = cachedGames.First();
 
             string externalRoundId = _services.GetExternalRoundId(source.RoundId, source.EventId);
             var autoCloseRound = data.AutoCloseRound;
@@ -79,10 +79,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var externalGameActionGroupId = source.TrxId.ToString();
             if (cachedGame.Type == GameType.LiveDealer)
             {
-                string acction = (gameActionType == GameActionType.FreeBet) ? "freeBet" : "settle";
+                string action = (gameActionType == GameActionType.FreeBet) ? "freeBet" : "settle";
                 externalRoundId = source.RoundId;
                 externalGameActionGroupId = _services.GetExternalTransactionId(source.TrxId, source.EventId, string.Empty);
-                externalTransactionId = _services.GetExternalTransactionId(source.TrxId, source.EventId, acction);
+                externalTransactionId = _services.GetExternalTransactionId(source.TrxId, source.EventId, action);
                 autoCloseRound = (gameActionType != GameActionType.FreeBet);
             }
 
@@ -108,7 +108,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var transactions = default(TransactionData);
 
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, source.GameCode).ConfigureAwait(false);
-            var cachedGame = cachedGames.Where(x => x.ExternalId == source.GameCode).First();
+            var cachedGame = cachedGames.First();
             string externalTransactionId = source.TrxId;
 
             if (cachedGame.Type == GameType.LiveDealer)
