@@ -127,7 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             }
             else
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.SexyGaming, playerCode).ConfigureAwait(false);
                 return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
                 {
                     Status = ((int)GameApiError.BetHasCanceled).ToString("d4"),
@@ -165,7 +165,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             }
             else
             {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.SexyGaming, playerCode).ConfigureAwait(false);
                 balance = getBalance.Balance;
             }
 
