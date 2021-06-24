@@ -88,20 +88,23 @@ namespace TGS.Services.Promotion.Handlers
 
             foreach (var promotionsItem in promotions.Items)
             {
-                if (promotionsItem.LocalizationString is not null)
+                if (promotionsItem.LocalizationString.IsNotNullOrEmpty())
                 {
-                    if (request.Language is not null)
+                    if (request.Language.IsNotNullOrEmpty())
                     {
                         var localization = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(
                             promotionsItem
                                 .LocalizationString);
-                        localization.TryGetValue(request.Language, out var languageObject);
-                        promotionsItem.LocalizationString = languageObject?.ToString();
+                        if (localization.TryGetValue(request.Language, out var languageObject))
+                        {
+                            promotionsItem.LocalizationString = languageObject.ToString();
+                            promotionsItem.Localization = JsonDocument.Parse(promotionsItem.LocalizationString!);
+                        }
+
+                        continue;
                     }
 
-                    promotionsItem.Localization = promotionsItem.LocalizationString.IsNullOrEmpty()
-                        ? null
-                        : JsonDocument.Parse(promotionsItem.LocalizationString!);
+                    promotionsItem.Localization = JsonDocument.Parse(promotionsItem.LocalizationString!);
                 }
             }
 
