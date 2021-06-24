@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.Operations.Commands;
 using TGS.Services.Operations.Models.Services;
 using TGS.Services.Operations.Queries;
@@ -18,6 +19,8 @@ namespace TGS.Services.Operations
         Task<AgentLoginRecord> AgentLoginAsync(AgentLoginData data);
 
         Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data);
+
+        Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn);
     }
 
     public sealed class AgentOperations : IAgentOperations
@@ -46,7 +49,11 @@ namespace TGS.Services.Operations
         public async Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data)
         {
             await _agentCommands.ChangeAgentPasswordAsync(data);
-            //await _cacheManager.ClearCacheAsync(RedisCacheType.Player, data.PlayerCode);
+        }
+
+        public Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn)
+        {
+            return _agentCommands.SetEmailAsync(agentId, email, updatedOn);
         }
     }
 }

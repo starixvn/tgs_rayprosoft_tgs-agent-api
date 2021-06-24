@@ -18,7 +18,7 @@ namespace Agent.UnitTests
     public class WithdrawTests
     {
         [Test]
-        public async Task Agent_Balance_Not_Enough_Create_Withdraw_Form_Will_Fail()
+        public void Agent_Balance_Not_Enough_Create_Withdraw_Form_Will_Fail()
         {
             var fakeAgentRepository = Substitute.For<IAgentRepository>();
             var fakeWalletRepository = Substitute.For<IAgentWalletRepository>();
