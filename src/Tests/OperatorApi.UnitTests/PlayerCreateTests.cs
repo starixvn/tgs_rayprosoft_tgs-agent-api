@@ -1,28 +1,22 @@
 using System;
 using System.Threading.Tasks;
 using FluentValidation.TestHelper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Apis.OperatorApi.Handlers.Player;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
-using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Commands;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
+using TGS.Services.Operator.Services.Player;
 
 namespace OperatorApi.UnitTests
 {
@@ -32,66 +26,33 @@ namespace OperatorApi.UnitTests
         public async Task Register_Player_With_Existent_InvitationCode()
         {
             // arrange
-            var playerCode = "playerCode";
-            var invitationCode = "6rd4mq";
-            var fakeHttpContext = new DefaultHttpContext();
             var brandId = Guid.NewGuid();
-            fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData { PlayerCode = playerCode });
-            var fakeHttpContextAccessor = new HttpContextAccessor { HttpContext = fakeHttpContext };
+            var invitationCode = "6rd4mq";
 
-            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-
-            var tgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
-
-            var fakeFuncWalletQueries = Substitute.For<Func<IWalletQueries>>();
-            var fakeFuncPlayerQueries = Substitute.For<Func<IPlayerQueries>>();
-            var fakePlayerCommands = Substitute.For<IPlayerCommands>();
-
+            var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
 
             fakeAgentOperations
                 .GetAgentByInvitationCodeAsync(Arg.Is(invitationCode))
                 .Returns(new Agent());
 
-            var BrandQueries = new BrandQueries(tgsRepository);
-
-            var fakeTgsLog = Substitute.For<ITgsLog>();
-
-            var fakeBrandOperations = Substitute.For<IBrandOperations>();
-
-            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
-            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-            var fakeStatusValidator = Substitute.For<IStatusValidator>();
-
-            var sut = new CreatePlayerHandler
-            (fakeHttpContextAccessor,
-                fakePlayerOperations,
-                fakeBrandOperations,
-                fakeBrandCurrencyCodeMapper,
-                fakePasswordHandler,
+            var sut = new GetCreatePlayerQueryService(
                 fakeStatusValidator,
-                fakeAgentOperations
-            );
-            var password = "password";
+                fakePlayerOperations,
+                fakePasswordHandler,
+                fakeBrandCurrencyCodeMapper,
+                fakeBrandOperations,
+                fakeAgentOperations);
 
-            var request = new CreatePlayerRequest
-            {
-                AgentInvitationCode = invitationCode,
-                Username = "username",
-                Password = password,
-                ConfirmPassword = password,
-                CurrencyCode = "CNY",
-                IsTestPlayer = false
-            };
+            var query = new GetCreatePlayerQuery(brandId, "username", "password", "CNY", invitationCode, false);
+
             // act
-            var actual = await sut.Handle(request, default);
+            var actual = await sut.GetAsync(query, default);
+
             // assert
             Assert.IsTrue(actual.IsNew);
         }
@@ -100,15 +61,8 @@ namespace OperatorApi.UnitTests
         public async Task Register_Player_With_No_InvitationCode()
         {
             // arrange
-            var playerCode = "playerCode";
-            var fakeHttpContext = new DefaultHttpContext();
             var brandId = Guid.NewGuid();
-            fakeHttpContext.Items.Add(Consts.ContextItems.BrandId, brandId);
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData { PlayerCode = playerCode });
-            var fakeHttpContextAccessor = new HttpContextAccessor { HttpContext = fakeHttpContext };
 
-            var fakeRedisCacheManager = Substitute.For<IRedisCacheManager>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
             dbContextOptionsBuilder
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
@@ -130,27 +84,20 @@ namespace OperatorApi.UnitTests
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
 
-            var sut = new CreatePlayerHandler
-            (fakeHttpContextAccessor,
-                fakePlayerOperations,
-                fakeBrandOperations,
-                fakeBrandCurrencyCodeMapper,
-                fakePasswordHandler,
+            var sut = new GetCreatePlayerQueryService(
                 fakeStatusValidator,
-                fakeAgentOperations
-            );
+                fakePlayerOperations,
+                fakePasswordHandler,
+                fakeBrandCurrencyCodeMapper,
+                fakeBrandOperations,
+                fakeAgentOperations);
+
             var password = "password";
 
-            var request = new CreatePlayerRequest
-            {
-                Username = "username",
-                Password = password,
-                ConfirmPassword = password,
-                CurrencyCode = "CNY",
-                IsTestPlayer = false
-            };
+            var query = new GetCreatePlayerQuery(brandId, "username", password, "CNY", null, false);
+
             // act
-            var actual = await sut.Handle(request, default);
+            var actual = await sut.GetAsync(query, default);
             // assert
             Assert.IsTrue(actual.IsNew);
         }
@@ -159,10 +106,7 @@ namespace OperatorApi.UnitTests
         public void Register_Player_With_Non_Existent_InvitationCode()
         {
             // arrange
-            var playerCode = "testPlayerCode";
-            var fakeHttpContext = new DefaultHttpContext();
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData { PlayerCode = playerCode });
-            var fakeHttpContextAccessor = new HttpContextAccessor { HttpContext = fakeHttpContext };
+            var brandId = Guid.NewGuid();
 
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
@@ -171,29 +115,19 @@ namespace OperatorApi.UnitTests
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
 
-            var sut = new CreatePlayerHandler
-            (fakeHttpContextAccessor,
-                fakePlayerOperations,
-                fakeBrandOperations,
-                fakeBrandCurrencyCodeMapper,
-                fakePasswordHandler,
+            var sut = new GetCreatePlayerQueryService(
                 fakeStatusValidator,
-                fakeAgentOperations
-            );
+                fakePlayerOperations,
+                fakePasswordHandler,
+                fakeBrandCurrencyCodeMapper,
+                fakeBrandOperations,
+                fakeAgentOperations);
             var password = "password";
             var invitationCode = "NonExistentCode";
 
-            var request = new CreatePlayerRequest
-            {
-                AgentInvitationCode = invitationCode,
-                Username = "username",
-                Password = password,
-                ConfirmPassword = password,
-                CurrencyCode = "CNY",
-                IsTestPlayer = false
-            };
+            var query = new GetCreatePlayerQuery(brandId, "username", password, "CNY", invitationCode, false);
 
-            Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.Handle(request, default));
+            Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query, default));
         }
 
         [Test]
