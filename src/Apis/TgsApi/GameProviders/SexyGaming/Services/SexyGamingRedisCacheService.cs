@@ -26,7 +26,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         {
             string platformTxIdJoin = string.Join('|', source.Select(x => x.PlatformTxId).ToArray());
 
-            await _redisCacheManager.SafeCacheAsync(_cancelBetCacheType, platformTxIdJoin, TimeSpan.FromMinutes(30), platformTxIdJoin).ConfigureAwait(false);
+            await _redisCacheManager.SafeCacheAsync(_cancelBetCacheType, platformTxIdJoin, TimeSpan.FromDays(1), platformTxIdJoin).ConfigureAwait(false);
         }
 
         async ValueTask<string> ISexyGamingRedisCacheService.GetCancelBetPlatformTxIdJoinAsync(SexyGamingBet[] source)
