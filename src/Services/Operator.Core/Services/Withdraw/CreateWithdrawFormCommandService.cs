@@ -102,7 +102,7 @@ namespace TGS.Services.Operator.Services.Withdraw
             }
 
             await _paymentServiceClient
-                .SubmitDepositFormStatusAsync(
+                .SubmitWithdrawFormStatusAsync(
                     createFormId,
                     PaymentFlowState.WaitApprove)
                 .ConfigureAwait(false);

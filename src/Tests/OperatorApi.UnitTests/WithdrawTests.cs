@@ -198,8 +198,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
+            var actual = await command.ReturnFormIdSource.Task;
+
             _ = fakePaymentServiceClient.Received(1)
                 .CreateWithdrawFormAsync(Arg.Any<WithdrawFormCreateInfo>());
+
+            _ = fakePaymentServiceClient.Received(1)
+                .SubmitWithdrawFormStatusAsync(
+                    Arg.Is(actual),
+                    Arg.Is(PaymentFlowState.WaitApprove),
+                    Arg.Any<string?>(),
+                    Arg.Any<decimal?>());
         }
 
         [Test]
