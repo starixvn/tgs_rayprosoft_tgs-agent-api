@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Apis.OperatorApi.Handlers.Player;
-using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Security;
@@ -34,40 +32,32 @@ namespace OperatorApi.UnitTests
                 PlayerCode = playerCode
             });
 
+            var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakePlayerQueries = Substitute.For<IPlayerQueries>();
 
-            fakePlayerQueries.GetSaltAndPasswordByPlayerCodeAsync(Arg.Any<string>()).Returns((salt: new byte[] { 1, 2, 3 }, password: new byte[] { 4, 5, 6 }));
+            fakePlayerQueries
+                .GetSaltAndPasswordByPlayerCodeAsync(Arg.Any<string>())
+                .Returns((salt: new byte[] { 1, 2, 3 }, password: new byte[] { 4, 5, 6 }));
 
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
-            var sut = new ChangePasswordHandler(
-                new HttpContextAccessor()
-                {
-                    HttpContext = fakeHttpContext
-                },
-                fakePlayerQueries,
-                fakePlayerOperations,
-                fakePasswordHandler,
-                Substitute.For<IStatusValidator>());
+            var sut = new GetChangePasswordQueryService(fakeStatusValidator, fakePlayerQueries, fakePasswordHandler, fakePlayerOperations);
 
-            var request = new ChangePasswordRequest()
-            {
-                OldPassword = "password",
-                NewPassword = "newpass"
-            };
+            var brandId = Guid.NewGuid();
+            var query = new GetChangePasswordQuery(brandId, playerCode, "oldPassword", "newPassword");
 
             fakePasswordHandler
-                .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(request.OldPassword))
+                .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(query.OldPassword))
                 .Returns(true);
             fakePasswordHandler
-                .GenerateCredential(Arg.Is(request.NewPassword))
+                .GenerateCredential(Arg.Is(query.NewPassword))
                 .Returns((Salt: new byte[] { 1, 2, 3 }, HashedPassword: new byte[] { 4, 5, 6 }));
 
             var expected = playerCode;
 
-            var actual = await sut.Handle(request, default);
+            var actual = await sut.GetAsync(query, default);
 
             Assert.AreEqual(expected, actual.PlayerCode);
             _ = fakePlayerOperations.Received(1).ChangePlayerPasswordAsync(

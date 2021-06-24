@@ -1,13 +1,14 @@
 ﻿using System.Globalization;
 using System.Net.Mime;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.ServiceUtility;
+using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -21,9 +22,37 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [Consumes(MediaTypeNames.Application.Json)]
-        public Task<ChangePasswordResponse> ChangePasswordAsync(
-            [FromServices] IMediator mediator,
-            [FromBody] ChangePasswordRequest request) => mediator.Send(request);
+        public async Task<ChangePasswordResponse> ChangePasswordAsync(
+            [FromServices] IGetService<GetChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
+            [FromBody] ChangePasswordRequest request)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var query = new GetChangePasswordQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                request.OldPassword,
+                request.NewPassword);
+
+            ChangePasswordInfo info;
+            try
+            {
+                info = await getChangePasswordQueryService
+                    .GetAsync(query)
+                    .ConfigureAwait(false);
+            }
+            catch (Core.Models.Exceptions.InvalidCredentialsException)
+            {
+                throw new Core.Models.Exceptions.InvalidCredentialsException(Resources.Player.PasswordMismatched);
+            }
+
+            return new ChangePasswordResponse()
+            {
+                PlayerCode = info.PlayerCode,
+                UpdateTime = info.UpdateTime
+            };
+        }
 
         /// <summary>
         /// Start forgot password flow.

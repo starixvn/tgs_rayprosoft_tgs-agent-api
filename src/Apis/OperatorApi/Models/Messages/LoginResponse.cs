@@ -6,10 +6,10 @@ namespace TGS.Apis.OperatorApi.Models.Messages
     public record LoginResponse : TgsResponse
     {
         [JsonPropertyName("token")]
-        public string PlayerToken {  get; init; }
+        public string PlayerToken { get; init; }
 
         /// <summary>
-        ///     unix timestamp to milliseconds
+        /// unix timestamp to milliseconds
         /// </summary>
         [JsonPropertyName("logintime")]
         public long LoginTime { get; init; }
