@@ -9,7 +9,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Clients.Promotion.Client;
 using TGS.Clients.Promotion.Client.Models.Promotion;
-using GetPromotionsRequest = TGS.Apis.OperatorApi.Models.Messages.GetPromotionsRequest;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -25,21 +24,21 @@ namespace TGS.Apis.OperatorApi.Controllers
             _client = client;
         }
 
-        [HttpGet]
+        [HttpGet("{language}")]
         [Description("Get player's promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<PagingResponse<PromotionModel>> GetPlayerPromotionsAsync(
-            [FromQuery] GetPromotionsRequest request)
+        public async ValueTask<PagingResponse<PromotionModel>> GetPlayerPromotionsAsync(string language,
+            [FromQuery] PagingRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var promotionsRequest = new Clients.Promotion.Client.Models.Promotion.GetPromotionsRequest
+            var promotionsRequest = new GetPromotionsRequest
             {
                 BrandId = brandId,
-                Language = request.Language,
+                Language = language,
                 PlayerCode = playerTokenData.PlayerCode,
                 CurrentDate = DateTimeOffset.Now,
                 Page = request.Page,
