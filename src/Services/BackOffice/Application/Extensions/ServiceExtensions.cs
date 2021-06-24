@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Services.BackOffice.Application.Middlewares;
+using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.BackOffice.Infrastructure.Services;
 
@@ -35,6 +36,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<ICredentialGenerator, CredentialGenerator>();
             services.AddTransient<ISettingsService, SettingsService>();
             services.AddTransient<IGameService, GameService>();
+            services.AddTransient<IWalletExchangeService, WalletExchangeService>();
 
             services.AddTgsTransactionRepositoriesServices();
 

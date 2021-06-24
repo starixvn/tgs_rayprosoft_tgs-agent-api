@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment;
 using Tgs.Payment.Clients;
+using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
@@ -13,22 +14,19 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
     {
         private readonly IPaymentClient _paymentClient;
         private readonly IPaymentRepository _paymentRepository;
-        private readonly IPlayerService _playerService;
-        private readonly IWalletRepository _walletRepository;
+        private readonly IWalletExchangeService _walletExchangeService;
         private readonly IWithdrawProcessorFactory _withdrawProcessorFactory;
 
         public ReviewWithdrawFormCommandService(
             IPaymentRepository paymentRepository,
             IWithdrawProcessorFactory withdrawProcessorFactory,
             IPaymentClient paymentClient,
-            IWalletRepository walletRepository,
-            IPlayerService playerService)
+            IWalletExchangeService walletExchangeService)
         {
             _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
             _withdrawProcessorFactory = withdrawProcessorFactory ?? throw new ArgumentNullException(nameof(withdrawProcessorFactory));
             _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-            _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
-            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+            _walletExchangeService = walletExchangeService ?? throw new ArgumentNullException(nameof(walletExchangeService));
         }
 
         public async ValueTask ExecuteAsync(ReviewWithdrawFormCommand command, CancellationToken cancellationToken = default)
@@ -78,13 +76,9 @@ namespace TGS.Services.BackOffice.Application.Commands.Withdraw
                         command.Remark)
                     .ConfigureAwait(false);
 
-                var player = await _playerService
-                    .GetPlayerAsync(x => x.PlayerCode == formData.UserId)
-                    .ConfigureAwait(false);
-
-                await _walletRepository.ExchangeAsync(
+                await _walletExchangeService.ExchangeAsync(
                     formData.BrandId,
-                    player.DefaultWalletId,
+                    formData.UserType,
                     formData.UserId,
                     TransactionTypes.CancelWithdrawal,
                     formData.Amount).ConfigureAwait(false);
