@@ -35,12 +35,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var promotionsRequest = new GetPromotionsRequest
+            var promotionsRequest = new GetValidPromotionsRequest
             {
                 BrandId = brandId,
                 Language = language,
                 PlayerCode = playerTokenData.PlayerCode,
-                CurrentDate = DateTimeOffset.Now,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
@@ -48,7 +47,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ShowAll = request.ShowAll
             };
 
-            var response = await _client.GetPromotionsAsync(promotionsRequest);
+            var response = await _client.GetValidPromotionsAsync(promotionsRequest);
 
             return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
         }

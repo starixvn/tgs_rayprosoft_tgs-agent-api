@@ -83,7 +83,8 @@ namespace TGS.Services.Promotion.Handlers
                     Terms = x.Terms,
                     DesktopBanner = x.DesktopBanner,
                     MobileBanner = x.MobileBanner,
-                    LocalizationString = x.Localization
+                    LocalizationString = x.Localization,
+                    Localization = JsonDocument.Parse(x.Localization, new())
                 }).CreatePagedResponseAsync(request).ConfigureAwait(true);
 
             foreach (var promotionsItem in promotions.Items)
