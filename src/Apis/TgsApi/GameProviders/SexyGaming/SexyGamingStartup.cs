@@ -36,6 +36,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
             services.AddScoped<HandleSexyGamingExceptionMiddleware>();
             services.AddScoped<ISexyGamingServices, SexyGamingServices>();
             services.AddScoped<ISexyGamingActionModelMapper, SexyGamingActionModelMapper>();
+            services.AddScoped<ISexyGamingRedisCacheService, SexyGamingRedisCacheService>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(SexyGamingGameInitializer) }, (provider, _) =>
                   provider.GetRequiredService<SexyGamingGameInitializer>());

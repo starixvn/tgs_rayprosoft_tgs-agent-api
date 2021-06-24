@@ -15,7 +15,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
     public interface ISexyGamingActionModelMapper
     {
-        BetData Bet(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source);
+        Task<BetData> BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source);
 
         Task<BetData> CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source);
 
@@ -34,19 +34,29 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private const string GameProviderCode = Consts.GameProvider.SexyGaming;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ISexyGamingServices _services;
+        private readonly ISexyGamingRedisCacheService _redisCacheService;
 
         public SexyGamingActionModelMapper(
             ISexyGamingServices services,
-            IJsonSerializationProvider jsonSerializationProvider
+            IJsonSerializationProvider jsonSerializationProvider,
+            ISexyGamingRedisCacheService redisCacheService
             )
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _redisCacheService = redisCacheService ?? throw new ArgumentNullException(nameof(redisCacheService));
         }
 
 
-        BetData ISexyGamingActionModelMapper.Bet(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source)
+        async Task<BetData> ISexyGamingActionModelMapper.BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source)
         {
+            var platformTxIdJoin = await _redisCacheService.GetCancelBetPlatformTxIdJoinAsync(source).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(platformTxIdJoin))
+            {
+                return null;
+            }
+
             var transactions = (from order in source
                                 select new TransactionData
                                 {
@@ -61,13 +71,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                                     TimeStamp = DateTimeOffset.UtcNow,
                                     BetType = order.BetType
                                 }).ToArray();
-
             return GetBetData(data, playCode, transactions);
         }
 
         async Task<BetData> ISexyGamingActionModelMapper.CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source)
         {
             var batchTransactionData = new List<TransactionData>();
+
+            await _redisCacheService.AddCancelBetCacheAsync(source).ConfigureAwait(false);
+
             foreach (var order in source)
             {
                 var bet = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}").ConfigureAwait(false);

@@ -23,7 +23,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
     public class SkywindActionModelMapper : ISkywindActionModelMapper
     {
-        private const string _gameProviderCode = Consts.GameProvider.Skywind;
+        private readonly string _gameProviderCode = Consts.GameProvider.Skywind;
 
         private readonly ISkywindServices _services;
         private readonly IGameProviderOperations _gameProviderOperations;

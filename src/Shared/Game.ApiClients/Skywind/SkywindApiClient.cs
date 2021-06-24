@@ -22,7 +22,7 @@ namespace TGS.Shared.Game.ApiClients.Skywind
 
     public sealed class SkywindApiClient : BaseApiClient, ISkywindApiClient
     {
-        private static readonly string _accessTokenCacheType = "AccessToken";
+        private readonly string _accessTokenCacheType = "AccessToken";
         private readonly string _gameProvider = Consts.GameProvider.Skywind;
         private readonly IRedisCacheManager _redisCacheManager;
         public SkywindApiClient(
