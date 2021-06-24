@@ -10,7 +10,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/agent/email")]
     [ApiController]
     public class AgentEmailController : ControllerBase
     {
