@@ -92,6 +92,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(9, 6)
                 .IsRequired();
 
+            builder.Property(b => b.BeforeDividendAmount)
+                .HasPrecision(18, 6);
+
             builder.Property(b => b.From)
                 .IsRequired();
 

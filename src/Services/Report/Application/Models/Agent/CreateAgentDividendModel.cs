@@ -4,6 +4,8 @@ namespace TGS.Services.Report.Application.Models.Agent
 {
     public class CreateAgentDividendModel
     {
+        public int? Id { get; set; }
+        public int? ReferencedAgentDividendId { get; set; }
         public Guid AgentId { get; set; }
         public Guid BrandId { get; set; }
         public DateTimeOffset From { get; set; }
@@ -28,6 +30,8 @@ namespace TGS.Services.Report.Application.Models.Agent
         public decimal VirtualSportsWinLoss { get; set; }
         public decimal AgentDividendPercentage { get; set; }
         public decimal AgentDividendAmount { get; set; }
+        public decimal? BeforeDividendAmount { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
+        public bool AutoSend { get; set; }
     }
 }

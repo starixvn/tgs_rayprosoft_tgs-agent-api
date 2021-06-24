@@ -7,6 +7,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public int Id { get; set; }
         public Guid AgentId { get; set; }
         public Guid BrandId { get; set; }
+        public int? ReferencedAgentDividendId { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
         public decimal DepositAmount { get; set; }
@@ -29,6 +30,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal VirtualSportsWinLoss { get; set; }
         public decimal AgentDividendPercentage { get; set; }
         public decimal AgentDividendAmount { get; set; }
+        public decimal? BeforeDividendAmount { get; set; }
         public DateTimeOffset? SentOn { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
     }

@@ -460,6 +460,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("agent_dividend_amount");
 
+                    b.Property<int?>("ReferencedAgentDividendId")
+                        .HasColumnType("integer")
+                        .HasColumnName("referenced_agent_dividend_id");
+
                     b.Property<decimal>("AgentDividendPercentage")
                         .HasPrecision(9, 6)
                         .HasColumnType("numeric(9,6)")
@@ -473,6 +477,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("arcade_win_loss");
+
+                    b.Property<decimal?>("BeforeDividendAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("before_dividend_amount");
 
                     b.Property<decimal>("BetAmount")
                         .HasPrecision(18, 6)
