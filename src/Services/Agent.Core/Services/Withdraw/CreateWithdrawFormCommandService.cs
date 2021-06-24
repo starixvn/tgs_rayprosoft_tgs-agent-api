@@ -71,7 +71,7 @@ namespace TGS.Services.Agent.Services.Withdraw
                     new WithdrawFormCreateInfo(
                         command.AgentId.ToString(),
                         agentData.UserName,
-                        UserType.Player,
+                        UserType.Agent,
                         command.BrandId,
                         command.Amount,
                         7000,
@@ -99,7 +99,7 @@ namespace TGS.Services.Agent.Services.Withdraw
                 new WithdrawFormCreateInfo(
                         command.AgentId.ToString(),
                         agentData.UserName,
-                        UserType.Player,
+                        UserType.Agent,
                         command.BrandId,
                         command.Amount,
                         1000,
