@@ -1,8 +1,4 @@
-﻿using MediatR;
-
-namespace TGS.Apis.OperatorApi.Models.Messages
+﻿namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record GetPlayerRequest : IRequest<GetPlayerResponse>
-    {
-    }
+    public record GetPlayerRequest();
 }
