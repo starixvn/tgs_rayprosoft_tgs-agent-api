@@ -36,5 +36,28 @@ namespace TGS.Apis.AgentApi.Controllers
 
             return setEmailService.GetAsync(command);
         }
+
+        /// <summary>
+        /// Submits the change email.
+        /// </summary>
+        /// <param name="commitEmailService">The commit email service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPut]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public ValueTask SubmitChangeEmailAsync(
+            [FromServices] ICommandService<CommitSetAgentEmailCommand> commitEmailService,
+            [FromBody] SubmitChangeEmailRequest request)
+        {
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+            var command = new CommitSetAgentEmailCommand(
+                agentTokenData.AgentId,
+                request.SecurityKey,
+                request.ValidateCode);
+
+            return commitEmailService.ExecuteAsync(command);
+        }
     }
 }

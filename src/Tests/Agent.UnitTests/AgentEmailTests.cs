@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using NSubstitute;
@@ -11,12 +7,65 @@ using NUnit.Framework;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Agent.ValidateCode;
+using TGS.Services.Operations;
+using TGS.Services.Operator.Services.Player;
 
 namespace Agent.UnitTests
 {
     [TestFixture]
     public class AgentEmailTests
     {
+        [Test]
+        public void Commit_Set_Agent_Email_IF_Not_Verify_ValidateCode_Should_Throw_Exception()
+        {
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
+
+            var sut = new CommitSetAgentEmailCommandService(
+                fakeValidateCodeOperator,
+                fakeAgentOperations);
+
+            var agentId = Guid.NewGuid();
+            var validateCode = "123456";
+            var token = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+
+            var command = new CommitSetAgentEmailCommand(agentId, token, validateCode);
+
+            fakeValidateCodeOperator
+                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
+                .Returns((EmailValidateData)null);
+
+            Assert.ThrowsAsync<ValidateCodeNotVerifyException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
+        public async Task Commit_Set_Agent_Email_Should_Success()
+        {
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
+
+            var sut = new CommitSetAgentEmailCommandService(
+                fakeValidateCodeOperator,
+                fakeAgentOperations);
+
+            var agentId = Guid.NewGuid();
+            var validateCode = "123456";
+            var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var email = "test@raypro.com";
+
+            var command = new CommitSetAgentEmailCommand(agentId, securityKey, validateCode);
+
+            fakeValidateCodeOperator
+                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Is(validateCode), Arg.Is(securityKey))
+                .Returns(new EmailValidateData(email, agentId));
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeAgentOperations
+                .Received(1)
+                .SetEmailAsync(Arg.Is(agentId), Arg.Is(email), Arg.Any<DateTimeOffset>());
+        }
+
         [Test]
         public async Task Start_Set_Agent_Email_Should_Send_Confirm_Mail()
         {
