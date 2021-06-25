@@ -69,13 +69,6 @@ namespace TGS.Services.Operations.Commands
             agent.Email = email;
             agent.UpdatedOn = updatedOn;
 
-            var updateInfo = new Agent
-            {
-                Id = agentId,
-                Email = email,
-                UpdatedOn = updatedOn
-            };
-
             await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
