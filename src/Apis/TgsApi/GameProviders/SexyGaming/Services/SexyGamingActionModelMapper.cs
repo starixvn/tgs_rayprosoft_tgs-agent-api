@@ -190,7 +190,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_void_bet",
                         ExternalTransactionReferenceId = bet.ExternalTransactionId,
                         GameActionType = GameActionType.CancelTransaction,
-                        RoundClosed = true
+                        Timestamp = DateTimeOffset.UtcNow
                     });
                 }
             }
