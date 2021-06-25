@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async Task<GetGamesResponse> GetGamesAsync(
-            [FromServices] IQueryService<GetGamesQuery, GameModel> getGamesQueryService,
+            [FromServices] IQueryService<GetGamesQuery, GameInfo> getGamesQueryService,
             [FromQuery] GetGamesRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
@@ -38,16 +39,41 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.Types,
                 request.LanguageCode);
 
-            var info = await getGamesQueryService
+            var infos = await getGamesQueryService
                 .QueryAsync(query)
                 .OrderBy(g => g.DisplayOrder)
                 .ThenBy(g => g.Code)
-                .ToArrayAsync()
+                .ToListAsync()
                 .ConfigureAwait(false);
+
+            var games = new List<GameModel>();
+
+            foreach (var info in infos)
+            {
+                games.Add(
+                    new GameModel()
+                    {
+                        Code = info.Code,
+                        GameProviderCode = info.GameProviderCode,
+                        Description = info.Description,
+                        DisplayOrder = info.DisplayOrder,
+                        Id = info.Id,
+                        IsActive = info.IsActive,
+                        Name = info.Name,
+                        Tag = new Tag()
+                        {
+                            Hot = info.Tag.Hot,
+                            New = info.Tag.New,
+                            Recommend = info.Tag.Recommend
+                        },
+                        Type = info.Type
+                    }
+                );
+            }
 
             return new GetGamesResponse()
             {
-                Games = info
+                Games = games.ToArray()
             };
         }
 

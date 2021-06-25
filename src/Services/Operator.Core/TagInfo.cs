@@ -1,6 +1,6 @@
 ﻿namespace TGS.Services.Operator
 {
-    public record Tag
+    public record TagInfo
     {
         public bool New { get; init; }
 

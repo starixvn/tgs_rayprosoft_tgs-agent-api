@@ -17,7 +17,7 @@ using Localization = TGS.Core.Models.Consts.LocalizationContext;
 
 namespace TGS.Services.Operator.Services.Game
 {
-    internal class GetGamesQueryService : IQueryService<GetGamesQuery, GameModel>
+    internal class GetGamesQueryService : IQueryService<GetGamesQuery, GameInfo>
     {
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
@@ -49,7 +49,7 @@ namespace TGS.Services.Operator.Services.Game
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
         }
 
-        public async IAsyncEnumerable<GameModel> QueryAsync(
+        public async IAsyncEnumerable<GameInfo> QueryAsync(
             GetGamesQuery query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
@@ -89,7 +89,7 @@ namespace TGS.Services.Operator.Services.Game
             var types = query.Types ?? Array.Empty<GameType>();
             var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, query.BrandId);
 
-            var translatedGames = new List<GameModel>();
+            var translatedGames = new List<GameInfo>();
             foreach (var gameProviderId in gameProviderIds)
             {
                 var games = await GetGameModelsAsync(query.BrandId, gameProviderId, query.PlatformType, currencyCode, playerType);
@@ -124,7 +124,7 @@ namespace TGS.Services.Operator.Services.Game
             }
         }
 
-        private async Task<GameModel[]> GetGameModelsAsync(
+        private async Task<GameInfo[]> GetGameModelsAsync(
             Guid brandId,
             Guid gameProviderId,
             PlatformType platformType,
@@ -141,7 +141,7 @@ namespace TGS.Services.Operator.Services.Game
 
                 if (!isCurrencySupported)
                 {
-                    return Array.Empty<GameModel>();
+                    return Array.Empty<GameInfo>();
                 }
             }
 
@@ -162,7 +162,7 @@ namespace TGS.Services.Operator.Services.Game
                     where g.AvailableToBrand
                         && (g.AvailableCurrencies.Length == 0
                             || g.AvailableCurrencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase))
-                    select new GameModel
+                    select new GameInfo
                     {
                         Id = bg.GameId,
                         Code = g.Code,
@@ -174,7 +174,7 @@ namespace TGS.Services.Operator.Services.Game
                             && gameStatuses.Contains(g.Status)
                             && statuses.Contains(brandGameProviderStatus)
                             && gameStatuses.Contains(bg.BrandGameStatus),
-                        Tag = new Tag()
+                        Tag = new TagInfo()
                         {
                             New = bg.Tag.IsNew(),
                             Hot = bg.Tag.IsHot(),
