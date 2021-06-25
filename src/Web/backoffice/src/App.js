@@ -130,16 +130,18 @@ const Header = () => {
 
     return (
         <>
-            <TopNav background={getHeaderBackground()}>
+            <TopNav id="app-header" background={getHeaderBackground()}>
                 <TopNav.Section>
                     <TopNav.Item href="/" fontWeight="semibold"></TopNav.Item>
                 </TopNav.Section>
                 <TopNav.Section marginRight="major-2">
                     <TopNav.Item>
                         <DropdownMenu
+                            id="user-menu"
                             menu={
                                 <>
                                     <DropdownMenu.Item
+                                        id="change-password"
                                         onClick={changePasswordDialog.show}
                                     >
                                         <Trans
@@ -147,7 +149,10 @@ const Header = () => {
                                             en="Change Password"
                                         />
                                     </DropdownMenu.Item>
-                                    <DropdownMenu.Item onClick={logout}>
+                                    <DropdownMenu.Item
+                                        id="logout"
+                                        onClick={logout}
+                                    >
                                         <Trans zh="登出" en="Logout" />
                                     </DropdownMenu.Item>
                                 </>
@@ -159,7 +164,7 @@ const Header = () => {
                                 color={getHeaderButtonColor()}
                                 background={getHeaderButtonBackground()}
                             >
-                                {usename}
+                                <span id="username">{usename}</span>
                             </Button>
                         </DropdownMenu>
                     </TopNav.Item>
