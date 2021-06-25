@@ -62,20 +62,14 @@ namespace TGS.Services.Operations.Commands
             await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn)
+        public async Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Agent
-            {
-                Id = agentId,
-                Email = email,
-                UpdatedOn = updatedOn
-            };
+            var agent = await _repository.Agents.FindAsync(agentId).ConfigureAwait(false);
 
-            _repository.Agents.Attach(updateInfo);
-            _repository.Entry(updateInfo).Property(nameof(Player.Email)).IsModified = true;
-            _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
+            agent.Email = email;
+            agent.UpdatedOn = updatedOn;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
