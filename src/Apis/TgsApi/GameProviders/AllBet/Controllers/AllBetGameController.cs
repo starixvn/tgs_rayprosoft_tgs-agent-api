@@ -1,4 +1,6 @@
-﻿using System.Net.Mime;
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +9,9 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.AllBet.Services;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings.AllBet;
+using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
+using TGS.Shared.Game.Models.AllBet.Enums;
 using TGS.Shared.Game.Models.AllBet.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
@@ -19,6 +23,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
     [FeatureGate(Consts.GameProvider.AllBet)]
     public class AllBetGameController : ControllerBase
     {
+        private readonly
+            IReadOnlyDictionary<TransferType,
+                Func<string, GameProviderConfigurationData, TransferRequest, ValueTask<BetResult>>> _actionMap;
+
         private readonly IGamePlayActions _actions;
         private readonly IAllBetActionModelMapper _map;
         private readonly IAllBetServices _services;
@@ -31,6 +39,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
             _actions = actions;
             _map = map;
             _services = services;
+
+            _actionMap =
+                new Dictionary<TransferType,
+                    Func<string, GameProviderConfigurationData, TransferRequest, ValueTask<BetResult>>>
+                {
+                    [TransferType.PlaceBet] = PlaceBetAsync,
+                    [TransferType.Settle] = SettleAsync,
+                    [TransferType.ManuelSettle] = ManuelSettleAsync
+                };
         }
 
         [HttpGet]
@@ -48,7 +65,21 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         [HttpPost]
         [Route("Transfer")]
         [Consumes(MediaTypeNames.Application.Json)]
-        public ValueTask TransferAsync() => ValueTask.CompletedTask;
+        public async ValueTask<BalanceResponse> TransferAsync(TransferRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
+
+            if (!_actionMap.TryGetValue(request.Type, out var func))
+            {
+                throw new InvalidOperationException(
+                    $"no matched implementation of transfer type '{(int)request.Type}'");
+            }
+
+            var result = await func(playerCode, data, request);
+
+            return _map.Response(result);
+        }
 
         /// <summary>
         ///     Use to cancel place bet
@@ -57,6 +88,24 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         [HttpPost]
         [Route("CancelTransfer")]
         [Consumes(MediaTypeNames.Application.Json)]
-        public ValueTask CancelTransferAsync() => ValueTask.CompletedTask;
+        public ValueTask<BalanceResponse> CancelTransferAsync(CancelTransferRequest request)
+            => new ValueTask<BalanceResponse>();
+
+
+        private async ValueTask<BetResult> PlaceBetAsync(string playerCode, GameProviderConfigurationData data,
+            TransferRequest request)
+        {
+            var betData = _map.BetRequest(playerCode, data, request);
+
+            var result = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+
+            return result;
+        }
+
+        private ValueTask<BetResult> SettleAsync(string playerCode, GameProviderConfigurationData data,
+            TransferRequest request) => ValueTask.FromResult(new BetResult());
+
+        private ValueTask<BetResult> ManuelSettleAsync(string playerCode, GameProviderConfigurationData data,
+            TransferRequest request) => throw new NotImplementedException();
     }
 }

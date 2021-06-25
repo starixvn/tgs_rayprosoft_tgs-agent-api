@@ -5,23 +5,40 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameProviders.AllBet.Exceptions;
+using TGS.Apis.TgsApi.GameProviders.AllBet.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
+using TGS.Shared.Game.Models.AllBet.Enums;
+using TGS.Shared.Game.Models.AllBet.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
 {
     public sealed class AuthorizeAllBetMiddleware : IMiddleware
     {
         private static readonly string _Routing = "/api/ab";
+
+        private readonly IBrandOperations _brandOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IAllBetServices _services;
         private readonly ISettingOperations _settingOperations;
 
         public AuthorizeAllBetMiddleware(
-            ISettingOperations settingOperations)
+            ISettingOperations settingOperations,
+            IGameProviderOperations gameProviderOperations,
+            IBrandOperations brandOperations,
+            IPlayerOperations playerOperations,
+            IAllBetServices services)
         {
             _settingOperations = settingOperations;
+            _gameProviderOperations = gameProviderOperations;
+            _brandOperations = brandOperations;
+            _playerOperations = playerOperations;
+            _services = services;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -54,12 +71,30 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
                 }
             }
 
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.AllBet);
+
             context.Items.Add(AllBetConsts.ContextItems.Agent, agent);
+            context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
 
             if (path.Contains("Transfer"))
             {
-                //var json = await context.Request.ReadAsStringAsync();
-                //var doc = JsonDocument.Parse(json);
+                var request = await context.Request.ReadAsObjectFromJsonAsync<TransferRequest>();
+                var playerCode = _services.GetPlayerCode(request.PlayerId, agent.Suffix);
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+                var gameProviderConfigurationId = bgpc.GameProviderConfigurationId;
+
+                context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
+                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, gameProviderConfigurationId);
+
+                if (request.Type == TransferType.PlaceBet)
+                {
+                    var platformType = request.Details.Any(x => x.AppType == 3)
+                        ? PlatformType.Mobile
+                        : PlatformType.Desktop;
+
+                    context.Items.Add(Consts.ContextItems.PlatformType, platformType);
+                }
             }
 
             await next(context);
