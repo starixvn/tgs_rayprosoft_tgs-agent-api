@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -22,11 +26,20 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 
         BetData CancelBetRequest(string playerCode, GameProviderConfigurationData data,
             GameActionExternalIds[] externalIds, CancelTransferRequest request);
+
+        BetData SettleBetRequest(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, TransferRequest request, bool forceCloseRound);
     }
 
     public class AllBetActionModelMapper : IAllBetActionModelMapper
     {
         private static readonly string _GameProviderCode = Consts.GameProvider.AllBet;
+        private readonly IJsonSerializationProvider _json;
+
+        public AllBetActionModelMapper(IJsonSerializationProvider json)
+        {
+            _json = json;
+        }
 
         BalanceResponse IAllBetActionModelMapper.Response(GetBalanceResult result)
             => GetBalanceResponse(result.Balance);
@@ -108,6 +121,54 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 
             return GetBetData(playerCode, data, transactions);
         }
+
+        BetData IAllBetActionModelMapper.SettleBetRequest(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, TransferRequest request, bool forceCloseRound)
+        {
+            var detail = request.Details[0];
+            var betNum = detail.BetNumber.ToString();
+            var reference = externalIds.Where(t => t.GameActionType == PlaceBet && t.ExternalBetId == betNum)
+                .OrderBy(t => t.RecordedOn).First();
+
+            List<TransactionData> transactions = new();
+
+            if (detail.Deposit > 0)
+            {
+            }
+
+
+            var amount = detail.BetAmount + detail.ValidAmount!.Value;
+            transactions.Add(new TransactionData
+            {
+                Amount = amount,
+                ExternalTransactionId = $"{request.TransactionId}_{betNum}",
+                ExternalTransactionReferenceId = reference.ExternalTransactionId,
+                ExternalRoundId = reference.ExternalRoundId,
+                ExternalBetId = reference.ExternalBetId,
+                ExternalGameId = reference.ExternalGameId,
+                ExternalGameActionGroupId = request.TransactionId.ToString(),
+                GameActionType = GetGameActionType(detail.ValidAmount!.Value),
+                RoundClosed = forceCloseRound ? true : null,
+                TimeStamp = GetTimestamp(detail.RoundEndTime),
+                RoundDetail = !forceCloseRound
+                    ? null
+                    : _json.SerializeToString(new
+                    {
+                        Result = detail.GameResult,
+                        Extended = detail.GameResultExtended
+                    }, new JsonSerializerOptions {WriteIndented = false})
+            });
+
+            return GetBetData(playerCode, data, transactions.ToArray(), request.CurrencyCode);
+        }
+
+        private static GameActionType GetGameActionType(decimal validAmount)
+            => validAmount switch
+            {
+                > 0 => WinBet,
+                < 0 => LoseBet,
+                0   => TieBet
+            };
 
         private static BalanceResponse GetBalanceResponse(decimal balance)
             => new BalanceResponse

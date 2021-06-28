@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -8,9 +9,13 @@ using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.AllBet.Services;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Extensions;
 using TGS.Core.Models.GameProviders.Settings.AllBet;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations;
 using TGS.Shared.Game.Models.AllBet.Enums;
 using TGS.Shared.Game.Models.AllBet.Incoming;
 
@@ -29,6 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
 
         private readonly IGamePlayActions _actions;
         private readonly IAllBetCacheServices _cacheServices;
+        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IAllBetActionModelMapper _map;
         private readonly IAllBetServices _services;
 
@@ -36,12 +42,14 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
             IGamePlayActions actions,
             IAllBetActionModelMapper map,
             IAllBetServices services,
-            IAllBetCacheServices cacheServices)
+            IAllBetCacheServices cacheServices,
+            IGameProviderOperations gameProviderOperations)
         {
             _actions = actions;
             _map = map;
             _services = services;
             _cacheServices = cacheServices;
+            _gameProviderOperations = gameProviderOperations;
 
             _actionMap =
                 new Dictionary<TransferType,
@@ -114,13 +122,44 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         {
             var betData = _map.BetRequest(playerCode, data, request);
 
-            var result = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
-
-            return result;
+            return await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
         }
 
-        private ValueTask<BetResult> SettleAsync(string playerCode, GameProviderConfigurationData data,
-            TransferRequest request) => ValueTask.FromResult(new BetResult());
+        /// <summary>
+        ///     For settle request, only contains 1 transaction with 1 betNum
+        /// </summary>
+        private async ValueTask<BetResult> SettleAsync(string playerCode, GameProviderConfigurationData data,
+            TransferRequest request)
+        {
+            var detail = request.Details[0];
+            var roundId = detail.RoundId.ToString();
+            var externalGameId = detail.GameType.ToString();
+
+            var games = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, externalGameId);
+            var gameId = games.FirstOrDefault()?.Id;
+
+            if (!gameId.HasValue)
+            {
+                throw new InvalidGameActionException($"Game '{externalGameId}' is not found",
+                    InvalidGameActionErrorCode.GameNotFound);
+            }
+
+            var externalIds = await _services
+                .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
+                .ConfigureAwait(false);
+
+            var settledBetIds = externalIds.Where(t => t.GameActionType.IsSettleBet())
+                .Select(t => t.ExternalReferencedTransactionId).ToArray();
+
+            var unsettledCount = externalIds.Count(t => t.GameActionType == GameActionType.PlaceBet &&
+                !settledBetIds.Contains(t.ExternalTransactionId));
+
+            var forceCloseRound = unsettledCount == 1;
+
+            var betData = _map.SettleBetRequest(playerCode, data, externalIds, request, forceCloseRound);
+
+            return await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+        }
 
         private ValueTask<BetResult> ManuelSettleAsync(string playerCode, GameProviderConfigurationData data,
             TransferRequest request) => throw new NotImplementedException();

@@ -10,6 +10,7 @@
         public static class RedisKey
         {
             public static readonly string PlayerCodeByTranId = "AllBetPlayerCodeByTranId";
+            public static readonly string BetInfos = "AllBetBetInfos";
         }
     }
 }
