@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Redis;
 
-namespace TGS.Apis.TgsApi.GameProviders.AllBet
+namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 {
     public interface IAllBetCacheServices
     {
