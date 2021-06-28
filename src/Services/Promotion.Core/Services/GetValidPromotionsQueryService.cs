@@ -105,7 +105,7 @@ namespace TGS.Services.Promotion.Services
             {
                 if (promotionTypes.All(p => x.PromotionType != p))
                 {
-                    return new(true);
+                    return ValueTask.FromResult(true);
                 }
 
                 var checker = _promotionCheckerFactory.GetPromotionChecker(x.PromotionType);
