@@ -22,6 +22,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
         private static readonly string _Routing = "/api/ab";
 
         private readonly IBrandOperations _brandOperations;
+        private readonly IAllBetCacheServices _cacheServices;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IAllBetServices _services;
@@ -32,13 +33,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
             IGameProviderOperations gameProviderOperations,
             IBrandOperations brandOperations,
             IPlayerOperations playerOperations,
-            IAllBetServices services)
+            IAllBetServices services,
+            IAllBetCacheServices cacheServices)
         {
             _settingOperations = settingOperations;
             _gameProviderOperations = gameProviderOperations;
             _brandOperations = brandOperations;
             _playerOperations = playerOperations;
             _services = services;
+            _cacheServices = cacheServices;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -76,7 +79,27 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
             context.Items.Add(AllBetConsts.ContextItems.Agent, agent);
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
 
-            if (path.Contains("Transfer"))
+            if (path.Contains("CancelTransfer"))
+            {
+                var request = await context.Request.ReadAsObjectFromJsonAsync<CancelTransferRequest>();
+                var externalGameActionGroupId = request.ReferencedTransactionId.ToString();
+                var playerCode =
+                    await _cacheServices.GetPlayerCodeByExternalGameActionGroupIdAsync(externalGameActionGroupId);
+
+                if (playerCode.IsNullOrEmpty())
+                {
+                    throw new InvalidGameActionException($"Player by tranId '{externalGameActionGroupId}' is not found",
+                        InvalidGameActionErrorCode.TransactionNotFound);
+                }
+
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+                var gameProviderConfigurationId = bgpc.GameProviderConfigurationId;
+
+                context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
+                context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, gameProviderConfigurationId);
+            }
+            else if (path.Contains("Transfer"))
             {
                 var request = await context.Request.ReadAsObjectFromJsonAsync<TransferRequest>();
                 var playerCode = _services.GetPlayerCode(request.PlayerId, agent.Suffix);

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
@@ -12,6 +13,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 {
     public interface IAllBetServices
     {
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId,
+            string playerCode, string externalGameActionGroupId);
+
         string GetPlayerCode(string allBetPlayerId, string suffix);
 
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
@@ -53,6 +57,11 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 PlatformType = platformType
             };
         }
+
+        ValueTask<GameActionExternalIds[]> IAllBetServices.GetGameActionExternalIdsAsync(Guid gameProviderId,
+            string playerCode, string externalGameActionGroupId)
+            => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+                gameProviderId, playerCode, externalGameActionGroupId);
 
         string IAllBetServices.GetPlayerCode(string allBetPlayerId, string suffix)
             => allBetPlayerId.Replace(suffix, string.Empty);

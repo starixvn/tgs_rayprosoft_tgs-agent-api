@@ -36,6 +36,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet
 
             services.AddScoped<IAllBetActionModelMapper, AllBetActionModelMapper>();
             services.AddScoped<IAllBetServices, AllBetServices>();
+            services.AddScoped<IAllBetCacheServices, AllBetCacheServices>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

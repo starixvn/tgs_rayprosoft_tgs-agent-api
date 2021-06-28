@@ -6,5 +6,10 @@
         {
             public static readonly string Agent = "Agent";
         }
+
+        public static class RedisKey
+        {
+            public static readonly string PlayerCodeByTranId = "AllBetPlayerCodeByTranId";
+        }
     }
 }

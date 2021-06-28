@@ -4,6 +4,7 @@ using System.Linq;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.AllBet.Enums;
 using TGS.Shared.Game.Models.AllBet.Incoming;
@@ -18,6 +19,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
         BalanceResponse Response(BetResult result);
 
         BetData BetRequest(string playerCode, GameProviderConfigurationData data, TransferRequest request);
+
+        BetData CancelBetRequest(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, CancelTransferRequest request);
     }
 
     public class AllBetActionModelMapper : IAllBetActionModelMapper
@@ -82,6 +86,27 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             }).ToArray();
 
             return GetBetData(playerCode, data, transactions, request.CurrencyCode);
+        }
+
+        BetData IAllBetActionModelMapper.CancelBetRequest(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, CancelTransferRequest request)
+        {
+            var transactions = externalIds
+                .OrderByDescending(t => t.RecordedOn)
+                .Select(t => new TransactionData
+                {
+                    Amount = t.Amount,
+                    ExternalTransactionId = $"{t.ExternalTransactionId}_cancel",
+                    ExternalTransactionReferenceId = t.ExternalTransactionId,
+                    ExternalRoundId = t.ExternalRoundId,
+                    ExternalBetId = t.ExternalBetId,
+                    ExternalGameId = t.ExternalGameId,
+                    ExternalGameActionGroupId = request.TransactionId.ToString(),
+                    GameActionType = CancelTransaction,
+                    TimeStamp = DateTimeOffset.UtcNow
+                }).ToArray();
+
+            return GetBetData(playerCode, data, transactions);
         }
 
         private static BalanceResponse GetBalanceResponse(decimal balance)

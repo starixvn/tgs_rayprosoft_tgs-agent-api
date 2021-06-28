@@ -28,17 +28,20 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 Func<string, GameProviderConfigurationData, TransferRequest, ValueTask<BetResult>>> _actionMap;
 
         private readonly IGamePlayActions _actions;
+        private readonly IAllBetCacheServices _cacheServices;
         private readonly IAllBetActionModelMapper _map;
         private readonly IAllBetServices _services;
 
         public AllBetGameController(
             IGamePlayActions actions,
             IAllBetActionModelMapper map,
-            IAllBetServices services)
+            IAllBetServices services,
+            IAllBetCacheServices cacheServices)
         {
             _actions = actions;
             _map = map;
             _services = services;
+            _cacheServices = cacheServices;
 
             _actionMap =
                 new Dictionary<TransferType,
@@ -78,6 +81,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
 
             var result = await func(playerCode, data, request);
 
+            await _cacheServices.CachePlayerCodeByExternalGameActionGroupIdAsync(
+                request.TransactionId.ToString(), playerCode).ConfigureAwait(false);
+
             return _map.Response(result);
         }
 
@@ -88,9 +94,20 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         [HttpPost]
         [Route("CancelTransfer")]
         [Consumes(MediaTypeNames.Application.Json)]
-        public ValueTask<BalanceResponse> CancelTransferAsync(CancelTransferRequest request)
-            => new ValueTask<BalanceResponse>();
+        public async ValueTask<BalanceResponse> CancelTransferAsync(CancelTransferRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var data = await _services.GetGameProviderConfigurationDataAsync().ConfigureAwait(false);
 
+            var groupId = request.ReferencedTransactionId.ToString();
+            var externalIds = await _services.GetGameActionExternalIdsAsync(data.GameProviderId, playerCode, groupId)
+                .ConfigureAwait(false);
+
+            var betData = _map.CancelBetRequest(playerCode, data, externalIds, request);
+            var result = await _actions.CancelTransactionAsync(betData);
+
+            return _map.Response(result);
+        }
 
         private async ValueTask<BetResult> PlaceBetAsync(string playerCode, GameProviderConfigurationData data,
             TransferRequest request)
