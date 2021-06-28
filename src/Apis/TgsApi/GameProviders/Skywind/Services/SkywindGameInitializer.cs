@@ -24,6 +24,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         private readonly ITokenProvider _tokenProvider;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+        private readonly IGameProviderOperations _gameProviderOperations;
 
         public SkywindGameInitializer(
             ISkywindApiClient client,
@@ -32,7 +33,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             IJsonSerializationProvider jsonSerializationProvider,
             ISettingOperations settingOperations,
             ITokenProvider tokenProvider,
-            IBrandGameProviderOperations brandGameProviderOperations
+            IBrandGameProviderOperations brandGameProviderOperations,
+            IGameProviderOperations gameProviderOperations
             )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
@@ -42,6 +44,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
@@ -54,28 +57,36 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var brandId = player.BrandId;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
             var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind);
-            var data = new SkywindGameUrlRequest()
-            {
-                PlayerCode = player.PlayerCode,
-                GameCode = "sw_ro_a01bac",
-                //GameCode = "sw_bac",
-                Ticket = encryptedToken,
-                Language = cultureCode
-            };
 
             var url = default(string);
-            //url = $" https://2rkp4pb7-lobby.ss211208.com/ticket/{encryptedToken}";
-            
-            var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
-            if (responseGameUrl.Code.ToString().IgnoreCaseNotEquals(((int)GameApiError.Success).ToString()))
+
+            var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
+
+            if (cachedGame.ExternalId.IgnoreCaseContains("SWLobby"))
             {
-                throw new GameProviderApiErrorException(_jsonSerializationProvider.SerializeToString(responseGameUrl));
+                url = $"{configuration.LiveLobbyUrl}#/ticket/{encryptedToken}?lang={cultureCode}";
             }
             else
             {
-                url = responseGameUrl.Url;
+                var data = new SkywindGameUrlRequest()
+                {
+                    PlayerCode = player.PlayerCode,
+                    GameCode = cachedGame.ExternalId,
+                    Ticket = encryptedToken,
+                    Language = cultureCode
+                };
+
+                var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
+                if (responseGameUrl.Code.ToString().IgnoreCaseNotEquals(((int)GameApiError.Success).ToString()))
+                {
+                    throw new GameProviderApiErrorException(_jsonSerializationProvider.SerializeToString(responseGameUrl));
+                }
+                else
+                {
+                    url = responseGameUrl.Url;
+                }
             }
-            
+
             return new() { Url = url };
         }
     }

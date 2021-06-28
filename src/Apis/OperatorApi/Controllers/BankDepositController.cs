@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment;
 using Tgs.Payment.ApplePay;
+using Tgs.Payment.Clients;
 using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -59,7 +60,10 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
-            var getDepositFormQuery = new GetDepositFormQuery(playerTokenData.PlayerCode, createdFormId);
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
 
             var formData = await getDepositFormService
                 .GetAsync(getDepositFormQuery)
@@ -126,7 +130,10 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
 
-            var getDepositFormQuery = new GetDepositFormQuery(playerTokenData.PlayerCode, createdFormId);
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
 
             var formData = await getDepositFormService
                 .GetAsync(getDepositFormQuery)

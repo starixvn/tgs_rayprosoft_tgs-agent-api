@@ -69,6 +69,7 @@ export const FileUploadButton = ({
                     disabled,
                     refKey: "elementRef"
                 })}
+                isLoading={isLoading}
             >
                 {children}
                 <input {...getInputProps()} />

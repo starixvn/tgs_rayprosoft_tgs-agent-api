@@ -29,16 +29,16 @@ namespace TGS.Shared.Game.Models.Skywind.Incoming
         public string TrxId { get; set; }
         [Required]
         [JsonPropertyName("game_id")]
-        public string GameId { get; set; }
+        public long GameId { get; set; }
         [Required]
         [JsonPropertyName("event_type")]
         public string EventType { get; set; }
         [Required]
         [JsonPropertyName("event_id")]
-        public string EventId { get; set; }
+        public long EventId { get; set; }
         [Required]
         [JsonPropertyName("timestamp")]
-        public string Timestamp { get; set; }
+        public int Timestamp { get; set; }
         [Required]
         [JsonPropertyName("game_type")]
         public string GameType { get; set; }

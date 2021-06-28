@@ -59,8 +59,8 @@ namespace TGS.Services.Promotion.Handlers
             promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
 
             var bannerImages = request.Localization.ToJson().GetMatchStrings(Consts.UploadFile.ImagePattern);
-            var contentImages = request.Content.GetMatchStrings(Consts.UploadFile.ImagePattern);
-            var images = bannerImages.Union(contentImages).ToArray();
+            var contentImages = request.Content?.GetMatchStrings(Consts.UploadFile.ImagePattern);
+            var images = contentImages is null ? bannerImages : bannerImages.Union(contentImages).ToArray();
 
             await _service.UpdatePromotionAsync(promotion, request);
 

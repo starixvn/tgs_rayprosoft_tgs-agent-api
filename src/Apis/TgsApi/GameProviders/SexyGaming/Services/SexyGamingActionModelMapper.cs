@@ -8,7 +8,6 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Games;
-using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SexyGaming.Incoming.Transactions;
 using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 
@@ -16,7 +15,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
     public interface ISexyGamingActionModelMapper
     {
-        BetData BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source);
+        Task<BetData> BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source);
 
         Task<BetData> CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source);
 
@@ -35,22 +34,29 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private const string GameProviderCode = Consts.GameProvider.SexyGaming;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ISexyGamingServices _services;
-        private readonly IBrandOperations _brandOperations;
+        private readonly ISexyGamingRedisCacheService _redisCacheService;
 
         public SexyGamingActionModelMapper(
             ISexyGamingServices services,
             IJsonSerializationProvider jsonSerializationProvider,
-            IBrandOperations brandOperations
+            ISexyGamingRedisCacheService redisCacheService
             )
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _redisCacheService = redisCacheService ?? throw new ArgumentNullException(nameof(redisCacheService));
         }
 
 
-        BetData ISexyGamingActionModelMapper.BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source)
+        async Task<BetData> ISexyGamingActionModelMapper.BetAsync(GameProviderConfigurationData data, string playCode, SexyGamingBet[] source)
         {
+            var platformTxIdJoin = await _redisCacheService.GetCancelBetPlatformTxIdJoinAsync(source).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(platformTxIdJoin))
+            {
+                return null;
+            }
+
             var transactions = (from order in source
                                 select new TransactionData
                                 {
@@ -65,13 +71,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                                     TimeStamp = DateTimeOffset.UtcNow,
                                     BetType = order.BetType
                                 }).ToArray();
-
             return GetBetData(data, playCode, transactions);
         }
 
         async Task<BetData> ISexyGamingActionModelMapper.CancelBetAsync(GameProviderConfigurationData data, string playCode, SexyGamingCancelBet[] source)
         {
             var batchTransactionData = new List<TransactionData>();
+
+            await _redisCacheService.AddCancelBetCacheAsync(source).ConfigureAwait(false);
+
             foreach (var order in source)
             {
                 var bet = await _services.GetGameActionExternalIdAsync(data.GameProviderId, order.UserId, $"{ order.PlatformTxId}").ConfigureAwait(false);
@@ -82,12 +90,11 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         Amount = 0,
                         Commission = 0,
                         ExternalGameId = order.GameCode,
-                        ExternalBetId = bet.ExternalBetId,
-                        ExternalRoundId = bet.ExternalRoundId,
-                        ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_bet",
+                        ExternalBetId = order.PlatformTxId,
+                        ExternalRoundId = order.RoundId,
+                        ExternalTransactionId = $"{order.PlatformTxId}_cancel_bet",
                         ExternalTransactionReferenceId = order.PlatformTxId,
                         GameActionType = GameActionType.CancelTransaction,
-                        RoundClosed = true,
                         TimeStamp = DateTimeOffset.UtcNow
                     });
                 }
@@ -183,7 +190,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         ExternalTransactionId = $"{ bet.ExternalTransactionId}_cancel_void_bet",
                         ExternalTransactionReferenceId = bet.ExternalTransactionId,
                         GameActionType = GameActionType.CancelTransaction,
-                        RoundClosed = true
+                        Timestamp = DateTimeOffset.UtcNow
                     });
                 }
             }
@@ -210,6 +217,19 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         ExternalRoundId = order.RoundId.ToString(),
                         ExternalTransactionId = $"{ settle.ExternalTransactionId}_cancel_void_settle",
                         ExternalTransactionReferenceId = settle.ExternalTransactionId,
+                        GameActionType = GameActionType.CancelTransaction,
+                        RoundClosed = false,
+                        Timestamp = DateTimeOffset.UtcNow
+                    });
+                    batchTransactionData.Add(new BatchTransactionData()
+                    {
+                        PlayerCode = order.UserId,
+                        GameProviderConfigurationId = gameProviderConfigurationId,
+                        ExternalGameId = order.GameCode,
+                        ExternalBetId = order.PlatformTxId.ToString(),
+                        ExternalRoundId = order.RoundId.ToString(),
+                        ExternalTransactionId = $"{ settle.ExternalReferencedTransactionId}_cancel_void_bet",
+                        ExternalTransactionReferenceId = settle.ExternalReferencedTransactionId,
                         GameActionType = GameActionType.CancelTransaction,
                         RoundClosed = true,
                         Timestamp = DateTimeOffset.UtcNow

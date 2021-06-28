@@ -40,6 +40,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(SkywindGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<SkywindGameInitializer>());
+
+            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(SkywindGameHistory) }, (provider, _) =>
+            provider.GetRequiredService<SkywindGameHistory>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

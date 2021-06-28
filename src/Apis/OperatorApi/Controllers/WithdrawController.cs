@@ -13,6 +13,7 @@ using TGS.Services.Operator.BrandPayment;
 using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Withdraw;
 using TGS.ServiceUtility;
+using Tgs.Payment.Clients;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {

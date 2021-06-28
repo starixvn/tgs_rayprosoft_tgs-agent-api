@@ -145,6 +145,7 @@ const LocalizationDialog = ({
                 }
                 css={css`
                     & .bb-DialogContent {
+                        min-height: 70vh;
                         max-height: 80vh;
                     }
 

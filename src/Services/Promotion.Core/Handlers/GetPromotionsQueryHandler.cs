@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -41,7 +43,7 @@ namespace TGS.Services.Promotion.Handlers
                 return CreateInvalidResponse<PagedResponse<PromotionModel>>(Player.NotFound);
             }
 
-            return await _service.GetPromotionQueries()
+            var promotions = await _service.GetPromotionQueries()
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(request.Status, x => x.Status == request.Status)
                 .Where(request.Name, x => x.Name == request.Name)
@@ -81,8 +83,32 @@ namespace TGS.Services.Promotion.Handlers
                     Terms = x.Terms,
                     DesktopBanner = x.DesktopBanner,
                     MobileBanner = x.MobileBanner,
-                    Localization = x.Localization
+                    LocalizationString = x.Localization
                 }).CreatePagedResponseAsync(request).ConfigureAwait(true);
+
+            foreach (var promotionsItem in promotions.Items)
+            {
+                if (promotionsItem.LocalizationString.IsNotNullOrEmpty())
+                {
+                    if (request.Language.IsNotNullOrEmpty())
+                    {
+                        var localization = _jsonSerializationProvider.DeserializeFromString<Dictionary<string, object>>(
+                            promotionsItem
+                                .LocalizationString);
+                        if (localization.TryGetValue(request.Language, out var languageObject))
+                        {
+                            promotionsItem.LocalizationString = languageObject.ToString();
+                            promotionsItem.Localization = JsonDocument.Parse(promotionsItem.LocalizationString!);
+                        }
+
+                        continue;
+                    }
+
+                    promotionsItem.Localization = JsonDocument.Parse(promotionsItem.LocalizationString!);
+                }
+            }
+
+            return promotions;
         }
     }
 }

@@ -24,12 +24,12 @@ namespace TGS.Apis.OperatorApi.Controllers
             _client = client;
         }
 
-        [HttpGet]
+        [HttpGet("{language}")]
         [Description("Get promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        public async ValueTask<PagingResponse<PromotionModel>> GetPromotionsAsync(
+        public async ValueTask<PagingResponse<PromotionModel>> GetPromotionsAsync(string language,
             [FromQuery] PagingRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
@@ -37,6 +37,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var promotionsRequest = new GetPromotionsRequest
             {
                 BrandId = brandId,
+                Language = language,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
@@ -46,11 +47,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
             var response = await _client.GetPromotionsAsync(promotionsRequest);
 
-            return new()
-            {
-                TotalCount = response.TotalCount,
-                Items = response.Items ?? Array.Empty<PromotionModel>()
-            };
+            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
         }
 
         [HttpPost("{id}/join")]
@@ -63,7 +60,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var response = await _client.JoinAsync(new(id, playerTokenData.PlayerCode));
 
-            return new() { Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty };
+            return new() {Success = response.Valid, ErrorMessage = !response.Valid ? response.Message : string.Empty};
         }
     }
 }

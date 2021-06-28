@@ -5,15 +5,13 @@ using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.BetHistories;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
-using TGS.Shared.Game.Models.KY.Outgoing;
 using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 
-namespace TGS.Apis.TgsApi.GameProviders.Services
+namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
     public sealed class SexyGamingGameHistory : BaseBetHistory
     {

@@ -123,6 +123,7 @@ AppPackages/
 .vscode/
 sql/
 node_modules/
+.playwright/
 bower_components/
 *.Cache
 ClientBin/

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { css } from "@emotion/react"
-import { Box, Set, Link, Group } from "bumbag"
+import { Box, Set, Link, Group, Button, Icon } from "bumbag"
 import { Trans } from "../../i18n"
 import { useUploadImage } from "./client"
 import { LocalizationDialogDisclosure } from "../../dialog/LocalizationDialog"
@@ -34,7 +34,7 @@ export const ImageUploadButton = ({
                     readOnly={readOnly}
                 />
             </Group>
-            <OpenLinkButton name={name} />
+            <OpenLinkButton name={name} disabled={disabled} />
         </Set>
     )
 }
@@ -47,13 +47,13 @@ const LocalizationUploadImageField = ({ code, prefix, disabled }) => {
                 <StaticButton>{code}</StaticButton>
                 <UploadButton name={name} prefix={prefix} disabled={disabled} />
             </Group>
-            <OpenLinkButton name={name} />
+            <OpenLinkButton name={name} disabled={disabled} />
         </Set>
     )
 }
 
-const OpenLinkButton = ({ name }) => {
-    let { control } = useFormContext()
+const OpenLinkButton = ({ name, disabled }) => {
+    let { control, setValue } = useFormContext()
     let url = useWatch({
         control,
         name
@@ -67,6 +67,14 @@ const OpenLinkButton = ({ name }) => {
             <Link href={url} target="_blank">
                 <Trans zh="查看图片" en="View Image" />
             </Link>
+            {!disabled && (
+                <Button.Close
+                    onClick={(event) => {
+                        setValue(name, "")
+                    }}
+                    disabled={disabled}
+                />
+            )}
         </StaticButton>
     )
 }

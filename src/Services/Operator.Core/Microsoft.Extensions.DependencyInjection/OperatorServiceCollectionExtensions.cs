@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Tgs.Payment.LeePay;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
@@ -31,6 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddTransient<IGameProviderStatusValidator, GameProviderStatusValidator>()
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
                 .AddTransient<IValidateCodeServiceClient>(sp => sp.GetRequiredService<ValidateCodeServiceClient>())
+                .AddTransient<IRequestAnalyzer, RequestAnalyzer>()
                 .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
                 .AddMail()
                 .AddSmsClient((sp, httpClient) =>
@@ -47,7 +48,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 })
                 .AddPaymentClient()
                 .AddSingleton<ManualDepositSerializer>()
-                .AddSingleton<LeePaySerializer>()
                 .AddNatsMessageQueue(config =>
                 {
                     config.ConfigQueueOptions((options, sp) =>

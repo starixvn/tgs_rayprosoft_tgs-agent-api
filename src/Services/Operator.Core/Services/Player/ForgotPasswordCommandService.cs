@@ -4,9 +4,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Core.DataServices.Tgs;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
@@ -33,7 +32,7 @@ namespace TGS.Services.Operator.Services.Player
                 .FirstOrDefault();
 
             if (player == null)
-                throw new PlayerNotFoundException(command.Email);
+                throw new PlayerNotFoundException($"The email ({command.Email}) can't find the player info.");
 
             var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
                 .RetryAsync(5)

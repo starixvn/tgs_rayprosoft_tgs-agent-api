@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Clients.Promotion.Client;
-using Tgs.Payment;
 using Tgs.Payment.Clients;
+using TGS.Clients.Promotion.Client;
 using TGS.Services.Operations.Commands;
 using TGS.ServiceUtility;
 
@@ -12,17 +11,17 @@ namespace TGS.Services.Operator.Services.Deposit
     internal class CreateDepositFormCommandService : ICommandService<CreateDepositFormCommand>
     {
         private readonly IPaymentClient _paymentClient;
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IPlayerCommands _playerCommands;
         private readonly IPromotionClient _promotionClient;
 
         public CreateDepositFormCommandService(
-            IPaymentRepository paymentRepository,
+            IPaymentServiceClient paymentServiceClient,
             IPaymentClient paymentClient,
             IPromotionClient promotionClient,
             IPlayerCommands playerCommands)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
             _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
             _playerCommands = playerCommands ?? throw new ArgumentNullException(nameof(playerCommands));
@@ -53,19 +52,21 @@ namespace TGS.Services.Operator.Services.Deposit
                 .DepositAsync(command.Subject, command.Amount, settings)
                 .ConfigureAwait(false);
 
-            var form = new DepositFormCreateInfo(
-                command.PlayerCode,
-                command.BrandId,
-                command.BrandPaymentId,
-                command.Amount,
-                command.PromotionId,
-                applyInfo);
+            var form = new DepositFormCreateInfo
+            {
+                Amount = command.Amount,
+                ApplyInfo = applyInfo,
+                BrandId = command.BrandId,
+                BrandPaymentId = command.BrandPaymentId,
+                PlayerCode = command.PlayerCode,
+                PromotionId = command.PromotionId
+            };
 
-            await _paymentRepository
+            await _paymentServiceClient
                 .CreateDepositFormAsync(createFormId, form)
                 .ConfigureAwait(false);
 
-            await _paymentRepository
+            await _paymentServiceClient
                 .SubmitDepositFormStatusAsync(createFormId, PaymentFlowState.WaitPayment, null)
                 .ConfigureAwait(false);
 

@@ -24,12 +24,12 @@ namespace TGS.Apis.OperatorApi.Controllers
             _client = client;
         }
 
-        [HttpGet]
+        [HttpGet("{language}")]
         [Description("Get player's promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<PagingResponse<PromotionModel>> GetPlayerPromotionsAsync(
+        public async ValueTask<PagingResponse<PromotionModel>> GetPlayerPromotionsAsync(string language,
             [FromQuery] PagingRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -38,6 +38,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var promotionsRequest = new GetPromotionsRequest
             {
                 BrandId = brandId,
+                Language = language,
                 PlayerCode = playerTokenData.PlayerCode,
                 CurrentDate = DateTimeOffset.Now,
                 Page = request.Page,
@@ -49,7 +50,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var response = await _client.GetPromotionsAsync(promotionsRequest);
 
-            return new() { TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>() };
+            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
         }
     }
 }

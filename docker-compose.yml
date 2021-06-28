@@ -162,6 +162,7 @@ services:
       ConnectionStrings__Tgs: "Server=postgres;Database=tgs;User Id=tgs;Password=1qaz2wsx!@"
       ConnectionStrings__RedisConfigurationString: "redis,abortConnect=false,connectTimeout=3000"
       NatsSetting__Urls: "nats://nats:4222"
+      File__FileServiceBaseUrl: "http://fileservice"
     ports:
       - 5201:80
     networks:

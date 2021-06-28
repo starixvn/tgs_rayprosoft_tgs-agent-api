@@ -2,6 +2,7 @@
 using Moq;
 using NUnit.Framework;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BrandPayment.PaymentConditions;
 
@@ -20,31 +21,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var fakeCondition1 = new Mock<IBrandPaymentCondition>();
 
@@ -84,31 +86,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = false,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -137,31 +140,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -180,31 +184,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = true,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                true,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -223,31 +228,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                true,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new IdentityCondition(brandPayment.AuthenticateIdentity);
 
@@ -266,31 +272,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
@@ -309,31 +316,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 true,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                true,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new PhoneCondition(brandPayment.AuthenticatePhone);
 
@@ -352,31 +360,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -401,31 +410,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = false,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new ShowOnAllPlayersCondition();
 
@@ -444,31 +454,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new DepositedAmountCondition(brandPayment.DepositedAmountLimit);
 
@@ -487,31 +498,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new BlockListCondition(new[] { brandPayment.Id });
 
@@ -530,31 +542,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new WhiteListCondition(new[] { brandPayment.Id });
 
@@ -573,31 +586,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var fakeCondition = new Mock<IBrandPaymentCondition>();
 
@@ -622,31 +636,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var fakeCondition1 = new Mock<IBrandPaymentCondition>();
 
@@ -686,31 +701,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 null);
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new VipCondition(Array.Empty<Guid>());
 
@@ -729,31 +745,32 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 false,
                 Guid.NewGuid());
 
-            var brandPayment = new BrandPaymentInfo(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "TestChannel",
-                "TestChannelCode",
-                string.Empty,
-                new ValueRange<decimal>
+            var brandPayment = new BrandPaymentInfo
+            {
+                Id = Guid.NewGuid(),
+                AuthenticateIdentity = false,
+                AuthenticatePhone = false,
+                ChannelCode = "TestChannelCode",
+                ChannelId = Guid.NewGuid(),
+                ChannelName = "TestChannel",
+                ConditionMatchType = ConditionMatchType.MatchAll,
+                DepositedAmountLimit = new ValueRange<decimal>
                 {
                     From = 10M,
                     To = 100M
                 },
-                false,
-                false,
-                false,
-                new ValueRange<decimal>
+                Enabled = true,
+                IsAllPlayers = true,
+                MethodId = Guid.NewGuid(),
+                PaymentId = Guid.NewGuid(),
+                PaymentMethodChannelId = Guid.NewGuid(),
+                TransferLimit = new ValueRange<decimal>
                 {
                     From = 10M,
-                    To = 1000M
+                    To = 100M
                 },
-                ConditionMatchType.MatchAll,
-                TransferType.Deposit,
-                true);
+                TransferType = TransferType.Deposit
+            };
 
             var sut = new VipCondition(new[] { playerInfo.VipLevel.Value });
 

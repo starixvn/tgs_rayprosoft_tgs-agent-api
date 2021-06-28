@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -13,6 +14,8 @@ namespace TGS.Services.Operations.Commands
         Task<AgentLoginRecord> AgentLoginAsync(AgentLoginData data);
 
         Task ChangeAgentPasswordAsync(ChangeAgentPasswordData data);
+
+        Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn);
     }
 
     public sealed class AgentCommands : IAgentCommands
@@ -55,6 +58,16 @@ namespace TGS.Services.Operations.Commands
             agent.Salt = data.Salt;
             agent.Password = data.Password;
             agent.UpdatedOn = data.UpdatedOn;
+
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async Task SetEmailAsync(Guid agentId, string email, DateTimeOffset updatedOn)
+        {
+            var agent = await _repository.Agents.FindAsync(agentId).ConfigureAwait(false);
+
+            agent.Email = email;
+            agent.UpdatedOn = updatedOn;
 
             await _repository.SaveChangesAsync().ConfigureAwait(false);
         }

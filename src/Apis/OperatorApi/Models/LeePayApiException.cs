@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.Operator
+namespace TGS.Apis.OperatorApi.Models
 {
     public class LeePayApiException : Exception
     {

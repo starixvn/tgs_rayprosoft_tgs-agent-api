@@ -54,6 +54,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.4-alpha" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.9-alpha" />
+    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.0.9-alpha" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.5" />
   </ItemGroup>
 
@@ -64,7 +65,6 @@
     <ProjectReference Include="..\..\Core\Infrastructures\Infrastructures.csproj" />
     <ProjectReference Include="..\..\Libraries\IdentityVerifiers\IdentityVerifiers.csproj" />
     <ProjectReference Include="..\..\Repositories\Operator.Repositories\Operator.Repositories.csproj" />
-    <ProjectReference Include="..\..\Repositories\PaymentRepositories\PaymentRepositories.csproj" />
     <ProjectReference Include="..\..\Repositories\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />
     <ProjectReference Include="..\..\Services\Operations\Operations.csproj" />

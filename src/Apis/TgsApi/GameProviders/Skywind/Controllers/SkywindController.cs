@@ -7,13 +7,10 @@ using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Skywind.Services;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
-using TGS.Services.Operations;
-using TGS.Services.Operations.CodeMappers;
 using TGS.Shared.Game.Models.Skywind.Common;
 using TGS.Shared.Game.Models.Skywind.Enums;
 using TGS.Shared.Game.Models.Skywind.Incoming;
@@ -28,35 +25,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
     [FeatureGate(Consts.GameProvider.Skywind)]
     public sealed class SkywindController : ControllerBase
     {
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IGamePlayActions _actions;
-        private readonly ISettingOperations _settingOperations;
         private readonly ISkywindActionModelMapper _map;
         private readonly ISkywindServices _services;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IGamePlayActions _gamePlayActions;
         public SkywindController(
             IGamePlayActions actions,
-            IJsonSerializationProvider jsonSerializationProvider,
-            ISettingOperations settingOperations,
             ISkywindActionModelMapper map,
             ISkywindServices services,
-            IGameProviderOperations gameProviderOperations,
-            IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
-            IPlayerOperations playerOperations,
             IGamePlayActions gamePlayActions)
         {
 
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _services = services ?? throw new ArgumentNullException(nameof(services));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _gamePlayActions = gamePlayActions ?? throw new ArgumentNullException(nameof(gamePlayActions));
         }
 
@@ -88,7 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.BetAsync(gameProviderConfigurationData, playerCode, new[] { request });
+            var betData = await _map.BetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
@@ -113,7 +95,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.SettleAsync(gameProviderConfigurationData, playerCode, new[] { request });
+            var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
             var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
@@ -139,8 +121,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = await _map.RollbackBetAsync(gameProviderConfigurationData, playerCode, new[] { request }).ConfigureAwait(false);
-            var balance = default(decimal);
+            var betData = await _map.RollbackBetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
+            decimal balance;
             if (betData.Transactions.Length > 0)
             {
                 var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
@@ -156,30 +138,33 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                Balance = balance
+                Balance = balance,
+                TrxId = request.TrxId
             };
         }
 
         [HttpPost("validate_ticket")]
         public async Task<SkywindValidateTicketResponse> ValidateTicketAsync(SkywindValidateTicketRequest request)
         {
-            /*
-            var loginRecord = await _services.DecryptTokenAsync(request.Ticket);
+
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
             var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
             {
-                PlayerCode = loginRecord.PlayerCode,
+                PlayerCode = playerCode,
                 GameProviderCode = Consts.GameProvider.Skywind,
-                PlatformType = loginRecord.PlatformType
+                PlatformType = platformType
             }).ConfigureAwait(false);
-            */
+
             return new SkywindValidateTicketResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                CustId = "4ucmqplxb029",
+                CustId = playerCode,
                 CustSessionId = request.Ticket,
-                CurrencyCode = "CNY",
+                CurrencyCode = validationResult.GameProviderCurrencyCode,
                 Country = "CN",
                 TestCust = false
             };
@@ -188,23 +173,24 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
         [HttpPost("validate_terminal_ticket")]
         public async Task<SkywindValidateTicketResponse> ValidateTerminalTicketAsync(SkywindValidateTicketRequest request)
         {
-            /*
-            var loginRecord = await _services.DecryptTokenAsync(request.Ticket);
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
             var validationResult = await _gamePlayActions.ValidatePlayerAsync(new PlayerValidationData()
             {
-                PlayerCode = loginRecord.PlayerCode,
+                PlayerCode = playerCode,
                 GameProviderCode = Consts.GameProvider.Skywind,
-                PlatformType = loginRecord.PlatformType
+                PlatformType = platformType
             }).ConfigureAwait(false);
-            */
+
             return new SkywindValidateTicketResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                CustId = "4ucmqplxb029",
+                CustId = playerCode,
                 CustSessionId = request.Ticket,
-                CurrencyCode = "CNY",
+                CurrencyCode = validationResult.GameProviderCurrencyCode,
                 Country = "CN",
                 TestCust = false
             };

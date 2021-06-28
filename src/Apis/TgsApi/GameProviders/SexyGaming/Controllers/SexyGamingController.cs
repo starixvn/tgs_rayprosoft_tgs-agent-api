@@ -46,8 +46,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
         {
 
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-            _jsonSerializationProvider = jsonSerializationProvider ??
-                throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _services = services ?? throw new ArgumentNullException(nameof(services));
@@ -92,7 +91,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
             {
                 Status = ((int)GameApiError.Success).ToString("d4"),
                 Desc = GameApiError.Success.Description(),
-                Balance = getBalance.Balance,
+                Balance = getBalance.Balance.Truncate(3),
                 BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
             }));
         }
@@ -113,16 +112,32 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.BetAsync(gameProviderConfigurationData, playerCode, data.Transaction);
-            var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+            var betData = await _map.BetAsync(gameProviderConfigurationData, playerCode, data.Transaction).ConfigureAwait(false);
 
-            return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
+            if (betData != null)
             {
-                Status = ((int)GameApiError.Success).ToString("d4"),
-                Desc = GameApiError.Success.Description(),
-                Balance = betResult.Balance,
-                BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
-            }));
+                var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+                return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
+                {
+                    Status = ((int)GameApiError.Success).ToString("d4"),
+                    Desc = GameApiError.Success.Description(),
+                    Balance = betResult.Balance.Truncate(3),
+                    BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
+                }));
+            }
+            else
+            {
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.SexyGaming, playerCode).ConfigureAwait(false);
+                return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
+                {
+                    Status = ((int)GameApiError.BetHasCanceled).ToString("d4"),
+                    Desc = GameApiError.BetHasCanceled.Description(),
+                    Balance = getBalance.Balance.Truncate(3),
+                    BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
+                }));
+            }
+
+
         }
 
         [HttpPost("cancelBet")]
@@ -142,18 +157,23 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
                 .ConfigureAwait(false);
 
             var betData = await _map.CancelBetAsync(gameProviderConfigurationData, playerCode, data.Transaction).ConfigureAwait(false);
-            var balance = default(decimal);
+            decimal balance;
             if (betData.Transactions.Length > 0)
             {
                 var betResult = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
                 balance = betResult.Balance;
+            }
+            else
+            {
+                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.SexyGaming, playerCode).ConfigureAwait(false);
+                balance = getBalance.Balance;
             }
 
             return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
             {
                 Status = ((int)GameApiError.Success).ToString("d4"),
                 Desc = GameApiError.Success.Description(),
-                Balance = balance,
+                Balance = balance.Truncate(3),
                 BalanceTs = DateTimeOffset.UtcNow.ToIso8601String(true)
             }));
         }

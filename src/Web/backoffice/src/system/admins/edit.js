@@ -119,6 +119,7 @@ export const AdminUserChangePasswordDialog = ({
     let title = usePasswordTitle()
     return (
         <FormDialog
+            id="change-user-password-dialog"
             defaultValues={{
                 password: "",
                 confirmPassword: ""
