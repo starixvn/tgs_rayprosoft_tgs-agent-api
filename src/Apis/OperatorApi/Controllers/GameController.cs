@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -46,34 +45,27 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ToListAsync()
                 .ConfigureAwait(false);
 
-            var games = new List<GameModel>();
-
-            foreach (var info in infos)
+            var games = infos.Select(info => new GameModel()
             {
-                games.Add(
-                    new GameModel()
-                    {
-                        Code = info.Code,
-                        GameProviderCode = info.GameProviderCode,
-                        Description = info.Description,
-                        DisplayOrder = info.DisplayOrder,
-                        Id = info.Id,
-                        IsActive = info.IsActive,
-                        Name = info.Name,
-                        Tag = new Tag()
-                        {
-                            Hot = info.Tag.Hot,
-                            New = info.Tag.New,
-                            Recommend = info.Tag.Recommend
-                        },
-                        Type = info.Type
-                    }
-                );
-            }
+                Code = info.Code,
+                GameProviderCode = info.GameProviderCode,
+                Description = info.Description,
+                DisplayOrder = info.DisplayOrder,
+                Id = info.Id,
+                IsActive = info.IsActive,
+                Name = info.Name,
+                Tag = new Tag()
+                {
+                    Hot = info.Tag.Hot,
+                    New = info.Tag.New,
+                    Recommend = info.Tag.Recommend
+                },
+                Type = info.Type
+            }).ToArray();
 
             return new GetGamesResponse()
             {
-                Games = games.ToArray()
+                Games = games
             };
         }
 
