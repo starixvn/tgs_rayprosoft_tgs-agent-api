@@ -2,19 +2,14 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
-using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
-using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
 using TGS.Services.PlayerBucket.Models;
@@ -27,9 +22,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
         [Test]
         public async Task Manager_Can_Get_The_DepositForm_Detail()
         {
-            var moqDepositRepository = new Mock<IDepositRepository>();
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-            var sut = new GetDepositFormDetailQueryService(moqDepositRepository.Object);
+            var sut = new GetDepositFormDetailQueryService(moqPaymentServiceClient.Object);
 
             var formId = Guid.NewGuid();
             var brandId = Guid.NewGuid();
@@ -38,21 +33,23 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             await sut.GetAsync(query);
 
-            moqDepositRepository.Verify(
-                fake => fake.GetDepositFormDetailAsync(It.Is<Guid>(x => x == formId)),
+            moqPaymentServiceClient.Verify(
+                fake => fake.GetDepositFormAsync(
+                    It.Is<Guid>(x => x == brandId),
+                    It.Is<Guid>(x => x == formId)),
                 Times.Exactly(1));
         }
 
         [Test]
         public async Task Manager_Can_Review_DepositForm()
         {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqPlayerService = new Mock<IPlayerService>();
             var moqPlayerBucketRepository = new Mock<IPlayerBucketRepository>();
             var moqPromotionClient = new Mock<IPromotionClient>();
 
             var sut = new ReviewDepositFormCommandService(
-                moqPaymentRepository.Object,
+                moqPaymentServiceClient.Object,
                 moqPlayerService.Object,
                 moqPlayerBucketRepository.Object,
                 moqPromotionClient.Object);
@@ -62,24 +59,24 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var walletId = Guid.NewGuid();
             var command = new ReviewDepositFormCommand(brandId, formId, ReviewState.Approve, null);
 
-            moqPaymentRepository
-                .Setup(fake => fake.GetDepositFormByIdAsync(It.Is<Guid>(x => x == formId)))
-                .Returns(ValueTask.FromResult(new DepositFormInfo(
-                    Guid.NewGuid(),
-                    "ThisIsPlayerCode",
-                    "PlayerName",
-                    brandId,
-                    Guid.NewGuid(),
-                    "ChannelName",
-                    Guid.NewGuid(),
-                    1000M,
-                    null,
-                    1000,
-                    null,
-                    null,
-                    null,
-                    DateTimeOffset.UtcNow,
-                    DateTimeOffset.UtcNow)));
+            moqPaymentServiceClient
+                .Setup(fake => fake.GetDepositFormAsync(
+                    It.Is<Guid>(x => x == brandId),
+                    It.Is<Guid>(x => x == formId)))
+                .Returns(ValueTask.FromResult(new DepositFormInfo
+                {
+                    Id = Guid.NewGuid(),
+                    PaymentMethodId = Guid.NewGuid(),
+                    Amount = 1000M,
+                    BrandId = brandId,
+                    BrandPaymentId = Guid.NewGuid(),
+                    ChannelName = "ChannelName",
+                    CreatedOn = DateTimeOffset.Now,
+                    PlayerCode = "ThisIsPlayerCode",
+                    Status = PaymentFlowState.WaitApprove,
+                    UpdatedOn = DateTimeOffset.Now,
+                    UserName = "PlayerName"
+                }));
             moqPlayerService
                 .Setup(fake => fake.GetPlayerAsync(
                     It.IsAny<Expression<Func<Player, bool>>>(),
@@ -92,8 +89,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqPaymentRepository.Verify(
-                fake => fake.SignOffDepositFormAsync(
+            moqPaymentServiceClient.Verify(
+                fake => fake.ReviewDepositFormAsync(
                     It.Is<Guid>(x => x == formId),
                     It.Is<ReviewState>(x => x == ReviewState.Approve),
                     It.IsAny<string>()),
@@ -112,69 +109,12 @@ namespace TGS.Tests.BackendOffice.UnitTests
         [Test]
         public async Task User_Can_List_DepositForm()
         {
-            var jsonSerializationProvider = new JsonSerializationProvider();
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-
-            var tgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
-
-            var brandId = Guid.NewGuid();
-
-            await tgsRepository.Players.AddAsync(
-                new Player
-                {
-                    PlayerCode = "PlayerCode",
-                    BrandId = brandId
-                });
-
-            var pmcId = Guid.NewGuid();
-            await tgsRepository.AddAsync(
-                new PaymentMethodChannel
-                {
-                    Id = pmcId,
-                    PaymentId = Guid.NewGuid(),
-                    MethodId = Guid.NewGuid(),
-                    ChannelId = Guid.NewGuid()
-                });
-
-            var brandPaymentId = Guid.NewGuid();
-            await tgsRepository.BrandPayments.AddAsync(
-                new BrandPayment
-                {
-                    Id = brandPaymentId,
-                    BrandId = brandId,
-                    PaymentMethodChannelId = pmcId
-                });
-
-            await tgsRepository.DepositForms.AddRangeAsync(
-                new DepositForm
-                {
-                    Id = Guid.NewGuid(),
-                    PlayerCode = "PlayerCode",
-                    BrandId = brandId,
-                    Amount = 1000M,
-                    BrandPaymentId = brandPaymentId,
-                    Status = 1000,
-                    ApplyInfo = jsonSerializationProvider.SerializeToString(
-                        new
-                        {
-                            BankAccount = "1234567890"
-                        },
-                        null),
-                    PaymentReturn = null,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedOn = DateTimeOffset.Now
-                });
-
-            await tgsRepository.SaveChangesAsync();
-
-            var sut = new DepositFormQueryService(tgsRepository, jsonSerializationProvider);
+            var sut = new DepositFormQueryService(moqPaymentServiceClient.Object);
 
             var query = new DepositFormQuery(
-                brandId,
+                Guid.NewGuid(),
                 null,
                 null,
                 null,
@@ -183,9 +123,13 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 null,
                 new PageableRequest());
 
-            var actual = await sut.QueryAsync(query).ToArrayAsync();
+            _ = await sut.GetAsync(query, default);
 
-            Assert.AreEqual(1, actual.Length);
+            moqPaymentServiceClient.Verify(
+                fake => fake.QueryDepositFormsAsync(
+                    It.IsAny<DepositFormQueryConditions>(),
+                    It.IsAny<Tgs.Payment.Clients.Paging>()),
+                Times.Exactly(1));
         }
     }
 }
