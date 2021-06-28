@@ -1,9 +1,12 @@
-﻿using System.Net.Mime;
+﻿using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator.Services.GameProvider;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -12,20 +15,46 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class GameProviderController : ControllerBase
     {
-        private readonly IMediator _mediator;
-
-        public GameProviderController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
         /// <summary>
-        ///     Get game provider list
+        /// Get game provider list
         /// </summary>
-        [HttpGet]
-        [Route("list")]
+        [HttpGet("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        public Task<GetGameProvidersResponse> GetGameProvidersAsync([FromQuery] GetGameProvidersRequest request) =>
-            _mediator.Send(request);
+        public async Task<GetGameProvidersResponse> GetGameProvidersAsync(
+            [FromServices] IQueryService<GetGameProviderQuery, Services.Operator.GameProviderModel> getGameProviderQueryService,
+            [FromQuery] GetGameProvidersRequest request)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var query = new GetGameProviderQuery(
+                brandId,
+                request.CurrencyCode,
+                playerTokenData,
+                request.PlatformType,
+                request.LanguageCode);
+            var infos = await getGameProviderQueryService
+                .QueryAsync(query)
+                .ToListAsync()
+                .ConfigureAwait(false);
+
+            var gameProviders = infos.Select(info =>
+                new GameProviderModel()
+                {
+                    Code = info.Code,
+                    Description = info.Description,
+                    GameTypes = info.GameTypes,
+                    Id = info.Id,
+                    IsTransferWallet = info.IsTransferWallet,
+                    Name = info.Name,
+                    Status = info.Status
+                })
+                .ToArray();
+
+            return new GetGameProvidersResponse()
+            {
+                GameProviders = gameProviders
+            };
+        }
     }
 }
