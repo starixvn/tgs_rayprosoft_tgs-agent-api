@@ -45,23 +45,25 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ToListAsync()
                 .ConfigureAwait(false);
 
-            var games = infos.Select(info => new GameModel()
-            {
-                Code = info.Code,
-                GameProviderCode = info.GameProviderCode,
-                Description = info.Description,
-                DisplayOrder = info.DisplayOrder,
-                Id = info.Id,
-                IsActive = info.IsActive,
-                Name = info.Name,
-                Tag = new Tag()
+            var games = infos.Select(info =>
+                new GameModel()
                 {
-                    Hot = info.Tag.Hot,
-                    New = info.Tag.New,
-                    Recommend = info.Tag.Recommend
-                },
-                Type = info.Type
-            }).ToArray();
+                    Code = info.Code,
+                    GameProviderCode = info.GameProviderCode,
+                    Description = info.Description,
+                    DisplayOrder = info.DisplayOrder,
+                    Id = info.Id,
+                    IsActive = info.IsActive,
+                    Name = info.Name,
+                    Tag = new Tag()
+                    {
+                        Hot = info.Tag.Hot,
+                        New = info.Tag.New,
+                        Recommend = info.Tag.Recommend
+                    },
+                    Type = info.Type
+                })
+                .ToArray();
 
             return new GetGamesResponse()
             {
