@@ -192,6 +192,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
             if (detail.Status == BetStatus.Settled)
             {
                 // Resettle
+                return await ResettleAsync(playerCode, data, externalIds, request).ConfigureAwait(false);
             }
 
             if (detail.Status == BetStatus.Refund)
@@ -209,6 +210,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         {
             var betData = _map.VoidRoundRequest(playerCode, data, externalIds, request);
             return _actions.CancelTransactionAsync(betData);
+        }
+
+        private ValueTask<BetResult> ResettleAsync(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, TransferRequest request)
+        {
+            var betData = _map.ResettleBetRequest(playerCode, data, externalIds, request);
+            return _actions.SettleBetAsync(betData);
         }
     }
 }
