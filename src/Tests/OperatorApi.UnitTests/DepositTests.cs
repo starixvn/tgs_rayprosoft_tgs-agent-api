@@ -119,7 +119,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqPaymentClient = new Mock<IPaymentClient>();
-            var serializer = new LeePaySerializer(new JsonSerializationProvider());
+            var serializer = new LeePaySerializer();
             var moqPromotionClient = new Mock<IPromotionClient>();
             var moqPlayerCommands = new Mock<IPlayerCommands>();
 
