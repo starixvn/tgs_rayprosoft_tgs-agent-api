@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record GetGameProvidersRequest : IRequest<GetGameProvidersResponse>
+    public record GetGameProvidersRequest
     {
         [Required]
         [BindProperty(Name = "platformtype", SupportsGet = true)]
