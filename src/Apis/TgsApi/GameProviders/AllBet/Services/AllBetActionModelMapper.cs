@@ -29,6 +29,9 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 
         BetData SettleBetRequest(string playerCode, GameProviderConfigurationData data,
             GameActionExternalIds[] externalIds, TransferRequest request, bool forceCloseRound);
+
+        BetData VoidRoundRequest(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, TransferRequest request);
     }
 
     public class AllBetActionModelMapper : IAllBetActionModelMapper
@@ -127,8 +130,17 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
         {
             var detail = request.Details[0];
             var betNum = detail.BetNumber.ToString();
-            var reference = externalIds.Where(t => t.GameActionType == PlaceBet && t.ExternalBetId == betNum)
-                .OrderBy(t => t.RecordedOn).First();
+
+            var cancelledReferenceIds = externalIds
+                .Where(t => t.GameActionType == CancelTransaction && t.ExternalBetId == betNum)
+                .Select(t => t.ExternalReferencedTransactionId).ToArray();
+
+            var reference = externalIds
+                .Where(t => t.GameActionType == PlaceBet &&
+                    t.ExternalBetId == betNum &&
+                    !cancelledReferenceIds.Contains(t.ExternalTransactionId))
+                .OrderBy(t => t.RecordedOn)
+                .First();
 
             List<TransactionData> transactions = new();
 
@@ -159,6 +171,37 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             });
 
             return GetBetData(playerCode, data, transactions.ToArray(), request.CurrencyCode);
+        }
+
+        BetData IAllBetActionModelMapper.VoidRoundRequest(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, TransferRequest request)
+        {
+            var detail = request.Details[0];
+            var betNum = detail.BetNumber.ToString();
+            var gameActions = externalIds.Where(t => t.ExternalBetId == betNum).ToArray();
+
+            var cancelledReferenceIds = gameActions
+                .Where(t => t.GameActionType == CancelTransaction)
+                .Select(t => t.ExternalReferencedTransactionId).ToArray();
+
+            var transactions = gameActions
+                .Where(t => !cancelledReferenceIds.Contains(t.ExternalTransactionId))
+                .OrderByDescending(t => t.RecordedOn)
+                .Select((t, idx) => new TransactionData
+                {
+                    Amount = t.Amount,
+                    ExternalTransactionId = $"{t.ExternalTransactionId}_cancel",
+                    ExternalTransactionReferenceId = t.ExternalTransactionId,
+                    ExternalRoundId = t.ExternalRoundId,
+                    ExternalBetId = t.ExternalBetId,
+                    ExternalGameId = t.ExternalGameId,
+                    ExternalGameActionGroupId = request.TransactionId.ToString(),
+                    GameActionType = CancelTransaction,
+                    TimeStamp = DateTimeOffset.UtcNow,
+                    RoundClosed = gameActions.Length > 1 && idx == 0 ? false : null
+                }).ToArray();
+
+            return GetBetData(playerCode, data, transactions, request.CurrencyCode);
         }
 
         private static GameActionType GetGameActionType(decimal betAmount, decimal winOrLossAmount)

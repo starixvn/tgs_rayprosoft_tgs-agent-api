@@ -13,6 +13,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.GameProviders.Settings.AllBet;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
@@ -192,13 +193,22 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
             {
                 // Resettle
             }
-            else if (detail.Status == BetStatus.Refund)
+
+            if (detail.Status == BetStatus.Refund)
             {
                 // Void Round
+                return await VoidRoundAsync(playerCode, data, externalIds, request).ConfigureAwait(false);
             }
 
             throw new InvalidGameActionException(
                 $"Unexpected status '{(int)detail.Status}' of action {(int)request.Type}");
+        }
+
+        private ValueTask<BetResult> VoidRoundAsync(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, TransferRequest request)
+        {
+            var betData = _map.VoidRoundRequest(playerCode, data, externalIds, request);
+            return _actions.CancelTransactionAsync(betData);
         }
     }
 }
