@@ -32,10 +32,10 @@ namespace TGS.Services.Agent.Services.Agent
             var parentAgent = await _tgsRepository.Agents.AsQueryable().FirstOrDefaultAsync(x => x.Id == query.ParentAgentId);
             var brand = await _tgsRepository.Brands.AsQueryable().FirstAsync(x => x.Id == query.BrandId);
 
-            var IsAgentNameExist = _tgsRepository.Agents.Any(x => x.BrandId == query.BrandId
+            var isAgentNameExist = _tgsRepository.Agents.Any(x => x.BrandId == query.BrandId
                && EF.Functions.ILike(x.Username, $"%{query.UserName}%"));
 
-            if (IsAgentNameExist)
+            if (isAgentNameExist)
             {
                 return new CreateAgentInfo()
                 {
