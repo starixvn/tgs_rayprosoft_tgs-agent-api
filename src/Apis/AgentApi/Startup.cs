@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -110,9 +112,18 @@ namespace TGS.Apis.AgentApi
                 {
                     config.GetSection("EmailSetting").Bind(options);
                 })
-                .AddPayment(configuration =>
+                .AddPaymentServiceClient((options, sp) =>
                 {
-                    configuration.UseTgsPaymentRepository();
+                    var config = sp.GetRequiredService<IConfiguration>();
+
+                    options.PaymentServiceBaseUrl = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
+                    options.JsonSerializerOptions = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        Converters = {
+                            new JsonStringEnumConverter()
+                        }
+                    };
                 })
                 .ConfigureWallet(config =>
                 {

@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 
 namespace TGS.Apis.AgentApi.Models.Messages
 {

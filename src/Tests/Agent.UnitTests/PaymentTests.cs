@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.Agent.Services.BrandPayments;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -14,22 +14,30 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Payment_Channels_Should_Success()
         {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-            var sut = new AllPaymentChannelsQueryService(moqPaymentRepository.Object);
+            var sut = new AllPaymentChannelsQueryService(moqPaymentServiceClient.Object);
 
             var query = new AllPaymentChannelsQuery();
 
-            moqPaymentRepository
+            moqPaymentServiceClient
                 .Setup(fake => fake.GetAllPaymentChannelsAsync())
                 .Returns(new[] {
-                    new PaymentChannelInfo(Guid.NewGuid(), "test1"),
-                    new PaymentChannelInfo(Guid.NewGuid(), "test2")
+                    new PaymentChannelInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "test1"
+                    },
+                    new PaymentChannelInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "test2"
+                    }
                 }.ToAsyncEnumerable());
 
             _ = await sut.GetAsync(query);
 
-            moqPaymentRepository.Verify(
+            moqPaymentServiceClient.Verify(
                 fake => fake.GetAllPaymentChannelsAsync(),
                 Times.Exactly(1));
         }
@@ -37,22 +45,30 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Get_Payment_Methods_Should_Success()
         {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-            var sut = new AllPaymentMethodsQueryService(moqPaymentRepository.Object);
+            var sut = new AllPaymentMethodsQueryService(moqPaymentServiceClient.Object);
 
             var query = new AllPaymentMethodsQuery();
 
-            moqPaymentRepository
+            moqPaymentServiceClient
                 .Setup(fake => fake.GetAllPaymentMethodsAsync())
                 .Returns(new[] {
-                    new PaymentMethodInfo(Guid.NewGuid(), "test1", "Bank"),
-                    new PaymentMethodInfo(Guid.NewGuid(), "test2", "Crypto")
+                    new PaymentMethodInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        Name = "Bank"
+                    } ,
+                    new PaymentMethodInfo
+                    {
+                        Id = Guid.NewGuid(),
+                        Name= "Crypto"
+                    }
                 }.ToAsyncEnumerable());
 
             _ = await sut.GetAsync(query);
 
-            moqPaymentRepository.Verify(
+            moqPaymentServiceClient.Verify(
                 fake => fake.GetAllPaymentMethodsAsync(),
                 Times.Exactly(1));
         }
@@ -60,9 +76,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task User_Can_Get_PaymentInfo()
         {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-            var sut = new GetPaymentQueryService(moqPaymentRepository.Object);
+            var sut = new GetPaymentQueryService(moqPaymentServiceClient.Object);
 
             var paymentId = Guid.NewGuid();
 
@@ -70,8 +86,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = await sut.GetAsync(query);
 
-            moqPaymentRepository.Verify(
-                fake => fake.GetPaymentAsync(It.Is<Guid>(x => x == paymentId)),
+            moqPaymentServiceClient.Verify(
+                fake => fake.GetPaymentByIdAsync(It.Is<Guid>(x => x == paymentId)),
                 Times.Exactly(1));
         }
     }

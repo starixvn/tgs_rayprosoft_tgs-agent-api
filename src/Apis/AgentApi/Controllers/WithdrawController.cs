@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;

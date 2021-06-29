@@ -49,7 +49,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = "OtherPlayerCode",
                     UserName = "OtherUserName",
-                    Status = 1000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now
                 }));
 
@@ -257,7 +257,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Id = query.FormId,
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = query.PlayerCode,
-                    Status = 10000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now,
                     UserName = "PlayerName"
                 }));
@@ -353,7 +353,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Id = query.FormId,
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = query.PlayerCode,
-                    Status = 1000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now,
                     UserName = "UserName"
                 });
