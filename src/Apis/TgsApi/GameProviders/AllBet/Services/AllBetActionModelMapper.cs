@@ -136,8 +136,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             {
             }
 
-
-            var amount = detail.BetAmount + detail.ValidAmount!.Value;
+            var amount = detail.BetAmount + detail.WinOrLossAmount!.Value;
             transactions.Add(new TransactionData
             {
                 Amount = amount,
@@ -147,7 +146,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 ExternalBetId = reference.ExternalBetId,
                 ExternalGameId = reference.ExternalGameId,
                 ExternalGameActionGroupId = request.TransactionId.ToString(),
-                GameActionType = GetGameActionType(detail.ValidAmount!.Value),
+                GameActionType = GetGameActionType(detail.BetAmount, detail.WinOrLossAmount!.Value),
                 RoundClosed = forceCloseRound ? true : null,
                 TimeStamp = GetTimestamp(detail.RoundEndTime),
                 RoundDetail = !forceCloseRound
@@ -162,13 +161,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             return GetBetData(playerCode, data, transactions.ToArray(), request.CurrencyCode);
         }
 
-        private static GameActionType GetGameActionType(decimal validAmount)
-            => validAmount switch
+        private static GameActionType GetGameActionType(decimal betAmount, decimal winOrLossAmount)
+        {
+            if (betAmount == winOrLossAmount)
             {
-                > 0 => WinBet,
-                < 0 => LoseBet,
-                0   => TieBet
-            };
+                return TieBet;
+            }
+
+            return betAmount + winOrLossAmount > 0 ? WinBet : LoseBet;
+        }
 
         private static BalanceResponse GetBalanceResponse(decimal balance)
             => new BalanceResponse

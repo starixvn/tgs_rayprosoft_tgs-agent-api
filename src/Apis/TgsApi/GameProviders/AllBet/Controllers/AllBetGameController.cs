@@ -89,9 +89,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
 
             var result = await func(playerCode, data, request);
 
-            await _cacheServices.CachePlayerCodeByExternalGameActionGroupIdAsync(
-                request.TransactionId.ToString(), playerCode).ConfigureAwait(false);
-
             return _map.Response(result);
         }
 
@@ -120,8 +117,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         private async ValueTask<BetResult> PlaceBetAsync(string playerCode, GameProviderConfigurationData data,
             TransferRequest request)
         {
-            var betData = _map.BetRequest(playerCode, data, request);
+            await _cacheServices.CachePlayerCodeByExternalGameActionGroupIdAsync(
+                request.TransactionId.ToString(), playerCode).ConfigureAwait(false);
 
+            var betData = _map.BetRequest(playerCode, data, request);
             return await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
         }
 
@@ -129,6 +128,47 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         ///     For settle request, only contains 1 transaction with 1 betNum
         /// </summary>
         private async ValueTask<BetResult> SettleAsync(string playerCode, GameProviderConfigurationData data,
+            TransferRequest request)
+        {
+            var detail = request.Details[0];
+            var roundId = detail.RoundId.ToString();
+            var externalGameId = detail.GameType.ToString();
+
+            if (detail.Deposit > 0)
+            {
+                return new BetResult();
+            }
+
+            var games = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, externalGameId);
+            var gameId = games.FirstOrDefault()?.Id;
+
+            if (!gameId.HasValue)
+            {
+                throw new InvalidGameActionException($"Game '{externalGameId}' is not found",
+                    InvalidGameActionErrorCode.GameNotFound);
+            }
+
+            var externalIds = await _services
+                .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
+                .ConfigureAwait(false);
+
+            var settledBetIds = externalIds.Where(t => t.GameActionType.IsSettleBet())
+                .Select(t => t.ExternalReferencedTransactionId).ToArray();
+
+            var unsettledCount = externalIds
+                .Where(t => t.GameActionType == GameActionType.PlaceBet &&
+                    !settledBetIds.Contains(t.ExternalTransactionId))
+                .Select(t => t.ExternalBetId)
+                .Distinct().Count();
+
+            var forceCloseRound = unsettledCount == 1;
+
+            var betData = _map.SettleBetRequest(playerCode, data, externalIds, request, forceCloseRound);
+
+            return await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+        }
+
+        private async ValueTask<BetResult> ManuelSettleAsync(string playerCode, GameProviderConfigurationData data,
             TransferRequest request)
         {
             var detail = request.Details[0];
@@ -148,20 +188,17 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
                 .ConfigureAwait(false);
 
-            var settledBetIds = externalIds.Where(t => t.GameActionType.IsSettleBet())
-                .Select(t => t.ExternalReferencedTransactionId).ToArray();
+            if (detail.Status == BetStatus.Settled)
+            {
+                // Resettle
+            }
+            else if (detail.Status == BetStatus.Refund)
+            {
+                // Void Round
+            }
 
-            var unsettledCount = externalIds.Count(t => t.GameActionType == GameActionType.PlaceBet &&
-                !settledBetIds.Contains(t.ExternalTransactionId));
-
-            var forceCloseRound = unsettledCount == 1;
-
-            var betData = _map.SettleBetRequest(playerCode, data, externalIds, request, forceCloseRound);
-
-            return await _actions.SettleBetAsync(betData).ConfigureAwait(false);
+            throw new InvalidGameActionException(
+                $"Unexpected status '{(int)detail.Status}' of action {(int)request.Type}");
         }
-
-        private ValueTask<BetResult> ManuelSettleAsync(string playerCode, GameProviderConfigurationData data,
-            TransferRequest request) => throw new NotImplementedException();
     }
 }
