@@ -116,7 +116,7 @@ namespace TGS.Apis.AgentApi
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
 
-                    options.PaymentServiceBaseUrl = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
+                    options.PaymentServiceBaseUrl = config.GetValue<Uri>("Agent:PaymentServiceBaseUrl");
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
