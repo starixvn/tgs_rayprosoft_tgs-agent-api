@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Tgs.MessageQueue;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.ServiceUtility;

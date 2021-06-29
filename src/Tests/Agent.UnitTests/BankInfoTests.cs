@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.BankInfos;
 
@@ -15,10 +16,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public async Task Player_Can_Create_BankInfo()
         {
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
             var fakeAgentRepository = Substitute.For<IAgentRepository>();
 
-            var sut = new CreateBankInfoCommandService(fakePaymentRepository, fakeAgentRepository);
+            var sut = new CreateBankInfoCommandService(fakePaymentServiceClient, fakeAgentRepository);
 
             var brandId = Guid.NewGuid();
             var agentId = Guid.NewGuid();
@@ -48,19 +49,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakePaymentRepository
+            _ = fakePaymentServiceClient
                 .Received(1)
                 .CreateAgentBankInfoAsync(
-                    Arg.Is<AgentBankInfo>(info => info.PaymentChannelId == paymentChannelId),
-                    Arg.Any<string>());
+                    Arg.Is(command.BrandId),
+                    Arg.Is(command.AgentId),
+                    Arg.Any<string>(),
+                    Arg.Is<BankCreateInfo>(info => info.PaymentChannelId == paymentChannelId));
         }
 
         [Test]
         public async Task Player_Can_Delete_BankInfo()
         {
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-            var sut = new DeleteBankInfoCommandService(fakePaymentRepository);
+            var sut = new DeleteBankInfoCommandService(fakePaymentServiceClient);
 
             var agentId = Guid.NewGuid();
             var bankInfoId = Guid.NewGuid();
@@ -68,7 +71,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakePaymentRepository
+            _ = fakePaymentServiceClient
                 .Received(1)
                 .DeleteAgentBankInfoAsync(Arg.Is(agentId), Arg.Is(bankInfoId));
         }
@@ -76,17 +79,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
         [Test]
         public void Player_Can_List_Self_BankInfos()
         {
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
-            var sut = new GetAgentBankInfosQueryService(fakePaymentRepository);
+            var sut = new GetAgentBankInfosQueryService(fakePaymentServiceClient);
 
             var agentId = Guid.NewGuid();
 
             sut.QueryAsync(new GetAgentBankInfosQuery(agentId));
 
-            _ = fakePaymentRepository
+            _ = fakePaymentServiceClient
                 .Received(1)
-                .GetAgentBankInfosByAgentIdAsync(Arg.Is(agentId));
+                .GetAgentBankInfosAsync(Arg.Is(agentId));
         }
     }
 }

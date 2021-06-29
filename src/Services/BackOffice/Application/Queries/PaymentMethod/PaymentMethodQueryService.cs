@@ -1,22 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.PaymentMethod
 {
     internal class PaymentMethodQueryService : IQueryService<PaymentMethodQuery, PaymentMethodInfo>
     {
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public PaymentMethodQueryService(IPaymentRepository paymentRepository)
+        public PaymentMethodQueryService(IPaymentServiceClient paymentServiceClient)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public IAsyncEnumerable<PaymentMethodInfo> QueryAsync(PaymentMethodQuery query,
             CancellationToken cancellationToken = default)
-            => _paymentRepository.GetAllPaymentMethodsAsync();
+            => _paymentServiceClient.GetAllPaymentMethodsAsync();
     }
 }

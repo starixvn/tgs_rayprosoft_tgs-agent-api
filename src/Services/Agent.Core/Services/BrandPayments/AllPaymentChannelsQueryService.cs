@@ -4,23 +4,23 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.BrandPayments
 {
     internal class AllPaymentChannelsQueryService : IGetService<AllPaymentChannelsQuery, IDictionary<Guid, PaymentChannelInfo>>
     {
-        private readonly IPaymentRepository _payamentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public AllPaymentChannelsQueryService(IPaymentRepository paymentRepository)
+        public AllPaymentChannelsQueryService(IPaymentServiceClient paymentServiceClient)
         {
-            _payamentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public async ValueTask<IDictionary<Guid, PaymentChannelInfo>> GetAsync(AllPaymentChannelsQuery query, CancellationToken cancellationToken = default)
         {
-            var allPaymentChannels = await _payamentRepository.GetAllPaymentChannelsAsync()
+            var allPaymentChannels = await _paymentServiceClient.GetAllPaymentChannelsAsync()
                 .ToDictionaryAsync(method => method.Id)
                 .ConfigureAwait(false);
 

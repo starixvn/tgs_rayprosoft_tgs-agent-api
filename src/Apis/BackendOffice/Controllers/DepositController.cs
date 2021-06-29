@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Extensions;
@@ -62,16 +63,14 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// <summary>
         /// Queries the deposit forms.
         /// </summary>
-        /// <param name="queryDepositFormsService">The query deposit forms service.</param>
-        /// <param name="countDepositFormsService">The count deposit forms service.</param>
+        /// <param name="queryService">The query service.</param>
         /// <param name="brandId">The brand identifier.</param>
         /// <param name="request">The request.</param>
         /// <param name="paging">The paging.</param>
         /// <returns></returns>
         [HttpGet("{brandId}")]
         public async Task<PagedResponse<DepositFormViewModel>> QueryDepositFormsAsync(
-            [FromServices] IQueryService<DepositFormQuery, DepositFormModel> queryDepositFormsService,
-            [FromServices] IGetService<DepositFormQuery, int> countDepositFormsService,
+            [FromServices] IGetService<DepositFormQuery, PagingResponse<DepositFormInfo>> queryService,
             Guid brandId,
             [FromQuery] DepositFormRequest request,
             [FromQuery] PageableRequest paging)
@@ -95,13 +94,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                 updateOnRange,
                 paging);
 
-            var totalCount = await countDepositFormsService.GetAsync(query).ConfigureAwait(false);
+            var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
             var response = new PagedResponse<DepositFormViewModel>
             {
                 Valid = true,
-                TotalCount = totalCount,
-                Items = await queryDepositFormsService.QueryAsync(query)
+                TotalCount = result.TotalCount,
+                Items = result.Items
                     .Select(form => new DepositFormViewModel
                     {
                         Id = form.Id,
@@ -114,11 +113,10 @@ namespace TGS.Apis.BackendOffice.Controllers
                         Status = form.Status.ToFlowState(),
                         Amount = form.Amount,
                         Remark = form.Remark,
-                        CreatedOn = form.CreateOn,
-                        UpdatedOn = form.UpdateOn
+                        CreatedOn = form.CreatedOn,
+                        UpdatedOn = form.UpdatedOn
                     })
-                    .ToArrayAsync()
-                    .ConfigureAwait(false)
+                    .ToArray()
             };
 
             return response;

@@ -3,14 +3,13 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Withdraw;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
-using TGS.Services.BackOffice.Domain;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
@@ -21,11 +20,11 @@ namespace TGS.Apis.BackendOffice.Controllers
     {
         [HttpGet("{brandId}/{formId}")]
         public async Task<GenericResponse<WithdrawFormDetailViewModel>> GetWithdrawFormDetailAsync(
-            [FromServices] IGetService<GetWithdrawFormDetailQuery, WithdrawFormInfo> getDepositFormService,
+            [FromServices] IGetService<GetWithdrawFormDetailQuery, WithdrawFormInfo> getWithdrawFormService,
             Guid brandId,
             Guid formId)
         {
-            var formDetail = await getDepositFormService
+            var formDetail = await getWithdrawFormService
                 .GetAsync(new GetWithdrawFormDetailQuery(formId, brandId))
                 .ConfigureAwait(false);
 
@@ -62,8 +61,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet("{brandId}")]
         public async Task<PagedResponse<WithdrawFormViewModel>> QueryWithdrawFormsAsync(
-            [FromServices] IQueryService<WithdrawFormQuery, WithdrawFormModel> queryWithdrawFormsService,
-            [FromServices] IGetService<WithdrawFormQuery, int> countWithdrawFormsService,
+            [FromServices] IGetService<WithdrawFormQuery, PagingResponse<WithdrawFormInfo>> queryService,
             Guid brandId,
             [FromQuery] WithdrawFormRequest request,
             [FromQuery] PageableRequest paging)
@@ -87,13 +85,13 @@ namespace TGS.Apis.BackendOffice.Controllers
                 updateOnRange,
                 paging);
 
-            var totalCount = await countWithdrawFormsService.GetAsync(query).ConfigureAwait(false);
+            var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
             var response = new PagedResponse<WithdrawFormViewModel>
             {
                 Valid = true,
-                TotalCount = totalCount,
-                Items = await queryWithdrawFormsService.QueryAsync(query)
+                TotalCount = result.TotalCount,
+                Items = result.Items
                     .Select(form => new WithdrawFormViewModel
                     {
                         Id = form.Id,
@@ -110,20 +108,21 @@ namespace TGS.Apis.BackendOffice.Controllers
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn
                     })
-                    .ToArrayAsync()
-                    .ConfigureAwait(false)
+                    .ToArray()
             };
 
             return response;
         }
 
-        [HttpPost("{formId}")]
+        [HttpPost("{brandId}/{formId}")]
         public async Task<MessageResponse> ReviewWithdrawFormAsync(
             [FromServices] ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
+            Guid brandId,
             Guid formId,
             [FromBody] WithdrawReviewRequest reviewResponse)
         {
             var command = new ReviewWithdrawFormCommand(
+                brandId,
                 formId,
                 reviewResponse.BrandPaymentId,
                 reviewResponse.ReviewResponse.ToReviewState(),

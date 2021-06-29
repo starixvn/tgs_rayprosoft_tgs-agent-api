@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Text.Json;
 using System.Threading.Tasks;
 using ExpectedObjects;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Payment;
-using TGS.Core.Infrastructures.Json;
+using Tgs.Payment.Clients;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Withdraw;
 using TGS.Services.WalletService;
@@ -22,17 +18,12 @@ namespace Agent.UnitTests
         {
             var fakeAgentRepository = Substitute.For<IAgentRepository>();
             var fakeWalletRepository = Substitute.For<IAgentWalletRepository>();
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-            var optionsAccessor = new OptionsWrapper<JsonOptions>(
-                new JsonOptions());
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
             var sut = new CreateWithdrawFormCommandService(
                 fakeAgentRepository,
                 fakeWalletRepository,
-                fakePaymentRepository,
-                jsonSerializationProvider,
-                optionsAccessor);
+                fakePaymentServiceClient);
 
             var command = new CreateWithdrawFormCommand(
                 Guid.NewGuid(),
@@ -54,31 +45,18 @@ namespace Agent.UnitTests
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
                 .Returns(2000M);
 
-            var fakeBankInfo = new AgentBankInfo(
-                command.BankInfoId,
-                command.AgentId,
-                command.BrandId,
-                Guid.NewGuid(),
-                "Bank",
-                "{}");
+            var expected = new WithdrawFormCreateInfo
+            {
+                Amount = command.Amount,
+                BankInfoId = command.BankInfoId,
+                BrandId = command.BrandId,
+                UserId = command.AgentId.ToString(),
+                UserName = "ThisIsAgentName",
+                UserType = UserType.Agent,
+            }.ToExpectedObject();
 
-            var expected = new WithdrawFormCreateInfo(
-                command.AgentId.ToString(),
-                "ThisIsAgentName",
-                UserType.Agent,
-                command.BrandId,
-                command.Amount,
-                7000,
-                null,
-                command.BankInfoId).ToExpectedObject();
-
-            fakePaymentRepository
-                .GetAgentBankInfoByIdAsync(Arg.Any<Guid>())
-                .Returns(fakeBankInfo);
-
-            fakePaymentRepository
+            fakePaymentServiceClient
                 .When(fake => fake.CreateWithdrawFormAsync(
-                    Arg.Any<Guid>(),
                     Arg.Any<WithdrawFormCreateInfo>()))
                 .Do(callInfo =>
                 {
@@ -100,10 +78,9 @@ namespace Agent.UnitTests
             Assert.ThrowsAsync<InsufficientFundsException>(
                 async () => await sut.ExecuteAsync(command));
 
-            _ = fakePaymentRepository
+            _ = fakePaymentServiceClient
                 .Received(1)
                 .CreateWithdrawFormAsync(
-                    Arg.Any<Guid>(),
                     Arg.Any<WithdrawFormCreateInfo>());
         }
 
@@ -112,17 +89,12 @@ namespace Agent.UnitTests
         {
             var fakeAgentRepository = Substitute.For<IAgentRepository>();
             var fakeWalletRepository = Substitute.For<IAgentWalletRepository>();
-            var fakePaymentRepository = Substitute.For<IPaymentRepository>();
-            var jsonSerializationProvider = new JsonSerializationProvider();
-            var optionsAccessor = new OptionsWrapper<JsonOptions>(
-                new JsonOptions());
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
 
             var sut = new CreateWithdrawFormCommandService(
                 fakeAgentRepository,
                 fakeWalletRepository,
-                fakePaymentRepository,
-                jsonSerializationProvider,
-                optionsAccessor);
+                fakePaymentServiceClient);
 
             var command = new CreateWithdrawFormCommand(
                 Guid.NewGuid(),
@@ -144,40 +116,18 @@ namespace Agent.UnitTests
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
                 .Returns(2000M);
 
-            var fakeBankInfo = new AgentBankInfo(
-                command.BankInfoId,
-                command.AgentId,
-                command.BrandId,
-                Guid.NewGuid(),
-                "Bank",
-                "{}");
+            var expected = new WithdrawFormCreateInfo
+            {
+                Amount = command.Amount,
+                BankInfoId = command.BankInfoId,
+                BrandId = command.BrandId,
+                UserId = command.AgentId.ToString(),
+                UserName = "ThisIsAgentName",
+                UserType = UserType.Agent
+            }.ToExpectedObject();
 
-            var expected = new WithdrawFormCreateInfo(
-                command.AgentId.ToString(),
-                "ThisIsAgentName",
-                UserType.Agent,
-                command.BrandId,
-                command.Amount,
-                1000,
-                null,
-                command.BankInfoId,
-                BankInfo: jsonSerializationProvider.SerializeToString(
-                    new
-                    {
-                        fakeBankInfo.Id,
-                        fakeBankInfo.PaymentChannelId,
-                        fakeBankInfo.BankType,
-                        Detail = jsonSerializationProvider.DeserializeFromString<JsonDocument>(fakeBankInfo.Detail, null)
-                    },
-                    optionsAccessor.Value.JsonSerializerOptions)).ToExpectedObject();
-
-            fakePaymentRepository
-                .GetAgentBankInfoByIdAsync(Arg.Any<Guid>())
-                .Returns(fakeBankInfo);
-
-            fakePaymentRepository
+            fakePaymentServiceClient
                 .When(fake => fake.CreateWithdrawFormAsync(
-                    Arg.Any<Guid>(),
                     Arg.Any<WithdrawFormCreateInfo>()))
                 .Do(callInfo =>
                 {
@@ -188,10 +138,9 @@ namespace Agent.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakePaymentRepository
+            _ = fakePaymentServiceClient
                 .Received(1)
                 .CreateWithdrawFormAsync(
-                    Arg.Any<Guid>(),
                     Arg.Any<WithdrawFormCreateInfo>());
         }
     }
