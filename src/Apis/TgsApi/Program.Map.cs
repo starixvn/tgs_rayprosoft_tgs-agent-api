@@ -13,6 +13,7 @@ using TGS.Apis.TgsApi.GameProviders.VR;
 using TGS.Core.Models;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming;
 using TGS.Apis.TgsApi.GameProviders.Skywind;
+using TGS.Apis.TgsApi.GameProviders.Evolution;
 
 namespace TGS.Apis.TgsApi
 {
@@ -33,7 +34,8 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.IMESports, typeof(IMESportsStartup)},
             {Consts.GameProvider.BigGaming, typeof(BigGamingStartup)},
             {Consts.GameProvider.SexyGaming, typeof(SexyGamingStartup)},
-             {Consts.GameProvider.Skywind, typeof(SkywindStartup)}
+            {Consts.GameProvider.Skywind, typeof(SkywindStartup)},
+            {Consts.GameProvider.Evolution, typeof(EvolutionStartup)}
         };
 
         private static readonly IReadOnlyDictionary<string, string> ConfigFileMap = new Dictionary<string, string>
@@ -49,7 +51,8 @@ namespace TGS.Apis.TgsApi
             {Consts.GameProvider.BigGaming, "BigGaming/biggaming.json"},
             {Consts.GameProvider.IMESports, "IMESports/imesports.json"},
             {Consts.GameProvider.SexyGaming, "SexyGaming/sexygaming.json"},
-            {Consts.GameProvider.Skywind, "Skywind/skywind.json"}
+            {Consts.GameProvider.Skywind, "Skywind/skywind.json"},
+            {Consts.GameProvider.Evolution, "Evolution/evolution.json"}
         };
     }
 }

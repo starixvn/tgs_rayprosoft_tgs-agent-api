@@ -1,0 +1,2 @@
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
+Lobby,Lobby,,EVOLobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,

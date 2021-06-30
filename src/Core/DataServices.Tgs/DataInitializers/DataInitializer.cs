@@ -78,7 +78,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SBOGameProvider(env), new HabaneroGameProvider(env), new PragmaticPlayGameProvider(env),
                 new AsiaGamingGameProvider(env), new SabaGameProvider(env), new KYGameProvider(env),
                 new VRGameProvider(env), new IMESportsGameProvider(env), new BigGamingGameProvider(env),
-                new JDBGameProvider(env), new SexyGamingGameProvider(env), new SkywindGameProvider(env)
+                new JDBGameProvider(env), new SexyGamingGameProvider(env), new SkywindGameProvider(env),
+                new EvolutionGameProvider(env)
             };
         }
 
