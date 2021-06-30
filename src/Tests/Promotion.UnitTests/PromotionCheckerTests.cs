@@ -14,8 +14,9 @@ namespace Promotion.UnitTests
         public async Task FirstDeposit_Should_Check_Well()
         {
             var fakePlayerService = Substitute.For<IPlayerService>();
+            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
 
-            var sut = new FirstDepositChecker(fakePlayerService);
+            var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
 
             fakePlayerService
                 .GetPlayerByPlayerCodeAsync(Arg.Any<string>())

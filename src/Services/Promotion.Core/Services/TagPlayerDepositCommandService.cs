@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -7,14 +6,22 @@ namespace TGS.Services.Promotion.Services
 {
     internal class TagPlayerDepositCommandService : ICommandService<TagPlayerDepositCommand>
     {
-        private readonly IPlayerDataRepository _playerDataRepository;
+        private readonly IPromotionChecker[] _checkers;
 
-        public TagPlayerDepositCommandService(IPlayerDataRepository playerDataRepository)
+        public TagPlayerDepositCommandService(PromotionCheckerFactory promotionCheckerFactory)
         {
-            _playerDataRepository = playerDataRepository ?? throw new ArgumentNullException(nameof(playerDataRepository));
+            var firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
+            var dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
+
+            _checkers = new[] { firstDepositChecker, dailyFirstDepositChecker };
         }
 
-        public ValueTask ExecuteAsync(TagPlayerDepositCommand command, CancellationToken cancellationToken = default)
-            => _playerDataRepository.SetPlayerDepositAsync(command.PlayerCode);
+        public async ValueTask ExecuteAsync(TagPlayerDepositCommand command, CancellationToken cancellationToken = default)
+        {
+            foreach (var checker in _checkers)
+                await checker
+                    .TagPromotionTypeAsync(command.PlayerCode)
+                    .ConfigureAwait(false);
+        }
     }
 }
