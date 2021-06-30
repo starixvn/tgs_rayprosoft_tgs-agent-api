@@ -40,6 +40,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(e => e.TransferWallet)
                 .HasDefaultValue(false)
                 .IsRequired();
+
+            builder.Property(e => e.Localization)
+                .HasColumnType(ColumnTypes.Jsonb);
         }
     }
 }
