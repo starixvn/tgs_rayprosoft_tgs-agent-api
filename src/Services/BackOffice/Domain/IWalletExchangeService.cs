@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.WalletService;
 
 namespace TGS.Services.BackOffice.Domain

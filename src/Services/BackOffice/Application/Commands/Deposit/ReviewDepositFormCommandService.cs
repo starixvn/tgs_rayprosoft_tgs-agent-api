@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.PlayerBucket;
@@ -12,18 +13,18 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
 {
     internal class ReviewDepositFormCommandService : ICommandService<ReviewDepositFormCommand>
     {
-        private readonly IPaymentRepository _paymentRepository;
         private readonly IPlayerBucketRepository _playerBucketRepository;
         private readonly IPromotionClient _promotionClient;
+        private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IPlayerService _playerService;
 
         public ReviewDepositFormCommandService(
-            IPaymentRepository paymentRepository,
+            IPaymentServiceClient paymentServiceClient,
             IPlayerService playerService,
             IPlayerBucketRepository playerBucketRepository,
             IPromotionClient promotionClient)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _playerBucketRepository = playerBucketRepository ?? throw new ArgumentNullException(nameof(playerBucketRepository));
             _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
@@ -31,15 +32,15 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
 
         public async ValueTask ExecuteAsync(ReviewDepositFormCommand command, CancellationToken cancellationToken = default)
         {
-            var form = await _paymentRepository
-                .GetDepositFormByIdAsync(command.FormId)
+            var form = await _paymentServiceClient
+                .GetDepositFormAsync(command.BrandId, command.FormId)
                 .ConfigureAwait(false);
 
-            if (form.Status != 1000)
+            if (form.Status != PaymentFlowState.WaitApprove)
                 return;
 
-            await _paymentRepository
-                .SignOffDepositFormAsync(command.FormId, command.Status, command.remark)
+            await _paymentServiceClient
+                .ReviewDepositFormAsync(command.FormId, command.Status, command.remark)
                 .ConfigureAwait(false);
 
             if (command.Status == ReviewState.Approve)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 
@@ -7,13 +8,13 @@ namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class EnumExtensions
     {
-        public static FlowState ToFlowState(this int status)
+        public static FlowState ToFlowState(this PaymentFlowState status)
             => status switch
             {
-                100 => FlowState.WaitingPayment,
-                1000 => FlowState.Review,
-                7000 => FlowState.Rejected,
-                8000 => FlowState.Approved,
+                PaymentFlowState.WaitPayment => FlowState.WaitingPayment,
+                PaymentFlowState.WaitApprove => FlowState.Review,
+                PaymentFlowState.Reject => FlowState.Rejected,
+                PaymentFlowState.Approved => FlowState.Approved,
                 _ => FlowState.Unkown,
             };
 

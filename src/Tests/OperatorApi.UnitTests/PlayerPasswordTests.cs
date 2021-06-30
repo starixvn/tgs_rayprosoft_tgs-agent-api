@@ -37,7 +37,7 @@ namespace OperatorApi.UnitTests
 
             fakePlayerQueries
                 .GetSaltAndPasswordByPlayerCodeAsync(Arg.Any<string>())
-                .Returns((salt: new byte[] { 1, 2, 3 }, password: new byte[] { 4, 5, 6 }));
+                .Returns((Salt: new byte[] { 1, 2, 3 }, Password: new byte[] { 4, 5, 6 }));
 
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 

@@ -116,6 +116,16 @@ namespace TGS.Apis.OperatorApi
                 .AddTransactions();
 
             services
+                .AddOperatorApiCore()
+                .ConfigureOperatorOptions<IConfiguration>((options, config) =>
+                {
+                    config.GetSection("Operator").Bind(options);
+                })
+                .UseOperatorRepositories()
+                .ConfigureWallet(config =>
+                {
+                    config.AddTgsWalletRepositories();
+                })
                 .AddPaymentServiceClient((options, sp) =>
                 {
                     var config = sp.GetRequiredService<IConfiguration>();
@@ -128,16 +138,6 @@ namespace TGS.Apis.OperatorApi
                             new JsonStringEnumConverter()
                         }
                     };
-                })
-                .AddOperatorApiCore()
-                .ConfigureOperatorOptions<IConfiguration>((options, config) =>
-                {
-                    config.GetSection("Operator").Bind(options);
-                })
-                .UseOperatorRepositories()
-                .ConfigureWallet(config =>
-                {
-                    config.AddTgsWalletRepositories();
                 })
                 .Services
                 .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>()

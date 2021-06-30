@@ -7,7 +7,6 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddBackendOfficeRepositories(this IServiceCollection services)
         {
-            services.AddTransient<IDepositRepository, DepositRepository>();
             services.AddTransient<ISettingRepository, SettingRepository>();
             services.AddTransient<ISystemPaymentRepository, SystemPaymentRepository>();
 

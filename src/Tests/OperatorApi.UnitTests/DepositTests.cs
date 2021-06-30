@@ -49,7 +49,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = "OtherPlayerCode",
                     UserName = "OtherUserName",
-                    Status = 1000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now
                 }));
 
@@ -119,7 +119,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqPaymentClient = new Mock<IPaymentClient>();
-            var serializer = new LeePaySerializer(new JsonSerializationProvider());
+            var serializer = new LeePaySerializer();
             var moqPromotionClient = new Mock<IPromotionClient>();
             var moqPlayerCommands = new Mock<IPlayerCommands>();
 
@@ -257,7 +257,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Id = query.FormId,
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = query.PlayerCode,
-                    Status = 10000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now,
                     UserName = "PlayerName"
                 }));
@@ -353,7 +353,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Id = query.FormId,
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = query.PlayerCode,
-                    Status = 1000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now,
                     UserName = "UserName"
                 });

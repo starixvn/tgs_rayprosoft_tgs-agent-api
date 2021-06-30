@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.StationLetters;
 using TGS.Services.WalletService.Configuration;
@@ -13,6 +14,14 @@ namespace TGS.Services.Operator.Configuration
         public OperatorConfiguration(IServiceCollection services)
         {
             Services = services ?? throw new ArgumentNullException(nameof(services));
+        }
+
+        public OperatorConfiguration AddPaymentServiceClient(
+            Action<PaymentServiceClientOptions, IServiceProvider> configure)
+        {
+            Services.AddPaymentServiceClient(configure);
+
+            return this;
         }
 
         public OperatorConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure) where TDep : class

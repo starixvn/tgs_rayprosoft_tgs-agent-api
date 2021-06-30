@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using Microsoft.AspNetCore.Http;
-using TGS.Apis.OperatorApi.Extensions;
-using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -17,77 +12,68 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using TGS.ServiceUtility;
 using Localization = TGS.Core.Models.Consts.LocalizationContext;
 
-namespace TGS.Apis.OperatorApi.Handlers.Game
+namespace TGS.Services.Operator.Services.Game
 {
-    public sealed class GetGamesHandler : IRequestHandler<GetGamesRequest, GetGamesResponse>
+    internal class GetGamesQueryService : IQueryService<GetGamesQuery, GameInfo>
     {
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
-        private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IRedisCacheManager _cacheManger;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly HttpContext _httpContext;
-        private readonly IJsonSerializationProvider _json;
-        private readonly ILocalizationOperations _localizationOperations;
+        private readonly IBrandOperations _brandOperations;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IValidStatus<GameStatus> _validGameStatus;
+        private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
+        private readonly ILocalizationOperations _localizationOperations;
         private readonly IValidStatus<Status> _validStatus;
+        private readonly IValidStatus<GameStatus> _validGameStatus;
 
-        public GetGamesHandler(
-            IHttpContextAccessor httpContextAccessor,
-            IBrandOperations brandOperations,
-            IGameProviderOperations gameProviderOperations,
-            IPlayerOperations playerOperations,
-            ILocalizationOperations localizationOperations,
-            IBrandLanguageCodeMapper brandLanguageCodeMapper,
+        public GetGamesQueryService(
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
-            IRedisCacheManager cacheManager,
-            IJsonSerializationProvider json,
+            IGameProviderOperations gameProviderOperations,
+            IBrandOperations brandOperations,
+            IPlayerOperations playerOperations,
+            IBrandLanguageCodeMapper brandLanguageCodeMapper,
+            ILocalizationOperations localizationOperations,
             IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus)
+            IValidStatus<GameStatus> validGameStatus
+            )
         {
-            _httpContext = httpContextAccessor.HttpContext;
-            _brandOperations = brandOperations;
-            _gameProviderOperations = gameProviderOperations;
-            _playerOperations = playerOperations;
-            _localizationOperations = localizationOperations;
-            _brandLanguageCodeMapper = brandLanguageCodeMapper;
-            _brandCurrencyCodeMapper = brandCurrencyCodeMapper;
-            _cacheManger = cacheManager;
-            _json = json;
-            _validStatus = validStatus;
-            _validGameStatus = validGameStatus;
+            _brandCurrencyCodeMapper = brandCurrencyCodeMapper ?? throw new System.ArgumentNullException(nameof(brandCurrencyCodeMapper));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _brandLanguageCodeMapper = brandLanguageCodeMapper ?? throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
+            _localizationOperations = localizationOperations ?? throw new ArgumentNullException(nameof(localizationOperations));
+            _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
+            _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
         }
 
-        public async Task<GetGamesResponse> Handle(GetGamesRequest request,
-            CancellationToken cancellationToken)
+        public async IAsyncEnumerable<GameInfo> QueryAsync(
+            GetGamesQuery query,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var brandId = _httpContext.Items.GetBrandId();
-            var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, brandId);
+            var playerTokenData = query.PlayerTokenData;
+            var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(query.CurrencyCode, query.BrandId);
 
             Guid[] gameProviderIds;
-            if (!string.IsNullOrEmpty(request.GameProviderCode))
+            if (!string.IsNullOrEmpty(query.GameProviderCode))
             {
-                var gameProviderId =
-                    await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode);
-                gameProviderIds = new[] { gameProviderId };
+                var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(query.GameProviderCode);
+                gameProviderIds = new Guid[] { gameProviderId };
             }
             else
             {
-                gameProviderIds = (await _brandOperations.GetBrandGameProvidersAsync(brandId))
-                    .Select(x => x.GameProviderId).ToArray();
+                gameProviderIds = (await _brandOperations.GetBrandGameProvidersAsync(query.BrandId))
+                    .Select(x => x.GameProviderId)
+                    .ToArray();
             }
 
-            var playerTokenData = _httpContext.Items.GetPlayerTokenData();
-            var platformType = request.PlatformType;
-
-            CachedPlayer cachedPlayer = null;
+            CachedPlayer? cachedPlayer = null;
 
             if (playerTokenData != null)
             {
-                if (playerTokenData.PlatformType != platformType)
+                if (playerTokenData.PlatformType != query.PlatformType)
                 {
                     throw new InvalidOperationException("request platform is not matched with player login platform.");
                 }
@@ -100,14 +86,15 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var types = request.Types ?? Array.Empty<GameType>();
-            var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
+            var types = query.Types ?? Array.Empty<GameType>();
+            var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, query.BrandId);
 
-            var translatedGames = new List<GameModel>();
+            var translatedGames = new List<GameInfo>();
             foreach (var gameProviderId in gameProviderIds)
             {
-                var games = await GetGameModelsAsync(brandId, gameProviderId, platformType, currencyCode, playerType);
-                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId,
+                var games = await GetGameModelsAsync(query.BrandId, gameProviderId, query.PlatformType, currencyCode, playerType);
+                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(
+                    gameProviderId,
                     cultureCode);
 
                 var translatedGame = games
@@ -128,17 +115,21 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                 translatedGames.AddRange(translatedGame);
             }
 
-            return new()
+            foreach (var item in translatedGames)
             {
-                Games = translatedGames
-                    .OrderBy(g => g.DisplayOrder)
-                    .ThenBy(g => g.Code)
-                    .ToArray()
-            };
+                yield return item;
+
+                if (cancellationToken.IsCancellationRequested)
+                    yield break;
+            }
         }
 
-        private async Task<GameModel[]> GetGameModelsAsync(Guid brandId, Guid gameProviderId,
-            PlatformType platformType, string currencyCode, PlayerType playerType)
+        private async Task<GameInfo[]> GetGameModelsAsync(
+            Guid brandId,
+            Guid gameProviderId,
+            PlatformType platformType,
+            string currencyCode,
+            PlayerType playerType)
         {
             var statuses = _validStatus.GetStatus(playerType);
             var gameStatuses = _validGameStatus.GetStatus(playerType);
@@ -150,7 +141,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
 
                 if (!isCurrencySupported)
                 {
-                    return Array.Empty<GameModel>();
+                    return Array.Empty<GameInfo>();
                 }
             }
 
@@ -171,7 +162,7 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                     where g.AvailableToBrand
                         && (g.AvailableCurrencies.Length == 0
                             || g.AvailableCurrencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase))
-                    select new GameModel
+                    select new GameInfo
                     {
                         Id = bg.GameId,
                         Code = g.Code,
@@ -179,9 +170,11 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                         Description = g.Description,
                         GameProviderCode = cachedGameProvider.Code,
                         Type = g.Type,
-                        IsActive = IsGameActive(statuses, cachedGameProvider.Status, brandGameProviderStatus,
-                            gameStatuses, g.Status, bg.BrandGameStatus),
-                        Tag = new()
+                        IsActive = statuses.Contains(cachedGameProvider.Status)
+                            && gameStatuses.Contains(g.Status)
+                            && statuses.Contains(brandGameProviderStatus)
+                            && gameStatuses.Contains(bg.BrandGameStatus),
+                        Tag = new TagInfo()
                         {
                             New = bg.Tag.IsNew(),
                             Hot = bg.Tag.IsHot(),
@@ -191,10 +184,5 @@ namespace TGS.Apis.OperatorApi.Handlers.Game
                     })
                 .ToArray();
         }
-
-        private static bool IsGameActive(Status[] statuses, Status gameProviderStatus, Status brandGameProviderStatus,
-            GameStatus[] gameStatuses, GameStatus gameStatus, GameStatus brandGameStatus) =>
-            statuses.Contains(gameProviderStatus) && gameStatuses.Contains(gameStatus) &&
-            statuses.Contains(brandGameProviderStatus) && gameStatuses.Contains(brandGameStatus);
     }
 }

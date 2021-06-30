@@ -39,5 +39,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string AvailableCurrencies { get; set; }
 
         public virtual ICollection<BrandGame> Brands { get; set; }
+
+        public string Localization { get; set; }
     }
 }

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using MediatR;
-using Microsoft.AspNetCore.Http;
-using TGS.Apis.OperatorApi.Extensions;
-using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -15,55 +12,53 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using TGS.ServiceUtility;
 using static TGS.Core.Models.Consts.LocalizationContext;
 
-namespace TGS.Apis.OperatorApi.Handlers.GameProvider
+namespace TGS.Services.Operator.Services.GameProvider
 {
-    public sealed class GetGameProvidersHandler : IRequestHandler<GetGameProvidersRequest, GetGameProvidersResponse>
+    internal class GetGameProviderQueryService : IQueryService<GetGameProviderQuery, GameProviderModel>
     {
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
         private readonly IBrandOperations _brandOperations;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly HttpContext _httpContext;
-        private readonly ILocalizationOperations _localizationOperations;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IValidStatus<Status> _validStatus;
+        private readonly IValidStatus<GameStatus> _validGameStatus;
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly ILocalizationOperations _localizationOperations;
 
-        public GetGameProvidersHandler(
-            IHttpContextAccessor httpContextAccessor,
-            IBrandOperations brandOperations,
-            IGameProviderOperations gameProviderOperations,
-            IPlayerOperations playerOperations,
-            ILocalizationOperations localizationOperations,
-            IBrandLanguageCodeMapper brandLanguageCodeMapper,
+        public GetGameProviderQueryService(
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
+            IPlayerOperations playerOperations,
+            IBrandLanguageCodeMapper brandLanguageCodeMapper,
+            IBrandOperations brandOperations,
             IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus)
+            IValidStatus<GameStatus> validGameStatus,
+            IGameProviderOperations gameProviderOperations,
+            ILocalizationOperations localizationOperations)
         {
-            _httpContext = httpContextAccessor.HttpContext;
-            _brandOperations = brandOperations;
-            _gameProviderOperations = gameProviderOperations;
-            _playerOperations = playerOperations;
-            _localizationOperations = localizationOperations;
-            _brandLanguageCodeMapper = brandLanguageCodeMapper;
-            _brandCurrencyCodeMapper = brandCurrencyCodeMapper;
-            _validStatus = validStatus;
-            _validGameStatus = validGameStatus;
+            _brandCurrencyCodeMapper = brandCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(brandCurrencyCodeMapper));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _brandLanguageCodeMapper = brandLanguageCodeMapper ?? throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
+            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
+            _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _localizationOperations = localizationOperations ?? throw new ArgumentNullException(nameof(localizationOperations));
         }
 
-        async Task<GetGameProvidersResponse> IRequestHandler<GetGameProvidersRequest, GetGameProvidersResponse>.Handle(
-            GetGameProvidersRequest request, CancellationToken cancellationToken)
+        public async IAsyncEnumerable<GameProviderModel> QueryAsync(
+            GetGameProviderQuery query,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var brandId = _httpContext.Items.GetBrandId();
-            var currencyCode =
-                await _brandCurrencyCodeMapper.ExternalToInternalAsync(request.CurrencyCode, brandId);
+            var brandId = query.BrandId;
+            var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(query.CurrencyCode, brandId);
 
-            var playerTokenData = _httpContext.Items.GetPlayerTokenData();
-            var platformType = request.PlatformType;
+            var playerTokenData = query.PlayerTokenData;
+            var platformType = query.PlatformType;
 
-            CachedPlayer cachedPlayer = null;
+            CachedPlayer? cachedPlayer = null;
 
             if (playerTokenData != null)
             {
@@ -73,17 +68,17 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                 }
 
                 cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
-                if (cachedPlayer != null && cachedPlayer.DefaultWalletCurrencyCode.IgnoreCaseNotEquals(currencyCode))
+                if (cachedPlayer != null
+                    && cachedPlayer.DefaultWalletCurrencyCode.IgnoreCaseNotEquals(currencyCode))
                 {
                     throw new CurrencyNotMatchingException(cachedPlayer.DefaultWalletCurrencyCode, currencyCode);
                 }
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(request.LanguageCode, brandId);
+            var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, brandId);
             var providers = await GetGameProviderModelsAsync(brandId, currencyCode, platformType, playerType);
 
-            var translatedProviders = new List<GameProviderModel>();
             foreach (var gpm in providers)
             {
                 var key = $"{gpm.Id}";
@@ -92,18 +87,20 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                 var model = gpm with
                 {
                     Name = _localizationOperations.Parse(store, key, GameProviderDescription, gpm.Name),
-                    Description =
-                    _localizationOperations.Parse(store, key, GameProviderDescription, gpm.Description)
+                    Description = _localizationOperations.Parse(store, key, GameProviderDescription, gpm.Description)
                 };
 
-                translatedProviders.Add(model);
-            }
+                yield return model;
 
-            return new() {GameProviders = translatedProviders.ToArray()};
+                if (cancellationToken.IsCancellationRequested)
+                    yield break;
+            }
         }
 
-        private async Task<GameProviderModel[]> GetGameProviderModelsAsync(Guid brandId,
-            string currencyCode, PlatformType platformType,
+        private async Task<GameProviderModel[]> GetGameProviderModelsAsync(
+            Guid brandId,
+            string currencyCode,
+            PlatformType platformType,
             PlayerType playerType)
         {
             var gameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId);
@@ -116,8 +113,7 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
             {
                 var gameProviderId = bgp.GameProviderId;
                 var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(bgp.GameProviderId);
-                var currencySupported =
-                    await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, currencyCode);
+                var currencySupported = await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, currencyCode);
 
                 if (!currencySupported)
                 {
@@ -141,8 +137,10 @@ namespace TGS.Apis.OperatorApi.Handlers.GameProvider
                     Description = gameProvider.Description,
                     Status = gameProvider.Status,
                     IsTransferWallet = gameProvider.IsTransferWallet,
-                    GameTypes = games.Select(g => g.Type).OrderBy(t => (int)t)
-                        .Distinct().ToArray()
+                    GameTypes = games.Select(g => g.Type)
+                        .OrderBy(t => (int)t)
+                        .Distinct()
+                        .ToArray()
                 };
 
                 providers.Add(model);

@@ -43,8 +43,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     {
         private const string GameProviderCode = Consts.GameProvider.SBOBET;
         private readonly ServiceProvider _serviceProvider;
-        private IHost _opApiHost;
-        private IHost _tgsApiHost;
 
         public SBOBETEndpoint(ScenarioContext context)
             : base(context)

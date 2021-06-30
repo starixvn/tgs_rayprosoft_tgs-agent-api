@@ -9,15 +9,10 @@ namespace TGS.Services.Promotion.Models.Promotion
     {
         public Guid BrandId { get; set; }
 
-        public string Name { get; set; }
-
-        public string PlayerCode { get; set; }
+        public string Name { get; set; } = default!;
 
         public SwitchStatus? Status { get; set; }
 
-        public string Type { get; set; }
-
-        public DateTimeOffset? CurrentDate { get; set; }
-        public string Language { get; set; }
+        public string Type { get; set; } = default!;
     }
 }

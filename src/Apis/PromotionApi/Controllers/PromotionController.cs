@@ -72,6 +72,14 @@ namespace TGS.Apis.PromotionApi.Controllers
         public Task<PagedResponse<PromotionModel>> GetPromotionsAsync([FromQuery] GetPromotionsRequest request) =>
             _mediator.Send(request);
 
+        [HttpGet("valid")]
+        [Description("Get promotions fro player")]
+        public async Task<PagedResponse<PromotionModel>> GetPromotionsForPlayerAsync(
+            [FromServices] IGetService<GetValidPromotionsQuery, PagedResponse<PromotionModel>> promotionsService,
+            [FromQuery] GetValidPromotionsQuery request) =>
+            await promotionsService.GetAsync(request).ConfigureAwait(false);
+
+
         [HttpDelete("{promotionId}/{amount}")]
         public async Task RevertPromotionAsync(
             [FromServices] ICommandService<RevertPromotionAmountCommand> revertService,
@@ -79,7 +87,9 @@ namespace TGS.Apis.PromotionApi.Controllers
             decimal amount)
         {
             if (amount <= 0)
+            {
                 return;
+            }
 
             var command = new RevertPromotionAmountCommand(promotionId, amount);
 

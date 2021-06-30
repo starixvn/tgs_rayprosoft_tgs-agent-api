@@ -25,5 +25,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<GameProviderBetLimit> BetLimits { get; set; }
         public virtual ICollection<SportType> SportTypes { get; set; }
         public virtual ICollection<MarketType> MarketTypes { get; set; }
+
+        public string Localization { get; set; }
     }
 }
