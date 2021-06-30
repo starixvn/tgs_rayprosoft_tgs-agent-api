@@ -78,7 +78,11 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 return new GetGameUrlResponse {Url = loginResponse.Data.Url};
             }
 
-            throw new GameProviderApiErrorException(loginResponse.ErrorMessage);
+            var message = loginResponse.ErrorMessage.IsNullOrEmpty()
+                ? loginResponse.ErrorCode
+                : loginResponse.ErrorMessage;
+
+            throw new GameProviderApiErrorException(message);
         }
     }
 }

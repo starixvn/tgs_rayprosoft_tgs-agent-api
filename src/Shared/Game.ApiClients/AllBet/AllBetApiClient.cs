@@ -24,7 +24,7 @@ namespace TGS.Shared.Game.ApiClients.AllBet
     public class AllBetApiClient : BaseApiClient, IAllBetApiClient
     {
         private readonly IHashProvider _hashProvider;
-        private readonly JsonSerializerOptions _options = new JsonSerializerOptions {WriteIndented = true};
+        private readonly JsonSerializerOptions _options = new JsonSerializerOptions {WriteIndented = false};
 
         public AllBetApiClient(
             HttpClient client,
@@ -51,8 +51,8 @@ namespace TGS.Shared.Game.ApiClients.AllBet
             GetHeaders<T>(HttpMethod method, string propertyId, string apiKey, string path, T request)
         {
             var body = Json.SerializeToString(request, _options);
-            var md5 = _hashProvider.Hash(body, HashAlgorithmKind.Md5, HashStringKind.Hex, Encoding.UTF8);
-            var date = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss UTC", new CultureInfo("en-US"));
+            var md5 = _hashProvider.Hash(body, HashAlgorithmKind.Md5, HashStringKind.Base64, Encoding.UTF8);
+            var date = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss GMT", new CultureInfo("en-US"));
             var contentType = "application/json";
 
             var stringToSign = string.Join("\n", method.ToString(), md5, contentType, date, path);
