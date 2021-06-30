@@ -25,13 +25,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Handlers\Announcement\**" />
+    <Compile Remove="Handlers\**" />
     <Compile Remove="Services\**" />
-    <Content Remove="Handlers\Announcement\**" />
+    <Content Remove="Handlers\**" />
     <Content Remove="Services\**" />
-    <EmbeddedResource Remove="Handlers\Announcement\**" />
+    <EmbeddedResource Remove="Handlers\**" />
     <EmbeddedResource Remove="Services\**" />
-    <None Remove="Handlers\Announcement\**" />
+    <None Remove="Handlers\**" />
     <None Remove="Services\**" />
   </ItemGroup>
 
