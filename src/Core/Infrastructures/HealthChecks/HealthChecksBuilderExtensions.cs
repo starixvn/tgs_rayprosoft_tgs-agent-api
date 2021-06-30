@@ -48,22 +48,38 @@ namespace TGS.Core.Infrastructures.HealthChecks
         public static IHealthChecksBuilder AddAwsS3(this IHealthChecksBuilder builder, string name = null,
             HealthStatus? failureStatus = null, IEnumerable<string> tags = null, TimeSpan? timeout = null)
         {
+            name ??= "AwsS3";
             builder.AddS3(sp =>
             {
                 var setting = sp.GetRequiredService<AwsSettings>();
                 return new()
                 {
-                    BucketName = setting.S3.Bucket,
+                    BucketName = setting.Project.Bucket,
                     AccessKey = setting.AccessKeyId,
                     SecretKey = setting.SecretAccessKey,
                     S3Config = new()
                     {
                         UseHttp = setting.UseHttp,
-                        ServiceURL = setting.S3.ServiceUrl,
+                        ServiceURL = setting.Project.ServiceUrl,
                         ForcePathStyle = true
                     }
                 };
-            }, name, failureStatus, tags, timeout);
+            }, $"{name}_public", failureStatus, tags, timeout);
+
+            builder.AddS3(sp =>
+            {
+                var setting = sp.GetRequiredService<AwsSettings>();
+                return new()
+                {
+                    BucketName = setting.Secret.Bucket,
+                    AccessKey = setting.AccessKeyId,
+                    SecretKey = setting.SecretAccessKey,
+                    S3Config = new()
+                    {
+                        UseHttp = setting.UseHttp, ServiceURL = setting.Secret.ServiceUrl, ForcePathStyle = true
+                    }
+                };
+            }, $"{name}_private", failureStatus, tags, timeout);
 
             return builder;
         }

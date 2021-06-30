@@ -45,7 +45,7 @@ namespace TGS.Apis.FileService.Clients
                 .ConfigureAwait(false);
 
         public async ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType,
-            Stream fileStream)
+            Stream fileStream, bool isPublic)
         {
             using var uploadContent = new MultipartFormDataContent();
 
@@ -56,8 +56,10 @@ namespace TGS.Apis.FileService.Clients
 
             uploadContent.Add(fileContent, "file", fileName);
 
+            var url = isPublic ? $"/api/fs/public/{path.TrimStart('/')}" : $"/api/fs/{path.TrimStart('/')}";
+
             var response = await _httpClient
-                .PostAsync($"/api/fs/{path.TrimStart('/')}", uploadContent)
+                .PostAsync(url, uploadContent)
                 .ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();

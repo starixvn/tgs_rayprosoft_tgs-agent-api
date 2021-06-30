@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.FileService.Controllers.Messages;
+using TGS.Core.Infrastructures.Aws;
 using TGS.FileService;
 
 namespace TGS.Apis.FileService.Controllers
@@ -12,9 +13,9 @@ namespace TGS.Apis.FileService.Controllers
     [ApiController]
     public class FileManagementController : ControllerBase
     {
-        private readonly IFileManager _fileManager;
+        private readonly IFileManager<IPrivateAmazonS3> _fileManager;
 
-        public FileManagementController(IFileManager fileManager)
+        public FileManagementController(IFileManager<IPrivateAmazonS3> fileManager)
         {
             _fileManager = fileManager ?? throw new ArgumentNullException(nameof(fileManager));
         }
@@ -37,7 +38,7 @@ namespace TGS.Apis.FileService.Controllers
         {
             var meta = await _fileManager.GetFileMetaByObjectIdAsync(objectId).ConfigureAwait(false);
 
-            return new FileViewModel
+            return new()
             {
                 Id = meta.Id,
                 FileName = meta.FileName,
@@ -57,7 +58,7 @@ namespace TGS.Apis.FileService.Controllers
                 .SaveAsync(path, file.ContentType, file.Length, file.OpenReadStream())
                 .ConfigureAwait(false);
 
-            return new FileViewModel
+            return new()
             {
                 Id = meta.Id,
                 FileName = meta.FileName,

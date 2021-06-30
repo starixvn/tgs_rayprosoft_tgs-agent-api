@@ -1,6 +1,4 @@
 ﻿using System;
-using Amazon.CloudWatchLogs;
-using Amazon.S3;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -15,7 +13,7 @@ namespace TGS.Core.Infrastructures.Aws
             services.Configure<AwsSettings>(configuration.GetSection(configSectionName));
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<AwsSettings>>().Value);
 
-            services.AddSingleton<IAmazonS3>(sp =>
+            services.AddSingleton<IPublicAmazonS3>(sp =>
             {
                 var settings = sp.GetRequiredService<AwsSettings>();
                 if (settings == null)
@@ -23,22 +21,23 @@ namespace TGS.Core.Infrastructures.Aws
                     throw new ArgumentException("can't get aws settings");
                 }
 
-                return new AmazonS3Client(settings.AccessKeyId, settings.SecretAccessKey, new AmazonS3Config
-                {
-                    UseHttp = settings.UseHttp,
-                    ServiceURL = settings.S3.ServiceUrl,
-                    ForcePathStyle = true
-                });
+                return new PublicAmazonS3Client(settings.AccessKeyId, settings.SecretAccessKey,
+                    new()
+                    {
+                        UseHttp = settings.UseHttp, ServiceURL = settings.Project.ServiceUrl, ForcePathStyle = true
+                    });
             });
 
-            services.AddSingleton<IAmazonCloudWatchLogs>(sp =>
+            services.AddSingleton<IPrivateAmazonS3>(sp =>
             {
                 var settings = sp.GetRequiredService<AwsSettings>();
-                return new AmazonCloudWatchLogsClient(new AmazonCloudWatchLogsConfig
+                if (settings == null)
                 {
-                    UseHttp = true,
-                    ServiceURL = settings?.CloudWatch.ServiceUrl
-                });
+                    throw new ArgumentException("can't get aws settings");
+                }
+
+                return new PrivateAmazonS3Client(settings.AccessKeyId, settings.SecretAccessKey,
+                    new() {UseHttp = settings.UseHttp, ServiceURL = settings.Secret.ServiceUrl, ForcePathStyle = true});
             });
 
             return services;

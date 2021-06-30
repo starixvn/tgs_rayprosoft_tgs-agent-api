@@ -61,7 +61,10 @@ namespace TGS.Apis.FileService
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     config.GetSection("AWS").Bind(options);
-                    options.Bucket = config.GetValue<string>("AWS:S3:Bucket");
+                    options.ExternalPublicServiceUrl = config.GetValue<string>("AWS:Project:ExternalServiceUrl");
+                    options.ExternalPrivateServiceUrl = config.GetValue<string>("AWS:Project:ExternalServiceUrl");
+                    options.PublicBucket = config.GetValue<string>("AWS:Project:Bucket");
+                    options.PrivateBucket = config.GetValue<string>("AWS:Secret:Bucket");
                 })
                 .UseMongoRepository((options, sp) =>
                 {

@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -23,32 +22,38 @@ namespace TGS.Apis.FileService
             await host.RunAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args)
-        {
-            return Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-        }
 
         private static async Task CreateBucketAsync(IServiceProvider services)
         {
             using var scope = services.CreateScope();
             var sp = scope.ServiceProvider;
-            var amazonS3 = sp.GetRequiredService<IAmazonS3>();
+            var publicAmazonS3 = sp.GetRequiredService<IPublicAmazonS3>();
+            var privateAmazonS3 = sp.GetRequiredService<IPrivateAmazonS3>();
             var settings = sp.GetRequiredService<AwsSettings>();
             var configuration = sp.GetRequiredService<IConfiguration>();
 
-            if (configuration.GetValue<string>(Consts.EnvironmentVariable.Environment) != "Production" && settings != null && !await amazonS3.DoesS3BucketExistAsync(settings.S3.Bucket))
+            if (configuration.GetValue<string>(Consts.EnvironmentVariable.Environment) != "Production" &&
+                settings != null && !await publicAmazonS3.DoesS3BucketExistAsync(settings.Project.Bucket))
             {
-                var putBucketRequest = new PutBucketRequest
-                {
-                    BucketName = settings.S3.Bucket,
-                    UseClientRegion = true
-                };
+                var putBucketRequest =
+                    new PutBucketRequest {BucketName = settings.Project.Bucket, UseClientRegion = true};
 
-                await amazonS3.PutBucketAsync(putBucketRequest);
+                await publicAmazonS3.PutBucketAsync(putBucketRequest);
+            }
+
+            if (configuration.GetValue<string>(Consts.EnvironmentVariable.Environment) != "Production" &&
+                settings != null && !await privateAmazonS3.DoesS3BucketExistAsync(settings.Secret.Bucket))
+            {
+                var putBucketRequest =
+                    new PutBucketRequest {BucketName = settings.Secret.Bucket, UseClientRegion = true};
+
+                await privateAmazonS3.PutBucketAsync(putBucketRequest);
             }
         }
     }
