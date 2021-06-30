@@ -14,6 +14,7 @@ using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.Apis.FileService.Extensions;
+using TGS.Apis.FileService.Middlewares;
 using TGS.Core.Infrastructures.Aws;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
@@ -103,6 +104,8 @@ namespace TGS.Apis.FileService
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<ExceptionMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

@@ -62,8 +62,15 @@ namespace TGS.FileService
         public IAsyncEnumerable<FileMeta> ListPathAsync(string prefix)
             => _fileMetaRepository.ListFileMetasAsync(prefix);
 
-        public Task<Stream> OpenFileStreamAsync(FileMeta meta) =>
-            _amazonS3.GetObjectStreamAsync(_bucket, meta.FileName, null);
+        public Task<Stream> OpenFileStreamAsync(FileMeta meta)
+        {
+            var url = _amazonS3.GeneratePreSignedURL(_bucket, meta.FileName, DateTime.UtcNow.AddMinutes(5), null);
+
+            var client = new WebClient();
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            return client.OpenReadTaskAsync(url);
+        }
 
         public async Task<FileMeta> SaveAsync(string filePath, string contentType, long contentLength,
             Stream fileStream)

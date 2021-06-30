@@ -6,8 +6,9 @@ namespace TGS.Apis.FileService.Clients
 {
     public interface IFileServiceClient
     {
-        ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType, Stream fileStream,
-            bool isPublic = false);
+        ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType, Stream fileStream);
+
+        ValueTask<FileView> UploadPublicFileAsync(string path, MediaTypeHeaderValue contentType, Stream fileStream);
 
         ValueTask<FileView> FindFileByObjectIdAsync(string objectId);
 

@@ -313,14 +313,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Setup(fake => fake.UploadFileAsync(
                     It.IsAny<string>(),
                     It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
-                    It.IsAny<Stream>(), false))
+                    It.IsAny<Stream>()))
                 .Returns(ValueTask.FromResult(new FileView {Id = "testFileId", ContentType = contentType}));
 
             await sut.ExecuteAsync(command);
 
             moqFileServiceClient.Verify(
-                fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>(),
-                    false),
+                fake => fake.UploadFileAsync(It.IsAny<string>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<Stream>()),
                 Times.Exactly(1));
             moqPaymentServiceClient.Verify(
                 fake => fake.SubmitDepositFormStatusAsync(

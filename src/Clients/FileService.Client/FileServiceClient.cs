@@ -45,7 +45,7 @@ namespace TGS.Apis.FileService.Clients
                 .ConfigureAwait(false);
 
         public async ValueTask<FileView> UploadFileAsync(string path, MediaTypeHeaderValue contentType,
-            Stream fileStream, bool isPublic)
+            Stream fileStream)
         {
             using var uploadContent = new MultipartFormDataContent();
 
@@ -56,10 +56,35 @@ namespace TGS.Apis.FileService.Clients
 
             uploadContent.Add(fileContent, "file", fileName);
 
-            var url = isPublic ? $"/api/fs/public/{path.TrimStart('/')}" : $"/api/fs/{path.TrimStart('/')}";
+            var response = await _httpClient
+                .PostAsync($"/api/fs/{path.TrimStart('/')}", uploadContent)
+                .ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            var view = _jsonSerializationProvider.DeserializeFromString<FileView>(
+                json,
+                new() {PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
+
+            return view;
+        }
+
+        public async ValueTask<FileView> UploadPublicFileAsync(string path, MediaTypeHeaderValue contentType,
+            Stream fileStream)
+        {
+            using var uploadContent = new MultipartFormDataContent();
+
+            using var fileContent = new StreamContent(fileStream);
+
+            var fileName = path.Split('/').Last();
+            fileContent.Headers.ContentType = contentType;
+
+            uploadContent.Add(fileContent, "file", fileName);
 
             var response = await _httpClient
-                .PostAsync(url, uploadContent)
+                .PostAsync($"/api/fs/public/{path.TrimStart('/')}", uploadContent)
                 .ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
