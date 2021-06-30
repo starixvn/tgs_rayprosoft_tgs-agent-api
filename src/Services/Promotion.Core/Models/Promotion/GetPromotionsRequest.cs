@@ -11,13 +11,8 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public string Name { get; set; }
 
-        public string PlayerCode { get; set; }
-
         public SwitchStatus? Status { get; set; }
 
         public string Type { get; set; }
-
-        public DateTimeOffset? CurrentDate { get; set; }
-        public string Language { get; set; }
     }
 }

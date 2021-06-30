@@ -16,9 +16,6 @@ namespace TGS.Core.Models.Messages
 
         public bool ShowAll { get; set; }
 
-        public SortOption GetSortOption()
-        {
-            return new SortOption(SortBy, IsDesc);
-        }
+        public SortOption GetSortOption() => new(SortBy, IsDesc);
     }
 }
