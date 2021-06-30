@@ -38,9 +38,10 @@ namespace TGS.Services.Agent.Services.Agent
                 .FirstAsync(x => x.Id == query.BrandId)
                 .ConfigureAwait(false);
 
-            var isAgentNameExist = _tgsRepository.Agents.Any(
-                x => x.BrandId == query.BrandId
-                    && EF.Functions.ILike(x.Username, $"%{query.UserName}%"));
+            var isAgentNameExist = await _tgsRepository.Agents.AsQueryable()
+                .AnyAsync(x => x.BrandId == query.BrandId
+                    && EF.Functions.ILike(x.Username, $"%{query.UserName}%"))
+                .ConfigureAwait(false);
 
             if (isAgentNameExist)
             {
@@ -53,7 +54,9 @@ namespace TGS.Services.Agent.Services.Agent
 
             var invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
 
-            while (_tgsRepository.Agents.Any(x => x.InvitationCode == invitationCode))
+            while (await _tgsRepository.Agents.AsQueryable()
+                .AnyAsync(agent => agent.InvitationCode == invitationCode)
+                .ConfigureAwait(false))
             {
                 invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
             }
@@ -103,21 +106,21 @@ namespace TGS.Services.Agent.Services.Agent
             agent.WithdrawPassword = Array.Empty<byte>();
             agent.WithdrawSalt = Array.Empty<byte>();
             agent.Wallets = new AgentWallet[]
+            {
+                new AgentWallet
                 {
-                    new AgentWallet
-                    {
-                        Id = defaultWalletId,
-                        Agent = agent,
-                        Balance = 0,
-                        CurrencyCode = brand.Currencies.First().CurrencyCode,
-                        CreatedOn = DateTimeOffset.Now,
-                        UpdatedOn = DateTimeOffset.Now
-                    }
+                    Id = defaultWalletId,
+                    Agent = agent,
+                    Balance = 0,
+                    CurrencyCode = brand.Currencies.First().CurrencyCode,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedOn = DateTimeOffset.Now
                 }
-                .ToHashSet();
+            }
+            .ToHashSet();
 
-            await _tgsRepository.Agents.AddAsync(agent);
-            await _tgsRepository.SaveChangesAsync();
+            await _tgsRepository.Agents.AddAsync(agent).ConfigureAwait(false);
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
 
             return new CreateAgentInfo()
             {
