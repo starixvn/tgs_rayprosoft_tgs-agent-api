@@ -7,16 +7,16 @@ namespace TGS.Services.Operator
     {
         public Guid Id { get; init; }
 
-        public string Code { get; init; }
+        public string Code { get; init; } = default!;
 
-        public string Name { get; init; }
+        public string Name { get; init; } = default!;
 
-        public string Description { get; init; }
+        public string Description { get; init; } = default!;
 
         public Status Status { get; init; }
 
         public bool IsTransferWallet { get; init; }
 
-        public GameType[] GameTypes { get; init; }
+        public GameType[] GameTypes { get; init; } = default!;
     }
 }

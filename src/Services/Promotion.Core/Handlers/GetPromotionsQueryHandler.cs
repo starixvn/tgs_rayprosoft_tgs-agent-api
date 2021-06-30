@@ -59,6 +59,9 @@ namespace TGS.Services.Promotion.Handlers
                     MobileBanner = x.MobileBanner,
                     LocalizationString = x.Localization,
                     Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new())
-                }).AsSingleQuery().CreatePagedResponseAsync(request).ConfigureAwait(false);
+                })
+                .AsSingleQuery()
+                .CreatePagedResponseAsync(request)
+                .ConfigureAwait(false);
     }
 }

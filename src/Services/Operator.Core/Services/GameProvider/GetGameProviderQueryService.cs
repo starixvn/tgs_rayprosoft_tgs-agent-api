@@ -58,7 +58,7 @@ namespace TGS.Services.Operator.Services.GameProvider
             var playerTokenData = query.PlayerTokenData;
             var platformType = query.PlatformType;
 
-            CachedPlayer cachedPlayer = null;
+            CachedPlayer? cachedPlayer = null;
 
             if (playerTokenData != null)
             {

@@ -21,11 +21,11 @@ namespace TGS.Services.Promotion.Models.PromotionBonus
 
         public decimal Percentage { get; set; }
 
-        public PromotionBonusPlayerModel[] Players { get; set; }
+        public PromotionBonusPlayerModel[] Players { get; set; } = default!;
 
         public Guid PromotionId { get; set; }
 
-        public string PromotionType { get; set; }
+        public string PromotionType { get; set; } = default!;
 
         public DateTimeOffset? SentOn { get; set; }
 

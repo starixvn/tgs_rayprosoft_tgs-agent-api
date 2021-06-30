@@ -32,7 +32,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             _repository = repository;
         }
 
-        Task IResellerService.CreateResellerAsync(CreateResellerRequest request,
+        async Task IResellerService.CreateResellerAsync(CreateResellerRequest request,
             string username)
         {
             var reseller = new Reseller
@@ -55,8 +55,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             reseller.GameProviders = GenerateResellerGameProviders(reseller, request);
             reseller.BetLimits = GenerateResellerBetLimits(reseller, request);
 
-            _repository.Resellers.AddAsync(reseller);
-            return _repository.SaveChangesAsync();
+            await _repository.Resellers.AddAsync(reseller).ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         Task<Reseller> IResellerService.GetResellerAsync(Expression<Func<Reseller, bool>> predicate,

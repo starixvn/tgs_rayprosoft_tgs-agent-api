@@ -8,10 +8,10 @@ namespace TGS.Services.Promotion.Models.PromotionBonus
 
         public int Id { get; set; }
 
-        public string PlayerCode { get; set; }
+        public string PlayerCode { get; set; } = default!;
 
         public Guid PromotionBonusId { get; set; }
 
-        public string PromotionType { get; set; }
+        public string PromotionType { get; set; } = default!;
     }
 }

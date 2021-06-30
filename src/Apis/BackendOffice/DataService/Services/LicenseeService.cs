@@ -49,7 +49,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return _repository.SaveChangesAsync();
         }
 
-        Task ILicenseeService.CreateLicenseeAsync(CreateLicenseeRequest request, string username)
+        async Task ILicenseeService.CreateLicenseeAsync(CreateLicenseeRequest request, string username)
         {
             var licensee = new Licensee
             {
@@ -71,8 +71,8 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             licensee.GameProviders = GenerateLicenseeGameProviders(licensee, request);
             licensee.BetLimits = GenerateLicenseeBetLimits(licensee, request);
 
-            _repository.Licensees.AddAsync(licensee);
-            return _repository.SaveChangesAsync();
+            await _repository.Licensees.AddAsync(licensee).ConfigureAwait(false);
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         Task<Licensee> ILicenseeService.GetLicenseeAsync(Expression<Func<Licensee, bool>> predicate,

@@ -23,6 +23,6 @@ namespace TGS.GameProviders.Repositories.Models.GameProviderFundTransferTransact
         public decimal Balance { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
-        public string? Description { get; set; }
+        public string Description { get; set; }
     }
 }

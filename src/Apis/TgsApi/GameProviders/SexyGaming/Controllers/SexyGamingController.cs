@@ -286,16 +286,17 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
         }
 
         [HttpPost("give")]
-        public async Task<JsonDocument> GiveAsync(JsonDocument request)
-        {
-            return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
-            {
-                Status = ((int)GameApiError.Fail).ToString("d4"),
-                Desc = GameApiError.Fail.Description(),
-                Balance = default(decimal),
-                BalanceTs = string.Empty
-            }));
-        }
+        public Task<JsonDocument> GiveAsync(JsonDocument request)
+            => Task.FromResult(
+                JsonDocument.Parse(
+                    _jsonSerializationProvider.SerializeToString(
+                        new SexyGamingGetBalanceResponse()
+                        {
+                            Status = ((int)GameApiError.Fail).ToString("d4"),
+                            Desc = GameApiError.Fail.Description(),
+                            Balance = default(decimal),
+                            BalanceTs = string.Empty
+                        })));
 
         [HttpPost("ping")]
         public Task<JsonDocument> PingAsync(JsonDocument request)

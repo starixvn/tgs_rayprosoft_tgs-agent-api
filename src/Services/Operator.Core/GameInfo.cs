@@ -6,19 +6,19 @@ namespace TGS.Services.Operator
     {
         public int Id { get; init; }
 
-        public string Code { get; init; }
+        public string Code { get; init; } = default!;
 
-        public string Name { get; init; }
+        public string Name { get; init; } = default!;
 
-        public string Description { get; init; }
+        public string Description { get; init; } = default!;
 
-        public string GameProviderCode { get; init; }
+        public string GameProviderCode { get; init; } = default!;
 
         public bool IsActive { get; init; }
 
         public GameType Type { get; init; }
 
-        public TagInfo Tag { get; init; }
+        public TagInfo Tag { get; init; } = default!;
 
         public int DisplayOrder { get; init; }
     }

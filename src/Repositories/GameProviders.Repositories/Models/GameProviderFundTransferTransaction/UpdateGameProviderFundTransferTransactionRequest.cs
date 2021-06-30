@@ -15,6 +15,6 @@ namespace TGS.GameProviders.Repositories.Models.GameProviderFundTransferTransact
         public FundTransferTransactionStatus Status { get; set; }
         public decimal Balance { get; set; }
         public DateTimeOffset UpdatedOn { get; set; }
-        public string? Description { get; set; }
+        public string Description { get; set; }
     }
 }

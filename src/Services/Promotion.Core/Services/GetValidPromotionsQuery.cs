@@ -6,7 +6,9 @@ namespace TGS.Services.Promotion.Services
     public class GetValidPromotionsQuery : PageableRequest
     {
         public Guid BrandId { get; init; }
-        public string PlayerCode { get; init; }
-        public string Language { get; set; }
+
+        public string Language { get; set; } = default!;
+
+        public string PlayerCode { get; init; } = default!;
     }
 }

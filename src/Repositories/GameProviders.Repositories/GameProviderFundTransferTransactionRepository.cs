@@ -14,7 +14,7 @@ namespace TGS.GameProviders.Repositories
 
         ValueTask<Guid?> AddAsync(AddGameProviderFundTransferTransactionRequest request);
         ValueTask<Guid?> UpdateAsync(UpdateGameProviderFundTransferTransactionRequest request);
-        ValueTask<GetGameProviderFundTransferTransactionResponse?> GetAsync(Guid gameProviderFundTransferTransactionId);
+        ValueTask<GetGameProviderFundTransferTransactionResponse> GetAsync(Guid gameProviderFundTransferTransactionId);
     }
 
     internal sealed class GameProviderFundTransferTransactionRepository : IGameProviderFundTransferTransactionRepository
@@ -88,16 +88,19 @@ namespace TGS.GameProviders.Repositories
         /// </summary>
         /// <param name="gameProviderFundTransferTransactionId">The game provider fund transfer transaction identifier.</param>
         /// <returns></returns>
-        async ValueTask<GetGameProviderFundTransferTransactionResponse?> IGameProviderFundTransferTransactionRepository.GetAsync(Guid gameProviderFundTransferTransactionId)
+        ValueTask<GetGameProviderFundTransferTransactionResponse> IGameProviderFundTransferTransactionRepository.GetAsync(
+            Guid gameProviderFundTransferTransactionId)
         {
-            var data = _repository.GameProviderFundTransferTransactions.Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId).FirstOrDefault();
+            var data = _repository.GameProviderFundTransferTransactions
+                .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+                .FirstOrDefault();
 
             if (data == null)
             {
                 return new();
             }
 
-            return new GetGameProviderFundTransferTransactionResponse()
+            return ValueTask.FromResult(new GetGameProviderFundTransferTransactionResponse()
             {
                 GameProviderFundTransferTransactionId = data.GameProviderFundTransferTransactionId,
                 TransactionId = data.TransactionId,
@@ -114,7 +117,7 @@ namespace TGS.GameProviders.Repositories
                 CreatedOn = data.CreatedOn,
                 UpdatedOn = data.UpdatedOn,
                 Description = data.Description,
-            };
+            });
         }
     }
 }
