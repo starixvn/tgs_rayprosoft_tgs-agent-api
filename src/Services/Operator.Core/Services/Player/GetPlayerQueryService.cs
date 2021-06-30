@@ -34,8 +34,8 @@ namespace TGS.Services.Operator.Services.Player
             return new PlayerDataInfo(
                 player.Username,
                 player.RealName,
-                player.Email,
                 player.Phone,
+                player.Email,
                 player.QQ,
                 player.Wechat,
                 IsSetPayPassword: player.WithdrawPassword.Length > 0,
