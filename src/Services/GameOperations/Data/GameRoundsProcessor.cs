@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -34,7 +33,6 @@ namespace TGS.Services.GameOperations.Data
             if (data.Success)
             {
                 await SuccessProcessorAsync(data).ConfigureAwait(false);
-
             }
             else
             {
@@ -49,64 +47,88 @@ namespace TGS.Services.GameOperations.Data
 
         public async ValueTask<(Round round, RoundDetail roundsDetail)> GetAsync(Guid roundsId)
         {
-            var round = _tgsRepository.Rounds.Where(x => x.Id == roundsId).FirstOrDefault();
-            var roundsDetail = _tgsRepository.RoundDetails.Where(x => x.RoundId == roundsId).FirstOrDefault();
-            return new(round, roundsDetail);
+            var round = await _tgsRepository.Rounds.AsQueryable()
+                .Where(x => x.Id == roundsId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+            var roundsDetail = await _tgsRepository.RoundDetails.AsQueryable()
+                .Where(x => x.RoundId == roundsId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            return (round, roundsDetail);
         }
 
-        public async ValueTask<(Round roundsData, RoundDetail roundsDetail)> GetExternalRoundIdAsync(string externalRoundId, string playerCode, Guid gameProviderId, int gameId)
+        public ValueTask<(Round roundsData, RoundDetail roundsDetail)> GetExternalRoundIdAsync(
+            string externalRoundId,
+            string playerCode,
+            Guid gameProviderId,
+            int gameId)
         {
-            var round = _tgsRepository.Rounds.Where(x =>
-            x.ExternalRoundId == externalRoundId
-            && x.PlayerCode == playerCode
-            && x.GameProviderId == gameProviderId
-            && x.GameId == gameId).FirstOrDefault();
+            var round = _tgsRepository.Rounds
+                .Where(x => x.ExternalRoundId == externalRoundId
+                    && x.PlayerCode == playerCode
+                    && x.GameProviderId == gameProviderId
+                    && x.GameId == gameId)
+                .FirstOrDefault();
             if (round == null)
             {
-                return new();
+                return ValueTask.FromResult((default(Round), default(RoundDetail)));
             }
             else
             {
                 var roundsDetail = _tgsRepository.RoundDetails.Where(x => x.RoundId == round.Id).FirstOrDefault();
 
-                return (round, roundsDetail);
+                return ValueTask.FromResult((round, roundsDetail));
             }
         }
 
         #region private
-        private async Task SuccessProcessorAsync(GameRoundsData data)
+
+        private async Task FailedInsertAsync(GameRoundsData data)
         {
-            var round = _tgsRepository.Rounds.Where(x =>
-            x.ExternalRoundId == data.ExternalRoundId
-            && x.PlayerCode == data.PlayerCode
-            && x.GameProviderId == data.GameProviderId
-            && x.GameId == data.GameId).FirstOrDefault();
-            if (round == null)
+            var item = new FailedGameRecordOperation()
             {
-                await SuccessInsertAsync(data).ConfigureAwait(false);
+                Id = GuidExtensions.NewSequentialGuid(),
+                GameProviderId = data.GameProviderId,
+                GameProviderCode = data.GameProviderCode,
+                ExternalRoundId = data.ExternalRoundId,
+                PlayerCode = data.PlayerCode,
+                GameId = data.GameId,
+                ExternalId = data.ExternalId,
+                Detail = data.AdditionalData,
+                AutoStatus = FailedGameRecordOperationAutoStatus.Manual,
+                ProcesStatus = FailedGameRecordOperationProcesStatus.Process,
+                CreatedOn = DateTimeOffset.UtcNow,
+                UpdatedOn = DateTimeOffset.UtcNow,
+            };
+            _tgsRepository.FailedGameRecordOperations.Add(item);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        private async Task FailedProcessorAsync(GameRoundsData data)
+        {
+            var failed = _tgsRepository.FailedGameRecordOperations.Where(x => x.ExternalRoundId == data.ExternalRoundId && x.PlayerCode == data.PlayerCode && x.GameProviderId == data.GameProviderId && x.GameId == data.GameId).FirstOrDefault();
+            if (failed == null)
+            {
+                await FailedInsertAsync(data).ConfigureAwait(false);
             }
             else
             {
-                if (round.Status == RoundStatus.Open && data.Status == RoundStatus.Closed)
+                if (failed.ProcesStatus == FailedGameRecordOperationProcesStatus.Process)
                 {
-                    await SuccessUpdateColseAsync(round, data).ConfigureAwait(false);
-                }
-                else
-                {
-                    // 改單
-                    if (round.Status == RoundStatus.Closed)
-                    {
-                        if (round.BetAmount != data.BetAmount ||
-                        round.ValidBetAmount != data.ValidBetAmount ||
-                        round.SettleAmount != data.SettleAmount ||
-                         round.WinLoss != (data.PlayerWinLoss ?? 0).Negate()
-                        )
-                        {
-                            await SuccessUpdateReopenedAsync(round, data).ConfigureAwait(false);
-                        }
-                    }
+                    await FailedUpdateAsync(failed, data).ConfigureAwait(false);
                 }
             }
+        }
+
+        private async Task FailedUpdateAsync(FailedGameRecordOperation failed, GameRoundsData data)
+        {
+            failed.Detail = data.AdditionalData;
+            failed.UpdatedOn = DateTimeOffset.UtcNow;
+            _tgsRepository.FailedGameRecordOperations.Update(failed);
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private async Task SuccessInsertAsync(GameRoundsData data)
@@ -147,7 +169,41 @@ namespace TGS.Services.GameOperations.Data
             });
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
 
+        private async Task SuccessProcessorAsync(GameRoundsData data)
+        {
+            var round = _tgsRepository.Rounds.Where(x =>
+            x.ExternalRoundId == data.ExternalRoundId
+            && x.PlayerCode == data.PlayerCode
+            && x.GameProviderId == data.GameProviderId
+            && x.GameId == data.GameId).FirstOrDefault();
+            if (round == null)
+            {
+                await SuccessInsertAsync(data).ConfigureAwait(false);
+            }
+            else
+            {
+                if (round.Status == RoundStatus.Open && data.Status == RoundStatus.Closed)
+                {
+                    await SuccessUpdateColseAsync(round, data).ConfigureAwait(false);
+                }
+                else
+                {
+                    // 改單
+                    if (round.Status == RoundStatus.Closed)
+                    {
+                        if (round.BetAmount != data.BetAmount ||
+                        round.ValidBetAmount != data.ValidBetAmount ||
+                        round.SettleAmount != data.SettleAmount ||
+                         round.WinLoss != (data.PlayerWinLoss ?? 0).Negate()
+                        )
+                        {
+                            await SuccessUpdateReopenedAsync(round, data).ConfigureAwait(false);
+                        }
+                    }
+                }
+            }
         }
 
         private async Task SuccessUpdateColseAsync(Round round, GameRoundsData data)
@@ -175,7 +231,6 @@ namespace TGS.Services.GameOperations.Data
             _tgsRepository.RoundDetails.Update(roundDetail);
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-
         }
 
         private async Task SuccessUpdateReopenedAsync(Round round, GameRoundsData data)
@@ -202,54 +257,8 @@ namespace TGS.Services.GameOperations.Data
             _tgsRepository.RoundDetails.Update(roundDetail);
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-
         }
 
-        private async Task FailedProcessorAsync(GameRoundsData data)
-        {
-            var failed = _tgsRepository.FailedGameRecordOperations.Where(x => x.ExternalRoundId == data.ExternalRoundId && x.PlayerCode == data.PlayerCode && x.GameProviderId == data.GameProviderId && x.GameId == data.GameId).FirstOrDefault();
-            if (failed == null)
-            {
-                await FailedInsertAsync(data).ConfigureAwait(false);
-            }
-            else
-            {
-                if (failed.ProcesStatus == FailedGameRecordOperationProcesStatus.Process)
-                {
-                    await FailedUpdateAsync(failed, data).ConfigureAwait(false);
-                }
-            }
-        }
-
-        private async Task FailedInsertAsync(GameRoundsData data)
-        {
-            var item = new FailedGameRecordOperation()
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                GameProviderId = data.GameProviderId,
-                GameProviderCode = data.GameProviderCode,
-                ExternalRoundId = data.ExternalRoundId,
-                PlayerCode = data.PlayerCode,
-                GameId = data.GameId,
-                ExternalId = data.ExternalId,
-                Detail = data.AdditionalData,
-                AutoStatus = FailedGameRecordOperationAutoStatus.Manual,
-                ProcesStatus = FailedGameRecordOperationProcesStatus.Process,
-                CreatedOn = DateTimeOffset.UtcNow,
-                UpdatedOn = DateTimeOffset.UtcNow,
-            };
-            _tgsRepository.FailedGameRecordOperations.Add(item);
-
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-        }
-
-        private async Task FailedUpdateAsync(FailedGameRecordOperation failed, GameRoundsData data)
-        {
-            failed.Detail = data.AdditionalData;
-            failed.UpdatedOn = DateTimeOffset.UtcNow;
-            _tgsRepository.FailedGameRecordOperations.Update(failed);
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-        }
-        #endregion
+        #endregion private
     }
 }

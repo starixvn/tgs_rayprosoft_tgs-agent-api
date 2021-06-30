@@ -14,11 +14,11 @@ namespace TGS.Services.Promotion
         Task CreatePromotionBonusAsync(PromotionBonusModel[] model);
 
         IQueryable<PromotionPlayer> GetPromotionBonusPlayersQueries(
-            Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>> preQuery = null,
+            Func<IQueryable<PromotionPlayer>, IQueryable<PromotionPlayer>>? preQuery = null,
             bool tracking = false);
 
         IQueryable<PromotionBonus> GetPromotionBonusQueries(
-                            Func<IQueryable<PromotionBonus>, IQueryable<PromotionBonus>> preQuery = null,
+                            Func<IQueryable<PromotionBonus>, IQueryable<PromotionBonus>>? preQuery = null,
             bool tracking = false);
 
         Task UpdatePromotionBonusPlayersAsync(PromotionPlayer[] players);

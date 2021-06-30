@@ -69,7 +69,7 @@ namespace TGS.Services.Operator.Services.Game
                     .ToArray();
             }
 
-            CachedPlayer cachedPlayer = null;
+            CachedPlayer? cachedPlayer = null;
 
             if (playerTokenData != null)
             {

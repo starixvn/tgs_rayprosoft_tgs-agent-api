@@ -16,6 +16,6 @@ namespace TGS.Services.Agent.Services.BrandPayments
         }
 
         public ValueTask<PaymentInfo> GetAsync(GetPaymentQuery query, CancellationToken cancellationToken = default)
-            => _paymentServiceClient.GetPaymentByIdAsync(query.PaymentId);
+            => _paymentServiceClient.GetPaymentByIdAsync(query.PaymentId)!;
     }
 }

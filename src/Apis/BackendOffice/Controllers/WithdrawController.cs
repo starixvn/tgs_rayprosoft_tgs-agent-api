@@ -114,15 +114,14 @@ namespace TGS.Apis.BackendOffice.Controllers
             return response;
         }
 
-        [HttpPost("{brandId}/{formId}")]
+        [HttpPost("{formId}")]
         public async Task<MessageResponse> ReviewWithdrawFormAsync(
             [FromServices] ICommandService<ReviewWithdrawFormCommand> reviewCommandService,
-            Guid brandId,
             Guid formId,
             [FromBody] WithdrawReviewRequest reviewResponse)
         {
             var command = new ReviewWithdrawFormCommand(
-                brandId,
+                reviewResponse.BrandId,
                 formId,
                 reviewResponse.BrandPaymentId,
                 reviewResponse.ReviewResponse.ToReviewState(),

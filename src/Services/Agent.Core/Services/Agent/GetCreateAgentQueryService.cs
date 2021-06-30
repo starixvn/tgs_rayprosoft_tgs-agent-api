@@ -9,15 +9,17 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.ServiceUtility;
+
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
+
 using CoreUtility = TGS.Core.Infrastructures.Utility;
 
 namespace TGS.Services.Agent.Services.Agent
 {
     internal class GetCreateAgentQueryService : IGetService<GetCreateAgentQuery, CreateAgentInfo>
     {
-        private readonly ITgsRepository _tgsRepository;
         private readonly IPasswordHandler _passwordHandler;
+        private readonly ITgsRepository _tgsRepository;
 
         public GetCreateAgentQueryService(
             ITgsRepository tgsRepository,
@@ -29,11 +31,17 @@ namespace TGS.Services.Agent.Services.Agent
 
         public async ValueTask<CreateAgentInfo> GetAsync(GetCreateAgentQuery query, CancellationToken cancellationToken = default)
         {
-            var parentAgent = await _tgsRepository.Agents.AsQueryable().FirstOrDefaultAsync(x => x.Id == query.ParentAgentId);
-            var brand = await _tgsRepository.Brands.AsQueryable().FirstAsync(x => x.Id == query.BrandId);
+            var parentAgent = await _tgsRepository.Agents.AsQueryable()
+                .FirstAsync(x => x.Id == query.ParentAgentId)
+                .ConfigureAwait(false);
+            var brand = await _tgsRepository.Brands.AsQueryable()
+                .FirstAsync(x => x.Id == query.BrandId)
+                .ConfigureAwait(false);
 
-            var isAgentNameExist = _tgsRepository.Agents.Any(x => x.BrandId == query.BrandId
-               && EF.Functions.ILike(x.Username, $"%{query.UserName}%"));
+            var isAgentNameExist = await _tgsRepository.Agents.AsQueryable()
+                .AnyAsync(x => x.BrandId == query.BrandId
+                    && EF.Functions.ILike(x.Username, $"%{query.UserName}%"))
+                .ConfigureAwait(false);
 
             if (isAgentNameExist)
             {
@@ -46,7 +54,9 @@ namespace TGS.Services.Agent.Services.Agent
 
             var invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
 
-            while (_tgsRepository.Agents.Any(x => x.InvitationCode == invitationCode))
+            while (await _tgsRepository.Agents.AsQueryable()
+                .AnyAsync(agent => agent.InvitationCode == invitationCode)
+                .ConfigureAwait(false))
             {
                 invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
             }
@@ -64,14 +74,14 @@ namespace TGS.Services.Agent.Services.Agent
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
                     query.LiveDealerRebatePercentage == 0
-                    && query.DividendPercentage == 0
-                    && query.SlotRebatePercentage == 0
-                    && query.LotteryRebatePercentage == 0
-                    && query.CardGameRebatePercentage == 0
-                    && query.SportsRebatePercentage == 0
-                    && query.VirtualSportsRebatePercentage == 0
-                        ? AgentConfigStatus.WaitForConfigurePercentage
-                        : AgentConfigStatus.DoneForConfigurePercentage,
+                        && query.DividendPercentage == 0
+                        && query.SlotRebatePercentage == 0
+                        && query.LotteryRebatePercentage == 0
+                        && query.CardGameRebatePercentage == 0
+                        && query.SportsRebatePercentage == 0
+                        && query.VirtualSportsRebatePercentage == 0
+                            ? AgentConfigStatus.WaitForConfigurePercentage
+                            : AgentConfigStatus.DoneForConfigurePercentage,
 
                 DividendPercentage = query.DividendPercentage,
                 LiveDealerRebatePercentage = query.LiveDealerRebatePercentage,
@@ -82,8 +92,8 @@ namespace TGS.Services.Agent.Services.Agent
                 VirtualSportsRebatePercentage = query.VirtualSportsRebatePercentage,
                 InvitationCode = invitationCode,
                 Remarks = query.Remarks,
-                CreatedByUsername = parentAgent.Username,
-                UpdatedByUsername = parentAgent.Username,
+                CreatedByUsername = parentAgent!.Username,
+                UpdatedByUsername = parentAgent!.Username,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now,
                 RegisteredOn = DateTimeOffset.Now
@@ -96,21 +106,21 @@ namespace TGS.Services.Agent.Services.Agent
             agent.WithdrawPassword = Array.Empty<byte>();
             agent.WithdrawSalt = Array.Empty<byte>();
             agent.Wallets = new AgentWallet[]
+            {
+                new AgentWallet
                 {
-                    new AgentWallet
-                    {
-                        Id = defaultWalletId,
-                        Agent = agent,
-                        Balance = 0,
-                        CurrencyCode = brand.Currencies.First().CurrencyCode,
-                        CreatedOn = DateTimeOffset.Now,
-                        UpdatedOn = DateTimeOffset.Now
-                    }
+                    Id = defaultWalletId,
+                    Agent = agent,
+                    Balance = 0,
+                    CurrencyCode = brand.Currencies.First().CurrencyCode,
+                    CreatedOn = DateTimeOffset.Now,
+                    UpdatedOn = DateTimeOffset.Now
                 }
-                .ToHashSet();
+            }
+            .ToHashSet();
 
-            await _tgsRepository.Agents.AddAsync(agent);
-            await _tgsRepository.SaveChangesAsync();
+            await _tgsRepository.Agents.AddAsync(agent).ConfigureAwait(false);
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
 
             return new CreateAgentInfo()
             {

@@ -22,18 +22,22 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
         {
         }
 
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
-            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+        protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
+            string playerCode,
+            Round round,
+            CachedGameProvider cachedGameProvider,
+            CachedGame cachedGame,
+            string language)
         {
             var gameRecord = JsonSerializer.Deserialize<KYGameRecord>(round.RoundDetail.AdditionalData);
 
             if (gameRecord == null)
             {
-                return null;
+                return ValueTask.FromResult<RoundResult>(null);
             }
 
 
-            return new RoundResult
+            return ValueTask.FromResult(new RoundResult
             {
                 BetAmount = round.BetAmount ?? 0,
                 Turnover = round.Turnover ?? 0,
@@ -43,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                {
                     new JsonData {Value = gameRecord.CardValue}
                }
-            };
+            });
 
         }
 

@@ -2,8 +2,10 @@
 {
     public class CreateAgentInfo
     {
+        public string AgentId { get; init; } = default!;
+
         public bool IsNew { get; init; }
-        public string AgentId { get; init; }
-        public string Message { get; init; }
+
+        public string Message { get; init; } = default!;
     }
 }
