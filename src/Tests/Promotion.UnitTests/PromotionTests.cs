@@ -240,7 +240,7 @@ namespace Promotion.UnitTests
             await sut.ExecuteAsync(command);
 
             _ = fakePromotionChecker.Received(2)
-                .CheckAsync(Arg.Any<string>());
+                .TagPromotionTypeAsync(Arg.Any<string>());
         }
     }
 }

@@ -63,13 +63,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
             var moqPromotionClient = new Mock<IPromotionClient>();
-            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentServiceClient.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object,
-                moqPlayerCommands.Object);
+                moqPromotionClient.Object);
 
             var command = new CreateDepositFormCommand(
                 "ThisIsPlayerCode",
@@ -121,13 +119,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new LeePaySerializer();
             var moqPromotionClient = new Mock<IPromotionClient>();
-            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentServiceClient.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object,
-                moqPlayerCommands.Object);
+                moqPromotionClient.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(
@@ -209,13 +205,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqPaymentClient = new Mock<IPaymentClient>();
             var moqPromotionClient = new Mock<IPromotionClient>();
-            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentServiceClient.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object,
-                moqPlayerCommands.Object);
+                moqPromotionClient.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(
