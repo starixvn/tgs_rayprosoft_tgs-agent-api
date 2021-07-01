@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
+using TGS.Apis.TgsApi.GameProviders.AllBet;
 using TGS.Apis.TgsApi.GameProviders.AsiaGaming;
 using TGS.Apis.TgsApi.GameProviders.BigGaming;
 using TGS.Apis.TgsApi.GameProviders.Habanero;
 using TGS.Apis.TgsApi.GameProviders.IMESports;
-using TGS.Apis.TgsApi.GameProviders.KY;
 using TGS.Apis.TgsApi.GameProviders.JDB;
+using TGS.Apis.TgsApi.GameProviders.KY;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.Saba;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
-using TGS.Apis.TgsApi.GameProviders.VR;
-using TGS.Core.Models;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming;
 using TGS.Apis.TgsApi.GameProviders.Skywind;
+using TGS.Apis.TgsApi.GameProviders.VR;
+using static TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Apis.TgsApi
 {
@@ -20,36 +21,38 @@ namespace TGS.Apis.TgsApi
     {
         // TODO: RedTiger is temporary used only since it has no implementation, would be removed or refactored in the future
 
-        private static readonly IReadOnlyDictionary<string, Type> StartupMap = new Dictionary<string, Type>
+        private static readonly IReadOnlyDictionary<string, Type> _StartupMap = new Dictionary<string, Type>
         {
-            {Consts.GameProvider.SBOBET, typeof(SBOBETStartup)},
-            {Consts.GameProvider.Habanero, typeof(HabaneroStartup)},
-            {Consts.GameProvider.PragmaticPlay, typeof(PragmaticPlayStartup)},
-            {Consts.GameProvider.AsiaGaming, typeof(AsiaGamingStartup)},
-            {Consts.GameProvider.JDB, typeof(JDBStartup)},
-            {Consts.GameProvider.Saba, typeof(SabaStartup)},
-            {Consts.GameProvider.KY, typeof(KYStartup)},
-            {Consts.GameProvider.VR, typeof(VRStartup)},
-            {Consts.GameProvider.IMESports, typeof(IMESportsStartup)},
-            {Consts.GameProvider.BigGaming, typeof(BigGamingStartup)},
-            {Consts.GameProvider.SexyGaming, typeof(SexyGamingStartup)},
-             {Consts.GameProvider.Skywind, typeof(SkywindStartup)}
+            {SBOBET, typeof(SBOBETStartup)},
+            {Habanero, typeof(HabaneroStartup)},
+            {PragmaticPlay, typeof(PragmaticPlayStartup)},
+            {AsiaGaming, typeof(AsiaGamingStartup)},
+            {JDB, typeof(JDBStartup)},
+            {Saba, typeof(SabaStartup)},
+            {KY, typeof(KYStartup)},
+            {VR, typeof(VRStartup)},
+            {IMESports, typeof(IMESportsStartup)},
+            {BigGaming, typeof(BigGamingStartup)},
+            {SexyGaming, typeof(SexyGamingStartup)},
+            {Skywind, typeof(SkywindStartup)},
+            {AllBet, typeof(AllBetStartup)}
         };
 
-        private static readonly IReadOnlyDictionary<string, string> ConfigFileMap = new Dictionary<string, string>
+        private static readonly IReadOnlyDictionary<string, string> _ConfigFileMap = new Dictionary<string, string>
         {
-            {Consts.GameProvider.SBOBET, "SBOBET/sbobet.json"},
-            {Consts.GameProvider.Habanero, "Habanero/habanero.json"},
-            {Consts.GameProvider.PragmaticPlay, "PragmaticPlay/pragmaticplay.json"},
-            {Consts.GameProvider.AsiaGaming, "AsiaGaming/asiagaming.json"},
-            {Consts.GameProvider.JDB, "JDB/jdb.json"},
-            {Consts.GameProvider.Saba, "Saba/saba.json"},
-            {Consts.GameProvider.KY, "KY/ky.json"},
-            {Consts.GameProvider.VR, "VR/vr.json"},
-            {Consts.GameProvider.BigGaming, "BigGaming/biggaming.json"},
-            {Consts.GameProvider.IMESports, "IMESports/imesports.json"},
-            {Consts.GameProvider.SexyGaming, "SexyGaming/sexygaming.json"},
-            {Consts.GameProvider.Skywind, "Skywind/skywind.json"}
+            {SBOBET, "SBOBET/sbobet.json"},
+            {Habanero, "Habanero/habanero.json"},
+            {PragmaticPlay, "PragmaticPlay/pragmaticplay.json"},
+            {AsiaGaming, "AsiaGaming/asiagaming.json"},
+            {JDB, "JDB/jdb.json"},
+            {Saba, "Saba/saba.json"},
+            {KY, "KY/ky.json"},
+            {VR, "VR/vr.json"},
+            {BigGaming, "BigGaming/biggaming.json"},
+            {IMESports, "IMESports/imesports.json"},
+            {SexyGaming, "SexyGaming/sexygaming.json"},
+            {Skywind, "Skywind/skywind.json"},
+            {AllBet, "Allbet/allbet.json"}
         };
     }
 }

@@ -74,6 +74,7 @@ namespace TGS.Core.Models
             public const string BigGaming = "BG";
             public const string SexyGaming = "SG";
             public const string Skywind = "SW";
+            public const string AllBet = "AB";
         }
 
         public static class EnvironmentVariable

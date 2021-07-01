@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DataInitializers\Games\AB.csv" />
     <None Remove="DataInitializers\Games\SW.csv" />
+    <None Remove="SqlScripts\Functions\game_action_get_game_actions_by_external_group_id.sql" />
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <None Remove="SqlScripts\PaymentInitial\applepay.sql" />
   </ItemGroup>
@@ -21,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\AB.csv" />
     <EmbeddedResource Include="DataInitializers\Games\IMES.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\BG.csv" />
@@ -35,6 +38,7 @@
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
     <EmbeddedResource Include="Migrations\RefactorWithdrawForm.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_provider_configuration_for_cache.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_group_id.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_transaction_id.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_referenced_game_action_exists.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_actions_by_external_round_id.sql" />
