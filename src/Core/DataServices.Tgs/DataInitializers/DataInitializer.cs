@@ -24,7 +24,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private const string AdminUsername = "admin.enabled";
         private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
 
-        private static readonly IList<IReseller> Resellers = new IReseller[] { new TgsReseller() };
+        private static readonly IList<IReseller> Resellers = new IReseller[]
+        {
+            new TgsReseller()
+        };
 
         private static readonly IRole _gpiBrandRole = new GpiBrandRole();
 
@@ -35,15 +38,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private readonly CurrencyDefined[] _currencies =
         {
-            new("CNY", "Yuan", "元", "¥"), new("EUR", "Euro", "Euro", "€"),
+            new("CNY", "Yuan", "元", "¥"),
+            new("EUR", "Euro", "Euro", "€"),
             new("GBP", "Pound Sterling", "Pound Sterling", "£"),
             new("IDR", "Indonesian rupiah", "rupiah Indonesia", "Rp"),
             new("IDR_1000", "Indonesian rupiah", "rupiah Indonesia", "Rp"),
-            new("INR", "Indian Rupee", "भारतीय रुपये", "₹"), new("JPY", "Japanese Yen", "円", "¥"),
-            new("KRW", "Korean won", "Korean won", "₩"), new("MYR", "Malaysian Ringgit", "Malaysian Ringgit", "RM"),
-            new("SGD", "Singapore Dollar", "Singapore Dollar", "$"), new("THB", "Thai Baht", "บาท", "฿"),
+            new("INR", "Indian Rupee", "भारतीय रुपये", "₹"),
+            new("JPY", "Japanese Yen", "円", "¥"),
+            new("KRW", "Korean won", "Korean won", "₩"),
+            new("MYR", "Malaysian Ringgit", "Malaysian Ringgit", "RM"),
+            new("SGD", "Singapore Dollar", "Singapore Dollar", "$"),
+            new("THB", "Thai Baht", "บาท", "฿"),
             new("USD", "United States Dollar", "United States Dollar", "$"),
-            new("VND", "Vietnamese Dong", "đồng", "₫"), new("VND_1000", "Vietnamese Dong", "đồng", "₫"),
+            new("VND", "Vietnamese Dong", "đồng", "₫"),
+            new("VND_1000", "Vietnamese Dong", "đồng", "₫"),
             new("HKD", "Hong Kong Dollars", "元", "HK$")
         };
 
@@ -58,7 +66,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private readonly IRole[] _roles =
         {
-            new AdminRole(), new ResellerAdminRole(), new LicenseeAdminRole(), new TgsBrandRole(), _gpiBrandRole
+            new AdminRole(),
+            new ResellerAdminRole(),
+            new LicenseeAdminRole(),
+            new TgsBrandRole(),
+            _gpiBrandRole
         };
 
         private BetLimit[] _betLimits;
@@ -75,11 +87,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             _gameProviders = new IGameProvider[]
             {
-                new SBOGameProvider(env), new HabaneroGameProvider(env), new PragmaticPlayGameProvider(env),
-                new AsiaGamingGameProvider(env), new SabaGameProvider(env), new KYGameProvider(env),
-                new VRGameProvider(env), new IMESportsGameProvider(env), new BigGamingGameProvider(env),
-                new JDBGameProvider(env), new SexyGamingGameProvider(env), new SkywindGameProvider(env),
-                new EvolutionGameProvider(env)
+                new SBOGameProvider(env),
+                new HabaneroGameProvider(env),
+                new PragmaticPlayGameProvider(env),
+                new AsiaGamingGameProvider(env),
+                new SabaGameProvider(env),
+                new KYGameProvider(env),
+                new VRGameProvider(env),
+                new IMESportsGameProvider(env),
+                new BigGamingGameProvider(env),
+                new JDBGameProvider(env),
+                new SexyGamingGameProvider(env),
+                new SkywindGameProvider(env),
+                new AllBetGameProvider(env),
+                 new EvolutionGameProvider(env)
             };
         }
 
@@ -329,11 +350,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             BetLimitDefined[] limits =
             {
-                new("CNY", 1, 200, 1000), new("CNY", 10, 300, 1000), new("EUR", 1, 200, 1000),
-                new("GBP", 1, 200, 1000), new("IDR", 1000, 200000, 1000000), new("IDR_1000", 1, 200, 1000),
-                new("INR", 1, 200, 1000), new("JPY", 1, 200, 1000), new("KRW", 1, 200, 1000),
-                new("MYR", 1, 200, 1000), new("SGD", 1, 200, 1000), new("THB", 1, 200, 1000),
-                new("USD", 1, 200, 1000), new("VND", 1000, 200000, 1000000), new("VND_1000", 1, 200, 1000)
+                new("CNY", 1, 200, 1000),
+                new("CNY", 10, 300, 1000),
+                new("EUR", 1, 200, 1000),
+                new("GBP", 1, 200, 1000),
+                new("IDR", 1000, 200000, 1000000),
+                new("IDR_1000", 1, 200, 1000),
+                new("INR", 1, 200, 1000),
+                new("JPY", 1, 200, 1000),
+                new("KRW", 1, 200, 1000),
+                new("MYR", 1, 200, 1000),
+                new("SGD", 1, 200, 1000),
+                new("THB", 1, 200, 1000),
+                new("USD", 1, 200, 1000),
+                new("VND", 1000, 200000, 1000000),
+                new("VND_1000", 1, 200, 1000)
             };
 
             _betLimits = limits.Select(b => new BetLimit
@@ -1010,10 +1041,22 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             string[] adminAccounts =
             {
-                "hank.wu", "lester.wei", "sam.chuang", "houdini.sheng", "rico.lin", "Paul.hsu", "Phoenix.chen",
-                "Gordon.hung", "andy.chu", "jj"
+                "hank.wu",
+                "lester.wei",
+                "sam.chuang",
+                "houdini.sheng",
+                "rico.lin",
+                "Paul.hsu",
+                "Phoenix.chen",
+                "Gordon.hung",
+                "andy.chu",
+                "jj"
             };
-            string[] brandAccounts = { "aaron.xiao", "meg.chiu" };
+            string[] brandAccounts =
+            {
+                "aaron.xiao",
+                "meg.chiu"
+            };
             var users = new List<User>
             {
                 CreateUser("admin.disabled", UserStatus.Disabled, Roles.AdminRoleId,

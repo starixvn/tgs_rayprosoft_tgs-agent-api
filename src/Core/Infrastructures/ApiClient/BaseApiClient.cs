@@ -13,7 +13,13 @@ namespace TGS.Core.Infrastructures.ApiClient
     public abstract class BaseApiClient
     {
         private const char Slash = '/';
-        private static readonly char[] UrlTrimChars = {Slash, ' '};
+
+        private static readonly char[] UrlTrimChars =
+        {
+            Slash,
+            ' '
+        };
+
         private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(60);
 
         private readonly HttpClient _client;
@@ -39,7 +45,7 @@ namespace TGS.Core.Infrastructures.ApiClient
             string logPrefix = null, TimeSpan? timeout = null, JsonSerializerOptions options = null)
         {
             var requestMessage = CreateHttpRequestMessage(path, method);
-            var httpRequestMessage = CreateJsonRequest(requestMessage, request, headers, contentHeaders);
+            var httpRequestMessage = CreateJsonRequest(requestMessage, request, headers, contentHeaders, options);
             var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
             return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
@@ -51,7 +57,7 @@ namespace TGS.Core.Infrastructures.ApiClient
         {
             var uriString = GetUriString(apiUrl, path);
             var requestMessage = CreateHttpRequestMessage(uriString, method);
-            var httpRequestMessage = CreateJsonRequest(requestMessage, request, headers, contentHeaders);
+            var httpRequestMessage = CreateJsonRequest(requestMessage, request, headers, contentHeaders, options);
             var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
             return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
@@ -141,7 +147,7 @@ namespace TGS.Core.Infrastructures.ApiClient
             return await _client.SendAsync(request, cts.Token);
         }
 
-        private void PrepareJsonRequest(HttpRequestMessage request, object content)
+        private void PrepareJsonRequest(HttpRequestMessage request, object content, JsonSerializerOptions options)
         {
             request.Headers.Remove("Accept");
             request.Headers.Add("Accept", "application/json");
@@ -154,7 +160,7 @@ namespace TGS.Core.Infrastructures.ApiClient
                     return;
                 }
 
-                request.Content = new StringContent(Json.SerializeToString(content));
+                request.Content = new StringContent(Json.SerializeToString(content, options));
                 request.Content.Headers.Remove("Content-Type");
                 request.Content.Headers.Add("Content-Type", "application/json");
             }
@@ -210,7 +216,7 @@ namespace TGS.Core.Infrastructures.ApiClient
         }
 
         private static HttpRequestMessage CreateHttpRequestMessage(string path, HttpMethod method) =>
-            new(method, path);
+            new HttpRequestMessage(method, path);
 
         private async Task<T> ReadJsonContentAsync<T>(HttpContent content, JsonSerializerOptions options)
         {
@@ -219,9 +225,10 @@ namespace TGS.Core.Infrastructures.ApiClient
         }
 
         private HttpRequestMessage CreateJsonRequest(HttpRequestMessage httpRequestMessage, object request,
-            IReadOnlyDictionary<string, string> headers, IReadOnlyDictionary<string, string> contentHeaders)
+            IReadOnlyDictionary<string, string> headers, IReadOnlyDictionary<string, string> contentHeaders,
+            JsonSerializerOptions options)
         {
-            PrepareJsonRequest(httpRequestMessage, request);
+            PrepareJsonRequest(httpRequestMessage, request, options);
             AddHeaders(httpRequestMessage, headers, contentHeaders);
             return httpRequestMessage;
         }
