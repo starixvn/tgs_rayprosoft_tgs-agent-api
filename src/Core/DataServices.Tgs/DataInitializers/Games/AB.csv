@@ -1,0 +1,12 @@
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
+Lobby,Lobby,,AllbetLobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Normal Baccarat,Normal_Baccarat,,101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
+VIP Baccarat,VIP_Baccarat,,102,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
+Quick Baccarat,Quick_Baccarat,,103,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
+See Card Baccarat,See_Card_Baccarat,,104,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
+SicBo(HiLo),SicBo(HiLo),,201,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,TRUE,TRUE,
+Dragon Tiger,Dragon_Tiger,,301,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,TRUE,TRUE,
+Roulette,Roulette,,401,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,TRUE,TRUE,
+Pok Deng,Pok_Deng,,501,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
+Bull Bull,Bull_Bull,,801,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
+Win Three Cards,Win_Three_Cards,,901,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,

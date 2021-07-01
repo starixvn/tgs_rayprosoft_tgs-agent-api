@@ -353,7 +353,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         },
-                        new MenuSetting("Brands")
+                        new MenuSetting("Platforms")
+                        {
+                            SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
+                        },
+                        new MenuSetting("PlatformCredit")
                         {
                             SubMenus = new[] {new MenuSetting("View"), new MenuSetting("Update")}
                         }
