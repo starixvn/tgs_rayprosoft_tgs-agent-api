@@ -5,8 +5,8 @@ namespace TGS.Services.Promotion
 {
     internal class FirstDepositChecker : IPromotionChecker
     {
-        private readonly IPlayerService _playerService;
         private readonly IPlayerDataRepository _playerDataRepository;
+        private readonly IPlayerService _playerService;
 
         public FirstDepositChecker(IPlayerService playerService, IPlayerDataRepository playerDataRepository)
         {
@@ -33,23 +33,9 @@ namespace TGS.Services.Promotion
             return player.FirstDepositOn == null;
         }
 
-        public async ValueTask CommitTagAsync(string playerCode)
-        {
-            var depositTime = await _playerDataRepository
-                .GetPlayerFirstDepositFlagTimeAsync(playerCode)
-                .ConfigureAwait(false);
-
-            if (depositTime == null)
-                return;
-
-            await _playerService
-                .SetFirstDepositTimeAsync(playerCode, depositTime.Value)
-                .ConfigureAwait(false);
-
-            await _playerDataRepository
-                .RemovePlayerFirstDepositFlagAsync(playerCode)
-                .ConfigureAwait(false);
-        }
+        public ValueTask CommitTagAsync(string playerCode)
+            => _playerDataRepository
+                .RemovePlayerFirstDepositFlagAsync(playerCode);
 
         public ValueTask RollbackTagAsync(string playerCode)
             => _playerDataRepository.RemovePlayerFirstDepositFlagAsync(playerCode);

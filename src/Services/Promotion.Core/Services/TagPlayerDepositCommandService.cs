@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TGS.ServiceUtility;
 
@@ -8,8 +9,13 @@ namespace TGS.Services.Promotion.Services
     {
         private readonly IPromotionChecker[] _checkers;
 
-        public TagPlayerDepositCommandService(PromotionCheckerFactory promotionCheckerFactory)
+        public TagPlayerDepositCommandService(IPromotionCheckerFactory promotionCheckerFactory)
         {
+            if (promotionCheckerFactory is null)
+            {
+                throw new ArgumentNullException(nameof(promotionCheckerFactory));
+            }
+
             var firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
             var dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
 

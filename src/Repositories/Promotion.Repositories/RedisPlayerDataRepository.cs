@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Services.Promotion;
 
@@ -37,62 +36,60 @@ namespace TGS.Promotion.Repositories
                 .ConfigureAwait(false);
         }
 
-        public async ValueTask<DateTimeOffset?> GetPlayerFirstDepositFlagTimeAsync(string playerCode)
-        {
-            var dataKey = $"{_KeyPrefix}:{playerCode}";
-
-            var value = await _redisDatabase
-                .StringGetAsync(dataKey)
-                .ConfigureAwait(false);
-
-            return value.HasValue ? DateTimeOffset.Parse(value) : null;
-        }
-
         public async ValueTask RemovePlayerDailyDepositFlagAsync(string playerCode)
         {
             var currentDate = DateTimeOffset.Now;
+            var dataKey = $"{_KeyPrefix}:{currentDate:yyyyMMdd}:{playerCode}";
 
-            await _redisDatabase
-                .KeyDeleteAsync(
-                    $"{_KeyPrefix}:{currentDate:yyyyMMdd}:{playerCode}",
-                    CommandFlags.FireAndForget)
+            var count = await _redisDatabase
+                .StringDecrementAsync(dataKey)
                 .ConfigureAwait(false);
+
+            if (count <= 0)
+                await _redisDatabase
+                    .KeyDeleteAsync(dataKey, CommandFlags.FireAndForget)
+                    .ConfigureAwait(false);
         }
 
         public async ValueTask RemovePlayerFirstDepositFlagAsync(string playerCode)
         {
             var dataKey = $"{_KeyPrefix}:{playerCode}";
 
-            await _redisDatabase
-                .KeyDeleteAsync(dataKey, CommandFlags.FireAndForget)
+            var count = await _redisDatabase
+                .StringDecrementAsync(dataKey)
                 .ConfigureAwait(false);
+
+            if (count <= 0)
+                await _redisDatabase
+                    .KeyDeleteAsync(dataKey, CommandFlags.FireAndForget)
+                    .ConfigureAwait(false);
         }
 
         public async ValueTask SetPlayerDailyDepositFlagAsync(string playerCode)
         {
             var currentDate = DateTimeOffset.Now;
+            var key = $"{_KeyPrefix}:{currentDate:yyyyMMdd}:{playerCode}";
 
             await _redisDatabase
                 .StringSetAsync(
                     $"{_KeyPrefix}:{currentDate:yyyyMMdd}:{playerCode}",
-                    "1",
+                    "0",
                     TimeSpan.FromDays(1D),
                     when: When.NotExists,
                     flags: CommandFlags.FireAndForget)
+                .ConfigureAwait(false);
+
+            await _redisDatabase
+                .StringIncrementAsync(key, flags: CommandFlags.FireAndForget)
                 .ConfigureAwait(false);
         }
 
         public async ValueTask SetPlayerFirstDepositFlagAsync(string playerCode)
         {
             var dataKey = $"{_KeyPrefix}:{playerCode}";
-            var currentDate = DateTimeOffset.Now;
 
             await _redisDatabase
-                .StringSetAsync(
-                    dataKey,
-                    currentDate.ToIso8601String(),
-                    when: When.NotExists,
-                    flags: CommandFlags.FireAndForget)
+                .StringIncrementAsync(dataKey, flags: CommandFlags.FireAndForget)
                 .ConfigureAwait(false);
         }
     }

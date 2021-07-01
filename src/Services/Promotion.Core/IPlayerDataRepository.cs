@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace TGS.Services.Promotion
 {
@@ -8,8 +7,6 @@ namespace TGS.Services.Promotion
         ValueTask<bool> CheckPlayerFirstDepositingAsync(string playerCode);
 
         ValueTask<bool> CheckPlayerIsDailyFirstDepositAsync(string playerCode);
-
-        ValueTask<DateTimeOffset?> GetPlayerFirstDepositFlagTimeAsync(string playerCode);
 
         ValueTask RemovePlayerDailyDepositFlagAsync(string playerCode);
 
