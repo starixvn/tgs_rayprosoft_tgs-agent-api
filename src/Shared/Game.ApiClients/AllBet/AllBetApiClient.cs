@@ -19,6 +19,9 @@ namespace TGS.Shared.Game.ApiClients.AllBet
     {
         ValueTask<LoginResponse> LoginAsync(Uri apiUrl, string propertyId, string apiKey,
             LoginRequest request);
+
+        ValueTask<CheckOrCreateMemberResponse> CheckOrCreateMemberAsync(Uri apiUrl, string propertyId,
+            string apiKey, CheckOrCreateMemberRequest request);
     }
 
     public class AllBetApiClient : BaseApiClient, IAllBetApiClient
@@ -47,13 +50,26 @@ namespace TGS.Shared.Game.ApiClients.AllBet
                 request, headers, contentHeaders, options: _options);
         }
 
+        ValueTask<CheckOrCreateMemberResponse> IAllBetApiClient.CheckOrCreateMemberAsync(Uri apiUrl, string propertyId,
+            string apiKey, CheckOrCreateMemberRequest request)
+        {
+            var method = HttpMethod.Post;
+            var path = "/CheckOrCreate";
+            var (headers, contentHeaders) = GetHeaders(method, propertyId, apiKey, path, request);
+
+            return ExecuteJsonRequestAsync<CheckOrCreateMemberRequest, CheckOrCreateMemberResponse>(
+                method, apiUrl, path, request, headers, contentHeaders, options: _options);
+        }
+
         private (IReadOnlyDictionary<string, string> Headers, IReadOnlyDictionary<string, string> ContentHeaders)
             GetHeaders<T>(HttpMethod method, string propertyId, string apiKey, string path, T request)
         {
             var body = Json.SerializeToString(request, _options);
             var md5 = _hashProvider.Hash(body, HashAlgorithmKind.Md5, HashStringKind.Base64, Encoding.UTF8);
-            var date = DateTime.UtcNow.ToString("ddd, dd MMM yyyy HH:mm:ss GMT", new CultureInfo("en-US"));
             var contentType = "application/json";
+
+            // RFC 1123 pattern
+            var date = DateTime.Now.ToUniversalTime().ToString("R", new DateTimeFormatInfo());
 
             var stringToSign = string.Join("\n", method.ToString(), md5, contentType, date, path);
 
