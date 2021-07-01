@@ -1,113 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Json;
-using TGS.Paging;
-using TGS.Services.BackOffice.Domain;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
 {
-    internal class DepositFormQueryService : IQueryService<DepositFormQuery, DepositFormModel>, IGetService<DepositFormQuery, int>
+    internal class DepositFormQueryService : IGetService<DepositFormQuery, PagingResponse<DepositFormInfo>>
     {
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly ITgsRepository _tgsRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public DepositFormQueryService(ITgsRepository tgsRepository, IJsonSerializationProvider jsonSerializationProvider)
+        public DepositFormQueryService(IPaymentServiceClient paymentServiceClient)
         {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
-        public async ValueTask<int> GetAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
-            => await MakeQuery(query).CountAsync().ConfigureAwait(false);
-
-        public IAsyncEnumerable<DepositFormModel> QueryAsync(DepositFormQuery query, CancellationToken cancellationToken = default)
-        {
-            var dataQuery = MakeQuery(query);
-
-            var dbPaging = new Paging<DepositForm>();
-
-            if (query.Paging.ShowAll)
-            {
-                dbPaging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
-
-                dataQuery = dataQuery.ApplyOrderBy(dbPaging);
-            }
-            else
-            {
-                dbPaging.Page = query.Paging.Page;
-                dbPaging.RowCount = query.Paging.Rows;
-
-                dbPaging.SortByPropertyName(query.Paging.SortBy, query.Paging.IsDesc);
-
-                dataQuery = dataQuery.ApplyOrderBy(dbPaging).ApplyPaging(dbPaging);
-            }
-
-            return dataQuery
-                .ToAsyncEnumerable()
-                .Select(form => new DepositFormModel(
-                    form.Id,
-                    form.PlayerCode,
-                    form.Player.Username,
-                    form.BrandId,
-                    form.BrandPaymentId,
-                    form.BrandPayment.ChannelName,
-                    form.BrandPayment.PaymentMethodChannel.MethodId,
-                    form.Amount,
-                    form.Remark,
-                    form.Status,
-                    string.IsNullOrWhiteSpace(form.ApplyInfo)
-                        ? null
-                        : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.ApplyInfo, null),
-                    string.IsNullOrWhiteSpace(form.PaymentReturn)
-                        ? null
-                        : _jsonSerializationProvider.DeserializeFromString<JsonDocument>(form.PaymentReturn, null),
-                    form.CreatedOn,
-                    form.UpdatedOn))
-                .AsAsyncEnumerable();
-        }
-
-        private IQueryable<DepositForm> MakeQuery(DepositFormQuery query)
-        {
-            var dataQuery = _tgsRepository.DepositForms
-                .Include(f => f.Player)
-                .Include(f => f.BrandPayment)
-                .ThenInclude(bp => bp.PaymentMethodChannel)
-                .Where(form => form.BrandId == query.BrandId);
-
-            if (!string.IsNullOrWhiteSpace(query.UserName))
-                dataQuery = dataQuery.Where(form => form.Player.Username == query.UserName);
-
-            if (!string.IsNullOrWhiteSpace(query.ChannelName))
-                dataQuery = dataQuery.Where(form => form.BrandPayment.ChannelName == query.ChannelName);
-
-            if (query.PaymentMethodId != null)
-                dataQuery = dataQuery.Where(form => form.BrandPayment.PaymentMethodChannel.MethodId == query.PaymentMethodId);
-
-            if (query.Status != null)
-            {
-                var statusList = query.Status.Cast<int>().ToArray();
-
-                if (statusList.Length > 0)
-                    dataQuery = dataQuery.Where(form => statusList.Contains(form.Status));
-            }
-
-            if (query.CreateOnRange != null)
-                dataQuery = dataQuery.Where(form => form.CreatedOn >= query.CreateOnRange.Value.Begin
-                    && form.CreatedOn < query.CreateOnRange.Value.End);
-
-            if (query.UpdateOnRange != null)
-                dataQuery = dataQuery.Where(form => form.UpdatedOn >= query.UpdateOnRange.Value.Begin
-                    && form.UpdatedOn < query.UpdateOnRange.Value.End);
-
-            return dataQuery;
-        }
+        public ValueTask<PagingResponse<DepositFormInfo>> GetAsync(DepositFormQuery query, CancellationToken cancellationToken)
+            => _paymentServiceClient.QueryDepositFormsAsync(
+                new DepositFormQueryConditions
+                {
+                    BrandId = query.BrandId,
+                    ChannelName = query.ChannelName,
+                    CreateOnRange = query.CreateOnRange,
+                    PaymentMethodId = query.PaymentMethodId,
+                    Status = query.Status,
+                    UpdateOnRange = query.UpdateOnRange,
+                    UserName = query.UserName
+                },
+                new Tgs.Payment.Clients.Paging
+                {
+                    IsDesc = query.Paging.IsDesc,
+                    Page = query.Paging.Page,
+                    Rows = query.Paging.Rows,
+                    ShowAll = query.Paging.ShowAll,
+                    SortBy = query.Paging.SortBy
+                });
     }
 }

@@ -25,7 +25,7 @@ namespace TGS.Services.Promotion
 
         public Task<Player> GetPlayerAsync(
             Expression<Func<Player, bool>> predicate,
-            Func<IQueryable<Player>, IQueryable<Player>> preQuery) =>
+            Func<IQueryable<Player>, IQueryable<Player>>? preQuery = null) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         public Task<Player> GetPlayerByPlayerCodeAsync(string playerCode)

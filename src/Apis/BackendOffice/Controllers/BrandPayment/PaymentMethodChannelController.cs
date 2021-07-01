@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.BrandPayment;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;

@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.BrandPayments
 {
     internal class GetPaymentQueryService : IGetService<GetPaymentQuery, PaymentInfo>
     {
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public GetPaymentQueryService(IPaymentRepository paymentRepository)
+        public GetPaymentQueryService(IPaymentServiceClient paymentServiceClient)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public ValueTask<PaymentInfo> GetAsync(GetPaymentQuery query, CancellationToken cancellationToken = default)
-            => _paymentRepository.GetPaymentAsync(query.PaymentId);
+            => _paymentServiceClient.GetPaymentByIdAsync(query.PaymentId)!;
     }
 }

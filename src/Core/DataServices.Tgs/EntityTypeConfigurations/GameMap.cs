@@ -62,6 +62,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValue(string.Empty);
 
+            builder.Property(e => e.Localization)
+                .HasColumnType(ColumnTypes.Jsonb);
+
             builder.HasOne(e => e.GameProvider)
                 .WithMany(e => e.Games)
                 .HasForeignKey(e => e.GameProviderId)

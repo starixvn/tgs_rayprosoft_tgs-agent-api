@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,27 +24,6 @@ namespace TGS.Apis.BackendOffice
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
-        }
-
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services
-                .AddBackendOfficeServices(_configuration)
-                .AddBackendOfficeRepositories();
-
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new() {Title = "TGS BackOffice API", Version = "v1"});
-
-                c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
-
-                var xml = "TGS.Apis.BackendOffice.xml";
-                var path = Path.Combine(AppContext.BaseDirectory, xml);
-                if (File.Exists(path))
-                {
-                    c.IncludeXmlComments(path);
-                }
-            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -83,6 +64,41 @@ namespace TGS.Apis.BackendOffice
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TGS BackOffice API"));
             }
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services
+                .AddBackendOfficeServices(_configuration)
+                .AddBackendOfficeRepositories();
+
+            services.AddPaymentServiceClient((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                options.PaymentServiceBaseUrl = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
+                options.JsonSerializerOptions = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    Converters = {
+                        new JsonStringEnumConverter()
+                    }
+                };
+            });
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new() { Title = "TGS BackOffice API", Version = "v1" });
+
+                c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
+
+                var xml = "TGS.Apis.BackendOffice.xml";
+                var path = Path.Combine(AppContext.BaseDirectory, xml);
+                if (File.Exists(path))
+                {
+                    c.IncludeXmlComments(path);
+                }
+            });
         }
     }
 }

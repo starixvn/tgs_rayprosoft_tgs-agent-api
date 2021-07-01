@@ -44,7 +44,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             await _repository.SaveChangesAsync();
         }
 
-        public Task ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
+        public async Task ChangeStatusAsync(BrandPayment payment, SwitchStatus status, string username)
         {
             var beforePayment = new BrandPayment
             {
@@ -66,8 +66,12 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             payment.UpdatedByUsername = username;
 
             _repository.Entry(payment).State = EntityState.Modified;
-            _repository.PaymentAuditLogs.AddAsync(GeneratePaymentAuditLog(payment, beforePayment));
-            return _repository.SaveChangesAsync();
+
+            await _repository.PaymentAuditLogs
+                .AddAsync(GeneratePaymentAuditLog(payment, beforePayment))
+                .ConfigureAwait(false);
+
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task CreatePaymentAsync(CreateBrandPaymentRequest request, PaymentTransferType transferType, string username)

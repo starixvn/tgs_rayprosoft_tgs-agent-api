@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.5")
+                .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
@@ -460,10 +460,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric")
                         .HasColumnName("agent_dividend_amount");
 
-                    b.Property<int?>("ReferencedAgentDividendId")
-                        .HasColumnType("integer")
-                        .HasColumnName("referenced_agent_dividend_id");
-
                     b.Property<decimal>("AgentDividendPercentage")
                         .HasPrecision(9, 6)
                         .HasColumnType("numeric(9,6)")
@@ -539,6 +535,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasPrecision(18, 6)
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
+
+                    b.Property<int?>("ReferencedAgentDividendId")
+                        .HasColumnType("integer")
+                        .HasColumnName("referenced_agent_dividend_id");
 
                     b.Property<DateTimeOffset?>("SentOn")
                         .HasColumnType("timestamp with time zone")
@@ -2024,6 +2024,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("html5");
 
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -2282,6 +2286,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("description");
+
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
 
                     b.Property<string>("Name")
                         .IsRequired()

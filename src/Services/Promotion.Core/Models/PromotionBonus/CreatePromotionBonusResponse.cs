@@ -4,6 +4,6 @@ namespace TGS.Services.Promotion.Models.PromotionBonus
 {
     public class CreatePromotionBonusResponse : MessageResponse
     {
-        public PromotionBonusModel[] PromotionBonus { get; set; }
+        public PromotionBonusModel[] PromotionBonus { get; set; } = default!;
     }
 }

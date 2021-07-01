@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -9,14 +10,6 @@ using TGS.GameProviders.Repositories.Models.GameProviderFundTransferTransaction;
 
 namespace TGS.GameProviders.Repositories
 {
-    public interface IGameProviderFundTransferTransactionRepository
-    {
-
-        ValueTask<Guid?> AddAsync(AddGameProviderFundTransferTransactionRequest request);
-        ValueTask<Guid?> UpdateAsync(UpdateGameProviderFundTransferTransactionRequest request);
-        ValueTask<GetGameProviderFundTransferTransactionResponse?> GetAsync(Guid gameProviderFundTransferTransactionId);
-    }
-
     internal sealed class GameProviderFundTransferTransactionRepository : IGameProviderFundTransferTransactionRepository
     {
         private readonly ITgsRepository _repository;
@@ -31,9 +24,10 @@ namespace TGS.GameProviders.Repositories
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns></returns>
-        async ValueTask<Guid?> IGameProviderFundTransferTransactionRepository.AddAsync(AddGameProviderFundTransferTransactionRequest request)
+        public async ValueTask<Guid?> AddAsync(AddGameProviderFundTransferTransactionRequest request)
         {
             var gameProviderFundTransferTransactionId = GuidExtensions.NewSequentialGuid();
+
             var data = new GameProviderFundTransferTransaction()
             {
                 GameProviderFundTransferTransactionId = gameProviderFundTransferTransactionId,
@@ -53,34 +47,13 @@ namespace TGS.GameProviders.Repositories
                 Description = request.Description
             };
 
-            await _repository.GameProviderFundTransferTransactions.AddAsync(data).ConfigureAwait(false);
+            await _repository.GameProviderFundTransferTransactions
+                .AddAsync(data)
+                .ConfigureAwait(false);
+
             await _repository.SaveChangesAsync().ConfigureAwait(false);
 
             return gameProviderFundTransferTransactionId;
-        }
-
-        /// <summary>
-        /// Updates the asynchronous.
-        /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        async ValueTask<Guid?> IGameProviderFundTransferTransactionRepository.UpdateAsync(UpdateGameProviderFundTransferTransactionRequest request)
-        {
-            var data = _repository.GameProviderFundTransferTransactions.Where(x => x.GameProviderFundTransferTransactionId == request.GameProviderFundTransferTransactionId).FirstOrDefault();
-            if (data == null)
-            {
-                return new();
-            }
-
-            data.TransactionId = request.TransactionId;
-            data.GameProviderTransactionId = request.GameProviderTransactionId;
-            data.Status = request.Status;
-            data.Balance = request.Balance;
-            data.UpdatedOn = request.UpdatedOn;
-            data.Description = request.Description;
-            _repository.GameProviderFundTransferTransactions.Update(data);
-            await _repository.SaveChangesAsync().ConfigureAwait(false);
-            return data.GameProviderFundTransferTransactionId;
         }
 
         /// <summary>
@@ -88,13 +61,17 @@ namespace TGS.GameProviders.Repositories
         /// </summary>
         /// <param name="gameProviderFundTransferTransactionId">The game provider fund transfer transaction identifier.</param>
         /// <returns></returns>
-        async ValueTask<GetGameProviderFundTransferTransactionResponse?> IGameProviderFundTransferTransactionRepository.GetAsync(Guid gameProviderFundTransferTransactionId)
+        public async ValueTask<GetGameProviderFundTransferTransactionResponse> GetAsync(
+            Guid gameProviderFundTransferTransactionId)
         {
-            var data = _repository.GameProviderFundTransferTransactions.Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId).FirstOrDefault();
+            var data = await _repository.GameProviderFundTransferTransactions
+                .Where(x => x.GameProviderFundTransferTransactionId == gameProviderFundTransferTransactionId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
 
             if (data == null)
             {
-                return new();
+                return new GetGameProviderFundTransferTransactionResponse();
             }
 
             return new GetGameProviderFundTransferTransactionResponse()
@@ -115,6 +92,38 @@ namespace TGS.GameProviders.Repositories
                 UpdatedOn = data.UpdatedOn,
                 Description = data.Description,
             };
+        }
+
+        /// <summary>
+        /// Updates the asynchronous.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        public async ValueTask<Guid?> UpdateAsync(UpdateGameProviderFundTransferTransactionRequest request)
+        {
+            var data = await _repository.GameProviderFundTransferTransactions
+                .Where(
+                    x => x.GameProviderFundTransferTransactionId == request.GameProviderFundTransferTransactionId)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (data == null)
+            {
+                return null;
+            }
+
+            data.TransactionId = request.TransactionId;
+            data.GameProviderTransactionId = request.GameProviderTransactionId;
+            data.Status = request.Status;
+            data.Balance = request.Balance;
+            data.UpdatedOn = request.UpdatedOn;
+            data.Description = request.Description;
+
+            _repository.GameProviderFundTransferTransactions.Update(data);
+
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            return data.GameProviderFundTransferTransactionId;
         }
     }
 }

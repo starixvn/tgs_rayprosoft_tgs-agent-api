@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -39,22 +40,28 @@ namespace TGS.Services.Promotion.Handlers
             GetPromotionDispatchesRequest request,
             CancellationToken cancellationToken)
         {
-            var promotionsJson = await _settingRepository.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
-            var promotionTypeGroups =
-                _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
+            var promotionsJson = await _settingRepository
+                .GetSettingAsync(x => x.Key == SettingConsts.PromotionType)
+                .ConfigureAwait(false);
+            var promotionTypeGroups = _jsonSerializationProvider
+                .DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
 
             var promotionGroup = promotionTypeGroups.FirstOrDefault(x => x.Name == request.PromotionGroup);
-            var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray();
+            var promotionTypes = promotionGroup?.Types.Select(x => x.Name).ToArray() ?? Array.Empty<string>();
 
-            var promotion = await _tgsPromotionService.GetPromotionAsync(x => x.Name == request.PromotionName);
-            var player = await _tgsPlayerService.GetPlayerAsync(x => x.Username == request.Username);
+            var promotion = await _tgsPromotionService
+                .GetPromotionAsync(x => x.Name == request.PromotionName)
+                .ConfigureAwait(false);
+            var player = await _tgsPlayerService
+                .GetPlayerAsync(x => x.Username == request.Username)
+                .ConfigureAwait(false);
 
             var promotionDispatchPages = await _promotionBonusService.GetPromotionBonusPlayersQueries()
                 .Where(x => x.PromotionBonus.BrandId == request.BrandId)
                 .Where(request.From, x => request.From <= x.PromotionBonus.CreatedOn)
                 .Where(request.To, x => request.To >= x.PromotionBonus.CreatedOn)
-                .Where(promotion is not null, x => x.PromotionBonus.PromotionId == promotion.Id)
-                .Where(player is not null, x => x.PlayerCode == player.PlayerCode)
+                .Where(promotion is not null, x => x.PromotionBonus.PromotionId == promotion!.Id)
+                .Where(player is not null, x => x.PlayerCode == player!.PlayerCode)
                 .Where(promotionTypes, x => promotionTypes.Contains(x.PromotionBonus.PromotionType))
                 .Select(x => new PromotionDispatchModel
                 {

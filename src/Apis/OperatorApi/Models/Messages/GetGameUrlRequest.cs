@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record GetGameUrlRequest : IRequest<GetGameUrlResponse>
+    public record GetGameUrlRequest
     {
         [Required]
         [JsonPropertyName("gpcode")]
