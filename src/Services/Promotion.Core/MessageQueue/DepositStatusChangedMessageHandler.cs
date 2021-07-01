@@ -12,10 +12,12 @@ namespace TGS.Services.Promotion.MessageQueue
         private readonly IPromotionChecker _dailyFirstDepositChecker;
         private readonly IPromotionChecker _firstDepositChecker;
         private readonly IPaymentServiceClient _paymentServiceClient;
+        private readonly IPlayerService _playerService;
 
         public DepositStatusChangedMessageHandler(
             IPaymentServiceClient paymentServiceClient,
-            IPromotionCheckerFactory promotionCheckerFactory)
+            IPromotionCheckerFactory promotionCheckerFactory,
+            IPlayerService playerService)
         {
             if (promotionCheckerFactory is null)
             {
@@ -23,6 +25,7 @@ namespace TGS.Services.Promotion.MessageQueue
             }
 
             _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
             _firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
             _dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
         }
@@ -46,6 +49,10 @@ namespace TGS.Services.Promotion.MessageQueue
             switch (depositForm.Status)
             {
                 case PaymentFlowState.Approved:
+                    await _playerService
+                        .SetFirstDepositTimeAsync(depositForm.PlayerCode, DateTimeOffset.Now)
+                        .ConfigureAwait(false);
+
                     await _firstDepositChecker
                         .CommitTagAsync(depositForm.PlayerCode)
                         .ConfigureAwait(false);

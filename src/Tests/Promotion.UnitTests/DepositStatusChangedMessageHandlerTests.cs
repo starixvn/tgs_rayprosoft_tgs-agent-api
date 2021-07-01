@@ -33,9 +33,12 @@ namespace Promotion.UnitTests
                 },
                 fakeServiceProvider);
 
+            var fakePlayerService = Substitute.For<IPlayerService>();
+
             var sut = new DepositStatusChangedMessageHandler(
                 fakePaymentServiceClient,
-                fakeCheckFactory);
+                fakeCheckFactory,
+                fakePlayerService);
 
             var formEvent = new FormEvent
             {
@@ -49,13 +52,16 @@ namespace Promotion.UnitTests
                     Id = Guid.Parse(formEvent.FormId),
                     BrandId = Guid.Parse(formEvent.BrandId),
                     Status = PaymentFlowState.Approved,
-                    CreatedOn = DateTimeOffset.UtcNow
+                    CreatedOn = DateTimeOffset.UtcNow,
+                    PlayerCode = "ThisIsPlayerCode"
                 });
 
             await sut.HandleAsync(formEvent.ToByteArray());
 
             _ = fakePromotionChecker.Received(2)
                 .CommitTagAsync(Arg.Any<string>());
+            _ = fakePlayerService.Received(1)
+                .SetFirstDepositTimeAsync(Arg.Is("ThisIsPlayerCode"), Arg.Any<DateTimeOffset>());
         }
 
         [Test]
@@ -77,9 +83,12 @@ namespace Promotion.UnitTests
                 },
                 fakeServiceProvider);
 
+            var fakePlayerService = Substitute.For<IPlayerService>();
+
             var sut = new DepositStatusChangedMessageHandler(
                 fakePaymentServiceClient,
-                fakeCheckFactory);
+                fakeCheckFactory,
+                fakePlayerService);
 
             var formEvent = new FormEvent
             {

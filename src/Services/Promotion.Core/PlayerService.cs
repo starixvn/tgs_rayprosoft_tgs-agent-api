@@ -44,7 +44,7 @@ namespace TGS.Services.Promotion
                 .FindAsync(playerCode)
                 .ConfigureAwait(false);
 
-            if (player.FirstDepositOn != null)
+            if (player.FirstDepositOn is null)
             {
                 player.FirstDepositOn = time;
 
