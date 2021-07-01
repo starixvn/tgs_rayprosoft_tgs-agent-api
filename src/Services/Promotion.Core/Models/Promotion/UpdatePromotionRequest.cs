@@ -12,7 +12,7 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public decimal BonusAmountLimit { get; set; }
 
-        public string EditorUsername { get; set; } = default!;
+        public string? EditorUsername { get; set; }
 
         public DateTimeOffset From { get; set; }
 

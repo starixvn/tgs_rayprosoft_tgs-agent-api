@@ -7,8 +7,8 @@ namespace TGS.Services.Promotion.Services
     {
         public Guid BrandId { get; init; }
 
-        public string Language { get; set; } = default!;
+        public string? Language { get; init; }
 
-        public string PlayerCode { get; init; } = default!;
+        public string? PlayerCode { get; init; }
     }
 }
