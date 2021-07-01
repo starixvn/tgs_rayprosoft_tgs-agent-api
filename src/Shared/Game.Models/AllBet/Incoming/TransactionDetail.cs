@@ -62,7 +62,7 @@ namespace TGS.Shared.Game.Models.AllBet.Incoming
         [JsonPropertyName("gameRoundEndTime")]
         public string RoundEndTime { get; init; }
 
-        [JsonPropertyName("ip	")]
+        [JsonPropertyName("ip")]
         public string Ip { get; init; }
     }
 }
