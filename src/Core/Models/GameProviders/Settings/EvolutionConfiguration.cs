@@ -9,11 +9,10 @@ namespace TGS.Core.Models.GameProviders.Settings
     public record EvolutionConfiguration : PluggableConfigurationBase
     {
         public Uri ApiUrl { get; init; }
-
-        public string AuthenticationToken { get; init; }
-
-        public string Casinokey { get; init; }
-
-        public string APIToken { get; init; }
+        public string Ua2Token { get; set; }
+        public string GameHistoryApiToken { get; set; }
+        public string ExternalLobbyApiToken { get; set; }
+        public Uri Ua2AuthenticationUrl { get; set; }
+        public string OwAuthToken { get; set; }
     }
 }

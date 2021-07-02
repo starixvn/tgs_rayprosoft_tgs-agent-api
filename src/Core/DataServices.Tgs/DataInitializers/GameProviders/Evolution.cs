@@ -76,8 +76,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-evo") : new("http://localhost:62330"),
-                    ApiUrl = new("https://tttint.onlinegames22.com/"),
-                    AuthenticationToken = "I2gcyH6kRTiHYAzLxy1RfH",
+                    ApiUrl = new("https://babylonqm.uat1.evo-test.com/"),
+                    Ua2Token = "test123",
+                    GameHistoryApiToken = "test123",
+                    ExternalLobbyApiToken = "test123",
+                    Ua2AuthenticationUrl = new("https://babylonqm.uat1.evo-test.com/ua/v1/babylonqm0000001/test123"),
+                    OwAuthToken = "I2gcyH6kRTiHYAzLxy1RfH"
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();

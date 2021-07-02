@@ -31,10 +31,7 @@ namespace TGS.Shared.Game.ApiClients.Evolution
 
         async ValueTask<EvolutionGameUrlResponse> IEvolutionApiClient.GetGameUrlAsync(EvolutionConfiguration configuration, EvolutionGameUrlRequest request)
         {
-
-            var url = $"https://{configuration.ApiUrl}/ua/v1/{configuration.Casinokey}/{configuration.APIToken}";
-
-            return await ExecuteJsonRequestAsync<EvolutionGameUrlRequest, EvolutionGameUrlResponse>(HttpMethod.Post, url, request, logPrefix: $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
+            return await ExecuteJsonRequestAsync<EvolutionGameUrlRequest, EvolutionGameUrlResponse>(HttpMethod.Post, configuration.Ua2AuthenticationUrl,string.Empty, request, logPrefix: $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
         }
 
         async ValueTask<EvolutionGamHistoryRoundResponse> IEvolutionApiClient.GetGamHistoryRoundAsync(EvolutionConfiguration configuration, EvolutionGamHistoryRoundRequest request)
