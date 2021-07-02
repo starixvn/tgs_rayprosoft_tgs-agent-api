@@ -16,6 +16,7 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
+using TGS.Services.Promotion.MessageQueue;
 
 namespace TGS.Apis.PromotionApi
 {
@@ -31,7 +32,7 @@ namespace TGS.Apis.PromotionApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
+            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
@@ -90,6 +91,20 @@ namespace TGS.Apis.PromotionApi
                 httpClient.BaseAddress = new(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
+            services.AddNatsMessageQueue(config =>
+            {
+                config
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var configuration = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .AddHandler<DepositStatusChangedMessageHandler>(
+                        "tgs.payment.deposit.status",
+                        "tgs.payment.deposit.status");
+            });
+
             services
                 .AddHttpContextAccessor()
                 .AddRouting(options => options.LowercaseUrls = true);
@@ -100,7 +115,7 @@ namespace TGS.Apis.PromotionApi
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() {Title = "TGS Promotion API", Version = "v1"});
+                c.SwaggerDoc("v1", new() { Title = "TGS Promotion API", Version = "v1" });
 
                 var xml = "TGS.Apis.Promotion.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);

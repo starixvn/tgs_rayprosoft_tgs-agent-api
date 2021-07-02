@@ -12,19 +12,16 @@ namespace TGS.Services.Operator.Services.Deposit
     {
         private readonly IPaymentClient _paymentClient;
         private readonly IPaymentServiceClient _paymentServiceClient;
-        private readonly IPlayerCommands _playerCommands;
         private readonly IPromotionClient _promotionClient;
 
         public CreateDepositFormCommandService(
             IPaymentServiceClient paymentServiceClient,
             IPaymentClient paymentClient,
-            IPromotionClient promotionClient,
-            IPlayerCommands playerCommands)
+            IPromotionClient promotionClient)
         {
             _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
             _promotionClient = promotionClient ?? throw new ArgumentNullException(nameof(promotionClient));
-            _playerCommands = playerCommands ?? throw new ArgumentNullException(nameof(playerCommands));
         }
 
         public async ValueTask ExecuteAsync(
@@ -44,6 +41,10 @@ namespace TGS.Services.Operator.Services.Deposit
                     throw new CannotJoinPromotionException();
                 }
             }
+
+            await _promotionClient
+                .TagPlayerDepositAsync(command.PlayerCode)
+                .ConfigureAwait(false);
 
             var createFormId = Guid.NewGuid();
 
@@ -68,14 +69,6 @@ namespace TGS.Services.Operator.Services.Deposit
 
             await _paymentServiceClient
                 .SubmitDepositFormStatusAsync(createFormId, PaymentFlowState.WaitPayment, null)
-                .ConfigureAwait(false);
-
-            await _promotionClient
-                .TagPlayerDepositAsync(command.PlayerCode)
-                .ConfigureAwait(false);
-
-            await _playerCommands
-                .TagPlayerFirstDepositAsync(command.PlayerCode)
                 .ConfigureAwait(false);
 
             command.ReturnFormIdSource.SetResult(createFormId);
