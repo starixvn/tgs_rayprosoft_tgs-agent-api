@@ -16,6 +16,8 @@ namespace TGS.Shared.Game.ApiClients.Evolution
     public interface IEvolutionApiClient
     {
         ValueTask<EvolutionGameUrlResponse> GetGameUrlAsync(EvolutionConfiguration configuration, EvolutionGameUrlRequest request);
+
+        ValueTask<EvolutionGamHistoryRoundResponse> GetGamHistoryRoundAsync(EvolutionConfiguration configuration, EvolutionGamHistoryRoundRequest request);
     }
 
     public sealed class EvolutionApiClient : BaseApiClient, IEvolutionApiClient
@@ -33,6 +35,13 @@ namespace TGS.Shared.Game.ApiClients.Evolution
             var url = $"https://{configuration.ApiUrl}/ua/v1/{configuration.Casinokey}/{configuration.APIToken}";
 
             return await ExecuteJsonRequestAsync<EvolutionGameUrlRequest, EvolutionGameUrlResponse>(HttpMethod.Post, url, request, logPrefix: $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
+        }
+
+        async ValueTask<EvolutionGamHistoryRoundResponse> IEvolutionApiClient.GetGamHistoryRoundAsync(EvolutionConfiguration configuration, EvolutionGamHistoryRoundRequest request)
+        {
+            var url = $"https://{configuration.ApiUrl}/players/{request.PlayerCode}/games/{request.RoundId}";
+
+            return await ExecuteJsonRequestAsync<EvolutionGamHistoryRoundRequest, EvolutionGamHistoryRoundResponse>(HttpMethod.Get, url, null, logPrefix: $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
         }
     }
 }
