@@ -3,12 +3,12 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Amazon.S3;
 using Amazon.S3.Model;
 using ExpectedObjects;
 using Microsoft.Extensions.Options;
 using Moq;
 using NUnit.Framework;
+using TGS.Core.Infrastructures.Aws;
 using TGS.FileService;
 
 namespace TGS.Tests.FileService.UnitTests.Services
@@ -19,15 +19,11 @@ namespace TGS.Tests.FileService.UnitTests.Services
         [Test]
         public async Task Save_File_Should_Success()
         {
-            var options = new AwsOptions
-            {
-                ServiceUrl = "https://aws",
-                Bucket = "bucket"
-            };
-            var moqAmazonS3 = new Mock<IAmazonS3>();
+            var options = new AwsOptions {ExternalPrivateServiceUrl = "https://aws", PrivateBucket = "bucket"};
+            var moqAmazonS3 = new Mock<IPrivateAmazonS3>();
             var moqFileMetaRepository = new Mock<IFileMetaRepository>();
 
-            var sut = new FileManager(
+            var sut = new FileManager<IPrivateAmazonS3>(
                 new OptionsWrapper<AwsOptions>(options),
                 moqAmazonS3.Object,
                 moqFileMetaRepository.Object);
@@ -44,17 +40,14 @@ namespace TGS.Tests.FileService.UnitTests.Services
                 ContentType = contentType,
                 FileLength = fileLength,
                 CreatedOn = DateTimeOffset.UtcNow,
-                ExternalUrl = $"{options.ServiceUrl}/{options.Bucket}/test/path/file.ext"
+                ExternalUrl = $"{options.ExternalPrivateServiceUrl}/{options.PrivateBucket}/test/path/file.ext"
             };
 
             moqAmazonS3
                 .Setup(fake => fake.PutObjectAsync(
                     It.IsAny<PutObjectRequest>(),
                     It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new PutObjectResponse()
-                {
-                    HttpStatusCode = HttpStatusCode.OK
-                }));
+                .Returns(Task.FromResult(new PutObjectResponse {HttpStatusCode = HttpStatusCode.OK}));
             moqFileMetaRepository
                 .Setup(fake => fake.AddFileMetaAsync(
                     It.IsAny<FileMeta>()))
@@ -67,6 +60,5 @@ namespace TGS.Tests.FileService.UnitTests.Services
                 ctx.Ignore(obj => obj.CreatedOn);
             }).ShouldMatch(actual);
         }
-
     }
 }
