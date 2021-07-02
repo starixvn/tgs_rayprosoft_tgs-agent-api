@@ -19,5 +19,7 @@ namespace TGS.Services.Promotion
         IQueryable<Player> GetPlayerQueries(
             Func<IQueryable<Player>, IQueryable<Player>>? preQuery = null,
             bool tracking = false);
+
+        Task SetFirstDepositTimeAsync(string playerCode, DateTimeOffset time);
     }
 }

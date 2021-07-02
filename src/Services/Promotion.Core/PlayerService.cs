@@ -37,5 +37,19 @@ namespace TGS.Services.Promotion
             Func<IQueryable<Player>, IQueryable<Player>>? preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
+
+        public async Task SetFirstDepositTimeAsync(string playerCode, DateTimeOffset time)
+        {
+            var player = await _repository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            if (player.FirstDepositOn is null)
+            {
+                player.FirstDepositOn = time;
+
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
     }
 }

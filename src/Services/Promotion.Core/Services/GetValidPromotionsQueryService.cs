@@ -20,12 +20,12 @@ namespace TGS.Services.Promotion.Services
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerService _playerService;
-        private readonly PromotionCheckerFactory _promotionCheckerFactory;
+        private readonly IPromotionCheckerFactory _promotionCheckerFactory;
         private readonly IPromotionRepository _promotionRepository;
         private readonly ISettingsService _settingsService;
 
         public GetValidPromotionsQueryService(
-            PromotionCheckerFactory promotionCheckerFactory,
+            IPromotionCheckerFactory promotionCheckerFactory,
             IPromotionRepository promotionRepository,
             IPlayerService playerService,
             ISettingsService settingsService,
