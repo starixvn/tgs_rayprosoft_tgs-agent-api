@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.FileService.DataService.Services;
+using TGS.Core.Infrastructures.Aws;
 using TGS.FileService;
 using TGS.Tests.FileService.UnitTests.Controllers;
 
@@ -16,7 +17,7 @@ namespace TGS.Tests.FileService.UnitTests.Services
         {
             CreateFile();
 
-            var moqFileManager = new Mock<IFileManager>();
+            var moqFileManager = new Mock<IFileManager<IPublicAmazonS3>>();
 
             var sut = new UploadService(moqFileManager.Object);
 

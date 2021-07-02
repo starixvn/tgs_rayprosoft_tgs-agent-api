@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit");
 
             services
-                .AddScoped(
+                .AddScoped<IPromotionCheckerFactory>(
                     sp => ActivatorUtilities.CreateInstance<PromotionCheckerFactory>(
                         sp,
                         configuration.GetAllRegisterCheckerTypes()))

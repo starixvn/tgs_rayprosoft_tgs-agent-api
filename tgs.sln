@@ -175,7 +175,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Promotion.UnitTests", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agent.UnitTests", "src\Tests\Agent.UnitTests\Agent.UnitTests.csproj", "{30631B97-81DC-49DE-B25C-FF19E71C1DDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Agent.Repositories", "src\Repositories\Agent.Repositories\Agent.Repositories.csproj", "{19134CE1-4EE6-4A1E-8253-B3D0CB51C82C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Agent.Repositories", "src\Repositories\Agent.Repositories\Agent.Repositories.csproj", "{19134CE1-4EE6-4A1E-8253-B3D0CB51C82C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -499,7 +499,7 @@ Global
 		{19134CE1-4EE6-4A1E-8253-B3D0CB51C82C} = {C96BCD1C-B096-450F-8C1F-0AFFB38E6E19}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 		RESX_TaskErrorCategory = Message
+		SolutionGuid = {079E8E6E-803B-42FB-ACC6-2B253C8A689A}
 	EndGlobalSection
 EndGlobal

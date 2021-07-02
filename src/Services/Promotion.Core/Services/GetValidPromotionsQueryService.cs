@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -20,12 +21,12 @@ namespace TGS.Services.Promotion.Services
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerService _playerService;
-        private readonly PromotionCheckerFactory _promotionCheckerFactory;
+        private readonly IPromotionCheckerFactory _promotionCheckerFactory;
         private readonly IPromotionRepository _promotionRepository;
         private readonly ISettingsService _settingsService;
 
         public GetValidPromotionsQueryService(
-            PromotionCheckerFactory promotionCheckerFactory,
+            IPromotionCheckerFactory promotionCheckerFactory,
             IPromotionRepository promotionRepository,
             IPlayerService playerService,
             ISettingsService settingsService,
@@ -101,19 +102,18 @@ namespace TGS.Services.Promotion.Services
 
             var promotions = await promotionQueryable.AsSingleQuery().ToArrayAsync(cancellationToken);
 
-            var validPromotions = await promotions.Where(x =>
+            var promotionModels = new List<PromotionModel>();
+            foreach (var promotionModel in promotions)
             {
-                if (promotionTypes.All(p => x.PromotionType != p))
+                var checker = _promotionCheckerFactory.GetPromotionChecker(promotionModel.PromotionType);
+                if (promotionTypes.All(p => promotionModel.PromotionType != p) ||
+                    await checker.CheckAsync(request.PlayerCode!).ConfigureAwait(false))
                 {
-                    return ValueTask.FromResult(true);
+                    promotionModels.Add(promotionModel);
                 }
+            }
 
-                var checker = _promotionCheckerFactory.GetPromotionChecker(x.PromotionType);
-
-                return checker.CheckAsync(request.PlayerCode);
-            }).ConfigureAwait(false);
-
-            return validPromotions.AsQueryable().CreatePagedResponse(request);
+            return promotionModels.AsQueryable().CreatePagedResponse(request);
         }
     }
 }

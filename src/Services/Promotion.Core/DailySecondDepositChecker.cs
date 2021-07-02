@@ -18,5 +18,11 @@ namespace TGS.Services.Promotion
                 .CheckPlayerIsDailyFirstDepositAsync(playerCode)
                 .ConfigureAwait(false);
         }
+
+        public ValueTask CommitTagAsync(string playerCode) => ValueTask.CompletedTask;
+
+        public ValueTask RollbackTagAsync(string playerCode) => ValueTask.CompletedTask;
+
+        public ValueTask TagPromotionTypeAsync(string playerCode) => ValueTask.CompletedTask;
     }
 }

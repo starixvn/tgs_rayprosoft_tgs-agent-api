@@ -10,9 +10,11 @@ namespace TGS.FileService
 
         public string Region { get; set; }
 
-        public string ServiceUrl { get; set; }
+        public string ExternalPublicServiceUrl { get; set; }
+        public string ExternalPrivateServiceUrl { get; set; }
 
-        public string Bucket { get; set; }
+        public string PublicBucket { get; set; }
+        public string PrivateBucket { get; set; }
     }
 }
 
