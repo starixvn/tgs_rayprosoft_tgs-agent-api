@@ -20,7 +20,7 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public DateTimeOffset CreatedOn { get; set; }
 
-        public string DesktopBanner { get; set; } = default!;
+        public string? DesktopBanner { get; set; } = default!;
 
         public DateTimeOffset From { get; set; }
 
@@ -34,7 +34,7 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public string? LocalizationString { get; set; }
 
-        public string MobileBanner { get; set; } = default!;
+        public string? MobileBanner { get; set; }
 
         public string Name { get; set; } = default!;
 
@@ -44,9 +44,9 @@ namespace TGS.Services.Promotion.Models.Promotion
 
         public SwitchStatus Status { get; set; }
 
-        public string SubSubject { get; set; } = default!;
+        public string? SubSubject { get; set; }
 
-        public string Terms { get; set; } = default!;
+        public string? Terms { get; set; }
 
         public DateTimeOffset To { get; set; }
 
