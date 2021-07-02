@@ -11,5 +11,9 @@ namespace TGS.Core.Models.GameProviders.Settings
         public Uri ApiUrl { get; init; }
 
         public string AuthenticationToken { get; init; }
+
+        public string Casinokey { get; init; }
+
+        public string APIToken { get; init; }
     }
 }

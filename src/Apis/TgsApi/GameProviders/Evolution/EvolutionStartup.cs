@@ -32,6 +32,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution
 
             services.AddScoped<HandleEvolutionExceptionMiddleware>();
             services.AddScoped<AuthorizeEvolutionMiddleware>();
+
+            services.AddScoped<IEvolutionServices, EvolutionServices>();
+            services.AddScoped<IEvolutionActionModelMapper, EvolutionActionModelMapper>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
