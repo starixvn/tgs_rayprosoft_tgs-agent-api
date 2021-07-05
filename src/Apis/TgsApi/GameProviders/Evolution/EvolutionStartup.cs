@@ -6,7 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Evolution.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution
@@ -29,12 +31,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution
                   GameProvider.Evolution => provider.GetRequiredService<EvolutionErrorMapper>(),
                   _ => provider.GetRequiredService<TgsErrorMapper>()
               });
-
+            services.AddHttpContextAccessor();
             services.AddScoped<HandleEvolutionExceptionMiddleware>();
             services.AddScoped<AuthorizeEvolutionMiddleware>();
 
             services.AddScoped<IEvolutionServices, EvolutionServices>();
             services.AddScoped<IEvolutionActionModelMapper, EvolutionActionModelMapper>();
+            services.AddScoped<IEvolutionRedisCacheService, EvolutionRedisCacheService>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(EvolutionGameInitializer) }, (provider, _) =>
+            provider.GetRequiredService<EvolutionGameInitializer>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

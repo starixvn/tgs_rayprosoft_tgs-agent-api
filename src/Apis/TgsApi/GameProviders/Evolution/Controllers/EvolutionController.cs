@@ -12,6 +12,8 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Evolution.Services;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Models.Enums;
+using TGS.Services.Operations;
+using TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 {
@@ -26,16 +28,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
         private readonly IGamePlayActions _actions;
         private readonly IEvolutionActionModelMapper _map;
         private readonly IEvolutionServices _services;
-
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IEvolutionRedisCacheService _redisCacheService;
         public EvolutionController(
             IGamePlayActions actions,
             IEvolutionActionModelMapper map,
-            IEvolutionServices services
+            IEvolutionServices services,
+            IPlayerOperations playerOperations,
+            IEvolutionRedisCacheService redisCacheService
         )
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _redisCacheService = redisCacheService ?? throw new ArgumentNullException(nameof(redisCacheService));
         }
 
         [HttpPost("check")]
@@ -54,7 +61,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
         public async Task<EvolutionStandardResponse> GetBalanceAsync(
            EvolutionBalanceRequest source)
         {
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, source.UserId).ConfigureAwait(false);
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
             return new EvolutionStandardResponse()
             {
                 Status = "OK",
@@ -142,6 +152,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
         public async Task<EvolutionCheckUserResponse> SidAsync(
             EvolutionCheckUserRequest source)
         {
+            var player = await _playerOperations.GetPlayerByCodeAsync(source.UserId).ConfigureAwait(false);
+
+            if (player == null)
+            {
+                throw new PlayerNotFoundException($"{source.UserId }");
+            }
+
+            await _redisCacheService.AddSidAsync(source.Sid, player).ConfigureAwait(false);
+
             return new EvolutionCheckUserResponse()
             {
                 Status = "OK",

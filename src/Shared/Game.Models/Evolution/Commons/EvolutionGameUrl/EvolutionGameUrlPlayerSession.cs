@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.Evolution.Commons
+namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGameUrl
 {
     public record EvolutionGameUrlPlayerSession
     {

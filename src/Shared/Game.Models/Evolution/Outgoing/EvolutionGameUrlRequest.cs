@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 using TGS.Shared.Game.Models.Evolution.Commons;
+using TGS.Shared.Game.Models.Evolution.Commons.EvolutionGameUrl;
 
 namespace TGS.Shared.Game.Models.Evolution.Outgoing
 {
