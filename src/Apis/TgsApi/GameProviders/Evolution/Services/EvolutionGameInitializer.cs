@@ -74,14 +74,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             var ip = _requestAnalyzer.GetIp(_httpContextAccessor.HttpContext);
 
             var category = "slots";
-            var tableId = "777strike0000000";//cachedGame.ExternalId;
-           /*
-                if (cachedGame.Type == TGS.Core.Models.Enums.GameType.LiveDealerLobby)
+            var tableId = cachedGame.ExternalId;
+
+            if (cachedGame.Type == TGS.Core.Models.Enums.GameType.LiveDealerLobby)
             {
                 category = "baccarat_sicbo";
-                tableId = null;
+                tableId = "k2oswnib7jjaaznw";
             }
-           */
+
             var data = new EvolutionGameUrlRequest()
             {
                 Uuid = GuidExtensions.NewSequentialGuid().ToString(),
