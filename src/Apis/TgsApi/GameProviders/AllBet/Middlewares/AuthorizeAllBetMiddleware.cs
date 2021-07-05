@@ -57,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
 
             if (agent == null)
             {
-                throw new InvalidOperatorIdException();
+                throw new InvalidOperatorIdException($"No agent of property id '{propertyId}' is found.");
             }
 
             var path = GetEndPath(context.Request.Path);
