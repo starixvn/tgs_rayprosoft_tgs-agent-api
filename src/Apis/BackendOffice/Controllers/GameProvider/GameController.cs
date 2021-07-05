@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Game;
 using TGS.Apis.BackendOffice.Services;
-using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Queries.Game;
@@ -22,13 +21,11 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
     {
         private readonly IMediator _mediator;
         private readonly IUploadService _uploadService;
-        private readonly ITgsRepository _tgsRepository;
 
-        public GameController(IMediator mediator, IUploadService uploadService, ITgsRepository tgsRepository)
+        public GameController(IMediator mediator, IUploadService uploadService)
         {
             _mediator = mediator;
             _uploadService = uploadService;
-            _tgsRepository = tgsRepository;
         }
 
         [HttpGet]
