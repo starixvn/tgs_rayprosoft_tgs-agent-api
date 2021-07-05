@@ -8,21 +8,21 @@ namespace TGS.Services.GameOperations.Extensions
     public static class ServiceExtensions
     {
         /// <summary>
-        /// Dependency Injection of GameOperations, need to add dependencies beforehand:  
-        /// 1. AddTimeZone() in Infrastructures.TimeZone
-        /// 2. AddTgsLog() in Infrastructures.Log
-        /// 3. AddOperations() in Operations project
-        /// 4. AddTransactions() in Infrastructures.Transactions
+        ///     Dependency Injection of GameOperations, need to add dependencies beforehand:
+        ///     1. AddTimeZone() in Infrastructures.TimeZone
+        ///     2. AddTgsLog() in Infrastructures.Log
+        ///     3. AddOperations() in Operations project
+        ///     4. AddTransactions() in Infrastructures.Transactions
         /// </summary>
         public static IServiceCollection AddGameOperations(this IServiceCollection services)
-        {  
+        {
             services.AddScoped<IGameActionDataOperations, GameActionDataOperations>();
             services.AddScoped<IGameActionProcessor, GameActionProcessor>();
             services.AddScoped<IGamePlayActions, GamePlayActions>();
             services.AddScoped<IGameRoundsProcessor, GameRoundsProcessor>();
             services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();
             services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
-            services.AddSingleton<IBetValuesCalculator, BetValuesCalculator>();
+            services.AddSingleton<IBetValuesCalculator, DefaultBetValuesCalculator>();
             services.AddSingleton<IRoundStatusManager, RoundStatusManager>();
 
             return services;

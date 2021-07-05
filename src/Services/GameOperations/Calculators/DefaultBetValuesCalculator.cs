@@ -8,13 +8,7 @@ using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Services.GameOperations.Calculators
 {
-    internal interface IBetValuesCalculator
-    {
-        BetValuesResult Calculate(bool hasTurnoverOnTieBet, BetActionData current,
-            IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns = null);
-    }
-
-    internal sealed class BetValuesCalculator : IBetValuesCalculator
+    internal sealed class DefaultBetValuesCalculator : IBetValuesCalculator
     {
         BetValuesResult IBetValuesCalculator.Calculate(bool hasTurnoverOnTieBet, BetActionData current,
             IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns)
@@ -257,7 +251,10 @@ namespace TGS.Services.GameOperations.Calculators
 
         private static IList<BetActionData>
             GetAllActions(BetActionData current, IList<BetActionData> previousActions) =>
-            previousActions.Concat(new[] {current}).ToArray();
+            previousActions.Concat(new[]
+            {
+                current
+            }).ToArray();
 
         private static decimal CalculateRollingTurnover(Dictionary<string, decimal> betAmountOfBetTypes)
         {
