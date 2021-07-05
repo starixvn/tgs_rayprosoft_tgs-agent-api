@@ -63,7 +63,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                 .Where(p => !string.IsNullOrEmpty(p.Id))
                 .Select(x => new GameLocalizationModel()
                 {
-                    Id = x.Id,
+                    Id = int.Parse(x.Id),
                     Name = x.Name,
                     Localization = new Dictionary<string, JsonDocument>()
                     {

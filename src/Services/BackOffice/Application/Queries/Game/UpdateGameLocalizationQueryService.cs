@@ -20,18 +20,20 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
 
         public async ValueTask<UpdateGameLocationInfo> GetAsync(UpdateGameLocalizationQuery query, CancellationToken cancellationToken = default)
         {
+            var queryGameIds = query.Games.Select(x => x.Id).ToList();
+
             var existGameIds = await _tgsRepository.Games.AsAsyncEnumerable()
-                .Where(p => query.Games.Select(x => x.Id).ToList().Contains(p.Id.ToString()))
+                .Where(p => queryGameIds.Contains(p.Id))
                 .Select(p => p.Id)
                 .ToListAsync();
 
-            var diffGames = query.Games.Select(x => int.Parse(x.Id)).ToArray().Except(existGameIds).ToArray();
+            var diffGames = query.Games.Select(x => x.Id).ToArray().Except(existGameIds).ToArray();
 
             if (diffGames.Length == 0)
             {
                 foreach (var item in existGameIds)
                 {
-                    var model = query.Games.First(x => x.Id == item.ToString());
+                    var model = query.Games.First(x => x.Id == item);
                     var game = await _tgsRepository.Games.FirstOrDefaultAsync(x => x.Id == item);
                     game.Localization = model.Localization.ToJson();
                 }
