@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,6 +54,112 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         [Description("Upload games")]
         public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request) =>
             _mediator.Send(request);
+
+        [HttpPost("localization/export")]
+        [Description("Export game localization for example")]
+        public async Task<FileStreamResult> ExportGameLocalizationAsync(
+            [FromServices] IGetService<GetGameLocalizationQuery, GameLocalizationInfo> getLocalizationQueryService,
+            [FromBody] ExportGameLocalizationRequest request
+            )
+        {
+            var query = new GetGameLocalizationQuery()
+            {
+                GpCode = request.GpCode
+            };
+            var info = await getLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
+
+            var memoryStream = new MemoryStream();
+
+            using (var document = SpreadsheetDocument.Create(memoryStream, SpreadsheetDocumentType.Workbook))
+            {
+                var workbookPart = document.AddWorkbookPart();
+                workbookPart.Workbook = new Workbook();
+
+                var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                worksheetPart.Worksheet = new Worksheet(new SheetData());
+
+                var sheets = workbookPart.Workbook.AppendChild(new Sheets());
+
+                sheets.Append(new Sheet()
+                {
+                    Id = workbookPart.GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = request.GpCode
+                });
+
+                var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+
+                var row = new Row();
+                row.Append(
+                    new Cell()
+                    {
+                        CellValue = new CellValue("Id"),
+                        DataType = CellValues.String
+                    },
+                    new Cell()
+                    {
+                        CellValue = new CellValue("Name"),
+                        DataType = CellValues.String
+                    }
+                );
+
+                foreach (var item in info.Languages)
+                {
+                    row.Append(
+                        new Cell()
+                        {
+                            CellValue = new CellValue(item.Replace("-", "")),
+                            DataType = CellValues.String
+                        }
+                    );
+                }
+
+                sheetData.AppendChild(row);
+
+                for (var i = 0; i < info.Games.Count; i++)
+                {
+                    var data = info.Games[i];
+                    row = new Row();
+                    row.Append(
+                        new Cell()
+                        {
+                            CellValue = new CellValue(data.GameId),
+                            DataType = CellValues.String
+                        },
+                        new Cell()
+                        {
+                            CellValue = new CellValue(data.GameName),
+                            DataType = CellValues.String
+                        }
+                    );
+                    if (data.Localization != null)
+                    {
+                        foreach (var item in info.Languages)
+                        {
+                            var localization = JsonDocument.Parse(data.Localization);
+                            JsonElement lang;
+                            var isExist = localization.RootElement.TryGetProperty(item, out lang);
+                            if (isExist)
+                            {
+                                row.Append(
+                                    new Cell()
+                                    {
+                                        CellValue = new CellValue(lang.GetProperty("name").ToString()),
+                                        DataType = CellValues.String
+                                    }
+                                );
+                            }
+                        }
+                    }
+
+                    sheetData.AppendChild(row);
+                }
+            }
+
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            return new FileStreamResult(memoryStream,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        }
 
         [HttpPost("localization/upload")]
         [Description("Upload game localization file")]
