@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TGS.Apis.TgsApi.GameProviders.AllBet;
 using TGS.Apis.TgsApi.GameProviders.AsiaGaming;
 using TGS.Apis.TgsApi.GameProviders.BigGaming;
+using TGS.Apis.TgsApi.GameProviders.Evolution;
 using TGS.Apis.TgsApi.GameProviders.Habanero;
 using TGS.Apis.TgsApi.GameProviders.IMESports;
 using TGS.Apis.TgsApi.GameProviders.JDB;
@@ -35,7 +36,8 @@ namespace TGS.Apis.TgsApi
             {BigGaming, typeof(BigGamingStartup)},
             {SexyGaming, typeof(SexyGamingStartup)},
             {Skywind, typeof(SkywindStartup)},
-            {AllBet, typeof(AllBetStartup)}
+            {AllBet, typeof(AllBetStartup)},
+            {Evolution, typeof(EvolutionStartup)}
         };
 
         private static readonly IReadOnlyDictionary<string, string> _ConfigFileMap = new Dictionary<string, string>
@@ -52,7 +54,8 @@ namespace TGS.Apis.TgsApi
             {IMESports, "IMESports/imesports.json"},
             {SexyGaming, "SexyGaming/sexygaming.json"},
             {Skywind, "Skywind/skywind.json"},
-            {AllBet, "Allbet/allbet.json"}
+            {AllBet, "Allbet/allbet.json"},
+            {Evolution, "Evolution/evolution.json"}
         };
     }
 }

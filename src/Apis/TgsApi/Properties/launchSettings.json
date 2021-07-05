@@ -141,6 +141,16 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
+    "TgsApi-Evolution": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "EVO",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
@@ -254,6 +264,17 @@
         "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
         "environmentVariables": {
           "GameProviderCode": "SW",
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "publishAllPorts": true,
+        "useSSL": true
+      },
+      "Docker-Evolution": {
+        "commandName": "Docker",
+        "launchBrowser": true,
+        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+        "environmentVariables": {
+          "GameProviderCode": "EVO",
           "ASPNETCORE_ENVIRONMENT": "Development"
         },
         "publishAllPorts": true,
