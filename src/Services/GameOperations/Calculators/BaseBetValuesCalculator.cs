@@ -8,7 +8,7 @@ using static TGS.Core.Models.Enums.GameActionType;
 
 namespace TGS.Services.GameOperations.Calculators
 {
-    internal abstract class BaseBetValuesCalculator : IBetValuesCalculator
+    public abstract class BaseBetValuesCalculator : IBetValuesCalculator
     {
         public BetValuesResult Calculate(bool hasTurnoverOnTieBet, BetActionData current,
             IList<BetActionData> previousActions, IList<OppositeBetPattern> oppositeBetPatterns = null)

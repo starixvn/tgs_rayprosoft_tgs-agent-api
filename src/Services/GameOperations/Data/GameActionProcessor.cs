@@ -13,7 +13,6 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Calculators;
-using TGS.Services.GameOperations.Calculators.Enums;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.GameOperations.Validators;
 using TGS.Services.Operations.Validators;
@@ -35,7 +34,7 @@ namespace TGS.Services.GameOperations.Data
 
         private readonly IActionWithinRoundValidator _actionWithinRoundValidator;
         private readonly IAmountValidator _amountValidator;
-        private readonly IBetValuesCalculatorFactory _betValuesCalculatorFactory;
+        private readonly IBetValuesCalculator _betValuesCalculator;
         private readonly IJsonSerializationProvider _json;
         private readonly IRoundStatusManager _roundStatusManager;
         private readonly IStatusValidator _statusValidator;
@@ -49,7 +48,7 @@ namespace TGS.Services.GameOperations.Data
             IAmountValidator amountValidator,
             IStatusValidator statusValidator,
             IActionWithinRoundValidator actionWithinRoundValidator,
-            IBetValuesCalculatorFactory betValuesCalculatorFactory,
+            IBetValuesCalculator betValuesCalculator,
             ITimeZoneManager timeZoneManager,
             IRoundStatusManager roundStatusManager,
             IValidStatus<Status> validStatus,
@@ -60,7 +59,7 @@ namespace TGS.Services.GameOperations.Data
             _amountValidator = amountValidator;
             _statusValidator = statusValidator;
             _actionWithinRoundValidator = actionWithinRoundValidator;
-            _betValuesCalculatorFactory = betValuesCalculatorFactory;
+            _betValuesCalculator = betValuesCalculator;
             _timeZoneManager = timeZoneManager;
             _roundStatusManager = roundStatusManager;
             _validStatus = validStatus;
@@ -486,9 +485,7 @@ namespace TGS.Services.GameOperations.Data
                 .Where(r => r.ExternalGameIds.IgnoreCaseContains(s.Game.ExternalId))
                 .SelectMany(r => r.Patterns).Select(p => new OppositeBetPattern(p.BetType, p.GroupId)).ToArray();
 
-            var type = s.WithCustomBetValues ? BetValuesType.Custom : BetValuesType.Default;
-            var calculator = _betValuesCalculatorFactory.Get(type);
-            var betValues = calculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
+            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
                 s.PreviousActions, oppositePatterns);
 
             s.BetValueResult = betValues;

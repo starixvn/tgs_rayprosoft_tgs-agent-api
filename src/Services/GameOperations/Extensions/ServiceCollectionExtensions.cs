@@ -7,7 +7,7 @@ using TGS.Services.GameOperations.Validators;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    public static class ServiceExtensions
+    public static class ServiceCollectionExtensions
     {
         /// <summary>
         ///     Dependency Injection of GameOperations, need to add dependencies beforehand:
@@ -28,16 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
             services.AddSingleton<IRoundStatusManager, RoundStatusManager>();
 
-            services.AddScoped<IBetValuesCalculatorFactory, BetValuesCalculatorFactory>();
-
-            //services.AddScoped<IBetValuesCalculator>(sp =>
-            //{
-            //    var options = sp.GetRequiredService<xxxxx>();
-
-            //    if (options.gp == allbet)
-            //        return allbet;
-            //    return default;
-            //});
+            services.AddSingleton<IBetValuesCalculator, DefaultBetValuesCalculator>();
 
             return services;
         }

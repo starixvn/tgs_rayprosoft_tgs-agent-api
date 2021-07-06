@@ -4,7 +4,7 @@ using TGS.Core.Models.Services.Games;
 
 namespace TGS.Services.GameOperations.Models.Data
 {
-    internal class BetActionData
+    public class BetActionData
     {
         public Guid Id { get; init; }
         public Guid? ReferenceId { get; init; }
