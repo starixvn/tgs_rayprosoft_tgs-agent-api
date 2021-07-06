@@ -116,27 +116,26 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
                 sheetData.AppendChild(row);
 
-                for (var i = 0; i < info.Games.Count; i++)
+                foreach (var game in info.Games)
                 {
-                    var data = info.Games[i];
                     row = new Row();
                     row.Append(
                         new Cell()
                         {
-                            CellValue = new CellValue(data.GameId),
+                            CellValue = new CellValue(game.GameId),
                             DataType = CellValues.String
                         },
                         new Cell()
                         {
-                            CellValue = new CellValue(data.GameName),
+                            CellValue = new CellValue(game.GameName),
                             DataType = CellValues.String
                         }
                     );
-                    if (data.Localization != null)
+                    if (game.Localization != null)
                     {
                         foreach (var item in info.Languages)
                         {
-                            var localization = JsonDocument.Parse(data.Localization);
+                            var localization = JsonDocument.Parse(game.Localization);
                             JsonElement lang;
                             var isExist = localization.RootElement.TryGetProperty(item, out lang);
                             if (isExist)

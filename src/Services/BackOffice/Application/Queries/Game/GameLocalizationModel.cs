@@ -7,6 +7,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public Dictionary<string, JsonDocument> Localization { get; set; }
+        public IDictionary<string, JsonDocument> Localization { get; set; }
     }
 }

@@ -28,16 +28,16 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
             var providerLanguages = await _tgsRepository.GameProviderLanguages
                 .AsAsyncEnumerable()
                 .Where(x => x.GameProviderId == gpId)
-                .ToListAsync();
+                .ToArrayAsync();
 
             var games = await _tgsRepository.Games
                 .AsAsyncEnumerable()
                 .Where(x => x.GameProviderId == gpId)
-                .ToListAsync();
+                .ToArrayAsync();
 
             return new GameLocalizationInfo()
             {
-                Languages = providerLanguages.Select(x => x.CultureCode).ToList(),
+                Languages = providerLanguages.Select(x => x.CultureCode),
                 Games = games.Select(x =>
                     new GameData()
                     {
@@ -45,7 +45,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
                         GameName = x.Name,
                         Localization = x.Localization
                     })
-                    .ToList()
             };
         }
     }
