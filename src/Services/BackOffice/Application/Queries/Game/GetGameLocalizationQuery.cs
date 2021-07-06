@@ -2,6 +2,6 @@
 {
     public class GetGameLocalizationQuery
     {
-        public string GpCode { get; set; }
+        public string GameProviderCode { get; set; }
     }
 }

@@ -21,7 +21,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
             GetGameLocalizationQuery query,
             CancellationToken cancellationToken = default)
         {
-            var gameProvider = await _tgsRepository.GameProviders.FirstOrDefaultAsync(x => x.Code == query.GpCode);
+            var gameProvider = await _tgsRepository.GameProviders.FirstOrDefaultAsync(x => x.Code == query.GameProviderCode);
 
             var gpId = gameProvider.Id;
 

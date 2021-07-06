@@ -64,7 +64,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         {
             var query = new GetGameLocalizationQuery()
             {
-                GpCode = request.GpCode
+                GameProviderCode = request.GameProviderCode
             };
             var info = await getLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
 
@@ -84,7 +84,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                 {
                     Id = workbookPart.GetIdOfPart(worksheetPart),
                     SheetId = 1,
-                    Name = request.GpCode
+                    Name = request.GameProviderCode
                 });
 
                 var sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
