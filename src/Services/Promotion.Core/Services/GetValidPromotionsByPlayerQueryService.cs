@@ -55,7 +55,9 @@ namespace TGS.Services.Promotion.Services
                     new GetValidPromotionsQuery(brandId),
                     cancellationToken)
                 .Where(row => row.VipLevels.Length == 0
-                    || row.VipLevels.Contains(vipLevel));
+                    || row.VipLevels.Contains(vipLevel))
+                .ToEnumerable()
+                .ToAsyncEnumerable();
 
             await foreach (var promotion in promotions)
             {
