@@ -68,7 +68,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
             };
             var info = await getLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
 
-            using var memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
 
             using (var document = SpreadsheetDocument.Create(memoryStream, SpreadsheetDocumentType.Workbook))
             {
