@@ -61,7 +61,7 @@ namespace TGS.Services.Promotion.Services
                     Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new())
                 });
 
-            return promotionQueryable.ToAsyncEnumerable();
+            return promotionQueryable.ToArray().ToAsyncEnumerable();
         }
     }
 }
