@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi
             {IMESports, "IMESports/imesports.json"},
             {SexyGaming, "SexyGaming/sexygaming.json"},
             {Skywind, "Skywind/skywind.json"},
-            {AllBet, "Allbet/allbet.json"},
+            {AllBet, "AllBet/allbet.json"},
             {Evolution, "Evolution/evolution.json"}
         };
     }
