@@ -2,6 +2,7 @@
 using TGS.Shared.Game.ApiClients.AllBet;
 using TGS.Shared.Game.ApiClients.AsiaGaming;
 using TGS.Shared.Game.ApiClients.BigGaming;
+using TGS.Shared.Game.ApiClients.Evolution;
 using TGS.Shared.Game.ApiClients.IMESports;
 using TGS.Shared.Game.ApiClients.JDB;
 using TGS.Shared.Game.ApiClients.KY;
@@ -34,7 +35,7 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<ISexyGamingApiClient, SexyGamingApiClient>();
             services.AddHttpClient<ISkywindApiClient, SkywindApiClient>();
             services.AddHttpClient<IAllBetApiClient, AllBetApiClient>();
-
+            services.AddHttpClient<IEvolutionApiClient, EvolutionApiClient>();
             return services;
         }
     }

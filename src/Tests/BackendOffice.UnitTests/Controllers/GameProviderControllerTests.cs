@@ -8,6 +8,7 @@ using MediatR;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.GameProvider;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
@@ -24,11 +25,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new(
-                _mediatorMock.Object);
+                _mediatorMock.Object,
+                _uploadMock.Object);
         }
 
         private GameProviderController _controller;
         private readonly Mock<IMediator> _mediatorMock = new();
+        private readonly Mock<IUploadService> _uploadMock = new ();
 
         [TestCase(true)]
         [TestCase(false)]

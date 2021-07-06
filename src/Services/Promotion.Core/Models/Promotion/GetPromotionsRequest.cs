@@ -9,10 +9,10 @@ namespace TGS.Services.Promotion.Models.Promotion
     {
         public Guid BrandId { get; set; }
 
-        public string Name { get; set; } = default!;
+        public string? Name { get; set; }
 
         public SwitchStatus? Status { get; set; }
 
-        public string Type { get; set; } = default!;
+        public string? Type { get; set; }
     }
 }

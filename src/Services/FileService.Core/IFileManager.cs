@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TGS.FileService
 {
-    public interface IFileManager
+    public interface IFileManager<TAmazonS3>
     {
         Task<FileMeta> GetFileMetaByObjectIdAsync(string objectId);
 
