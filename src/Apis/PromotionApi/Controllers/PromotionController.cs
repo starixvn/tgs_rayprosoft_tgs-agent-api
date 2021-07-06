@@ -78,7 +78,6 @@ namespace TGS.Apis.PromotionApi.Controllers
         [HttpGet("valid")]
         [Description("Get promotions fro player")]
         public async Task<PagedResponse<PromotionModel>> GetPromotionsForPlayerAsync(
-            [FromServices] IGetService<GetValidPromotionsQuery, PagedResponse<PromotionModel>> promotionsService,
             [FromServices] IQueryService<GetValidPromotionsQuery, PromotionModel> queryAllService,
             [FromServices] IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel> queryByPlayerService,
             [FromQuery] GetValidPromotionsRequest request)
