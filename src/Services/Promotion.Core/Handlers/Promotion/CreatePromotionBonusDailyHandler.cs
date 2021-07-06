@@ -84,7 +84,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
             var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
-            var playerGameRoundAggregate = await _repository.PlayerGameAggregates
+            var playerGameRoundAggregate = await _repository.PlayerGameAggregates.AsQueryable()
                 .Where(x => x.ReportDate == reportDate)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
@@ -126,7 +126,7 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
             var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
 
-            var players = await _repository.Players
+            var players = await _repository.Players.AsQueryable()
                 .Where(x => playerCodes.Contains(x.PlayerCode))
                 .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
                 .ToArrayAsync(cancellationToken);
