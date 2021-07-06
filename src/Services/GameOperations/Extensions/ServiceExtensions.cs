@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿// ReSharper disable CheckNamespace
+
+using TGS.Services.GameOperations;
 using TGS.Services.GameOperations.Calculators;
 using TGS.Services.GameOperations.Data;
 using TGS.Services.GameOperations.Validators;
 
-namespace TGS.Services.GameOperations.Extensions
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceExtensions
     {
@@ -18,12 +20,24 @@ namespace TGS.Services.GameOperations.Extensions
         {
             services.AddScoped<IGameActionDataOperations, GameActionDataOperations>();
             services.AddScoped<IGameActionProcessor, GameActionProcessor>();
+
             services.AddScoped<IGamePlayActions, GamePlayActions>();
             services.AddScoped<IGameRoundsProcessor, GameRoundsProcessor>();
+
             services.AddSingleton<IActionWithinRoundValidator, ActionWithinRoundValidator>();
             services.AddSingleton<ITransactionSettingsGenerator, TransactionSettingsGenerator>();
-            services.AddSingleton<IBetValuesCalculator, DefaultBetValuesCalculator>();
             services.AddSingleton<IRoundStatusManager, RoundStatusManager>();
+
+            services.AddScoped<IBetValuesCalculatorFactory, BetValuesCalculatorFactory>();
+
+            //services.AddScoped<IBetValuesCalculator>(sp =>
+            //{
+            //    var options = sp.GetRequiredService<xxxxx>();
+
+            //    if (options.gp == allbet)
+            //        return allbet;
+            //    return default;
+            //});
 
             return services;
         }

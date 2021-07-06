@@ -13,6 +13,7 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations.Calculators;
+using TGS.Services.GameOperations.Calculators.Enums;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Services.GameOperations.Validators;
 using TGS.Services.Operations.Validators;
@@ -27,10 +28,14 @@ namespace TGS.Services.GameOperations.Data
 
     internal sealed partial class GameActionProcessor : IGameActionProcessor
     {
-        private static readonly GameType[] BypassPreviousActionGameTypes = {GameType.Slot};
+        private static readonly GameType[] _BypassPreviousActionGameTypes =
+        {
+            GameType.Slot
+        };
+
         private readonly IActionWithinRoundValidator _actionWithinRoundValidator;
         private readonly IAmountValidator _amountValidator;
-        private readonly IBetValuesCalculator _betValuesCalculator;
+        private readonly IBetValuesCalculatorFactory _betValuesCalculatorFactory;
         private readonly IJsonSerializationProvider _json;
         private readonly IRoundStatusManager _roundStatusManager;
         private readonly IStatusValidator _statusValidator;
@@ -44,7 +49,7 @@ namespace TGS.Services.GameOperations.Data
             IAmountValidator amountValidator,
             IStatusValidator statusValidator,
             IActionWithinRoundValidator actionWithinRoundValidator,
-            IBetValuesCalculator betValuesCalculator,
+            IBetValuesCalculatorFactory betValuesCalculatorFactory,
             ITimeZoneManager timeZoneManager,
             IRoundStatusManager roundStatusManager,
             IValidStatus<Status> validStatus,
@@ -55,7 +60,7 @@ namespace TGS.Services.GameOperations.Data
             _amountValidator = amountValidator;
             _statusValidator = statusValidator;
             _actionWithinRoundValidator = actionWithinRoundValidator;
-            _betValuesCalculator = betValuesCalculator;
+            _betValuesCalculatorFactory = betValuesCalculatorFactory;
             _timeZoneManager = timeZoneManager;
             _roundStatusManager = roundStatusManager;
             _validStatus = validStatus;
@@ -74,7 +79,7 @@ namespace TGS.Services.GameOperations.Data
                 var transactionSettings = _transactionSettingsGenerator.GetTransactionSettings(trx.GameActionType);
                 var hasWalletUpdate = transactionSettings.HasWalletUpdate(trx);
 
-                var result = await HandleGameActionAsync(new(trx)
+                var result = await HandleGameActionAsync(new GameActionState(trx)
                 {
                     Repository = data.Repository,
                     GameProvider = data.GameProvider,
@@ -92,6 +97,7 @@ namespace TGS.Services.GameOperations.Data
                     FreeBetAsSingleRound = betData.FreeBetAsSingleRound,
                     AllowCancelCancelTransaction = betData.AllowCancelCancelTransaction,
                     AllowPlaceBetWithDifferentPlatformToken = betData.AllowPlaceBetWithDifferentPlatformToken,
+                    WithCustomBetValues = betData.WithCustomBetValues,
                     AutoCloseRound = betData.AutoCloseRound,
                     OppositeBetRules = betData.OppositeBetRules ?? Array.Empty<OppositeBetRule>()
                 });
@@ -394,7 +400,7 @@ namespace TGS.Services.GameOperations.Data
         private static bool ShouldGetPreviousActions(GameActionState s) =>
             s.ForceGetPreviousActions ||
             s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
-            !BypassPreviousActionGameTypes.Contains(s.Game.Type);
+            !_BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
         private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId,
             string externalTransactionId, Guid roundId, int gameId) =>
@@ -464,6 +470,12 @@ namespace TGS.Services.GameOperations.Data
                 AllowCancelCancelTransaction = s.AllowCancelCancelTransaction
             };
 
+            if (s.CustomBetValues != null)
+            {
+                current.Turnover = s.CustomBetValues.Turnover;
+                current.WinLoss = s.CustomBetValues.WinLoss;
+            }
+
             var error = _actionWithinRoundValidator.FindError(current, s.PreviousActions);
             if (error != null)
             {
@@ -474,13 +486,19 @@ namespace TGS.Services.GameOperations.Data
                 .Where(r => r.ExternalGameIds.IgnoreCaseContains(s.Game.ExternalId))
                 .SelectMany(r => r.Patterns).Select(p => new OppositeBetPattern(p.BetType, p.GroupId)).ToArray();
 
-            var betValues = _betValuesCalculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
+            var type = s.WithCustomBetValues ? BetValuesType.Custom : BetValuesType.Default;
+            var calculator = _betValuesCalculatorFactory.Get(type);
+            var betValues = calculator.Calculate(s.Game.HasTurnoverOnTieBet, current,
                 s.PreviousActions, oppositePatterns);
 
             s.BetValueResult = betValues;
 
-            current.Turnover = betValues.Turnover;
-            current.WinLoss = betValues.WinLoss;
+            if (s.CustomBetValues == null)
+            {
+                current.Turnover = betValues.Turnover;
+                current.WinLoss = betValues.WinLoss;
+            }
+
             current.UnsettledBets = betValues.UnsettledBets;
 
             s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s).ConfigureAwait(false);
