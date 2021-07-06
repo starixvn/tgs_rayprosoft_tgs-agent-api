@@ -77,6 +77,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new Uri("http://game-evo") : new("http://localhost:62330"),
                     ApiUrl = new("https://babylonqm.uat1.evo-test.com/"),
+                    CasinoID = "babylonqm0000001",
                     Ua2Token = "test123",
                     GameHistoryApiToken = "test123",
                     ExternalLobbyApiToken = "test123",
