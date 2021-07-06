@@ -55,11 +55,11 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request) =>
             _mediator.Send(request);
 
-        [HttpPost("localization/export")]
+        [HttpGet("localization/export")]
         [Description("Export game localization for example")]
-        public async Task<FileStreamResult> ExportGameLocalizationAsync(
+        public async Task<FileStreamResult> ExportGamesLocalizationAsync(
             [FromServices] IGetService<GetGameLocalizationQuery, GameLocalizationInfo> getLocalizationQueryService,
-            [FromBody] ExportGameLocalizationRequest request
+            [FromQuery] ExportGameLocalizationRequest request
             )
         {
             var query = new GetGameLocalizationQuery()
@@ -162,9 +162,9 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpPost("localization/upload")]
         [Description("Upload game localization file")]
-        public async Task<MessageResponse> UploadPlayersAsync(
+        public async Task<MessageResponse> UploadGamesLocalizationAsync(
             IFormFile file,
-            [FromServices] IGetService<UpdateGameLocalizationQuery, UpdateGameLocationInfo> updateGameLocalizationCommandService)
+            [FromServices] IGetService<UpdateGameLocalizationQuery, UpdateGameLocationInfo> updateGameLocalizationQueryService)
         {
             var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadGameLocalizationModel>(file);
 
@@ -190,7 +190,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
             var query = new UpdateGameLocalizationQuery() { Games = games };
 
-            var info = await updateGameLocalizationCommandService.GetAsync(query).ConfigureAwait(false);
+            var info = await updateGameLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
 
             var diffGames = info.DiffGameIds;
 
@@ -208,7 +208,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                 return new MessageResponse
                 {
                     Valid = true,
-                    Message = "Update Game Localization Success"
+                    Message = "Update Games Localization Success"
                 };
             }
         }
