@@ -25,7 +25,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
             var existGameIds = await _tgsRepository.Games.AsAsyncEnumerable()
                 .Where(p => queryGameIds.Contains(p.Id))
                 .Select(p => p.Id)
-                .ToListAsync();
+                .ToArrayAsync();
 
             var diffGames = query.Games.Select(x => x.Id).ToArray().Except(existGameIds).ToArray();
 
