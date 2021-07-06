@@ -1,10 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.PromotionApi.ViewModels;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using TGS.Paging;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion.Services;
 using TGS.ServiceUtility;
@@ -76,9 +79,46 @@ namespace TGS.Apis.PromotionApi.Controllers
         [Description("Get promotions fro player")]
         public async Task<PagedResponse<PromotionModel>> GetPromotionsForPlayerAsync(
             [FromServices] IGetService<GetValidPromotionsQuery, PagedResponse<PromotionModel>> promotionsService,
-            [FromQuery] GetValidPromotionsQuery request) =>
-            await promotionsService.GetAsync(request).ConfigureAwait(false);
+            [FromServices] IQueryService<GetValidPromotionsQuery, PromotionModel> queryAllService,
+            [FromServices] IQueryService<GetValidPromotionsByPlayerQuery, PromotionModel> queryByPlayerService,
+            [FromQuery] GetValidPromotionsRequest request)
+        {
+            var promotions = string.IsNullOrWhiteSpace(request.PlayerCode)
+                ? queryAllService.QueryAsync(new GetValidPromotionsQuery(request.BrandId))
+                : queryByPlayerService.QueryAsync(new GetValidPromotionsByPlayerQuery(
+                    request.BrandId,
+                    request.PlayerCode));
 
+            var paging = new Paging<PromotionModel>();
+
+            if (!string.IsNullOrWhiteSpace(request.SortBy))
+                paging.SortByPropertyName(request.SortBy, request.IsDesc);
+
+            if (!request.ShowAll)
+                return new PagedResponse<PromotionModel>
+                {
+                    TotalCount = await promotions.CountAsync().ConfigureAwait(false),
+                    Items = await promotions
+                        .ApplyOrderBy(paging)
+                        .ToArrayAsync()
+                        .ConfigureAwait(false)
+                };
+            else
+            {
+                paging.Page = request.Page;
+                paging.RowCount = request.Rows;
+
+                return new PagedResponse<PromotionModel>
+                {
+                    TotalCount = await promotions.CountAsync().ConfigureAwait(false),
+                    Items = await promotions
+                        .ApplyOrderBy(paging)
+                        .ApplyPaging(paging)
+                        .ToArrayAsync()
+                        .ConfigureAwait(false)
+                };
+            }
+        }
 
         [HttpDelete("{promotionId}/{amount}")]
         public async Task RevertPromotionAsync(

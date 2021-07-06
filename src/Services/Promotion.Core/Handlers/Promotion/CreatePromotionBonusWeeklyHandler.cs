@@ -83,16 +83,16 @@ namespace TGS.Services.Promotion.Handlers.Promotion
 
             var gameTypes = promotions.Select(x => x.GameType).ToArray();
 
-            var playerGameRoundAggregate = await _repository.PlayerGameAggregates
+            var playerGameRoundAggregate = await _repository.PlayerGameAggregates.AsQueryable()
                 .Where(x => x.ReportDate >= _PreviousMonday && x.ReportDate <= _PreviousSunday)
                 .Where(x => gameProviderIds.Contains(x.GameProviderId))
                 .Where(!gameTypes.Contains(null), x => gameTypes.Contains(x.GameType))
                 .GroupJoin(_repository.BrandGames,
-                    aggregate => new {aggregate.BrandId, aggregate.GameId},
-                    brandGame => new {brandGame.BrandId, brandGame.GameId},
-                    (aggregate, brandGame) => new {aggregate, brandGame})
+                    aggregate => new { aggregate.BrandId, aggregate.GameId },
+                    brandGame => new { brandGame.BrandId, brandGame.GameId },
+                    (aggregate, brandGame) => new { aggregate, brandGame })
                 .SelectMany(x => x.brandGame.DefaultIfEmpty(),
-                    (x, brandGame) => new {x.aggregate, brandGame})
+                    (x, brandGame) => new { x.aggregate, brandGame })
                 .Where(x => x.brandGame == null || x.brandGame.Rebate).ToArrayAsync(cancellationToken);
 
             var promotionBonus = promotions.Select(x =>
@@ -126,15 +126,15 @@ namespace TGS.Services.Promotion.Handlers.Promotion
             var autoSentPlayerBonuses = promotionBonus.Where(x => x.AutoSentPlayerBonus).ToArray();
             var playerCodes = autoSentPlayerBonuses.SelectMany(p => p.Players).Select(p => p.PlayerCode);
 
-            var players = await _repository.Players
+            var players = await _repository.Players.AsQueryable()
                 .Where(x => playerCodes.Contains(x.PlayerCode))
-                .Select(x => new {x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId})
+                .Select(x => new { x.BrandId, x.PlayerCode, x.Wallets, x.DefaultWalletId })
                 .ToArrayAsync(cancellationToken);
 
             var playerBuckets = autoSentPlayerBonuses
                 .SelectMany(x =>
                 {
-                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new {pb, p})
+                    return x.Players.Join(players, pb => pb.PlayerCode, p => p.PlayerCode, (pb, p) => new { pb, p })
                         .Select(p => new
                         {
                             x.BrandId,

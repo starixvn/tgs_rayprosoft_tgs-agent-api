@@ -33,6 +33,26 @@ namespace Promotion.UnitTests
         }
 
         [Test]
+        public async Task FirstDeposit_Player_FirstDepositOn_Is_Null_Should_Return_True()
+        {
+            var fakePlayerService = Substitute.For<IPlayerService>();
+            var fakePlayerDataRepository = Substitute.For<IPlayerDataRepository>();
+
+            var sut = new FirstDepositChecker(fakePlayerService, fakePlayerDataRepository);
+
+            fakePlayerService
+                .GetPlayerByPlayerCodeAsync(Arg.Any<string>())
+                .Returns(new Player
+                {
+                    FirstDepositOn = null
+                });
+
+            var actual = await sut.CheckAsync("ThisIsPlayerCode");
+
+            Assert.IsTrue(actual);
+        }
+
+        [Test]
         public async Task Player_DailyFirstDeposit_Checker()
         {
             var fakePlayerDataService = Substitute.For<IPlayerDataRepository>();
