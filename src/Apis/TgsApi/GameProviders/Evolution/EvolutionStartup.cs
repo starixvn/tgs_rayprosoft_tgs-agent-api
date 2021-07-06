@@ -45,7 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
         {
-            const string Route = "/evo/api/";
+            const string Route = "/evo/api";
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
