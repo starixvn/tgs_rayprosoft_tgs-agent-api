@@ -23,7 +23,8 @@ namespace TGS.UnitTests.Operations
 
         [TestCase(GameActionType.PlaceBet, 20, -20)]
         [TestCase(GameActionType.WinBet, 50, 50)]
-        [TestCase(GameActionType.LoseBet, 20, 0)]
+        [TestCase(GameActionType.LoseBet, -20, -20)]
+        [TestCase(GameActionType.LoseBet, 0, 0)]
         [TestCase(GameActionType.FreeBet, 20, 20)]
         [TestCase(GameActionType.TieBet, 20, 20)]
         [TestCase(GameActionType.CancelTransaction, 20, -20)]
