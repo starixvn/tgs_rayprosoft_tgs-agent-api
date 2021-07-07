@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
@@ -13,7 +14,6 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.ServiceUtility;
-using static TGS.Core.Models.Consts.LocalizationContext;
 
 namespace TGS.Services.Operator.Services.GameProvider
 {
@@ -26,7 +26,6 @@ namespace TGS.Services.Operator.Services.GameProvider
         private readonly IValidStatus<Status> _validStatus;
         private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ILocalizationOperations _localizationOperations;
 
         public GetGameProviderQueryService(
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
@@ -35,8 +34,7 @@ namespace TGS.Services.Operator.Services.GameProvider
             IBrandOperations brandOperations,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
-            IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations)
+            IGameProviderOperations gameProviderOperations)
         {
             _brandCurrencyCodeMapper = brandCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(brandCurrencyCodeMapper));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -45,7 +43,6 @@ namespace TGS.Services.Operator.Services.GameProvider
             _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _localizationOperations = localizationOperations ?? throw new ArgumentNullException(nameof(localizationOperations));
         }
 
         public async IAsyncEnumerable<GameProviderModel> QueryAsync(
@@ -78,16 +75,35 @@ namespace TGS.Services.Operator.Services.GameProvider
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
             var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, brandId);
             var providers = await GetGameProviderModelsAsync(brandId, currencyCode, platformType, playerType);
+            var store = await _gameProviderOperations.GetGameProvidersLocalizationByGameProviderIdsAsync(providers.Select(x => x.Id).ToArray());
 
             foreach (var gpm in providers)
             {
                 var key = $"{gpm.Id}";
-                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gpm.Id, culture);
+
+                var gameProviderName = gpm.Name;
+                var gameProviderDesc = gpm.Description;
+
+                if (store.TryGetValue(gpm.Id, out var value))
+                {
+                    var localization = JsonDocument.Parse(value);
+
+                    localization.RootElement.TryGetProperty(query.LanguageCode, out var langName);
+                    if (langName.ValueKind != JsonValueKind.Undefined)
+                    {
+                        if (langName.TryGetProperty("name", out var localizationName)
+                                && !string.IsNullOrEmpty(localizationName.GetString()))
+                            gameProviderName = localizationName.GetString();
+                        if (langName.TryGetProperty("description", out var localizationDesc)
+                                && !string.IsNullOrEmpty(localizationDesc.GetString()))
+                            gameProviderDesc = localizationDesc.GetString();
+                    }
+                }
 
                 var model = gpm with
                 {
-                    Name = _localizationOperations.Parse(store, key, GameProviderDescription, gpm.Name),
-                    Description = _localizationOperations.Parse(store, key, GameProviderDescription, gpm.Description)
+                    Name = gameProviderName!,
+                    Description = gameProviderDesc!
                 };
 
                 yield return model;
