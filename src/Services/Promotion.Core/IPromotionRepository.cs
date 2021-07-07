@@ -22,7 +22,8 @@ namespace TGS.Services.Promotion
         Task<Core.DataServices.Tgs.Models.Promotion> GetPromotionByIdAsync(Guid promotionId);
 
         IQueryable<Core.DataServices.Tgs.Models.Promotion> GetPromotionQueries(
-            Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>, IQueryable<Core.DataServices.Tgs.Models.Promotion>>? preQuery = null,
+            Func<IQueryable<Core.DataServices.Tgs.Models.Promotion>,
+            IQueryable<Core.DataServices.Tgs.Models.Promotion>>? preQuery = null,
             bool tracking = false);
 
         Task UpdatePromotionAsync(Core.DataServices.Tgs.Models.Promotion promotion, UpdatePromotionRequest request);

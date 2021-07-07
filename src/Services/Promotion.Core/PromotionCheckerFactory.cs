@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace TGS.Services.Promotion
 {
-    internal class PromotionCheckerFactory
+    internal class PromotionCheckerFactory : IPromotionCheckerFactory
     {
         private readonly IDictionary<string, Type> _checkerTypes;
         private readonly IServiceProvider _serviceProvider;

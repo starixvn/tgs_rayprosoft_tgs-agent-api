@@ -62,7 +62,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
             var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
 
-            if (cachedGame.ExternalId.IgnoreCaseContains("SWLobby"))
+            if (cachedGame.Type == Core.Models.Enums.GameType.LiveDealerLobby)
             {
                 url = $"{configuration.LiveLobbyUrl}#/ticket/{encryptedToken}?lang={cultureCode}";
             }

@@ -56,7 +56,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var path = $"/{type}/{randomFileName}";
 
-            var fileView = await fileServiceClient.UploadFileAsync(path,
+            var fileView = await fileServiceClient.UploadPublicFileAsync(path,
                 MediaTypeHeaderValue.Parse(contentType), fileStream);
             return new() {Valid = true, Location = fileView.ExternalUrl};
         }
