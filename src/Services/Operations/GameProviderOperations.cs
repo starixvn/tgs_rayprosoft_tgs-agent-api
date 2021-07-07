@@ -37,8 +37,6 @@ namespace TGS.Services.Operations
 
         Task<string[]> GetGameProviderCurrenciesAsync(Guid gameProviderId);
 
-        //Task<string> GetGameProviderBetLimitCodeAsync(Guid gameProviderId, string currencyCode, int betLimitGroupId);
-
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId);
 
         Task<CachedGame[]> GetCachedGamesAsync(Guid gameProviderId, string externalGameId);
@@ -212,29 +210,6 @@ namespace TGS.Services.Operations
                         .GetGameProviderCurrenciesByInternalCodeAsync(gameProviderId);
                     return dict.Keys.ToArray();
                 });
-
-        //async Task<string> IGameProviderOperations.GetGameProviderBetLimitCodeAsync(Guid gameProviderId,
-        //    string currencyCode, int betLimitGroupId)
-        //{
-        //    var field = $"{currencyCode}:{betLimitGroupId}";
-        //    var value = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.GameProviderBetLimitCode, gameProviderId,
-        //        field);
-        //    if (value.HasValue)
-        //    {
-        //        return value;
-        //    }
-
-        //    var betLimitCode = await _gameProviderQueries
-        //        .GetGameProviderBetLimitCodeAsync(gameProviderId, currencyCode, betLimitGroupId);
-
-        //    await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProviderBetLimitCode, gameProviderId,
-        //        new HashEntry[]
-        //        {
-        //            new(field, betLimitCode)
-        //        }, TimeSpan.FromHours(2));
-
-        //    return betLimitCode;
-        //}
 
         async Task<CachedGame[]> IGameProviderOperations.GetCachedGamesAsync(Guid gameProviderId)
         {

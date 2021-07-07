@@ -26,7 +26,6 @@ namespace TGS.Services.Operator.Services.GameProvider
         private readonly IValidStatus<Status> _validStatus;
         private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IGameProviderOperations _gameProviderOperations;
-        //private readonly ILocalizationOperations _localizationOperations;
 
         public GetGameProviderQueryService(
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
