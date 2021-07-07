@@ -57,11 +57,11 @@ namespace TGS.Services.GameOperations
         private TransactionSettings LoseBetTransactionSettings => new()
         {
             GameActionType = GameActionType.LoseBet,
-            ValidateAmount = _ => _amountValidator.IgnoreAmount,
-            HasWalletUpdate = _ => false,
+            ValidateAmount = _ => _amountValidator.ThrowIfAmountIsPositive,
+            HasWalletUpdate = t => t.Amount < 0,
             MustHaveExistingRound = true,
             MustHaveReferencedTransaction = true,
-            GetTransactionAmount = _ => 0m // Get Transaction Amount - set parameter as is
+            GetTransactionAmount = a => a // Get Transaction Amount - set parameter as is
         };
 
         private TransactionSettings FreeBetTransactionSettings => new()
