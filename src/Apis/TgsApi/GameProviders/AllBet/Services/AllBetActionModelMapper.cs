@@ -149,6 +149,18 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 
             if (detail.Deposit > 0)
             {
+                transactions.Add(new TransactionData
+                {
+                    Amount = detail.Deposit,
+                    ExternalTransactionId = $"{request.TransactionId}_{betNum}_unlock",
+                    ExternalRoundId = reference.ExternalRoundId,
+                    ExternalBetId = reference.ExternalBetId,
+                    ExternalGameId = reference.ExternalGameId,
+                    ExternalGameActionGroupId = request.TransactionId.ToString(),
+                    GameActionType = UnlockAmount,
+                    RoundClosed = false,
+                    TimeStamp = GetTimestamp(detail.RoundEndTime)
+                });
             }
 
             var winOrLossAmount = detail.WinOrLossAmount!.Value;
@@ -167,11 +179,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 TimeStamp = GetTimestamp(detail.RoundEndTime),
                 RoundDetail = !forceCloseRound
                     ? null
-                    : _json.SerializeToString(new
-                    {
-                        Result = detail.GameResult,
-                        Extended = detail.GameResultExtended
-                    }, new JsonSerializerOptions {WriteIndented = false}),
+                    : GetRoundDetail(detail),
                 CustomBetValues = new CustomBetValues(detail.ValidAmount!.Value, winOrLossAmount.Negate())
             });
 
@@ -237,7 +245,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 RoundClosed = false
             }).ToArray();
 
-            var reference = gameActions.First(t => t.GameActionType == PlaceBet);
+            var reference = gameActions.First(t => t.GameActionType == PlaceBet &&
+                !cancelledReferenceIds.Contains(t.ExternalTransactionId));
 
             var winOrLossAmount = detail.WinOrLossAmount!.Value;
             var amount = detail.BetAmount + winOrLossAmount;
@@ -253,11 +262,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 GameActionType = GetGameActionType(detail.BetAmount, winOrLossAmount),
                 RoundClosed = true,
                 TimeStamp = DateTimeOffset.UtcNow,
-                RoundDetail = _json.SerializeToString(new
-                {
-                    Result = detail.GameResult,
-                    Extended = detail.GameResultExtended
-                }, new JsonSerializerOptions {WriteIndented = false}),
+                RoundDetail = GetRoundDetail(detail),
                 CustomBetValues = new CustomBetValues(detail.ValidAmount!.Value, winOrLossAmount.Negate())
             };
 
@@ -313,5 +318,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             var dateTime = DateTime.ParseExact(timeStamp, "yyyy-MM-dd HH:mm:ss", null, DateTimeStyles.AllowWhiteSpaces);
             return new DateTimeOffset(dateTime, offset);
         }
+
+        private string GetRoundDetail(TransactionDetail detail)
+            => _json.SerializeToString(new
+            {
+                detail.GameType,
+                Result = detail.GameResult,
+                Extended = detail.GameResultExtended
+            }, new JsonSerializerOptions {WriteIndented = false});
     }
 }
