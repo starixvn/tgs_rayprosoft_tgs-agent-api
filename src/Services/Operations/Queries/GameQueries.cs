@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Services.Operations.Queries
 {
     public interface IGameQueries
     {
-        Task<Game[]> GetGamesLocalizationByGameIdsAsync(int[] gameIds);
+        Task<Dictionary<int, string>> GetGamesLocalizationByGameIdsAsync(int[] gameIds);
     }
 
     public sealed class GameQueries : IGameQueries
@@ -21,13 +21,12 @@ namespace TGS.Services.Operations.Queries
             _repository = repository;
         }
 
-        Task<Game[]> IGameQueries.GetGamesLocalizationByGameIdsAsync(int[] gameIds)
+        Task<Dictionary<int, string>> IGameQueries.GetGamesLocalizationByGameIdsAsync(int[] gameIds)
         {
             return _repository.Games
                 .Where(x => gameIds.Contains(x.Id)
                     && x.Localization != null)
-                .Select(x => new Game() { Id = x.Id, Localization = x.Localization })
-                .ToArrayAsync();
+                .ToDictionaryAsync(x => x.Id, x => x.Localization);
         }
     }
 }

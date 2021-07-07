@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Generics;
@@ -37,7 +36,7 @@ namespace TGS.Services.Operations.Queries
 
         Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
 
-        Task<GameProvider[]> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds);
+        Task<Dictionary<Guid, string>> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds);
     }
 
     public sealed class GameProviderQueries : IGameProviderQueries
@@ -168,13 +167,12 @@ namespace TGS.Services.Operations.Queries
             return r.ToArray();
         }
 
-        public Task<GameProvider[]> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds)
+        public Task<Dictionary<Guid, string>> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds)
         {
             return _repository.GameProviders
                 .Where(x => gameProviderIds.Contains(x.Id)
                     && x.Localization != null)
-                .Select(x => new GameProvider() { Id = x.Id, Localization = x.Localization })
-                .ToArrayAsync();
+                .ToDictionaryAsync(x => x.Id, x => x.Localization);
         }
     }
 }

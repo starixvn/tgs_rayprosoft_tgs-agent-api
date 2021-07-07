@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
@@ -62,7 +62,7 @@ namespace TGS.Services.Operations
 
         Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
 
-        Task<GameProvider[]> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds);
+        Task<Dictionary<Guid, string>> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -398,7 +398,7 @@ namespace TGS.Services.Operations
                 $"{clientId}{secretKey}", TimeSpan.FromDays(1),
                 () => _gameProviderQueries.GetGameProviderIdsByCredentialsAsync(clientId, secretKey));
 
-        public Task<GameProvider[]> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds)
+        public Task<Dictionary<Guid, string>> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds)
         {
             return _gameProviderQueries.GetGameProvidersLocalizationByGameProviderIdsAsync(gameProviderIds);
         }

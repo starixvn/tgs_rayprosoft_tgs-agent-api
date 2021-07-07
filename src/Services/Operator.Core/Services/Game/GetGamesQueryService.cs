@@ -105,11 +105,9 @@ namespace TGS.Services.Operator.Services.Game
                         var gameName = g.Name;
                         var gameDesc = g.Description;
 
-                        var gameLocalization = store.FirstOrDefault(x => x.Id == g.Id);
-
-                        if (gameLocalization != null)
+                        if (store.Any(x => x.Key == g.Id))
                         {
-                            var localization = JsonDocument.Parse(gameLocalization.Localization);
+                            var localization = JsonDocument.Parse(store.FirstOrDefault(x => x.Key == g.Id).Value);
 
                             localization.RootElement.TryGetProperty(query.LanguageCode, out var langName);
                             if (langName.ValueKind != JsonValueKind.Undefined)
