@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
@@ -62,6 +63,8 @@ namespace TGS.Services.Operations
         Task<bool> GetAutoCloseRoundAsync(Guid gameProviderId);
 
         Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
+
+        Task<GameProvider[]> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds);
     }
 
     public sealed class GameProviderOperations : IGameProviderOperations
@@ -395,7 +398,7 @@ namespace TGS.Services.Operations
         private async Task CacheGameProviderConfigurationAsync(Guid gameProviderId, Guid gameProviderConfigurationId,
             CachedGameProviderConfiguration gpc)
         {
-            var fields = new HashEntry[] {new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc))};
+            var fields = new HashEntry[] { new(gameProviderConfigurationId.ToString(), _json.SerializeToString(gpc)) };
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.GameProviderConfiguration, gameProviderId, fields,
                 TimeSpan.FromHours(2), true);
@@ -419,6 +422,11 @@ namespace TGS.Services.Operations
                 RedisCacheType.GameProviderIdAndConfigurationIdByCredentials,
                 $"{clientId}{secretKey}", TimeSpan.FromDays(1),
                 () => _gameProviderQueries.GetGameProviderIdsByCredentialsAsync(clientId, secretKey));
+
+        public Task<GameProvider[]> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds)
+        {
+            return _gameProviderQueries.GetGameProvidersLocalizationByGameProviderIdsAsync(gameProviderIds);
+        }
 
         private static class CachedGameProviderFields
         {

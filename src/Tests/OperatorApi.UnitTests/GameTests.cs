@@ -11,6 +11,7 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
@@ -43,8 +44,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
-            var fakeLocalizationOperations = Substitute.For<ILocalizationOperations>();
+            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();            
+            var fakeIGameQueries = Substitute.For<IGameQueries>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
 
@@ -54,7 +55,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakePlayerOperations,
                 fakeBrandLanguageCodeMapper,
-                fakeLocalizationOperations,
+                fakeIGameQueries,
                 fakeValidStatus,
                 fakeValidGameStatus);
 
@@ -75,7 +76,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
-            var fakeLocalizationOperations = Substitute.For<ILocalizationOperations>();
+            var fakeIGameQueries = Substitute.For<IGameQueries>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
 
@@ -85,7 +86,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakePlayerOperations,
                 fakeBrandLanguageCodeMapper,
-                fakeLocalizationOperations,
+                fakeIGameQueries,
                 fakeValidStatus,
                 fakeValidGameStatus);
 

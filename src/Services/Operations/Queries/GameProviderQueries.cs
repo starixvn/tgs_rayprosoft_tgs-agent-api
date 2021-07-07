@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Generics;
@@ -37,6 +38,8 @@ namespace TGS.Services.Operations.Queries
         Task<CachedSubGame[]> GetSubGamesAsync(Guid gameProviderId);
 
         Task<IdAndCodeAndConfigurationId> GetGameProviderIdsByCredentialsAsync(string clientId, string secretKey);
+
+        Task<GameProvider[]> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds);
     }
 
     public sealed class GameProviderQueries : IGameProviderQueries
@@ -56,7 +59,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_game_provider_for_cache";
             return _repository.SqlQuerySingleAsync<GetCachedGameProviderResult>(spName,
-                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
+                parameters: new Dictionary<string, object> { { ":game_provider_id", gameProviderId } });
         }
 
         Task<GetCachedGameProviderConfigurationResult> IGameProviderQueries.GetCachedGameProviderConfigurationAsync(
@@ -75,7 +78,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_currencies_by_external_code";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
+                parameters: new Dictionary<string, object> { { ":game_provider_id", gameProviderId } });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -85,7 +88,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_currencies_by_internal_code";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
+                parameters: new Dictionary<string, object> { { ":game_provider_id", gameProviderId } });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -95,7 +98,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_languages_by_external_code";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
+                parameters: new Dictionary<string, object> { { ":game_provider_id", gameProviderId } });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -105,7 +108,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_languages_by_internal_code";
             var r = await _repository.SqlQueryMultipleAsync<Map<string, string>>(spName,
-                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
+                parameters: new Dictionary<string, object> { { ":game_provider_id", gameProviderId } });
 
             return r.ToDictionary(m => m.Key, m => m.Value, StringComparer.OrdinalIgnoreCase);
         }
@@ -142,7 +145,7 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_games_for_cache";
             var r = await _repository.SqlQueryMultipleAsync<GetCachedGameResult>(spName,
-                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
+                parameters: new Dictionary<string, object> { { ":game_provider_id", gameProviderId } });
 
             return r.Select(g => new CachedGame
             {
@@ -168,7 +171,7 @@ namespace TGS.Services.Operations.Queries
         Task<IdAndCodeAndConfigurationId> IGameProviderQueries.GetGameProviderIdsByCredentialsAsync(string clientId,
             string secretKey)
         {
-            var statuses = new[] {Status.Active, Status.Maintenance};
+            var statuses = new[] { Status.Active, Status.Maintenance };
 
             return (from gp in _repository.GameProviders
                     where statuses.Contains(gp.Status)
@@ -190,9 +193,18 @@ namespace TGS.Services.Operations.Queries
         {
             const string spName = "dbo.game_provider_get_sub_games";
             var r = await _repository.SqlQueryMultipleAsync<CachedSubGame>(spName,
-                parameters: new Dictionary<string, object> {{":game_provider_id", gameProviderId}});
+                parameters: new Dictionary<string, object> { { ":game_provider_id", gameProviderId } });
 
             return r.ToArray();
+        }
+
+        public Task<GameProvider[]> GetGameProvidersLocalizationByGameProviderIdsAsync(Guid[] gameProviderIds)
+        {
+            return _repository.GameProviders
+                .Where(x => gameProviderIds.Contains(x.Id)
+                    && x.Localization != null)
+                .Select(x => new GameProvider() { Id = x.Id, Localization = x.Localization })
+                .ToArrayAsync();
         }
     }
 }
