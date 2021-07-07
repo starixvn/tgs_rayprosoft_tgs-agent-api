@@ -84,9 +84,9 @@ namespace TGS.Services.Operator.Services.GameProvider
                 var gameProviderName = gpm.Name;
                 var gameProviderDesc = gpm.Description;
 
-                if (store.Any(x => x.Key == gpm.Id))
+                if (store.TryGetValue(gpm.Id, out var value))
                 {
-                    var localization = JsonDocument.Parse(store.FirstOrDefault(x => x.Key == gpm.Id).Value);
+                    var localization = JsonDocument.Parse(value);
 
                     localization.RootElement.TryGetProperty(query.LanguageCode, out var langName);
                     if (langName.ValueKind != JsonValueKind.Undefined)
