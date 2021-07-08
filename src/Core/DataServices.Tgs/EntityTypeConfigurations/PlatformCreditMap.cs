@@ -4,14 +4,14 @@ using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
-    internal class PlatformQuotaMap : BaseConfiguration, IEntityTypeConfiguration<PlatformCredit>
+    internal class PlatformCreditMap : BaseConfiguration, IEntityTypeConfiguration<PlatformCredit>
     {
         void IEntityTypeConfiguration<PlatformCredit>.Configure(EntityTypeBuilder<PlatformCredit> builder)
         {
-            builder.ToTable("brand_credits");
+            builder.ToTable("platform_credits");
 
             builder.HasKey(p => p.Id)
-                .HasName("pk_brand_credits");
+                .HasName("pk_platform_credits");
 
             builder.Property(e => e.BrandId)
                 .IsRequired();
@@ -41,11 +41,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasOne(e => e.Brand)
                 .WithOne()
                 .HasForeignKey<PlatformCredit>(e => e.BrandId)
-                .HasConstraintName("fk_brand_credits_brands_brand_id")
+                .HasConstraintName("fk_platform_credits_brands_brand_id")
                 .IsRequired();
 
             builder.HasIndex(e => e.BrandId)
-                .HasDatabaseName("ix_brand_credits_brand_id");
+                .HasDatabaseName("ix_platform_credits_brand_id");
         }
     }
 }

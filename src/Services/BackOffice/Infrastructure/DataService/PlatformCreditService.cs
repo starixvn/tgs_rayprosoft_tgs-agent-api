@@ -88,7 +88,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await UpdateEntityAsync(platformCredit);
         }
 
-        public async ValueTask<decimal> GetBalanceAsync(Guid brandId, decimal amount)
+        private async ValueTask<decimal> GetBalanceAsync(Guid brandId, decimal amount)
         {
             var previousDay = DateTimeOffset.Now.ToOffset(new(8, 0, 0)).AddDays(-1);
 

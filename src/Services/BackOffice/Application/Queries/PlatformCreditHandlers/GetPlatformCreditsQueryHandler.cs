@@ -23,8 +23,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandQuotaHandlers
         public override Task<PagedResponse<PlatformCreditModel>> Handle(GetPlatformCreditsRequest request,
             CancellationToken cancellationToken) =>
             _service.GetPlatformCreditQueries(q => q
-                    .Where(x => x.Id == request.BrandId)
-                    .Where(BrandId, l => l.Id == BrandId)
+                    .Where(x => x.BrandId == request.BrandId)
                     .Where(request.LicenseeName, x => EF.Functions.ILike(x.Brand.Licensee.Name, $"%{request.Keyword}%"))
                     .Where(request.Keyword, x => EF.Functions.ILike(x.Brand.Code, $"%{request.Keyword}%") ||
                         EF.Functions.ILike(x.Brand.Name, $"%{request.Keyword}%")))
