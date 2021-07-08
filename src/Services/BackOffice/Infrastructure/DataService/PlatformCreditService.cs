@@ -13,8 +13,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 {
     public interface IPlatformCreditService
     {
-        ValueTask<decimal> GetPlatformCreditBalancesAsync(Guid brandId, decimal amount);
-
         Task<PlatformCredit> GetPlatformCreditAsync(
             Expression<Func<PlatformCredit, bool>> predicate,
             Func<IQueryable<PlatformCredit>,
