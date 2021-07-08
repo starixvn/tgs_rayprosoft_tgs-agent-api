@@ -2,11 +2,11 @@
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
-    public class BrandPayRecord
+    public class PlatformPayRecord
     {
         public int Id { get; set; }
-        public Guid BrandQuotaId { get; set; }
-        public BrandQuota BrandQuota { get; set; }
+        public Guid PlatformCreditId { get; set; }
+        public virtual PlatformCredit PlatformCredit { get; set; }
         public decimal PayAmount { get; set; }
         public decimal Balance { get; set; }
         public string CreatedByUsername { get; set; }
