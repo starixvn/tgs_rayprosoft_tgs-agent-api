@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
@@ -12,8 +13,8 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using TGS.Services.Operations.Queries;
 using TGS.ServiceUtility;
-using Localization = TGS.Core.Models.Consts.LocalizationContext;
 
 namespace TGS.Services.Operator.Services.Game
 {
@@ -24,7 +25,7 @@ namespace TGS.Services.Operator.Services.Game
         private readonly IBrandOperations _brandOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
-        private readonly ILocalizationOperations _localizationOperations;
+        private readonly IGameQueries _gameQueries;
         private readonly IValidStatus<Status> _validStatus;
         private readonly IValidStatus<GameStatus> _validGameStatus;
 
@@ -34,7 +35,7 @@ namespace TGS.Services.Operator.Services.Game
             IBrandOperations brandOperations,
             IPlayerOperations playerOperations,
             IBrandLanguageCodeMapper brandLanguageCodeMapper,
-            ILocalizationOperations localizationOperations,
+            IGameQueries gameQueries,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus
             )
@@ -44,7 +45,7 @@ namespace TGS.Services.Operator.Services.Game
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandLanguageCodeMapper = brandLanguageCodeMapper ?? throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
-            _localizationOperations = localizationOperations ?? throw new ArgumentNullException(nameof(localizationOperations));
+            _gameQueries = gameQueries ?? throw new ArgumentNullException(nameof(gameQueries));
             _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
         }
@@ -93,9 +94,7 @@ namespace TGS.Services.Operator.Services.Game
             foreach (var gameProviderId in gameProviderIds)
             {
                 var games = await GetGameModelsAsync(query.BrandId, gameProviderId, query.PlatformType, currencyCode, playerType);
-                var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(
-                    gameProviderId,
-                    cultureCode);
+                var store = await _gameQueries.GetGamesLocalizationByGameIdsAsync(games.Select(x => x.Id).ToArray());
 
                 var translatedGame = games
                     .Where(g => types.Length == 0 || types.Contains(g.Type))
@@ -103,12 +102,28 @@ namespace TGS.Services.Operator.Services.Game
                     {
                         var key = g.Id.ToString();
 
+                        var gameName = g.Name;
+                        var gameDesc = g.Description;
+
+                        if (store.TryGetValue(g.Id, out var value))
+                        {
+                            var localization = JsonDocument.Parse(value);
+
+                            localization.RootElement.TryGetProperty(query.LanguageCode, out var langName);
+                            if (langName.ValueKind != JsonValueKind.Undefined)
+                            {
+                                if (langName.TryGetProperty("name", out var localizationName)
+                                    && !string.IsNullOrEmpty(localizationName.GetString()))
+                                    gameName = localizationName.GetString();
+                                if (langName.TryGetProperty("description", out var localizationDesc)
+                                    && !string.IsNullOrEmpty(localizationDesc.GetString()))
+                                    gameDesc = localizationDesc.GetString();
+                            }
+                        }
                         return g with
                         {
-                            Name = _localizationOperations.Parse(store, key,
-                                Localization.GameName, g.Name),
-                            Description = _localizationOperations.Parse(store, key,
-                                Localization.GameDescription, g.Description)
+                            Name = gameName!,
+                            Description = gameDesc!
                         };
                     }).ToArray();
 

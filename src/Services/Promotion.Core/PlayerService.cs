@@ -29,7 +29,7 @@ namespace TGS.Services.Promotion
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         public Task<Player> GetPlayerByPlayerCodeAsync(string playerCode)
-            => _repository.Players
+            => _repository.Players.AsQueryable()
                 .Where(player => player.PlayerCode == playerCode)
                 .FirstOrDefaultAsync();
 
