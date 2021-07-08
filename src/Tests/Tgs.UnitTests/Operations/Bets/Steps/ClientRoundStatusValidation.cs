@@ -59,13 +59,16 @@ namespace TGS.UnitTests.Operations.Bets.Steps
         public void WhenIGetTheClientRoundStatus()
         {
             var betValuesCalculator =
-                (IBetValuesCalculator)new TGS.Services.GameOperations.Calculators.BetValuesCalculator();
+                (IBetValuesCalculator)new DefaultBetValuesCalculator();
 
             var hasTurnoverOnTieBet = Get<bool>(SR.HasTurnoverOnTieBet);
             var oppositeBetPatterns = Get<List<OppositeBetPattern>>(SR.OppositeBetPatterns);
 
             var current = Actions.Last();
-            var previousActions = Actions.Except(new[] {current}).ToArray();
+            var previousActions = Actions.Except(new[]
+            {
+                current
+            }).ToArray();
             var betValuesResult =
                 betValuesCalculator.Calculate(hasTurnoverOnTieBet, current, previousActions, oppositeBetPatterns);
 
