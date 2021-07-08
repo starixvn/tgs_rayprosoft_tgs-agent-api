@@ -167,6 +167,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             var amount = detail.BetAmount + winOrLossAmount;
             transactions.Add(new TransactionData
             {
+                AllowLoseBetNegativeAmount = true,
                 Amount = amount,
                 ExternalTransactionId = $"{request.TransactionId}_{betNum}",
                 ExternalTransactionReferenceId = reference.ExternalTransactionId,
@@ -252,6 +253,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             var amount = detail.BetAmount + winOrLossAmount;
             var resettle = new TransactionData
             {
+                AllowLoseBetNegativeAmount = true,
                 Amount = amount,
                 ExternalTransactionId = $"{request.TransactionId}_{betNum}",
                 ExternalTransactionReferenceId = reference.ExternalTransactionId,

@@ -75,8 +75,8 @@ namespace TGS.Services.GameOperations.Data
 
             foreach (var trx in betData.Transactions)
             {
-                var transactionSettings = _transactionSettingsGenerator.GetTransactionSettings(trx.GameActionType);
-                var hasWalletUpdate = transactionSettings.HasWalletUpdate(trx);
+                var transactionSettings = _transactionSettingsGenerator.GetTransactionSettings(trx);
+                var hasWalletUpdate = transactionSettings.HasWalletUpdate;
 
                 var result = await HandleGameActionAsync(new GameActionState(trx)
                 {
@@ -88,7 +88,7 @@ namespace TGS.Services.GameOperations.Data
                     HasWalletUpdate = hasWalletUpdate,
                     MustHaveExistingRound = transactionSettings.MustHaveExistingRound,
                     MustHaveReferencedTransaction = transactionSettings.MustHaveReferencedTransaction,
-                    ValidateAmount = transactionSettings.ValidateAmount(trx),
+                    ValidateAmount = transactionSettings.ValidateAmount,
                     PrepareAmount = transactionSettings.GetTransactionAmount,
                     PlayerData = player,
                     GameProviderGames = data.Games,
@@ -469,7 +469,7 @@ namespace TGS.Services.GameOperations.Data
                 AllowCancelCancelTransaction = s.AllowCancelCancelTransaction
             };
 
-            if (s.CustomBetValues != null)
+            if (s.WithCustomBetValues && s.CustomBetValues != null)
             {
                 current.Turnover = s.CustomBetValues.Turnover;
                 current.WinLoss = s.CustomBetValues.WinLoss;
@@ -490,7 +490,7 @@ namespace TGS.Services.GameOperations.Data
 
             s.BetValueResult = betValues;
 
-            if (s.CustomBetValues == null)
+            if (!s.WithCustomBetValues)
             {
                 current.Turnover = betValues.Turnover;
                 current.WinLoss = betValues.WinLoss;

@@ -21,5 +21,6 @@ namespace TGS.Core.Models.Services.Games
         public string RoundDetail { get; init; }
         public JackpotContribution JackpotContribution { get; init; }
         public CustomBetValues CustomBetValues { get; init; }
+        public bool AllowLoseBetNegativeAmount { get; init; } = false;
     }
 }
