@@ -9,6 +9,7 @@ using TGS.Apis.TgsApi.GameProviders.AllBet.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Services.GameOperations.Calculators;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.AllBet
@@ -50,6 +51,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet
             {
                 typeof(AllBetGameHistory)
             }, (provider, _) => provider.GetRequiredService<AllBetGameHistory>());
+
+            services.AddSingleton<IBetValuesCalculator, AllBetBetValuesCalculator>();
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

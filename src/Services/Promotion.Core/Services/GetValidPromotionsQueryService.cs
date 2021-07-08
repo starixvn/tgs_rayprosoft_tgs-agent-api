@@ -3,56 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
-using Castle.Core.Internal;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.Infrastructures.Json;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Messages;
-using TGS.Core.Models.Settings;
 using TGS.Services.Promotion.Models.Promotion;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Promotion.Services
 {
-    internal class GetValidPromotionsQueryService : IGetService<GetValidPromotionsQuery, PagedResponse<PromotionModel>>
+    internal class GetValidPromotionsQueryService : IQueryService<GetValidPromotionsQuery, PromotionModel>
     {
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPlayerService _playerService;
-        private readonly IPromotionCheckerFactory _promotionCheckerFactory;
         private readonly IPromotionRepository _promotionRepository;
-        private readonly ISettingsService _settingsService;
 
         public GetValidPromotionsQueryService(
-            IPromotionCheckerFactory promotionCheckerFactory,
-            IPromotionRepository promotionRepository,
-            IPlayerService playerService,
-            ISettingsService settingsService,
-            IJsonSerializationProvider jsonSerializationProvider)
+            IPromotionRepository promotionRepository)
         {
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-            _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
-            _promotionCheckerFactory = promotionCheckerFactory ??
-                throw new ArgumentNullException(nameof(promotionCheckerFactory));
-            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
-            _jsonSerializationProvider = jsonSerializationProvider ??
-                throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
-        public async ValueTask<PagedResponse<PromotionModel>> GetAsync(GetValidPromotionsQuery request,
-            CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<PromotionModel> QueryAsync(GetValidPromotionsQuery query, CancellationToken cancellationToken = default)
         {
-            var player = await _playerService.GetPlayerAsync(x => x.PlayerCode == request.PlayerCode)
-                .ConfigureAwait(false);
             var now = DateTimeOffset.Now;
 
             var promotionQueryable = _promotionRepository.GetPromotionQueries()
-                .Where(x => x.BrandId == request.BrandId)
-                .Where(request.PlayerCode,
-                    x => x.PromotionVipLevels.Count == 0 ||
-                        x.PromotionVipLevels.Select(p => p.Level).Contains(player.Vip.Level))
+                .Where(x => x.BrandId == query.BrandId)
                 .Where(x => x.Unlimited || x.TotalAmountLimit > x.AmountUsed)
                 .Where(x => x.Status == SwitchStatus.Enabled
                     && x.From <= now
@@ -88,32 +61,7 @@ namespace TGS.Services.Promotion.Services
                     Localization = x.Localization == null ? null : JsonDocument.Parse(x.Localization, new())
                 });
 
-            if (request.PlayerCode.IsNullOrEmpty())
-            {
-                return promotionQueryable.CreatePagedResponse(request);
-            }
-
-            var promotionsJson = await _settingsService.GetSettingAsync(x => x.Key == SettingConsts.PromotionType);
-            var promotionTypeGroups =
-                _jsonSerializationProvider.DeserializeFromString<PromotionTypeGroup[]>(promotionsJson.Value);
-
-            var promotionTypes =
-                promotionTypeGroups.First(x => x.Name == "Deposit").Types.Select(x => x.Name).ToArray();
-
-            var promotions = await promotionQueryable.AsSingleQuery().ToArrayAsync(cancellationToken);
-
-            var promotionModels = new List<PromotionModel>();
-            foreach (var promotionModel in promotions)
-            {
-                var checker = _promotionCheckerFactory.GetPromotionChecker(promotionModel.PromotionType);
-                if (promotionTypes.All(p => promotionModel.PromotionType != p) ||
-                    await checker.CheckAsync(request.PlayerCode!).ConfigureAwait(false))
-                {
-                    promotionModels.Add(promotionModel);
-                }
-            }
-
-            return promotionModels.AsQueryable().CreatePagedResponse(request);
+            return promotionQueryable.ToArray().ToAsyncEnumerable();
         }
     }
 }

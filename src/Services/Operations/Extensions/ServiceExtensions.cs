@@ -25,7 +25,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddScoped<IBrandCurrencyCodeMapper, BrandCurrencyCodeMapper>();
             services.AddScoped<IBrandLanguageCodeMapper, BrandLanguageCodeMapper>();
 
-            #endregion
+            #endregion Code Mappers
 
             #region Queries
 
@@ -36,20 +36,21 @@ namespace TGS.Services.Operations.Extensions
             services.AddFactory<IWalletQueries, WalletQueries>();
             services.AddFactory<ISettingQueries, SettingQueries>();
             services.AddFactory<ILocalizationStringQueries, LocalizationStringQueries>();
+            services.AddFactory<IGameQueries, GameQueries>();
 
             services.AddFactory<IGameActionQueries, GameActionQueries>();
             services.AddFactory<IRoundQueries, RoundQueries>();
 
             services.AddFactory<IBetLimitQueries, BetLimitQueries>();
 
-            #endregion
+            #endregion Queries
 
             #region Commands
 
             services.AddFactory<IPlayerCommands, PlayerCommands>();
             services.AddFactory<IAgentCommands, AgentCommands>();
 
-            #endregion
+            #endregion Commands
 
             #region Operations
 
@@ -61,7 +62,7 @@ namespace TGS.Services.Operations.Extensions
             services.AddScoped<ILocalizationOperations, LocalizationOperations>();
             services.AddScoped<IAgentOperations, AgentOperations>();
 
-            #endregion
+            #endregion Operations
 
             services.AddSingleton<IValidStatus<Status>, ValidStatus>();
             services.AddSingleton<IValidStatus<GameStatus>, ValidGameStatus>();

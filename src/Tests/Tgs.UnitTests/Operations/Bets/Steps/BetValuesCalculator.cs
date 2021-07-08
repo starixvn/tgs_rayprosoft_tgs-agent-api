@@ -95,7 +95,7 @@ namespace TGS.UnitTests.Operations.Bets.Steps
 
             var previousInput = new List<BetActionData>();
             var previousOutput = new List<BetValuesResult>();
-            var calculator = (IBetValuesCalculator)new TGS.Services.GameOperations.Calculators.BetValuesCalculator();
+            var calculator = (IBetValuesCalculator)new DefaultBetValuesCalculator();
 
             var oppositeBetPatterns = HasTag("OppositeBets")
                 ? Get<IList<OppositeBetPattern>>(SR.OppositeBetPatterns)

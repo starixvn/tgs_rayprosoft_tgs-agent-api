@@ -20,7 +20,11 @@ namespace Microsoft.Extensions.DependencyInjection
             configuration
                 .RegisterPromotionChecker<FirstDepositChecker>("FirstDeposit")
                 .RegisterPromotionChecker<DailyFirstDepositChecker>("DailyFirstDeposit")
-                .RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit");
+                .RegisterPromotionChecker<DailySecondDepositChecker>("DailySecondDeposit")
+                .RegisterPromotionChecker<AlwaysTrueChecker>("TurnoverRebate")
+                .RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyDaily")
+                .RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyWeekly")
+                .RegisterPromotionChecker<AlwaysTrueChecker>("ReliefMoneyMonthly");
 
             services
                 .AddScoped<IPromotionCheckerFactory>(

@@ -8,7 +8,6 @@ using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
-using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.AllBet.Enums;
@@ -150,11 +149,25 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 
             if (detail.Deposit > 0)
             {
+                transactions.Add(new TransactionData
+                {
+                    Amount = detail.Deposit,
+                    ExternalTransactionId = $"{request.TransactionId}_{betNum}_unlock",
+                    ExternalRoundId = reference.ExternalRoundId,
+                    ExternalBetId = reference.ExternalBetId,
+                    ExternalGameId = reference.ExternalGameId,
+                    ExternalGameActionGroupId = request.TransactionId.ToString(),
+                    GameActionType = UnlockAmount,
+                    RoundClosed = false,
+                    TimeStamp = GetTimestamp(detail.RoundEndTime)
+                });
             }
 
-            var amount = detail.BetAmount + detail.WinOrLossAmount!.Value;
+            var winOrLossAmount = detail.WinOrLossAmount!.Value;
+            var amount = detail.BetAmount + winOrLossAmount;
             transactions.Add(new TransactionData
             {
+                AllowLoseBetNegativeAmount = true,
                 Amount = amount,
                 ExternalTransactionId = $"{request.TransactionId}_{betNum}",
                 ExternalTransactionReferenceId = reference.ExternalTransactionId,
@@ -162,16 +175,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 ExternalBetId = reference.ExternalBetId,
                 ExternalGameId = reference.ExternalGameId,
                 ExternalGameActionGroupId = request.TransactionId.ToString(),
-                GameActionType = GetGameActionType(detail.BetAmount, detail.WinOrLossAmount!.Value),
+                GameActionType = GetGameActionType(detail.BetAmount, winOrLossAmount),
                 RoundClosed = forceCloseRound ? true : null,
                 TimeStamp = GetTimestamp(detail.RoundEndTime),
                 RoundDetail = !forceCloseRound
                     ? null
-                    : _json.SerializeToString(new
-                    {
-                        Result = detail.GameResult,
-                        Extended = detail.GameResultExtended
-                    }, new JsonSerializerOptions {WriteIndented = false})
+                    : GetRoundDetail(detail),
+                CustomBetValues = new CustomBetValues(detail.ValidAmount!.Value, winOrLossAmount.Negate())
             });
 
             return GetBetData(playerCode, data, transactions.ToArray(), request.CurrencyCode);
@@ -236,11 +246,14 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 RoundClosed = false
             }).ToArray();
 
-            var reference = gameActions.First(t => t.GameActionType == PlaceBet);
+            var reference = gameActions.First(t => t.GameActionType == PlaceBet &&
+                !cancelledReferenceIds.Contains(t.ExternalTransactionId));
 
-            var amount = detail.BetAmount + detail.WinOrLossAmount!.Value;
+            var winOrLossAmount = detail.WinOrLossAmount!.Value;
+            var amount = detail.BetAmount + winOrLossAmount;
             var resettle = new TransactionData
             {
+                AllowLoseBetNegativeAmount = true,
                 Amount = amount,
                 ExternalTransactionId = $"{request.TransactionId}_{betNum}",
                 ExternalTransactionReferenceId = reference.ExternalTransactionId,
@@ -248,14 +261,11 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 ExternalBetId = reference.ExternalBetId,
                 ExternalGameId = reference.ExternalGameId,
                 ExternalGameActionGroupId = request.TransactionId.ToString(),
-                GameActionType = GetGameActionType(detail.BetAmount, detail.WinOrLossAmount!.Value),
+                GameActionType = GetGameActionType(detail.BetAmount, winOrLossAmount),
                 RoundClosed = true,
                 TimeStamp = DateTimeOffset.UtcNow,
-                RoundDetail = _json.SerializeToString(new
-                {
-                    Result = detail.GameResult,
-                    Extended = detail.GameResultExtended
-                }, new JsonSerializerOptions {WriteIndented = false})
+                RoundDetail = GetRoundDetail(detail),
+                CustomBetValues = new CustomBetValues(detail.ValidAmount!.Value, winOrLossAmount.Negate())
             };
 
             var transactions = cancelSettles.Concat(new[]
@@ -289,8 +299,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             string playerCode,
             GameProviderConfigurationData data,
             TransactionData[] transactions,
-            string currencyCode = null,
-            OppositeBetSetting[] oppositeBetSettings = null)
+            string currencyCode = null)
             => new BetData
             {
                 GameProviderId = data.GameProviderId,
@@ -302,11 +311,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 HasCurrencyFromGameProvider = currencyCode.IsNotNullOrEmpty(),
                 CurrencyCode = currencyCode,
                 Transactions = transactions,
-                OppositeBetRules = oppositeBetSettings?.Select(o => new OppositeBetRule
-                {
-                    ExternalGameIds = o.Games,
-                    Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
-                }).ToArray()
+                WithCustomBetValues = true
             };
 
         private static DateTimeOffset GetTimestamp(string timeStamp)
@@ -315,5 +320,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             var dateTime = DateTime.ParseExact(timeStamp, "yyyy-MM-dd HH:mm:ss", null, DateTimeStyles.AllowWhiteSpaces);
             return new DateTimeOffset(dateTime, offset);
         }
+
+        private string GetRoundDetail(TransactionDetail detail)
+            => _json.SerializeToString(new
+            {
+                detail.GameType,
+                Result = detail.GameResult,
+                Extended = detail.GameResultExtended
+            }, new JsonSerializerOptions {WriteIndented = false});
     }
 }

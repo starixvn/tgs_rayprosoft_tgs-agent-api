@@ -35,6 +35,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
                 {
                     var model = query.Games.First(x => x.Id == item);
                     var game = await _tgsRepository.Games.FirstOrDefaultAsync(x => x.Id == item);
+                    game.Name = model.Name;
                     game.Localization = model.Localization.ToJson();
                 }
                 await _tgsRepository.SaveChangesAsync();

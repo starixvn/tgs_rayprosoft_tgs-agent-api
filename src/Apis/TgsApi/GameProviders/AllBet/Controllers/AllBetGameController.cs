@@ -135,11 +135,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
             var roundId = detail.RoundId.ToString();
             var externalGameId = detail.GameType.ToString();
 
-            if (detail.Deposit > 0)
-            {
-                return new BetResult();
-            }
-
             var games = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, externalGameId);
             var gameId = games.FirstOrDefault()?.Id;
 
@@ -189,20 +184,13 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
                 .ConfigureAwait(false);
 
-            if (detail.Status == BetStatus.Settled)
+            return detail.Status switch
             {
-                // Resettle
-                return await ResettleAsync(playerCode, data, externalIds, request).ConfigureAwait(false);
-            }
-
-            if (detail.Status == BetStatus.Refund)
-            {
-                // Void Round
-                return await VoidRoundAsync(playerCode, data, externalIds, request).ConfigureAwait(false);
-            }
-
-            throw new InvalidGameActionException(
-                $"Unexpected status '{(int)detail.Status}' of action {(int)request.Type}");
+                BetStatus.Settled => await ResettleAsync(playerCode, data, externalIds, request).ConfigureAwait(false),
+                BetStatus.Refund  => await VoidRoundAsync(playerCode, data, externalIds, request).ConfigureAwait(false),
+                _ => throw new InvalidGameActionException(
+                    $"Unexpected status '{(int)detail.Status}' of action {(int)request.Type}")
+            };
         }
 
         private ValueTask<BetResult> VoidRoundAsync(string playerCode, GameProviderConfigurationData data,
