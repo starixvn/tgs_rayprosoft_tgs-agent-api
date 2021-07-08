@@ -27,6 +27,7 @@ namespace TGS.Workers.Schedulers.Jobs
             }
 
             _repository.PlatformCredits.UpdateRange(platformCredits);
+            await _repository.SaveChangesAsync();
 
             return new();
         }
