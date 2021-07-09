@@ -80,7 +80,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             if (cachedGame.Type == TGS.Core.Models.Enums.GameType.LiveDealerLobby)
             {
                 category = "baccarat_sicbo";
-                tableId = "k2oswnib7jjaaznw";
+                tableId = "oytmvb9m1zysmc4";
             }
 
             var data = new EvolutionGameUrlRequest()
