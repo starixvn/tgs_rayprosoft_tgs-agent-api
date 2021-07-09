@@ -65,7 +65,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     GameProviderIds = item.GameProviderIds,
                     GameType = item.GameType,
                     Id = item.Id,
-                    Localization = item.Localization.ContainsKey(language)
+                    Localization = item.Localization?.ContainsKey(language) == true
                         ? item.Localization[language]
                         : JsonDocument.Parse("{}"),
                     MobileBanner = item.MobileBanner,
