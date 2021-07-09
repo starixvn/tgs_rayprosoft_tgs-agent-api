@@ -14,7 +14,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     {
         BetData Bet(GameProviderConfigurationData data, string playCode, EvolutionDebitRequest source);
 
-        BetData Settle(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source);
+        ValueTask<BetData> Settle(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source);
 
         Task<BetData> CancelAsync(GameProviderConfigurationData data, string playCode, EvolutionCancelRequest source);
     }
@@ -23,13 +23,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     {
         private readonly string _gameProviderCode = Consts.GameProvider.Evolution;
         private readonly IEvolutionServices _services;
-
+        private readonly IGameProviderOperations _gameProviderOperations;
 
         public EvolutionActionModelMapper(
-            IEvolutionServices services
+            IEvolutionServices services,
+             IGameProviderOperations gameProviderOperations
             )
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
 
@@ -50,17 +52,22 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return GetBetData(data, playCode, transactions, data.AutoCloseRound);
         }
 
-        BetData IEvolutionActionModelMapper.Settle(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source)
+        async ValueTask<BetData> IEvolutionActionModelMapper.Settle(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source)
         {
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, source.Game.GameDetail.GameTable.Id).ConfigureAwait(false);
+
+            var cachedGame = cachedGames.First();
+            var orders = await _services.GetGameActionExternalIdsAsync(data.GameProviderId, playCode, source.Game.Id, cachedGame.Id, new GameActionType[] { GameActionType.PlaceBet }).ConfigureAwait(false);
+            var order = orders.Where(x => x.ExternalBetId == source.Transaction.RefId).First();
             var transactions = new TransactionData
             {
                 Amount = Math.Abs(source.Transaction.Amount),
-                ExternalTransactionId = $"{ source.Transaction.Id}_settle",
+                ExternalTransactionId = source.Transaction.Id,
                 ExternalRoundId = source.Game.Id,
                 ExternalBetId = source.Transaction.RefId,
                 ExternalGameActionGroupId = source.Transaction.RefId,
                 ExternalGameId = source.Game.GameDetail.GameTable.Id.ToString(),
-                ExternalTransactionReferenceId = source.Transaction.RefId,
+                ExternalTransactionReferenceId = order.ExternalTransactionId,
                 GameActionType = ProcessingSettlement(source),
                 TimeStamp = DateTimeOffset.UtcNow
             };
