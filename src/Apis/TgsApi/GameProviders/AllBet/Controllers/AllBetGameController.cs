@@ -149,15 +149,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 .ConfigureAwait(false);
 
             var settledBetIds = externalIds.Where(t => t.GameActionType.IsSettleBet())
-                .Select(t => t.ExternalReferencedTransactionId).ToArray();
+                .Select(t => t.ExternalBetId).ToArray();
 
-            var unsettledCount = externalIds
+            var unsettles = externalIds
                 .Where(t => t.GameActionType == GameActionType.PlaceBet &&
-                    !settledBetIds.Contains(t.ExternalTransactionId))
+                    !settledBetIds.Contains(t.ExternalBetId))
                 .Select(t => t.ExternalBetId)
-                .Distinct().Count();
+                .Distinct().ToArray();
 
-            var forceCloseRound = unsettledCount == 1;
+            var forceCloseRound = unsettles.Length == 1;
 
             var betData = _map.SettleBetRequest(playerCode, data, externalIds, request, forceCloseRound);
 
