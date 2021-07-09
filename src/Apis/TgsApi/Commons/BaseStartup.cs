@@ -18,7 +18,6 @@ using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
-using TGS.Services.GameOperations.Extensions;
 using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.ApiClients.Extensions;
 
@@ -57,7 +56,6 @@ namespace TGS.Apis.TgsApi.Commons
                 .AddWallet()
                 .AddTgsWalletRepositories();
 
-
             services.AddHttpContextAccessor();
 
             AddCustomDependencyServices(services);
@@ -68,7 +66,10 @@ namespace TGS.Apis.TgsApi.Commons
             {
                 options.Filters.Add<ValidateModelFilter>();
                 AddCustomFilters(options);
-            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options => { options.SuppressModelStateInvalidFilter = false; });
+            }).AddXmlSerializerFormatters().ConfigureApiBehaviorOptions(options =>
+            {
+                options.SuppressModelStateInvalidFilter = false;
+            });
 
             services.AddHealthChecks()
                 .AddPostgres(Configuration, "Tgs", "tgs-db")
@@ -82,7 +83,12 @@ namespace TGS.Apis.TgsApi.Commons
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(LogPrefix, new[] { "/health", "/favicon.ico", "/metrics" });
+            app.UseApiLogger(LogPrefix, new[]
+            {
+                "/health",
+                "/favicon.ico",
+                "/metrics"
+            });
 
             app.UseRouting();
 
