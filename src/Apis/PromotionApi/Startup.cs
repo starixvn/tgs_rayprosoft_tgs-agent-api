@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -89,7 +91,13 @@ namespace TGS.Apis.PromotionApi
                     var jsonOptions = sp.GetRequiredService<JsonOptions>();
                     var config = sp.GetRequiredService<IConfiguration>();
 
-                    options.JsonSerializerOptions = jsonOptions.JsonSerializerOptions;
+                    options.JsonSerializerOptions = new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        Converters = {
+                            new JsonStringEnumConverter()
+                        }
+                    };
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Promotion:PaymentServiceBaseUrl");
                 });
 
