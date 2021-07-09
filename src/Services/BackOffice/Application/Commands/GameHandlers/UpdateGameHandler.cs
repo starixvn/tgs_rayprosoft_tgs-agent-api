@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Models.Messages;
@@ -28,7 +29,7 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
                 return CreateInvalidResponse<CreateGamesResponse>(GameProvider.GameRequired);
             }
 
-             if (await _gameService.ExistsAsync(x =>
+            if (await _gameService.ExistsAsync(x =>
                 x.GameProviderId == game.GameProviderId && x.Code != game.Code && request.ExternalId == x.ExternalId))
             {
                 return CreateInvalidResponse<CreateGamesResponse>(GameProvider.ExternalIdExisted);
@@ -47,6 +48,8 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
             game.HasTurnoverOnTieBet = request.HasTurnoverOnTieBet;
             game.Html5 = request.Html5;
             game.AvailableCurrencies = request.AvailableCurrencies;
+            game.UpdatedByUsername = request.EditorUsername;
+            game.UpdatedOn = DateTimeOffset.Now;
 
             await _gameService.UpdateGameAsync(game);
 
