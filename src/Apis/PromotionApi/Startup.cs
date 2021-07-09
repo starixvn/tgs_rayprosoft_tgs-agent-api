@@ -88,7 +88,6 @@ namespace TGS.Apis.PromotionApi
                 .AddTgsPromotionRepositories()
                 .AddPaymentServiceClient((options, sp) =>
                 {
-                    var jsonOptions = sp.GetRequiredService<JsonOptions>();
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.JsonSerializerOptions = new JsonSerializerOptions
