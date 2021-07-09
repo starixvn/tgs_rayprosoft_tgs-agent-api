@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Google.Protobuf;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
@@ -38,7 +39,8 @@ namespace Promotion.UnitTests
             var sut = new DepositStatusChangedMessageHandler(
                 fakePaymentServiceClient,
                 fakeCheckFactory,
-                fakePlayerService);
+                fakePlayerService,
+                NullLogger<DepositStatusChangedMessageHandler>.Instance);
 
             var formEvent = new FormEvent
             {
@@ -88,7 +90,8 @@ namespace Promotion.UnitTests
             var sut = new DepositStatusChangedMessageHandler(
                 fakePaymentServiceClient,
                 fakeCheckFactory,
-                fakePlayerService);
+                fakePlayerService,
+                NullLogger<DepositStatusChangedMessageHandler>.Instance);
 
             var formEvent = new FormEvent
             {
