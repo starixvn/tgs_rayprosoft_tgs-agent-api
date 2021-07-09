@@ -14,6 +14,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using Microsoft.AspNetCore.Http;
 using TGS.Shared.Game.Models.Evolution.Commons.EvolutionGameUrl;
+using TGS.Core.Models.Exceptions;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 {
@@ -124,10 +125,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 
             };
 
-            var url = default(string);
-            var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
 
-            return new() { Url = responseGameUrl.Entry };
+            var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
+            if (responseGameUrl.Errors != null)
+            {
+                throw new GameProviderApiErrorException(responseGameUrl.Errors[0].Message);
+            }
+
+            var path = responseGameUrl.Entry.Substring(1, responseGameUrl.Entry.Length - 1);
+            var url = $"{configuration.ApiUrl}{path}";
+            return new() { Url = url };
         }
     }
 }
