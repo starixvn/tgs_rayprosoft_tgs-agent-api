@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
@@ -3103,6 +3103,98 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("payment_method_channels");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlatformCredit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<decimal>("Credit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("credit");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Id")
+                        .HasName("pk_platform_credits");
+
+                    b.HasIndex("BrandId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_platform_credits_brand_id");
+
+                    b.ToTable("platform_credits");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlatformPayRecord", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal>("Balance")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("balance");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<decimal>("PayAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("pay_amount");
+
+                    b.Property<Guid>("PlatformCreditId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("platform_credit_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_platform_pay_records");
+
+                    b.HasIndex("PlatformCreditId")
+                        .HasDatabaseName("ix_brand_credits_id");
+
+                    b.ToTable("platform_pay_records");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Player", b =>
                 {
                     b.Property<string>("PlayerCode")
@@ -6168,6 +6260,30 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Payment");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlatformCredit", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlatformCredit", "BrandId")
+                        .HasConstraintName("fk_platform_credits_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlatformPayRecord", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.PlatformCredit", "PlatformCredit")
+                        .WithMany("BrandPayRecords")
+                        .HasForeignKey("PlatformCreditId")
+                        .HasConstraintName("fk_platform_credits_brand_quotas_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlatformCredit");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Player", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", "Agent")
@@ -6886,6 +7002,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.MarketType", b =>
                 {
                     b.Navigation("SportTypes");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlatformCredit", b =>
+                {
+                    b.Navigation("BrandPayRecords");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Player", b =>

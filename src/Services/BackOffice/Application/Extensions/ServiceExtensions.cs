@@ -37,6 +37,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<ISettingsService, SettingsService>();
             services.AddTransient<IGameService, GameService>();
             services.AddTransient<IWalletExchangeService, WalletExchangeService>();
+            services.AddTransient<IPlatformCreditService, PlatformCreditService>();
 
             services.AddTgsTransactionRepositoriesServices();
 
