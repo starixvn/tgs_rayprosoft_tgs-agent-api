@@ -56,6 +56,8 @@ namespace TGS.Services.Operations.Commands
             var createdOn = DateTimeOffset.UtcNow;
             var playerCode = default(string);
 
+            var vip = await _repository.VipLevels.FirstOrDefaultAsync(x => x.BrandId == data.BrandId && x.Level == 1);
+
             while (retries < RetryCount)
             {
                 playerCode = PlayerCodeGenerator.NewId();
@@ -81,6 +83,7 @@ namespace TGS.Services.Operations.Commands
                         AgentId = data.AgentId,
                         UpdatedByUsername = username,
                         UpdatedOn = createdOn,
+                        VipId = vip.Id,
                         Wallets = new HashSet<Wallet>
                         {
                             new()
@@ -128,14 +131,22 @@ namespace TGS.Services.Operations.Commands
         {
             const string sql = "call dbo.player_deauthorize_by_login_record_id(:player_code, :login_record_id)";
             return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
-                new Dictionary<string, object> { { ":player_code", playerCode }, { ":login_record_id", loginRecordId } });
+                new Dictionary<string, object>
+                {
+                    {":player_code", playerCode},
+                    {":login_record_id", loginRecordId}
+                });
         }
 
         public Task DeauthorizePlayerAsync(string playerCode, PlatformType? platformType)
         {
             const string sql = "call dbo.player_deauthorize_by_platform_type";
             return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
-                new Dictionary<string, object> { { ":player_code", playerCode }, { ":platform_type", platformType } });
+                new Dictionary<string, object>
+                {
+                    {":player_code", playerCode},
+                    {":platform_type", platformType}
+                });
         }
 
         public async Task<PlayerLoginRecord> PlayerLoginAsync(PlayerLoginData data)
@@ -160,7 +171,12 @@ namespace TGS.Services.Operations.Commands
 
         public Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player { PlayerCode = playerCode, Email = email, UpdatedOn = updatedOn };
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                Email = email,
+                UpdatedOn = updatedOn
+            };
 
             _repository.Players.Attach(updateInfo);
             _repository.Entry(updateInfo).Property(nameof(Player.Email)).IsModified = true;
@@ -228,7 +244,12 @@ namespace TGS.Services.Operations.Commands
 
         public Task SetQqAsync(string playerCode, string qqId, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player { PlayerCode = playerCode, QQ = qqId, UpdatedOn = updatedOn };
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                QQ = qqId,
+                UpdatedOn = updatedOn
+            };
 
             _repository.Players.Attach(updateInfo);
             _repository.Entry(updateInfo).Property(nameof(Player.QQ)).IsModified = true;
@@ -239,7 +260,12 @@ namespace TGS.Services.Operations.Commands
 
         public Task SetWeChatAsync(string playerCode, string weChatId, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player { PlayerCode = playerCode, Wechat = weChatId, UpdatedOn = updatedOn };
+            var updateInfo = new Player
+            {
+                PlayerCode = playerCode,
+                Wechat = weChatId,
+                UpdatedOn = updatedOn
+            };
 
             _repository.Players.Attach(updateInfo);
             _repository.Entry(updateInfo).Property(nameof(Player.Wechat)).IsModified = true;
