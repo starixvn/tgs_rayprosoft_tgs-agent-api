@@ -53,7 +53,9 @@ namespace TGS.Workers.Schedulers.Services
                 new JobDescription(new("FCAD4CED-13A9-DE79-B86F-EBF00E07CE39"), Cron.Minutely(), null,
                     typeof(KYGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("F239A243-86CB-3D47-4667-F49A2BF874B4"), Cron.Minutely(), null,
-                    typeof(VRGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
+                    typeof(VRGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
+                new JobDescription(new("321E2BEE-0028-4D82-8CA7-BB1F1B83C4E0"), Cron.Monthly(1, 0, 0), null,
+                    typeof(PlatformCreditBalanceWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
             )
 
         {

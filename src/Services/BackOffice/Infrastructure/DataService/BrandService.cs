@@ -62,6 +62,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IBrandService.CreateBrandAsync(CreateBrandRequest request)
         {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
             var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
                 BrandSettlementIntervalGenerator.GetInterval(request.SettlementIntervalType);
             var brand = new Brand
@@ -98,6 +100,21 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.Domains = GenerateBrandDomains(brand, request);
 
             await CreateEntityAsync(brand);
+
+            var platformCredit = new PlatformCredit
+            {
+                BrandId = brand.Id,
+                Credit = 0,
+                Balance = 0,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
+
+            await CreateEntityAsync(platformCredit);
+
+            scope.Complete();
         }
 
         Task<Brand> IBrandService.GetBrandAsync(Expression<Func<Brand, bool>> predicate,
