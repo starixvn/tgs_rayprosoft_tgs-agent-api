@@ -75,14 +75,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             var ip = _requestAnalyzer.GetIp(_httpContextAccessor.HttpContext);
 
             var category = "slots";
-            var tableId = cachedGame.ExternalId;
+            var table = new EvolutionGameUrlConfigGameTable()
+            {
+                Id = cachedGame.ExternalId
+            };
+
 
             if (cachedGame.Type == TGS.Core.Models.Enums.GameType.LiveDealerLobby)
             {
                 category = "baccarat_sicbo";
-                tableId = "oytmvb9m1zysmc4";
+                table = null;
             }
 
+            var playerGroup = default(EvolutionGameUrlPlayerGroup);
             var data = new EvolutionGameUrlRequest()
             {
                 Uuid = GuidExtensions.NewSequentialGuid().ToString(),
@@ -101,20 +106,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                         Id = encryptedToken,
                         Ip = ip
                     },
-                    Group = new EvolutionGameUrlPlayerGroup()
-                    {
-                        Action = "clear"
-                    },
+                    Group = playerGroup
                 },
                 Config = new EvolutionGameUrlConfig()
                 {
                     Game = new EvolutionGameUrlConfigGame()
                     {
                         Category = category,
-                        Table = new EvolutionGameUrlConfigGameTable()
-                        {
-                            Id = tableId
-                        }
+                        Table = table
                     },
                     Channel = new EvolutionGameUrlConfigChannel()
                     {
