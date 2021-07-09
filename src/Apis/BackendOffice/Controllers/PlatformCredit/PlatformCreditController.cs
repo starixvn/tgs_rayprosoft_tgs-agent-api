@@ -21,7 +21,8 @@ namespace TGS.Apis.BackendOffice.Controllers.PlatformCredit
 
         [HttpGet]
         [Description("Get platform credits")]
-        public Task<PagedResponse<PlatformCreditModel>> GetBrandsAsync([FromQuery] GetPlatformCreditsRequest request) =>
+        public Task<PagedResponse<PlatformCreditModel>> GetPlatformCreditsAsync(
+            [FromQuery] GetPlatformCreditsRequest request) =>
             _mediator.Send(request);
 
         [HttpPut("{id}/{amount}")]
