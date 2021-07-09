@@ -107,7 +107,7 @@ namespace Promotion.UnitTests
                     Status = PaymentFlowState.Reject,
                     CreatedOn = DateTimeOffset.UtcNow
                 });
-
+            
             await sut.HandleAsync(formEvent.ToByteArray());
 
             _ = fakePromotionChecker.Received(2)
