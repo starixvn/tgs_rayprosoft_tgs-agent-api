@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Google.Protobuf;
+using Microsoft.Extensions.Logging;
 using Tgs.MessageQueue;
 using Tgs.Payment.Clients;
 using Tgs.Payment.Protos;
@@ -11,13 +13,15 @@ namespace TGS.Services.Promotion.MessageQueue
     {
         private readonly IPromotionChecker _dailyFirstDepositChecker;
         private readonly IPromotionChecker _firstDepositChecker;
+        private readonly ILogger<DepositStatusChangedMessageHandler> _logger;
         private readonly IPaymentServiceClient _paymentServiceClient;
         private readonly IPlayerService _playerService;
 
         public DepositStatusChangedMessageHandler(
             IPaymentServiceClient paymentServiceClient,
             IPromotionCheckerFactory promotionCheckerFactory,
-            IPlayerService playerService)
+            IPlayerService playerService,
+            ILogger<DepositStatusChangedMessageHandler> logger)
         {
             if (promotionCheckerFactory is null)
             {
@@ -26,16 +30,21 @@ namespace TGS.Services.Promotion.MessageQueue
 
             _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _playerService = playerService ?? throw new ArgumentNullException(nameof(playerService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _firstDepositChecker = promotionCheckerFactory.GetPromotionChecker("FirstDeposit");
             _dailyFirstDepositChecker = promotionCheckerFactory.GetPromotionChecker("DailyFirstDeposit");
         }
 
         public async ValueTask HandleAsync(byte[] data, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Deposit status change event.");
+
             var formEvent = FormEvent.Parser.ParseFrom(data);
 
             if (formEvent == null)
                 return;
+
+            _logger.LogInformation($"formEvent: ({JsonFormatter.Default.Format(formEvent)})");
 
             var depositForm = await _paymentServiceClient
                 .GetDepositFormAsync(Guid.Parse(formEvent.BrandId), Guid.Parse(formEvent.FormId))
