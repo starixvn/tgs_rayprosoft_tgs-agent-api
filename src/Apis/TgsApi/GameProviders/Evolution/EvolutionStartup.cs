@@ -41,6 +41,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(EvolutionGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<EvolutionGameInitializer>());
+            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(EvolutionGameHistory) }, (provider, _) =>
+            provider.GetRequiredService<EvolutionGameHistory>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)
