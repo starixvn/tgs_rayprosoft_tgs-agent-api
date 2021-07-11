@@ -38,7 +38,7 @@ namespace TGS.Shared.Game.ApiClients.Evolution
 
         async ValueTask<EvolutionGamHistoryRoundResponse> IEvolutionApiClient.GetGamHistoryRoundAsync(EvolutionConfiguration configuration, EvolutionGamHistoryRoundRequest request)
         {
-            var url = $"https://{configuration.ApiUrl}/players/{request.PlayerCode}/games/{request.RoundId}";
+            var url = $"{configuration.ApiUrl}api/gamehistory/v1/players/{request.PlayerCode}/games/{request.RoundId}";
             var headers = GettHeaders(configuration.CasinoID, configuration.GameHistoryApiToken);
             return await ExecuteJsonRequestAsync<EvolutionGamHistoryRoundRequest, EvolutionGamHistoryRoundResponse>(HttpMethod.Get, url, null, headers: headers, logPrefix: $"{_gameProvider}.GetGamHistoryRound").ConfigureAwait(false);
         }
