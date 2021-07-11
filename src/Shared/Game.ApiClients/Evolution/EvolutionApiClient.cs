@@ -40,7 +40,7 @@ namespace TGS.Shared.Game.ApiClients.Evolution
         {
             var url = $"https://{configuration.ApiUrl}/players/{request.PlayerCode}/games/{request.RoundId}";
             var headers = GettHeaders(configuration.CasinoID, configuration.GameHistoryApiToken);
-            return await ExecuteJsonRequestAsync<EvolutionGamHistoryRoundRequest, EvolutionGamHistoryRoundResponse>(HttpMethod.Get, url, null, headers: headers, logPrefix: $"{_gameProvider}.GetGameUrl").ConfigureAwait(false);
+            return await ExecuteJsonRequestAsync<EvolutionGamHistoryRoundRequest, EvolutionGamHistoryRoundResponse>(HttpMethod.Get, url, null, headers: headers, logPrefix: $"{_gameProvider}.GetGamHistoryRound").ConfigureAwait(false);
         }
 
         private Dictionary<string, string> GettHeaders(string casinoKey, string apiToken) => new Dictionary<string, string> {
