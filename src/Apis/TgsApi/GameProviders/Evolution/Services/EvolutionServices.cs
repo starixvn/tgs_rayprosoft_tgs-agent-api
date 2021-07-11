@@ -16,6 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     public interface IEvolutionServices
     {
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
         ValueTask<Guid> GetGameProviderIdAsync();
@@ -42,6 +43,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 
         async ValueTask<GameActionExternalIds> IEvolutionServices.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
+
+        async ValueTask<GameActionExternalIds[]> IEvolutionServices.GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes)
+           => await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, gameActionTypes).ConfigureAwait(false);
 
         async ValueTask<GameProviderConfigurationData> IEvolutionServices.GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {
