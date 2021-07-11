@@ -98,7 +98,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             };
         }
 
-        [HttpPost("credit)")]
+        [HttpPost("credit")]
         public async Task<EvolutionStandardResponse> SettleAsync(
           EvolutionCreditRequest source)
         {
@@ -112,7 +112,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            var betData = _map.Settle(gameProviderConfigurationData, playerCode, source);
+            var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, source).ConfigureAwait(false);
             var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
 
             return new EvolutionStandardResponse()

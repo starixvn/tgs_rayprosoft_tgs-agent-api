@@ -14,7 +14,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     {
         BetData Bet(GameProviderConfigurationData data, string playCode, EvolutionDebitRequest source);
 
-        ValueTask<BetData> Settle(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source);
+        ValueTask<BetData> SettleAsync(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source);
 
         Task<BetData> CancelAsync(GameProviderConfigurationData data, string playCode, EvolutionCancelRequest source);
     }
@@ -52,7 +52,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return GetBetData(data, playCode, transactions, data.AutoCloseRound);
         }
 
-        async ValueTask<BetData> IEvolutionActionModelMapper.Settle(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source)
+        async ValueTask<BetData> IEvolutionActionModelMapper.SettleAsync(GameProviderConfigurationData data, string playCode, EvolutionCreditRequest source)
         {
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, source.Game.GameDetail.GameTable.Id).ConfigureAwait(false);
 
