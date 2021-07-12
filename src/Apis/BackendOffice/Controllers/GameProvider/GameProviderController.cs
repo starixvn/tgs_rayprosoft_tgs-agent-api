@@ -59,10 +59,12 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         [HttpGet("localization/export")]
         [Description("Export game providers localization for example")]
         public async Task<FileStreamResult> ExportGameProvidersLocalizationAsync(
-           [FromServices] IGetService<GetGameProvidersLocalizationQuery, GameProvidersLocalizationInfo> getLocalizationQueryService
-           )
+            [FromServices]
+            IGetService<GetGameProvidersLocalizationQuery, GameProvidersLocalizationInfo> getLocalizationQueryService
+        )
         {
-            var info = await getLocalizationQueryService.GetAsync(new GetGameProvidersLocalizationQuery()).ConfigureAwait(false);
+            var info = await getLocalizationQueryService.GetAsync(new GetGameProvidersLocalizationQuery())
+                .ConfigureAwait(false);
 
             var memoryStream = new MemoryStream();
 
@@ -76,7 +78,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
                 var sheets = workbookPart.Workbook.AppendChild(new Sheets());
 
-                sheets.Append(new Sheet()
+                sheets.Append(new Sheet
                 {
                     Id = workbookPart.GetIdOfPart(worksheetPart),
                     SheetId = 1,
@@ -87,12 +89,12 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
                 var row = new Row();
                 row.Append(
-                    new Cell()
+                    new Cell
                     {
                         CellValue = new CellValue("Id"),
                         DataType = CellValues.String
                     },
-                    new Cell()
+                    new Cell
                     {
                         CellValue = new CellValue("Name"),
                         DataType = CellValues.String
@@ -102,7 +104,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                 foreach (var item in info.Languages)
                 {
                     row.Append(
-                        new Cell()
+                        new Cell
                         {
                             CellValue = new CellValue(item.Replace("-", "")),
                             DataType = CellValues.String
@@ -116,12 +118,12 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                 {
                     row = new Row();
                     row.Append(
-                        new Cell()
+                        new Cell
                         {
                             CellValue = new CellValue(gameProvider.GameProviderId.ToString()),
                             DataType = CellValues.String
                         },
-                        new Cell()
+                        new Cell
                         {
                             CellValue = new CellValue(gameProvider.GameProviderName),
                             DataType = CellValues.String
@@ -137,7 +139,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
                             if (isExist)
                             {
                                 row.Append(
-                                    new Cell()
+                                    new Cell
                                     {
                                         CellValue = new CellValue(lang.GetProperty("name").ToString()),
                                         DataType = CellValues.String
@@ -160,31 +162,37 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         [Description("Upload game providers localization file")]
         public async Task<MessageResponse> UploadGameProvidersLocalizationAsync(
             IFormFile file,
-            [FromServices] IGetService<UpdateGameProvidersLocalizationQuery, UpdateGameProvidersLocationInfo> updateGameLocalizationQueryService)
+            [FromServices]
+            IGetService<UpdateGameProvidersLocalizationQuery, UpdateGameProvidersLocationInfo>
+                updateGameLocalizationQueryService)
         {
             var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadGameProvidersLocalizationModel>(file);
 
             var gameProviders = uploadedResult
                 .Where(p => !string.IsNullOrEmpty(p.Id))
-                .Select(x => new GameProvidersLocalizationModel()
+                .Select(x => new GameProvidersLocalizationModel
                 {
                     Id = new Guid(x.Id),
                     Name = x.Name,
-                    Localization = new Dictionary<string, JsonDocument>()
+                    Localization = new Dictionary<string, JsonDocument>
                     {
-                        { "en-US", JsonDocument.Parse("{ \"name\": \""+x.EnUS+"\" }") },
-                        { "zh-CN", JsonDocument.Parse("{ \"name\": \""+x.ZhCN+"\" }") },
-                        { "zh-TW", JsonDocument.Parse("{ \"name\": \""+x.ZhTW+"\" }") },
-                        { "id-ID", JsonDocument.Parse("{ \"name\": \""+x.IdID+"\" }") },
-                        { "th-TH", JsonDocument.Parse("{ \"name\": \""+x.ThTH+"\" }") },
-                        { "vi-VN", JsonDocument.Parse("{ \"name\": \""+x.ViVN+"\" }") },
-                        { "ko-KR", JsonDocument.Parse("{ \"name\": \""+x.KoKR+"\" }") },
-                        { "ja-JP", JsonDocument.Parse("{ \"name\": \""+x.JaJP+"\" }") }
+                        {"en-US", JsonDocument.Parse("{ \"name\": \"" + x.EnUS + "\" }")},
+                        {"zh-CN", JsonDocument.Parse("{ \"name\": \"" + x.ZhCN + "\" }")},
+                        {"zh-TW", JsonDocument.Parse("{ \"name\": \"" + x.ZhTW + "\" }")},
+                        {"id-ID", JsonDocument.Parse("{ \"name\": \"" + x.IdID + "\" }")},
+                        {"th-TH", JsonDocument.Parse("{ \"name\": \"" + x.ThTH + "\" }")},
+                        {"vi-VN", JsonDocument.Parse("{ \"name\": \"" + x.ViVN + "\" }")},
+                        {"ko-KR", JsonDocument.Parse("{ \"name\": \"" + x.KoKR + "\" }")},
+                        {"ja-JP", JsonDocument.Parse("{ \"name\": \"" + x.JaJP + "\" }")}
                     }
                 })
                 .ToList();
 
-            var query = new UpdateGameProvidersLocalizationQuery() { GameProviders = gameProviders };
+            var query = new UpdateGameProvidersLocalizationQuery
+            {
+                GameProviders = gameProviders,
+                EditorUsername = Username
+            };
 
             var info = await updateGameLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
 
@@ -192,21 +200,19 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
             if (diffGameProviders.Any())
             {
-                return new MessageResponse()
+                return new MessageResponse
                 {
                     Valid = false,
                     Message = "GameProviders Not Found",
                     Errors = diffGameProviders.Select(x => x.ToString()).ToArray()
                 };
             }
-            else
+
+            return new MessageResponse
             {
-                return new MessageResponse
-                {
-                    Valid = true,
-                    Message = "Update Game Providers Localization Success"
-                };
-            }
+                Valid = true,
+                Message = "Update Game Providers Localization Success"
+            };
         }
     }
 }
