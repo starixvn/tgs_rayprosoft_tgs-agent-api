@@ -82,7 +82,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         {
             "sicbo" => GetSicboGameHistory(source.Data.Result),//轮盘
             "dragontiger" => GetDragontigerGameHistory(source.Data.Result),//轮盘
-            _ => GetBaccaratGameHistory(source.Data.Result)//百家樂相關
+            "baccarat" => GetBaccaratGameHistory(source.Data.Result),//百家樂相關
+            _ => _jsonSerializationProvider.SerializeToString(source.Data.Result)
         };
 
 
