@@ -30,11 +30,9 @@ namespace TGS.Apis.FileService.Controllers
             {
                 case Consts.UploadFile.Promotion:
                     await _promotionService.AddPromotionFileAsync(id, request.FileNames);
-                    await _uploadService.CleanFilesAsync(Consts.UploadFile.Promotion, request.FileNames);
                     break;
                 case Consts.UploadFile.StationLetter:
                     await _stationLetterService.AddStationLetterFileAsync(id, request.FileNames);
-                    await _uploadService.CleanFilesAsync(Consts.UploadFile.StationLetter, request.FileNames);
                     break;
             }
 
@@ -46,7 +44,11 @@ namespace TGS.Apis.FileService.Controllers
         {
             var keys = await _uploadService.GetObjectsAsync();
 
-            return new() {Valid = true, Names = keys};
+            return new()
+            {
+                Valid = true,
+                Names = keys
+            };
         }
     }
 }
