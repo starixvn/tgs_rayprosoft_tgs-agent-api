@@ -17,6 +17,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     {
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
         ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes);
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId, string playerCode, string externalGameActionGroupId);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
         ValueTask<Guid> GetGameProviderIdAsync();
@@ -47,6 +48,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         async ValueTask<GameActionExternalIds[]> IEvolutionServices.GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes)
            => await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, gameActionTypes).ConfigureAwait(false);
 
+        public async ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId, string playerCode, string externalGameActionGroupId)
+            => await _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(gameProviderId, playerCode, externalGameActionGroupId).ConfigureAwait(false);
+
         async ValueTask<GameProviderConfigurationData> IEvolutionServices.GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
@@ -76,5 +80,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         {
             return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Evolution).ConfigureAwait(false);
         }
+
+
     }
 }
