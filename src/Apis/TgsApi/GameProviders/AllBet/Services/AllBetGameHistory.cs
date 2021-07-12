@@ -141,7 +141,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 
             for (var i = 0; i < values.Length; i++)
             {
-                var key = i == 0 ? "Banker" : $"Player{i + 1}";
+                var key = i == 0 ? "Banker" : $"Player{i}";
                 var details = values[i].SplitByComma();
                 var cards = GetCards(details);
 
@@ -163,7 +163,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 {
                     0 => "First",
                     1 => "Banker",
-                    _ => $"Player{i + 1}"
+                    _ => $"Player{i - 1}"
                 };
 
                 var details = values[i].SplitByComma();
