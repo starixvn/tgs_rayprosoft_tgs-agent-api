@@ -80,11 +80,25 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 
         private string GetGameHistory(EvolutionGamHistoryRoundResponse source) => source.Data.GameType.ToLower() switch
         {
-            "sicbo" => GetSicboGameHistory(source.Data.Result),//轮盘
+            "sicbo" => GetSicboGameHistory(source.Data.Result),//骰寶
+            "roulette" => GetRouletteGameHistory(source.Data.Result),//輪盤
             "dragontiger" => GetDragontigerGameHistory(source.Data.Result),//轮盘
             "baccarat" => GetBaccaratGameHistory(source.Data.Result),//百家樂相關
             _ => _jsonSerializationProvider.SerializeToString(source.Data.Result)
         };
+
+        private string GetRouletteGameHistory(JsonDocument source)
+        {
+            var gameResult = _jsonSerializationProvider.DeserializeFromString<Roulette>(_jsonSerializationProvider.SerializeToString(source));
+            var roulettes = (from Outcome in gameResult.Outcomes
+                             select new
+                             {
+                                 number = Outcome.Number,
+                                 color = Outcome.Color
+                             }).ToArray();
+
+            return _jsonSerializationProvider.SerializeToString(roulettes);
+        }
 
 
         private string GetBaccaratGameHistory(JsonDocument source)
