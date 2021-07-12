@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
@@ -46,7 +48,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             if (cachedGame.Type == GameType.Slot)
             {
                 var gameResult = _jsonSerializationProvider.DeserializeFromString<SlotGames>(_jsonSerializationProvider.SerializeToString(response.Data.Result));
-                var path = gameResult.Path.Substring(1, gameResult.Path.Length - 1);
+                var path = gameResult.Path[1..];
                 var url = $"{configuration.ApiUrl}{path}";
                 return new RoundResult()
                 {
@@ -70,10 +72,73 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                     GameResult = round.ClientStatus.ToString(),
                     Data = new BaseData[]
                     {
-                        new JsonData { Value = _jsonSerializationProvider.SerializeToString(response.Data.Result) }
+                        new JsonData { Value =GetGameHistory( response)  }
                     }
                 };
             }
         }
+
+        private string GetGameHistory(EvolutionGamHistoryRoundResponse source) => source.Data.GameType.ToLower() switch
+        {
+            "sicbo" => GetSicboGameHistory(source.Data.Result),//轮盘
+            "dragontiger" => GetDragontigerGameHistory(source.Data.Result),//轮盘
+            _ => GetBaccaratGameHistory(source.Data.Result)//百家樂相關
+        };
+
+
+        private string GetBaccaratGameHistory(JsonDocument source)
+        {
+
+            var gameResult = _jsonSerializationProvider.DeserializeFromString<Baccarat>(_jsonSerializationProvider.SerializeToString(source));
+
+            var bankers = (from card in gameResult.Banker.Cards
+                           select
+                               GetCard(card).ToString()
+                           ).ToArray();
+
+            var players = (from card in gameResult.Player.Cards
+                           select
+                               GetCard(card).ToString()
+                         ).ToArray();
+
+            return JsonSerializer.Serialize(
+                new Dictionary<string, string>() {
+                    { "player",string.Join(',', bankers)},
+                    { "banker",string.Join(',', players)}
+                });
+        }
+
+        private string GetDragontigerGameHistory(JsonDocument source)
+        {
+            var gameResult = _jsonSerializationProvider.DeserializeFromString<DragonTiger>(_jsonSerializationProvider.SerializeToString(source));
+            return JsonSerializer.Serialize(
+                new Dictionary<string, string>() {
+                    { "dragon",GetCard(gameResult.Dragon.Card)},
+                    { "tiger", GetCard(gameResult.Tiger.Card)}
+                });
+        }
+
+        private string GetSicboGameHistory(JsonDocument source)
+        {
+            var gameResult = _jsonSerializationProvider.DeserializeFromString<SicBo>(_jsonSerializationProvider.SerializeToString(source));
+
+            return _jsonSerializationProvider.SerializeToString(
+                new Dictionary<string, int>() {
+                    { "dice1",gameResult.First},
+                    { "dice2",gameResult.Second},
+                    { "dice3", gameResult.Third}
+                });
+        }
+
+        private string GetCard(string rank) => $"{GetSuit(rank.ToCharArray()[1])}{rank.ToCharArray()[0]}";
+
+
+        private string GetSuit(char suit) => suit switch
+        {
+            'H' => "♥",
+            'C' => "♣",
+            'D' => "♦",
+            _ => "♠"
+        };
     }
 }

@@ -14,11 +14,11 @@ namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound
         [JsonPropertyName("description")]
         public string Description { get; set; }
         [JsonPropertyName("payout")]
-        public float Payout { get; set; }
+        public decimal Payout { get; set; }
         [JsonPropertyName("placedOn")]
         public DateTime PlacedOn { get; set; }
         [JsonPropertyName("stake")]
-        public int Stake { get; set; }
+        public decimal Stake { get; set; }
         [JsonPropertyName("transactionId")]
         public string TransactionId { get; set; }
         [JsonPropertyName("owTransactionId")]
