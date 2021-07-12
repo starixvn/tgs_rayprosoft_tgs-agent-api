@@ -34,20 +34,5 @@ namespace TGS.Apis.FileService.DataService.Services
             => _fileManager.ListPathAsync(prefix)
                 .Select(meta => meta.FileName)
                 .ToArrayAsync();
-
-        public async Task CleanFilesAsync(string prefix, string[] names)
-        {
-            var files = await _fileManager.FindExpiredFilesAsync($"/{prefix}/", DateTimeOffset.Now.AddHours(-24))
-                .Where(meta => !names.Contains(meta.FileName))
-                .ToArrayAsync()
-                .ConfigureAwait(false);
-
-            if (files.Length == 0)
-            {
-                return;
-            }
-
-            await _fileManager.DeleteFilesAsync(files);
-        }
     }
 }
