@@ -8,6 +8,6 @@ namespace TGS.Services.BackOffice.Application.Models.PlatformCredit
     {
         public string Keyword { get; set; }
         public string LicenseeName { get; set; }
-        public Guid BrandId { get; set; }
+        public Guid? BrandId { get; set; }
     }
 }

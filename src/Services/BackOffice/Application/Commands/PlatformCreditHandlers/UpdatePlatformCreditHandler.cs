@@ -6,7 +6,7 @@ using TGS.Services.BackOffice.Application.Models.PlatformCredit;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.BrandQuota
+namespace TGS.Services.BackOffice.Application.Commands.PlatformCreditHandlers
 {
     public class UpdatePlatformCreditHandler : Handler<UpdatePlatformCreditRequest, MessageResponse>
     {

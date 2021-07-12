@@ -34,5 +34,14 @@ namespace TGS.Apis.BackendOffice.Controllers.PlatformCredit
         [HttpPut("{id}/pay/{amount}")]
         [Description("Update a platform credit")]
         public Task<MessageResponse> PayAsync(Guid id, decimal amount) => _mediator.Send(new PayRequest(id, amount));
+
+        [HttpGet("{id}/paymentRecords")]
+        [Description("Get payment records")]
+        public Task<PagedResponse<PlatformCreditPaymentModel>> GetPaymentRecordsAsync(Guid id,
+            [FromQuery] GetPlatformCreditPaymentRequest request)
+        {
+            request.PlatformCreditId = id;
+            return _mediator.Send(request);
+        }
     }
 }
