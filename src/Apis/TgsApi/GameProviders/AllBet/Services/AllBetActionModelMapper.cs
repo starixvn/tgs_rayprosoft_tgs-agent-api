@@ -10,6 +10,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
+using TGS.Shared.Game.Models.AllBet.Common;
 using TGS.Shared.Game.Models.AllBet.Enums;
 using TGS.Shared.Game.Models.AllBet.Incoming;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -322,11 +323,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
         }
 
         private string GetRoundDetail(TransactionDetail detail)
-            => _json.SerializeToString(new
-            {
-                detail.GameType,
-                Result = detail.GameResult,
-                Extended = detail.GameResultExtended
-            }, new JsonSerializerOptions {WriteIndented = false});
+            => _json.SerializeToString(
+                new GameHistory(detail.GameType, detail.GameResult, detail.GameResultExtended),
+                new JsonSerializerOptions {WriteIndented = false});
     }
 }
