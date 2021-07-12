@@ -23,6 +23,11 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 IQueryable<PlatformCredit>> preQuery = null,
             bool tracking = false);
 
+        IQueryable<PlatformPayRecord> GetPlatformCreditPaymentQueries(
+            Func<IQueryable<PlatformPayRecord>,
+                IQueryable<PlatformPayRecord>> preQuery = null,
+            bool tracking = false);
+
         Task UpdatePlatformCreditAsync(PlatformCredit platformCredit,
             UpdatePlatformCreditRequest request);
 
@@ -87,6 +92,10 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             await UpdateEntityAsync(platformCredit);
         }
+
+        IQueryable<PlatformPayRecord> IPlatformCreditService.GetPlatformCreditPaymentQueries(
+            Func<IQueryable<PlatformPayRecord>, IQueryable<PlatformPayRecord>> preQuery, bool tracking)
+            => GetQueriesAsync(preQuery, tracking);
 
         private async ValueTask<decimal> GetBalanceAsync(Guid brandId, decimal amount)
         {

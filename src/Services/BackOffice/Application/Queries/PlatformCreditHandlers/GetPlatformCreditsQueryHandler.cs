@@ -8,7 +8,7 @@ using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.PlatformCredit;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Queries.BrandQuotaHandlers
+namespace TGS.Services.BackOffice.Application.Queries.PlatformCreditHandlers
 {
     public class GetPlatformCreditsQueryHandler : Handler<GetPlatformCreditsRequest, PagedResponse<PlatformCreditModel>>
     {
@@ -23,13 +23,16 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandQuotaHandlers
         public override Task<PagedResponse<PlatformCreditModel>> Handle(GetPlatformCreditsRequest request,
             CancellationToken cancellationToken) =>
             _service.GetPlatformCreditQueries(q => q
-                    .Where(x => x.BrandId == request.BrandId)
+                    .Where(request.BrandId, x => x.BrandId == request.BrandId)
                     .Where(request.LicenseeName, x => EF.Functions.ILike(x.Brand.Licensee.Name, $"%{request.Keyword}%"))
                     .Where(request.Keyword, x => EF.Functions.ILike(x.Brand.Code, $"%{request.Keyword}%") ||
                         EF.Functions.ILike(x.Brand.Name, $"%{request.Keyword}%")))
                 .Select(x => new PlatformCreditModel
                 {
                     Id = x.Id,
+                    LicenseeName = x.Brand.Licensee.Name,
+                    BrandName = x.Brand.Name,
+                    BrandCode = x.Brand.Code,
                     Credit = x.Credit,
                     Balance = x.Balance,
                     CreatedOn = x.CreatedOn,
