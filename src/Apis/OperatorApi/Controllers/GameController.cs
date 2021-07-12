@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
 using TGS.ServiceUtility;
@@ -74,33 +73,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// get game launch url via game id
         /// </summary>
-        [HttpGet("geturl")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<GetGameUrlResponse> GetGameUrlForGetAsync(
-            [FromServices] IGetService<GetGameUrlQuery, GameUrlInfo> getGameUrlQueryService,
-            [FromQuery(Name = "gpcode")] string gpCode,
-            [FromQuery(Name = "gid")] int gameId,
-            [FromQuery(Name = "language")] string languageCode
-            )
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var query = new GetGameUrlQuery(playerTokenData, gpCode, gameId, languageCode, null);
-            var info = await getGameUrlQueryService
-                .GetAsync(query)
-                .ConfigureAwait(false);
-
-            return new GetGameUrlResponse()
-            {
-                Error = info.Error,
-                ErrorMessage = info.ErrorMessage,
-                Url = info.Url
-            };
-        }
-
-        /// <summary>
-        /// get game launch url via game id
-        /// </summary>
         [HttpPost("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetGameUrlResponse> GetGameUrlForPostAsync(
@@ -116,38 +88,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.LanguageCode,
                 request.ExtendedData);
             var info = await getGameUrlQueryService
-                .GetAsync(query)
-                .ConfigureAwait(false);
-
-            return new GetGameUrlResponse()
-            {
-                Error = info.Error,
-                ErrorMessage = info.ErrorMessage,
-                Url = info.Url
-            };
-        }
-
-        /// <summary>
-        /// get game launch url for lobby type game.
-        /// </summary>
-        [HttpGet("lobby/geturl")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<GetGameUrlResponse> GetLobbyGameUrlForGetAsync(
-            [FromServices] IGetService<GetLobbyGameUrlQuery, LobbyGameUrlInfo> getLobbyGameUrlQueryService,
-            [FromQuery(Name = "gpcode")] string gpCode,
-            [FromQuery(Name = "gtype")] GameType gameType,
-            [FromQuery(Name = "language")] string languageCode)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var query = new GetLobbyGameUrlQuery(
-                gpCode,
-                playerTokenData,
-                gameType,
-                languageCode,
-                null);
-
-            var info = await getLobbyGameUrlQueryService
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
