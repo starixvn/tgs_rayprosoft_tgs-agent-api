@@ -11,7 +11,7 @@ namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.Comm
     {
         [JsonPropertyName("number")]
         public string Number { get; set; }
-        [JsonPropertyName("number")]
+        [JsonPropertyName("wheel")]
         public string Wheel { get; set; }
         [JsonPropertyName("spin")]
         public string Spin { get; set; }
