@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             CachedGameProvider cachedGameProvider,
             CachedGame cachedGame, string language)
         {
-            var value = GetGameHistory(round.RoundDetail.AdditionalData);
+            var value = GetGameHistory(round.RoundDetail?.AdditionalData);
 
             return ValueTask.FromResult(new RoundResult
             {
