@@ -84,6 +84,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             "roulette" => GetRouletteGameHistory(source.Data.Result),//輪盤
             "dragontiger" => GetDragontigerGameHistory(source.Data.Result),//轮盘
             "baccarat" => GetBaccaratGameHistory(source.Data.Result),//百家樂相關
+            "blackjack" => GetBlackJackGameHistory(source.Data.Result),//21點
             _ => _jsonSerializationProvider.SerializeToString(source.Data.Result)
         };
 
@@ -98,6 +99,89 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                              }).ToArray();
 
             return _jsonSerializationProvider.SerializeToString(roulettes);
+        }
+
+        private string GetBlackJackGameHistory(JsonDocument source)
+        {
+
+            var gameResult = _jsonSerializationProvider.DeserializeFromString<BlackJack>(_jsonSerializationProvider.SerializeToString(source));
+
+            var result = new Dictionary<string, object>();
+
+
+            if (gameResult.Dealer != null)
+            {
+                var cards = (from card in gameResult.Dealer.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("dealer", new { score = gameResult.Dealer.Score, cards = string.Join(',', cards) });
+            }
+
+            if (gameResult.Seats.Seat1 != null)
+            {
+                var cards = (from card in gameResult.Seats.Seat1.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("seat1", new { score = gameResult.Seats.Seat1.Score, cards = string.Join(',', cards) });
+            }
+
+            if (gameResult.Seats.Seat2 != null)
+            {
+                var cards = (from card in gameResult.Seats.Seat2.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("seat2", new { score = gameResult.Seats.Seat2.Score, cards = string.Join(',', cards) });
+            }
+
+            if (gameResult.Seats.Seat3 != null)
+            {
+                var cards = (from card in gameResult.Seats.Seat3.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("seat3", new { score = gameResult.Seats.Seat3.Score, cards = string.Join(',', cards) });
+            }
+
+            if (gameResult.Seats.Seat4 != null)
+            {
+                var cards = (from card in gameResult.Seats.Seat4.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("seat4", new { score = gameResult.Seats.Seat4.Score, cards = string.Join(',', cards) });
+            }
+
+            if (gameResult.Seats.Seat5 != null)
+            {
+                var cards = (from card in gameResult.Seats.Seat5.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("seat5", new { score = gameResult.Seats.Seat5.Score, cards = string.Join(',', cards) });
+            }
+
+            if (gameResult.Seats.Seat6 != null)
+            {
+                var cards = (from card in gameResult.Seats.Seat6.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("seat6", new { score = gameResult.Seats.Seat6.Score, cards = string.Join(',', cards) });
+            }
+
+            if (gameResult.Seats.Seat7 != null)
+            {
+                var cards = (from card in gameResult.Seats.Seat7.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("seat7", new { score = gameResult.Seats.Seat7.Score, cards = string.Join(',', cards) });
+            }
+
+            return JsonSerializer.Serialize(result);
         }
 
 
@@ -118,8 +202,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 
             return JsonSerializer.Serialize(
                 new Dictionary<string, string>() {
-                    { "player",string.Join(',', bankers)},
-                    { "banker",string.Join(',', players)}
+                    { "player",string.Join(',', players)},
+                    { "banker",string.Join(',', bankers)}
                 });
         }
 
@@ -145,8 +229,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                 });
         }
 
-        private string GetCard(string rank) => $"{GetSuit(rank.ToCharArray()[1])}{rank.ToCharArray()[0]}";
-
+        private string GetCard(string rank) => $"{GetSuit(rank.ToCharArray()[1])}{GetScore(rank.ToCharArray()[0])}";
 
         private string GetSuit(char suit) => suit switch
         {
@@ -154,6 +237,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             'C' => "♣",
             'D' => "♦",
             _ => "♠"
+        };
+
+        private string GetScore(char score) => score switch
+        {
+            'T' => "10",
+            _ => score.ToString()
         };
     }
 }
