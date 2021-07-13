@@ -33,6 +33,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _roleQueriesMock.Object,
                 _settingQueriesMock.Object,
                 _roleCommandsMock.Object,
+                _resellerQueriesMock.Object,
+                _licenseeQueriesMock.Object,
+                _brandQueriesMock.Object,
                 _jsonSerializationProviderMock.Object);
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
@@ -41,6 +44,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new();
         private readonly Mock<ITgsQueries<Setting>> _settingQueriesMock = new();
         private readonly Mock<ITgsCommands<Role>> _roleCommandsMock = new();
+        private readonly Mock<ITgsQueries<Reseller>> _resellerQueriesMock = new();
+        private readonly Mock<ITgsQueries<Licensee>> _licenseeQueriesMock = new();
+        private readonly Mock<ITgsQueries<Brand>> _brandQueriesMock = new();
 
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock =
             new();
@@ -582,7 +588,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Role>(u => u
-                .With(s => s.Users, new User[] { })
+                .With(s => s.Users, new User[]
+                {
+                })
                 .With(s => s.MenuSetting));
             return fixture;
         }
@@ -591,7 +599,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<MenuSetting>(u => u
-                .With(s => s.SubMenus, new MenuSetting[] { }));
+                .With(s => s.SubMenus, new MenuSetting[]
+                {
+                }));
 
 
             fixture.Customize<MenuSetting>(u => u
@@ -603,7 +613,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<CreateRoleRequest>(u => u
-                .With(s => s.Menus, new MenuSetting[] { }));
+                .With(s => s.Menus, new MenuSetting[]
+                {
+                }));
             return fixture;
         }
 
@@ -611,7 +623,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<UpdateRoleRequest>(u => u
-                .With(s => s.Menus, new MenuSetting[] { }));
+                .With(s => s.Menus, new MenuSetting[]
+                {
+                }));
             return fixture;
         }
     }
