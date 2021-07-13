@@ -11,6 +11,6 @@ namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound.Game
     public record InstantRoulette
     {
         [JsonPropertyName("outcomes")]
-        public InstantRouletteOutcome[] outcomes { get; set; }
+        public InstantRouletteOutcome[] Outcomes { get; set; }
     }
 }

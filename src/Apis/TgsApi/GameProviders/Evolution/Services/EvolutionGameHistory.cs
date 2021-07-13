@@ -82,6 +82,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         {
             "sicbo" => GetSicboGameHistory(source.Data.Result),//骰寶
             "roulette" => GetRouletteGameHistory(source.Data.Result),//輪盤
+            "instantroulette" => GetInstantRouletteGameHistory(source.Data.Result),//及時輪盤
             "dragontiger" => GetDragontigerGameHistory(source.Data.Result),//轮盘
             "baccarat" => GetBaccaratGameHistory(source.Data.Result),//百家樂相關
             "scalableblackjack" => GetScalableBlackJackGameHistory(source),//無限21點
@@ -92,6 +93,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         private string GetRouletteGameHistory(JsonDocument source)
         {
             var gameResult = _jsonSerializationProvider.DeserializeFromString<Roulette>(_jsonSerializationProvider.SerializeToString(source));
+            var roulettes = (from Outcome in gameResult.Outcomes
+                             select new
+                             {
+                                 number = Outcome.Number,
+                                 color = Outcome.Color
+                             }).ToArray();
+
+            return _jsonSerializationProvider.SerializeToString(roulettes);
+        }
+
+        private string GetInstantRouletteGameHistory(JsonDocument source)
+        {
+            var gameResult = _jsonSerializationProvider.DeserializeFromString<InstantRoulette>(_jsonSerializationProvider.SerializeToString(source));
             var roulettes = (from Outcome in gameResult.Outcomes
                              select new
                              {
