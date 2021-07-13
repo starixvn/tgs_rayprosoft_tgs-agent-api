@@ -82,6 +82,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         {
             "sicbo" => GetSicboGameHistory(source.Data.Result),//骰寶
             "roulette" => GetRouletteGameHistory(source.Data.Result),//輪盤
+            "craps" => GetCrapsGameHistory(source.Data.Result),//擲骰子
             "instantroulette" => GetInstantRouletteGameHistory(source.Data.Result),//及時輪盤
             "dragontiger" => GetDragontigerGameHistory(source.Data.Result),//轮盘
             "baccarat" => GetBaccaratGameHistory(source.Data.Result),//百家樂相關
@@ -271,6 +272,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                     { "dice3", gameResult.Third}
                 });
         }
+
+        private string GetCrapsGameHistory(JsonDocument source)
+        {
+            var gameResult = _jsonSerializationProvider.DeserializeFromString<Craps>(_jsonSerializationProvider.SerializeToString(source));
+
+            var craps = (from Roll in gameResult.Rolls
+                         select new
+                         {
+                             first = Roll.Result.First,
+                             second = Roll.Result.Second
+                         }).ToArray();
+
+            return _jsonSerializationProvider.SerializeToString(craps);
+        }
+
 
         private string GetCard(string rank) => $"{GetSuit(rank.ToCharArray()[1])}{GetScore(rank.ToCharArray()[0])}";
 
