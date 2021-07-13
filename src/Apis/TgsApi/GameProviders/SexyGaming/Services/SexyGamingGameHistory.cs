@@ -138,6 +138,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 
         private string GetNumber(int value) => value switch
         {
+            1 => "A",
             11 => "J",
             12 => "Q",
             13 => "K",

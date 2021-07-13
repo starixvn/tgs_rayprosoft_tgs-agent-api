@@ -100,6 +100,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
         private string GetPokerNumbers(string number) =>
              number.ToLower() switch
              {
+                 "1" => "A",
                  "a" => "10",
                  "b" => "J",
                  "c" => "Q",
