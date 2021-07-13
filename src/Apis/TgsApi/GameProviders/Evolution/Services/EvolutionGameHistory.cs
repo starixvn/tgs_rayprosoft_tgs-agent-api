@@ -90,6 +90,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             "blackjack" => GetBlackJackGameHistory(source.Data.Result),//21點
             "eth" => GetExtremeTexasHoldemGameHistory(source.Data.Result),//Extreme Texas Holdem
             "dhp" => GetDoubleHandCasinoHoldemPokerHandGameHistory(source.Data.Result),//2 Hand Casino Holdem
+            "holdem" => GetExtremeTexasHoldemGameHistory(source.Data.Result),//Casino Hold'em
+            "tcp" => GetExtremeTexasHoldemGameHistory(source.Data.Result),//Three Card Poker
+            "trp" => GetExtremeTexasHoldemGameHistory(source.Data.Result),//Triple Card Poker
+            "csp" => GetExtremeTexasHoldemGameHistory(source.Data.Result),//Caribbean Stud Poker
+            "thb" => GetExtremeTexasHoldemGameHistory(source.Data.Result),//Texas Hold'em Bonus Poker
             "sidebetcity" => GetSideBetCityGameHistory(source.Data.Result),//Side Bet City
             _ => _jsonSerializationProvider.SerializeToString(source.Data.Result)
         };
@@ -332,6 +337,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                     select GetCard(card).ToString()).ToArray());
             }
             result.Add("cards", cards);
+            result.Add("outcome", gameResult.Outcome);
             return _jsonSerializationProvider.SerializeToString(result);
         }
 
