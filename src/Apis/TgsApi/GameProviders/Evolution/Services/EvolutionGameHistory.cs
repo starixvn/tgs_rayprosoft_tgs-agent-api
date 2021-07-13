@@ -84,6 +84,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             "roulette" => GetRouletteGameHistory(source.Data.Result),//輪盤
             "dragontiger" => GetDragontigerGameHistory(source.Data.Result),//轮盘
             "baccarat" => GetBaccaratGameHistory(source.Data.Result),//百家樂相關
+            "scalableblackjack" => GetScalableBlackJackGameHistory(source),//無限21點
             "blackjack" => GetBlackJackGameHistory(source.Data.Result),//21點
             _ => _jsonSerializationProvider.SerializeToString(source.Data.Result)
         };
@@ -184,6 +185,34 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return JsonSerializer.Serialize(result);
         }
 
+        private string GetScalableBlackJackGameHistory(EvolutionGamHistoryRoundResponse source)
+        {
+
+            var gameResult = _jsonSerializationProvider.DeserializeFromString<ScalableBlackJack>(_jsonSerializationProvider.SerializeToString(source.Data.Result));
+
+            var result = new Dictionary<string, object>();
+
+
+            if (gameResult.DealerHand != null)
+            {
+                var cards = (from card in gameResult.DealerHand.Cards
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("dealer", new { score = gameResult.DealerHand.Score, cards = string.Join(',', cards) });
+            }
+
+            if (gameResult.DealtToPlayer != null)
+            {
+                var cards = (from card in gameResult.DealtToPlayer
+                             select
+                                 GetCard(card).ToString()
+                             ).ToArray();
+                result.Add("seat1", new { score = source.Data.Participants.First().Hands.Hand1.Score, cards = string.Join(',', cards) });
+            }
+
+            return JsonSerializer.Serialize(result);
+        }
 
         private string GetBaccaratGameHistory(JsonDocument source)
         {
