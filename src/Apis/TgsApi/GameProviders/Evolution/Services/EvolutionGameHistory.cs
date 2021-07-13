@@ -208,7 +208,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                              select
                                  GetCard(card).ToString()
                              ).ToArray();
-                result.Add("seat1", new { score = source.Data.Participants.First().Hands.Hand1.Score, cards = string.Join(',', cards) });
+                result.Add("player", new { score = source.Data.Participants.First().Hands.Hand1.Score, cards = string.Join(',', cards) });
             }
 
             return JsonSerializer.Serialize(result);
