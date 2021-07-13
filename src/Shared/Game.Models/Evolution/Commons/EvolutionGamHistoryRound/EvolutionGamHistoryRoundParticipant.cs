@@ -13,10 +13,14 @@ namespace TGS.Shared.Game.Models.Evolution.Commons.EvolutionGamHistoryRound
         public EvolutionGamHistoryRoundParticipantBet[] Bets { get; set; }
         [JsonPropertyName("casinoId")]
         public string CasinoId { get; set; }
+        [JsonPropertyName("hands")]
+        public EvolutionGamHistoryRoundParticipantHands Hands { get; set; }
         [JsonPropertyName("channel")]
         public string Channel { get; set; }
         [JsonPropertyName("configOverlays")]
         public object[] ConfigOverlays { get; set; }
+        [JsonPropertyName("playMode")]
+        public string playMode { get; set; }
         [JsonPropertyName("currency")]
         public string Currency { get; set; }
         [JsonPropertyName("device")]
