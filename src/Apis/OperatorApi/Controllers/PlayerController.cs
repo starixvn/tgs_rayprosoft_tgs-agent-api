@@ -68,7 +68,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet("identity/check/{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<bool> CheckIdentityIsValidAsync(
             [FromServices] IIdentityVerifierSelector<string> identityVerifierSelector,
             [FromServices] IPlayerOperations playerOperations,
@@ -140,7 +139,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("password/forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-        [TgsResponseWrapper]
         public ValueTask<string> ForgotPasswordAsync(
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
@@ -269,7 +267,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
-        [TgsResponseWrapper]
         public async ValueTask ResetPasswordAsync(
             [FromServices] ICommandService<ResetPasswordCommand> resetService,
             [FromBody] ResetPasswordRequest request)
@@ -306,7 +303,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         [HttpPatch("qq")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task SetQqIdAsync(
             [FromServices] ICommandService<SetQqCommand> setQqService,
             [FromBody] SetQqIdRequest request)
@@ -325,7 +321,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         [HttpPatch("wechat")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task SetWeChatIdAsync(
             [FromServices] ICommandService<SetWeChatCommand> setWeChatService,
             [FromBody] SetWeChatIdRequest request)
@@ -345,7 +340,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPost("email")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public ValueTask<string> StartChangeEmailAsync(
             [FromServices] IGetService<StartSetPlayerEmailCommand, string> setPlayerEmailService,
             [FromBody] StartSetEmailRequest request)
@@ -364,7 +358,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         [HttpPost("phone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public ValueTask<string> StartChangePhoneAsync(
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartSetPhoneRequest request)
@@ -385,7 +378,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPut("email")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public ValueTask SubmitChangeEmailAsync(
             [FromServices] ICommandService<CommitSetPlayerEmailCommand> commitPlayerEmailService,
             [FromBody] SubmitChangeEmailRequest request)
@@ -408,7 +400,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPut("phone")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public ValueTask SubmitChangePhoneAsync(
             [FromServices] ICommandService<CommitSetPlayerPhoneCommand> commitPlayerPhoneService,
             [FromBody] SubmitChangePhoneRequest request)

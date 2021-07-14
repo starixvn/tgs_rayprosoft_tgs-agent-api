@@ -28,7 +28,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("{language}")]
         [Description("Get player's promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
-        [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<PagingResponse<PromotionResponse>> GetPlayerPromotionsAsync(string language,
             [FromQuery] PagingRequest request)

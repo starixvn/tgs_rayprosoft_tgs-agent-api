@@ -36,9 +36,7 @@ namespace TGS.Apis.OperatorApi.Models
             };
 
         public bool CanProcess(Exception exception)
-        {
-            return TgsApiErrorByException.TryGetValue(exception.GetType(), out _);
-        }
+            => TgsApiErrorByException.TryGetValue(exception.GetType(), out _);
 
         public int GetApiErrorByException(Exception exception)
         {
@@ -48,7 +46,9 @@ namespace TGS.Apis.OperatorApi.Models
             }
 
             var type = exception.GetType();
-            return TgsApiErrorByException.TryGetValue(type, out var error) ? (int)error : (int)TgsApiError.SystemError;
+            return TgsApiErrorByException.TryGetValue(type, out var error)
+                ? (int)error
+                : (int)TgsApiError.SystemError;
         }
 
         public int GetHttpStatusByException(Exception exception)
@@ -65,7 +65,7 @@ namespace TGS.Apis.OperatorApi.Models
                     : StatusCodes.Status500InternalServerError;
         }
 
-        public string GetMessageByException(Exception exception) =>
-            exception.Message;
+        public string GetMessageByException(Exception exception)
+            => exception.Message;
     }
 }

@@ -29,7 +29,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("rounds")]
         [Description("Get rounds")]
         [Consumes(MediaTypeNames.Application.Json)]
-        [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
             [FromQuery] GetPlayerRoundReportRequest request)

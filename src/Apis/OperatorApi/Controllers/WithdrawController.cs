@@ -23,7 +23,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<Guid> CreateWithdrawRequestAsync(
             [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
             [FromServices] ICommandService<CheckWithdrawPayPasswordCommand> checkPasswordService,
@@ -61,7 +60,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpGet]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
             [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
             [FromServices]
@@ -127,7 +125,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet("player/list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<PagedResponse<WithdrawFormViewModel>> GetWithdrawFormsAsync(
             [FromServices] IGetService<GetWithdrawFormsQuery, Tgs.Payment.Clients.PagingResponse<WithdrawFormInfo>> getWithdrawFormsQueryService,
             [FromQuery] GetWithdrawFormsRequest request,

@@ -17,6 +17,7 @@ using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.PrimePay;
+using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Middlewares;
@@ -165,7 +166,11 @@ namespace TGS.Apis.OperatorApi
             services
                 .AddRouting(options => options.LowercaseUrls = true);
             services
-                .AddControllers(options => options.Filters.Add<ValidateModelFilter>())
+                .AddControllers(options =>
+                {
+                    options.Filters.Add<ValidateModelFilter>();
+                    options.Filters.Add<TgsResponseWrapperAttribute>();
+                })
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
                 {
