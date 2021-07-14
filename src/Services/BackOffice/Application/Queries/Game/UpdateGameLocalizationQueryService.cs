@@ -18,14 +18,15 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<UpdateGameLocationInfo> GetAsync(UpdateGameLocalizationQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<UpdateGameLocationInfo> GetAsync(UpdateGameLocalizationQuery query,
+            CancellationToken cancellationToken = default)
         {
             var queryGameIds = query.Games.Select(x => x.Id).ToList();
 
             var existGameIds = await _tgsRepository.Games.AsAsyncEnumerable()
                 .Where(p => queryGameIds.Contains(p.Id))
                 .Select(p => p.Id)
-                .ToArrayAsync();
+                .ToArrayAsync(cancellationToken);
 
             var diffGames = query.Games.Select(x => x.Id).ToArray().Except(existGameIds).ToArray();
 
@@ -34,24 +35,19 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
                 foreach (var item in existGameIds)
                 {
                     var model = query.Games.First(x => x.Id == item);
-                    var game = await _tgsRepository.Games.FirstOrDefaultAsync(x => x.Id == item);
+                    var game = await _tgsRepository.Games.FirstOrDefaultAsync(x => x.Id == item, cancellationToken);
                     game.Name = model.Name;
                     game.Localization = model.Localization.ToJson();
+                    game.UpdatedByUsername = query.EditorUsername;
+                    game.UpdatedOn = DateTimeOffset.Now;
                 }
-                await _tgsRepository.SaveChangesAsync();
 
-                return new UpdateGameLocationInfo()
-                {
-                    DiffGameIds = Array.Empty<int>()
-                };
+                await _tgsRepository.SaveChangesAsync(cancellationToken);
+
+                return new UpdateGameLocationInfo {DiffGameIds = Array.Empty<int>()};
             }
-            else
-            {
-                return new UpdateGameLocationInfo()
-                {
-                    DiffGameIds = diffGames
-                };
-            }
+
+            return new UpdateGameLocationInfo {DiffGameIds = diffGames};
         }
     }
 }
