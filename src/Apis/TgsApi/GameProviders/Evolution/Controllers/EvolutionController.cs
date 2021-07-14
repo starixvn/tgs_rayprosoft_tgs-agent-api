@@ -14,6 +14,7 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Core.Models.Exceptions;
+using TGS.Shared.Game.Models.Evolution.Enums;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 {
@@ -51,7 +52,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
         {
             return new EvolutionCheckUserResponse()
             {
-                Status = "OK",
+                Status = GameApiError.OK.Description(),
                 Sid = source.Sid,
                 Uuid = source.Uuid
             };
@@ -67,7 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
             var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
             return new EvolutionStandardResponse()
             {
-                Status = "OK",
+                Status = GameApiError.OK.Description(),
                 Balance = getBalance.Balance.Truncate(2),
                 Uuid = source.Uuid
             };
@@ -92,7 +93,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 
             return new EvolutionStandardResponse()
             {
-                Status = "OK",
+                Status = GameApiError.OK.Description(),
                 Balance = betResult.Balance.Truncate(2),
                 Uuid = source.Uuid
             };
@@ -117,7 +118,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 
             return new EvolutionStandardResponse()
             {
-                Status = "OK",
+                Status = GameApiError.OK.Description(),
                 Balance = betResult.Balance.Truncate(2),
                 Uuid = source.Uuid
             };
@@ -142,7 +143,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 
             return new EvolutionStandardResponse()
             {
-                Status = "OK",
+                Status = GameApiError.OK.Description(),
                 Balance = betResult.Balance.Truncate(2),
                 Uuid = source.Uuid
             };
@@ -163,18 +164,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
 
             return new EvolutionCheckUserResponse()
             {
-                Status = "OK",
+                Status = GameApiError.OK.Description(),
                 Sid = source.Sid,
                 Uuid = source.Uuid
             };
         }
 
         [HttpPost("ping")]
-        public EvolutionBaseResponse Ping()
+        public EvolutionBaseResponse Ping(EvolutionBaseRequest source)
         {
             return (new EvolutionBaseResponse()
             {
-                Status = "OK"
+                Status = GameApiError.OK.Description(),
+                Uuid = source.Uuid
+
             });
         }
     }
