@@ -54,14 +54,18 @@ namespace TGS.Apis.OperatorApi
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseGlobalExceptionHandler();
-            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
-
             app.UseRequestLocalization(options =>
             {
-                options.DefaultRequestCulture = new("en-US");
-                options.ApplyCurrentCultureToResponseHeaders = true;
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+                options.SupportedCultures.Clear();
+                options.SupportedUICultures.Clear();
+
+                config.GetSection("RequestLocalization").Bind(options);
             });
+
+            app.UseGlobalExceptionHandler();
+            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
 
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
@@ -158,7 +162,8 @@ namespace TGS.Apis.OperatorApi
                 .AddIdentityVerifiers()
                 .AddPlayerBucketRepositoriesServices();
 
-            services.AddRouting(options => options.LowercaseUrls = true);
+            services
+                .AddRouting(options => options.LowercaseUrls = true);
             services
                 .AddControllers(options => options.Filters.Add<ValidateModelFilter>())
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
