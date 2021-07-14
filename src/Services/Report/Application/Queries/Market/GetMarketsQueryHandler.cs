@@ -40,9 +40,17 @@ namespace TGS.Services.Report.Application.Queries.Market
                         .Where(x => x.BrandId == request.BrandId)
                         .Where(x => x.ReportDate >= from && x.ReportDate < to), date => date,
                     market => market.ReportDate,
-                    (date, markets) => new {date, markets})
+                    (date, markets) => new
+                    {
+                        date,
+                        markets
+                    })
                 .SelectMany(x => x.markets.DefaultIfEmpty(),
-                    (x, market) => new {ReportDate = x.date, market})
+                    (x, market) => new
+                    {
+                        ReportDate = x.date,
+                        market
+                    })
                 .GroupBy(x => new {x.ReportDate}, (market, markets) =>
                     new MarketModel
                     {
@@ -50,7 +58,7 @@ namespace TGS.Services.Report.Application.Queries.Market
                         RegisteredCount = markets.Sum(m => m.market?.RegisteredCount ?? 0),
                         FirstFundInCount = markets.Sum(m => m.market?.FirstFundInCount ?? 0),
                         DepositAmount = markets.Sum(m => m.market?.DepositAmount ?? 0),
-                        WithdrawalAmount = markets.Sum(m => m.market?.WithdrawalAmount ?? 0),
+                        WithdrawalAmount = -markets.Sum(m => m.market?.WithdrawalAmount ?? 0),
                         AdjustmentAmount = markets.Sum(m => m.market?.AdjustmentAmount ?? 0),
                         BonusAmount = markets.Sum(m => m.market?.BonusAmount ?? 0),
                         BetAmount = markets.Sum(m => m.market?.BetAmount ?? 0),
