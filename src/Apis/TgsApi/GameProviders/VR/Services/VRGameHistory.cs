@@ -1,12 +1,10 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Services.BetHistories;
 using TGS.Core.Models.Services.Caches;
-using TGS.Services.GameOperations.Data;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.Models.VR.Outgoing;
@@ -23,17 +21,16 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
         {
         }
 
-        protected async override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round, CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+        protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round, CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
             var gameRecord = JsonSerializer.Deserialize<VRGameRecord>(round.RoundDetail.AdditionalData);
 
             if (gameRecord == null)
             {
-                return null;
+                return ValueTask.FromResult<RoundResult>(null);
             }
 
-
-            return new RoundResult
+            return ValueTask.FromResult(new RoundResult
             {
                 BetAmount = round.BetAmount ?? 0,
                 Turnover = round.Turnover ?? 0,
@@ -43,7 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                {
                     new JsonData {Value = JsonSerializer.Serialize(gameRecord.PrizeDetail)}
                }
-            };
+            });
         }
     }
 }

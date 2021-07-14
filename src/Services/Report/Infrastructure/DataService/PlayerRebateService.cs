@@ -67,7 +67,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
         IQueryable<PlayerRebate> IPlayerRebateService.GetPlayerRebateQueries(
             Func<IQueryable<PlayerRebate>, IQueryable<PlayerRebate>> preQuery,
-            bool tracking = false) =>
+            bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
     }
 }

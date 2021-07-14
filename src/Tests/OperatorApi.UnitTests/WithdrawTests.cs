@@ -207,7 +207,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .SubmitWithdrawFormStatusAsync(
                     Arg.Is(actual),
                     Arg.Is(PaymentFlowState.WaitApprove),
-                    Arg.Any<string?>(),
+                    Arg.Any<string>(),
                     Arg.Any<decimal?>());
         }
 

@@ -14,6 +14,7 @@ using TGS.Apis.FileService.DataService;
 using TGS.Apis.FileService.DataService.Model;
 using TGS.Apis.FileService.DataService.Services;
 using TGS.Apis.FileService.Extensions;
+using TGS.Apis.FileService.Middlewares;
 using TGS.Core.Infrastructures.Aws;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
@@ -61,7 +62,10 @@ namespace TGS.Apis.FileService
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     config.GetSection("AWS").Bind(options);
-                    options.Bucket = config.GetValue<string>("AWS:S3:Bucket");
+                    options.ExternalPublicServiceUrl = config.GetValue<string>("AWS:Project:ExternalServiceUrl");
+                    options.ExternalPrivateServiceUrl = config.GetValue<string>("AWS:Project:ExternalServiceUrl");
+                    options.PublicBucket = config.GetValue<string>("AWS:Project:Bucket");
+                    options.PrivateBucket = config.GetValue<string>("AWS:Secret:Bucket");
                 })
                 .UseMongoRepository((options, sp) =>
                 {
@@ -100,6 +104,8 @@ namespace TGS.Apis.FileService
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<ExceptionMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

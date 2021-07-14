@@ -1,7 +1,8 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Net.Mime;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
@@ -29,18 +30,17 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async ValueTask<PagingResponse<PromotionModel>> GetPlayerPromotionsAsync(string language,
+        public async ValueTask<PagingResponse<PromotionResponse>> GetPlayerPromotionsAsync(string language,
             [FromQuery] PagingRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            var promotionsRequest = new GetPromotionsRequest
+            var promotionsRequest = new GetValidPromotionsRequest
             {
                 BrandId = brandId,
                 Language = language,
                 PlayerCode = playerTokenData.PlayerCode,
-                CurrentDate = DateTimeOffset.Now,
                 Page = request.Page,
                 Rows = request.Rows,
                 OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
@@ -48,9 +48,44 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ShowAll = request.ShowAll
             };
 
-            var response = await _client.GetPromotionsAsync(promotionsRequest);
+            var response = await _client.GetValidPromotionsAsync(promotionsRequest);
 
-            return new() {TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<PromotionModel>()};
+            return new PagingResponse<PromotionResponse>
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items.Select(item => new PromotionResponse
+                {
+                    AmountUsed = item.AmountUsed,
+                    AutoSentPlayerBonus = item.AutoSentPlayerBonus,
+                    BonusAmountLimit = item.BonusAmountLimit,
+                    BrandId = item.BrandId,
+                    Content = item.Content,
+                    CreatedByUsername = item.CreatedByUsername,
+                    CreatedOn = item.CreatedOn,
+                    DesktopBanner = item.DesktopBanner,
+                    From = item.From,
+                    GameProviderIds = item.GameProviderIds,
+                    GameType = item.GameType,
+                    Id = item.Id,
+                    Localization = item.Localization?.ContainsKey(language) == true
+                        ? item.Localization[language]
+                        : JsonDocument.Parse("{}"),
+                    MobileBanner = item.MobileBanner,
+                    Name = item.Name,
+                    Percentage = item.Percentage,
+                    PromotionType = item.PromotionType,
+                    Status = item.Status,
+                    SubSubject = item.SubSubject,
+                    Terms = item.Terms,
+                    To = item.To,
+                    TotalAmountLimit = item.TotalAmountLimit,
+                    TurnoverMultiple = item.TurnoverMultiple,
+                    Unlimited = item.Unlimited,
+                    UpdatedByUsername = item.UpdatedByUsername,
+                    UpdatedOn = item.UpdatedOn,
+                    VipLevels = item.VipLevels
+                })
+            };
         }
     }
 }

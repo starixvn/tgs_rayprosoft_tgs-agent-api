@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 {
     internal class GetWithdrawFormDetailQueryService : IGetService<GetWithdrawFormDetailQuery, WithdrawFormInfo>
     {
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public GetWithdrawFormDetailQueryService(IPaymentRepository paymentRepository)
+        public GetWithdrawFormDetailQueryService(IPaymentServiceClient paymentServiceClient)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public ValueTask<WithdrawFormInfo> GetAsync(GetWithdrawFormDetailQuery query, CancellationToken cancellationToken = default)
-            => _paymentRepository.GetWithdrawFormByIdAsync(query.FormId);
+            => _paymentServiceClient.GetWithdrawFormAsync(query.BrandId, query.FormId);
     }
 }

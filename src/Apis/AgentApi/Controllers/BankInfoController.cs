@@ -13,6 +13,7 @@ using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Core.Infrastructures.Json;
 using TGS.ServiceUtility;
 using TGS.Services.Agent.Services.BankInfos;
+using Tgs.Payment.Clients;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -74,7 +75,7 @@ namespace TGS.Apis.AgentApi.Controllers
                     Id = info.Id,
                     PaymentChannelId = info.PaymentChannelId,
                     BankType = info.BankType,
-                    Detail = JsonDocument.Parse(info.Detail)
+                    Detail = info.Detail
                 });
         }
     }

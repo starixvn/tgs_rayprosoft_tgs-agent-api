@@ -10,19 +10,21 @@ namespace TGS.Services.Promotion
 {
     public interface ISettingsService
     {
-        Task<Setting> GetSettingAsync(Expression<Func<Setting, bool>> predicate,
-            Func<IQueryable<Setting>, IQueryable<Setting>> preQuery = null);
+        Task<Setting> GetSettingAsync(
+            Expression<Func<Setting, bool>> predicate,
+            Func<IQueryable<Setting>, IQueryable<Setting>>? preQuery = null);
     }
 
     public class SettingsService : BaseRepositoryOperations<ITgsRepository>, ISettingsService
     {
-        public SettingsService(ITgsRepository tgsRepository) : base(
-            tgsRepository)
+        public SettingsService(ITgsRepository tgsRepository)
+            : base(tgsRepository)
         {
         }
 
-        Task<Setting> ISettingsService.GetSettingAsync(Expression<Func<Setting, bool>> predicate,
-            Func<IQueryable<Setting>, IQueryable<Setting>> preQuery) =>
+        Task<Setting> ISettingsService.GetSettingAsync(
+            Expression<Func<Setting, bool>> predicate,
+            Func<IQueryable<Setting>, IQueryable<Setting>>? preQuery) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
     }
 }

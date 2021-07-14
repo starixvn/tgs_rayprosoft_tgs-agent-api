@@ -16,9 +16,6 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Prometheus;
-using Tgs.Payment.ApplePay;
-using Tgs.Payment.LeePay;
-using Tgs.Payment.PrimePay;
 using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Filters;
@@ -37,7 +34,6 @@ using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.BackOffice.Application.Extensions;
-using TGS.Services.BackOffice.Domain;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 
@@ -163,17 +159,7 @@ namespace TGS.Apis.BackendOffice.Extensions
             });
 
             services
-                .AddPayment()
-                .UseTgsPaymentRepository()
-                .RegisterWithdrawProcessor<LeePayProcessor>("LeePay")
-                .RegisterWithdrawProcessor<PrimePayProcessor>("PrimePay")
-                .RegisterWithdrawProcessor<ApplePayProcessor>("ApplePay");
-
-            services
                 .AddPaymentClient()
-                .AddSingleton<LeePaySerializer>()
-                .AddSingleton<PrimePaySerializer>()
-                .AddSingleton<ApplePaySerializer>()
                 .AddNatsMessageQueue(config =>
                 {
                     config

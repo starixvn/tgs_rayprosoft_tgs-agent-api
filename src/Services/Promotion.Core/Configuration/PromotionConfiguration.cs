@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
+using Tgs.Payment.Clients;
 using TGS.Services.WalletService.Configuration;
 
 namespace TGS.Services.Promotion.Configuration
@@ -64,6 +65,13 @@ namespace TGS.Services.Promotion.Configuration
             Services.AddTransient<TChecker>();
 
             _checkerTypes[typeName] = typeof(TChecker);
+
+            return this;
+        }
+
+        public PromotionConfiguration AddPaymentServiceClient(Action<PaymentServiceClientOptions, IServiceProvider> configure)
+        {
+            Services.AddPaymentServiceClient(configure);
 
             return this;
         }

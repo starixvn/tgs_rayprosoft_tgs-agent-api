@@ -7,12 +7,10 @@ using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
-using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.SexyGaming.Common;
 using TGS.Shared.Game.Models.SexyGaming.Incoming;
@@ -25,7 +23,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
-        private readonly ITokenProvider _tokenProvider;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ISexyGamingServices _services;
         public AuthorizeSexyGamingMiddleware(
@@ -33,7 +30,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             ISettingOperations settingOperations,
-            ITokenProvider tokenProvider,
             IJsonSerializationProvider jsonSerializationProvider,
             ISexyGamingServices services)
         {
@@ -41,7 +37,6 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Middlewares
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _services = services ?? throw new ArgumentNullException(nameof(services));
         }

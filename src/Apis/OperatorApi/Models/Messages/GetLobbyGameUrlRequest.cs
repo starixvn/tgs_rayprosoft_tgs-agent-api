@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public record GetLobbyGameUrlRequest : IRequest<GetGameUrlResponse>
+    public record GetLobbyGameUrlRequest
     {
         [Required]
         [JsonPropertyName("gpcode")]

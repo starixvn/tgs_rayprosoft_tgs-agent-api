@@ -6,12 +6,11 @@ using ExpectedObjects;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using Tgs.Payment;
-using Tgs.Payment.Clients;
-using Tgs.Payment.LeePay;
 using TGS.Apis.FileService.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
+using Tgs.Payment.Clients;
+using Tgs.Payment.LeePay;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operations.Commands;
 using TGS.Services.Operator;
@@ -49,7 +48,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = "OtherPlayerCode",
                     UserName = "OtherUserName",
-                    Status = 1000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now
                 }));
 
@@ -63,13 +62,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentClient = new Mock<IPaymentClient>();
             var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
             var moqPromotionClient = new Mock<IPromotionClient>();
-            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentServiceClient.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object,
-                moqPlayerCommands.Object);
+                moqPromotionClient.Object);
 
             var command = new CreateDepositFormCommand(
                 "ThisIsPlayerCode",
@@ -119,15 +116,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqPaymentClient = new Mock<IPaymentClient>();
-            var serializer = new LeePaySerializer(new JsonSerializationProvider());
+            var serializer = new LeePaySerializer();
             var moqPromotionClient = new Mock<IPromotionClient>();
-            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentServiceClient.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object,
-                moqPlayerCommands.Object);
+                moqPromotionClient.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(
@@ -209,13 +204,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqPaymentClient = new Mock<IPaymentClient>();
             var moqPromotionClient = new Mock<IPromotionClient>();
-            var moqPlayerCommands = new Mock<IPlayerCommands>();
 
             var sut = new CreateDepositFormCommandService(
                 moqPaymentServiceClient.Object,
                 moqPaymentClient.Object,
-                moqPromotionClient.Object,
-                moqPlayerCommands.Object);
+                moqPromotionClient.Object);
 
             var createFormId = Guid.NewGuid();
             var command = new CreateDepositFormCommand(
@@ -257,7 +250,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Id = query.FormId,
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = query.PlayerCode,
-                    Status = 10000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now,
                     UserName = "PlayerName"
                 }));
@@ -315,7 +308,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>(),
                     It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
                     It.IsAny<Stream>()))
-                .Returns(ValueTask.FromResult(new FileView { Id = "testFileId", ContentType = contentType }));
+                .Returns(ValueTask.FromResult(new FileView {Id = "testFileId", ContentType = contentType}));
 
             await sut.ExecuteAsync(command);
 
@@ -353,7 +346,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Id = query.FormId,
                     PaymentMethodId = Guid.NewGuid(),
                     PlayerCode = query.PlayerCode,
-                    Status = 1000,
+                    Status = PaymentFlowState.WaitApprove,
                     UpdatedOn = DateTimeOffset.Now,
                     UserName = "UserName"
                 });

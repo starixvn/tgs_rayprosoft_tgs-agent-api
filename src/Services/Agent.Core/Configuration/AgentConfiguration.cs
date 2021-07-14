@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using Tgs.Payment.Configuration;
+using Tgs.Payment.Clients;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.WalletService.Configuration;
 
@@ -22,9 +22,9 @@ namespace TGS.Services.Agent.Configuration
             return this;
         }
 
-        public AgentConfiguration AddPayment(Action<PaymentConfiguration> configure)
+        public AgentConfiguration AddPaymentServiceClient(Action<PaymentServiceClientOptions, IServiceProvider> configure)
         {
-            configure(Services.AddPayment());
+            Services.AddPaymentServiceClient(configure);
 
             return this;
         }

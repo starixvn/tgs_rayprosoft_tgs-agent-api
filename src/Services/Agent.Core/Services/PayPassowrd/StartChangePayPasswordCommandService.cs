@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
@@ -54,9 +55,11 @@ namespace TGS.Services.Agent.Services.PayPassowrd
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
+            var cultureInfo = command.CultureInfo ?? new CultureInfo("en-us");
+
             await _validateCodeOperator
                 .SendEmailAsync(
-                    command.CultureInfo,
+                    cultureInfo,
                     agent.Email,
                     saveResult.ValidateCode)
                 .ConfigureAwait(false);

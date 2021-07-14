@@ -25,11 +25,11 @@ namespace TGS.Services.Promotion
 
         public Task<Player> GetPlayerAsync(
             Expression<Func<Player, bool>> predicate,
-            Func<IQueryable<Player>, IQueryable<Player>> preQuery) =>
+            Func<IQueryable<Player>, IQueryable<Player>>? preQuery = null) =>
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         public Task<Player> GetPlayerByPlayerCodeAsync(string playerCode)
-            => _repository.Players
+            => _repository.Players.AsQueryable()
                 .Where(player => player.PlayerCode == playerCode)
                 .FirstOrDefaultAsync();
 
@@ -37,5 +37,19 @@ namespace TGS.Services.Promotion
             Func<IQueryable<Player>, IQueryable<Player>>? preQuery,
             bool tracking) =>
             GetQueriesAsync(preQuery, tracking);
+
+        public async Task SetFirstDepositTimeAsync(string playerCode, DateTimeOffset time)
+        {
+            var player = await _repository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            if (player.FirstDepositOn is null)
+            {
+                player.FirstDepositOn = time;
+
+                await _repository.SaveChangesAsync().ConfigureAwait(false);
+            }
+        }
     }
 }

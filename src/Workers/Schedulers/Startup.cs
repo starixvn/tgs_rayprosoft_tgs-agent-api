@@ -46,7 +46,13 @@ namespace TGS.Workers.Schedulers
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseHangfireScheduler(new[] {Consts.Queue.Schedule, Consts.Queue.GameProvider, Consts.Queue.Report});
+            app.UseHangfireScheduler(new[]
+            {
+                Consts.Queue.Schedule,
+                Consts.Queue.GameProvider,
+                Consts.Queue.Report,
+                Consts.Queue.ArrearsEmail
+            });
 
             app.UseRouting();
 
@@ -64,7 +70,13 @@ namespace TGS.Workers.Schedulers
                 endpoints.MapMetrics();
 
                 endpoints.MapHangfireDashboard("/hangfire",
-                    new() {Authorization = new[] {new IgnoreHangfireAuthorizationFilter()}});
+                    new()
+                    {
+                        Authorization = new[]
+                        {
+                            new IgnoreHangfireAuthorizationFilter()
+                        }
+                    });
             });
         }
 
@@ -131,7 +143,8 @@ namespace TGS.Workers.Schedulers
         private static Type[] GetModuleTypes() =>
             new[]
             {
-                typeof(AggregateJobManagement), typeof(RebateAndDividendJobManagement),
+                typeof(AggregateJobManagement),
+                typeof(RebateAndDividendJobManagement),
                 typeof(PromotionJobManagement)
             };
     }

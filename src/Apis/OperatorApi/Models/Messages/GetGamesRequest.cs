@@ -1,13 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
     [BindProperties(SupportsGet = true)]
-    public record GetGamesRequest : IRequest<GetGamesResponse>
-    {        
+    public record GetGamesRequest
+    {
         [BindProperty(Name = "gpcode")]
         public string GameProviderCode { get; init; }
 

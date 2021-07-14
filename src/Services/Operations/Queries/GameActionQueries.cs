@@ -25,6 +25,9 @@ namespace TGS.Services.Operations.Queries
         ValueTask<bool> ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode,
             string externalRoundId, string externalTransactionId);
 
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+            Guid gameProviderId, string playerCode, string externalGameActionGroupId);
+
         ValueTask<string[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId, string externalGameActionGroupId);
 
@@ -147,6 +150,22 @@ namespace TGS.Services.Operations.Queries
                     {":external_round_id", externalRoundId},
                     {":external_transaction_id", externalTransactionId}
                 });
+        }
+
+        async ValueTask<GameActionExternalIds[]> IGameActionQueries.
+            GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+                Guid gameProviderId, string playerCode, string externalGameActionGroupId)
+        {
+            const string spName = "bet.game_action_get_game_actions_by_external_group_id";
+            var r = await _repository.SqlQueryMultipleAsync<GameActionExternalIds>(spName, parameters:
+                new Dictionary<string, object>
+                {
+                    {":game_provider_id", gameProviderId},
+                    {":player_code", playerCode},
+                    {":external_group_id", externalGameActionGroupId}
+                });
+
+            return r.ToArray();
         }
 
         async ValueTask<string[]> IGameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(

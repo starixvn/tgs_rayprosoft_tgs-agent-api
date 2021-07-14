@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .AddOptions<AwsOptions>()
                 .Services
-                .AddTransient<IFileManager, FileManager>();
+                .AddTransient(typeof(IFileManager<>), typeof(FileManager<>));
 
             var configuration = new FileServiceConfiguration(services);
 
