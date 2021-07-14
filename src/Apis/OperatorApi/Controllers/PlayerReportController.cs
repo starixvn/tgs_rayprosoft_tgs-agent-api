@@ -52,7 +52,11 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var response = await _client.GetRoundsAsync(roundsRequest);
 
-            return new PagingResponse<RoundModel>() { TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<RoundModel>() };
+            return new PagingResponse<RoundModel>()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<RoundModel>()
+            };
         }
     }
 }
