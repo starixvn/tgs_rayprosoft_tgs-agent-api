@@ -13,7 +13,7 @@ namespace TGS.Apis.OperatorApi.Extensions
                 PaymentFlowState.WaitApprove => FlowState.Review,
                 PaymentFlowState.Reject => FlowState.Rejected,
                 PaymentFlowState.Approved => FlowState.Approved,
-                _ => FlowState.Unkown,
+                _ => FlowState.Unknown,
             };
 
         public static IEnumerable<PaymentFlowState> ToPaymentFlowState(this FlowState? status)
