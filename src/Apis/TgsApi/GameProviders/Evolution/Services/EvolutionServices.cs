@@ -5,6 +5,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -20,6 +21,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId, string playerCode, string externalGameActionGroupId);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
+        ValueTask<EvolutionConfiguration> GetConfiguration();
         ValueTask<Guid> GetGameProviderIdAsync();
     }
 
@@ -29,17 +31,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         private readonly ITokenProvider _tokenProvider;
         private readonly IPlayerOperations _playerOperations;
         private readonly IGameActionQueries _gameActionQueries;
+        private readonly ISettingOperations _settingOperations;
 
         public EvolutionServices(
             IGameProviderOperations gameProviderOperations,
              ITokenProvider tokenProvider,
              IPlayerOperations playerOperations,
-             IGameActionQueries gameActionQueries)
+             IGameActionQueries gameActionQueries,
+             ISettingOperations settingOperations)
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
         }
 
         async ValueTask<GameActionExternalIds> IEvolutionServices.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
@@ -74,6 +79,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
+        }
+
+        async ValueTask<EvolutionConfiguration> IEvolutionServices.GetConfiguration()
+        {
+            return await _settingOperations.GetValueFromJsonByKeyAsync<EvolutionConfiguration>(SettingConsts.GameProviderConfigurations.Evolution);
         }
 
         async ValueTask<Guid> IEvolutionServices.GetGameProviderIdAsync()

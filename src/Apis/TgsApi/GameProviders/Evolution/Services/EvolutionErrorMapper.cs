@@ -15,6 +15,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
             new Dictionary<Type, GameApiError>
             {
+                {typeof(InvalidCaptchaException), InvalidTokenId},
                 {typeof(InvalidCredentialsException), InvalidTokenId},
                 {typeof(MissingTokenException), InvalidTokenId},
                 {typeof(PlayerLoginExpiredException), InvalidTokenId},

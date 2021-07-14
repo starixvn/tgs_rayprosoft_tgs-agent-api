@@ -88,15 +88,23 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 
         private string GetGameHistory(EvolutionGamHistoryRoundResponse source) => source.Data.GameType.ToLower() switch
         {
-            "sicbo"             => GetSicboGameHistory(source.Data.Result),           //骰寶
-            "roulette"          => GetRouletteGameHistory(source.Data.Result),        //輪盤
-            "craps"             => GetCrapsGameHistory(source.Data.Result),           //擲骰子
-            "instantroulette"   => GetInstantRouletteGameHistory(source.Data.Result), //及時輪盤
-            "dragontiger"       => GetDragontigerGameHistory(source.Data.Result),     //轮盘
-            "baccarat"          => GetBaccaratGameHistory(source.Data.Result),        //百家樂相關
-            "scalableblackjack" => GetScalableBlackJackGameHistory(source),           //無限21點
-            "blackjack"         => GetBlackJackGameHistory(source.Data.Result),       //21點
-            _                   => _jsonSerializationProvider.SerializeToString(source.Data.Result)
+            "sicbo" => GetSicboGameHistory(source.Data.Result), //骰寶
+            "roulette" => GetRouletteGameHistory(source.Data.Result), //輪盤
+            "craps" => GetCrapsGameHistory(source.Data.Result), //擲骰子
+            "instantroulette" => GetInstantRouletteGameHistory(source.Data.Result), //及時輪盤
+            "dragontiger" => GetDragontigerGameHistory(source.Data.Result), //轮盘
+            "baccarat" => GetBaccaratGameHistory(source.Data.Result), //百家樂相關
+            "scalableblackjack" => GetScalableBlackJackGameHistory(source), //無限21點
+            "blackjack" => GetBlackJackGameHistory(source.Data.Result), //21點
+            "eth" => GetExtremeTexasHoldemGameHistory(source.Data.Result), //Extreme Texas Holdem
+            "dhp" => GetDoubleHandCasinoHoldemPokerHandGameHistory(source.Data.Result), //2 Hand Casino Holdem
+            "holdem" => GetExtremeTexasHoldemGameHistory(source.Data.Result), //Casino Hold'em
+            "tcp" => GetExtremeTexasHoldemGameHistory(source.Data.Result), //Three Card Poker
+            "trp" => GetExtremeTexasHoldemGameHistory(source.Data.Result), //Triple Card Poker
+            "csp" => GetExtremeTexasHoldemGameHistory(source.Data.Result), //Caribbean Stud Poker
+            "thb" => GetExtremeTexasHoldemGameHistory(source.Data.Result), //Texas Hold'em Bonus Poker
+            "sidebetcity" => GetSideBetCityGameHistory(source.Data.Result), //Side Bet City
+            _ => _jsonSerializationProvider.SerializeToString(source.Data.Result)
         };
 
         private string GetRouletteGameHistory(JsonDocument source)
@@ -349,6 +357,162 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                          }).ToArray();
 
             return _jsonSerializationProvider.SerializeToString(craps);
+        }
+
+        private string GetExtremeTexasHoldemGameHistory(JsonDocument source)
+        {
+            var gameResult =
+                _jsonSerializationProvider.DeserializeFromString<Poker>(
+                    _jsonSerializationProvider.SerializeToString(source));
+            var result = new Dictionary<string, object>();
+
+            var dealer = (from card in gameResult.Dealer.Cards
+                          select
+                              GetCard(card).ToString()
+                ).ToArray();
+            result.Add("dealer", dealer);
+            var player = (from card in gameResult.Player.Cards
+                          select
+                              GetCard(card).ToString()
+                ).ToArray();
+            result.Add("player", player);
+
+            var cards = new Dictionary<string, string[]>();
+            if (gameResult.Cards.Dealer != null)
+            {
+                cards.Add("dealer", (
+                    from card in gameResult.Cards.Dealer
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            if (gameResult.Cards.Player != null)
+            {
+                cards.Add("player", (
+                    from card in gameResult.Cards.Player
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            if (gameResult.Cards.River != null)
+            {
+                cards.Add("river", (
+                    from card in gameResult.Cards.River
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            if (gameResult.Cards.Flop != null)
+            {
+                cards.Add("flop", (
+                    from card in gameResult.Cards.Flop
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            result.Add("cards", cards);
+            result.Add("outcome", gameResult.Outcome);
+            return _jsonSerializationProvider.SerializeToString(result);
+        }
+
+        private string GetDoubleHandCasinoHoldemPokerHandGameHistory(JsonDocument source)
+        {
+            var gameResult =
+                _jsonSerializationProvider.DeserializeFromString<DoubleHandCasinoHoldemPoker>(
+                    _jsonSerializationProvider.SerializeToString(source));
+            var result = new Dictionary<string, object>();
+
+            var dealer = (from card in gameResult.Dealer.Cards
+                          select
+                              GetCard(card).ToString()
+                ).ToArray();
+            result.Add("dealer", dealer);
+
+            if (gameResult.FirstHand != null)
+            {
+                var player = (from card in gameResult.FirstHand.Player.Cards
+                              select
+                                  GetCard(card).ToString()
+                    ).ToArray();
+                result.Add("firstPlayer", player);
+            }
+
+            if (gameResult.SecondHand != null)
+            {
+                var player = (from card in gameResult.SecondHand.Player.Cards
+                              select
+                                  GetCard(card).ToString()
+                    ).ToArray();
+                result.Add("secondPlayer", player);
+            }
+
+            var cards = new Dictionary<string, string[]>();
+            if (gameResult.Cards.Dealer != null)
+            {
+                cards.Add("dealer", (
+                    from card in gameResult.Cards.Dealer
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            if (gameResult.Cards.Player != null)
+            {
+                cards.Add("player", (
+                    from card in gameResult.Cards.Player
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            if (gameResult.Cards.River != null)
+            {
+                cards.Add("river", (
+                    from card in gameResult.Cards.River
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            if (gameResult.Cards.Flop != null)
+            {
+                cards.Add("flop", (
+                    from card in gameResult.Cards.Flop
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            result.Add("cards", cards);
+            return _jsonSerializationProvider.SerializeToString(result);
+        }
+
+
+        private string GetSideBetCityGameHistory(JsonDocument source)
+        {
+            var gameResult =
+                _jsonSerializationProvider.DeserializeFromString<SideBetCity>(
+                    _jsonSerializationProvider.SerializeToString(source));
+            var result = new Dictionary<string, object>();
+
+            var cardsDealt = (from card in gameResult.CardsDealt
+                              select
+                                  GetCard(card).ToString()
+                ).ToArray();
+            result.Add("cardsDealt", cardsDealt);
+
+            var cards = new Dictionary<string, string[]>();
+            if (gameResult.Outcome.ThreeCards != null)
+            {
+                cards.Add("threeCards", (
+                    from card in gameResult.Outcome.ThreeCards.Cards
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            if (gameResult.Outcome.FiveCards != null)
+            {
+                cards.Add("fiveCards", (
+                    from card in gameResult.Outcome.FiveCards.Cards
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            if (gameResult.Outcome.SevenCards != null)
+            {
+                cards.Add("sevenCards", (
+                    from card in gameResult.Outcome.SevenCards.Cards
+                    select GetCard(card).ToString()).ToArray());
+            }
+
+            result.Add("outCome", cards);
+            return _jsonSerializationProvider.SerializeToString(result);
         }
 
 

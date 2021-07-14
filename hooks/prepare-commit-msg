@@ -6,7 +6,8 @@ addBranchName() {
   NAME=$(git branch | grep '*' | sed 's/* //') 
   DESCRIPTION=$(git config branch."$NAME".description)
   TOECHO=""
-  if [[ $NAME != "develop" ]] && [[ $NAME != "master" ]]
+  
+  if [[ $NAME != "develop" ]] && [[ $NAME != "master" ]] && [[ $NAME != "release" ]] && [[ $NAME != "main" ]]
   then
 
       #extract prefix and number
@@ -17,10 +18,10 @@ addBranchName() {
       #extract just NUMBER
       NUMBER=${NAME#$PREFIX}
 
-      REPOURL="$(git config --get remote.origin.url)"
-      if [[ $REPOURL == *"turnkey-gaming-system.git" ]]
+      re='^[0-9]+$'
+      if [[ $NUMBER =~ $re ]] ;
       then
-        TOECHO="TGS-$NUMBER"
+        TOECHO="tgs-$NUMBER"
       else
         TOECHO=NAME
       fi

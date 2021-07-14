@@ -24,11 +24,14 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
 
         public record Transaction
         {
+            [JsonPropertyName("refId")]
+            public string ReferenceId { get; init; }
+
             [JsonPropertyName("txId")]
             public long ExternalTransactionId { get; init; }
 
             [JsonPropertyName("licenseeTxId")]
-            public long ExternalRoundId { get; init; }
+            public string ExternalRoundId { get; init; }
 
             [JsonPropertyName("actualAmount")]
             public decimal ActualAmount { get; init; }
