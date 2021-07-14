@@ -16,7 +16,7 @@ namespace TGS.Shared.Game.Models.Evolution.Enums
         [Description("INVALID_TOKEN_ID")]
         InvalidTokenId = 10003,
         [Description("INVALID_SID")]
-        InvalidSid = 10003,
+        InvalidSid = 10004,
         [Description("ACCOUNT_LOCKED")]
         AccountLocked = 10007,
         [Description("FATAL_ERROR_CLOSE_USER_SESSION")]
@@ -44,9 +44,9 @@ namespace TGS.Shared.Game.Models.Evolution.Enums
         [Description("CASINO_LIMIT_EXCEEDED_LOSS")]
         CasinoLimitExceededLoss = 4003,
         [Description("SESSION_ALREADY_CLOSED")]
-        SessionAlreadyClosed = 0,
+        SessionAlreadyClosed = 1,
         [Description("SESSION_DOES_NOT_EXIST")]
-        SessionDoesNotExist = 0,
+        SessionDoesNotExist = 2,
         [Description("OPERATION_IN_PROCESS")]
         OperationInProcess = 2003
     }

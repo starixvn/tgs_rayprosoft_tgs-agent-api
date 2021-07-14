@@ -6,9 +6,10 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Evolution.Commons;
+using TGS.Shared.Game.Models.Evolution.Enums;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
 {
@@ -39,6 +40,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
+
+            string authToken = context.Request.Query["authToken"];
+            var config = await _services.GetConfiguration().ConfigureAwait(false);
+
+            if (authToken.IgnoreCaseNotEquals(config.OwAuthToken))
+            {
+                throw new InvalidCaptchaException(GameApiError.InvalidTokenId.Description());
+            }
+
             var body = await context.Request.ReadAsStringAsync();
             var baseRequest = _jsonSerializationProvider.DeserializeFromString<EvolutionBaseRequest>(body);
 
