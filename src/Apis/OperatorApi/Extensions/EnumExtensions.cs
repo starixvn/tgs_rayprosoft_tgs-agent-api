@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Tgs.Payment.Clients;
-using TGS.Apis.OperatorApi.Models.Messages.Deposit;
+using TGS.Apis.OperatorApi.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Extensions
 {

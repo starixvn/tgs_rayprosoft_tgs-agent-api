@@ -1,4 +1,4 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages.Deposit
+﻿namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public enum FlowState
     {
