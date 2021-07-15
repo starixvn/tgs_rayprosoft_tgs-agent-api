@@ -255,7 +255,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return JsonSerializer.Serialize(
                 new Dictionary<string, string>() {
                     { "player",string.Join(',', players)},
-                    { "banker",string.Join(',', bankers)}
+                    { "banker",string.Join(',', bankers)},
+                    { "outcome",gameResult.Outcome},
                 });
         }
 
@@ -265,7 +266,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return JsonSerializer.Serialize(
                 new Dictionary<string, string>() {
                     { "dragon",GetCard(gameResult.Dragon.Card)},
-                    { "tiger", GetCard(gameResult.Tiger.Card)}
+                    { "tiger", GetCard(gameResult.Tiger.Card)},
+                     { "outcome", GetCard(gameResult.Outcome)}
                 });
         }
 
@@ -399,8 +401,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return _jsonSerializationProvider.SerializeToString(result);
         }
 
-
-
         private string GetSideBetCityGameHistory(JsonDocument source)
         {
             var gameResult = _jsonSerializationProvider.DeserializeFromString<SideBetCity>(_jsonSerializationProvider.SerializeToString(source));
@@ -435,7 +435,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             result.Add("outCome", cards);
             return _jsonSerializationProvider.SerializeToString(result);
         }
-
 
         private string GetCard(string rank) => $"{GetSuit(rank.ToCharArray()[1])}{GetScore(rank.ToCharArray()[0])}";
 

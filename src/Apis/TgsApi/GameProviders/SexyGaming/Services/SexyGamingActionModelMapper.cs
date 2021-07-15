@@ -31,7 +31,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 
     public class SexyGamingActionModelMapper : ISexyGamingActionModelMapper
     {
-        private const string GameProviderCode = Consts.GameProvider.SexyGaming;
+        private const string _gameProviderCode = Consts.GameProvider.SexyGaming;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ISexyGamingServices _services;
         private readonly ISexyGamingRedisCacheService _redisCacheService;
@@ -249,7 +249,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
               PlatformType = data.PlatformType,
               GameProviderId = data.GameProviderId,
               GameProviderConfigurationId = data.GameProviderConfigurationId,
-              GameProviderCode = GameProviderCode,
+              GameProviderCode = _gameProviderCode,
               HasCurrencyFromGameProvider = false,
               AutoCloseRound = data.AutoCloseRound,
               AllowCancelCancelTransaction = false,
@@ -266,7 +266,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             => new()
             {
                 GameProviderId = data.GameProviderId,
-                GameProviderCode = GameProviderCode,
+                GameProviderCode = _gameProviderCode,
                 AutoCloseRound = data.AutoCloseRound,
                 ExternalBatchId = string.Empty,
                 AllowCancelCancelTransaction = false,
