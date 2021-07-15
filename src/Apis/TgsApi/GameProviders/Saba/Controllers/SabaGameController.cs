@@ -115,7 +115,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
                 .ConfigureAwait(false);
 
             var confirmBet = request.Body.Transactions[0];
-            var externalRoundId = confirmBet.ExternalRoundId.ToString();
+            var externalRoundId = confirmBet.ExternalRoundId;
             var unlockAmount = confirmBet.IsOddsChanged
                 ? await GetLockAmountAsync(playerCode, data.GameProviderId, externalRoundId).ConfigureAwait(false)
                 : confirmBet.ActualAmount;
@@ -143,7 +143,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Controllers
 
             foreach (var confirmBet in request.Body.Transactions)
             {
-                var externalRoundId = confirmBet.ExternalRoundId.ToString();
+                var externalRoundId = confirmBet.ExternalRoundId;
                 var unlockAmount = confirmBet.IsOddsChanged
                     ? await GetLockAmountAsync(playerCode, data.GameProviderId, externalRoundId).ConfigureAwait(false)
                     : confirmBet.ActualAmount;

@@ -22,9 +22,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
         public AllBetGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations,
             IJsonSerializationProvider json)
-            : base(roundQueries, gameProviderOperations, localizationOperations)
+            : base(roundQueries, gameProviderOperations)
         {
             _json = json;
         }

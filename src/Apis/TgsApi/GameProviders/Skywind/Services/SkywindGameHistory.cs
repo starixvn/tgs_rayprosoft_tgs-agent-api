@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
@@ -18,16 +18,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
     {
         private readonly ISkywindApiClient _client;
         private readonly ISettingOperations _settingOperations;
+
         public SkywindGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations,
             ISkywindApiClient client,
             ISettingOperations settingOperations
-            ) : base(roundQueries, gameProviderOperations, localizationOperations)
+        ) : base(roundQueries, gameProviderOperations)
         {
-            _client = client ?? throw new System.ArgumentNullException(nameof(client));
-            _settingOperations = settingOperations ?? throw new System.ArgumentNullException(nameof(settingOperations));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
         }
 
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
@@ -38,8 +38,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             {
                 roundId = roundId.Split("_")[0];
             }
-            var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind).ConfigureAwait(false);
-            var response = await _client.GetGamHistoryRoundDetailsAsync(configuration, new SkywindGamHistoryRoundDetailsRequest() { RoundId = roundId }).ConfigureAwait(false);
+
+            var configuration = await _settingOperations
+                .GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind)
+                .ConfigureAwait(false);
+
+            var response = await _client
+                .GetGamHistoryRoundDetailsAsync(configuration,
+                    new SkywindGamHistoryRoundDetailsRequest {RoundId = roundId}).ConfigureAwait(false);
+
             return new RoundResult
             {
                 BetAmount = round.BetAmount ?? 0,
@@ -47,11 +54,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                 Winloss = round.WinLoss ?? 0,
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
-               {
-                    new UrlData {Url=response.ImageUrl}
-               }
+                {
+                    new UrlData {Url = response.ImageUrl}
+                }
             };
-
         }
     }
 }

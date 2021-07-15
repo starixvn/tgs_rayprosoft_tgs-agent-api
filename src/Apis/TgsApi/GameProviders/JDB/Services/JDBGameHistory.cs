@@ -17,7 +17,7 @@ using TGS.Shared.Game.Models.JDB.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
 {
-    public sealed class JDBBetHistory : BaseBetHistory
+    public sealed class JDBGameHistory : BaseBetHistory
     {
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IJDBApiClient _jdbApiClient;
@@ -25,16 +25,15 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
         private readonly IPlayerOperations _playerOperations;
         private readonly ISettingOperations _settingOperations;
 
-        public JDBBetHistory(
+        public JDBGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations,
             ISettingOperations settingOperations,
             IJDBApiClient jdbApiClient,
             IBrandGameProviderOperations brandGameProviderOperations,
             IPlayerOperations playerOperations,
-            IJDBServices jdbServices) :
-            base(roundQueries, gameProviderOperations, localizationOperations)
+            IJDBServices jdbServices)
+            : base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
             _jdbApiClient = jdbApiClient;
@@ -89,7 +88,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB.Services
                 Winloss = (round.WinLoss ?? 0).Negate(),
                 Turnover = round.Turnover ?? 0,
                 GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[] {new UrlData {Url = url}}
+                Data = new BaseData[]
+                {
+                    new UrlData {Url = url}
+                }
             };
         }
     }

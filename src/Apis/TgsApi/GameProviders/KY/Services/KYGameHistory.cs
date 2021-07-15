@@ -16,9 +16,8 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
     {
         public KYGameHistory(
             IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations
-            ) : base(roundQueries, gameProviderOperations, localizationOperations)
+            IGameProviderOperations gameProviderOperations
+        ) : base(roundQueries, gameProviderOperations)
         {
         }
 
@@ -36,7 +35,6 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 return ValueTask.FromResult<RoundResult>(null);
             }
 
-
             return ValueTask.FromResult(new RoundResult
             {
                 BetAmount = round.BetAmount ?? 0,
@@ -44,47 +42,42 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 Winloss = round.WinLoss ?? 0,
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
-               {
+                {
                     new JsonData {Value = gameRecord.CardValue}
-               }
+                }
             });
-
         }
 
         private string GetData(CachedGame cachedGame, KYGameRecord gameRecord)
         {
-            string data = string.Empty;
+            var data = string.Empty;
             switch (cachedGame.Type)
             {
                 case GameType.CardGame:
                     data = GetCardGame(cachedGame, gameRecord.CardValue);
                     break;
-
             }
 
             return data;
         }
 
-        private string GetCardGame(CachedGame cachedGame, string value)
-        {
-            return string.Empty;
-        }
+        private string GetCardGame(CachedGame cachedGame, string value) => string.Empty;
 
 
         private string GetMahjong(string mahjong) =>
-             mahjong.ToLower() switch
-             {
-                 "1" => "⼀筒",
-                 "2" => "⼆筒",
-                 "3" => "三筒",
-                 "4" => "四筒",
-                 "5" => "五筒",
-                 "6" => "六筒",
-                 "7" => "七筒",
-                 "8" => "⼋筒",
-                 "9" => "九筒",
-                 _ => "⽩板",
-             };
+            mahjong.ToLower() switch
+            {
+                "1" => "⼀筒",
+                "2" => "⼆筒",
+                "3" => "三筒",
+                "4" => "四筒",
+                "5" => "五筒",
+                "6" => "六筒",
+                "7" => "七筒",
+                "8" => "⼋筒",
+                "9" => "九筒",
+                _   => "⽩板"
+            };
 
 
         private string GetPokerBrandColor(string brandColor) =>
@@ -93,20 +86,19 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 "0" => "♦",
                 "1" => "♣",
                 "2" => "♥",
-                _ => "♠",
+                _   => "♠"
             };
 
 
         private string GetPokerNumbers(string number) =>
-             number.ToLower() switch
-             {
-                 "1" => "A",
-                 "a" => "10",
-                 "b" => "J",
-                 "c" => "Q",
-                 "d" => "K",
-                 _ => number,
-             };
-
+            number.ToLower() switch
+            {
+                "1" => "A",
+                "a" => "10",
+                "b" => "J",
+                "c" => "Q",
+                "d" => "K",
+                _   => number
+            };
     }
 }
