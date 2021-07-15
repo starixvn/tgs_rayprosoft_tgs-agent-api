@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Apis.OperatorApi.Models.Messages.Deposit;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {

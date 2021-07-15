@@ -6,7 +6,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
     {
         public Guid Id { get; init; }
 
-        public string Status { get; init; }
+        public FlowState Status { get; init; }
 
         public decimal Amount { get; init; }
 
