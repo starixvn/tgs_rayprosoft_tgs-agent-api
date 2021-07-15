@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Tgs.Payment.Clients;
-using TGS.Apis.OperatorApi.Models.Messages.Deposit;
+using TGS.Apis.OperatorApi.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Extensions
 {
@@ -13,7 +13,7 @@ namespace TGS.Apis.OperatorApi.Extensions
                 PaymentFlowState.WaitApprove => FlowState.Review,
                 PaymentFlowState.Reject => FlowState.Rejected,
                 PaymentFlowState.Approved => FlowState.Approved,
-                _ => FlowState.Unkown,
+                _ => FlowState.Unknown,
             };
 
         public static IEnumerable<PaymentFlowState> ToPaymentFlowState(this FlowState? status)

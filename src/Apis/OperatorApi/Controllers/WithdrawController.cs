@@ -163,7 +163,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .Select(form => new WithdrawFormViewModel
                     {
                         Id = form.Id,
-                        Status = form.Status.ToFlowState().ToString(),
+                        Status = form.Status.ToFlowState(),
                         Amount = form.Amount,
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn
@@ -172,6 +172,18 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
 
             return response;
+        }
+
+        [HttpGet("status")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public Task<Dictionary<int, string>> GetWithdrawFormStatusAsync()
+        {
+            var dict = Enum.GetValues(typeof(FlowState))
+               .Cast<FlowState>()
+               .Where(x => x != FlowState.Unknown)
+               .ToDictionary(t => (int)t, t => t.ToString());
+            return Task.FromResult(dict);
         }
     }
 }
