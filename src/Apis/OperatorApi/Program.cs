@@ -15,7 +15,7 @@ namespace TGS.Apis.OperatorApi
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((ctx, builder) =>
                 {
-                    builder.AddJsonFile("/data/appsettings.json", true);
+                    builder.AddJsonFile("/config/appsettings.json", true);
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {

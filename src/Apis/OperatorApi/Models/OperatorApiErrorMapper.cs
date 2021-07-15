@@ -36,7 +36,7 @@ namespace TGS.Apis.OperatorApi.Models
             };
 
         public bool CanProcess(Exception exception)
-            => TgsApiErrorByException.TryGetValue(exception.GetType(), out _);
+            => TgsApiErrorByException.ContainsKey(exception.GetType());
 
         public int GetApiErrorByException(Exception exception)
         {

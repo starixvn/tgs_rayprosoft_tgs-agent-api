@@ -20,7 +20,6 @@ using Tgs.Payment.PrimePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
-using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -65,8 +64,7 @@ namespace TGS.Apis.OperatorApi
                 config.GetSection("RequestLocalization").Bind(options);
             });
 
-            app.UseGlobalExceptionHandler();
-            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
+            app.UseTgsErrorHandler();
 
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
@@ -108,7 +106,6 @@ namespace TGS.Apis.OperatorApi
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddOperations()
-                .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddReportClientServices(_configuration)
@@ -119,6 +116,10 @@ namespace TGS.Apis.OperatorApi
                     config.GetSection("Promotion").Bind(options);
                 })
                 .AddTransactions();
+
+            services.AddErrorMapper()
+                .AddErrorMapper<OperatorApiErrorMapper>()
+                .AddErrorMapper<TgsErrorMapper>();
 
             services
                 .AddOperatorApiCore()

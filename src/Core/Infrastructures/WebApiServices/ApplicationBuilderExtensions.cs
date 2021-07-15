@@ -19,11 +19,11 @@ namespace TGS.Core.Infrastructures.WebApiServices
         /// 2. AddErrorMappers() in Infrastructure.ErrorMapper
         /// </summary>
         public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
-        { 
+        {
             app.UseExceptionHandler(new ExceptionHandlerOptions
-            { 
-                ExceptionHandler = async context => 
-                { 
+            {
+                ExceptionHandler = async context =>
+                {
                     var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
                     var exception = exceptionFeature?.Error;
                     if (exception == null)
@@ -52,6 +52,38 @@ namespace TGS.Core.Infrastructures.WebApiServices
             });
 
             return app;
+        }
+
+        public static IApplicationBuilder UseTgsErrorHandler(this IApplicationBuilder app)
+        {
+            return app.UseExceptionHandler(
+                new ExceptionHandlerOptions
+                {
+                    ExceptionHandler = async context =>
+                    {
+                        var exceptionFeature = context.Features.Get<IExceptionHandlerFeature>();
+                        var exception = exceptionFeature?.Error;
+                        if (exception == null)
+                            return;
+
+                        var log = context.RequestServices.GetRequiredService<ITgsLog>();
+                        var errorMapper = context.RequestServices.GetRequiredService<IErrorMapper>();
+                        var error = errorMapper.GetApiErrorByException(exception);
+                        var statusCode = errorMapper.GetHttpStatusByException(exception);
+                        var message = exception.GetMessageChain();
+
+                        log.LogError($"Caught global error on :{context.Request.Host} with message: {message}", exception);
+
+                        context.Response.ContentType = "application/json";
+                        context.Response.StatusCode = statusCode;
+
+                        await context.Response.WriteAsJsonAsync(new TgsResponse
+                        {
+                            Error = error,
+                            ErrorMessage = message
+                        });
+                    }
+                });
         }
     }
 }

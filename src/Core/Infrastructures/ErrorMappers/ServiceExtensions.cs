@@ -15,11 +15,14 @@ namespace TGS.Core.Infrastructures.ErrorMappers
         public static IServiceCollection AddErrorMappers(this IServiceCollection services, Type[] customErrorMapperTypes = null, Func<IServiceProvider, string, IErrorMapper> get = null)
         {
             customErrorMapperTypes ??= Array.Empty<Type>();
-            var types = customErrorMapperTypes.Concat(new[] {typeof(TgsErrorMapper)}).ToArray();
+            var types = customErrorMapperTypes.Concat(new[] { typeof(TgsErrorMapper) }).ToArray();
 
             get ??= (provider, _) => provider.GetRequiredService<TgsErrorMapper>();
 
             return services.AddSingletonWithResolver(types, get);
         }
+
+        public static ErrorMapperBuilder AddErrorMapper(this IServiceCollection services)
+            => new ErrorMapperBuilder(services);
     }
 }
