@@ -29,11 +29,10 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
-            ILocalizationOperations localizationOperations,
             ISettingOperations settingOperations,
             IPragmaticPlayHashProvider hashProvider,
             IPragmaticPlayApiClient client)
-            : base(roundQueries, gameProviderOperations, localizationOperations)
+            : base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
@@ -83,7 +82,10 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 Winloss = (round.WinLoss ?? 0).Negate(),
                 Turnover = round.Turnover ?? 0,
                 GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[] {new UrlData {Url = response.Url}}
+                Data = new BaseData[]
+                {
+                    new UrlData {Url = response.Url}
+                }
             };
         }
     }

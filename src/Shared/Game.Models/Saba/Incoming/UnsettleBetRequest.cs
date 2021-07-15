@@ -21,6 +21,9 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
             [JsonPropertyName("userId")]
             public string UserId { get; init; }
 
+            [JsonPropertyName("refId")]
+            public string ReferenceId { get; init; }
+
             [JsonPropertyName("txId")]
             public long ExternalTransactionId { get; init; }
 

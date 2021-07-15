@@ -15,13 +15,13 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
     {
         public VRGameHistory(
             IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations
-            ) : base(roundQueries, gameProviderOperations, localizationOperations)
+            IGameProviderOperations gameProviderOperations
+        ) : base(roundQueries, gameProviderOperations)
         {
         }
 
-        protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round, CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
+        protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+            CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
             var gameRecord = JsonSerializer.Deserialize<VRGameRecord>(round.RoundDetail.AdditionalData);
 
@@ -37,9 +37,9 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 Winloss = round.WinLoss ?? 0,
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
-               {
+                {
                     new JsonData {Value = JsonSerializer.Serialize(gameRecord.PrizeDetail)}
-               }
+                }
             });
         }
     }

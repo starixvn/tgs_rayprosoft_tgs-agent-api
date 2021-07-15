@@ -25,7 +25,7 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
         public record Transaction
         {
             [JsonPropertyName("refId")]
-            public long ExternalRoundId { get; init; }
+            public string ExternalRoundId { get; init; }
         }
     }
 }
