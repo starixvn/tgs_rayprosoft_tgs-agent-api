@@ -21,7 +21,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId, string playerCode, string externalGameActionGroupId);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
-        ValueTask<EvolutionConfiguration> GetConfiguration();
+        ValueTask<EvolutionConfiguration> GetConfigurationAsync();
         ValueTask<Guid> GetGameProviderIdAsync();
     }
 
@@ -81,7 +81,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
         }
 
-        async ValueTask<EvolutionConfiguration> IEvolutionServices.GetConfiguration()
+        async ValueTask<EvolutionConfiguration> IEvolutionServices.GetConfigurationAsync()
         {
             return await _settingOperations.GetValueFromJsonByKeyAsync<EvolutionConfiguration>(SettingConsts.GameProviderConfigurations.Evolution);
         }
