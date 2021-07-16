@@ -358,6 +358,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
         public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
+        public DbSet<BrandCommunication> BrandCommunications { get; set; }
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 
