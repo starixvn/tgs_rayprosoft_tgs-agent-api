@@ -17,8 +17,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
     public class BrandCommunicationController : BaseContextController
     {
         [HttpGet("{brandId}")]
-        [Description("Get a Brand communcations")]
-        public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationAsync(
+        [Description("Get a brand's communications")]
+        public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
             Guid brandId,
             [FromServices] IQueryService<BrandCommunicationQuery, BrandCommunicationInfo> queryService)
         {
@@ -37,7 +37,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
         }
 
         [HttpPost]
-        [Description("Create a Brand communcation")]
+        [Description("Create a brand communication")]
         public async Task<MessageResponse> CreateBrandCommunicationAsync(
             [FromServices] ICommandService<CreateBrandCommunicationCommand> createService,
             [FromBody] CreateBrandCommunicationRequest request)
