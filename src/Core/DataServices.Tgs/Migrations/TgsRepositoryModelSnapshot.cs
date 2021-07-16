@@ -1113,6 +1113,46 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("brand_bet_limits");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCommunication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AppId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("app_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("QRCodeUrl")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("qr_code_url");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_brand_communications");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_brand_communications_brand_id");
+
+                    b.ToTable("brand_communications");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCurrency", b =>
                 {
                     b.Property<Guid>("BrandId")
@@ -5729,6 +5769,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Brand");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCommunication", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_brand_communications_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCurrency", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
@@ -5995,13 +6047,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Department", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brands")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
                         .WithMany("Departments")
                         .HasForeignKey("BrandId")
                         .HasConstraintName("fk_departments_brands_brand_id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Licensee", "Licensees")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Licensee", "Licensee")
                         .WithMany("Departments")
                         .HasForeignKey("LicenseeId")
                         .HasConstraintName("fk_departments_licensees_licensee_id")
@@ -6013,9 +6065,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasConstraintName("fk_departments_resellers_reseller_id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Brands");
+                    b.Navigation("Brand");
 
-                    b.Navigation("Licensees");
+                    b.Navigation("Licensee");
 
                     b.Navigation("Reseller");
                 });
