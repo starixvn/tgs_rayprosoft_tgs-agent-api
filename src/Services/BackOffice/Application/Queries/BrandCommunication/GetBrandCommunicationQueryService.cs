@@ -17,11 +17,14 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandCommunication
             _tgsQueries = tgsQueries ?? throw new ArgumentNullException(nameof(tgsQueries));
         }
 
-        public IAsyncEnumerable<BrandCommunicationInfo> QueryAsync(BrandCommunicationQuery query, CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<BrandCommunicationInfo> QueryAsync(
+            BrandCommunicationQuery query,
+            CancellationToken cancellationToken = default)
         {
             var result = _tgsQueries.GetQueries()
                 .Where(x => x.BrandId == query.BrandId)
                 .ToAsyncEnumerable();
+
             return result.Select(x => new BrandCommunicationInfo()
             {
                 Id = x.Id,
