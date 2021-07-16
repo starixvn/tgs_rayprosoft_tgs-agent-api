@@ -32,6 +32,7 @@ namespace TGS.Agent.Repositories
                 agent.Wechat,
                 agent.InvitationCode,
                 agent.Brand.Domains.FirstOrDefault()?.Url,
+                (int)agent.LevelType,
                 agent.WithdrawPassword,
                 agent.WithdrawSalt);
         }

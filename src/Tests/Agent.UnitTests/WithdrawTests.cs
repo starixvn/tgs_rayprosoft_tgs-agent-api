@@ -44,6 +44,7 @@ namespace Agent.UnitTests
                     null,
                     "aaabbb",
                     null,
+                    1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>()));
 
@@ -121,6 +122,7 @@ namespace Agent.UnitTests
                     null,
                     "aaabbb",
                     null,
+                    1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>()));
 

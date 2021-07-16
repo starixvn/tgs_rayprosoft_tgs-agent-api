@@ -39,6 +39,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 "aaabbb",
                 null,
+                1,
                 Array.Empty<byte>(),
                 Array.Empty<byte>());
 
@@ -83,6 +84,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 "aaabbb",
                 null,
+                1,
                 Array.Empty<byte>(),
                 Array.Empty<byte>());
 
@@ -136,6 +138,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     "aaabbb",
                     null,
+                    1,
                     new byte[] { 1, 2, 3 },
                     Array.Empty<byte>()));
 
@@ -169,6 +172,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     "aaabbb",
                     null,
+                    1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>()));
 
@@ -204,6 +208,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 "aaabbb",
                 null,
+                1,
                 Array.Empty<byte>(),
                 Array.Empty<byte>());
 
@@ -251,6 +256,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 "aaabbb",
                 null,
+                1,
                 Array.Empty<byte>(),
                 Array.Empty<byte>());
             fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);

@@ -43,6 +43,7 @@ namespace Agent.UnitTests
                     null,
                     "aaabbb",
                     null,
+                    1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>())));
             var expected = new BalanceInfo(10000M).ToExpectedObject();

@@ -50,6 +50,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     "aaabbb",
                     null,
+                    1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>()));
 

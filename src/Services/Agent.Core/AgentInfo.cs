@@ -13,6 +13,7 @@ namespace TGS.Services.Agent
         string? Wechat,
         string InvitationCode,
         string? BrandUrl,
+        int AgentLevel,
         byte[] PayPassword,
         byte[] PaySalt);
 }

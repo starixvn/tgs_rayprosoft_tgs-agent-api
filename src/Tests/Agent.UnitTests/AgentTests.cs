@@ -8,6 +8,7 @@ using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Security;
+using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
@@ -65,6 +66,22 @@ namespace Agent.UnitTests
             var info = await sut.GetAsync(query);
 
             Assert.IsTrue(info.IsNew);
+        }
+
+        [Test]
+        public async Task Get_Agent_Info_By_Agent_Id()
+        {
+            var fakeAgentRepository = Substitute.For<IAgentRepository>();
+
+            var sut = new GetAgentInfoQueryService(fakeAgentRepository);
+
+            var agentId = Guid.NewGuid();
+
+
+            await sut.GetAsync(new GetAgentInfoQuery(agentId));
+
+            _ = fakeAgentRepository.Received(1)
+                .GetAgentByIdAsync(Arg.Is(agentId));
         }
     }
 }
