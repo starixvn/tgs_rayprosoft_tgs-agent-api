@@ -183,7 +183,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new PromotionParticipant
                                 {
                                     PlayerCode = p.PlayerCode,
-                                    PromotionId = promotionId
+                                    PromotionId = promotionId,
+                                    CreatedOn = now
                                 })
                             .ToHashSet(),
                     CreatedOn = DateTimeOffset.Now,
