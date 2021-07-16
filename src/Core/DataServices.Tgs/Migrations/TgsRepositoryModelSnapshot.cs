@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.5")
+                .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
@@ -2051,6 +2051,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("sub_game");
 
+                    b.Property<string>("SubGameProviderCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("sub_game_provider_code");
+
                     b.Property<short>("Type")
                         .HasColumnType("smallint")
                         .HasColumnName("type");
@@ -2070,6 +2075,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.HasIndex("GameProviderId")
                         .HasDatabaseName("ix_games_game_provider_id");
+
+                    b.HasIndex("SubGameProviderCode")
+                        .HasDatabaseName("ix_games_sub_game_provider_code");
 
                     b.ToTable("games");
                 });
@@ -4963,6 +4971,61 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("station_letter_players");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SubGameProvider", b =>
+                {
+                    b.Property<string>("Code")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("CreatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("created_by_username");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("GameProviderId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("game_provider_id");
+
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("UpdatedByUsername")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("updated_by_username");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on");
+
+                    b.HasKey("Code")
+                        .HasName("pk_sub_game_providers");
+
+                    b.HasIndex("GameProviderId")
+                        .HasDatabaseName("ix_sub_game_providers_game_provider_id");
+
+                    b.ToTable("sub_game_providers");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5996,7 +6059,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.SubGameProvider", "SubGameProvider")
+                        .WithMany("Games")
+                        .HasForeignKey("SubGameProviderCode")
+                        .HasConstraintName("fk_games_sub_game_providers_sub_game_provider_code");
+
                     b.Navigation("GameProvider");
+
+                    b.Navigation("SubGameProvider");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameAction", b =>
@@ -6678,6 +6748,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("StationLetter");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SubGameProvider", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.GameProvider", "GameProvider")
+                        .WithMany("SubGameProviders")
+                        .HasForeignKey("GameProviderId")
+                        .HasConstraintName("fk_sub_game_providers_game_providers_game_provider_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GameProvider");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Transaction", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
@@ -6957,6 +7039,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Resellers");
 
                     b.Navigation("SportTypes");
+
+                    b.Navigation("SubGameProviders");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.GameProviderBetLimit", b =>
@@ -7080,6 +7164,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.StationLetter", b =>
                 {
                     b.Navigation("Players");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SubGameProvider", b =>
+                {
+                    b.Navigation("Games");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.VipLevel", b =>
