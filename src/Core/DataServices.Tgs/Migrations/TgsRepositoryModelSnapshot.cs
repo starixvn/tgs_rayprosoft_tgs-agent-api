@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.8")
+                .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
@@ -4946,10 +4946,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<string>("LanguageContent")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("language_content");
-
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
@@ -6051,13 +6047,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Department", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brands")
                         .WithMany("Departments")
                         .HasForeignKey("BrandId")
                         .HasConstraintName("fk_departments_brands_brand_id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Licensee", "Licensee")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Licensee", "Licensees")
                         .WithMany("Departments")
                         .HasForeignKey("LicenseeId")
                         .HasConstraintName("fk_departments_licensees_licensee_id")
@@ -6069,9 +6065,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasConstraintName("fk_departments_resellers_reseller_id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Brand");
+                    b.Navigation("Brands");
 
-                    b.Navigation("Licensee");
+                    b.Navigation("Licensees");
 
                     b.Navigation("Reseller");
                 });
