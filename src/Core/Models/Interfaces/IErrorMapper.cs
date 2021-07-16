@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Core.Models.Interfaces
 {
@@ -11,5 +12,7 @@ namespace TGS.Core.Models.Interfaces
         int GetHttpStatusByException(Exception exception);
 
         string GetMessageByException(Exception exception);
+
+        string GetMessageKeyByException(TgsApiError errorType) => null;
     }
 }

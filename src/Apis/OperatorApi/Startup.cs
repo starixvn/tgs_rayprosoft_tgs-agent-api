@@ -118,8 +118,7 @@ namespace TGS.Apis.OperatorApi
                 .AddTransactions();
 
             services.AddErrorMapper()
-                .AddErrorMapper<OperatorApiErrorMapper>()
-                .AddErrorMapper<TgsErrorMapper>();
+                .AddErrorMapper<OperatorApiErrorMapper>();
 
             services
                 .AddOperatorApiCore()
@@ -244,8 +243,6 @@ namespace TGS.Apis.OperatorApi
                             .SetIsOriginAllowed(_ => true);
                     });
             });
-
-            services.AddSingleton<OperatorApiErrorMapper>();
         }
     }
 }
