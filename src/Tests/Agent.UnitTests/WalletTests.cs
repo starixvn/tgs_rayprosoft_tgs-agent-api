@@ -35,8 +35,14 @@ namespace Agent.UnitTests
                 .Returns(ValueTask.FromResult(new AgentInfo(
                     agentId,
                     "TestAgent",
+                    null,
+                    null,
                     Guid.NewGuid(),
                     "agent@test.com",
+                    null,
+                    null,
+                    "aaabbb",
+                    null,
                     Array.Empty<byte>(),
                     Array.Empty<byte>())));
             var expected = new BalanceInfo(10000M).ToExpectedObject();
