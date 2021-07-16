@@ -41,5 +41,9 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<BrandGame> Brands { get; set; }
 
         public string Localization { get; set; }
+
+        public string SubGameProviderCode { get; set; }
+
+        public virtual SubGameProvider SubGameProvider { get; set; }
     }
 }

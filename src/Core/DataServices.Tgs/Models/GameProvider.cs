@@ -15,6 +15,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public int SettleBetTimeout { get; set; }
         public ushort UniqueId { get; set; }
         public bool TransferWallet { get; set; }
+        public string Localization { get; set; }
+
         public virtual ICollection<Game> Games { get; set; }
         public virtual ICollection<ResellerGameProvider> Resellers { get; set; }
         public virtual ICollection<LicenseeGameProvider> Licensees { get; set; }
@@ -25,7 +27,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<GameProviderBetLimit> BetLimits { get; set; }
         public virtual ICollection<SportType> SportTypes { get; set; }
         public virtual ICollection<MarketType> MarketTypes { get; set; }
-
-        public string Localization { get; set; }
+        public virtual ICollection<SubGameProvider> SubGameProviders { get; set; }
     }
 }
