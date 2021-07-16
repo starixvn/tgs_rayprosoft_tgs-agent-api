@@ -10,11 +10,18 @@ namespace TGS.Core.Models
         public const string DefaultCultureCode = "en-US";
         public const string Default = "default";
 
-        public static readonly GameType[] Sports = {GameType.Sportsbook, GameType.VirtualSports, GameType.ESports};
+        public static readonly GameType[] Sports =
+        {
+            GameType.Sportsbook,
+            GameType.VirtualSports,
+            GameType.ESports
+        };
 
         public static readonly GamePlatformType[] AllGamePlatformTypes =
         {
-            GamePlatformType.Desktop, GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile
+            GamePlatformType.Desktop,
+            GamePlatformType.Mobile,
+            GamePlatformType.DesktopAndMobile
         };
 
         public static readonly IDictionary<HealthStatus, int> HealthCheckResultStatusCodes =
@@ -25,8 +32,19 @@ namespace TGS.Core.Models
                 {HealthStatus.Degraded, StatusCodes.Status500InternalServerError}
             };
 
-        public static GameType[] SportsGroup = {GameType.Sportsbook, GameType.ESports};
-        public static GameType[] SlotGroup = {GameType.Fishing, GameType.Arcade, GameType.Slot, GameType.TableGame};
+        public static GameType[] SportsGroup =
+        {
+            GameType.Sportsbook,
+            GameType.ESports
+        };
+
+        public static GameType[] SlotGroup =
+        {
+            GameType.Fishing,
+            GameType.Arcade,
+            GameType.Slot,
+            GameType.TableGame
+        };
 
         public static class CachePrefix
         {
@@ -126,8 +144,14 @@ namespace TGS.Core.Models
             public const string ImagePattern = @"\b(http(s?):)([/|:|.|\w|-])*\.(?:jpg|gif|png|jpeg)\b";
             public const string StationLetter = "stationLetter";
             public const string Promotion = "promotion";
+            public const string MessengerQRCode = "messengerQRCode";
 
-            public static readonly string[] Types = {StationLetter, Promotion};
+            public static readonly string[] Types =
+            {
+                StationLetter,
+                Promotion,
+                MessengerQRCode
+            };
         }
     }
 }
