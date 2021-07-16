@@ -11,9 +11,9 @@ namespace TGS.Services.Promotion.Handlers
 {
     public class CreatePromotionParticipantHandler : Handler<CreatePromotionParticipantRequest, MessageResponse>
     {
-        private readonly IPromotionRepository _promotionRepository;
-        private readonly IPromotionParticipantRepository _promotionParticipantService;
         private readonly ILogger<CreatePromotionParticipantHandler> _logger;
+        private readonly IPromotionParticipantRepository _promotionParticipantService;
+        private readonly IPromotionRepository _promotionRepository;
 
         public CreatePromotionParticipantHandler(
             IPromotionRepository promotionRepository,
@@ -21,22 +21,15 @@ namespace TGS.Services.Promotion.Handlers
             IHttpContextAccessor accessor,
             ILogger<CreatePromotionParticipantHandler> logger) : base(accessor)
         {
-            _promotionRepository = promotionRepository ?? throw new System.ArgumentNullException(nameof(promotionRepository));
-            _promotionParticipantService = promotionParticipantService ?? throw new System.ArgumentNullException(nameof(promotionParticipantService));
-            _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
+            _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+            _promotionParticipantService = promotionParticipantService ??
+                throw new ArgumentNullException(nameof(promotionParticipantService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public override async Task<MessageResponse> Handle(CreatePromotionParticipantRequest request,
             CancellationToken cancellationToken)
         {
-            if (await _promotionParticipantService.ExistsAsync(x =>
-                x.PromotionId == request.PromotionId && x.PlayerCode == request.PlayerCode))
-            {
-                _logger.LogWarning(Properties.Promotion.PromotionJoinedAlready);
-
-                return CreateInvalidResponse<MessageResponse>(Properties.Promotion.PromotionJoinedAlready);
-            }
-
             var promotion = await _promotionRepository
                 .GetPromotionByIdAsync(request.PromotionId)
                 .ConfigureAwait(false);
