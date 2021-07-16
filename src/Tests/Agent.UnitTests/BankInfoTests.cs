@@ -42,10 +42,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(new AgentInfo(
                     agentId,
                     "Tester",
+                    null,
+                    null,
                     Guid.NewGuid(),
                     "test@gmail.com",
                     null,
-                    null));
+                    null,
+                    "aaabbb",
+                    null,
+                    1,
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>()));
 
             await sut.ExecuteAsync(command);
 
