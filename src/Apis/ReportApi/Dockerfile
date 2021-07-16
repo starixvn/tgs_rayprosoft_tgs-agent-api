@@ -25,7 +25,6 @@ COPY ["src/Repositories/PlayerBucket.Repositories/PlayerBucket.Repositories.cspr
 COPY ["src/Services/Bucket/PlayerBucket.Core.csproj", "src/Services/Bucket/"]
 COPY ["src/Repositories/BackOffice.Repositories/BackOffice.Repositories.csproj", "src/Repositories/BackOffice.Repositories/"]
 COPY ["src/Services/BackOffice/BackOffice.csproj", "src/Services/BackOffice/"]
-COPY ["src/Repositories/PaymentRepositories/PaymentRepositories.csproj", "src/Repositories/PaymentRepositories/"]
 COPY ["src/Clients/Promotion.Client/Promotion.Client.csproj", "src/Clients/Promotion.Client/"]
 COPY ["src/Services/TgsTransaction.Core/TgsTransaction.Core.csproj", "src/Services/TgsTransaction.Core/"]
 COPY ["src/Repositories/TgsTransaction.Repositories/TgsTransaction.Repositories.csproj", "src/Repositories/TgsTransaction.Repositories/"]
