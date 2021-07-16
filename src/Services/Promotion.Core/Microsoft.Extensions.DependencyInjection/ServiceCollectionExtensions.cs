@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using MediatR;
-using Microsoft.Extensions.DependencyInjection;
+using TGS.Services.Promotion;
 using TGS.Services.Promotion.Configuration;
 
-namespace TGS.Services.Promotion.Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {

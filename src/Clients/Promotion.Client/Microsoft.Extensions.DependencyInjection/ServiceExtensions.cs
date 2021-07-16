@@ -1,8 +1,8 @@
 ﻿using System;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using TGS.Clients.Promotion.Client;
 
-namespace TGS.Clients.Promotion.Client.Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceExtensions
     {
