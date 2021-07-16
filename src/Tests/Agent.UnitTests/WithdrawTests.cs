@@ -36,10 +36,17 @@ namespace Agent.UnitTests
                 .Returns(new AgentInfo(
                     command.AgentId,
                     "ThisIsAgentName",
+                    null,
+                    null,
                     Guid.NewGuid(),
                     "test@gmail.com",
                     null,
-                    null));
+                    null,
+                    "aaabbb",
+                    null,
+                    1,
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>()));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
@@ -107,10 +114,17 @@ namespace Agent.UnitTests
                 .Returns(new AgentInfo(
                     command.AgentId,
                     "ThisIsAgentName",
+                    null,
+                    null,
                     Guid.NewGuid(),
                     "test@gmail.com",
                     null,
-                    null));
+                    null,
+                    "aaabbb",
+                    null,
+                    1,
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>()));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
