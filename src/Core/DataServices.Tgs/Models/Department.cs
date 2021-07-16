@@ -23,8 +23,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual Guid? ResellerId { get; set; }
         public virtual Reseller Reseller { get; set; }
         public virtual Guid? LicenseeId { get; set; }
-        public virtual Licensee Licensees { get; set; }
+        public virtual Licensee Licensee { get; set; }
         public virtual Guid? BrandId { get; set; }
-        public virtual Brand Brands { get; set; }
+        public virtual Brand Brand { get; set; }
     }
 }

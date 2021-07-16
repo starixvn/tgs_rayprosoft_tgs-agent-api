@@ -237,7 +237,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var department = CreateDepartmentFixture().Create<Department>();
             var departmentId = Guid.NewGuid();
-            department.Users = new[] {new User()};
+            department.Users = new[]
+            {
+                new User()
+            };
 
             _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Department, bool>>>(),
                     It.IsAny<Func<IQueryable<Department>, IQueryable<Department>>>()))
@@ -257,10 +260,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Department>(u => u
-                .With(s => s.Users, new User[] { })
+                .With(s => s.Users, new User[]
+                {
+                })
                 .With(s => s.Reseller, new Reseller())
-                .With(s => s.Licensees, new Licensee())
-                .With(s => s.Brands, new Brand()));
+                .With(s => s.Licensee, new Licensee())
+                .With(s => s.Brand, new Brand()));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

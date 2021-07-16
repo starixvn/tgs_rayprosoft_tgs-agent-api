@@ -21,7 +21,10 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class RoleController : BaseContextController
     {
+        private readonly ITgsQueries<Core.DataServices.Tgs.Models.Brand> _brandQueries;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ITgsQueries<Core.DataServices.Tgs.Models.Licensee> _licenseeQueries;
+        private readonly ITgsQueries<Core.DataServices.Tgs.Models.Reseller> _resellerQueries;
         private readonly ITgsCommands<Role> _roleCommands;
         private readonly ITgsQueries<Role> _roleQueries;
         private readonly ITgsQueries<Setting> _settingQueries;
@@ -30,11 +33,17 @@ namespace TGS.Apis.BackendOffice.Controllers
             ITgsQueries<Role> roleQueries,
             ITgsQueries<Setting> settingQueries,
             ITgsCommands<Role> roleCommands,
+            ITgsQueries<Core.DataServices.Tgs.Models.Reseller> resellerQueries,
+            ITgsQueries<Core.DataServices.Tgs.Models.Licensee> licenseeQueries,
+            ITgsQueries<Core.DataServices.Tgs.Models.Brand> brandQueries,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _roleQueries = roleQueries;
             _roleCommands = roleCommands;
             _settingQueries = settingQueries;
+            _resellerQueries = resellerQueries;
+            _licenseeQueries = licenseeQueries;
+            _brandQueries = brandQueries;
             _jsonSerializationProvider = jsonSerializationProvider;
         }
 
@@ -50,21 +59,62 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(LicenseeId, x => x.LicenseeId == LicenseeId)
                 .Where(BrandId, x => x.BrandId == BrandId)
                 .Where(request.Name, x => EF.Functions.ILike(x.Name, $"%{request.Name}%"))
-                .Select(role => new RoleModel
+                .GroupJoin(_resellerQueries.GetQueries(), r => r.ResellerId, r => r.Id, (role, resellers) => new
                 {
-                    Id = role.Id,
-                    RoleType = role.RoleType,
-                    ResellerId = role.ResellerId.Value,
-                    LicenseeId = role.LicenseeId.Value,
-                    BrandId = role.BrandId.Value,
-                    Name = role.Name,
-                    DisplayName = role.DisplayName,
-                    Description = role.Description,
-                    IsRoot = role.IsRoot,
-                    CreatedOn = role.CreatedOn,
-                    UpdatedOn = role.UpdatedOn,
-                    CreatedByUsername = role.CreatedByUsername,
-                    UpdatedByUsername = role.UpdatedByUsername
+                    role,
+                    resellers
+                })
+                .SelectMany(x => x.resellers.DefaultIfEmpty(), (x, reseller) => new
+                {
+                    x.role,
+                    reseller
+                })
+                .GroupJoin(_licenseeQueries.GetQueries(), combine => combine.role.LicenseeId, l => l.Id,
+                    (combine, licensees) => new
+                    {
+                        combine.role,
+                        combine.reseller,
+                        licensees
+                    })
+                .SelectMany(x => x.licensees.DefaultIfEmpty(), (x, licensee) => new
+                {
+                    x.role,
+                    x.reseller,
+                    licensee
+                })
+                .GroupJoin(_brandQueries.GetQueries(), combine => combine.role.BrandId, b => b.Id,
+                    (combine, brands) => new
+                    {
+                        combine.role,
+                        combine.reseller,
+                        combine.licensee,
+                        brands
+                    })
+                .SelectMany(x => x.brands.DefaultIfEmpty(), (x, brand) => new
+                {
+                    x.role,
+                    x.reseller,
+                    x.licensee,
+                    brand
+                })
+                .Select(x => new RoleModel
+                {
+                    Id = x.role.Id,
+                    RoleType = x.role.RoleType,
+                    ResellerId = x.role.ResellerId,
+                    LicenseeId = x.role.LicenseeId,
+                    BrandId = x.role.BrandId,
+                    ResellerName = x.reseller != null ? x.reseller.Name : null,
+                    LicenseeName = x.licensee != null ? x.licensee.Name : null,
+                    BrandName = x.brand != null ? x.brand.Name : null,
+                    Name = x.role.Name,
+                    DisplayName = x.role.DisplayName,
+                    Description = x.role.Description,
+                    IsRoot = x.role.IsRoot,
+                    CreatedOn = x.role.CreatedOn,
+                    UpdatedOn = x.role.UpdatedOn,
+                    CreatedByUsername = x.role.CreatedByUsername,
+                    UpdatedByUsername = x.role.UpdatedByUsername
                 })
                 .CreatePagedResponseAsync(request);
 
@@ -114,7 +164,11 @@ namespace TGS.Apis.BackendOffice.Controllers
                 UpdatedByUsername = role.UpdatedByUsername
             };
 
-            return new() {Valid = true, Role = roleModel};
+            return new()
+            {
+                Valid = true,
+                Role = roleModel
+            };
         }
 
         [HttpPut("{roleId}")]
@@ -166,7 +220,10 @@ namespace TGS.Apis.BackendOffice.Controllers
                 var licenseeRootRole = roles.FirstOrDefault(x => x.RoleType == RoleType.Licensee && x.IsRoot);
                 if (licenseeRootRole != null)
                 {
-                    UpdateRoles(role, new[] {licenseeRootRole});
+                    UpdateRoles(role, new[]
+                    {
+                        licenseeRootRole
+                    });
                 }
 
                 var licenseeRoles = roles.Where(x => x.RoleType == RoleType.Licensee).ToArray();
@@ -177,7 +234,10 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (brandRootRole != null)
             {
-                UpdateRoles(role, new[] {brandRootRole});
+                UpdateRoles(role, new[]
+                {
+                    brandRootRole
+                });
             }
 
             var brandRoles = roles.Where(x => x.RoleType == RoleType.Brand).ToArray();
@@ -310,7 +370,11 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var menus = GetMenuSettingByString(setting);
 
-            return new() {Valid = true, Menus = menus};
+            return new()
+            {
+                Valid = true,
+                Menus = menus
+            };
         }
 
         private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
