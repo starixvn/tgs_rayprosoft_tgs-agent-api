@@ -50,14 +50,22 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("RMB"), new USDCurrency("USD"), new VND1000Currency("VND"),
-                new IDR1000Currency("IDR"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new MYRCurrency("MYR"),
-                new THBCurrency("THB"), new EURCurrency("EUR")
+                new CNYCurrency("RMB"),
+                new USDCurrency("USD"),
+                new VND1000Currency("VND"),
+                new IDR1000Currency("IDR"),
+                new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"),
+                new THBCurrency("THB"),
+                new EURCurrency("EUR")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage(), new CNLanguage(), new TWLanguage()
+                new USLanguage(),
+                new CNLanguage(),
+                new TWLanguage()
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -89,7 +97,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             Status = true,
                             AgentMappers = new KYAgentMapper[]
                             {
-                                new() {CurrencyCode = "CNY", AgentId = "72412", Status = true}
+                                new()
+                                {
+                                    CurrencyCode = "CNY",
+                                    AgentId = "72412",
+                                    Status = true
+                                }
                             }
                         },
                         new KYBrandMerchant
@@ -102,7 +115,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             Status = false,
                             AgentMappers = new KYAgentMapper[]
                             {
-                                new() {CurrencyCode = "CNY", AgentId = "72412", Status = false}
+                                new()
+                                {
+                                    CurrencyCode = "CNY",
+                                    AgentId = "72412",
+                                    Status = false
+                                }
                             }
                         }
                     }
@@ -111,6 +129,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Dictionary<string, string> IGameProvider.SportTypes => new();
 
             Dictionary<string, string> IGameProvider.MarketTypes => new();
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.KY, "KY")
+            };
         }
 
         internal record KYGameProviderConfiguration : IGameProviderConfiguration

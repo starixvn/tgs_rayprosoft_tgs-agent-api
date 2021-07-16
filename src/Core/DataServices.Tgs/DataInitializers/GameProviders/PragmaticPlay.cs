@@ -43,20 +43,37 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string IGameProvider.Name => "PragmaticPlay";
 
             IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations =>
-                new IGameProviderConfiguration[] {new PragmaticPlayGameProviderConfiguration()};
+                new IGameProviderConfiguration[]
+                {
+                    new PragmaticPlayGameProviderConfiguration()
+                };
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VNDCurrency("VND"), new IDRCurrency("IDR"),
-                new VND1000Currency("VND2"), new IDR1000Currency("IDR2"), new JPYCurrency("JPY"),
-                new EURCurrency("EUR"), new KRWCurrency("KRW"), new MYRCurrency("MYR"), new THBCurrency("THB"),
+                new CNYCurrency("CNY"),
+                new USDCurrency("USD"),
+                new VNDCurrency("VND"),
+                new IDRCurrency("IDR"),
+                new VND1000Currency("VND2"),
+                new IDR1000Currency("IDR2"),
+                new JPYCurrency("JPY"),
+                new EURCurrency("EUR"),
+                new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"),
+                new THBCurrency("THB"),
                 new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new THLanguage("th"), new JPLanguage("ja"), new IDLanguage("id"),
-                new VNLanguage("vi"), new CNLanguage("zh"), new TWLanguage("zt"), new KRLanguage("ko")
+                new USLanguage("en"),
+                new THLanguage("th"),
+                new JPLanguage("ja"),
+                new IDLanguage("id"),
+                new VNLanguage("vi"),
+                new CNLanguage("zh"),
+                new TWLanguage("zt"),
+                new KRLanguage("ko")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -76,6 +93,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 GameUrlQueryStringTemplate =
                     "token={TOKEN}&symbol={EXTERNALGAMEID}&technology={TECHNOLOGY}&platform={PLATFORM}&language={CULTURE}",
                 DelaySecondsForPlaceBet = 0
+            };
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.PragmaticPlay, "PragmaticPlay")
             };
         }
 

@@ -52,15 +52,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("RB"), new USDCurrency("US"), new VNDCurrency("VN"), new IDRCurrency("RP"),
-                new JPYCurrency("JP"), new KRWCurrency("KW"), new MYRCurrency("RM"), new THBCurrency("TB"),
+                new CNYCurrency("RB"),
+                new USDCurrency("US"),
+                new VNDCurrency("VN"),
+                new IDRCurrency("RP"),
+                new JPYCurrency("JP"),
+                new KRWCurrency("KW"),
+                new MYRCurrency("RM"),
+                new THBCurrency("TB"),
                 new GBPCurrency("GB")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("zh-CN"), new IDLanguage("id"), new JPLanguage("ja"),
-                new KRLanguage("ko"), new THLanguage("th"), new VNLanguage("vi"), new TWLanguage("zh-TW")
+                new USLanguage("en"),
+                new CNLanguage("zh-CN"),
+                new IDLanguage("id"),
+                new JPLanguage("ja"),
+                new KRLanguage("ko"),
+                new THLanguage("th"),
+                new VNLanguage("vi"),
+                new TWLanguage("zh-TW")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -95,6 +107,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Dictionary<string, string> IGameProvider.SportTypes => new();
 
             Dictionary<string, string> IGameProvider.MarketTypes => new();
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.JDB, "JDB")
+            };
         }
 
         private record JDBGameProviderConfiguration : IGameProviderConfiguration

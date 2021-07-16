@@ -29,7 +29,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with { EndpointPath = string.Empty };
+                        return (Game)g with {EndpointPath = string.Empty};
                     })
                     .ToArray();
 
@@ -49,17 +49,31 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VNDCurrency("VND"),
-                new IDRCurrency("IDR"), new JPYCurrency("JPY"), new KRWCurrency("KRW"),
-                new MYRCurrency("MYR"), new THBCurrency("THB"), new EURCurrency("EUR"),
-                new HKDCurrency("HKD"), new GBPCurrency("GBP"), new SGDCurrency("SGD"),
+                new CNYCurrency("CNY"),
+                new USDCurrency("USD"),
+                new VNDCurrency("VND"),
+                new IDRCurrency("IDR"),
+                new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"),
+                new THBCurrency("THB"),
+                new EURCurrency("EUR"),
+                new HKDCurrency("HKD"),
+                new GBPCurrency("GBP"),
+                new SGDCurrency("SGD"),
                 new INRCurrency("INR")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("zh-cn"), new TWLanguage("zh-tw"), new JPLanguage("ja"), new KRLanguage("ko"),
-                new VNLanguage("vi"), new THLanguage("th"), new IDLanguage("id")
+                new USLanguage("en"),
+                new CNLanguage("zh-cn"),
+                new TWLanguage("zh-tw"),
+                new JPLanguage("ja"),
+                new KRLanguage("ko"),
+                new VNLanguage("vi"),
+                new THLanguage("th"),
+                new IDLanguage("id")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -89,6 +103,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Dictionary<string, string> IGameProvider.SportTypes => new();
 
             Dictionary<string, string> IGameProvider.MarketTypes => new();
+
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.Skywind, "Skywind")
+            };
         }
 
         internal record SkywindGameProviderConfiguration : IGameProviderConfiguration

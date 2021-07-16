@@ -61,6 +61,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Dictionary<string, string> SportTypes => new();
             Dictionary<string, string> MarketTypes => new();
             bool TransferWallet => false;
+            SubGameProvider[] SubGameProviders { get; }
             PluggableConfigurationBase GetConfiguration();
         }
 
@@ -90,6 +91,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             bool AvailableToBrand { get; init; }
             bool Html5 { get; init; }
             string AvailableCurrencies { get; init; }
+            string SubGameProviderCode { get; init; }
         }
 
         internal interface ICodeMapper
@@ -117,6 +119,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         {
             private readonly string _availableCurrencies;
             private readonly string _code;
+
+            [Name("SubGpCode")]
+            public string SubGameProviderCode { get; init; }
 
             [Name("Platform")]
             public GamePlatformType PlatformType { get; init; }
