@@ -33,7 +33,6 @@
     <EmbeddedResource Include="DataInitializers\Games\SABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />
-    <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\EVO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SW.csv" />
