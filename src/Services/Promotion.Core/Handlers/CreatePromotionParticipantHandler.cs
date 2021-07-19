@@ -12,18 +12,18 @@ namespace TGS.Services.Promotion.Handlers
     public class CreatePromotionParticipantHandler : Handler<CreatePromotionParticipantRequest, MessageResponse>
     {
         private readonly ILogger<CreatePromotionParticipantHandler> _logger;
-        private readonly IPromotionParticipantRepository _promotionParticipantService;
+        private readonly IPromotionParticipantRepository _promotionParticipantRepository;
         private readonly IPromotionRepository _promotionRepository;
 
         public CreatePromotionParticipantHandler(
             IPromotionRepository promotionRepository,
-            IPromotionParticipantRepository promotionParticipantService,
+            IPromotionParticipantRepository promotionParticipantRepository,
             IHttpContextAccessor accessor,
             ILogger<CreatePromotionParticipantHandler> logger) : base(accessor)
         {
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
-            _promotionParticipantService = promotionParticipantService ??
-                throw new ArgumentNullException(nameof(promotionParticipantService));
+            _promotionParticipantRepository = promotionParticipantRepository ??
+                throw new ArgumentNullException(nameof(promotionParticipantRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -52,7 +52,8 @@ namespace TGS.Services.Promotion.Handlers
                 return CreateInvalidResponse<MessageResponse>("Promotion invalid");
             }
 
-            await _promotionParticipantService.CreatePromotionParticipantAsync(request.PromotionId, request.PlayerCode);
+            await _promotionParticipantRepository.CreatePromotionParticipantAsync(request.PromotionId,
+                request.PlayerCode);
 
             return CreateValidResponse<MessageResponse>();
         }
