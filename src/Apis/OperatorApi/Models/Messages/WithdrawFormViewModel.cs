@@ -10,9 +10,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         public FlowState Status { get; init; }
 
         public decimal Amount { get; init; }
-        [JsonPropertyName("createon")]
+        [JsonPropertyName("createdon")]
         public DateTimeOffset CreatedOn { get; init; }
-        [JsonPropertyName("updateon")]
+        [JsonPropertyName("updatedon")]
         public DateTimeOffset UpdatedOn { get; init; }
     }
 }

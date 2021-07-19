@@ -4,7 +4,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 {
     public record BrandCommunicationModel
     {
-        public string Id { get; init; }
         public string Type { get; init; }
         public string Phone { get; init; }
 
