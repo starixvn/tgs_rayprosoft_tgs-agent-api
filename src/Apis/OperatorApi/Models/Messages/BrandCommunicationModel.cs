@@ -1,11 +1,17 @@
-﻿namespace TGS.Apis.OperatorApi.Models.Messages
+﻿using System.Text.Json.Serialization;
+
+namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public class BrandCommunicationModel
+    public record BrandCommunicationModel
     {
-        public string Id { get; set; }
-        public string Type { get; set; }
-        public string Phone { get; set; }
-        public string AppId { get; set; }
-        public string QRCodeUrl { get; set; }
+        public string Id { get; init; }
+        public string Type { get; init; }
+        public string Phone { get; init; }
+
+        [JsonPropertyName("appid")]
+        public string AppId { get; init; }
+
+        [JsonPropertyName("qrcodeurl")]
+        public string QRCodeUrl { get; init; }
     }
 }

@@ -26,7 +26,6 @@ namespace TGS.Services.Operator.Services.BrandCommunication
 
             return result.Select(x => new BrandCommunicationInfo()
             {
-                Id = x.Id,
                 CommunicationType = x.Type,
                 Phone = x.Phone,
                 AppId = x.AppId,

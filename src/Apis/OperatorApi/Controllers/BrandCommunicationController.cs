@@ -30,7 +30,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             return info.Select(x =>
                 new BrandCommunicationModel()
                 {
-                    Id = x.Id.ToString(),
                     Type = x.CommunicationType,
                     Phone = x.Phone,
                     AppId = x.AppId,

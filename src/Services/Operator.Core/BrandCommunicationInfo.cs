@@ -1,13 +1,10 @@
-﻿using System;
-
-namespace TGS.Services.Operator
+﻿namespace TGS.Services.Operator
 {
-    public class BrandCommunicationInfo
+    public record BrandCommunicationInfo
     {
-        public Guid Id { get; set; }
-        public string CommunicationType { get; set; } = default!;
-        public string Phone { get; set; } = default!;
-        public string AppId { get; set; } = default!;
-        public string QRCodeUrl { get; set; } = default!;
+        public string CommunicationType { get; init; } = default!;
+        public string Phone { get; init; } = default!;
+        public string AppId { get; init; } = default!;
+        public string QRCodeUrl { get; init; } = default!;
     }
 }
