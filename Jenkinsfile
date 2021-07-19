@@ -236,7 +236,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\'deployment/k8s/operator-api\\' \
+                        helm template deployment/k8s/operator-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set validateCodeTestEnabled=${tgs_validateCodeTestEnabled} \
@@ -262,7 +262,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\"deployment/k8s/agent-api\\" \
+                        helm template deployment/k8s/agent-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
@@ -287,7 +287,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \"deployment/k8s/backoffice-api\" \
+                        helm template deployment/k8s/backoffice-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
@@ -312,7 +312,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\"deployment/k8s/global-api\\" \
+                        helm template deployment/k8s/global-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
@@ -337,7 +337,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\"deployment/k8s/log-api\\" \
+                        helm template deployment/k8s/log-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
@@ -362,7 +362,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\"deployment/k8s/report-api\\" \
+                        helm template deployment/k8s/report-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
@@ -387,7 +387,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\"deployment/k8s/validatecode-api\\" \
+                        helm template deployment/k8s/validatecode-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
@@ -411,7 +411,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\"deployment/k8s/promotion-api\\" \
+                        helm template deployment/k8s/promotion-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
@@ -436,7 +436,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\"deployment/k8s/file-service\\" \
+                        helm template deployment/k8s/file-service \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.mongo=\\${tgs_mongo}\\" \
@@ -469,7 +469,7 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template \\"deployment/k8s/schedulers\\" \
+                        helm template deployment/k8s/schedulers \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
