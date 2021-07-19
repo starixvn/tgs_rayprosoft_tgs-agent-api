@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -13,6 +12,7 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using TGS.Services.Operator.GameProviders;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameProvider
@@ -20,12 +20,13 @@ namespace TGS.Services.Operator.Services.GameProvider
     internal class GetGameProviderQueryService : IQueryService<GetGameProviderQuery, GameProviderModel>
     {
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
+
         private readonly IBrandOperations _brandOperations;
-        private readonly IValidStatus<Status> _validStatus;
+        private readonly IGameProviderRepository _gameProviderRepository;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<GameStatus> _validGameStatus;
-        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IValidStatus<Status> _validStatus;
 
         public GetGameProviderQueryService(
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
@@ -34,15 +35,19 @@ namespace TGS.Services.Operator.Services.GameProvider
             IBrandOperations brandOperations,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
-            IGameProviderOperations gameProviderOperations)
+            IGameProviderRepository gameProviderRepository)
         {
-            _brandCurrencyCodeMapper = brandCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(brandCurrencyCodeMapper));
+            _brandCurrencyCodeMapper = brandCurrencyCodeMapper ??
+                throw new ArgumentNullException(nameof(brandCurrencyCodeMapper));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandLanguageCodeMapper = brandLanguageCodeMapper ?? throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
+            _brandLanguageCodeMapper = brandLanguageCodeMapper ??
+                throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+
+            _gameProviderRepository =
+                gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
         }
 
         public async IAsyncEnumerable<GameProviderModel> QueryAsync(
@@ -73,96 +78,108 @@ namespace TGS.Services.Operator.Services.GameProvider
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, brandId);
-            var providers = await GetGameProviderModelsAsync(brandId, currencyCode, platformType, playerType);
-            var store = await _gameProviderOperations.GetGameProvidersLocalizationByGameProviderIdsAsync(providers.Select(x => x.Id).ToArray());
+            var culture = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, brandId)
+                .ConfigureAwait(false);
 
-            foreach (var gpm in providers)
-            {
-                var key = $"{gpm.Id}";
+            var brandGameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId)
+                .ConfigureAwait(false);
 
-                var gameProviderName = gpm.Name;
-                var gameProviderDesc = gpm.Description;
-
-                if (store.TryGetValue(gpm.Id, out var value))
-                {
-                    var localization = JsonDocument.Parse(value);
-
-                    localization.RootElement.TryGetProperty(query.LanguageCode, out var langName);
-                    if (langName.ValueKind != JsonValueKind.Undefined)
-                    {
-                        if (langName.TryGetProperty("name", out var localizationName)
-                                && !string.IsNullOrEmpty(localizationName.GetString()))
-                            gameProviderName = localizationName.GetString();
-                        if (langName.TryGetProperty("description", out var localizationDesc)
-                                && !string.IsNullOrEmpty(localizationDesc.GetString()))
-                            gameProviderDesc = localizationDesc.GetString();
-                    }
-                }
-
-                var model = gpm with
-                {
-                    Name = gameProviderName!,
-                    Description = gameProviderDesc!
-                };
-
-                yield return model;
-
-                if (cancellationToken.IsCancellationRequested)
-                    yield break;
-            }
-        }
-
-        private async Task<GameProviderModel[]> GetGameProviderModelsAsync(
-            Guid brandId,
-            string currencyCode,
-            PlatformType platformType,
-            PlayerType playerType)
-        {
-            var gameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId);
             var statuses = _validStatus.GetStatus(playerType);
             var gameStatuses = _validGameStatus.GetStatus(playerType);
 
-            var providers = new List<GameProviderModel>();
+            var gamePlatformTypes = platformType.ToGamePlatformTypes();
+            var gameProviderIds = brandGameProviders.Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus))
+                .Select(bgp => bgp.GameProviderId).Distinct().ToArray();
 
-            foreach (var bgp in gameProviders.Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus)))
+            var gameProviders =
+                await _gameProviderRepository.QueryGameProvidersAsync(gameProviderIds, gamePlatformTypes)
+                    .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync(gameProviderIds)
+                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            foreach (var gp in gameProviders.Where(gp => statuses.Contains(gp.Status)))
             {
-                var gameProviderId = bgp.GameProviderId;
-                var gameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(bgp.GameProviderId);
-                var currencySupported = await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, currencyCode);
-
-                if (!currencySupported)
+                if (gp.Currencies.IgnoreCaseNotContains(currencyCode))
                 {
                     continue;
                 }
 
-                var gamePlatformTypes = platformType.ToGamePlatformTypes();
-                var allGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes);
-                var games = allGames.Where(g => gameStatuses.Contains(g.Status)).ToArray();
-
-                if (games.Length == 0)
+                foreach (var sgp in subGameProviders.Where(sgp => sgp.GameProviderId == gp.Id))
                 {
-                    continue;
-                }
+                    var games = gp.Games.Where(g
+                            => gameStatuses.Contains(g.Status) && g.SubGameProviderCode.IgnoreCaseEquals(sgp.Code))
+                        .ToArray();
 
-                var model = new GameProviderModel
-                {
-                    Id = gameProviderId,
-                    Code = gameProvider.Code,
-                    Name = gameProvider.Name,
-                    Description = gameProvider.Description,
-                    Status = gameProvider.Status,
-                    IsTransferWallet = gameProvider.IsTransferWallet,
-                    GameTypes = games.Select(g => g.Type)
+                    if (games.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    var gameTypes = games.Select(g => g.Type)
                         .OrderBy(t => (int)t)
                         .Distinct()
-                        .ToArray()
-                };
+                        .ToArray();
 
-                providers.Add(model);
+                    if (string.IsNullOrEmpty(sgp.Localization))
+                    {
+                        yield return new GameProviderModel
+                        {
+                            Code = sgp.Code,
+                            Name = sgp.Name,
+                            Description = sgp.Description,
+                            Status = gp.Status,
+                            IsTransferWallet = gp.IsTransferWallet,
+                            GameTypes = gameTypes
+                        };
+
+                        continue;
+                    }
+
+                    var localization = JsonDocument.Parse(sgp.Localization);
+                    if (!localization.RootElement.TryGetProperty(culture, out var lang) ||
+                        lang.ValueKind == JsonValueKind.Undefined)
+                    {
+                        yield return new GameProviderModel
+                        {
+                            Code = sgp.Code,
+                            Name = sgp.Name,
+                            Description = sgp.Description,
+                            Status = gp.Status,
+                            IsTransferWallet = gp.IsTransferWallet,
+                            GameTypes = gameTypes
+                        };
+
+                        continue;
+                    }
+
+                    yield return new GameProviderModel
+                    {
+                        Code = sgp.Code,
+                        Name = GetLocalization(lang, "name", sgp.Name),
+                        Description = GetLocalization(lang, "description", sgp.Description),
+                        Status = gp.Status,
+                        IsTransferWallet = gp.IsTransferWallet,
+                        GameTypes = gameTypes
+                    };
+                }
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    yield break;
+                }
+            }
+        }
+
+        private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
+        {
+            if (!element.TryGetProperty(propertyName, out var value))
+            {
+                return defaultValue;
             }
 
-            return providers.Where(gpm => gpm != null).ToArray();
+            var val = value.GetString();
+            return string.IsNullOrEmpty(val) ? defaultValue : val;
         }
     }
 }

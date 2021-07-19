@@ -1,4 +1,6 @@
-﻿using TGS.Operator.Repositories;
+﻿// ReSharper disable CheckNamespace
+
+using TGS.Operator.Repositories;
 using TGS.Services.Operator.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -8,6 +10,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration) =>
             configuration
                 .UseWalletRepository<WalletRepository>()
-                .UseStationLetterRepository<StationLetterRepository>();
+                .UseStationLetterRepository<StationLetterRepository>()
+                .UseGameProviderRepository<GameProviderRepository>();
     }
 }
