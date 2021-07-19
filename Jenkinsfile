@@ -68,7 +68,7 @@ pipeline {
                 ImageName="${Registry}operator-api"
             }
 			steps {
-				sh 'dotnet build "src/Apis/OperatorApi" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+				sh 'dotnet build `src/Apis/OperatorApi` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -83,7 +83,7 @@ pipeline {
                 ImageName="${Registry}agent-api"
             }
 			steps {
-                sh 'dotnet build "src/Apis/AgentApi" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Apis/AgentApi` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -98,7 +98,7 @@ pipeline {
                 ImageName="${Registry}backoffice-api"
             }
 			steps {
-                sh 'dotnet build "src/Apis/BackendOffice" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Apis/BackendOffice` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -113,7 +113,7 @@ pipeline {
                 ImageName="${Registry}global-api"
             }
 			steps {
-                sh 'dotnet build "src/Apis/GlobalApi" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Apis/GlobalApi` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -128,7 +128,7 @@ pipeline {
                 ImageName="${Registry}log-api"
             }
 			steps {
-                sh 'dotnet build "src/Apis/LogApi" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Apis/LogApi` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -143,7 +143,7 @@ pipeline {
                 ImageName="${Registry}report-api"
             }
 			steps {
-                sh 'dotnet build "src/Apis/ReportApi" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Apis/ReportApi` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -158,7 +158,7 @@ pipeline {
                 ImageName="${Registry}validatecode-api"
             }
 			steps {
-                sh 'dotnet build "src/Apis/ValidateCodeApi" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Apis/ValidateCodeApi` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -173,7 +173,7 @@ pipeline {
                 ImageName="${Registry}promotion-api"
             }
 			steps {
-                sh 'dotnet build "src/Apis/PromotionApi" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Apis/PromotionApi` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -188,7 +188,7 @@ pipeline {
                 ImageName="${Registry}file-service"
             }
 			steps {
-                sh 'dotnet build "src/Apis/FileService" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Apis/FileService` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -203,7 +203,7 @@ pipeline {
                 ImageName="${Registry}schedulers"
             }
 			steps {
-                sh 'dotnet build "src/Workers/Schedulers" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
+                sh 'dotnet build `src/Workers/Schedulers` -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag=`$ImageName:${TAG}` --no-restore '
                 sh 'docker push $ImageName:${TAG}'
 			}
         }
@@ -236,14 +236,14 @@ pipeline {
             steps {
                 withKubeConfig([credentialsId: 'k8s-kube-config']) {
                     sh '''
-                        helm template 'deployment/k8s/operator-api' \
+                        helm template `deployment/k8s/operator-api` \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set validateCodeTestEnabled=${tgs_validateCodeTestEnabled} \
-                            --set "connectionStrings.tgs=${tgs_tgs}" \
-                            --set "connectionStrings.redis=${tgs_redis}" \
-                            --set "nats.urls=${tgs_nats}" \
-                        | tee /dev/stdout \
+                            --set `connectionStrings.tgs=${tgs_tgs}` \
+                            --set `connectionStrings.redis=${tgs_redis}` \
+                            --set `nats.urls=${tgs_nats}` \
+                        | tee /dev/tty \
                         | kubectl apply -f -
                     '''
                 }
