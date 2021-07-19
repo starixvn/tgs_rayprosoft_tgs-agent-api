@@ -1,259 +1,259 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-Lobby,Lobby,,EVOLobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-First Person Top Card,First_Person_Top_Card,,rng-topcard00001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Roulette,Roulette,,vctlz20yfnmp1ylr,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Three Card Poker,Three_Card_Poker,,n5emwq5c5dwepwam,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-First Person Baccarat,First_Person_Baccarat,,rngbaccarat00000,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Blackjack A,Blackjack_A,,uwd2bl2khwcikjlz,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Dream Catcher,Dream_Catcher,,MOWDream00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Crazy Time,Crazy_Time,,CrazyTime0000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Craps,Craps,,Craps00000000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Side Bet City,Side_Bet_City,,SBCTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Caribbean Stud Poker,Caribbean_Stud_Poker,,CSPTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Baccarat Squeeze,Baccarat_Squeeze,,zixzea8nrf1675oh,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Dragon Tiger,Dragon_Tiger,,DragonTiger00001,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,TRUE,TRUE,
-First Person Dragon Tiger,First_Person_Dragon_Tiger,,rng-dragontiger0,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,TRUE,TRUE,
-2 Hand Casino Hold'em,2_Hand_Casino_Holdem,,DHPTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-No Commission Baccarat,No_Commission_Baccarat,,NoCommBac0000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Immersive Roulette,Immersive_Roulette,,9dxyqtvp0rjqvu6r,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-MONOPOLY Live,MONOPOLY_Live,,Monopoly00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Blackjack VIP B,Blackjack_VIP_B,,cpxl81x0rgi34cmo,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Lightning Roulette,Lightning_Roulette,,LightningTable01,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Baccarat Control Squeeze,Baccarat_Control_Squeeze,,k2oswnib7jjaaznw,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-First Person Roulette,First_Person_Roulette,,rng-rt-european0,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Blackjack Party,Blackjack_Party,,sni5cza6d1vvl50i,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Lightning Baccarat,Lightning_Baccarat,,LightningBac0001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Triple Card Poker,Triple_Card_Poker,,TRPTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Double Ball Roulette,Double_Ball_Roulette,,DoubleBallRou001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Auto-Roulette,Auto-Roulette,,48z5pjps3ntvqc1b,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Casino Hold'em,Casino_Holdem,,HoldemTable00001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Instant Roulette,Instant_Roulette,,InstantRo0000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Deal or No Deal,Deal_or_No_Deal,,dealnodeal000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-First Person Blackjack,First_Person_Blackjack,,rng-bj-standard0,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Mega Ball,Mega_Ball,,MegaBall00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Lightning Dice,Lightning_Dice,,LightningDice001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Blackjack B,Blackjack_B,,lyhldhsafw61m7jx,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Gonzo's Treasure Hunt,Gonzos_Treasure_Hunt,,GonzoTH000000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Texas Hold'em Bonus Poker,Texas_Holdem_Bonus_Poker,,THBTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-First Person Mega Ball,First_Person_Mega_Ball,,RngMegaBall00001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Blackjack C,Blackjack_C,,g48qnr279zcxecmd,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Baccarat A,Baccarat_A,,oytmvb9m1zysmc44,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Extreme Texas Hold'em,Extreme_Texas_Holdem,,ETHTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Infinite Blackjack,Infinite_Blackjack,,mrfykemt5slanyi5,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Ultimate Texas Hold'em,Ultimate_Texas_Holdem,,UTHTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Football Studio,Football_Studio,,TopCard000000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Super Sic Bo,Super_Sic_Bo,,SuperSicBo000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Power Blackjack,Power_Blackjack,,PowerInfiniteBJ1,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-American Roulette,American_Roulette,,AmericanTable001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-First Person Dream Catcher,First_Person_Dream_Catcher,,rng-dreamcatcher,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-First Person Craps,First_Person_Craps,,RngCraps00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Blackjack VIP A,Blackjack_VIP_A,,lvgmxv5gv5tsz43z,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-VIP Roulette,VIP_Roulette,,wzg6kdkad1oe7m5k,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-Free Bet Blackjack,Free_Bet_Blackjack,,FreeBet000000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,
-French Roulette Gold,French_Roulette_Gold,,pjqtrptg33cqbkgi,LiveDealer,Desktop,FALSE,,,TRUE,TRUE,TRUE,
-Aloha! Christmas,Aloha_Christmas,,alohaxmas0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aloha! Cluster Pays,Aloha_Cluster_Pays,,aloha00000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Blood Suckers,Blood_Suckers,,bloodsuckers0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Blood Suckers II,Blood_Suckers_II,,bloodsuckers2000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Butterfly Staxx,Butterfly_Staxx,,butterflystaxx00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dark King: Forbidden Riches,Dark_King_Forbidden_Riches,,darkking00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dazzle Me,Dazzle_Me,,dazzle0000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dead or Alive,Dead_or_Alive,,deadoralive00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dead or Alive 2,Dead_or_Alive_2,,deadoralive20000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dead or Alive 2 Feature Buy,Dead_or_Alive_2_Feature_Buy,,deadoralive2fb00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Divine Fortune Megaways,Divine_Fortune_Megaways,,divinemegaways00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Elements: The Awakening,Elements_The_Awakening,,elements00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Finn and the Swirly Spin,Finn_and_the_Swirly_Spin,,finn000000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fruit Shop,Fruit_Shop,,fruitshop0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fruit Shop Christmas Edition,Fruit_Shop_Christmas_Edition,,fruitshopchristm,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fruit Shop Megaways,Fruit_Shop_Megaways,,fruitshopmegaway,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gonzo's Quest,Gonzos_Quest,,eldorado00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gordon Ramsay Hell¡¦s Kitchen,Gordon_Ramsay_Hells_Kitchen,,hellskitchen0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gorilla Kingdom,Gorilla_Kingdom,,gorillakingdom00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Guns N' Roses video Slots,Guns_N_Roses_video_Slots,,gunsnroses000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Hotline,Hotline,,hotline000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Hotline 2,Hotline_2,,hotline200000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Irish Pot Luck,Irish_Pot_Luck,,irishpotluck0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jack and the Beanstalk,Jack_and_the_Beanstalk,,jackandbeanstalk,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jack Hammer,Jack_Hammer,,jackhammer000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jimi Hendrix Online Slot,Jimi_Hendrix_Online_Slot,,jimihendrix00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jingle Spin,Jingle_Spin,,jinglespin000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jumanji,Jumanji,,jumanji000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Motorhead video Slot,Motorhead_video_Slot,,motorhead0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Narcos,Narcos,,narcos0000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ozzy Osbourne video Slots,Ozzy_Osbourne_video_Slots,,ozzy000000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Piggy Riches,Piggy_Riches,,piggyriches00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Pyramid: Quest for Immortality,Pyramid_Quest_for_Immortality,,pyramid000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rage of the Seas,Rage_of_the_Seas,,rageoftheseas000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Reel Rush,Reel_Rush,,reelrush00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Riches of Midgard: Land and Expand,Riches_of_Midgard_Land_and_Expand,,richesofmidgard0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rome: The Golden Age,Rome_The_Golden_Age,,rome000000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Serengeti Kings,Serengeti_Kings,,serengetikings00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Starburst,Starburst,,starburst0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Steam Tower,Steam_Tower,,steamtower000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Street Fighter II: The World Warrior Slot,Street_Fighter_II_The_World_Warrior_Slot,,streetfighter200,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Turn Your Fortune,Turn_Your_Fortune,,turnyourfortune0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Twin Spin,Twin_Spin,,twinspin00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Twin Spin Megaways,Twin_Spin_Megaways,,twinspinmw000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Victorious,Victorious,,victorious000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Wild West: The Great Train Heist,Wild_Wild_West_The_Great_Train_Heist,,wildwildwest0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Willy's Hot Chillies,Willys_Hot_Chillies,,willyshotchillie,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-10001 Nights,10001_Nights,,10001nights00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-24 Hour Grand Prix,24_Hour_Grand_Prix,,24hourgrandprix0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-4Squad,4Squad,,4squad0000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-5 Families,5_Families,,5families0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-777 Strike,777_Strike,,777strike0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Agent Royale,Agent_Royale,,agentroyale00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ancient Script,Ancient_Script,,ancientscript000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ancients Blessing,Ancients_Blessing,,ancientsblessing,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Arcade Bomb,Arcade_Bomb,,arcadebomb000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Atlantis,Atlantis,,atlantis00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aurum Codex,Aurum_Codex,,aurumcodex000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aztec Spins,Aztec_Spins,,aztecspins000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-"Betty, Boris and Boo",Betty_Boris_and_Boo,,bettyborisandboo,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Blue Diamond,Blue_Diamond,,bluediamond00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bombuster,Bombuster,,bombuster0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bounty Raid,Bounty_Raid,,bountyraid000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cash Ultimate,Cash_Ultimate,,cashultimate0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cash volt,Cash_volt,,cashvolt00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Chinese Treasures,Chinese_Treasures,,chinesetreasures,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cinderella's Ball,Cinderellas_Ball,,cinderella000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cirque de la Fortune,Cirque_de_la_Fortune,,cirquedelafortun,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Clash of the Beasts,Clash_of_the_Beasts,,clashofthebeasts,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Crazy Genie,Crazy_Genie,,crazygenie000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Crystal Mirror,Crystal_Mirror,,crystalmirror000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Da Vinci's Mystery,Da_Vincis_Mystery,,davincismystery0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Devil's Number,Devils_Number,,devilsnumber0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Diamond Blitz,Diamond_Blitz,,diamondblitz0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dice Dice Dice,Dice_Dice_Dice,,dicedicedice0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Divine Ways,Divine_Ways,,divineways000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Fire,Dragons_Fire,,dragonsfire00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Fire Infinireels,Dragons_Fire_Infinireels,,dragonsfireinfin,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Fire Megaways,Dragons_Fire_Megaways,,dragonsfiremegaw,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Luck,Dragons_Luck,,dragonsluck00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Luck Deluxe,Dragons_Luck_Deluxe,,dragonslckdeluxe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Luck Megaways,Dragons_Luck_Megaways,,dragonsluckmegaw,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Luck Power Reels,Dragons_Luck_Power_Reels,,dragonslckstacks,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dynamite Riches,Dynamite_Riches,,dynamiteriches00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Eagle Riches,Eagle_Riches,,eagleriches00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Elven Magic,Elven_Magic,,elvenmagic000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Emerald Diamond,Emerald_Diamond,,emeralddiamond00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Epic Journey,Epic_Journey,,epicjourney00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Esqueleto Mariachi,Esqueleto_Mariachi,,esqueletomariach,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Five Star,Five_Star,,fivestar00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Five Star Power Reels,Five_Star_Power_Reels,,fivestarpowerree,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Flaming Fox,Flaming_Fox,,flamingfox000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fortune Charm,Fortune_Charm,,fortunecharm0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fortune Fest,Fortune_Fest,,fortunefest00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fortune House,Fortune_House,,fortunehouse0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fruit Blox,Fruit_Blox,,fruitblox0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fruit Snap,Fruit_Snap,,fruitsnap0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gems Gone Wild,Gems_Gone_Wild,,gemsgonewild0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gems Gone Wild Power Reels,Gems_Gone_Wild_Power_Reels,,gemsgonewildpowe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gemtastic,Gemtastic,,gemtastic0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-God of Wealth,God_of_Wealth,,godofwealth00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gold Star,Gold_Star,,goldstar00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Golden Cryptex,Golden_Cryptex,,goldencryptex000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Golden Leprechaun Megaways,Golden_Leprechaun_Megaways,,goldenleprechaun,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Golden Lotus,Golden_Lotus,,goldenlotus00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Golden Offer,Golden_Offer,,goldexffer00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Golden Temple,Golden_Temple,,templeofgold0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Golden Tsar,Golden_Tsar,,goldentsar000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gonzo's Quest Megaways,Gonzos_Quest_Megaways,,gonzosqumegaways,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Grand Wheel,Grand_Wheel,,grandwheel000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Hoard of Poseidon,Hoard_of_Poseidon,,hoardofposeidon0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Imperial Palace,Imperial_Palace,,imperialpalace00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jack in a Pot,Jack_in_a_Pot,,jackinapot000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jackpot Quest,Jackpot_Quest,,jackpotquest0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jade Charms,Jade_Charms,,jadecharms000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jester Spins,Jester_Spins,,jesterspins00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jewel Scarabs,Jewel_Scarabs,,jewelscarabs0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jingle Bells,Jingle_Bells,,jinglebells00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jingle Bells Power Reels,Jingle_Bells_Power_Reels,,jinglebellspower,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Laser Fruit,Laser_Fruit,,laserfruit000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Legend of Athena,Legend_of_Athena,,legendofathena00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Legendary Excalibur,Legendary_Excalibur,,legendaryexcalib,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lion Dance,Lion_Dance,,liondance0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Easter,Lucky_Easter,,luckyeaster00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Fortune Cat,Lucky_Fortune_Cat,,luckyfortunecat0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Fridays,Lucky_Fridays,,luckyfridays0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Halloween,Lucky_Halloween,,luckyhalloween00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Little Devil,Lucky_Little_Devil,,luckydevil000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Oktoberfest,Lucky_Oktoberfest,,luckyoktoberfest,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Valentine,Lucky_Valentine,,luckyvalentine00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Wizard,Lucky_Wizard,,luckywizard00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Magic Gate,Magic_Gate,,magicgate0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Masquerade,Masquerade,,masquerade000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mayan Gods,Mayan_Gods,,mayangods0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mega Dragon,Mega_Dragon,,megadragon000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mega Jade,Mega_Jade,,megajade00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mega Pyramid,Mega_Pyramid,,megapyramid00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mega Rise,Mega_Rise,,megarise00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Midas Gold,Midas_Gold,,midasgold0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Multiplier Riches,Multiplier_Riches,,multiplierriches,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mystery Reels,Mystery_Reels,,mysteryfruit0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mystery Reels Megaways,Mystery_Reels_Megaways,,mysteryreelsmega,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mystery Reels Power Reels,Mystery_Reels_Power_Reels,,mysteryreelspowe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mystic Wheel,Mystic_Wheel,,mysticwheel00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ninja Ways,Ninja_Ways,,ninjaways0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ocean Fortune,Ocean_Fortune,,oceanfortune0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Path of Destiny,Path_of_Destiny,,pathofdestiny000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Persian Fortune,Persian_Fortune,,persianfortune00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Phoenix,Phoenix,,redphoenixrising,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Phoenix Fire Power Reels,Phoenix_Fire_Power_Reels,,phoenixfwerreels,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Piggy Pirates,Piggy_Pirates,,piggypirates0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Piggy Riches Megaways,Piggy_Riches_Megaways,,piggyrichesmegaw,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Pirates' Plenty,Pirates_Plenty,,piratesplenty000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Pirates' Plenty Battle for Gold,Pirates_Plenty_Battle_for_Gold,,piratespeforgold,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Puss 'N Boots,Puss_N_Boots,,pussnboots000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-RA's Legend,RAs_Legend,,raslegend0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rainbow Jackpots,Rainbow_Jackpots,,rainbowjackpots0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rainbow Jackpots Power Lines,Rainbow_Jackpots_Power_Lines,,rainbowjackpotsp,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Reactor,Reactor,,reactor000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Red Diamond,Red_Diamond,,reddiamond000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Reel Heist,Reel_Heist,,reelheist0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Reel Keeper,Reel_Keeper,,reelkeeper000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Reel King Mega,Reel_King_Mega,,reelkingmega0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Regal Beasts,Regal_Beasts,,regalbeasts00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Regal Streak,Regal_Streak,,regalstreak00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Riddle Of The Sphinx,Riddle_Of_The_Sphinx,,riddleofthesphin,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rio Stars,Rio_Stars,,riostars00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Robin Hoods Wild Forest,Robin_Hoods_Wild_Forest,,robinhoodswildfo,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rocket Men,Rocket_Men,,rocketmen0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Royal Gems,Royal_Gems,,royalgems0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Snow Wild And The 7 Features,Snow_Wild_And_The_7_Features,,snowwildandthe7f,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Spin Town,Spin_Town,,spintown00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Stage 888,Stage_888,,stage88800000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Sumo Spins,Sumo_Spins,,sumospins0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Sylvan Spirits,Sylvan_Spirits,,sylvanspirits000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ten Elements,Ten_Elements,,tenelements00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-The Equalizer,The_Equalizer,,theequalizer0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-The Greatest Train Robbery,The_Greatest_Train_Robbery,,thegreatesttrain,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-The Wild Hatter,The_Wild_Hatter,,thewildhatter000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Thor's Lightning,Thors_Lightning,,thorslightning00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Thor's vengeance,Thors_vengeance,,thorsvengeance00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Three Kingdoms,Three_Kingdoms,,threekingdoms000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Three Musketeers,Three_Musketeers,,threemusketeers0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Tiki Fruits,Tiki_Fruits,,tikifruits000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Totem Lightning,Totem_Lightning,,totemlightning00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Totem Lightning Power Reels,Totem_Lightning_Power_Reels,,totemlightningpo,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Treasure Mine,Treasure_Mine,,treasuremine0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Trillionaire,Trillionaire,,trillionaire0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Vault Cracker,Vault_Cracker,,vaultcracker0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Vault of Anubis,Vault_of_Anubis,,vaultofanubis000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Vicky Ventura,Vicky_Ventura,,vickyventura0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-War Of Gods,War_Of_Gods,,warofgods0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Well Of Wishes,Well_Of_Wishes,,wellofwishes0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Cats Multiline,Wild_Cats_Multiline,,wildcatsmultilin,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Circus,Wild_Circus,,wildcircus000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Elements,Wild_Elements,,wildelements0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Fight,Wild_Fight,,wildfight0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Nords,Wild_Nords,,wildnords0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild O'Clock,Wild_OClock,,wildoclock000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Spartans,Wild_Spartans,,wildspartans0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Wild Chest,Wild_Wild_Chest,,wildwildchest000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Win Escalator,Win_Escalator,,winescalator0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wings of Ra,Wings_of_Ra,,wingsofra0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Winter Wonders,Winter_Wonders,,winterwonders000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Yucatan's Mystery,Yucatans_Mystery,,yucatansmystery0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Zeus Lightning Power Reels,Zeus_Lightning_Power_Reels,,zeuslightningpow,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Lobby,Lobby,,EVOLobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,EVO
+First Person Top Card,First_Person_Top_Card,,rng-topcard00001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Roulette,Roulette,,vctlz20yfnmp1ylr,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Three Card Poker,Three_Card_Poker,,n5emwq5c5dwepwam,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+First Person Baccarat,First_Person_Baccarat,,rngbaccarat00000,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Blackjack A,Blackjack_A,,uwd2bl2khwcikjlz,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Dream Catcher,Dream_Catcher,,MOWDream00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Crazy Time,Crazy_Time,,CrazyTime0000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Craps,Craps,,Craps00000000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Side Bet City,Side_Bet_City,,SBCTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Caribbean Stud Poker,Caribbean_Stud_Poker,,CSPTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Baccarat Squeeze,Baccarat_Squeeze,,zixzea8nrf1675oh,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Dragon Tiger,Dragon_Tiger,,DragonTiger00001,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,TRUE,TRUE,,EVO
+First Person Dragon Tiger,First_Person_Dragon_Tiger,,rng-dragontiger0,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,TRUE,TRUE,,EVO
+2 Hand Casino Hold'em,2_Hand_Casino_Holdem,,DHPTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+No Commission Baccarat,No_Commission_Baccarat,,NoCommBac0000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Immersive Roulette,Immersive_Roulette,,9dxyqtvp0rjqvu6r,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+MONOPOLY Live,MONOPOLY_Live,,Monopoly00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Blackjack VIP B,Blackjack_VIP_B,,cpxl81x0rgi34cmo,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Lightning Roulette,Lightning_Roulette,,LightningTable01,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Baccarat Control Squeeze,Baccarat_Control_Squeeze,,k2oswnib7jjaaznw,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+First Person Roulette,First_Person_Roulette,,rng-rt-european0,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Blackjack Party,Blackjack_Party,,sni5cza6d1vvl50i,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Lightning Baccarat,Lightning_Baccarat,,LightningBac0001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Triple Card Poker,Triple_Card_Poker,,TRPTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Double Ball Roulette,Double_Ball_Roulette,,DoubleBallRou001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Auto-Roulette,Auto-Roulette,,48z5pjps3ntvqc1b,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Casino Hold'em,Casino_Holdem,,HoldemTable00001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Instant Roulette,Instant_Roulette,,InstantRo0000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Deal or No Deal,Deal_or_No_Deal,,dealnodeal000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+First Person Blackjack,First_Person_Blackjack,,rng-bj-standard0,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Mega Ball,Mega_Ball,,MegaBall00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Lightning Dice,Lightning_Dice,,LightningDice001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Blackjack B,Blackjack_B,,lyhldhsafw61m7jx,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Gonzo's Treasure Hunt,Gonzos_Treasure_Hunt,,GonzoTH000000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Texas Hold'em Bonus Poker,Texas_Holdem_Bonus_Poker,,THBTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+First Person Mega Ball,First_Person_Mega_Ball,,RngMegaBall00001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Blackjack C,Blackjack_C,,g48qnr279zcxecmd,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Baccarat A,Baccarat_A,,oytmvb9m1zysmc44,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Extreme Texas Hold'em,Extreme_Texas_Holdem,,ETHTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Infinite Blackjack,Infinite_Blackjack,,mrfykemt5slanyi5,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Ultimate Texas Hold'em,Ultimate_Texas_Holdem,,UTHTable00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Football Studio,Football_Studio,,TopCard000000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Super Sic Bo,Super_Sic_Bo,,SuperSicBo000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Power Blackjack,Power_Blackjack,,PowerInfiniteBJ1,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+American Roulette,American_Roulette,,AmericanTable001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+First Person Dream Catcher,First_Person_Dream_Catcher,,rng-dreamcatcher,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+First Person Craps,First_Person_Craps,,RngCraps00000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Blackjack VIP A,Blackjack_VIP_A,,lvgmxv5gv5tsz43z,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+VIP Roulette,VIP_Roulette,,wzg6kdkad1oe7m5k,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Free Bet Blackjack,Free_Bet_Blackjack,,FreeBet000000001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,EVO
+French Roulette Gold,French_Roulette_Gold,,pjqtrptg33cqbkgi,LiveDealer,Desktop,FALSE,,,TRUE,TRUE,TRUE,,EVO
+Aloha! Christmas,Aloha_Christmas,,alohaxmas0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Aloha! Cluster Pays,Aloha_Cluster_Pays,,aloha00000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Blood Suckers,Blood_Suckers,,bloodsuckers0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Blood Suckers II,Blood_Suckers_II,,bloodsuckers2000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Butterfly Staxx,Butterfly_Staxx,,butterflystaxx00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Dark King: Forbidden Riches,Dark_King_Forbidden_Riches,,darkking00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Dazzle Me,Dazzle_Me,,dazzle0000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Dead or Alive,Dead_or_Alive,,deadoralive00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Dead or Alive 2,Dead_or_Alive_2,,deadoralive20000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Dead or Alive 2 Feature Buy,Dead_or_Alive_2_Feature_Buy,,deadoralive2fb00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Divine Fortune Megaways,Divine_Fortune_Megaways,,divinemegaways00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Elements: The Awakening,Elements_The_Awakening,,elements00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Finn and the Swirly Spin,Finn_and_the_Swirly_Spin,,finn000000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Fruit Shop,Fruit_Shop,,fruitshop0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Fruit Shop Christmas Edition,Fruit_Shop_Christmas_Edition,,fruitshopchristm,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Fruit Shop Megaways,Fruit_Shop_Megaways,,fruitshopmegaway,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Gonzo's Quest,Gonzos_Quest,,eldorado00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Gordon Ramsay Hellï¿½ï¿½s Kitchen,Gordon_Ramsay_Hells_Kitchen,,hellskitchen0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Gorilla Kingdom,Gorilla_Kingdom,,gorillakingdom00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Guns N' Roses video Slots,Guns_N_Roses_video_Slots,,gunsnroses000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Hotline,Hotline,,hotline000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Hotline 2,Hotline_2,,hotline200000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Irish Pot Luck,Irish_Pot_Luck,,irishpotluck0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Jack and the Beanstalk,Jack_and_the_Beanstalk,,jackandbeanstalk,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Jack Hammer,Jack_Hammer,,jackhammer000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Jimi Hendrix Online Slot,Jimi_Hendrix_Online_Slot,,jimihendrix00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Jingle Spin,Jingle_Spin,,jinglespin000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Jumanji,Jumanji,,jumanji000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Motorhead video Slot,Motorhead_video_Slot,,motorhead0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Narcos,Narcos,,narcos0000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Ozzy Osbourne video Slots,Ozzy_Osbourne_video_Slots,,ozzy000000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Piggy Riches,Piggy_Riches,,piggyriches00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Pyramid: Quest for Immortality,Pyramid_Quest_for_Immortality,,pyramid000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Rage of the Seas,Rage_of_the_Seas,,rageoftheseas000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Reel Rush,Reel_Rush,,reelrush00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Riches of Midgard: Land and Expand,Riches_of_Midgard_Land_and_Expand,,richesofmidgard0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Rome: The Golden Age,Rome_The_Golden_Age,,rome000000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Serengeti Kings,Serengeti_Kings,,serengetikings00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Starburst,Starburst,,starburst0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Steam Tower,Steam_Tower,,steamtower000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Street Fighter II: The World Warrior Slot,Street_Fighter_II_The_World_Warrior_Slot,,streetfighter200,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Turn Your Fortune,Turn_Your_Fortune,,turnyourfortune0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Twin Spin,Twin_Spin,,twinspin00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Twin Spin Megaways,Twin_Spin_Megaways,,twinspinmw000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Victorious,Victorious,,victorious000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Wild Wild West: The Great Train Heist,Wild_Wild_West_The_Great_Train_Heist,,wildwildwest0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+Willy's Hot Chillies,Willys_Hot_Chillies,,willyshotchillie,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+10001 Nights,10001_Nights,,10001nights00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,NT
+24 Hour Grand Prix,24_Hour_Grand_Prix,,24hourgrandprix0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+4Squad,4Squad,,4squad0000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+5 Families,5_Families,,5families0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+777 Strike,777_Strike,,777strike0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Agent Royale,Agent_Royale,,agentroyale00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Ancient Script,Ancient_Script,,ancientscript000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Ancients Blessing,Ancients_Blessing,,ancientsblessing,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Arcade Bomb,Arcade_Bomb,,arcadebomb000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Atlantis,Atlantis,,atlantis00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Aurum Codex,Aurum_Codex,,aurumcodex000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Aztec Spins,Aztec_Spins,,aztecspins000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+"Betty, Boris and Boo",Betty_Boris_and_Boo,,bettyborisandboo,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Blue Diamond,Blue_Diamond,,bluediamond00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Bombuster,Bombuster,,bombuster0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Bounty Raid,Bounty_Raid,,bountyraid000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Cash Ultimate,Cash_Ultimate,,cashultimate0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Cash volt,Cash_volt,,cashvolt00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Chinese Treasures,Chinese_Treasures,,chinesetreasures,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Cinderella's Ball,Cinderellas_Ball,,cinderella000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Cirque de la Fortune,Cirque_de_la_Fortune,,cirquedelafortun,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Clash of the Beasts,Clash_of_the_Beasts,,clashofthebeasts,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Crazy Genie,Crazy_Genie,,crazygenie000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Crystal Mirror,Crystal_Mirror,,crystalmirror000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Da Vinci's Mystery,Da_Vincis_Mystery,,davincismystery0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Devil's Number,Devils_Number,,devilsnumber0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Diamond Blitz,Diamond_Blitz,,diamondblitz0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dice Dice Dice,Dice_Dice_Dice,,dicedicedice0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Divine Ways,Divine_Ways,,divineways000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dragon's Fire,Dragons_Fire,,dragonsfire00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dragon's Fire Infinireels,Dragons_Fire_Infinireels,,dragonsfireinfin,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dragon's Fire Megaways,Dragons_Fire_Megaways,,dragonsfiremegaw,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dragon's Luck,Dragons_Luck,,dragonsluck00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dragon's Luck Deluxe,Dragons_Luck_Deluxe,,dragonslckdeluxe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dragon's Luck Megaways,Dragons_Luck_Megaways,,dragonsluckmegaw,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dragon's Luck Power Reels,Dragons_Luck_Power_Reels,,dragonslckstacks,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Dynamite Riches,Dynamite_Riches,,dynamiteriches00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Eagle Riches,Eagle_Riches,,eagleriches00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Elven Magic,Elven_Magic,,elvenmagic000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Emerald Diamond,Emerald_Diamond,,emeralddiamond00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Epic Journey,Epic_Journey,,epicjourney00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Esqueleto Mariachi,Esqueleto_Mariachi,,esqueletomariach,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Five Star,Five_Star,,fivestar00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Five Star Power Reels,Five_Star_Power_Reels,,fivestarpowerree,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Flaming Fox,Flaming_Fox,,flamingfox000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Fortune Charm,Fortune_Charm,,fortunecharm0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Fortune Fest,Fortune_Fest,,fortunefest00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Fortune House,Fortune_House,,fortunehouse0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Fruit Blox,Fruit_Blox,,fruitblox0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Fruit Snap,Fruit_Snap,,fruitsnap0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Gems Gone Wild,Gems_Gone_Wild,,gemsgonewild0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Gems Gone Wild Power Reels,Gems_Gone_Wild_Power_Reels,,gemsgonewildpowe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Gemtastic,Gemtastic,,gemtastic0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+God of Wealth,God_of_Wealth,,godofwealth00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Gold Star,Gold_Star,,goldstar00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Golden Cryptex,Golden_Cryptex,,goldencryptex000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Golden Leprechaun Megaways,Golden_Leprechaun_Megaways,,goldenleprechaun,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Golden Lotus,Golden_Lotus,,goldenlotus00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Golden Offer,Golden_Offer,,goldexffer00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Golden Temple,Golden_Temple,,templeofgold0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Golden Tsar,Golden_Tsar,,goldentsar000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Gonzo's Quest Megaways,Gonzos_Quest_Megaways,,gonzosqumegaways,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Grand Wheel,Grand_Wheel,,grandwheel000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Hoard of Poseidon,Hoard_of_Poseidon,,hoardofposeidon0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Imperial Palace,Imperial_Palace,,imperialpalace00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Jack in a Pot,Jack_in_a_Pot,,jackinapot000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Jackpot Quest,Jackpot_Quest,,jackpotquest0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Jade Charms,Jade_Charms,,jadecharms000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Jester Spins,Jester_Spins,,jesterspins00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Jewel Scarabs,Jewel_Scarabs,,jewelscarabs0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Jingle Bells,Jingle_Bells,,jinglebells00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Jingle Bells Power Reels,Jingle_Bells_Power_Reels,,jinglebellspower,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Laser Fruit,Laser_Fruit,,laserfruit000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Legend of Athena,Legend_of_Athena,,legendofathena00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Legendary Excalibur,Legendary_Excalibur,,legendaryexcalib,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lion Dance,Lion_Dance,,liondance0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lucky Easter,Lucky_Easter,,luckyeaster00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lucky Fortune Cat,Lucky_Fortune_Cat,,luckyfortunecat0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lucky Fridays,Lucky_Fridays,,luckyfridays0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lucky Halloween,Lucky_Halloween,,luckyhalloween00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lucky Little Devil,Lucky_Little_Devil,,luckydevil000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lucky Oktoberfest,Lucky_Oktoberfest,,luckyoktoberfest,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lucky Valentine,Lucky_Valentine,,luckyvalentine00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Lucky Wizard,Lucky_Wizard,,luckywizard00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Magic Gate,Magic_Gate,,magicgate0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Masquerade,Masquerade,,masquerade000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mayan Gods,Mayan_Gods,,mayangods0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mega Dragon,Mega_Dragon,,megadragon000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mega Jade,Mega_Jade,,megajade00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mega Pyramid,Mega_Pyramid,,megapyramid00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mega Rise,Mega_Rise,,megarise00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Midas Gold,Midas_Gold,,midasgold0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Multiplier Riches,Multiplier_Riches,,multiplierriches,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mystery Reels,Mystery_Reels,,mysteryfruit0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mystery Reels Megaways,Mystery_Reels_Megaways,,mysteryreelsmega,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mystery Reels Power Reels,Mystery_Reels_Power_Reels,,mysteryreelspowe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Mystic Wheel,Mystic_Wheel,,mysticwheel00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Ninja Ways,Ninja_Ways,,ninjaways0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Ocean Fortune,Ocean_Fortune,,oceanfortune0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Path of Destiny,Path_of_Destiny,,pathofdestiny000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Persian Fortune,Persian_Fortune,,persianfortune00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Phoenix,Phoenix,,redphoenixrising,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Phoenix Fire Power Reels,Phoenix_Fire_Power_Reels,,phoenixfwerreels,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Piggy Pirates,Piggy_Pirates,,piggypirates0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Piggy Riches Megaways,Piggy_Riches_Megaways,,piggyrichesmegaw,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Pirates' Plenty,Pirates_Plenty,,piratesplenty000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Pirates' Plenty Battle for Gold,Pirates_Plenty_Battle_for_Gold,,piratespeforgold,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Puss 'N Boots,Puss_N_Boots,,pussnboots000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+RA's Legend,RAs_Legend,,raslegend0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Rainbow Jackpots,Rainbow_Jackpots,,rainbowjackpots0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Rainbow Jackpots Power Lines,Rainbow_Jackpots_Power_Lines,,rainbowjackpotsp,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Reactor,Reactor,,reactor000000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Red Diamond,Red_Diamond,,reddiamond000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Reel Heist,Reel_Heist,,reelheist0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Reel Keeper,Reel_Keeper,,reelkeeper000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Reel King Mega,Reel_King_Mega,,reelkingmega0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Regal Beasts,Regal_Beasts,,regalbeasts00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Regal Streak,Regal_Streak,,regalstreak00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Riddle Of The Sphinx,Riddle_Of_The_Sphinx,,riddleofthesphin,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Rio Stars,Rio_Stars,,riostars00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Robin Hoods Wild Forest,Robin_Hoods_Wild_Forest,,robinhoodswildfo,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Rocket Men,Rocket_Men,,rocketmen0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Royal Gems,Royal_Gems,,royalgems0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Snow Wild And The 7 Features,Snow_Wild_And_The_7_Features,,snowwildandthe7f,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Spin Town,Spin_Town,,spintown00000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Stage 888,Stage_888,,stage88800000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Sumo Spins,Sumo_Spins,,sumospins0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Sylvan Spirits,Sylvan_Spirits,,sylvanspirits000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Ten Elements,Ten_Elements,,tenelements00000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+The Equalizer,The_Equalizer,,theequalizer0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+The Greatest Train Robbery,The_Greatest_Train_Robbery,,thegreatesttrain,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+The Wild Hatter,The_Wild_Hatter,,thewildhatter000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Thor's Lightning,Thors_Lightning,,thorslightning00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Thor's vengeance,Thors_vengeance,,thorsvengeance00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Three Kingdoms,Three_Kingdoms,,threekingdoms000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Three Musketeers,Three_Musketeers,,threemusketeers0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Tiki Fruits,Tiki_Fruits,,tikifruits000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Totem Lightning,Totem_Lightning,,totemlightning00,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Totem Lightning Power Reels,Totem_Lightning_Power_Reels,,totemlightningpo,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Treasure Mine,Treasure_Mine,,treasuremine0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Trillionaire,Trillionaire,,trillionaire0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Vault Cracker,Vault_Cracker,,vaultcracker0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Vault of Anubis,Vault_of_Anubis,,vaultofanubis000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Vicky Ventura,Vicky_Ventura,,vickyventura0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+War Of Gods,War_Of_Gods,,warofgods0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Well Of Wishes,Well_Of_Wishes,,wellofwishes0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wild Cats Multiline,Wild_Cats_Multiline,,wildcatsmultilin,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wild Circus,Wild_Circus,,wildcircus000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wild Elements,Wild_Elements,,wildelements0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wild Fight,Wild_Fight,,wildfight0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wild Nords,Wild_Nords,,wildnords0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wild O'Clock,Wild_OClock,,wildoclock000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wild Spartans,Wild_Spartans,,wildspartans0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wild Wild Chest,Wild_Wild_Chest,,wildwildchest000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Win Escalator,Win_Escalator,,winescalator0000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Wings of Ra,Wings_of_Ra,,wingsofra0000000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Winter Wonders,Winter_Wonders,,winterwonders000,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Yucatan's Mystery,Yucatans_Mystery,,yucatansmystery0,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT
+Zeus Lightning Power Reels,Zeus_Lightning_Power_Reels,,zeuslightningpow,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,RT

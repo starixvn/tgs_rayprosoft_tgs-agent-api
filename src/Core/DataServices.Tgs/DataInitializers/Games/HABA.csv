@@ -1,182 +1,182 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-Totem Towers,Totem_Towers,,SGTotemTowers,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Christmas Gift Rush,Christmas_Gift_Rush,,SGChristmasGiftRush,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Taberna De Los Muertos,Taberna_De_Los_Muertos,,SGTabernaDeLosMuertos,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Taberna De Los Muertos Ultra,Taberna_De_Los_Muertos_Ultra,,SGTabernaDeLosMuertosUltra,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Happy Ape,Happy_Ape,,SGHappyApe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jellyfish Flow,Jellyfish_Flow,,SGJellyfishFlow,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jellyfish Flow Ultra,Jellyfish_Flow_Ultra,,SGJellyfishFlowUltra,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wealth Inn,Wealth_Inn,,SGWealthInn,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Hey Sushi,Hey_Sushi,,SGHeySushi,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Scopa,Scopa,,SGScopa,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Techno Tumble,Techno_Tumble,,SGTechnoTumble,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Fortune Cat,Lucky_Fortune_Cat,,SGLuckyFortuneCat,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Knockout Football Rush,Knockout_Football_Rush,,SGKnockoutFootballRush,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Loony Blox,Loony_Blox,,SGLoonyBlox,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fa Cai Shen Deluxe,Fa_Cai_Shen_Deluxe,,SGFaCaiShenDeluxe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Naughty Santa,Naughty_Santa,,SGNaughtySanta,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Hot Hot Halloween,Hot_Hot_Halloween,,SGHotHotHalloween,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wizards Want War!,Wizards_Want_War,,SGWizardsWantWar,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Colossal Gems,Colossal_Gems,,SGColossalGems,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Nuwa,Nuwa,,SGNuwa,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wild Trucks,Wild_Trucks,,SGWildTrucks,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Lucky,Lucky_Lucky,,SGLuckyLucky,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Magic Oak,Magic_Oak,,SGMagicOak,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mount Mazuma,Mount_Mazuma,,SGMountMazuma,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-5 Lucky Lions,5_Lucky_Lions,,SG5LuckyLions,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Hot Hot Fruit,Hot_Hot_Fruit,,SGHotHotFruit,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Happiest Christmas Tree,Happiest_Christmas_Tree,,SGHappiestChristmasTree,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Pumpkin Patch,Pumpkin_Patch,,SGPumpkinPatch,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jump!,Jump,,SGJump,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Egyptian Dreams Deluxe,Egyptian_Dreams_Deluxe,,SGEgyptianDreamsDeluxe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ways Of Fortune,Ways_Of_Fortune,,SGWaysOfFortune,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Knockout Football,Knockout_Football,,SGKnockoutFootball,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fortune Dogs,Fortune_Dogs,,SGFortuneDogs,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Presto!,Presto,,SGPresto,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-London Hunter,London_Hunter,,SGLondonHunter,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Four Divine Beasts,Four_Divine_Beasts,,SGFourDivineBeasts,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-5 Mariachis,5_Mariachis,,SG5Mariachis,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Santa's Village,Santas_Village,,SGSantasVillage,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rolling Roger,Rolling_Roger,,SGRollingRoger,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cake Valley,Cake_Valley,,SGCakeValley,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Scruffy Scallywags,Scruffy_Scallywags,,SGScruffyScallywags,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-The Dead Escape,The_Dead_Escape,,SGTheDeadEscape,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Panda Panda,Panda_Panda,,SGPandaPanda,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bird of Thunder,Bird_of_Thunder,,SGBirdOfThunder,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Koi Gate,Koi_Gate,,SGTheKoiGate,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fire Rooster,Fire_Rooster,,SGFireRooster,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fenghuang,Fenghuang,,SGFenghuang,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jugglenaut,Jugglenaut,,SGJugglenaut,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ocean's Call,Oceans_Call,,SGOceansCall,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gangsters,Gangsters,,SGGangsters,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Sparta,Sparta,,SGSparta,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Super Twister,Super_Twister,,SGSuperTwister,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-12 Zodiacs,12_Zodiacs,,SG12Zodiacs,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Arcane Elements,Arcane_Elements,,SGArcaneElements,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Throne,Dragons_Throne,,SGDragonsThrone,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Coyote Crash,Coyote_Crash,,SGCoyoteCrash,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Roman Empire,Roman_Empire,,SGRomanEmpire,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ruffled Up,Ruffled_Up,,SGRuffledUp,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fa Cai Shen,Fa_Cai_Shen,,SGFaCaiShen,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bombs Away,Bombs_Away,,SGBombsAway,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gold Rush,Gold_Rush,,SGGoldRush,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wicked Witch,Wicked_Witch,,SGWickedWitch,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Galactic Cash,Galactic_Cash,,SGGalacticCash,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Buggy Bonus,Buggy_Bonus,,SGBuggyBonus,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Kane's Inferno,Kanes_Inferno,,SGKanesInferno,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-All For One,All_For_One,,SGAllForOne,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Arctic Wonders,Arctic_Wonders,,SGArcticWonders,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aztlan's Gold,Aztlans_Gold,,SGAzlandsGold,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Barnstormer Bucks,Barnstormer_Bucks,,SGBarnstormerBucks,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bikini Island,Bikini_Island,,SGBikiniIsland,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Blackbeard's Bounty,Blackbeards_Bounty,,SGBlackbeardsBounty,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Carnival Cash,Carnival_Cash,,SGCarnivalCash,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cashosaurus,Cashosaurus,,SGCashosaurus,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cash Reef,Cash_Reef,,SGCashReef,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Disco Funk,Disco_Funk,,SGDiscoFunk,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double O Dollars,Double_O_Dollars,,SGDoubleODollars,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon's Realm,Dragons_Realm,,SGDragonsRealm,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dr Feelgood,Dr_Feelgood,,SGDrFeelgood,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Egyptian Dreams,Egyptian_Dreams,,SGEgyptianDreams,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Flying High,Flying_High,,SGFlyingHigh,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Frontier Fortunes,Frontier_Fortunes,,SGFrontierFortunes,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Glam Rock,Glam_Rock,,SGGlamRock,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Golden Unicorn,Golden_Unicorn,,SGGoldenUnicorn,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Grape Escape,Grape_Escape,,SGGrapeEscape,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Haunted House,Haunted_House,,SGHauntedHouse,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Indian Cash Catcher,Indian_Cash_Catcher,,SGIndianCashCatcher,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jungle Rumble,Jungle_Rumble,,SGJungleRumble,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-King Tut's Tomb,King_Tuts_Tomb,,SGKingTutsTomb,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Little Green Money,Little_Green_Money,,SGLittleGreenMoney,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Monster Mash Cash,Monster_Mash_Cash,,SGMonsterMashCash,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mr Bling,Mr_Bling,,SGMrBling,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mummy Money,Mummy_Money,,SGMummyMoney,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mystic Fortune,Mystic_Fortune,,SGMysticFortune,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Pamper Me,Pamper_Me,,SGPamperMe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Pirate's Plunder,Pirates_Plunder,,SGPiratesPlunder,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Pool Shark,Pool_Shark,,SGPoolShark,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Pucker Up Prince,Pucker_Up_Prince,,SGPuckerUpPrince,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Queen of Queens II,Queen_of_Queens_II,,SGQueenOfQueens1024,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Queen of Queens,Queen_of_Queens,,SGQueenOfQueens243,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ride 'em Cowboy,Ride_em_Cowboy,,SGRideEmCowboy,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rodeo Drive,Rodeo_Drive,,SGRodeoDrive,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Shaolin Fortunes 100,Shaolin_Fortunes_100,,SGShaolinFortunes100,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Shaolin Fortunes,Shaolin_Fortunes,,SGShaolinFortunes243,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Shogun's Land,Shoguns_Land,,SGShogunsLand,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Sir Blingalot,Sir_Blingalot,,SGSirBlingalot,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Sky's the Limit,Skys_the_Limit,,SGSkysTheLimit,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-S.O.S!,SOS,,SGSOS,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Space Fortune,Space_Fortune,,SGSpaceFortune,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Super Strike,Super_Strike,,SGSuperStrike,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-The Big Deal,The_Big_Deal,,SGTheBigDeal,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon Castle,Dragon_Castle,,SGTheDragonCastle,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Tower Of Pizza,Tower_Of_Pizza,,SGTowerOfPizza,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Treasure Diver,Treasure_Diver,,SGTreasureDiver,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Treasure Tomb,Treasure_Tomb,,SGTreasureTomb,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Viking's Plunder,Vikings_Plunder,,SGVikingsPlunder,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Weird Science,Weird_Science,,SGWeirdScience,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Zeus,Zeus,,SGZeus,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Zeus 2,Zeus_2,,SGZeus2,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Caribbean Hold'Em,Caribbean_HoldEm,,CaribbeanHoldem,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Caribbean Stud,Caribbean_Stud,,CaribbeanStud,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Blackjack 3 Hand,Blackjack_3_Hand,,BlackJack3H,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Blackjack Double Exposure 3 Hand,Blackjack_Double_Exposure_3_Hand,,BlackJack3HDoubleExposure,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-American Blackjack,American_Blackjack,,TGBlackjackAmerican,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-European Roulette,European_Roulette,,EURoulette,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-American Baccarat,American_Baccarat,,AmericanBaccarat,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-American Baccarat Zero Commission,American_Baccarat_Zero_Commission,,Baccarat3HZC,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Sicbo,Sicbo,,SicBo,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Three Card Poker,Three_Card_Poker,,TGThreeCardPoker,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Three Card Poker Deluxe,Three_Card_Poker_Deluxe,,TGThreeCardPokerDeluxe,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-War,War,,TGWar,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon Tiger,Dragon_Tiger,,TGDragonTiger,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aces & Eights 1 Hand,Aces_Eights_1_Hand,,AcesandEights1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aces & Eights 5 Hand,Aces_Eights_5_Hand,,AcesandEights5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aces & Eights 10 Hand,Aces_Eights_10_Hand,,AcesandEights10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aces & Eights 50 Hand,Aces_Eights_50_Hand,,AcesandEights50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Aces & Eights 100 Hand,Aces_Eights_100_Hand,,AcesandEights100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-All American Poker 1 Hand,All_American_Poker_1_Hand,,AllAmericanPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-All American Poker 5 Hand,All_American_Poker_5_Hand,,AllAmericanPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-All American Poker 10 Hand,All_American_Poker_10_Hand,,AllAmericanPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-All American Poker 50 Hand,All_American_Poker_50_Hand,,AllAmericanPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-All American Poker 100 Hand,All_American_Poker_100_Hand,,AllAmericanPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Deuces Wild 1 Hand,Bonus_Deuces_Wild_1_Hand,,BonusDuecesWild1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Deuces Wild 5 Hand,Bonus_Deuces_Wild_5_Hand,,BonusDuecesWild5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Deuces Wild 10 Hand,Bonus_Deuces_Wild_10_Hand,,BonusDuecesWild10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Deuces Wild 50 Hand,Bonus_Deuces_Wild_50_Hand,,BonusDuecesWild50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Deuces Wild 100 Hand,Bonus_Deuces_Wild_100_Hand,,BonusDuecesWild100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Poker 1 Hand,Bonus_Poker_1_Hand,,BonusPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Poker 5 Hand,Bonus_Poker_5_Hand,,BonusPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Poker 10 Hand,Bonus_Poker_10_Hand,,BonusPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Poker 50 Hand,Bonus_Poker_50_Hand,,BonusPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Bonus Poker 100 Hand,Bonus_Poker_100_Hand,,BonusPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Deuces Wild 1 Hand,Deuces_Wild_1_Hand,,DuecesWild1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Deuces Wild 5 Hand,Deuces_Wild_5_Hand,,DuecesWild5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Deuces Wild 10 Hand,Deuces_Wild_10_Hand,,DuecesWild10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Deuces Wild 50 Hand,Deuces_Wild_50_Hand,,DuecesWild50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Deuces Wild 100 Hand,Deuces_Wild_100_Hand,,DuecesWild100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Bonus Poker 1 Hand,Double_Bonus_Poker_1_Hand,,DoubleBonusPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Bonus Poker 5 Hand,Double_Bonus_Poker_5_Hand,,DoubleBonusPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Bonus Poker 10 Hand,Double_Bonus_Poker_10_Hand,,DoubleBonusPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Bonus Poker 50 Hand,Double_Bonus_Poker_50_Hand,,DoubleBonusPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Bonus Poker 100 Hand,Double_Bonus_Poker_100_Hand,,DoubleBonusPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Double Bonus Poker 1 Hand,Double_Double_Bonus_Poker_1_Hand,,DoubleDoubleBonusPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Double Bonus Poker 5 Hand,Double_Double_Bonus_Poker_5_Hand,,DoubleDoubleBonusPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Double Bonus Poker 10 Hand,Double_Double_Bonus_Poker_10_Hand,,DoubleDoubleBonusPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Double Bonus Poker 50 Hand,Double_Double_Bonus_Poker_50_Hand,,DoubleDoubleBonusPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Double Double Bonus Poker 100 Hand,Double_Double_Bonus_Poker_100_Hand,,DoubleDoubleBonusPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jacks or Better 1 Hand,Jacks_or_Better_1_Hand,,JacksorBetter1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jacks or Better 5 Hand,Jacks_or_Better_5_Hand,,JacksorBetter5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jacks or Better 10 Hand,Jacks_or_Better_10_Hand,,JacksorBetter10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jacks or Better 50 Hand,Jacks_or_Better_50_Hand,,JacksorBetter50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Jacks or Better 100 Hand,Jacks_or_Better_100_Hand,,JacksorBetter100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Joker Poker 1 Hand,Joker_Poker_1_Hand,,JokerPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Joker Poker 5 Hand,Joker_Poker_5_Hand,,JokerPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Joker Poker 10 Hand,Joker_Poker_10_Hand,,JokerPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Joker Poker 50 Hand,Joker_Poker_50_Hand,,JokerPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Joker Poker 100 Hand,Joker_Poker_100_Hand,,JokerPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Tens Or Better 1 Hand,Tens_Or_Better_1_Hand,,TensorBetter1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Tens Or Better 5 Hand,Tens_Or_Better_5_Hand,,TensorBetter5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Tens Or Better 10 Hand,Tens_Or_Better_10_Hand,,TensorBetter10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Tens Or Better 50 Hand,Tens_Or_Better_50_Hand,,TensorBetter50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Tens Or Better 100 Hand,Tens_Or_Better_100_Hand,,TensorBetter100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Totem Towers,Totem_Towers,,SGTotemTowers,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Christmas Gift Rush,Christmas_Gift_Rush,,SGChristmasGiftRush,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Taberna De Los Muertos,Taberna_De_Los_Muertos,,SGTabernaDeLosMuertos,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Taberna De Los Muertos Ultra,Taberna_De_Los_Muertos_Ultra,,SGTabernaDeLosMuertosUltra,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Happy Ape,Happy_Ape,,SGHappyApe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jellyfish Flow,Jellyfish_Flow,,SGJellyfishFlow,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jellyfish Flow Ultra,Jellyfish_Flow_Ultra,,SGJellyfishFlowUltra,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Wealth Inn,Wealth_Inn,,SGWealthInn,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Hey Sushi,Hey_Sushi,,SGHeySushi,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Scopa,Scopa,,SGScopa,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Techno Tumble,Techno_Tumble,,SGTechnoTumble,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Lucky Fortune Cat,Lucky_Fortune_Cat,,SGLuckyFortuneCat,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Knockout Football Rush,Knockout_Football_Rush,,SGKnockoutFootballRush,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Loony Blox,Loony_Blox,,SGLoonyBlox,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Fa Cai Shen Deluxe,Fa_Cai_Shen_Deluxe,,SGFaCaiShenDeluxe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Naughty Santa,Naughty_Santa,,SGNaughtySanta,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Hot Hot Halloween,Hot_Hot_Halloween,,SGHotHotHalloween,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Wizards Want War!,Wizards_Want_War,,SGWizardsWantWar,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Colossal Gems,Colossal_Gems,,SGColossalGems,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Nuwa,Nuwa,,SGNuwa,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Wild Trucks,Wild_Trucks,,SGWildTrucks,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Lucky Lucky,Lucky_Lucky,,SGLuckyLucky,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Magic Oak,Magic_Oak,,SGMagicOak,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Mount Mazuma,Mount_Mazuma,,SGMountMazuma,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+5 Lucky Lions,5_Lucky_Lions,,SG5LuckyLions,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Hot Hot Fruit,Hot_Hot_Fruit,,SGHotHotFruit,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Happiest Christmas Tree,Happiest_Christmas_Tree,,SGHappiestChristmasTree,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Pumpkin Patch,Pumpkin_Patch,,SGPumpkinPatch,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jump!,Jump,,SGJump,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Egyptian Dreams Deluxe,Egyptian_Dreams_Deluxe,,SGEgyptianDreamsDeluxe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Ways Of Fortune,Ways_Of_Fortune,,SGWaysOfFortune,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Knockout Football,Knockout_Football,,SGKnockoutFootball,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Fortune Dogs,Fortune_Dogs,,SGFortuneDogs,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Presto!,Presto,,SGPresto,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+London Hunter,London_Hunter,,SGLondonHunter,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Four Divine Beasts,Four_Divine_Beasts,,SGFourDivineBeasts,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+5 Mariachis,5_Mariachis,,SG5Mariachis,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Santa's Village,Santas_Village,,SGSantasVillage,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Rolling Roger,Rolling_Roger,,SGRollingRoger,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Cake Valley,Cake_Valley,,SGCakeValley,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Scruffy Scallywags,Scruffy_Scallywags,,SGScruffyScallywags,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+The Dead Escape,The_Dead_Escape,,SGTheDeadEscape,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Panda Panda,Panda_Panda,,SGPandaPanda,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bird of Thunder,Bird_of_Thunder,,SGBirdOfThunder,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Koi Gate,Koi_Gate,,SGTheKoiGate,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Fire Rooster,Fire_Rooster,,SGFireRooster,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Fenghuang,Fenghuang,,SGFenghuang,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jugglenaut,Jugglenaut,,SGJugglenaut,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Ocean's Call,Oceans_Call,,SGOceansCall,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Gangsters,Gangsters,,SGGangsters,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Sparta,Sparta,,SGSparta,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Super Twister,Super_Twister,,SGSuperTwister,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+12 Zodiacs,12_Zodiacs,,SG12Zodiacs,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Arcane Elements,Arcane_Elements,,SGArcaneElements,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Dragon's Throne,Dragons_Throne,,SGDragonsThrone,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Coyote Crash,Coyote_Crash,,SGCoyoteCrash,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Roman Empire,Roman_Empire,,SGRomanEmpire,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Ruffled Up,Ruffled_Up,,SGRuffledUp,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Fa Cai Shen,Fa_Cai_Shen,,SGFaCaiShen,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bombs Away,Bombs_Away,,SGBombsAway,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Gold Rush,Gold_Rush,,SGGoldRush,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Wicked Witch,Wicked_Witch,,SGWickedWitch,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Galactic Cash,Galactic_Cash,,SGGalacticCash,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Buggy Bonus,Buggy_Bonus,,SGBuggyBonus,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Kane's Inferno,Kanes_Inferno,,SGKanesInferno,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+All For One,All_For_One,,SGAllForOne,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Arctic Wonders,Arctic_Wonders,,SGArcticWonders,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Aztlan's Gold,Aztlans_Gold,,SGAzlandsGold,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Barnstormer Bucks,Barnstormer_Bucks,,SGBarnstormerBucks,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bikini Island,Bikini_Island,,SGBikiniIsland,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Blackbeard's Bounty,Blackbeards_Bounty,,SGBlackbeardsBounty,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Carnival Cash,Carnival_Cash,,SGCarnivalCash,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Cashosaurus,Cashosaurus,,SGCashosaurus,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Cash Reef,Cash_Reef,,SGCashReef,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Disco Funk,Disco_Funk,,SGDiscoFunk,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double O Dollars,Double_O_Dollars,,SGDoubleODollars,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Dragon's Realm,Dragons_Realm,,SGDragonsRealm,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Dr Feelgood,Dr_Feelgood,,SGDrFeelgood,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Egyptian Dreams,Egyptian_Dreams,,SGEgyptianDreams,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Flying High,Flying_High,,SGFlyingHigh,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Frontier Fortunes,Frontier_Fortunes,,SGFrontierFortunes,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Glam Rock,Glam_Rock,,SGGlamRock,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Golden Unicorn,Golden_Unicorn,,SGGoldenUnicorn,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Grape Escape,Grape_Escape,,SGGrapeEscape,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Haunted House,Haunted_House,,SGHauntedHouse,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Indian Cash Catcher,Indian_Cash_Catcher,,SGIndianCashCatcher,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jungle Rumble,Jungle_Rumble,,SGJungleRumble,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+King Tut's Tomb,King_Tuts_Tomb,,SGKingTutsTomb,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Little Green Money,Little_Green_Money,,SGLittleGreenMoney,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Monster Mash Cash,Monster_Mash_Cash,,SGMonsterMashCash,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Mr Bling,Mr_Bling,,SGMrBling,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Mummy Money,Mummy_Money,,SGMummyMoney,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Mystic Fortune,Mystic_Fortune,,SGMysticFortune,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Pamper Me,Pamper_Me,,SGPamperMe,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Pirate's Plunder,Pirates_Plunder,,SGPiratesPlunder,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Pool Shark,Pool_Shark,,SGPoolShark,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Pucker Up Prince,Pucker_Up_Prince,,SGPuckerUpPrince,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Queen of Queens II,Queen_of_Queens_II,,SGQueenOfQueens1024,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Queen of Queens,Queen_of_Queens,,SGQueenOfQueens243,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Ride 'em Cowboy,Ride_em_Cowboy,,SGRideEmCowboy,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Rodeo Drive,Rodeo_Drive,,SGRodeoDrive,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Shaolin Fortunes 100,Shaolin_Fortunes_100,,SGShaolinFortunes100,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Shaolin Fortunes,Shaolin_Fortunes,,SGShaolinFortunes243,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Shogun's Land,Shoguns_Land,,SGShogunsLand,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Sir Blingalot,Sir_Blingalot,,SGSirBlingalot,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Sky's the Limit,Skys_the_Limit,,SGSkysTheLimit,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+S.O.S!,SOS,,SGSOS,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Space Fortune,Space_Fortune,,SGSpaceFortune,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Super Strike,Super_Strike,,SGSuperStrike,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+The Big Deal,The_Big_Deal,,SGTheBigDeal,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Dragon Castle,Dragon_Castle,,SGTheDragonCastle,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Tower Of Pizza,Tower_Of_Pizza,,SGTowerOfPizza,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Treasure Diver,Treasure_Diver,,SGTreasureDiver,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Treasure Tomb,Treasure_Tomb,,SGTreasureTomb,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Viking's Plunder,Vikings_Plunder,,SGVikingsPlunder,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Weird Science,Weird_Science,,SGWeirdScience,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Zeus,Zeus,,SGZeus,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Zeus 2,Zeus_2,,SGZeus2,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Caribbean Hold'Em,Caribbean_HoldEm,,CaribbeanHoldem,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Caribbean Stud,Caribbean_Stud,,CaribbeanStud,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Blackjack 3 Hand,Blackjack_3_Hand,,BlackJack3H,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Blackjack Double Exposure 3 Hand,Blackjack_Double_Exposure_3_Hand,,BlackJack3HDoubleExposure,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+American Blackjack,American_Blackjack,,TGBlackjackAmerican,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+European Roulette,European_Roulette,,EURoulette,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+American Baccarat,American_Baccarat,,AmericanBaccarat,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+American Baccarat Zero Commission,American_Baccarat_Zero_Commission,,Baccarat3HZC,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Sicbo,Sicbo,,SicBo,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Three Card Poker,Three_Card_Poker,,TGThreeCardPoker,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Three Card Poker Deluxe,Three_Card_Poker_Deluxe,,TGThreeCardPokerDeluxe,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+War,War,,TGWar,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Dragon Tiger,Dragon_Tiger,,TGDragonTiger,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Aces & Eights 1 Hand,Aces_Eights_1_Hand,,AcesandEights1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Aces & Eights 5 Hand,Aces_Eights_5_Hand,,AcesandEights5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Aces & Eights 10 Hand,Aces_Eights_10_Hand,,AcesandEights10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Aces & Eights 50 Hand,Aces_Eights_50_Hand,,AcesandEights50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Aces & Eights 100 Hand,Aces_Eights_100_Hand,,AcesandEights100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+All American Poker 1 Hand,All_American_Poker_1_Hand,,AllAmericanPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+All American Poker 5 Hand,All_American_Poker_5_Hand,,AllAmericanPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+All American Poker 10 Hand,All_American_Poker_10_Hand,,AllAmericanPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+All American Poker 50 Hand,All_American_Poker_50_Hand,,AllAmericanPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+All American Poker 100 Hand,All_American_Poker_100_Hand,,AllAmericanPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Deuces Wild 1 Hand,Bonus_Deuces_Wild_1_Hand,,BonusDuecesWild1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Deuces Wild 5 Hand,Bonus_Deuces_Wild_5_Hand,,BonusDuecesWild5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Deuces Wild 10 Hand,Bonus_Deuces_Wild_10_Hand,,BonusDuecesWild10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Deuces Wild 50 Hand,Bonus_Deuces_Wild_50_Hand,,BonusDuecesWild50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Deuces Wild 100 Hand,Bonus_Deuces_Wild_100_Hand,,BonusDuecesWild100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Poker 1 Hand,Bonus_Poker_1_Hand,,BonusPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Poker 5 Hand,Bonus_Poker_5_Hand,,BonusPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Poker 10 Hand,Bonus_Poker_10_Hand,,BonusPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Poker 50 Hand,Bonus_Poker_50_Hand,,BonusPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Bonus Poker 100 Hand,Bonus_Poker_100_Hand,,BonusPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Deuces Wild 1 Hand,Deuces_Wild_1_Hand,,DuecesWild1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Deuces Wild 5 Hand,Deuces_Wild_5_Hand,,DuecesWild5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Deuces Wild 10 Hand,Deuces_Wild_10_Hand,,DuecesWild10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Deuces Wild 50 Hand,Deuces_Wild_50_Hand,,DuecesWild50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Deuces Wild 100 Hand,Deuces_Wild_100_Hand,,DuecesWild100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Bonus Poker 1 Hand,Double_Bonus_Poker_1_Hand,,DoubleBonusPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Bonus Poker 5 Hand,Double_Bonus_Poker_5_Hand,,DoubleBonusPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Bonus Poker 10 Hand,Double_Bonus_Poker_10_Hand,,DoubleBonusPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Bonus Poker 50 Hand,Double_Bonus_Poker_50_Hand,,DoubleBonusPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Bonus Poker 100 Hand,Double_Bonus_Poker_100_Hand,,DoubleBonusPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Double Bonus Poker 1 Hand,Double_Double_Bonus_Poker_1_Hand,,DoubleDoubleBonusPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Double Bonus Poker 5 Hand,Double_Double_Bonus_Poker_5_Hand,,DoubleDoubleBonusPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Double Bonus Poker 10 Hand,Double_Double_Bonus_Poker_10_Hand,,DoubleDoubleBonusPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Double Bonus Poker 50 Hand,Double_Double_Bonus_Poker_50_Hand,,DoubleDoubleBonusPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Double Double Bonus Poker 100 Hand,Double_Double_Bonus_Poker_100_Hand,,DoubleDoubleBonusPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jacks or Better 1 Hand,Jacks_or_Better_1_Hand,,JacksorBetter1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jacks or Better 5 Hand,Jacks_or_Better_5_Hand,,JacksorBetter5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jacks or Better 10 Hand,Jacks_or_Better_10_Hand,,JacksorBetter10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jacks or Better 50 Hand,Jacks_or_Better_50_Hand,,JacksorBetter50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Jacks or Better 100 Hand,Jacks_or_Better_100_Hand,,JacksorBetter100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Joker Poker 1 Hand,Joker_Poker_1_Hand,,JokerPoker1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Joker Poker 5 Hand,Joker_Poker_5_Hand,,JokerPoker5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Joker Poker 10 Hand,Joker_Poker_10_Hand,,JokerPoker10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Joker Poker 50 Hand,Joker_Poker_50_Hand,,JokerPoker50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Joker Poker 100 Hand,Joker_Poker_100_Hand,,JokerPoker100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Tens Or Better 1 Hand,Tens_Or_Better_1_Hand,,TensorBetter1Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Tens Or Better 5 Hand,Tens_Or_Better_5_Hand,,TensorBetter5Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Tens Or Better 10 Hand,Tens_Or_Better_10_Hand,,TensorBetter10Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Tens Or Better 50 Hand,Tens_Or_Better_50_Hand,,TensorBetter50Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA
+Tens Or Better 100 Hand,Tens_Or_Better_100_Hand,,TensorBetter100Hand,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,HABA

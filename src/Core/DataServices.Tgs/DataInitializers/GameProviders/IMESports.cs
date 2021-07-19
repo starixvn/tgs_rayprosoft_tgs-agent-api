@@ -48,15 +48,25 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VND1000Currency("VND"),
-                new IDR1000Currency("IDR"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new THBCurrency("THB"),
+                new CNYCurrency("CNY"),
+                new USDCurrency("USD"),
+                new VND1000Currency("VND"),
+                new IDR1000Currency("IDR"),
+                new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"),
+                new THBCurrency("THB"),
                 new MYRCurrency("MYR")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("EN"), new CNLanguage("ZH-CN"), new IDLanguage("ID"), new KRLanguage("KO"),
-                new THLanguage("TH"), new VNLanguage("VI"), new TWLanguage("ZH-HK")
+                new USLanguage("EN"),
+                new CNLanguage("ZH-CN"),
+                new IDLanguage("ID"),
+                new KRLanguage("KO"),
+                new THLanguage("TH"),
+                new VNLanguage("VI"),
+                new TWLanguage("ZH-HK")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -83,6 +93,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ProductWallet = 401,
                     SupportHttps = false
                 };
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.IMESports, "IMESports")
+            };
         }
 
         internal record IMESportsGameProviderConfiguration : IGameProviderConfiguration

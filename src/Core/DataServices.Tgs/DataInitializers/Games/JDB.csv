@@ -1,99 +1,99 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-Dragon Fishing,Dragon_Fishing,,7_7001,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon Fishing II,Dragon_Fishing_II,,7_7002,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cai Shen Fishing,Cai_Shen_Fishing,,7_7003,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Five Dragons Fishing,Five_Dragons_Fishing,,7_7004,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fishing YiLuFa,Fishing_YiLuFa,,7_7005,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon Master,Dragon_Master,,7_7006,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-FishingDisco,FishingDisco,,7_7007,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Poker King,Poker_King,,0_14023,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rolling In Money,Rolling_In_Money,,0_14021,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-GoLaiFu,GoLaiFu,,0_14034,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-SuperNiubi,SuperNiubi,,0_14036,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-FunkyKingKong,FunkyKingKong,,0_14044,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-SuperNiubiDeluxe,SuperNiubiDeluxe,,0_14045,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Racing,Lucky_Racing,,0_14025,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Gems Gems,Gems_Gems,,0_14019,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fa Da Cai,Fa_Da_Cai,,0_14026,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-TripleKingKong,TripleKingKong,,0_14030,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-LuckySeven,LuckySeven,,0_14027,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cury Magician,Cury_Magician,,0_14020,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mining Upstart,Mining_Upstart,,0_14022,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Guardians of The Galaxy,Guardians_of_The_Galaxy,,0_14011,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Super Dumpling,Super_Dumpling,,0_8031,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Crazy Scientist,Crazy_Scientist,,0_8030,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Miner,Lucky_Miner,,0_8028,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Burglar,Burglar,,0_8025,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mahjong,Mahjong,,0_8022,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Zelda,Zelda,,0_14004,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cash Man,Cash_Man,,0_8034,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Banana Saga,Banana_Saga,,0_8021,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Monkey King,Monkey_King,,0_15002,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Cock Fight,Cock_Fight,,0_14001,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon King,Dragon_King,,0_8036,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Olympian Temple,Olympian_Temple,,0_8023,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Four Treasures,Four_Treasures,,0_8019,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Lion,Lucky_Lion,,0_8014,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Wukong,Wukong,,0_8004,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-LuckyFuwa,LuckyFuwa,,0_15005,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Flirting Scholar Tang II,Flirting_Scholar_Tang_II,,0_8049,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mystery of Nine Tales,Mystery_of_Nine_Tales,,0_15013,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Daji,Daji,,0_14018,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-China Rouge,China_Rouge,,0_14013,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Ninja Rush,Ninja_Rush,,0_15009,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fire Bull,Fire_Bull,,0_15004,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-War of Beauty,War_of_Beauty,,0_14017,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Billionaire,Billionaire,,0_14006,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-One Punch Man,One_Punch_Man,,0_14007,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon Warrior,Dragon_Warrior,,0_14008,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Maya Run,Maya_Run,,0_14002,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mr. Bao,Mr_Bao,,0_14005,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Star Wars,Star_Wars,,0_14015,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Panda Panda,Panda_Panda,,0_14003,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Candy Land,Candy_Land,,0_8029,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Crystal Realm,Crystal_Realm,,0_8024,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Beauty And The Kingdom,Beauty_And_The_Kingdom,,0_8044,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Chef-Doeuvre,Chef_Doeuvre,,0_8027,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dragon,Dragon,,0_14010,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Inca Empire,Inca_Empire,,0_15006,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Dancing Papa,Dancing_Papa,,0_8026,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Napoleon,Napoleon,,0_8018,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-New Year,New_Year,,0_8017,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Coffeeholics,Coffeeholics,,0_8016,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Moonlight Treasure,Moonlight_Treasure,,0_8015,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Formosa Bear,Formosa_Bear,,0_8006,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Llama Adventure,Llama_Adventure,,0_8005,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Flirting Scholar Tang,Flirting_Scholar_Tang,,0_8002,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Dragon,Lucky_Dragon,,0_8001,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-EgyptTreasure,EgyptTreasure,,0_14038,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Fortune Treasure,Fortune_Treasure,,0_14039,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Winning Mask II,Winning_Mask_II,,0_8047,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Sun Archer,Sun_Archer,,0_15011,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Kingsman,Kingsman,,0_14016,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Chef Panda,Chef_Panda,,0_15010,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Phoenix,Lucky_Phoenix,,0_8035,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Guan Gong,Guan_Gong,,0_8046,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Street Fighter,Street_Fighter,,0_14012,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Lucky Qilin,Lucky_Qilin,,0_8007,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Rooster In Love,Rooster_In_Love,,0_15001,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Magic Show,Magic_Show,,0_8037,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Open Sesame,Open_Sesame,,0_8020,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Winning Mask,Winning_Mask,,0_8003,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-OpenSesameII,OpenSesameII,,0_8048,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Legendary5,Legendary5,,0_15012,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-OrientAnimals,OrientAnimals,,0_14029,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-BirdsParty,BirdsParty,,0_14033,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Mjoinir,Mjoinir,,0_14041,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Moneybags Man,Moneybags_Man,,0_14047,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-MinerBabe,MinerBabe,,0_14046,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-JungleJungle,JungleJungle,,0_14052,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-ExtremeKnockout,ExtremeKnockout,,0_8009,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-Goldfish Gold,Goldfish_Gold,,0_8011,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-Lucky Panda,Lucky_Panda,,0_8012,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-Sawadee Ka,Sawadee_Ka,,0_8013,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-Parvenu Tiger,Parvenu_Tiger,,0_8032,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-Golden Jaguar,Golden_Jaguar,,0_8033,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-Gold Dragon,Gold_Dragon,,0_8040,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-FuLaiLe,FuLaiLe,,0_8041,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-BaliDream,BaliDream,,0_8042,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
-MermaidPrincess,MermaidPrincess,,0_8043,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Dragon Fishing,Dragon_Fishing,,7_7001,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Dragon Fishing II,Dragon_Fishing_II,,7_7002,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Cai Shen Fishing,Cai_Shen_Fishing,,7_7003,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Five Dragons Fishing,Five_Dragons_Fishing,,7_7004,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Fishing YiLuFa,Fishing_YiLuFa,,7_7005,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Dragon Master,Dragon_Master,,7_7006,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+FishingDisco,FishingDisco,,7_7007,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Poker King,Poker_King,,0_14023,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Rolling In Money,Rolling_In_Money,,0_14021,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+GoLaiFu,GoLaiFu,,0_14034,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+SuperNiubi,SuperNiubi,,0_14036,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+FunkyKingKong,FunkyKingKong,,0_14044,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+SuperNiubiDeluxe,SuperNiubiDeluxe,,0_14045,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Lucky Racing,Lucky_Racing,,0_14025,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Gems Gems,Gems_Gems,,0_14019,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Fa Da Cai,Fa_Da_Cai,,0_14026,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+TripleKingKong,TripleKingKong,,0_14030,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+LuckySeven,LuckySeven,,0_14027,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Cury Magician,Cury_Magician,,0_14020,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Mining Upstart,Mining_Upstart,,0_14022,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Guardians of The Galaxy,Guardians_of_The_Galaxy,,0_14011,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Super Dumpling,Super_Dumpling,,0_8031,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Crazy Scientist,Crazy_Scientist,,0_8030,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Lucky Miner,Lucky_Miner,,0_8028,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Burglar,Burglar,,0_8025,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Mahjong,Mahjong,,0_8022,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Zelda,Zelda,,0_14004,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Cash Man,Cash_Man,,0_8034,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Banana Saga,Banana_Saga,,0_8021,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Monkey King,Monkey_King,,0_15002,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Cock Fight,Cock_Fight,,0_14001,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Dragon King,Dragon_King,,0_8036,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Olympian Temple,Olympian_Temple,,0_8023,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Four Treasures,Four_Treasures,,0_8019,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Lucky Lion,Lucky_Lion,,0_8014,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Wukong,Wukong,,0_8004,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+LuckyFuwa,LuckyFuwa,,0_15005,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Flirting Scholar Tang II,Flirting_Scholar_Tang_II,,0_8049,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Mystery of Nine Tales,Mystery_of_Nine_Tales,,0_15013,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Daji,Daji,,0_14018,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+China Rouge,China_Rouge,,0_14013,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Ninja Rush,Ninja_Rush,,0_15009,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Fire Bull,Fire_Bull,,0_15004,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+War of Beauty,War_of_Beauty,,0_14017,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Billionaire,Billionaire,,0_14006,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+One Punch Man,One_Punch_Man,,0_14007,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Dragon Warrior,Dragon_Warrior,,0_14008,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Maya Run,Maya_Run,,0_14002,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Mr. Bao,Mr_Bao,,0_14005,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Star Wars,Star_Wars,,0_14015,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Panda Panda,Panda_Panda,,0_14003,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Candy Land,Candy_Land,,0_8029,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Crystal Realm,Crystal_Realm,,0_8024,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Beauty And The Kingdom,Beauty_And_The_Kingdom,,0_8044,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Chef-Doeuvre,Chef_Doeuvre,,0_8027,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Dragon,Dragon,,0_14010,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Inca Empire,Inca_Empire,,0_15006,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Dancing Papa,Dancing_Papa,,0_8026,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Napoleon,Napoleon,,0_8018,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+New Year,New_Year,,0_8017,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Coffeeholics,Coffeeholics,,0_8016,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Moonlight Treasure,Moonlight_Treasure,,0_8015,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Formosa Bear,Formosa_Bear,,0_8006,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Llama Adventure,Llama_Adventure,,0_8005,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Flirting Scholar Tang,Flirting_Scholar_Tang,,0_8002,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Lucky Dragon,Lucky_Dragon,,0_8001,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+EgyptTreasure,EgyptTreasure,,0_14038,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Fortune Treasure,Fortune_Treasure,,0_14039,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Winning Mask II,Winning_Mask_II,,0_8047,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Sun Archer,Sun_Archer,,0_15011,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Kingsman,Kingsman,,0_14016,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Chef Panda,Chef_Panda,,0_15010,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Lucky Phoenix,Lucky_Phoenix,,0_8035,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Guan Gong,Guan_Gong,,0_8046,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Street Fighter,Street_Fighter,,0_14012,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Lucky Qilin,Lucky_Qilin,,0_8007,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Rooster In Love,Rooster_In_Love,,0_15001,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Magic Show,Magic_Show,,0_8037,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Open Sesame,Open_Sesame,,0_8020,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Winning Mask,Winning_Mask,,0_8003,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+OpenSesameII,OpenSesameII,,0_8048,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Legendary5,Legendary5,,0_15012,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+OrientAnimals,OrientAnimals,,0_14029,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+BirdsParty,BirdsParty,,0_14033,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Mjoinir,Mjoinir,,0_14041,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+Moneybags Man,Moneybags_Man,,0_14047,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+MinerBabe,MinerBabe,,0_14046,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+JungleJungle,JungleJungle,,0_14052,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
+ExtremeKnockout,ExtremeKnockout,,0_8009,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+Goldfish Gold,Goldfish_Gold,,0_8011,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+Lucky Panda,Lucky_Panda,,0_8012,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+Sawadee Ka,Sawadee_Ka,,0_8013,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+Parvenu Tiger,Parvenu_Tiger,,0_8032,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+Golden Jaguar,Golden_Jaguar,,0_8033,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+Gold Dragon,Gold_Dragon,,0_8040,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+FuLaiLe,FuLaiLe,,0_8041,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+BaliDream,BaliDream,,0_8042,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB
+MermaidPrincess,MermaidPrincess,,0_8043,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,THB,JDB

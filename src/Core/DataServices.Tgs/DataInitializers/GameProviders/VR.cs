@@ -43,11 +43,20 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string IGameProvider.Name => "VR";
 
             IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations =>
-                new IGameProviderConfiguration[] {new VRGameProviderConfiguration()};
+                new IGameProviderConfiguration[]
+                {
+                    new VRGameProviderConfiguration()
+                };
 
-            ICurrency[] IGameProvider.Currencies => new ICurrency[] {new CNYCurrency("CNY")};
+            ICurrency[] IGameProvider.Currencies => new ICurrency[]
+            {
+                new CNYCurrency("CNY")
+            };
 
-            ILanguage[] IGameProvider.Languages => new ILanguage[] {new CNLanguage("zh")};
+            ILanguage[] IGameProvider.Languages => new ILanguage[]
+            {
+                new CNLanguage("zh")
+            };
 
             IGame[] IGameProvider.Games => _games;
 
@@ -79,6 +88,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         Status = true
                     }
                 }
+            };
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.VR, "VR")
             };
         }
 

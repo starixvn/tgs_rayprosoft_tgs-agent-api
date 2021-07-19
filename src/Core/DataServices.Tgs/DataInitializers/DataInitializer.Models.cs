@@ -14,5 +14,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string ExternalSetting = "");
 
         internal record PlayerDefined(string PlayerCode, Guid WalletId, Guid BrandId, Guid? AgentId);
+
+        internal record SubGameProvider(string Code, string Name);
     }
 }
