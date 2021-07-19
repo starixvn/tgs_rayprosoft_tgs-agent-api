@@ -10,8 +10,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
         {
             builder.ToTable("promotion_participants");
 
-            builder.HasKey(b => new {b.PromotionId, b.PlayerCode})
-                .HasName("pk_promotion_participants");
+            builder.HasKey(b => b.Id)
+                .HasName("pk_promotion_participants_id");
+
+            builder.Property(b => b.Id)
+                .ValueGeneratedOnAdd();
 
             builder.HasOne(p => p.Promotion)
                 .WithMany(p => p.PromotionParticipants)

@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Clients.Promotion.Client;
+using TGS.Clients.Promotion.Client.Models.Promotion;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Player;
 using TGS.Core.Models.Messages;
@@ -13,11 +15,13 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public partial class PlayerController : BaseContextController
     {
+        private readonly IPromotionClient _client;
         private readonly IMediator _mediator;
 
-        public PlayerController(IMediator mediator)
+        public PlayerController(IMediator mediator, IPromotionClient client)
         {
             _mediator = mediator;
+            _client = client;
         }
 
         [HttpGet]
@@ -69,5 +73,14 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Clear player buckets")]
         public Task<ClearPlayerBucketsResponse> ClearPlayerBucketsAsync(string playerCode) =>
             _mediator.Send(new ClearPlayerBucketsRequest(playerCode));
+
+        [HttpGet("{playerCode}/joinedPromotions")]
+        [Description("Get player operation")]
+        public Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(string playerCode,
+            [FromQuery] GetJoinedPromotionsRequest request)
+        {
+            request.PlayerCode = playerCode;
+            return _client.GetJoinedPromotionsAsync(request);
+        }
     }
 }
