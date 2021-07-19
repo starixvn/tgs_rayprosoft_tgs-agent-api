@@ -160,9 +160,11 @@ namespace TGS.Apis.OperatorApi.Models
         public string GetMessageByException(Exception exception)
             => exception.Message;
 
-        public string GetMessageKeyByException(TgsApiError errorType)
+        public string GetMessageKeyByException(Exception exception)
         {
-            if (_ErrorCodeMessageIdMap.TryGetValue(errorType, out var messageKey))
+            var type = exception.GetType();
+            if (_TgsApiErrorByException.TryGetValue(type, out var errorType)
+                && _ErrorCodeMessageIdMap.TryGetValue(errorType, out var messageKey))
                 return messageKey;
             else
                 return null;

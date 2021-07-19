@@ -45,5 +45,14 @@ namespace TGS.Core.Infrastructures.ErrorMappers
 
             return exception.Message;
         }
+
+        public string GetMessageKeyByException(Exception exception)
+        {
+            foreach (var mapper in _mappers)
+                if (mapper.CanProcess(exception))
+                    return mapper.GetMessageKeyByException(exception);
+
+            return null;
+        }
     }
 }

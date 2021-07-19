@@ -13,6 +13,6 @@ namespace TGS.Core.Models.Interfaces
 
         string GetMessageByException(Exception exception);
 
-        string GetMessageKeyByException(TgsApiError errorType) => null;
+        string GetMessageKeyByException(Exception exception) => null;
     }
 }

@@ -188,7 +188,7 @@ namespace TGS.Apis.OperatorApi
 
             services.AddHttpContextAccessor();
 
-            services.AddMediatR(typeof(Startup).Assembly);
+            //services.AddMediatR(typeof(Startup).Assembly);
 
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")

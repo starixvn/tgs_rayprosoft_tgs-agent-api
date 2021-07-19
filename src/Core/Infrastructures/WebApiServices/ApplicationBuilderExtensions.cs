@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Interfaces;
 using TGS.Core.Models.Messages;
 
@@ -73,6 +74,7 @@ namespace TGS.Core.Infrastructures.WebApiServices
                         var error = errorMapper.GetApiErrorByException(exception);
                         var statusCode = errorMapper.GetHttpStatusByException(exception);
                         var message = exception.GetMessageChain();
+                        var messageKey = errorMapper.GetMessageKeyByException(exception);
 
                         if (statusCode >= 500)
                         {
@@ -84,14 +86,14 @@ namespace TGS.Core.Infrastructures.WebApiServices
                         else
                             logger.LogWarning(exception, "Caught global exception!");
 
-
                         context.Response.ContentType = "application/json";
                         context.Response.StatusCode = statusCode;
 
                         await context.Response.WriteAsJsonAsync(new TgsResponse
                         {
                             Error = error,
-                            ErrorMessage = message
+                            ErrorMessage = message,
+                            ErrorMessageKey = messageKey
                         });
                     }
                 });
