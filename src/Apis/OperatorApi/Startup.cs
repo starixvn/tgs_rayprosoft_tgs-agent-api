@@ -17,9 +17,9 @@ using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.PrimePay;
+using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
-using TGS.Apis.OperatorApi.Middlewares;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Clients.Report.Client.Extensions;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -54,14 +54,17 @@ namespace TGS.Apis.OperatorApi
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseGlobalExceptionHandler();
-            app.UseMiddleware<OperatorApiErrorMapperMiddleware>();
-
             app.UseRequestLocalization(options =>
             {
-                options.DefaultRequestCulture = new("en-US");
-                options.ApplyCurrentCultureToResponseHeaders = true;
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+                options.SupportedCultures.Clear();
+                options.SupportedUICultures.Clear();
+
+                config.GetSection("RequestLocalization").Bind(options);
             });
+
+            app.UseTgsErrorHandler();
 
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
 
@@ -103,7 +106,6 @@ namespace TGS.Apis.OperatorApi
                 .AddSystemJsonSerializer()
                 .AddSecurity()
                 .AddOperations()
-                .AddErrorMappers()
                 .AddApiClient()
                 .AddPluggableServices()
                 .AddReportClientServices(_configuration)
@@ -114,6 +116,9 @@ namespace TGS.Apis.OperatorApi
                     config.GetSection("Promotion").Bind(options);
                 })
                 .AddTransactions();
+
+            services.AddErrorMapper()
+                .AddErrorMapper<OperatorApiErrorMapper>();
 
             services
                 .AddOperatorApiCore()
@@ -158,9 +163,14 @@ namespace TGS.Apis.OperatorApi
                 .AddIdentityVerifiers()
                 .AddPlayerBucketRepositoriesServices();
 
-            services.AddRouting(options => options.LowercaseUrls = true);
             services
-                .AddControllers(options => options.Filters.Add<ValidateModelFilter>())
+                .AddRouting(options => options.LowercaseUrls = true);
+            services
+                .AddControllers(options =>
+                {
+                    options.Filters.Add<ValidateModelFilter>();
+                    options.Filters.Add<TgsResponseWrapperAttribute>();
+                })
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
                 {
@@ -178,7 +188,7 @@ namespace TGS.Apis.OperatorApi
 
             services.AddHttpContextAccessor();
 
-            services.AddMediatR(typeof(Startup).Assembly);
+            //services.AddMediatR(typeof(Startup).Assembly);
 
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")
@@ -233,8 +243,6 @@ namespace TGS.Apis.OperatorApi
                             .SetIsOriginAllowed(_ => true);
                     });
             });
-
-            services.AddSingleton<OperatorApiErrorMapper>();
         }
     }
 }

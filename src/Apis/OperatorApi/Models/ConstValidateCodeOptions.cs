@@ -1,4 +1,4 @@
-﻿namespace TGS.Apis.OperatorApi
+﻿namespace TGS.Apis.OperatorApi.Models
 {
     public class ConstValidateCodeOptions
     {

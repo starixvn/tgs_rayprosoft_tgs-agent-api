@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Tgs.Payment;
 using Tgs.Payment.Clients;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -22,7 +20,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task CreateBankInfoAsync(
             [FromServices] ICommandService<CreateBankInfoCommand> createService,
             [FromServices] IOptions<JsonOptions> options,
@@ -44,7 +41,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpDelete("{bankInfoId}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task DeleteBankInfoAsync(
             [FromServices] ICommandService<DeleteBankInfoCommand> deleteService,
             Guid bankInfoId)
@@ -60,7 +56,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpGet]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public IAsyncEnumerable<BankInfoResponse> GetPlayerBankInfosAsync(
             [FromServices] IQueryService<GetPlayerBankInfosQuery, PlayerBankInfo> queryService)
         {

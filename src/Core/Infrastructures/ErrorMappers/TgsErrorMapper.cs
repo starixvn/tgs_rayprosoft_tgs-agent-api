@@ -89,17 +89,17 @@ namespace TGS.Core.Infrastructures.ErrorMappers
         {
             if (exception == null)
             {
-                return (int) TgsApiError.None;
+                return (int)TgsApiError.None;
             }
 
             if (exception is InvalidGameActionException e &&
                 TgsApiErrorByInvalidGameActionErrorCode.TryGetValue(e.ErrorCode, out var error))
             {
-                return (int) error;
+                return (int)error;
             }
 
             var type = exception.GetType();
-            return TgsApiErrorByException.TryGetValue(type, out error) ? (int) error : (int) SystemError;
+            return TgsApiErrorByException.TryGetValue(type, out error) ? (int)error : (int)SystemError;
         }
 
         int IErrorMapper.GetHttpStatusByException(Exception exception)

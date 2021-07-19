@@ -27,7 +27,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<PagingResponse<StationLetterResponse>> GetLettersAsync(
             [FromServices] IQueryService<GetStationLettersQuery, StationLetter> getStationLetterService,
             [FromServices] IGetService<GetStationLettersQuery, int> countStationLetterService,
@@ -73,7 +72,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="stationLetterIds">The station letter ids.</param>
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task SetHaveReadAsync(
             [FromServices] ICommandService<SetHaveReadCommand> setHaveReadService,
             [FromBody] IEnumerable<Guid> stationLetterIds)

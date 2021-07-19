@@ -22,7 +22,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet("{gpCode}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<GetGameBalanceResponse> GetGameBalanceAsync(
             [FromServices] IGetService<GetGameBalanceQuery, GameBalanceInfo> getGameBalanceService,
             [FromServices] IGameProviderStatusValidator gameStatusValidator,
@@ -46,38 +45,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// Transfer wallet fund out(Tgs -> Gp)
-        /// </summary>
-        /// <param name="submitGameBalanceFundOutCommandService"></param>
-        /// <param name="gameStatusValidator"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut("fund/out")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public async ValueTask SubmitGameBalanceFundOutRequestAsync(
-            [FromServices] ICommandService<SubmitGameBalanceFundOutCommand> submitGameBalanceFundOutCommandService,
-            [FromServices] IGameProviderStatusValidator gameStatusValidator,
-            [FromBody] SubmitGameBalanceFundOutRequest request)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, request.GameProviderCode, brandId);
-
-            var command = new SubmitGameBalanceFundOutCommand
-            (
-                request.GameProviderCode,
-                playerTokenData.PlayerCode,
-                request.Amount
-            );
-
-            await submitGameBalanceFundOutCommandService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Transfer wallet fund in(GP -> Tgs)
         /// </summary>
         /// <param name="submitGameBalanceFundInCommandService"></param>
@@ -86,7 +53,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPut("fund/in")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async ValueTask SubmitGameBalanceFundInRequestAsync(
             [FromServices] ICommandService<SubmitGameBalanceFundInCommand> submitGameBalanceFundInCommandService,
             [FromServices] IGameProviderStatusValidator gameStatusValidator,
@@ -105,6 +71,37 @@ namespace TGS.Apis.OperatorApi.Controllers
             );
 
             await submitGameBalanceFundInCommandService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Transfer wallet fund out(Tgs -> Gp)
+        /// </summary>
+        /// <param name="submitGameBalanceFundOutCommandService"></param>
+        /// <param name="gameStatusValidator"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("fund/out")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SubmitGameBalanceFundOutRequestAsync(
+            [FromServices] ICommandService<SubmitGameBalanceFundOutCommand> submitGameBalanceFundOutCommandService,
+            [FromServices] IGameProviderStatusValidator gameStatusValidator,
+            [FromBody] SubmitGameBalanceFundOutRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, request.GameProviderCode, brandId);
+
+            var command = new SubmitGameBalanceFundOutCommand
+            (
+                request.GameProviderCode,
+                playerTokenData.PlayerCode,
+                request.Amount
+            );
+
+            await submitGameBalanceFundOutCommandService
                 .ExecuteAsync(command)
                 .ConfigureAwait(false);
         }

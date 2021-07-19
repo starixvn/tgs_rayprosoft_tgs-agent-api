@@ -20,7 +20,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<BalanceInfoResponse> GetBalanceAsync(
             [FromServices] IGetService<GetBalanceQuery, BalanceInfo> getBalanceService)
         {
@@ -31,7 +30,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            return new() {Main = info.Main};
+            return new BalanceInfoResponse()
+            {
+                Main = info.Main
+            };
         }
     }
 }

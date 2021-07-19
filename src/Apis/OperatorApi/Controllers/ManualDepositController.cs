@@ -4,15 +4,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Payment.Clients;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using Tgs.Payment;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
-using Tgs.Payment.Clients;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -22,7 +21,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpGet("{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<ManualDepositFormResponse> GetDepositFormAsync(
             [FromServices] IGetService<GetBankDepositFormQuery, DepositFormInfo> getBankDepositService,
             [FromServices]
@@ -71,7 +69,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost("{id}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async ValueTask SubmitDepositFormAsync(
             [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBankDepositFormCommandService,
             Guid id,
@@ -93,7 +90,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPut]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async ValueTask<Guid> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,

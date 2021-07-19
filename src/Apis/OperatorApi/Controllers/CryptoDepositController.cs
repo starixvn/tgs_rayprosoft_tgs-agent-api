@@ -3,14 +3,12 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.ServiceUtility;
 
@@ -20,9 +18,52 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class CryptoDepositController : ControllerBase
     {
+        [HttpGet("leepay/exchangerate/{brandPaymentId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        public async Task<GetLeePayExchangeRateResponse> GetExchangeRateAsync(
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetLeePayExchangeRateQuery, string> getLeePayExchangeRateService,
+            [FromServices] LeePaySerializer serializer,
+            string brandPaymentId)
+        {
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(new Guid(brandPaymentId)))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var query = new GetLeePayExchangeRateQuery(
+                "tgs.payment.leepay.queryexchangerate",
+                serializer.Serialize(
+                    new LeePayQueryExchangeRateSettings(
+                        brandPaymentInfo.RootElement.GetProperty("systemId").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("systemKey").GetString(),
+                        "CNY",
+                        "USDT")));
+
+            var response = await getLeePayExchangeRateService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<LeePayQueryExchangeRateApplyInfo>(response);
+
+            if (applyInfo.Response.Code == "00")
+            {
+                return new GetLeePayExchangeRateResponse
+                {
+                    BuyPrice = applyInfo.Response.BuyPrice.Value.ToString("#.#####"),
+                    SellPrice = applyInfo.Response.SellPrice.Value.ToString("#.#####"),
+                    UpdateTime = applyInfo.Response.BizTime
+                };
+            }
+            else
+            {
+                throw new LeePayApiException();
+            }
+        }
+
         [HttpPut("leepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async ValueTask<LeePayDepositFormCreatedResponse> SubmitDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
@@ -80,51 +121,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                 FormId = createdFormId,
                 PaymentUrl = applyInfo.Response.PaymentUrl
             };
-        }
-
-        [HttpGet("leepay/exchangerate/{brandPaymentId}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public async Task<GetLeePayExchangeRateResponse> GetExchangeRateAsync(
-            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
-            [FromServices] IGetService<GetLeePayExchangeRateQuery, string> getLeePayExchangeRateService,
-            [FromServices] LeePaySerializer serializer,
-            string brandPaymentId)
-        {
-            var brandPayment = await getBrandPaymentService
-                .GetAsync(new GetBrandPaymentQuery(new Guid(brandPaymentId)))
-                .ConfigureAwait(false);
-
-            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
-
-            var query = new GetLeePayExchangeRateQuery(
-                "tgs.payment.leepay.queryexchangerate",
-                serializer.Serialize(
-                    new LeePayQueryExchangeRateSettings(
-                        brandPaymentInfo.RootElement.GetProperty("systemId").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("systemKey").GetString(),
-                        "CNY",
-                        "USDT")));
-
-            var response = await getLeePayExchangeRateService
-                .GetAsync(query)
-                .ConfigureAwait(false);
-
-            var applyInfo = serializer.Deserialize<LeePayQueryExchangeRateApplyInfo>(response);
-
-            if (applyInfo.Response.Code == "00")
-            {
-                return new GetLeePayExchangeRateResponse
-                {
-                    BuyPrice = applyInfo.Response.BuyPrice.Value.ToString("#.#####"),
-                    SellPrice = applyInfo.Response.SellPrice.Value.ToString("#.#####"),
-                    UpdateTime = applyInfo.Response.BizTime
-                };
-            }
-            else
-            {
-                throw new LeePayApiException();
-            }
         }
     }
 }
