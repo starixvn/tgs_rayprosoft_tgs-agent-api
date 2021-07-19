@@ -180,6 +180,8 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<LogRecord> LogRecords { get; set; }
 
         DbSet<AdminLog> AdminLogs { get; set; }
+
+        DbSet<BrandCommunication> BrandCommunications { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
