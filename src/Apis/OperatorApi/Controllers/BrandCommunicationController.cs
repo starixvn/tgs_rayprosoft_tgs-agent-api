@@ -34,7 +34,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Phone = x.Phone,
                     AppId = x.AppId,
                     QRCodeUrl = x.QRCodeUrl
-                });
+                })
+                .Take(5);
         }
     }
 }
