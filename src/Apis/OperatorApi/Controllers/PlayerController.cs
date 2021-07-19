@@ -284,7 +284,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPatch("identity")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public ValueTask SetPlayerIdentityAsync(
             [FromServices] ICommandService<SetIdentityCommand> setIdentityService,
             [FromBody] SetPlayerIdentityRequest request)
