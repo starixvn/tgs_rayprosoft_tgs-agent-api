@@ -2,19 +2,24 @@
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
+using TGS.Apis.BackendOffice.DataService.Repositories;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
@@ -105,21 +110,36 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .AsQueryable()
                 .BuildMock().Object;
 
-            var request = new Fixture().Create<StationLetterRequest>();
-            request.AssignedAllPlayers = false;
+            var request = new StationLetterRequest
+            {
+                BrandId = Guid.NewGuid(),
+                AssignedAllPlayers = false,
+                Content = "test1",
+                LanguageContent = JsonDocument.Parse("{}"),
+                Subject = "subject",
+                From = DateTimeOffset.Now,
+                To = DateTimeOffset.Now.AddDays(1),
+                PlayerUsernames = Array.Empty<string>()
+            };
             request.PlayerUsernames = players
                 .Where(p => p.Status == PlayerStatus.Enabled && p.BrandId == request.BrandId)
                 .Select(p => p.Username).ToArray();
 
             _playerQueriesMock.Setup(p => p.GetQueries())
                 .Returns(players);
-
-            var response = await _controller.CreateAsync(request);
+            var serializationProvider = new JsonSerializationProvider();
+            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+            var response = await _controller.CreateAsync(
+                serializationProvider,
+                jsonOptionsAccessor,
+                request);
             response.Valid.Should().BeTrue();
-            _stationLetterServiceMock.Verify(p => p.CreateStationLetterAsync(It.Is<StationLetter>(s =>
-                    s.Subject == request.Subject &&
-                    s.Content == request.Content &&
-                    s.AssignedAllPlayers == request.AssignedAllPlayers),
+            _stationLetterServiceMock.Verify(
+                p => p.CreateStationLetterAsync(
+                    It.Is<StationLetter>(s =>
+                        s.Subject == request.Subject &&
+                        s.Content == request.Content &&
+                        s.AssignedAllPlayers == request.AssignedAllPlayers),
                 It.Is<StationLetterPlayer[]>(x => x.Length == request.PlayerUsernames.Length)));
         }
 
@@ -127,14 +147,33 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Update()
         {
             var stationLetterId = Guid.NewGuid();
-            var request = new Fixture().Create<StationLetterRequest>();
+            var request = new StationLetterRequest
+            {
+                BrandId = Guid.NewGuid(),
+                AssignedAllPlayers = false,
+                Content = "test1",
+                LanguageContent = JsonDocument.Parse("{}"),
+                Subject = "subject",
+                From = DateTimeOffset.Now,
+                To = DateTimeOffset.Now.AddDays(1),
+                PlayerUsernames = Array.Empty<string>()
+            };
             var stationLetter = CreateStationLetterFixture().Create<StationLetter>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
+            _queriesMock
+                .Setup(s => s.GetSingleAsync(
+                    It.IsAny<Expression<Func<StationLetter, bool>>>(),
                     It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
                 .Returns(Task.FromResult(stationLetter));
 
-            var response = await _controller.UpdateAsync(stationLetterId, request);
+            var serializationProvider = new JsonSerializationProvider();
+            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+            var response = await _controller.UpdateAsync(
+                serializationProvider,
+                jsonOptionsAccessor,
+                stationLetterId,
+                request);
             response.Valid.Should().BeTrue();
             _commandsMock.Verify(p => p.UpdateAsync(It.Is<StationLetter>(s =>
                 s.Subject == request.Subject &&
@@ -145,18 +184,54 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public async Task Can_Update_Not_Found()
         {
             var stationLetterId = Guid.NewGuid();
-            var request = new Fixture().Create<StationLetterRequest>();
+            var request = new StationLetterRequest
+            {
+                BrandId = Guid.NewGuid(),
+                AssignedAllPlayers = false,
+                Content = "test1",
+                LanguageContent = JsonDocument.Parse("{}"),
+                Subject = "subject",
+                From = DateTimeOffset.Now,
+                To = DateTimeOffset.Now.AddDays(1),
+                PlayerUsernames = Array.Empty<string>()
+            };
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
+            var queriesMock = new Mock<ITgsQueries<StationLetter>>();
+            var playerQueriesMock = new Mock<ITgsQueries<Player>>();
+            var commandsMock = new Mock<ITgsCommands<StationLetter>>();
+            var playerCommandsMock = new Mock<ITgsCommands<StationLetterPlayer>>();
+            var uploadServiceMock = new Mock<IUploadService>();
+            var stationLetterServiceMock = new Mock<IStationLetterService>();
+
+            queriesMock
+                .Setup(s => s.GetSingleAsync(
+                    It.IsAny<Expression<Func<StationLetter, bool>>>(),
                     It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
                 .Returns(Task.FromResult<StationLetter>(null));
 
-            var response = await _controller.UpdateAsync(stationLetterId, request);
+            var sut = new StationLetterController(
+                queriesMock.Object,
+                playerQueriesMock.Object,
+                commandsMock.Object,
+                playerCommandsMock.Object,
+                uploadServiceMock.Object,
+                stationLetterServiceMock.Object);
+
+            var serializationProvider = new JsonSerializationProvider();
+            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+            var response = await sut.UpdateAsync(
+                serializationProvider,
+                jsonOptionsAccessor,
+                stationLetterId,
+                request);
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.StationLetter.NotFound);
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<StationLetter>(s =>
-                s.Subject == request.Subject &&
-                s.Content == request.Content)), Times.Never);
+            commandsMock.Verify(
+                p => p.UpdateAsync(
+                    It.Is<StationLetter>(s => s.Subject == request.Subject
+                        && s.Content == request.Content)),
+                Times.Never);
         }
 
         [TestCase("pass", StationLetterStatus.Published)]
@@ -167,9 +242,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var stationLetter = CreateStationLetterFixture().Create<StationLetter>();
             stationLetter.Status = StationLetterStatus.InVerify;
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<StationLetter, bool>>>(),
+            _queriesMock
+                .Setup(s => s.GetSingleAsync(
+                    It.IsAny<Expression<Func<StationLetter, bool>>>(),
                     It.IsAny<Func<IQueryable<StationLetter>, IQueryable<StationLetter>>>()))
                 .Returns(Task.FromResult(stationLetter));
+
 
             var response = await _controller.VerifyAsync(stationLetter.Id, type, request);
             response.Valid.Should().BeTrue();
@@ -252,13 +330,6 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             }
         }
 
-        //[Test]
-        //public async Task Can_Export()
-        //{
-        //    var response = await _controller.ExportAsync();
-        //    response.StatusCode.Should().Be(HttpStatusCode.OK);
-        //}
-
         private Fixture CreateStationLetterFixture()
         {
             var fixture = new Fixture();
@@ -283,6 +354,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .With(s => s.Wallets, new[] { new Core.DataServices.Tgs.Models.Wallet { Balance = 0 } })
                 .With(s => s.BrandPaymentPlayers, new BrandPaymentPlayer[] { })
                 .With(s => s.SportsBetLimits, new PlayerSportsBetLimit[] { }));
+
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
