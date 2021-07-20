@@ -18,6 +18,32 @@ namespace TGS.Operator.Repositories
             _tgsRepository = tgsRepository;
         }
 
+        public IAsyncEnumerable<GameDataInfo> QueryGamesAsync(
+            IEnumerable<Guid> gameProviderIds,
+            IEnumerable<GameStatus> statuses,
+            IEnumerable<GamePlatformType> gamePlatformTypes)
+        {
+            var query = _tgsRepository.Games.AsQueryable()
+                .Where(g => gameProviderIds.Contains(g.GameProviderId) &&
+                    statuses.Contains(g.Status) &&
+                    gamePlatformTypes.Contains(g.PlatformType))
+                .Select(g =>
+                    new GameDataInfo(
+                        g.Id,
+                        g.Code,
+                        g.Name,
+                        g.Description,
+                        g.SubGameProviderCode,
+                        g.Status,
+                        g.Type,
+                        g.PlatformType,
+                        g.AvailableToBrand,
+                        g.AvailableCurrencies,
+                        g.Localization));
+
+            return query.AsAsyncEnumerable();
+        }
+
         public IAsyncEnumerable<GameTypeDataInfo> QueryGameTypeInfosAsync(IEnumerable<Guid> gameProviderIds,
             IEnumerable<GameStatus> statuses, IEnumerable<GamePlatformType> gamePlatformTypes)
         {

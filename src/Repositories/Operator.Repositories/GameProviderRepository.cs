@@ -37,14 +37,14 @@ namespace TGS.Operator.Repositories
         public IAsyncEnumerable<GameProviderDataInfo> QueryGameProvidersAsync(IEnumerable<Guid> gameProviderIds,
             IEnumerable<Status> statuses)
         {
-            var query = from gameProvider in _tgsRepository.GameProviders.AsQueryable()
-                        where gameProviderIds.Contains(gameProvider.Id) &&
-                            statuses.Contains(gameProvider.Status)
+            var query = from gp in _tgsRepository.GameProviders.AsQueryable()
+                        where gameProviderIds.Contains(gp.Id) &&
+                            statuses.Contains(gp.Status)
                         select new GameProviderDataInfo(
-                            gameProvider.Id,
-                            gameProvider.Code,
-                            gameProvider.Status,
-                            gameProvider.TransferWallet);
+                            gp.Id,
+                            gp.Code,
+                            gp.Status,
+                            gp.TransferWallet);
 
             return query.AsAsyncEnumerable();
         }
@@ -57,6 +57,20 @@ namespace TGS.Operator.Repositories
                 .Select(c => new GameProviderCurrencyDataInfo(c.GameProviderId, c.CurrencyCode));
 
             return query.AsAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<SubGameProviderDataInfo> QuerySubGameProvidersAsync(string? subGameProviderCode = null)
+        {
+            var query = _tgsRepository.SubGameProviders.AsQueryable();
+
+            if (!string.IsNullOrEmpty(subGameProviderCode))
+            {
+                query = query.Where(sgp => sgp.Code == subGameProviderCode);
+            }
+
+            var info = query.Select(sgp => new SubGameProviderDataInfo(sgp.GameProviderId, sgp.Code));
+
+            return info.AsAsyncEnumerable();
         }
     }
 }

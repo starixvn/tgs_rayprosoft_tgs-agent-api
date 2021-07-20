@@ -11,9 +11,10 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
+using TGS.Services.Operator.GameProviders;
+using TGS.Services.Operator.Games;
 using TGS.Services.Operator.Services.Game;
 using TGS.Services.PluggableServices;
 using TGS.ServiceUtility;
@@ -33,34 +34,34 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var query = new GetGamesQuery(
                 brandId,
-                CurrencyCode: "CNY",
+                "CNY",
                 gameProviderCode,
                 new PlayerTokenData(),
                 PlatformType.Desktop,
-                Types: Array.Empty<GameType>(),
-                LanguageCode: "zh-CN");
+                Array.Empty<GameType>(),
+                "zh-CN");
 
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();            
-            var fakeIGameQueries = Substitute.For<IGameQueries>();
+            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGameRepository = Substitute.For<IGameRepository>();
 
             var sut = new GetGamesQueryService(
                 fakeBrandCurrencyCodeMapper,
-                fakeGameProviderOperations,
                 fakeBrandOperations,
                 fakePlayerOperations,
                 fakeBrandLanguageCodeMapper,
-                fakeIGameQueries,
                 fakeValidStatus,
-                fakeValidGameStatus);
+                fakeValidGameStatus,
+                fakeGameProviderRepository,
+                fakeGameRepository);
 
             // act
-            await sut.QueryAsync(query, default).ToArrayAsync();
+            await sut.QueryAsync(query).ToArrayAsync();
 
             // assert
             // 驗證沒傳gpcode時 會執行一次 _brandOperations.GetBrandGameProvidersAsync 取得全部gameProviderId
@@ -76,33 +77,34 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
-            var fakeIGameQueries = Substitute.For<IGameQueries>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGameRepository = Substitute.For<IGameRepository>();
 
             var sut = new GetGamesQueryService(
                 fakeBrandCurrencyCodeMapper,
-                fakeGameProviderOperations,
                 fakeBrandOperations,
                 fakePlayerOperations,
                 fakeBrandLanguageCodeMapper,
-                fakeIGameQueries,
                 fakeValidStatus,
-                fakeValidGameStatus);
+                fakeValidGameStatus,
+                fakeGameProviderRepository,
+                fakeGameRepository);
 
             var gameProviderCode = "SBO";
 
             var query = new GetGamesQuery(
-                BrandId: Guid.NewGuid(),
-                CurrencyCode: "CNY",
+                Guid.NewGuid(),
+                "CNY",
                 gameProviderCode,
                 new PlayerTokenData(),
                 PlatformType.Desktop,
-                Types: Array.Empty<GameType>(),
-                LanguageCode: "zh-CN");
+                Array.Empty<GameType>(),
+                "zh-CN");
 
             // act
-            await sut.QueryAsync(query, default).ToArrayAsync();
+            await sut.QueryAsync(query).ToArrayAsync();
 
             // assert
             // 驗證有傳gpcode時 會執行一次 _gameProviderOperations.GetGameProviderIdByCodeAsync 取得gameProviderId
@@ -148,15 +150,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             fakePlayerOperations
                 .GetCachedPlayerAsync(playerCode)
-                .Returns(new CachedPlayer()
-                {
-                    Status = PlayerStatus.Enabled
-                });
+                .Returns(new CachedPlayer {Status = PlayerStatus.Enabled});
 
             fakePluggableOperations
                 .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
                 .Returns(uri);
-            var req = new PluggableModels.GetGameUrlRequest()
+            var req = new PluggableModels.GetGameUrlRequest
             {
                 ExtendedData = null,
                 GameId = gameId,
@@ -166,7 +165,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             };
             fakePluggalbeGameProviderApiClient
                 .GetGameUrlAsync(uri, Arg.Any<PluggableModels.GetGameUrlRequest>())
-                .Returns(new PluggableModels.GetGameUrlResponse()
+                .Returns(new PluggableModels.GetGameUrlResponse
                 {
                     Url = "http://www.lobbyURL.com",
                     Error = 0,
@@ -174,11 +173,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 });
 
             var query = new GetGameUrlQuery(
-               playerToken,
-               gameProviderCode,
-               gameId,
-               languageCode,
-               extendedData);
+                playerToken,
+                gameProviderCode,
+                gameId,
+                languageCode,
+                extendedData);
 
             var sut = new GetGameUrlQueryService(
                 fakePlayerOperations,
@@ -192,7 +191,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakePluggalbeGameProviderApiClient);
 
             // act
-            await sut.GetAsync(query, default);
+            await sut.GetAsync(query);
 
             // assert
             _ = fakePluggalbeGameProviderApiClient
@@ -234,7 +233,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var externalGameId = "CardGameLobby";
             var cachedGameList = new List<CachedGame>
             {
-                new CachedGame()
+                new CachedGame
                 {
                     Id = gameId,
                     ExternalId = externalGameId,
@@ -242,7 +241,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Type = gameType,
                     AvailableToBrand = true,
                     Status = GameStatus.Active,
-                    SubGame = false,
+                    SubGame = false
                 }
             };
 
@@ -252,7 +251,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(cachedGames);
 
             fakeGetGameUrlQueryService
-                .GetAsync(Arg.Any<GetGameUrlQuery>(), default)
+                .GetAsync(Arg.Any<GetGameUrlQuery>())
                 .Returns(new GameUrlInfo(0, "", "http://www.lobbyURL.com"));
 
             var query = new GetLobbyGameUrlQuery(
@@ -266,7 +265,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeGameProviderOperations,
                 fakeGetGameUrlQueryService);
             // act
-            var actual = await sut.GetAsync(query, default);
+            var actual = await sut.GetAsync(query);
 
             // assert
             Assert.AreEqual("http://www.lobbyURL.com", actual.Url);

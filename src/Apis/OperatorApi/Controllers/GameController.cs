@@ -1,10 +1,12 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
 using TGS.ServiceUtility;
@@ -17,7 +19,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class GameController : ControllerBase
     {
         /// <summary>
-        /// get game list of specific game provider
+        ///     get game list of specific game provider
         /// </summary>
         [HttpGet("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
@@ -34,7 +36,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.GameProviderCode,
                 playerTokenData,
                 request.PlatformType,
-                request.Types,
+                request.Types ?? Array.Empty<GameType>(),
                 request.LanguageCode);
 
             var infos = await getGamesQueryService
@@ -45,33 +47,30 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
             var games = infos.Select(info =>
-                new GameModel()
-                {
-                    Code = info.Code,
-                    GameProviderCode = info.GameProviderCode,
-                    Description = info.Description,
-                    DisplayOrder = info.DisplayOrder,
-                    Id = info.Id,
-                    IsActive = info.IsActive,
-                    Name = info.Name,
-                    Tag = new Tag()
+                    new GameModel
                     {
-                        Hot = info.Tag.Hot,
-                        New = info.Tag.New,
-                        Recommend = info.Tag.Recommend
-                    },
-                    Type = info.Type
-                })
+                        Code = info.Code,
+                        GameProviderCode = info.GameProviderCode,
+                        Description = info.Description,
+                        DisplayOrder = info.DisplayOrder,
+                        Id = info.Id,
+                        IsActive = info.IsActive,
+                        Name = info.Name,
+                        Tag = new Tag
+                        {
+                            Hot = info.Tag.Hot,
+                            New = info.Tag.New,
+                            Recommend = info.Tag.Recommend
+                        },
+                        Type = info.Type
+                    })
                 .ToArray();
 
-            return new GetGamesResponse()
-            {
-                Games = games
-            };
+            return new GetGamesResponse {Games = games};
         }
 
         /// <summary>
-        /// get game launch url via game id
+        ///     get game launch url via game id
         /// </summary>
         [HttpPost("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -91,7 +90,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            return new GetGameUrlResponse()
+            return new GetGameUrlResponse
             {
                 Error = info.Error,
                 ErrorMessage = info.ErrorMessage,
@@ -100,7 +99,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// get game launch url for lobby type game.
+        ///     get game launch url for lobby type game.
         /// </summary>
         [HttpPost("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -121,7 +120,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            return new GetGameUrlResponse()
+            return new GetGameUrlResponse
             {
                 Error = info.Error,
                 ErrorMessage = info.ErrorMessage,

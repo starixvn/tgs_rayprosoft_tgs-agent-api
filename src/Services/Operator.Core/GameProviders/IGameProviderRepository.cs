@@ -12,6 +12,9 @@ namespace TGS.Services.Operator.GameProviders
         IAsyncEnumerable<SubGameProviderWithLocationDataInfo> QuerySubGameProvidersAsync(
             IEnumerable<Guid> gameProviderIds);
 
+        IAsyncEnumerable<SubGameProviderDataInfo> QuerySubGameProvidersAsync(
+            string? subGameProviderCode = null);
+
         IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(
             IEnumerable<Guid> gameProviderIds);
     }
