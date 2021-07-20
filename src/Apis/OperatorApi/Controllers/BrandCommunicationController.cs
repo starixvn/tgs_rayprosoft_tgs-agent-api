@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
-using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.BrandCommunication;
@@ -15,15 +15,14 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class BrandCommunicationController : ControllerBase
     {
-        [HttpGet]
+        [HttpGet("{brandId}")]
         [Description("Get a brand's communications")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         [TgsResponseWrapper]
         public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
+            Guid brandId,
             [FromServices] IQueryService<BrandCommunicationQuery, BrandCommunicationInfo> queryService)
         {
-            var brandId = HttpContext.Items.GetBrandId();
-
             var query = new BrandCommunicationQuery(brandId);
             var info = queryService.QueryAsync(query);
 
