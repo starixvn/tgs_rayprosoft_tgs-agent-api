@@ -4,7 +4,7 @@ using TGS.Core.Models.Tokens;
 
 namespace TGS.Services.Operator.Services.GameProvider
 {
-    public record GetGameProviderQuery(
+    public record GetGameProvidersQuery(
         Guid BrandId,
         string CurrencyCode,
         PlayerTokenData PlayerTokenData,
