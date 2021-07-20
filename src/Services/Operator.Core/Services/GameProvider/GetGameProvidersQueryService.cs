@@ -17,7 +17,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameProvider
 {
-    internal class GetGameProviderQueryService : IQueryService<GetGameProviderQuery, GameProviderInfo>
+    internal class GetGameProvidersQueryService : IQueryService<GetGameProvidersQuery, GameProviderInfo>
     {
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
         private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
@@ -28,7 +28,7 @@ namespace TGS.Services.Operator.Services.GameProvider
         private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IValidStatus<Status> _validStatus;
 
-        public GetGameProviderQueryService(
+        public GetGameProvidersQueryService(
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
             IPlayerOperations playerOperations,
             IBrandLanguageCodeMapper brandLanguageCodeMapper,
@@ -51,7 +51,7 @@ namespace TGS.Services.Operator.Services.GameProvider
         }
 
         public async IAsyncEnumerable<GameProviderInfo> QueryAsync(
-            GetGameProviderQuery query,
+            GetGameProvidersQuery query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var brandId = query.BrandId;

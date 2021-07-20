@@ -22,13 +22,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async Task<GetGameProvidersResponse> GetGameProvidersAsync(
-            [FromServices] IQueryService<GetGameProviderQuery, GameProviderInfo> getGameProviderQueryService,
+            [FromServices] IQueryService<GetGameProvidersQuery, GameProviderInfo> getGameProviderQueryService,
             [FromQuery] GetGameProvidersRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var query = new GetGameProviderQuery(
+            var query = new GetGameProvidersQuery(
                 brandId,
                 request.CurrencyCode,
                 playerTokenData,
