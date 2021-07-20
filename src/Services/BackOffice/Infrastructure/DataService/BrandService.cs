@@ -15,6 +15,7 @@ using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
+using TGS.Services.BackOffice.Infrastructure.RedisServices;
 using TGS.Services.BackOffice.Infrastructure.Services;
 using IsolationLevel = System.Data.IsolationLevel;
 
@@ -40,14 +41,19 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private readonly IRedisCacheManager _cacheManager;
         private readonly ICredentialGenerator _credentialGenerator;
         private readonly ITgsRepository _repository;
+        private readonly IMaintenanceRedisService _maintenanceRedisService;
 
-        public BrandService(ITgsRepository tgsRepository, ICredentialGenerator credentialGenerator,
-            IRedisCacheManager cacheManager) : base(
+        public BrandService(
+            ITgsRepository tgsRepository,
+            ICredentialGenerator credentialGenerator,
+            IRedisCacheManager cacheManager,
+            IMaintenanceRedisService maintenanceRedisService) : base(
             tgsRepository)
         {
             _repository = tgsRepository;
             _credentialGenerator = credentialGenerator;
             _cacheManager = cacheManager;
+            _maintenanceRedisService = maintenanceRedisService ?? throw new ArgumentNullException(nameof(maintenanceRedisService));
         }
 
         async Task IBrandService.ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request)
@@ -58,6 +64,17 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             await UpdateEntityAsync(brand);
             await _cacheManager.ClearCacheAsync(RedisCacheType.Brand, brand.Id);
+            if (request.Status is Status.Active or Status.Maintenance)
+            {
+                if (request.Status is Status.Active)
+                {
+                    await _maintenanceRedisService.CleartBrandMaintenanceAsync(brand.Id).ConfigureAwait(false);
+                }
+                else
+                {
+                    await _maintenanceRedisService.AddBrandMaintenanceAsync(brand.Id).ConfigureAwait(false);
+                }
+            }
         }
 
         async Task IBrandService.CreateBrandAsync(CreateBrandRequest request)

@@ -8,6 +8,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Reseller;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
+using TGS.Services.BackOffice.Infrastructure.RedisServices;
 
 namespace TGS.Apis.BackendOffice.DataService.Services
 {
@@ -26,10 +27,15 @@ namespace TGS.Apis.BackendOffice.DataService.Services
     public class ResellerService : IResellerService
     {
         private readonly ITgsRepository _repository;
+        private readonly IMaintenanceRedisService _maintenanceRedisService;
 
-        public ResellerService(ITgsRepository repository)
+        public ResellerService(
+            ITgsRepository repository,
+            IMaintenanceRedisService maintenanceRedisService
+            )
         {
             _repository = repository;
+            _maintenanceRedisService = maintenanceRedisService ?? throw new ArgumentNullException(nameof(maintenanceRedisService));
         }
 
         async Task IResellerService.CreateResellerAsync(CreateResellerRequest request,
@@ -91,7 +97,7 @@ namespace TGS.Apis.BackendOffice.DataService.Services
             return _repository.SaveChangesAsync();
         }
 
-        Task IResellerService.ChangeStatusAsync(Reseller reseller, Status status, string username)
+        async Task IResellerService.ChangeStatusAsync(Reseller reseller, Status status, string username)
         {
             reseller.Status = status;
             reseller.UpdatedOn = DateTimeOffset.Now;
@@ -99,7 +105,33 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             _repository.Entry(reseller).State = EntityState.Modified;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            if (status is Status.Active or Status.Maintenance)
+            {
+                var licensees = _repository.Licensees.AsQueryable().Where(x => x.ResellerId == reseller.Id).Select(x => new { x.Id, x.Code }).ToArray();
+                var brands = (from brand in _repository.Brands.AsQueryable()
+                              join licensee in licensees
+                              on brand.LicenseeId equals licensee.Id
+                              select new { brand.Id, brand.Code }).ToArray();
+                if (status is Status.Active)
+                {
+                    await _maintenanceRedisService.ClearResellerMaintenanceAsync(reseller.Id).ConfigureAwait(false);
+
+                    await _maintenanceRedisService.CleartLicenseeMaintenancesAsync(licensees.Select(x => x.Id).ToArray()).ConfigureAwait(false);
+
+                    await _maintenanceRedisService.CleartBrandMaintenancesAsync(brands.Select(x => x.Id).ToArray()).ConfigureAwait(false);
+                }
+                else
+                {
+                    await _maintenanceRedisService.AddResellerMaintenanceAsync(reseller.Id).ConfigureAwait(false);
+
+                    await _maintenanceRedisService.AddLicenseeMaintenancesAsync(licensees.Select(x => x.Id).ToArray()).ConfigureAwait(false);
+
+                    await _maintenanceRedisService.AddBrandMaintenancesAsync(brands.Select(x => x.Id).ToArray()).ConfigureAwait(false);
+                }
+            }
+
         }
 
         Task<bool> IResellerService.ExistsAsync(Expression<Func<Reseller, bool>> predicate) =>

@@ -8,6 +8,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Licensee;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
+using TGS.Services.BackOffice.Infrastructure.RedisServices;
 
 namespace TGS.Apis.BackendOffice.DataService.Services
 {
@@ -32,13 +33,18 @@ namespace TGS.Apis.BackendOffice.DataService.Services
     public class LicenseeService : ILicenseeService
     {
         private readonly ITgsRepository _repository;
+        private readonly IMaintenanceRedisService _maintenanceRedisService;
 
-        public LicenseeService(ITgsRepository tgsRepository)
+        public LicenseeService(
+            ITgsRepository tgsRepository,
+            IMaintenanceRedisService maintenanceRedisService
+            )
         {
             _repository = tgsRepository;
+            _maintenanceRedisService = maintenanceRedisService ?? throw new ArgumentNullException(nameof(maintenanceRedisService));
         }
 
-        Task ILicenseeService.ChangeStatusAsync(Licensee licensee, Status status, string username)
+        async Task ILicenseeService.ChangeStatusAsync(Licensee licensee, Status status, string username)
         {
             licensee.Status = status;
             licensee.UpdatedOn = DateTimeOffset.Now;
@@ -46,7 +52,23 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             _repository.Entry(licensee).State = EntityState.Modified;
 
-            return _repository.SaveChangesAsync();
+            await _repository.SaveChangesAsync().ConfigureAwait(false);
+
+            if (status is Status.Active or Status.Maintenance)
+            {
+                var brands = _repository.Brands.AsQueryable().Where(x => x.LicenseeId == licensee.Id).Select(x => new { x.Id, x.Code }).ToArray();
+
+                if (status is Status.Active)
+                {
+                    await _maintenanceRedisService.CleartLicenseeMaintenanceAsync(licensee.Id).ConfigureAwait(false);
+                    await _maintenanceRedisService.CleartBrandMaintenancesAsync(brands.Select(x => x.Id).ToArray()).ConfigureAwait(false);
+                }
+                else
+                {
+                    await _maintenanceRedisService.AddLicenseeMaintenanceAsync(licensee.Id).ConfigureAwait(false);
+                    await _maintenanceRedisService.AddBrandMaintenancesAsync(brands.Select(x => x.Id).ToArray()).ConfigureAwait(false);
+                }
+            }
         }
 
         async Task ILicenseeService.CreateLicenseeAsync(CreateLicenseeRequest request, string username)
