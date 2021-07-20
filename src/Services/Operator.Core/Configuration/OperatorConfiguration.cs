@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Infrastructures.Mail;
 using Tgs.Payment.Clients;
 using TGS.Services.Operator.GameProviders;
+using TGS.Services.Operator.Games;
 using TGS.Services.Operator.StationLetters;
 using TGS.Services.WalletService.Configuration;
 
@@ -73,6 +74,14 @@ namespace TGS.Services.Operator.Configuration
             where TGameProviderRepository : class, IGameProviderRepository
         {
             Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration UseGameRepository<TGameRepository>()
+            where TGameRepository : class, IGameRepository
+        {
+            Services.AddTransient<IGameRepository, TGameRepository>();
 
             return this;
         }
