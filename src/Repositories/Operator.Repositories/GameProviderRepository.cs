@@ -31,19 +31,19 @@ namespace TGS.Operator.Repositories
             return query;
         }
 
-        public IAsyncEnumerable<GameProviderInfo> QueryGameProvidersAsync(IEnumerable<Guid> gameProviderIds,
+        public IAsyncEnumerable<GameProviderDataInfo> QueryGameProvidersAsync(IEnumerable<Guid> gameProviderIds,
             IEnumerable<GamePlatformType> gamePlatformTypes)
         {
             var query = from gameProvider in _tgsRepository.GameProviders.AsQueryable()
                         where gameProviderIds.Contains(gameProvider.Id)
-                        select new GameProviderInfo(
+                        select new GameProviderDataInfo(
                             gameProvider.Id,
                             gameProvider.Code,
                             gameProvider.Status,
                             gameProvider.TransferWallet,
                             gameProvider.Games
                                 .Where(g => gamePlatformTypes.Contains(g.PlatformType))
-                                .Select(g => new GameTypeAndStatusInfo(g.Type, g.Status, g.SubGameProviderCode)),
+                                .Select(g => new GameTypeAndStatusDataInfo(g.Type, g.Status, g.SubGameProviderCode)),
                             gameProvider.Currencies.Select(c => c.CurrencyCode));
 
             return query.ToAsyncEnumerable();

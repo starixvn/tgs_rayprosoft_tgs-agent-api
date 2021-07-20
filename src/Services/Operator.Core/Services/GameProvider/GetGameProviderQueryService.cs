@@ -17,7 +17,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameProvider
 {
-    internal class GetGameProviderQueryService : IQueryService<GetGameProviderQuery, GameProviderModel>
+    internal class GetGameProviderQueryService : IQueryService<GetGameProviderQuery, GameProviderInfo>
     {
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
         private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
@@ -50,7 +50,7 @@ namespace TGS.Services.Operator.Services.GameProvider
                 gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
         }
 
-        public async IAsyncEnumerable<GameProviderModel> QueryAsync(
+        public async IAsyncEnumerable<GameProviderInfo> QueryAsync(
             GetGameProviderQuery query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
@@ -123,7 +123,7 @@ namespace TGS.Services.Operator.Services.GameProvider
 
                     if (string.IsNullOrEmpty(sgp.Localization))
                     {
-                        yield return new GameProviderModel
+                        yield return new GameProviderInfo
                         {
                             Code = sgp.Code,
                             Name = sgp.Name,
@@ -140,7 +140,7 @@ namespace TGS.Services.Operator.Services.GameProvider
                     if (!localization.RootElement.TryGetProperty(culture, out var lang) ||
                         lang.ValueKind == JsonValueKind.Undefined)
                     {
-                        yield return new GameProviderModel
+                        yield return new GameProviderInfo
                         {
                             Code = sgp.Code,
                             Name = sgp.Name,
@@ -153,7 +153,7 @@ namespace TGS.Services.Operator.Services.GameProvider
                         continue;
                     }
 
-                    yield return new GameProviderModel
+                    yield return new GameProviderInfo
                     {
                         Code = sgp.Code,
                         Name = GetLocalization(lang, "name", sgp.Name),

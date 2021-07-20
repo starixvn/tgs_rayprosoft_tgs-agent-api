@@ -1,9 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using TGS.Core.Models.Enums;
+﻿using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator
 {
-    public record GameProviderInfo(Guid Id, string Code, Status Status, bool IsTransferWallet,
-        IEnumerable<GameTypeAndStatusInfo> Games, IEnumerable<string> Currencies);
+    public record GameProviderInfo
+    {
+        public string Code { get; init; } = default!;
+
+        public string Name { get; init; } = default!;
+
+        public string Description { get; init; } = default!;
+
+        public Status Status { get; init; }
+
+        public bool IsTransferWallet { get; init; }
+
+        public GameType[] GameTypes { get; init; } = default!;
+    }
 }

@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
 using TGS.Services.Operator.Services.GameProvider;
 using TGS.ServiceUtility;
-using GameProviderModel = TGS.Services.Operator.GameProviderModel;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -22,7 +22,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async Task<GetGameProvidersResponse> GetGameProvidersAsync(
-            [FromServices] IQueryService<GetGameProviderQuery, GameProviderModel> getGameProviderQueryService,
+            [FromServices] IQueryService<GetGameProviderQuery, GameProviderInfo> getGameProviderQueryService,
             [FromQuery] GetGameProvidersRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
@@ -40,7 +40,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
             var gameProviders = infos.Select(info =>
-                    new Models.Messages.GameProviderModel
+                    new GameProviderModel
                     {
                         Code = info.Code,
                         Description = info.Description,
