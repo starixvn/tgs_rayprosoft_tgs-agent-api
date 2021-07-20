@@ -22,7 +22,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
             if (!string.IsNullOrEmpty(await maintenanceRedisService.GetBrandMaintenanceAsync(brandId).ConfigureAwait(false)))
             {
-                throw new BrandUnderMaintenanceException("Missing Authorization Header");
+                throw new BrandUnderMaintenanceException();
             }
             await _next(context);
         }
