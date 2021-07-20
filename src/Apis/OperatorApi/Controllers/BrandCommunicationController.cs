@@ -18,7 +18,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("{brandId}")]
         [Description("Get a brand's communications")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
             Guid brandId,
             [FromServices] IQueryService<BrandCommunicationQuery, BrandCommunicationInfo> queryService)
