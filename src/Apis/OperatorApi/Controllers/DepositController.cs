@@ -28,7 +28,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
             [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
             [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
@@ -92,7 +91,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet("player/list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<PagedResponse<DepositFormViewModel>> GetDepositFormsAsync(
             [FromServices] IGetService<GetDepositFormsQuery, Tgs.Payment.Clients.PagingResponse<DepositFormInfo>> getDepositFormsQueryService,
             [FromQuery] GetDepositFormsRequest request,

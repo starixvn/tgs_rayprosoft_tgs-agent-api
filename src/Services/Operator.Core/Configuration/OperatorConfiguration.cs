@@ -85,5 +85,13 @@ namespace TGS.Services.Operator.Configuration
 
             return this;
         }
+
+        public OperatorConfiguration UseMaintenanceRedisRepository<TMaintenanceRedisRepository>() where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
+        {
+            Services
+                .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
+
+            return this;
+        }
     }
 }

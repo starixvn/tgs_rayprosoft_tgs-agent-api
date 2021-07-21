@@ -41,10 +41,20 @@ namespace TGS.Apis.AgentApi.Controllers
             var query = new GetCreateAgentQuery()
             {
                 BrandId = brandId,
+                CardGameRebatePercentage = request.CardGameRebatePercentage,
+                DividendPercentage = request.DividendPercentage,
+                LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
+                LotteryRebatePercentage = request.LotteryRebatePercentage,
                 ParentAgentId = agentTokenData.AgentId,
-                UserName = request.UserName,
                 Password = request.Password,
-                Remarks = request.Remarks
+                RealName = request.RealName,
+                Email = request.Email,
+                Phone = request.Phone,
+                Remarks = request.Remarks,
+                SlotRebatePercentage = request.SlotRebatePercentage,
+                SportsRebatePercentage = request.SportsRebatePercentage,
+                UserName = request.UserName,
+                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage
             };
 
             var info = await getCreateAgentQueryService

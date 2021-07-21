@@ -17,8 +17,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpGet]
         [Description("Get a brand's communications")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         public IAsyncEnumerable<BrandCommunicationModel> GetBrandCommunicationsAsync(
             [FromServices] IQueryService<BrandCommunicationQuery, BrandCommunicationInfo> queryService)
         {
@@ -34,7 +33,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Phone = x.Phone,
                     AppId = x.AppId,
                     QRCodeUrl = x.QRCodeUrl
-                });
+                })
+                .Take(5);
         }
     }
 }

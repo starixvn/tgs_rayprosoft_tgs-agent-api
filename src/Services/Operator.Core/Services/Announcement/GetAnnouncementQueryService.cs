@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
@@ -30,7 +31,11 @@ namespace TGS.Services.Operator.Services.Announcement
                     a.Subject,
                     a.Content,
                     a.From.ToUnixTimeMilliseconds(),
-                    a.To.ToUnixTimeMilliseconds()));
+                    a.To.ToUnixTimeMilliseconds(),
+                    a.LanguageContent == null
+                        ? null
+                        : JsonSerializer.Deserialize<IDictionary<string, JsonDocument>>(
+                            a.LanguageContent)));
 
             foreach (var data in items)
             {

@@ -102,21 +102,18 @@ namespace TGS.Apis.PromotionApi.Controllers
                         .ToArrayAsync()
                         .ConfigureAwait(false)
                 };
-            else
-            {
-                paging.Page = request.Page;
-                paging.RowCount = request.Rows;
+            paging.Page = request.Page;
+            paging.RowCount = request.Rows;
 
-                return new PagedResponse<PromotionModel>
-                {
-                    TotalCount = await promotions.CountAsync().ConfigureAwait(false),
-                    Items = await promotions
-                        .ApplyOrderBy(paging)
-                        .ApplyPaging(paging)
-                        .ToArrayAsync()
-                        .ConfigureAwait(false)
-                };
-            }
+            return new PagedResponse<PromotionModel>
+            {
+                TotalCount = await promotions.CountAsync().ConfigureAwait(false),
+                Items = await promotions
+                    .ApplyOrderBy(paging)
+                    .ApplyPaging(paging)
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
+            };
         }
 
         [HttpDelete("{promotionId}/{amount}")]
@@ -142,5 +139,11 @@ namespace TGS.Apis.PromotionApi.Controllers
             request.Id = id;
             return _mediator.Send(request);
         }
+
+        [HttpGet("joined")]
+        [Description("Get joined promotions")]
+        public Task<PagedResponse<JoinedPromotionModel>> GetPromotionsAsync(
+            [FromQuery] GetJoinedPromotionsRequest request) =>
+            _mediator.Send(request);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
@@ -44,7 +45,11 @@ namespace TGS.Operator.Repositories
                             letterPlayer.StationLetter.Subject,
                             letterPlayer.StationLetter.Content,
                             letterPlayer.StationLetter.CreatedOn,
-                            letterPlayer.IsRead);
+                            letterPlayer.IsRead,
+                            letterPlayer.StationLetter.Localization == null
+                                ? null
+                                : JsonSerializer.Deserialize<IDictionary<string, JsonDocument>>(
+                                    letterPlayer.StationLetter.Localization));
 
             return query;
         }

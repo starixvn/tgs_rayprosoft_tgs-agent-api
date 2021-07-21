@@ -1,5 +1,6 @@
 ﻿using System;
-using TGS.Services.Operator;
+using System.Collections.Generic;
+using System.Text.Json;
 
 namespace TGS.Services.Operator.StationLetters
 {
@@ -8,5 +9,6 @@ namespace TGS.Services.Operator.StationLetters
         string Subject,
         string Content,
         DateTimeOffset CreateOn,
-        bool IsRead);
+        bool IsRead,
+        IDictionary<string, JsonDocument>? Localization);
 }

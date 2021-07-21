@@ -47,15 +47,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
         }
 
         [HttpPost("check")]
-        public async Task<EvolutionCheckUserResponse> GetCheckAsync(
+        public Task<EvolutionCheckUserResponse> GetCheckAsync(
             EvolutionCheckUserRequest source)
         {
-            return new EvolutionCheckUserResponse()
+            return Task.FromResult(new EvolutionCheckUserResponse()
             {
                 Status = GameApiError.OK.Description(),
                 Sid = source.Sid,
                 Uuid = source.Uuid
-            };
+            });
         }
 
         [HttpPost("balance")]

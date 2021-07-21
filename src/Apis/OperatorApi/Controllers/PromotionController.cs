@@ -29,7 +29,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("{language}")]
         [Description("Get promotions")]
         [Consumes(MediaTypeNames.Application.Json)]
-        [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async ValueTask<PagingResponse<PromotionResponse>> GetPromotionsAsync(string language,
             [FromQuery] PagingRequest request)
@@ -89,7 +88,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("{id}/join")]
         [Description("Join a promotion")]
         [Consumes(MediaTypeNames.Application.Json)]
-        [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask<JoinPromotionResponse> JoinPromotionAsync(Guid id)
         {

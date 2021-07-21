@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
-using TGS.Services.Operator;
 using TGS.Services.Operator.ValidateCode;
 
-namespace TGS.Apis.OperatorApi
+namespace TGS.Apis.OperatorApi.Models
 {
     public class ConstValidateCodeGenerator : IValidateCodeGenerator
     {
-        private readonly IValidateCodeGenerator _validateCodeGenerator;
         private readonly ConstValidateCodeOptions _options;
+        private readonly IValidateCodeGenerator _validateCodeGenerator;
 
         public ConstValidateCodeGenerator(IValidateCodeGenerator validateCodeGenerator, IOptions<ConstValidateCodeOptions> optionsAccessor)
         {

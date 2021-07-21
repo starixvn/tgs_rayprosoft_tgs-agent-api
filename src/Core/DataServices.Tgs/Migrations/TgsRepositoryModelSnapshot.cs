@@ -781,6 +781,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
 
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
+
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
@@ -4266,19 +4270,32 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionParticipant", b =>
                 {
-                    b.Property<Guid>("PromotionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("promotion_id");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("PlayerCode")
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
-                    b.HasKey("PromotionId", "PlayerCode")
-                        .HasName("pk_promotion_participants");
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_participants_id");
 
                     b.HasIndex("PlayerCode")
                         .HasDatabaseName("ix_promotion_participant_player_code");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_promotion_participants_promotion_id");
 
                     b.ToTable("promotion_participants");
                 });
@@ -4946,9 +4963,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<string>("LanguageContent")
+                    b.Property<string>("Localization")
                         .HasColumnType("jsonb")
-                        .HasColumnName("language_content");
+                        .HasColumnName("localization");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
@@ -6584,9 +6601,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
                         .WithMany()
                         .HasForeignKey("PlayerCode")
-                        .HasConstraintName("fk_promotion_participant_player_code")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasConstraintName("fk_promotion_participant_player_code");
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
                         .WithMany("PromotionParticipants")
