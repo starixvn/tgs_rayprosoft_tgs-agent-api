@@ -332,8 +332,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             // arrange
             var playerCode = "playerCode";
             var languageCode = "zh-CN";
-            var brandId = Guid.NewGuid();
-            var gameProviderCode = "KY";
+            var subGameProviderCode = "RT";
             var gameProviderId = new Guid("a0f49ce0-2c1d-4f50-9fc5-58b610a30bf5");
             var gameId = 1000012;
             var uri = new Uri("http://www.fakeurl.com");
@@ -346,6 +345,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlatformType = PlatformType.Desktop
             };
 
+            var subGameProviders = new SubGameProviderDataInfo[]
+            {
+                new(gameProviderId, "RT")
+            };
+
+            var gameProvider = new CachedGameProvider
+            {
+                Id = gameProviderId,
+                Code = "EVO",
+                Status = Status.Active
+            };
+
             var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
@@ -355,10 +366,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeExpirationValidator = Substitute.For<IExpirationValidator>();
             var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
             var fakePluggableOperations = Substitute.For<IPluggableOperations>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            fakeGameProviderRepository.QuerySubGameProvidersAsync(subGameProviderCode)
+                .Returns(subGameProviders.ToAsyncEnumerable());
 
             fakeGameProviderOperations
-                .GetGameProviderIdByCodeAsync(gameProviderCode)
-                .Returns(gameProviderId);
+                .GetCachedGameProviderAsync(gameProviderId)
+                .Returns(Task.FromResult(gameProvider));
+
             fakeGameProviderOperations
                 .GetGamePlatformTypeAsync(gameProviderId, gameId)
                 .Returns(GamePlatformType.Desktop);
@@ -368,28 +384,23 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(new CachedPlayer {Status = PlayerStatus.Enabled});
 
             fakePluggableOperations
-                .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
-                .Returns(uri);
-            var req = new PluggableModels.GetGameUrlRequest
-            {
-                ExtendedData = null,
-                GameId = gameId,
-                GameProviderCode = gameProviderCode,
-                Language = null,
-                Token = playerToken
-            };
+                .GetEndpointUrlByGameProviderCodeAsync(gameProvider.Code)
+                .Returns(Task.FromResult(uri));
+
             fakePluggalbeGameProviderApiClient
-                .GetGameUrlAsync(uri, Arg.Any<PluggableModels.GetGameUrlRequest>())
-                .Returns(new PluggableModels.GetGameUrlResponse
-                {
-                    Url = "http://www.lobbyURL.com",
-                    Error = 0,
-                    ErrorMessage = string.Empty
-                });
+                .GetGameUrlAsync(Arg.Is(uri), Arg.Any<PluggableModels.GetGameUrlRequest>())
+                .Returns(
+                    ValueTask.FromResult(
+                        new PluggableModels.GetGameUrlResponse
+                        {
+                            Url = "http://www.lobbyURL.com",
+                            Error = 0,
+                            ErrorMessage = string.Empty
+                        }));
 
             var query = new GetGameUrlQuery(
                 playerToken,
-                gameProviderCode,
+                subGameProviderCode,
                 gameId,
                 languageCode,
                 extendedData);
@@ -403,7 +414,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidGameStatus,
                 fakeBrandLanguageCodeMapper,
                 fakePluggableOperations,
-                fakePluggalbeGameProviderApiClient);
+                fakePluggalbeGameProviderApiClient,
+                fakeGameProviderRepository);
 
             // act
             await sut.GetAsync(query);
@@ -415,7 +427,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     uri,
                     Arg.Is<PluggableModels.GetGameUrlRequest>(
                         d => d.GameId == gameId
-                            && d.GameProviderCode == gameProviderCode
+                            && d.GameProviderCode == gameProvider.Code
                             && d.ExtendedData != null));
         }
 
@@ -479,6 +491,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var sut = new GetLobbyGameUrlQueryService(
                 fakeGameProviderOperations,
                 fakeGetGameUrlQueryService);
+
             // act
             var actual = await sut.GetAsync(query);
 
