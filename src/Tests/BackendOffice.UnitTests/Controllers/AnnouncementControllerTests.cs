@@ -485,7 +485,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Announcement>(u => u
-                .With(s => s.Brand, new Brand()));
+                .With(s => s.Brand, new Brand())
+                .With(s => s.LanguageContent, "{}"));
+
             return fixture;
         }
     }

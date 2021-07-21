@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
 using ClosedXML.Extensions;
@@ -137,6 +138,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
+                    Localization = JsonDocument.Parse(a.LanguageContent, default),
                     Remarks = a.Remarks,
                     AssignedAllPlayers = a.AssignedAllPlayers,
                     PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),

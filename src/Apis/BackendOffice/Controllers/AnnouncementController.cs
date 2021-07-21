@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -118,7 +119,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpGet]
         [Description("Get announcements")]
-        public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
+        public Task<PagedResponse<AnnouncementModel>> GetListAsync(
+            [FromQuery] GetAnnouncementsRequest request)
         {
             var hasExpiredStatus = request.Status.Contains(AnnounceStatus.Expired);
             var now = DateTimeOffset.Now;
@@ -137,6 +139,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
+                    Localization = JsonDocument.Parse(a.LanguageContent, default),
                     Remarks = a.Remarks,
                     BrandName = a.Brand.Name,
                     CreatedByUsername = a.CreatedByUsername,

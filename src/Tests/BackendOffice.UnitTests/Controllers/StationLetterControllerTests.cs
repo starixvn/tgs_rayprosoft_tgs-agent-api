@@ -336,7 +336,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             fixture.Customize<StationLetter>(u => u
                 .With(s => s.Players, new StationLetterPlayer[] { })
                 .With(s => s.Brand, new Brand())
-            );
+                .With(s => s.LanguageContent, "{}"));
+
             return fixture;
         }
 
