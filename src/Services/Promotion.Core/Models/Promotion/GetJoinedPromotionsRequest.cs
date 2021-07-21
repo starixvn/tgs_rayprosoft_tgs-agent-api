@@ -6,8 +6,10 @@ namespace TGS.Services.Promotion.Models.Promotion
 {
     public class GetJoinedPromotionsRequest : PageableRequest, IRequest<PagedResponse<JoinedPromotionModel>>
     {
-        public string PlayerCode { get; init; }
         public DateTimeOffset From { get; init; }
+
+        public string PlayerCode { get; init; } = default!;
+
         public DateTimeOffset To { get; init; }
     }
 }

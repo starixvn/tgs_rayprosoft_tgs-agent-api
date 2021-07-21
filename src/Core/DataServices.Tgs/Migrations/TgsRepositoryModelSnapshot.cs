@@ -781,6 +781,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
 
+                    b.Property<string>("LanguageContent")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("language_content");
+
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
