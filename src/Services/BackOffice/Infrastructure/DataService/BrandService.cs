@@ -66,9 +66,9 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await _cacheManager.ClearCacheAsync(RedisCacheType.Brand, brand.Id);
             if (request.Status is Status.Active or Status.Maintenance)
             {
-                var licensee = _repository.Licensees.AsQueryable().Where(x => x.Id == brand.LicenseeId && x.Status == Status.Active).FirstOrDefault();
-                var reseller = _repository.Resellers.AsQueryable().Where(x => x.Id == licensee.ResellerId && x.Status == Status.Active).FirstOrDefault();
-                var isMaintenance = reseller != null && licensee != null && request.Status is Status.Active;
+                var licensee = _repository.Licensees.AsQueryable().Where(x => x.Id == brand.LicenseeId).First();
+                var reseller = _repository.Resellers.AsQueryable().Where(x => x.Id == licensee.ResellerId).First();
+                var isMaintenance = reseller.Status is Status.Active && licensee.Status is Status.Active && request.Status is Status.Active;
                 if (isMaintenance)
                 {
                     await _maintenanceRedisService.CleartBrandMaintenanceAsync(brand.Id).ConfigureAwait(false);
