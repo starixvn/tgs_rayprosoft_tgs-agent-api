@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
@@ -24,13 +25,15 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="getStationLetterService">The list station letter service.</param>
         /// <param name="countStationLetterService">The count station letter service.</param>
         /// <param name="request">The request.</param>
+        /// <param name="language">language</param>
         /// <returns></returns>
-        [HttpGet]
+        [HttpGet("{language}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<StationLetterResponse>> GetLettersAsync(
             [FromServices] IQueryService<GetStationLettersQuery, StationLetter> getStationLetterService,
             [FromServices] IGetService<GetStationLettersQuery, int> countStationLetterService,
-            [FromQuery] PagingRequest request)
+            [FromQuery] PagingRequest request,
+            string language)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
@@ -59,7 +62,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                         Subject = letter.Subject,
                         Content = letter.Content,
                         CreateOn = letter.CreateOn,
-                        IsRead = letter.IsRead
+                        IsRead = letter.IsRead,
+                        Localization = letter.Localization.ContainsKey(language) == true
+                        ? letter.Localization[language]
+                        : JsonDocument.Parse("{}")
                     })
                     .ToEnumerable()
             };
