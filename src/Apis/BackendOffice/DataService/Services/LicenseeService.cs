@@ -56,9 +56,10 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             if (status is Status.Active or Status.Maintenance)
             {
-                var brands = _repository.Brands.AsQueryable().Where(x => x.LicenseeId == licensee.Id).Select(x => new { x.Id, x.Code }).ToArray();
-
-                if (status is Status.Active)
+                var reseller = _repository.Resellers.AsQueryable().Where(x => x.Id == licensee.ResellerId && x.Status == Status.Active).FirstOrDefault();
+                var brands = _repository.Brands.AsQueryable().Where(x => x.LicenseeId == licensee.Id && x.Status == Status.Active);
+                var isMaintenance = reseller != null && status is Status.Active;
+                if (isMaintenance)
                 {
                     await _maintenanceRedisService.CleartLicenseeMaintenanceAsync(licensee.Id).ConfigureAwait(false);
                     await _maintenanceRedisService.CleartBrandMaintenancesAsync(brands.Select(x => x.Id).ToArray()).ConfigureAwait(false);

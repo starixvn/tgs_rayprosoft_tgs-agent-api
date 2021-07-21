@@ -109,10 +109,11 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             if (status is Status.Active or Status.Maintenance)
             {
-                var licensees = _repository.Licensees.AsQueryable().Where(x => x.ResellerId == reseller.Id);
+                var licensees = _repository.Licensees.AsQueryable().Where(x => x.ResellerId == reseller.Id && x.Status == Status.Active);
                 var brands = (from brand in _repository.Brands.AsQueryable()
                               join licensee in licensees
                               on brand.LicenseeId equals licensee.Id
+                              where brand.Status == Status.Active
                               select brand).ToArray();
                 if (status is Status.Active)
                 {

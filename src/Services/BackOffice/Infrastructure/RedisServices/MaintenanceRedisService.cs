@@ -42,17 +42,9 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
 
         async ValueTask IMaintenanceRedisService.AddResellerMaintenancesAsync(Guid[] ids)
         {
-            var tasks = new List<Task>();
-            foreach (var id in ids)
-            {
-                var task = AddResellerMaintenanceAsync(id).AsTask();
-                tasks.Add(task);
-
-            }
-
-            await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
+            await AddMaintenancesAsync(_resellers, ids).ConfigureAwait(false);
         }
-        public async ValueTask AddResellerMaintenanceAsync(Guid id)
+        async ValueTask IMaintenanceRedisService.AddResellerMaintenanceAsync(Guid id)
         {
             await AddMaintenanceAsync(_resellers, id).ConfigureAwait(false);
         }
@@ -62,6 +54,10 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
         }
         async ValueTask IMaintenanceRedisService.ClearResellerMaintenancesAsync(Guid[] ids)
         {
+            if (ids == null || ids.Length == 0)
+            {
+                return;
+            }
             await ClearMaintenancesAsync(_resellers, ids).ConfigureAwait(false);
         }
         async ValueTask IMaintenanceRedisService.ClearResellerMaintenanceAsync(Guid id)
@@ -71,17 +67,9 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
 
         async ValueTask IMaintenanceRedisService.AddLicenseeMaintenancesAsync(Guid[] ids)
         {
-            var tasks = new List<Task>();
-            foreach (var id in ids)
-            {
-                var task = AddLicenseeMaintenanceAsync(id).AsTask();
-                tasks.Add(task);
-
-            }
-
-            await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
+            await AddMaintenancesAsync(_licensees, ids).ConfigureAwait(false);
         }
-        public async ValueTask AddLicenseeMaintenanceAsync(Guid id)
+        async ValueTask IMaintenanceRedisService.AddLicenseeMaintenanceAsync(Guid id)
         {
             await AddMaintenanceAsync(_licensees, id).ConfigureAwait(false);
         }
@@ -91,6 +79,10 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
         }
         async ValueTask IMaintenanceRedisService.CleartLicenseeMaintenancesAsync(Guid[] ids)
         {
+            if (ids == null || ids.Length == 0)
+            {
+                return;
+            }
             await ClearMaintenancesAsync(_licensees, ids).ConfigureAwait(false);
         }
         async ValueTask IMaintenanceRedisService.CleartLicenseeMaintenanceAsync(Guid id)
@@ -100,16 +92,9 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
 
         async ValueTask IMaintenanceRedisService.AddBrandMaintenancesAsync(Guid[] ids)
         {
-            var tasks = new List<Task>();
-            foreach (var id in ids)
-            {
-                var task = AddBrandMaintenanceAsync(id).AsTask();
-                tasks.Add(task);
-
-            }
-            await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
+            await AddMaintenancesAsync(_brands, ids).ConfigureAwait(false);
         }
-        public async ValueTask AddBrandMaintenanceAsync(Guid id)
+        async ValueTask IMaintenanceRedisService.AddBrandMaintenanceAsync(Guid id)
         {
             await AddMaintenanceAsync(_brands, id).ConfigureAwait(false);
         }
@@ -119,6 +104,10 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
         }
         async ValueTask IMaintenanceRedisService.CleartBrandMaintenancesAsync(Guid[] ids)
         {
+            if (ids == null || ids.Length == 0)
+            {
+                return;
+            }
             await ClearMaintenancesAsync(_brands, ids).ConfigureAwait(false);
         }
         async ValueTask IMaintenanceRedisService.CleartBrandMaintenanceAsync(Guid id)
@@ -129,6 +118,22 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
         private string GetMaintenanceKey(string merchantKey, Guid id)
         {
             return $"{merchantKey }:{id}";
+        }
+
+        private async Task AddMaintenancesAsync(string merchantKey, Guid[] ids)
+        {
+            if (ids == null || ids.Length == 0)
+            {
+                return;
+            }
+            var tasks = new List<Task>();
+            foreach (var id in ids)
+            {
+                var task = AddMaintenanceAsync(merchantKey, id);
+                tasks.Add(task);
+
+            }
+            await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
         }
 
         private Task AddMaintenanceAsync(string merchantKey, Guid id)
@@ -146,15 +151,20 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
             await _cacheManager.ClearCacheAsync(_maintenance, GetMaintenanceKey(merchantKey, id)).ConfigureAwait(false);
         }
 
-        private async ValueTask<int> ClearMaintenancesAsync(string merchantKey, Guid[] ids)
+        private async Task ClearMaintenancesAsync(string merchantKey, Guid[] ids)
         {
+            if (ids == null || ids.Length == 0)
+            {
+                return;
+            }
+
             var cacheKeys = (from id in ids.ToList()
                              select new CacheKey()
                              {
                                  CacheType = _maintenance,
                                  Key = GetMaintenanceKey(merchantKey, id)
                              }).ToArray();
-            return await _cacheManager.ClearCacheByBatchAsync(cacheKeys).ConfigureAwait(false);
+            await _cacheManager.ClearCacheByBatchAsync(cacheKeys).ConfigureAwait(false);
         }
     }
 }
