@@ -161,7 +161,7 @@ namespace TGS.Services.Operations.Queries
         Task<int?> IBrandQueries.GetBrandDefaultBetLimitAsync(Guid brandId, string currencyCode) =>
             _repository.BrandBetLimits.Where(bl =>
                     bl.BrandId == brandId && bl.BetLimit.CurrencyCode == currencyCode && bl.IsDefault)
-                .Select(bl => (int?) bl.BetLimitId).FirstOrDefaultAsync();
+                .Select(bl => (int?)bl.BetLimitId).FirstOrDefaultAsync();
 
         Task<CachedAnnouncement[]> IBrandQueries.GetEffectiveAnnouncementsAsync(Guid brandId)
         {
@@ -177,7 +177,8 @@ namespace TGS.Services.Operations.Queries
                     Subject = a.Subject,
                     Content = a.Content,
                     From = a.From,
-                    To = a.To
+                    To = a.To,
+                    LanguageContent = a.LanguageContent
                 }).ToArrayAsync();
         }
     }

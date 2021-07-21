@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
@@ -15,9 +16,10 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AnnouncementController : ControllerBase
     {
-        [HttpGet("announcement/list")]
+        [HttpGet("announcement/list/{language}")]
         public IAsyncEnumerable<Announcement> GetAnnouncementsAsync(
-            [FromServices] IQueryService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService)
+            [FromServices] IQueryService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService,
+            string language)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
@@ -29,7 +31,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                     Content = item.Content,
                     From = item.From,
                     To = item.To,
-                    Subject = item.Subject
+                    Subject = item.Subject,
+                    Localization = item.Localization.ContainsKey(language) == true
+                        ? item.Localization[language]
+                        : JsonDocument.Parse("{}")
                 });
         }
     }

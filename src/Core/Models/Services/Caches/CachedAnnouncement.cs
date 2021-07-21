@@ -9,5 +9,6 @@ namespace TGS.Core.Models.Services.Caches
         public string Content { get; init; }
         public DateTimeOffset From { get; init; }
         public DateTimeOffset To { get; init; }
+        public string LanguageContent { get; init; }
     }
 }
