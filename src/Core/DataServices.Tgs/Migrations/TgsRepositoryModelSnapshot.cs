@@ -781,9 +781,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
 
-                    b.Property<string>("LanguageContent")
+                    b.Property<string>("Localization")
                         .HasColumnType("jsonb")
-                        .HasColumnName("language_content");
+                        .HasColumnName("localization");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
@@ -4963,9 +4963,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<string>("LanguageContent")
+                    b.Property<string>("Localization")
                         .HasColumnType("jsonb")
-                        .HasColumnName("language_content");
+                        .HasColumnName("localization");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)

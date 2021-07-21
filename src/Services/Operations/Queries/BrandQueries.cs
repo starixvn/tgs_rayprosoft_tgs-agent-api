@@ -178,7 +178,7 @@ namespace TGS.Services.Operations.Queries
                     Content = a.Content,
                     From = a.From,
                     To = a.To,
-                    LanguageContent = a.LanguageContent
+                    LanguageContent = a.Localization
                 }).ToArrayAsync();
         }
     }

@@ -13,7 +13,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.StationLetter
 
         public DateTimeOffset From { get; set; }
 
-        public JsonDocument LanguageContent { get; set; }
+        public JsonDocument Localization { get; set; }
 
         public string[] PlayerUsernames { get; set; }
 

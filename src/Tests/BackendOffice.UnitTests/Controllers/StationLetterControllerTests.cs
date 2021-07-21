@@ -115,7 +115,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 BrandId = Guid.NewGuid(),
                 AssignedAllPlayers = false,
                 Content = "test1",
-                LanguageContent = JsonDocument.Parse("{}"),
+                Localization = JsonDocument.Parse("{}"),
                 Subject = "subject",
                 From = DateTimeOffset.Now,
                 To = DateTimeOffset.Now.AddDays(1),
@@ -152,7 +152,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 BrandId = Guid.NewGuid(),
                 AssignedAllPlayers = false,
                 Content = "test1",
-                LanguageContent = JsonDocument.Parse("{}"),
+                Localization = JsonDocument.Parse("{}"),
                 Subject = "subject",
                 From = DateTimeOffset.Now,
                 To = DateTimeOffset.Now.AddDays(1),
@@ -189,7 +189,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 BrandId = Guid.NewGuid(),
                 AssignedAllPlayers = false,
                 Content = "test1",
-                LanguageContent = JsonDocument.Parse("{}"),
+                Localization = JsonDocument.Parse("{}"),
                 Subject = "subject",
                 From = DateTimeOffset.Now,
                 To = DateTimeOffset.Now.AddDays(1),
@@ -336,7 +336,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             fixture.Customize<StationLetter>(u => u
                 .With(s => s.Players, new StationLetterPlayer[] { })
                 .With(s => s.Brand, new Brand())
-            );
+                .With(s => s.Localization, "{}"));
+
             return fixture;
         }
 
