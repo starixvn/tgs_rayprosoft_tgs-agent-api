@@ -126,28 +126,33 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
             await ClearMaintenanceAsync(_brands, id).ConfigureAwait(false);
         }
 
-        private async ValueTask AddMaintenanceAsync(string merchantKey, Guid id)
+        private string GetMaintenanceKey(string merchantKey, Guid id)
         {
-            string key = $"{merchantKey }:{id}";
-            await _cacheManager.SafeCacheAsync(_maintenance, key, null, id).ConfigureAwait(false);
+            return $"{merchantKey }:{id}";
         }
+
+        private Task AddMaintenanceAsync(string merchantKey, Guid id)
+        {
+            return _cacheManager.SafeCacheAsync(_maintenance, GetMaintenanceKey(merchantKey, id), id);
+        }
+
         private async ValueTask<string> GetMaintenanceAsync(string merchantKey, Guid id)
         {
-            string key = $"{merchantKey }:{id}";
-            return await _cacheManager.SafeGetAsync(_maintenance, key, () => Task.FromResult(default(string))).ConfigureAwait(false);
+            return await _cacheManager.SafeGetAsync(_maintenance, GetMaintenanceKey(merchantKey, id), () => Task.FromResult(default(string))).ConfigureAwait(false);
         }
+
         private async ValueTask ClearMaintenanceAsync(string merchantKey, Guid id)
         {
-            string key = $"{merchantKey }:{id}";
-            await _cacheManager.ClearCacheAsync(_maintenance, key).ConfigureAwait(false);
+            await _cacheManager.ClearCacheAsync(_maintenance, GetMaintenanceKey(merchantKey, id)).ConfigureAwait(false);
         }
+
         private async ValueTask<int> ClearMaintenancesAsync(string merchantKey, Guid[] ids)
         {
             var cacheKeys = (from id in ids.ToList()
                              select new CacheKey()
                              {
                                  CacheType = _maintenance,
-                                 Key = $"{merchantKey }:{id}"
+                                 Key = GetMaintenanceKey(merchantKey, id)
                              }).ToArray();
             return await _cacheManager.ClearCacheByBatchAsync(cacheKeys).ConfigureAwait(false);
         }
