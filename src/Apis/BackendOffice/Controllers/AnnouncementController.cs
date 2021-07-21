@@ -101,8 +101,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 DisplayOrder = 99,
                 Subject = request.Subject,
                 Content = request.Content,
-                LanguageContent = jsonSerializationProvider.SerializeToString(
-                    request.LanguageContent,
+                Localization = jsonSerializationProvider.SerializeToString(
+                    request.Localization,
                     serializerOptions),
                 From = request.From,
                 To = request.To,
@@ -139,7 +139,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
-                    Localization = JsonDocument.Parse(a.LanguageContent, default),
+                    Localization = JsonDocument.Parse(a.Localization, default),
                     Remarks = a.Remarks,
                     BrandName = a.Brand.Name,
                     CreatedByUsername = a.CreatedByUsername,
@@ -176,8 +176,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             announcement.Subject = request.Subject;
             announcement.Content = request.Content;
-            announcement.LanguageContent = jsonSerializationProvider.SerializeToString(
-                request.LanguageContent,
+            announcement.Localization = jsonSerializationProvider.SerializeToString(
+                request.Localization,
                 serializerOptions);
             announcement.From = request.From;
             announcement.To = request.To;

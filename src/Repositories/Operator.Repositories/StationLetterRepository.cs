@@ -46,10 +46,10 @@ namespace TGS.Operator.Repositories
                             letterPlayer.StationLetter.Content,
                             letterPlayer.StationLetter.CreatedOn,
                             letterPlayer.IsRead,
-                            letterPlayer.StationLetter.LanguageContent == null
+                            letterPlayer.StationLetter.Localization == null
                                 ? null
                                 : JsonSerializer.Deserialize<IDictionary<string, JsonDocument>>(
-                                    letterPlayer.StationLetter.LanguageContent));
+                                    letterPlayer.StationLetter.Localization));
 
             return query;
         }

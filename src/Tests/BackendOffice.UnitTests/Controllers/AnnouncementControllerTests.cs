@@ -108,7 +108,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 Content = "test",
                 From = DateTimeOffset.Now,
                 To = DateTimeOffset.Now.AddDays(1D),
-                LanguageContent = JsonDocument.Parse("{}"),
+                Localization = JsonDocument.Parse("{}"),
                 Subject = "subject"
             };
 
@@ -146,7 +146,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 Content = "test",
                 From = DateTimeOffset.Now,
                 To = DateTimeOffset.Now.AddDays(1D),
-                LanguageContent = JsonDocument.Parse("{}"),
+                Localization = JsonDocument.Parse("{}"),
                 Subject = "subject"
             };
 
@@ -195,7 +195,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 Content = "test",
                 From = DateTimeOffset.Now,
                 To = DateTimeOffset.Now.AddDays(1D),
-                LanguageContent = JsonDocument.Parse("{}"),
+                Localization = JsonDocument.Parse("{}"),
                 Subject = "subject"
             };
 
@@ -241,7 +241,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 Content = "test",
                 From = DateTimeOffset.Now,
                 To = DateTimeOffset.Now.AddDays(1D),
-                LanguageContent = JsonDocument.Parse("{}"),
+                Localization = JsonDocument.Parse("{}"),
                 Subject = "subject"
             };
 
@@ -486,7 +486,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var fixture = new Fixture();
             fixture.Customize<Announcement>(u => u
                 .With(s => s.Brand, new Brand())
-                .With(s => s.LanguageContent, "{}"));
+                .With(s => s.Localization, "{}"));
 
             return fixture;
         }

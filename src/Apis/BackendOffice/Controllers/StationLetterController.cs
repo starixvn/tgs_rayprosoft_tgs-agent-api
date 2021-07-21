@@ -74,8 +74,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                 BrandId = request.BrandId,
                 Subject = request.Subject,
                 Content = request.Content,
-                LanguageContent = jsonSerializationProvider.SerializeToString(
-                    request.LanguageContent,
+                Localization = jsonSerializationProvider.SerializeToString(
+                    request.Localization,
                     jsonOptions.JsonSerializerOptions),
                 AssignedAllPlayers = request.AssignedAllPlayers,
                 Status = StationLetterStatus.InVerify,
@@ -138,7 +138,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
-                    Localization = JsonDocument.Parse(a.LanguageContent, default),
+                    Localization = JsonDocument.Parse(a.Localization, default),
                     Remarks = a.Remarks,
                     AssignedAllPlayers = a.AssignedAllPlayers,
                     PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),
@@ -168,8 +168,8 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             stationLetter.Subject = request.Subject;
             stationLetter.Content = request.Content;
-            stationLetter.LanguageContent = jsonSerializationProvider.SerializeToString(
-                request.LanguageContent,
+            stationLetter.Localization = jsonSerializationProvider.SerializeToString(
+                request.Localization,
                 jsonOptions.JsonSerializerOptions);
             stationLetter.UpdatedByUsername = Username;
             stationLetter.UpdatedOn = DateTimeOffset.Now;

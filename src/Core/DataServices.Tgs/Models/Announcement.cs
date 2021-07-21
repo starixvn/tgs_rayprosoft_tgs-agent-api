@@ -21,7 +21,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public Guid Id { get; set; }
 
-        public string LanguageContent { get; set; }
+        public string Localization { get; set; }
 
         public string Remarks { get; set; }
 
