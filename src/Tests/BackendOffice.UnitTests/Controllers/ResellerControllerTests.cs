@@ -212,6 +212,31 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 It.Is<string>(r => r == Username)), Times.Never);
         }
 
+        [TestCase(Core.Models.Enums.Status.Maintenance)]
+        [TestCase(Core.Models.Enums.Status.Active)]
+        public async Task Can_Update_Reseller_Status(Core.Models.Enums.Status status)
+        {
+
+            var reseller = CreateResellerFixture()
+                .Create<Reseller>();
+
+            _resellerServiceMock.Setup(s => s.GetResellerAsync(It.IsAny<Expression<Func<Reseller, bool>>>(),
+                    It.IsAny<Func<IQueryable<Reseller>, IQueryable<Reseller>>>()))
+                .Returns(Task.FromResult(reseller));
+
+            var response = await _controller.UpdateResellerStatusAsync(reseller.Id, status);
+
+            response.Valid.Should().BeTrue();
+
+            _resellerServiceMock.Verify(s => s.GetResellerAsync(It.IsAny<Expression<Func<Reseller, bool>>>(),
+                It.IsAny<Func<IQueryable<Reseller>, IQueryable<Reseller>>>()));
+
+            _resellerServiceMock.Verify(p => p.ChangeStatusAsync(It.Is<Reseller>(d =>
+                d.Status == status),
+                It.IsAny<Core.Models.Enums.Status>(),
+                It.Is<string>(r => r == Username)));
+        }
+
         private Fixture CreateResellerFixture()
         {
             var fixture = new Fixture();

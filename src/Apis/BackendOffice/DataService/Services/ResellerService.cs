@@ -109,11 +109,11 @@ namespace TGS.Apis.BackendOffice.DataService.Services
 
             if (status is Status.Active or Status.Maintenance)
             {
-                var licensees = _repository.Licensees.AsQueryable().Where(x => x.ResellerId == reseller.Id).Select(x => new { x.Id, x.Code }).ToArray();
+                var licensees = _repository.Licensees.AsQueryable().Where(x => x.ResellerId == reseller.Id);
                 var brands = (from brand in _repository.Brands.AsQueryable()
                               join licensee in licensees
                               on brand.LicenseeId equals licensee.Id
-                              select new { brand.Id, brand.Code }).ToArray();
+                              select brand).ToArray();
                 if (status is Status.Active)
                 {
                     await _maintenanceRedisService.ClearResellerMaintenanceAsync(reseller.Id).ConfigureAwait(false);

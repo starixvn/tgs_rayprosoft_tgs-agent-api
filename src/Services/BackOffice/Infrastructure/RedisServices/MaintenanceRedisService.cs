@@ -129,7 +129,7 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
         private async ValueTask AddMaintenanceAsync(string merchantKey, Guid id)
         {
             string key = $"{merchantKey }:{id}";
-            await _cacheManager.SafeCacheAsync(_maintenance, key, null, id).ConfigureAwait(false);
+            await _cacheManager.SafeCacheAsync(_maintenance, key, id).ConfigureAwait(false);
         }
         private async ValueTask<string> GetMaintenanceAsync(string merchantKey, Guid id)
         {
