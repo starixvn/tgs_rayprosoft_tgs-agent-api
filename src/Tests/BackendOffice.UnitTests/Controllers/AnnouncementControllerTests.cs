@@ -2,10 +2,13 @@
 using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using System.Threading.Tasks;
 using AutoFixture;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
@@ -15,6 +18,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 
@@ -40,8 +44,8 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsCommands<Announcement>> _commandsMock = new();
         private readonly Mock<IRedisCacheManager> _redisCacheManagerMock = new();
 
-        [TestCase(true, new[] {AnnounceStatus.Effective, AnnounceStatus.Invalid})]
-        [TestCase(false, new[] {AnnounceStatus.Expired})]
+        [TestCase(true, new[] { AnnounceStatus.Effective, AnnounceStatus.Invalid })]
+        [TestCase(false, new[] { AnnounceStatus.Expired })]
         public async Task Can_Get_Announcements(bool showAll, AnnounceStatus[] status)
         {
             var request = new GetAnnouncementsRequest
@@ -98,12 +102,28 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Can_Create_Announcement()
         {
-            var request = new Fixture().Create<AnnouncementRequest>();
+            var request = new AnnouncementRequest
+            {
+                BrandId = Guid.NewGuid(),
+                Content = "test",
+                From = DateTimeOffset.Now,
+                To = DateTimeOffset.Now.AddDays(1D),
+                LanguageContent = JsonDocument.Parse("{}"),
+                Subject = "subject"
+            };
 
-            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
+            _queriesMock
+                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.CreateAsync(request);
+            var jsonSerializationProvider = new JsonSerializationProvider();
+            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+            var response = await _controller.CreateAsync(
+                jsonSerializationProvider,
+                jsonOptionsAccessor,
+                request);
+
             response.Valid.Should().BeTrue();
 
             _commandsMock.Verify(p => p.CreateAsync(It.Is<Announcement>(d =>
@@ -120,27 +140,47 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var announcement = CreateAnnouncementFixture().Create<Announcement>();
             announcement.Status = AnnounceStatus.Invalid;
 
-            var request = new Fixture().Create<AnnouncementRequest>();
+            var request = new AnnouncementRequest
+            {
+                BrandId = Guid.NewGuid(),
+                Content = "test",
+                From = DateTimeOffset.Now,
+                To = DateTimeOffset.Now.AddDays(1D),
+                LanguageContent = JsonDocument.Parse("{}"),
+                Subject = "subject"
+            };
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+            _queriesMock
+                .Setup(s => s.GetSingleAsync(
+                    It.IsAny<Expression<Func<Announcement, bool>>>(),
                     It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
                 .Returns(Task.FromResult(announcement));
 
-            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
+            _queriesMock
+                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateAsync(announcement.Id, request);
+            var jsonSerializationProvider = new JsonSerializationProvider();
+            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+            var response = await _controller.UpdateAsync(
+                jsonSerializationProvider,
+                jsonOptionsAccessor,
+                announcement.Id,
+                request);
 
             response.Valid.Should().BeTrue();
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+
+            _queriesMock.Verify(s => s.GetSingleAsync(
+                It.IsAny<Expression<Func<Announcement, bool>>>(),
                 It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
 
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
-                d.Subject == request.Subject &&
-                d.Content == request.Content &&
-                d.From == request.From &&
-                d.To == request.To &&
-                d.Status == AnnounceStatus.InVerify)));
+            _commandsMock.Verify(p => p.UpdateAsync(
+                It.Is<Announcement>(d => d.Subject == request.Subject
+                && d.Content == request.Content
+                && d.From == request.From
+                && d.To == request.To
+                && d.Status == AnnounceStatus.InVerify)));
         }
 
         [Test]
@@ -148,16 +188,34 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var announcement = CreateAnnouncementFixture().Create<Announcement>();
             announcement.Status = AnnounceStatus.InVerify;
-            var request = new Fixture().Create<AnnouncementRequest>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+            var request = new AnnouncementRequest
+            {
+                BrandId = Guid.NewGuid(),
+                Content = "test",
+                From = DateTimeOffset.Now,
+                To = DateTimeOffset.Now.AddDays(1D),
+                LanguageContent = JsonDocument.Parse("{}"),
+                Subject = "subject"
+            };
+
+            _queriesMock
+                .Setup(s => s.GetSingleAsync(
+                    It.IsAny<Expression<Func<Announcement, bool>>>(),
                     It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
                 .Returns(Task.FromResult<Announcement>(null));
 
-            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
+            _queriesMock
+                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
                 .Returns(Task.FromResult(false));
 
-            var response = await _controller.UpdateAsync(announcement.Id, request);
+            var jsonSerializationProvider = new JsonSerializationProvider();
+            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+            var response = await _controller.UpdateAsync(
+                jsonSerializationProvider,
+                jsonOptionsAccessor,
+                announcement.Id, request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.Announcement.NotFound);
@@ -176,15 +234,35 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var announcement = CreateAnnouncementFixture().Create<Announcement>();
             announcement.Status = AnnounceStatus.InVerify;
-            var request = new Fixture().Create<AnnouncementRequest>();
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+
+            var request = new AnnouncementRequest
+            {
+                BrandId = Guid.NewGuid(),
+                Content = "test",
+                From = DateTimeOffset.Now,
+                To = DateTimeOffset.Now.AddDays(1D),
+                LanguageContent = JsonDocument.Parse("{}"),
+                Subject = "subject"
+            };
+
+            _queriesMock
+                .Setup(s => s.GetSingleAsync(
+                    It.IsAny<Expression<Func<Announcement, bool>>>(),
                     It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
                 .Returns(Task.FromResult(announcement));
 
-            _queriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
+            _queriesMock
+                .Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<Announcement, bool>>>()))
                 .Returns(Task.FromResult(true));
 
-            var response = await _controller.UpdateAsync(announcement.Id, request);
+            var jsonSerializationProvider = new JsonSerializationProvider();
+            var jsonOptionsAccessor = new OptionsWrapper<JsonOptions>(new JsonOptions());
+
+            var response = await _controller.UpdateAsync(
+                jsonSerializationProvider,
+                jsonOptionsAccessor,
+                announcement.Id,
+                request);
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.Announcement.CannotUpdateDueToInvalidStatus);
@@ -209,20 +287,24 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var request = new Fixture().Create<VerifyRequest>();
 
-            _queriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+            _queriesMock
+                .Setup(s => s.GetSingleAsync(
+                    It.IsAny<Expression<Func<Announcement, bool>>>(),
                     It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()))
                 .Returns(Task.FromResult(announcement));
 
             var response = await _controller.VerifyAsync(announcementId, type, request);
 
             response.Valid.Should().BeTrue();
-            _queriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<Announcement, bool>>>(),
+
+            _queriesMock.Verify(s => s.GetSingleAsync(
+                It.IsAny<Expression<Func<Announcement, bool>>>(),
                 It.IsAny<Func<IQueryable<Announcement>, IQueryable<Announcement>>>()));
 
-            _commandsMock.Verify(p => p.UpdateAsync(It.Is<Announcement>(d =>
-                d.UpdatedByUsername == "admin.enabled" &&
-                d.Status == verifiedStatus &&
-                d.Remarks == request.Remarks)));
+            _commandsMock.Verify(p => p.UpdateAsync(
+                It.Is<Announcement>(d => d.UpdatedByUsername == "admin.enabled"
+                && d.Status == verifiedStatus
+                && d.Remarks == request.Remarks)));
         }
 
 

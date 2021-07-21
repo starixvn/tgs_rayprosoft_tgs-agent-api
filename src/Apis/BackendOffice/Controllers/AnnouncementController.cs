@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Announcement;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
@@ -69,6 +71,51 @@ namespace TGS.Apis.BackendOffice.Controllers
             _cacheManager = cacheManager;
         }
 
+        [HttpPut("ChangeOrders")]
+        [Description("Change Announcement Order")]
+        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
+        {
+            var ids = request.Orders.Select(q => q.Id);
+            var announcements = await _queries.GetQueries().Where(q => ids.Contains(q.Id)).ToListAsync();
+            announcements.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
+
+            await _commands.BatchUpdateAsync(announcements.ToArray());
+
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPost]
+        [Description("Create a announcement")]
+        public async Task<MessageResponse> CreateAsync(
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+            [FromServices] IOptions<JsonOptions> optionsAccessor,
+            [FromBody] AnnouncementRequest request)
+        {
+            var serializerOptions = optionsAccessor.Value.JsonSerializerOptions;
+
+            var announcement = new Announcement
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                BrandId = request.BrandId,
+                DisplayOrder = 99,
+                Subject = request.Subject,
+                Content = request.Content,
+                LanguageContent = jsonSerializationProvider.SerializeToString(
+                    request.LanguageContent,
+                    serializerOptions),
+                From = request.From,
+                To = request.To,
+                Status = AnnounceStatus.InVerify,
+                CreatedByUsername = Username,
+                UpdatedByUsername = Username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
+
+            await _commands.CreateAsync(announcement);
+            return CreateValidResponse<MessageResponse>();
+        }
+
         [HttpGet]
         [Description("Get announcements")]
         public Task<PagedResponse<AnnouncementModel>> GetListAsync([FromQuery] GetAnnouncementsRequest request)
@@ -101,6 +148,45 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Status = now > a.To ? AnnounceStatus.Expired.ToString() : a.Status.ToString()
                 })
                 .CreatePagedResponseAsync(request);
+        }
+
+        [HttpPut("{id}")]
+        [Description("Update a announcement")]
+        public async Task<MessageResponse> UpdateAsync(
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+            [FromServices] IOptions<JsonOptions> optionsAccessor,
+            Guid id,
+            [FromBody] AnnouncementRequest request)
+        {
+            var serializerOptions = optionsAccessor.Value.JsonSerializerOptions;
+
+            var announcement = await _queries.GetSingleAsync(p => p.Id == id);
+            if (announcement == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
+            }
+
+            if (announcement.Status != AnnounceStatus.Effective && announcement.Status != AnnounceStatus.Invalid)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.CannotUpdateDueToInvalidStatus);
+            }
+
+            announcement.Subject = request.Subject;
+            announcement.Content = request.Content;
+            announcement.LanguageContent = jsonSerializationProvider.SerializeToString(
+                request.LanguageContent,
+                serializerOptions);
+            announcement.From = request.From;
+            announcement.To = request.To;
+            announcement.UpdatedByUsername = Username;
+            announcement.UpdatedOn = DateTimeOffset.Now;
+            announcement.Status = AnnounceStatus.InVerify;
+
+            await _commands.UpdateAsync(announcement);
+
+            await _cacheManager.ClearCacheAsync(RedisCacheType.Announcements, announcement.BrandId);
+
+            return CreateValidResponse<MessageResponse>();
         }
 
         [HttpPut("{id}/{type}")]
@@ -137,74 +223,6 @@ namespace TGS.Apis.BackendOffice.Controllers
             announcement.UpdatedOn = DateTimeOffset.Now;
 
             await _commands.UpdateAsync(announcement);
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPut("{id}")]
-        [Description("Update a announcement")]
-        public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] AnnouncementRequest request)
-        {
-            var announcement = await _queries.GetSingleAsync(p => p.Id == id);
-            if (announcement == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.NotFound);
-            }
-
-            if (announcement.Status != AnnounceStatus.Effective && announcement.Status != AnnounceStatus.Invalid)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.Announcement.CannotUpdateDueToInvalidStatus);
-            }
-
-
-            announcement.Subject = request.Subject;
-            announcement.Content = request.Content;
-            announcement.From = request.From;
-            announcement.To = request.To;
-            announcement.UpdatedByUsername = Username;
-            announcement.UpdatedOn = DateTimeOffset.Now;
-            announcement.Status = AnnounceStatus.InVerify;
-
-            await _commands.UpdateAsync(announcement);
-
-            await _cacheManager.ClearCacheAsync(RedisCacheType.Announcements, announcement.BrandId);
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPost]
-        [Description("Create a announcement")]
-        public async Task<MessageResponse> CreateAsync([FromBody] AnnouncementRequest request)
-        {
-            var announcement = new Announcement
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                BrandId = request.BrandId,
-                DisplayOrder = 99,
-                Subject = request.Subject,
-                Content = request.Content,
-                From = request.From,
-                To = request.To,
-                Status = AnnounceStatus.InVerify,
-                CreatedByUsername = Username,
-                UpdatedByUsername = Username,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            };
-
-            await _commands.CreateAsync(announcement);
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPut("ChangeOrders")]
-        [Description("Change Announcement Order")]
-        public async Task<MessageResponse> ChangeOrderAsync(ChangeOrderRequest request)
-        {
-            var ids = request.Orders.Select(q => q.Id);
-            var announcements = await _queries.GetQueries().Where(q => ids.Contains(q.Id)).ToListAsync();
-            announcements.ForEach(p => p.DisplayOrder = request.Orders.FirstOrDefault(x => x.Id == p.Id).DisplayOrder);
-
-            await _commands.BatchUpdateAsync(announcements.ToArray());
-
             return CreateValidResponse<MessageResponse>();
         }
     }
