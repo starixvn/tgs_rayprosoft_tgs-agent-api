@@ -28,35 +28,37 @@ namespace TGS.Services.Promotion.Handlers
         protected Handler(IHttpContextAccessor accessor)
         {
             if (accessor.HttpContext != null)
-            {
-                _userInfoMap = accessor.HttpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
-            }
+                _userInfoMap = accessor.HttpContext.User.Claims
+                    .ToDictionary(p => p.Type, p => p.Value);
+            else
+                _userInfoMap = new Dictionary<string, string>();
         }
 
         public abstract Task<TOut> Handle(T request, CancellationToken cancellationToken);
 
         protected static TResponse CreateInvalidResponse<TResponse>(string message)
-            where TResponse : MessageResponse, new() =>
-            new()
+            where TResponse : MessageResponse, new()
+            => new()
             {
                 Valid = false,
                 Message = message
             };
 
         protected static TResponse CreateInvalidResponse<TResponse>(string message, string[] errors)
-where TResponse : MessageResponse, new() =>
-new()
-{
-Valid = false,
-Message = message,
-Errors = errors
-};
+            where TResponse : MessageResponse, new()
+            => new()
+            {
+                Valid = false,
+                Message = message,
+                Errors = errors
+            };
 
-        protected static TResponse CreateValidResponse<TResponse>() where TResponse : MessageResponse, new() =>
-                    new()
-                    {
-                        Valid = true
-                    };
+        protected static TResponse CreateValidResponse<TResponse>()
+            where TResponse : MessageResponse, new()
+            => new()
+            {
+                Valid = true
+            };
 
         private Guid? GetIdByKey(string key) =>
             !_userInfoMap.TryGetValue(key, out var value) || value.IsNullOrEmpty() ||

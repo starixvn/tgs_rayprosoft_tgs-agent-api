@@ -6,7 +6,9 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class GameProvidersServiceConfigurationExtensions
     {
-        public static IServiceCollection AddGameProvidersMognoRepository(this IServiceCollection services, Action<GameProvidersOption, IServiceProvider> configure)
+        public static IServiceCollection AddGameProvidersMognoRepository(
+            this IServiceCollection services,
+            Action<GameProvidersOption, IServiceProvider> configure)
         {
             services
                 .AddOptions<GameProvidersOption>()
@@ -17,9 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         public static IServiceCollection AddGameProvidersoRepository(this IServiceCollection services)
-        {
-            return services
+            => services
                 .AddTransient<IGameProviderFundTransferTransactionRepository, GameProviderFundTransferTransactionRepository>();
-        }
     }
 }

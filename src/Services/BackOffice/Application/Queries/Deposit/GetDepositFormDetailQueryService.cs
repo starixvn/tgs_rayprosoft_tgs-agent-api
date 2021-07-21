@@ -1,24 +1,21 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment;
-using TGS.Services.BackOffice.Domain;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Deposit
 {
     internal class GetDepositFormDetailQueryService : IGetService<GetDepositFormDetailQuery, DepositFormInfo>
     {
-        private readonly IDepositRepository _depositRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public GetDepositFormDetailQueryService(IDepositRepository depositRepository)
+        public GetDepositFormDetailQueryService(IPaymentServiceClient paymentServiceClient)
         {
-            _depositRepository = depositRepository ?? throw new ArgumentNullException(nameof(depositRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public ValueTask<DepositFormInfo> GetAsync(GetDepositFormDetailQuery query, CancellationToken cancellationToken = default)
-        {
-            return _depositRepository.GetDepositFormDetailAsync(query.FormId);
-        }
+            => _paymentServiceClient.GetDepositFormAsync(query.BrandId, query.FormId);
     }
 }

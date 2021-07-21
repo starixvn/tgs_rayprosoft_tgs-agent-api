@@ -1,6 +1,6 @@
 ﻿using Moq;
 using NUnit.Framework;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
 
 namespace TGS.Tests.BackendOffice.UnitTests
@@ -11,15 +11,15 @@ namespace TGS.Tests.BackendOffice.UnitTests
         [Test]
         public void User_Can_Get_All_PaymentMethods()
         {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-            var sut = new PaymentMethodQueryService(moqPaymentRepository.Object);
+            var sut = new PaymentMethodQueryService(moqPaymentServiceClient.Object);
 
             var query = new PaymentMethodQuery();
 
             sut.QueryAsync(query);
 
-            moqPaymentRepository.Verify(
+            moqPaymentServiceClient.Verify(
                 fake => fake.GetAllPaymentMethodsAsync(),
                 Times.Exactly(1));
         }

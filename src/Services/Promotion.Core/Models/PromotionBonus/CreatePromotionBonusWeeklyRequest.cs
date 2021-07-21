@@ -5,8 +5,8 @@ namespace TGS.Services.Promotion.Models.PromotionBonus
 {
     public class CreatePromotionBonusWeeklyRequest : IRequest<MessageResponse>
     {
-        public string From { get; set; }
+        public string? From { get; set; }
 
-        public string To { get; set; }
+        public string? To { get; set; }
     }
 }

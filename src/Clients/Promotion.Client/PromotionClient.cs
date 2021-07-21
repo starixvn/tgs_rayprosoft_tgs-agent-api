@@ -21,7 +21,8 @@ namespace TGS.Clients.Promotion.Client
             : base(client, logger, jsonSerializationProvider)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _jsonSerializationProvider = jsonSerializationProvider ??
+                throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async Task<MessageResponse> ChangePromotionStatusAsync(UpdatePromotionStatusRequest request)
@@ -121,6 +122,19 @@ namespace TGS.Clients.Promotion.Client
             var prefix = $"Promotion.PromotionId.{request.Id}.UpdatePromotion";
             return await ExecuteJsonRequestAsync<UpdatePromotionRequest, MessageResponse>(HttpMethod.Put,
                 $"/api/promotion/{request.Id}", request, logPrefix: prefix,
+                options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<PagedResponse<PromotionModel>> GetValidPromotionsAsync(GetValidPromotionsRequest request)
+        {
+            var prefix = $"Promotion.BrandId.{request.BrandId}.GetValidPromotions";
+            var path = ClientPath.AppendWithProperties("/api/promotion/valid?", request);
+
+            return await ExecuteJsonRequestAsync<GetValidPromotionsRequest, PagedResponse<PromotionModel>>(
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
         }
     }

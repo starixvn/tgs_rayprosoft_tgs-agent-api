@@ -34,22 +34,22 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
                     {None, Fail},
-                    { Duplicate, InvalidBet},
-                    { Cancelled, BetHasCanceled},
-                    { Settled, InvalidBet},
-                    { InvalidGameActionErrorCode.TransactionNotFound,GameApiError. TransactionNotFound},
-                    { TransactionBeingCancelledNotFound, InvalidBet},
-                    { TransactionBeingReferencedNotFound, InvalidBet},
-                    { RoundNotFound ,GameApiError.TransactionNotFound},
-                    { GameNotFound, InvalidGamecode},
-                    { ActionProhibited, InvalidBet}
+                    {Duplicate, InvalidBet},
+                    {Cancelled, BetHasCanceled},
+                    {Settled, InvalidBet},
+                    {InvalidGameActionErrorCode.TransactionNotFound, GameApiError.TransactionNotFound},
+                    {TransactionBeingCancelledNotFound, InvalidBet},
+                    {TransactionBeingReferencedNotFound, InvalidBet},
+                    {RoundNotFound, GameApiError.TransactionNotFound},
+                    {GameNotFound, InvalidGamecode},
+                    {ActionProhibited, InvalidBet}
                 };
 
         int IErrorMapper.GetApiErrorByException(Exception exception)
         {
             if (exception == null)
             {
-                return (int)0;
+                return 0;
             }
 
             if (exception is InvalidGameActionException e &&

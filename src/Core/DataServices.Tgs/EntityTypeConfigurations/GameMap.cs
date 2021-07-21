@@ -62,6 +62,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValue(string.Empty);
 
+            builder.Property(e => e.Localization)
+                .HasColumnType(ColumnTypes.Jsonb);
+
+            builder.Property(e => e.SubGameProviderCode)
+                .HasMaxLength(16);
+
             builder.HasOne(e => e.GameProvider)
                 .WithMany(e => e.Games)
                 .HasForeignKey(e => e.GameProviderId)
@@ -69,6 +75,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(e => e.GameProviderId)
                 .HasDatabaseName("ix_games_game_provider_id");
+
+            builder.HasOne(e => e.SubGameProvider)
+                .WithMany(e => e.Games)
+                .HasForeignKey(e => e.SubGameProviderCode)
+                .HasConstraintName("fk_games_sub_game_providers_sub_game_provider_code");
+
+            builder.HasIndex(e => e.SubGameProviderCode)
+                .HasDatabaseName("ix_games_sub_game_provider_code");
         }
     }
 }

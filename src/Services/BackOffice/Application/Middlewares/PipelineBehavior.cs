@@ -22,9 +22,12 @@ namespace TGS.Services.BackOffice.Application.Middlewares
             CancellationToken cancellationToken,
             RequestHandlerDelegate<TOut> next)
         {
+            var userInfoMap = _httpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
+            var property = request.GetType().GetProperty("EditorUsername");
+            property?.SetValue(request, userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey]);
+
             if (request is BaseRequest br)
             {
-                var userInfoMap = _httpContext.User.Claims.ToDictionary(p => p.Type, p => p.Value);
                 br.EditorUsername = userInfoMap[Consts.BackendOffice.UserInfo.UsernameKey];
             }
 

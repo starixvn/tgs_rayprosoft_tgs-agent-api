@@ -9,7 +9,7 @@
     <AssemblyName>TGS.Apis.OperatorApi</AssemblyName>
     <RootNamespace>TGS.Apis.OperatorApi</RootNamespace>
     <GlobalNugetConfig>$(UserProfile)\AppData\Roaming\NuGet\NuGet.Config</GlobalNugetConfig>
-    <GlobalNugetConfig Condition="'$(UserProfile)'==''">~/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
+    <GlobalNugetConfig Condition="'$(UserProfile)'==''">$(HOME)/.nuget/NuGet/NuGet.Config</GlobalNugetConfig>
     <DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)" --secret id=nuget,src="$(GlobalNugetConfig)"</DockerfileBuildArguments>
     <DockerfileTag Condition="$(DockerfileTag) == ''">operator-api</DockerfileTag>
   </PropertyGroup>
@@ -25,13 +25,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Handlers\Announcement\**" />
+    <Compile Remove="Handlers\**" />
     <Compile Remove="Services\**" />
-    <Content Remove="Handlers\Announcement\**" />
+    <Content Remove="Handlers\**" />
     <Content Remove="Services\**" />
-    <EmbeddedResource Remove="Handlers\Announcement\**" />
+    <EmbeddedResource Remove="Handlers\**" />
     <EmbeddedResource Remove="Services\**" />
-    <None Remove="Handlers\Announcement\**" />
+    <None Remove="Handlers\**" />
     <None Remove="Services\**" />
   </ItemGroup>
 
@@ -52,9 +52,9 @@
     <PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="4.1.1" />
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
-    <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.4-alpha" />
-    <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.9-alpha" />
-    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.0.9-alpha" />
+    <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.10" />
+    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.0.10-alpha" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.5" />
   </ItemGroup>
 

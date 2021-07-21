@@ -34,6 +34,7 @@ namespace TGS.Services.GameOperations.Models.Data
             RoundClosed = td.RoundClosed;
             BetType = td.BetType;
             JackpotContribution = td.JackpotContribution;
+            CustomBetValues = td.CustomBetValues;
 
             UtcNow = DateTimeOffset.UtcNow;
         }
@@ -111,8 +112,10 @@ namespace TGS.Services.GameOperations.Models.Data
         public bool FreeBetAsSingleRound { get; init; }
         public bool AllowCancelCancelTransaction { get; init; }
         public bool AllowPlaceBetWithDifferentPlatformToken { get; init; }
+        public bool WithCustomBetValues { get; init; }
 
         public OppositeBetRule[] OppositeBetRules { get; init; }
         public JackpotContribution JackpotContribution { get; }
+        public CustomBetValues CustomBetValues { get; }
     }
 }

@@ -47,7 +47,7 @@ namespace TGS.Shared.Game.Models.Saba.Incoming
         public record Transaction
         {
             [JsonPropertyName("refId")]
-            public long ReferenceId { get; init; }
+            public string ReferenceId { get; init; }
 
             [JsonPropertyName("parlayType")]
             public string ParlayType { get; init; }

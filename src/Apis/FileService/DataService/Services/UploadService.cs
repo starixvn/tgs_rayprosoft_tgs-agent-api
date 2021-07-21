@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Core.Infrastructures.Aws;
 using TGS.Core.Infrastructures.Utility;
 using TGS.FileService;
 
@@ -10,10 +11,10 @@ namespace TGS.Apis.FileService.DataService.Services
 {
     public sealed class UploadService : IUploadService
     {
-        private readonly IFileManager _fileManager;
+        private readonly IFileManager<IPublicAmazonS3> _fileManager;
 
         public UploadService(
-            IFileManager fileManager)
+            IFileManager<IPublicAmazonS3> fileManager)
         {
             _fileManager = fileManager ?? throw new ArgumentNullException(nameof(fileManager));
         }
@@ -33,20 +34,5 @@ namespace TGS.Apis.FileService.DataService.Services
             => _fileManager.ListPathAsync(prefix)
                 .Select(meta => meta.FileName)
                 .ToArrayAsync();
-
-        public async Task CleanFilesAsync(string prefix, string[] names)
-        {
-            var files = await _fileManager.FindExpiredFilesAsync($"/{prefix}/", DateTimeOffset.Now.AddHours(-24))
-                .Where(meta => !names.Contains(meta.FileName))
-                .ToArrayAsync()
-                .ConfigureAwait(false);
-
-            if (files.Length == 0)
-            {
-                return;
-            }
-
-            await _fileManager.DeleteFilesAsync(files);
-        }
     }
 }

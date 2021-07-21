@@ -5,7 +5,7 @@ namespace TGS.Services.BackOffice.Application.Models.GameProviderConfiguration
 {
     public class GameProviderConfigurationModel
     {
-        public Guid Id { get; set; }
+        public Guid Id { get; init; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string ClientId { get; set; }

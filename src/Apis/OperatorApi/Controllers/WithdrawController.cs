@@ -4,16 +4,16 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Tgs.Payment.Clients;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
-using Tgs.Payment;
+using TGS.Core.Models.Messages;
 using TGS.Services.Operator.BrandPayment;
 using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Withdraw;
 using TGS.ServiceUtility;
-using Tgs.Payment.Clients;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -116,6 +116,74 @@ namespace TGS.Apis.OperatorApi.Controllers
                     BankType = paymentMethod.BankType
                 };
             }
+        }
+
+        /// <summary>
+        /// Get the player withdraw info list.
+        /// </summary>
+        /// <param name="getWithdrawFormsQueryService"></param>
+        /// <param name="request"></param>
+        /// <param name="paging"></param>
+        /// <returns></returns>
+        [HttpGet("player/list")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public async Task<PagedResponse<WithdrawFormViewModel>> GetWithdrawFormsAsync(
+            [FromServices] IGetService<GetWithdrawFormsQuery, Tgs.Payment.Clients.PagingResponse<WithdrawFormInfo>> getWithdrawFormsQueryService,
+            [FromQuery] GetWithdrawFormsRequest request,
+            [FromQuery] PageableRequest paging)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+            if (request.BeginCreateOn != null && request.EndCreateOn != null)
+                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+
+            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
+                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+
+            var query = new GetWithdrawFormsQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                request.Status.ToPaymentFlowState(),
+                createOnRange,
+                updateOnRange,
+                paging);
+
+            var result = await getWithdrawFormsQueryService.GetAsync(query).ConfigureAwait(false);
+
+            var response = new PagedResponse<WithdrawFormViewModel>
+            {
+                Valid = true,
+                TotalCount = result.TotalCount,
+                Items = result.Items
+                    .Select(form => new WithdrawFormViewModel
+                    {
+                        Id = form.Id,
+                        Status = form.Status.ToFlowState(),
+                        Amount = form.Amount,
+                        CreatedOn = form.CreatedOn,
+                        UpdatedOn = form.UpdatedOn
+                    })
+                    .ToArray()
+            };
+
+            return response;
+        }
+
+        [HttpGet("status")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        [TgsResponseWrapper]
+        public Task<Dictionary<int, string>> GetWithdrawFormStatusAsync()
+        {
+            var dict = Enum.GetValues(typeof(FlowState))
+               .Cast<FlowState>()
+               .Where(x => x != FlowState.Unknown)
+               .ToDictionary(t => (int)t, t => t.ToString());
+            return Task.FromResult(dict);
         }
     }
 }

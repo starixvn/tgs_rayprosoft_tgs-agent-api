@@ -7,12 +7,12 @@ namespace TGS.Services.Promotion.Services
 {
     internal class CheckCanJoinPromotionQueryService : IGetService<CheckCanJoinPromotionQuery, bool>
     {
-        private readonly PromotionCheckerFactory _promotionCheckerFactory;
+        private readonly IPromotionCheckerFactory _promotionCheckerFactory;
         private readonly IPromotionRepository _promotionRepository;
 
         public CheckCanJoinPromotionQueryService(
             IPromotionRepository promotionRepository,
-            PromotionCheckerFactory promotionCheckerFactory)
+            IPromotionCheckerFactory promotionCheckerFactory)
         {
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
             _promotionCheckerFactory = promotionCheckerFactory ??

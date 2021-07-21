@@ -1,5 +1,5 @@
 ﻿using System;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 
 namespace TGS.Services.BackOffice.Domain
 {

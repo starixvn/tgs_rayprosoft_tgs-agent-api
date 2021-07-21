@@ -2,6 +2,7 @@
 using Moq;
 using NUnit.Framework;
 using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.PaymentMethodChannel;
 using TGS.Services.BackOffice.Application.Queries.BrandPayment;
 using TGS.Services.BackOffice.Domain;
@@ -55,14 +56,14 @@ namespace TGS.Tests.BackendOffice.UnitTests
         [Test]
         public void Should_Get_All_PaymentMethodChannels()
         {
-            var moqPaymentRepository = new Mock<IPaymentRepository>();
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
 
-            var sut = new AllPaymentMethodChannelQueryService(moqPaymentRepository.Object);
+            var sut = new AllPaymentMethodChannelQueryService(moqPaymentServiceClient.Object);
 
             sut.QueryAsync(new AllPaymentMethodChannelQuery());
 
-            moqPaymentRepository.Verify(
-                fake => fake.GetPaymentMethodChannelsAsync(),
+            moqPaymentServiceClient.Verify(
+                fake => fake.GetAllPaymentMethodChannelsAsync(),
                 Times.Exactly(1));
         }
     }

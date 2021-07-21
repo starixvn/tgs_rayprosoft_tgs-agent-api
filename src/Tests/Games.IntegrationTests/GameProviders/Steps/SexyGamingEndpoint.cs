@@ -362,18 +362,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             Set(SR.Response, response);
         }
 
-
-        protected async Task VerifyRoundStatus(IServiceProvider serviceProvider, RoundStatus expectedStatus)
-        {
-            var externalRoundId = Get<string>(SR.ExternalRoundId);
-            var db = GetDb<ITgsRepository>(serviceProvider);
-            var status = await db.Rounds.AsQueryable().Where(r => r.ExternalRoundId == externalRoundId)
-                .Select(r => r.Status)
-                .FirstAsync();
-
-            status.Should().Be(expectedStatus);
-        }
-
         #endregion
     }
 }

@@ -27,7 +27,11 @@ namespace TGS.Services.GameOperations.Data
 
     internal sealed partial class GameActionProcessor : IGameActionProcessor
     {
-        private static readonly GameType[] BypassPreviousActionGameTypes = {GameType.Slot};
+        private static readonly GameType[] _BypassPreviousActionGameTypes =
+        {
+            GameType.Slot
+        };
+
         private readonly IActionWithinRoundValidator _actionWithinRoundValidator;
         private readonly IAmountValidator _amountValidator;
         private readonly IBetValuesCalculator _betValuesCalculator;
@@ -71,10 +75,10 @@ namespace TGS.Services.GameOperations.Data
 
             foreach (var trx in betData.Transactions)
             {
-                var transactionSettings = _transactionSettingsGenerator.GetTransactionSettings(trx.GameActionType);
-                var hasWalletUpdate = transactionSettings.HasWalletUpdate(trx);
+                var transactionSettings = _transactionSettingsGenerator.GetTransactionSettings(trx);
+                var hasWalletUpdate = transactionSettings.HasWalletUpdate;
 
-                var result = await HandleGameActionAsync(new(trx)
+                var result = await HandleGameActionAsync(new GameActionState(trx)
                 {
                     Repository = data.Repository,
                     GameProvider = data.GameProvider,
@@ -84,7 +88,7 @@ namespace TGS.Services.GameOperations.Data
                     HasWalletUpdate = hasWalletUpdate,
                     MustHaveExistingRound = transactionSettings.MustHaveExistingRound,
                     MustHaveReferencedTransaction = transactionSettings.MustHaveReferencedTransaction,
-                    ValidateAmount = transactionSettings.ValidateAmount(trx),
+                    ValidateAmount = transactionSettings.ValidateAmount,
                     PrepareAmount = transactionSettings.GetTransactionAmount,
                     PlayerData = player,
                     GameProviderGames = data.Games,
@@ -92,6 +96,7 @@ namespace TGS.Services.GameOperations.Data
                     FreeBetAsSingleRound = betData.FreeBetAsSingleRound,
                     AllowCancelCancelTransaction = betData.AllowCancelCancelTransaction,
                     AllowPlaceBetWithDifferentPlatformToken = betData.AllowPlaceBetWithDifferentPlatformToken,
+                    WithCustomBetValues = betData.WithCustomBetValues,
                     AutoCloseRound = betData.AutoCloseRound,
                     OppositeBetRules = betData.OppositeBetRules ?? Array.Empty<OppositeBetRule>()
                 });
@@ -394,7 +399,7 @@ namespace TGS.Services.GameOperations.Data
         private static bool ShouldGetPreviousActions(GameActionState s) =>
             s.ForceGetPreviousActions ||
             s.GameActionType.IsNotAllOf(LockAmount, PlaceBet) ||
-            !BypassPreviousActionGameTypes.Contains(s.Game.Type);
+            !_BypassPreviousActionGameTypes.Contains(s.Game.Type);
 
         private static GameActionResult GetDuplicateTransactionResult(Guid gameActionId,
             string externalTransactionId, Guid roundId, int gameId) =>
@@ -464,6 +469,12 @@ namespace TGS.Services.GameOperations.Data
                 AllowCancelCancelTransaction = s.AllowCancelCancelTransaction
             };
 
+            if (s.WithCustomBetValues && s.CustomBetValues != null)
+            {
+                current.Turnover = s.CustomBetValues.Turnover;
+                current.WinLoss = s.CustomBetValues.WinLoss;
+            }
+
             var error = _actionWithinRoundValidator.FindError(current, s.PreviousActions);
             if (error != null)
             {
@@ -479,8 +490,12 @@ namespace TGS.Services.GameOperations.Data
 
             s.BetValueResult = betValues;
 
-            current.Turnover = betValues.Turnover;
-            current.WinLoss = betValues.WinLoss;
+            if (!s.WithCustomBetValues)
+            {
+                current.Turnover = betValues.Turnover;
+                current.WinLoss = betValues.WinLoss;
+            }
+
             current.UnsettledBets = betValues.UnsettledBets;
 
             s.PlayerData.Wallet.Balance = await GetOrUpdateBalanceAsync(s).ConfigureAwait(false);

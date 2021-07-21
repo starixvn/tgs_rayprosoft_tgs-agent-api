@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment;
+using Tgs.Payment.Clients;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.BankInfos
@@ -9,13 +10,13 @@ namespace TGS.Services.Agent.Services.BankInfos
     internal class CreateBankInfoCommandService : ICommandService<CreateBankInfoCommand>
     {
         private readonly IAgentRepository _agentRepository;
-        private readonly IPaymentRepository _paymentRepository;
+        private readonly IPaymentServiceClient _paymentServiceClient;
 
         public CreateBankInfoCommandService(
-            IPaymentRepository paymentRepository,
+            IPaymentServiceClient paymentServiceClient,
             IAgentRepository agentRepository)
         {
-            _paymentRepository = paymentRepository ?? throw new ArgumentNullException(nameof(paymentRepository));
+            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
         }
 
@@ -23,16 +24,19 @@ namespace TGS.Services.Agent.Services.BankInfos
         {
             var agent = await _agentRepository.GetAgentByIdAsync(command.AgentId).ConfigureAwait(false);
 
-            var bankInfo = new AgentBankInfo(
-                Guid.NewGuid(),
-                command.AgentId,
-                command.BrandId,
-                command.PaymentChannelId,
-                command.BankType,
-                command.Detail);
+            var createInfo = new BankCreateInfo
+            {
+                PaymentChannelId = command.PaymentChannelId,
+                BankType = command.BankType,
+                Detail = JsonDocument.Parse(command.Detail)
+            };
 
-            await _paymentRepository
-                .CreateAgentBankInfoAsync(bankInfo, agent.UserName)
+            await _paymentServiceClient
+                .CreateAgentBankInfoAsync(
+                    command.BrandId,
+                    command.AgentId,
+                    agent.UserName,
+                    createInfo)
                 .ConfigureAwait(false);
         }
     }

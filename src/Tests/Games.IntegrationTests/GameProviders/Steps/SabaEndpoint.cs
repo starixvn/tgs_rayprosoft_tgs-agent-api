@@ -147,7 +147,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     BetAmount = amount,
                     ActualAmount = amount,
                     BetTime = now,
-                    ReferenceId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    ReferenceId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(),
                     Token = loginRecordId.ToString(),
                     UpdateTime = now
                 }
@@ -156,7 +156,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var client = _serviceProvider.GetRequiredService<ISabaApiClient>();
             var response = await client.PlaceBetAsync(request).ConfigureAwait(false);
 
-            var externalRoundId = request.Body.ReferenceId.ToString();
+            var externalRoundId = request.Body.ReferenceId;
 
             Set(SR.GameProviderCurrencyCode, gameProviderCurrencyCode);
             Set(SR.ExternalTransactionId, externalRoundId);
@@ -188,7 +188,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Should().NotBeNull();
             response.Status.Should().Be(((int)GameApiError.Success).ToString());
             response.Message.Should().BeNullOrEmpty();
-            response.ReferenceId.ToString().Should().Be(externalRoundId);
+            response.ReferenceId.Should().Be(externalRoundId);
         }
 
         [Then(@"player wallet database record will be for \$(.*)")]
