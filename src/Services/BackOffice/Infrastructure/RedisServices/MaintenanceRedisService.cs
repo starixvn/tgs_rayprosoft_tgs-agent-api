@@ -133,7 +133,7 @@ namespace TGS.Services.BackOffice.Infrastructure.RedisServices
 
         private Task AddMaintenanceAsync(string merchantKey, Guid id)
         {
-            return _cacheManager.SafeCacheAsync(_maintenance, GetMaintenanceKey(merchantKey, id), id);
+            return _cacheManager.SafeCacheForeverAsync(_maintenance, GetMaintenanceKey(merchantKey, id), id);
         }
 
         private async ValueTask<string> GetMaintenanceAsync(string merchantKey, Guid id)
