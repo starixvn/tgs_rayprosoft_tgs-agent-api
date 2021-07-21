@@ -163,18 +163,6 @@ namespace TGS.Core.Infrastructures.Redis
             }
         }
 
-        async Task IRedisCacheManager.SafeCacheAsync<T>(object cacheType, object key, T data)
-        {
-            try
-            {
-                await CacheAsync(cacheType, key, null, data, true);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"redis error :{ex}");
-            }
-        }
-
         Task IRedisCacheManager.SetKeyExpirationInAsync(object cacheType, object key, TimeSpan expiresIn)
         {
             var cacheKey = FormCacheKey(cacheType, key);

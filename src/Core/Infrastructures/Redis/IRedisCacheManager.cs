@@ -36,8 +36,6 @@ namespace TGS.Core.Infrastructures.Redis
 
         Task SafeCacheAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data);
 
-        Task SafeCacheAsync<T>(object cacheType, object key, T data);
-
         Task SetKeyExpirationInAsync(object cacheType, object key, TimeSpan expiresIn);
 
         Task<long> IncrementAsync(object cacheType, object key, long value = 1);
