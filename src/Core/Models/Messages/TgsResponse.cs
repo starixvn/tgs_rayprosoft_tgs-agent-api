@@ -12,6 +12,6 @@ namespace TGS.Core.Models.Messages
         public string ErrorMessage { get; init; } = string.Empty;
 
         [JsonPropertyName("errmsgid")]
-        public string? ErrorMessageKey { get; init; }
+        public string ErrorMessageKey { get; init; }
     }
 }

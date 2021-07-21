@@ -214,12 +214,12 @@ pipeline {
                     return env.kube_ns != 'dev';
                 }
             }
-			input {
-				message 'Ready to go?'
-				ok 'yes'
-			}
 
             steps {
+                script {
+                    input message: 'Ready to go?', ok: 'yes';
+                }
+                
                 sh "echo start deploy"
             }
         }
