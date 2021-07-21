@@ -22,7 +22,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
 
             if (!string.IsNullOrEmpty(await maintenanceRedisService.GetBrandMaintenanceAsync(brandId).ConfigureAwait(false)))
             {
-                throw new BrandUnderMaintenanceException();
+                throw new BrandUnderMaintenanceException("Brand is put into maintenance");
             }
             await _next(context);
         }
