@@ -128,6 +128,7 @@ namespace TGS.Services.Operator.Services.Game
                     gamePlatformTypes)
                 .ToArrayAsync(cancellationToken).ConfigureAwait(true);
 
+            var gameTypes = query.Types;
             var infos = from g in games
                         join bg in brandGames on g.Id equals bg.GameId
                         let availableCurrencies = !string.IsNullOrEmpty(g.AvailableCurrencies)
@@ -136,6 +137,8 @@ namespace TGS.Services.Operator.Services.Game
                         let gp = gameProviders.First(gp => gp.Id == bg.GameProviderId)
                         let bgp = brandGameProviders.First(bgp => bgp.GameProviderId == bg.GameProviderId)
                         where g.AvailableToBrand &&
+                            (gameTypes.Length == 0 ||
+                                gameTypes.Contains(g.Type)) &&
                             (availableCurrencies.Length == 0 ||
                                 availableCurrencies.IgnoreCaseContains(currencyCode)) &&
                             (string.IsNullOrEmpty(subGameProviderCode) ||
