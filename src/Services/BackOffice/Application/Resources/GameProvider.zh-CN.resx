@@ -153,4 +153,7 @@
   <data name="ExternalIdExisted" xml:space="preserve">
     <value>外部的代码已存在</value>
   </data>
+  <data name="GamesExisted" xml:space="preserve">
+    <value>游戏已经存在：{0}</value>
+  </data>
 </root>

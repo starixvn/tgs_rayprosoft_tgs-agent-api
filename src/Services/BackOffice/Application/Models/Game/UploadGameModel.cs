@@ -15,6 +15,6 @@
         public bool? AvailableToBrand { get; set; }
         public bool? Html5 { get; set; }
         public string AvailableCurrencies { get; set; }
-        public string SubGameProviderCode { get; set; }
+        public string SubGpCode { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace TGS.Services.BackOffice.Application.Queries.GameHandlers
                     Id = x.Id,
                     Name = x.Name,
                     Code = x.Code,
-                    SubGameProviderCode = x.SubGameProviderCode,
+                    SubGpCode = x.SubGameProviderCode,
                     Status = x.Status,
                     Description = x.Description,
                     ExternalId = x.ExternalId,

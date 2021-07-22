@@ -148,7 +148,7 @@
     <value>Game in use for brands.</value>
   </data>
   <data name="GamesExisted" xml:space="preserve">
-    <value>Games existed already.</value>
+    <value>Games existed already : {0}</value>
   </data>
   <data name="DuplicateGames" xml:space="preserve">
     <value>Duplicate games, please check game list.</value>

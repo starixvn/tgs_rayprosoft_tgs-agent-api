@@ -124,7 +124,7 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Games existed already..
+        ///   Looks up a localized string similar to Games existed already : {0}.
         /// </summary>
         public static string GamesExisted {
             get {
