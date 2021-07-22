@@ -126,6 +126,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get station letters")]
         public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] GetStationLettersRequest request)
         {
+            var jsonDocumentOptions = default(JsonDocumentOptions);
+
             return _queries.GetQueries()
                 .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
@@ -138,7 +140,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
-                    Localization = JsonDocument.Parse(a.Localization, default),
+                    Localization = JsonDocument.Parse(a.Localization, jsonDocumentOptions),
                     Remarks = a.Remarks,
                     AssignedAllPlayers = a.AssignedAllPlayers,
                     PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),
