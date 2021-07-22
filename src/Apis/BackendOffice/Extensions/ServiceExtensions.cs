@@ -33,7 +33,7 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
-using TGS.Services.BackOffice.Application.Extensions;
+using TGS.Services.BackOffice.Extensions;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 

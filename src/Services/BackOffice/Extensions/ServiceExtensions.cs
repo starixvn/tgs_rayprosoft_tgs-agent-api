@@ -8,7 +8,7 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Services.BackOffice.Infrastructure.RedisServices;
 using TGS.Services.BackOffice.Infrastructure.Services;
 
-namespace TGS.Services.BackOffice.Application.Extensions
+namespace TGS.Services.BackOffice.Extensions
 {
     public static class ServiceExtensions
     {
@@ -39,6 +39,7 @@ namespace TGS.Services.BackOffice.Application.Extensions
             services.AddTransient<IGameService, GameService>();
             services.AddTransient<IWalletExchangeService, WalletExchangeService>();
             services.AddTransient<IPlatformCreditService, PlatformCreditService>();
+            services.AddTransient<ISubGameProviderService, SubGameProviderService>();
             services.AddTransient<IMaintenanceRedisService, MaintenanceRedisService>();
             services.AddTgsTransactionRepositoriesServices();
 
