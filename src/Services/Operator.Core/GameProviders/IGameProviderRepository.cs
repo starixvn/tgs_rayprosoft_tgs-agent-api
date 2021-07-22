@@ -7,8 +7,15 @@ namespace TGS.Services.Operator.GameProviders
     public interface IGameProviderRepository
     {
         IAsyncEnumerable<GameProviderDataInfo> QueryGameProvidersAsync(IEnumerable<Guid> gameProviderIds,
-            IEnumerable<GamePlatformType> gamePlatformTypes);
+            IEnumerable<Status> statuses);
 
-        IAsyncEnumerable<SubGameProviderInfo> QuerySubGameProvidersAsync(IEnumerable<Guid> gameProviderIds);
+        IAsyncEnumerable<SubGameProviderWithLocationDataInfo> QuerySubGameProvidersAsync(
+            IEnumerable<Guid> gameProviderIds);
+
+        IAsyncEnumerable<SubGameProviderDataInfo> QuerySubGameProvidersAsync(
+            string? subGameProviderCode = null);
+
+        IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(
+            IEnumerable<Guid> gameProviderIds);
     }
 }

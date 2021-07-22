@@ -45,14 +45,14 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
             var currency = jwt.Claims.FirstOrDefault(x => x.Type == Consts.ClaimName.Currency)?.Value;
 
-            if (sub.IsNullOrEmpty() || !Guid.TryParse(sub, out var licenseeId))
+            if (sub.IsNullOrEmpty() || !Guid.TryParse(sub, out var brandId))
             {
-                throw new InvalidCredentialsException("Licensee doesn't exist");
+                throw new InvalidCredentialsException("Brand doesn't exist");
             }
 
-            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(licenseeId, ValidStatus.Default);
-            var secretKey = await brandOperations.GetBrandSecretKeyAsync(licenseeId);
-            var signature = $"{licenseeId}:{currency}:{secretKey}";
+            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
+            var secretKey = await brandOperations.GetBrandSecretKeyAsync(brandId);
+            var signature = $"{brandId}:{currency}:{secretKey}";
 
             handler.ValidateToken(token, new()
                 {
@@ -67,7 +67,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
                 exception => throw new InvalidCredentialsException(exception.Message),
                 _ => throw new InvalidCredentialsException("Token is expired"));
 
-            context.Items.Add(Core.Models.Consts.ContextItems.BrandId, licenseeId);
+            context.Items.Add(Core.Models.Consts.ContextItems.BrandId, brandId);
 
             await _next(context);
         }

@@ -13,6 +13,7 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operator.GameProviders;
+using TGS.Services.Operator.Games;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameProvider
@@ -24,6 +25,7 @@ namespace TGS.Services.Operator.Services.GameProvider
 
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
+        private readonly IGameRepository _gameRepository;
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IValidStatus<Status> _validStatus;
@@ -35,7 +37,8 @@ namespace TGS.Services.Operator.Services.GameProvider
             IBrandOperations brandOperations,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
-            IGameProviderRepository gameProviderRepository)
+            IGameProviderRepository gameProviderRepository,
+            IGameRepository gameRepository)
         {
             _brandCurrencyCodeMapper = brandCurrencyCodeMapper ??
                 throw new ArgumentNullException(nameof(brandCurrencyCodeMapper));
@@ -48,6 +51,7 @@ namespace TGS.Services.Operator.Services.GameProvider
 
             _gameProviderRepository =
                 gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+            _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
         }
 
         public async IAsyncEnumerable<GameProviderInfo> QueryAsync(
@@ -92,34 +96,38 @@ namespace TGS.Services.Operator.Services.GameProvider
                 .Select(bgp => bgp.GameProviderId).Distinct().ToArray();
 
             var gameProviders =
-                await _gameProviderRepository.QueryGameProvidersAsync(gameProviderIds, gamePlatformTypes)
+                await _gameProviderRepository.QueryGameProvidersAsync(gameProviderIds, statuses)
                     .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            var gameProviderCurrencies = await _gameProviderRepository.QueryGameProviderCurrenciesAsync(gameProviderIds)
+                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
             var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync(gameProviderIds)
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
-            foreach (var gp in gameProviders.Where(gp => statuses.Contains(gp.Status)))
+            var gameTypeInfos = await _gameRepository
+                .QueryGameTypeInfosAsync(gameProviderIds, gameStatuses, gamePlatformTypes)
+                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            foreach (var gp in gameProviders)
             {
-                if (gp.Currencies.IgnoreCaseNotContains(currencyCode))
+                var isCurrencySupported = gameProviderCurrencies.Any(c
+                    => c.GameProviderId == gp.Id && c.CurrencyCode.IgnoreCaseEquals(currencyCode));
+
+                if (!isCurrencySupported)
                 {
                     continue;
                 }
 
                 foreach (var sgp in subGameProviders.Where(sgp => sgp.GameProviderId == gp.Id))
                 {
-                    var games = gp.Games.Where(g
-                            => gameStatuses.Contains(g.Status) && g.SubGameProviderCode.IgnoreCaseEquals(sgp.Code))
-                        .ToArray();
+                    var gameTypes = gameTypeInfos.Where(g => g.SubGameProviderCode.IgnoreCaseEquals(sgp.Code))
+                        .Select(g => g.Type).OrderBy(t => (int)t).ToArray();
 
-                    if (games.Length == 0)
+                    if (gameTypes.Length == 0)
                     {
                         continue;
                     }
-
-                    var gameTypes = games.Select(g => g.Type)
-                        .OrderBy(t => (int)t)
-                        .Distinct()
-                        .ToArray();
 
                     if (string.IsNullOrEmpty(sgp.Localization))
                     {

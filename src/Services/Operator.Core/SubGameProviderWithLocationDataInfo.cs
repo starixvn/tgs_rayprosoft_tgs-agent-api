@@ -2,6 +2,6 @@
 
 namespace TGS.Services.Operator
 {
-    public record SubGameProviderInfo(Guid GameProviderId, string Code, string Name,
+    public record SubGameProviderWithLocationDataInfo(Guid GameProviderId, string Code, string Name,
         string Description, string Localization);
 }
