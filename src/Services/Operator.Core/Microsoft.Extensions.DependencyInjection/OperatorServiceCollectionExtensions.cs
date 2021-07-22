@@ -20,17 +20,14 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .AddOptions<OperatorOptions>()
                 .Services
-                .AddHttpClient<ValidateCodeServiceClient>()
-                .ConfigureHttpClient((sp, httpClient) =>
+                .AddValidateCodeClient((options, sp) =>
                 {
-                    var options = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
+                    var operatorOptions = sp.GetRequiredService<IOptions<OperatorOptions>>().Value;
 
-                    httpClient.BaseAddress = options.ValidateCodeBaseUrl;
+                    options.ValidateCodeBaseUrl = operatorOptions.ValidateCodeBaseUrl;
                 })
-                .Services
                 .AddTransient<IGameProviderStatusValidator, GameProviderStatusValidator>()
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
-                .AddTransient<IValidateCodeServiceClient>(sp => sp.GetRequiredService<ValidateCodeServiceClient>())
                 .AddTransient<IRequestAnalyzer, RequestAnalyzer>()
                 .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
                 .AddMail()
