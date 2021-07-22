@@ -182,6 +182,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<AdminLog> AdminLogs { get; set; }
 
         DbSet<BrandCommunication> BrandCommunications { get; set; }
+        DbSet<SubGameProvider> SubGameProviders { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
@@ -346,6 +347,7 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
         public DbSet<PlatformCredit> PlatformCredits { get; set; }
         public DbSet<PlatformPayRecord> PlatformPayRecords { get; set; }
+        public DbSet<SubGameProvider> SubGameProviders { get; set; }
 
         public DbSet<ApiLog> ApiLogs { get; set; }
 
