@@ -35,7 +35,7 @@ namespace TGS.Apis.OperatorApi.Models
 
                 [TgsApiError.InvalidArguments] = StatusCodes.Status400BadRequest,
                 [TgsApiError.IncorrectFormat] = StatusCodes.Status400BadRequest,
-                [TgsApiError.UnderMaintenance] = StatusCodes.Status500InternalServerError,
+                [TgsApiError.UnderMaintenance] = StatusCodes.Status503ServiceUnavailable,
                 [TgsApiError.InvalidStatus] = StatusCodes.Status500InternalServerError,
 
                 [TgsApiError.SystemError] = StatusCodes.Status500InternalServerError,
