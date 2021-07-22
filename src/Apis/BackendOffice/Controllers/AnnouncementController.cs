@@ -125,6 +125,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             var hasExpiredStatus = request.Status.Contains(AnnounceStatus.Expired);
             var now = DateTimeOffset.Now;
 
+            var serializerOptions = default(JsonDocumentOptions);
+
             return _queries.GetQueries()
                 .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
@@ -139,7 +141,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
-                    Localization = JsonDocument.Parse(a.Localization, default),
+                    Localization = JsonDocument.Parse(a.Localization, serializerOptions),
                     Remarks = a.Remarks,
                     BrandName = a.Brand.Name,
                     CreatedByUsername = a.CreatedByUsername,
