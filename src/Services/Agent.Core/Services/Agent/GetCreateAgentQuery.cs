@@ -20,6 +20,9 @@ namespace TGS.Services.Agent.Services.Agent
 
         public string RealName { get; init; } = default!;
 
+        public string Email { get; init; } = default!;
+        public string Phone { get; init; } = default!;
+
         public string? Remarks { get; init; }
 
         public decimal SlotRebatePercentage { get; init; }

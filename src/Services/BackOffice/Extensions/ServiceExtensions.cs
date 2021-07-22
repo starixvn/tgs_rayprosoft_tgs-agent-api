@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Services.BackOffice.Application.Middlewares;
 using TGS.Services.BackOffice.Domain;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.Services.BackOffice.Infrastructure.RedisServices;
 using TGS.Services.BackOffice.Infrastructure.Services;
 
 namespace TGS.Services.BackOffice.Extensions
@@ -39,7 +40,7 @@ namespace TGS.Services.BackOffice.Extensions
             services.AddTransient<IWalletExchangeService, WalletExchangeService>();
             services.AddTransient<IPlatformCreditService, PlatformCreditService>();
             services.AddTransient<ISubGameProviderService, SubGameProviderService>();
-
+            services.AddTransient<IMaintenanceRedisService, MaintenanceRedisService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;

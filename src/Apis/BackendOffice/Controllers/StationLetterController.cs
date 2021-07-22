@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ClosedXML.Excel;
 using ClosedXML.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Controllers.Messages.StationLetter;
 using TGS.Apis.BackendOffice.DataService.Services;
 using TGS.Apis.BackendOffice.Services;
@@ -16,6 +18,7 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 
@@ -56,10 +59,75 @@ namespace TGS.Apis.BackendOffice.Controllers
             _stationLetterService = stationLetterService;
         }
 
+        [HttpPost]
+        [Description("Create a station letter")]
+        public async Task<MessageResponse> CreateAsync(
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+            [FromBody] StationLetterRequest request)
+        {
+            var jsonOptions = jsonOptionsAccessor.Value;
+
+            var stationLetter = new StationLetter
+            {
+                Id = GuidExtensions.NewSequentialGuid(),
+                BrandId = request.BrandId,
+                Subject = request.Subject,
+                Content = request.Content,
+                Localization = jsonSerializationProvider.SerializeToString(
+                    request.Localization,
+                    jsonOptions.JsonSerializerOptions),
+                AssignedAllPlayers = request.AssignedAllPlayers,
+                Status = StationLetterStatus.InVerify,
+                CreatedByUsername = Username,
+                UpdatedByUsername = Username,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
+
+            var allPlayers = await _playerQueries.GetQueries()
+                .Where(p => p.Status == PlayerStatus.Enabled
+                    && p.BrandId == request.BrandId)
+                .ToArrayAsync();
+
+            if (!request.AssignedAllPlayers)
+            {
+                allPlayers = allPlayers.Where(p => request.PlayerUsernames.Contains(p.Username)).ToArray();
+            }
+
+            var players = allPlayers.Select(p => new StationLetterPlayer
+            {
+                PlayerCode = p.PlayerCode,
+                StationLetterId = stationLetter.Id
+            }).ToArray();
+
+            await _stationLetterService.CreateStationLetterAsync(stationLetter, players);
+
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPost("export")]
+        [Description("Export player file for example")]
+        public async Task<HttpResponseMessage> ExportAsync()
+        {
+            var wb = await Task.Run(() =>
+            {
+                var workbook = new XLWorkbook();
+                var ws = workbook.AddWorksheet("Player");
+                ws.Cell("A1").Value = "Player1";
+                ws.Cell("A2").Value = "Player2";
+
+                return workbook;
+            });
+            return wb.Deliver("Player.xlsx");
+        }
+
         [HttpGet]
         [Description("Get station letters")]
         public Task<PagedResponse<StationLetterModel>> GetListAsync([FromQuery] GetStationLettersRequest request)
         {
+            var jsonDocumentOptions = default(JsonDocumentOptions);
+
             return _queries.GetQueries()
                 .Where(request.BrandId, x => x.BrandId == request.BrandId)
                 .Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
@@ -72,6 +140,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     BrandId = a.BrandId,
                     Subject = a.Subject,
                     Content = a.Content,
+                    Localization = JsonDocument.Parse(a.Localization, jsonDocumentOptions),
                     Remarks = a.Remarks,
                     AssignedAllPlayers = a.AssignedAllPlayers,
                     PlayerUsernames = a.Players.Select(p => p.Player.Username).ToArray(),
@@ -81,6 +150,62 @@ namespace TGS.Apis.BackendOffice.Controllers
                     CreatedOn = a.CreatedOn
                 })
                 .CreatePagedResponseAsync(request);
+        }
+
+        [HttpPut("{id}")]
+        [Description("Update a station letter")]
+        public async Task<MessageResponse> UpdateAsync(
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+            Guid id,
+            [FromBody] StationLetterRequest request)
+        {
+            var jsonOptions = jsonOptionsAccessor.Value;
+
+            var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
+            if (stationLetter == null)
+            {
+                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
+            }
+
+            stationLetter.Subject = request.Subject;
+            stationLetter.Content = request.Content;
+            stationLetter.Localization = jsonSerializationProvider.SerializeToString(
+                request.Localization,
+                jsonOptions.JsonSerializerOptions);
+            stationLetter.UpdatedByUsername = Username;
+            stationLetter.UpdatedOn = DateTimeOffset.Now;
+
+            await _commands.UpdateAsync(stationLetter);
+            return CreateValidResponse<MessageResponse>();
+        }
+
+        [HttpPost("upload")]
+        [Description("Upload player file")]
+        public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
+        {
+            var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadPlayerModel>(file);
+            var users = uploadedResult.Where(p => !string.IsNullOrEmpty(p.Username)).Select(p => p.Username);
+
+            var allPlayers = await _playerQueries.GetQueries()
+                .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))
+                .ToArrayAsync();
+
+            var players = from u in users
+                          join p in allPlayers on u equals p.Username
+                              into tmpU
+                          from p in tmpU.DefaultIfEmpty()
+                          select new GetPlayerFromFileResponse.PlayerModel
+                          {
+                              Username = u,
+                              Exists = p != null
+                          };
+
+            return new GetPlayerFromFileResponse
+            {
+                Valid = true,
+                Players = players.ToArray()
+            };
         }
 
         [HttpPut("{id}/{type}")]
@@ -114,108 +239,6 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             await _commands.UpdateAsync(stationLetter);
             return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPut("{id}")]
-        [Description("Update a station letter")]
-        public async Task<MessageResponse> UpdateAsync(Guid id, [FromBody] StationLetterRequest request)
-        {
-            var stationLetter = await _queries.GetSingleAsync(p => p.Id == id);
-            if (stationLetter == null)
-            {
-                return CreateInvalidResponse<MessageResponse>(Resources.StationLetter.NotFound);
-            }
-
-            stationLetter.Subject = request.Subject;
-            stationLetter.Content = request.Content;
-            stationLetter.UpdatedByUsername = Username;
-            stationLetter.UpdatedOn = DateTimeOffset.Now;
-
-            await _commands.UpdateAsync(stationLetter);
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPost]
-        [Description("Create a station letter")]
-        public async Task<MessageResponse> CreateAsync([FromBody] StationLetterRequest request)
-        {
-            var stationLetter = new StationLetter
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                BrandId = request.BrandId,
-                Subject = request.Subject,
-                Content = request.Content,
-                AssignedAllPlayers = request.AssignedAllPlayers,
-                Status = StationLetterStatus.InVerify,
-                CreatedByUsername = Username,
-                UpdatedByUsername = Username,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
-            };
-
-            var allPlayers = await _playerQueries.GetQueries()
-                .Where(p => p.Status == PlayerStatus.Enabled
-                    && p.BrandId == request.BrandId)
-                .ToArrayAsync();
-
-            if (!request.AssignedAllPlayers)
-            {
-                allPlayers = allPlayers.Where(p => request.PlayerUsernames.Contains(p.Username)).ToArray();
-            }
-
-            var players = allPlayers.Select(p => new StationLetterPlayer
-            {
-                PlayerCode = p.PlayerCode,
-                StationLetterId = stationLetter.Id
-            }).ToArray();
-
-            await _stationLetterService.CreateStationLetterAsync(stationLetter, players);
-
-            return CreateValidResponse<MessageResponse>();
-        }
-
-        [HttpPost("upload")]
-        [Description("Upload player file")]
-        public async Task<GetPlayerFromFileResponse> UploadAsync(IFormFile file)
-        {
-            var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadPlayerModel>(file);
-            var users = uploadedResult.Where(p => !string.IsNullOrEmpty(p.Username)).Select(p => p.Username);
-
-            var allPlayers = await _playerQueries.GetQueries()
-                .Where(p => p.Status == PlayerStatus.Enabled && users.Contains(p.Username))
-                .ToArrayAsync();
-
-            var players = from u in users
-                          join p in allPlayers on u equals p.Username
-                              into tmpU
-                          from p in tmpU.DefaultIfEmpty()
-                          select new GetPlayerFromFileResponse.PlayerModel
-                          {
-                              Username = u,
-                              Exists = p != null
-                          };
-
-            return new GetPlayerFromFileResponse
-            {
-                Valid = true,
-                Players = players.ToArray()
-            };
-        }
-
-        [HttpPost("export")]
-        [Description("Export player file for example")]
-        public async Task<HttpResponseMessage> ExportAsync()
-        {
-            var wb = await Task.Run(() =>
-            {
-                var workbook = new XLWorkbook();
-                var ws = workbook.AddWorksheet("Player");
-                ws.Cell("A1").Value = "Player1";
-                ws.Cell("A2").Value = "Player2";
-
-                return workbook;
-            });
-            return wb.Deliver("Player.xlsx");
         }
     }
 }

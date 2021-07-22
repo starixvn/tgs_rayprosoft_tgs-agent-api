@@ -9,6 +9,7 @@ using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers;
+using TGS.Clients.Promotion.Client;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
@@ -24,11 +25,13 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             base.Setup();
             _controller = new(
-                _mediatorMock.Object);
+                _mediatorMock.Object,
+                _promotionClientMock.Object);
         }
 
         private PlayerController _controller;
         private readonly Mock<IMediator> _mediatorMock = new();
+        private readonly Mock<IPromotionClient> _promotionClientMock = new();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -55,7 +58,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetPlayersRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<PlayersModel> {Valid = true, Items = expectedPlayers});
+                .ReturnsAsync(new PagedResponse<PlayersModel>
+                {
+                    Valid = true,
+                    Items = expectedPlayers
+                });
 
             var response = await _controller.GetListAsync(request);
             response.Valid.Should().BeTrue();
@@ -98,7 +105,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetPlayerOperationRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new PagedResponse<PlayerOperationModel> {Valid = true, Items = expectedPlayers});
+                .ReturnsAsync(new PagedResponse<PlayerOperationModel>
+                {
+                    Valid = true,
+                    Items = expectedPlayers
+                });
 
             var response = await _controller.GetPlayerOperationsAsync(playerCode, request);
             response.Valid.Should().BeTrue();
@@ -120,7 +131,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GetPlayerResponse {Valid = false, Message = Player.NotFound});
+                .ReturnsAsync(new GetPlayerResponse
+                {
+                    Valid = false,
+                    Message = Player.NotFound
+                });
 
             var response = await _controller.GetSingleAsync(playerCode);
             response.Valid.Should().BeFalse();
@@ -136,7 +151,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var player = CreatePlayersModelFixture().Create<PlayerModel>();
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<GetPlayerRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new GetPlayerResponse {Valid = true, Player = player});
+                .ReturnsAsync(new GetPlayerResponse
+                {
+                    Valid = true,
+                    Player = player
+                });
 
             var response = await _controller.GetSingleAsync(It.IsAny<string>());
             response.Valid.Should().BeTrue();
@@ -160,7 +179,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var playerCode = Generator.RandomString(12);
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = false, Message = Player.UpdateTypeNotFound});
+                .ReturnsAsync(new MessageResponse
+                {
+                    Valid = false,
+                    Message = Player.UpdateTypeNotFound
+                });
 
             var request = new Fixture().Create<UpdatePlayerRequest>();
 
@@ -178,7 +201,11 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
             var playerCode = Generator.RandomString(12);
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdatePlayerRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new MessageResponse {Valid = false, Message = Player.NotFound});
+                .ReturnsAsync(new MessageResponse
+                {
+                    Valid = false,
+                    Message = Player.NotFound
+                });
 
             var request = new Fixture().Create<UpdatePlayerRequest>();
 
@@ -194,7 +221,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<PlayerModel>(u => u
-                .With(s => s.Banks, new PlayerModel.BankModel[] { }));
+                .With(s => s.Banks, new PlayerModel.BankModel[]
+                {
+                }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }

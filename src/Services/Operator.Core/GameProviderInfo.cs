@@ -1,12 +1,9 @@
-﻿using System;
-using TGS.Core.Models.Enums;
+﻿using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator
 {
-    public record GameProviderModel
+    public record GameProviderInfo
     {
-        public Guid Id { get; init; }
-
         public string Code { get; init; } = default!;
 
         public string Name { get; init; } = default!;

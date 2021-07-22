@@ -182,6 +182,7 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<AdminLog> AdminLogs { get; set; }
 
         DbSet<BrandCommunication> BrandCommunications { get; set; }
+
         DbSet<SubGameProvider> SubGameProviders { get; set; }
     }
 
