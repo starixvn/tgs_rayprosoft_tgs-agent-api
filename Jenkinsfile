@@ -148,21 +148,6 @@ pipeline {
 			}
         }
 
-        stage('Building validatecode-api image') {
-            when {
-                expression {
-                    return checkIsRunStage("validatecode-api", params['Components'])
-                }
-            }
-            environment {
-                ImageName="${Registry}validatecode-api"
-            }
-			steps {
-                sh 'dotnet build "src/Apis/ValidateCodeApi" -c $BuildConfiguration -t:ContainerBuild -p:DockerfileTag="$ImageName:${TAG}" --no-restore '
-                sh 'docker push $ImageName:${TAG}'
-			}
-        }
-
         stage('Building promotion-api image') {
             when {
                 expression {
@@ -368,30 +353,6 @@ pipeline {
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy validatecode-api') {
-            when {
-                expression {
-                    return checkIsRunStage("validatecode-api", params['Components'])
-                }
-            }
-            environment {
-                ImageName="${Registry}validatecode-api"
-            }
-            steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
-                    sh '''
-                        helm template deployment/k8s/validatecode-api \
-                            --set image.tag=${TAG} \
-                            --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
