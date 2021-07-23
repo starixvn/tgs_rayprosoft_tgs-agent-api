@@ -50,6 +50,7 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
             game.AvailableCurrencies = request.AvailableCurrencies;
             game.UpdatedByUsername = request.EditorUsername;
             game.UpdatedOn = DateTimeOffset.Now;
+            game.SubGameProviderCode = request.SubGpCode;
 
             await _gameService.UpdateGameAsync(game);
 

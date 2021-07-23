@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Services.BackOffice.Application.Models.SubGameProvider;
 
 namespace TGS.Services.BackOffice.Infrastructure.DataService
@@ -50,6 +51,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             gameProvider.Name = request.Name;
             gameProvider.Description = request.Description;
+            gameProvider.Localization = request.Localization?.ToJson();
             gameProvider.UpdatedByUsername = request.EditorUsername;
             gameProvider.UpdatedOn = DateTimeOffset.Now;
 
@@ -64,6 +66,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 Code = request.Code,
                 Name = request.Name,
                 Description = request.Description,
+                Localization = request.Localization?.ToJson(),
                 CreatedByUsername = request.EditorUsername,
                 UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,

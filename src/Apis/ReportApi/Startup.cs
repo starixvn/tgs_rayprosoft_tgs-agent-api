@@ -20,7 +20,7 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
-using TGS.Services.Report.Application.Extensions;
+using TGS.Services.Report.Extensions;
 
 namespace TGS.Apis.ReportApi
 {
@@ -62,7 +62,11 @@ namespace TGS.Apis.ReportApi
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() {Title = "TGS Report API", Version = "v1"});
+                c.SwaggerDoc("v1", new()
+                {
+                    Title = "TGS Report API",
+                    Version = "v1"
+                });
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 
@@ -77,7 +81,13 @@ namespace TGS.Apis.ReportApi
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
+            var defaultBypassRouting = new[]
+            {
+                "/health",
+                "/metrics",
+                "/favicon.ico",
+                "/swagger"
+            };
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();

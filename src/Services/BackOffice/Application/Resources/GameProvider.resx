@@ -156,4 +156,7 @@
   <data name="ExternalIdExisted" xml:space="preserve">
     <value>External id existed already.</value>
   </data>
+  <data name="InvalidSubGameProviderCode" xml:space="preserve">
+    <value>Sub game provider codes is invalid : {0}</value>
+  </data>
 </root>
