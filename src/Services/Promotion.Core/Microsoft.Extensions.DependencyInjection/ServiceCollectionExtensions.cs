@@ -32,7 +32,8 @@ namespace Microsoft.Extensions.DependencyInjection
                         sp,
                         configuration.GetAllRegisterCheckerTypes()))
                 .AddTransient<IPlayerService, PlayerService>()
-                .AddTransient<ISettingsService, SettingsService>();
+                .AddTransient<ISettingsService, SettingsService>()
+                .AddTransient<IPromotionTypeFactory, PromotionTypeFactory>();
 
             services.AddTgsTransactionRepositoriesServices();
 

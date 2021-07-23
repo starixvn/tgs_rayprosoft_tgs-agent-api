@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Promotion.Models.Promotion;
@@ -14,16 +15,20 @@ namespace TGS.Services.Promotion.Handlers
         private readonly ILogger<CreatePromotionParticipantHandler> _logger;
         private readonly IPromotionParticipantRepository _promotionParticipantRepository;
         private readonly IPromotionRepository _promotionRepository;
+        private readonly IPromotionTypeFactory _promotionType;
 
         public CreatePromotionParticipantHandler(
             IPromotionRepository promotionRepository,
             IPromotionParticipantRepository promotionParticipantRepository,
+            IPromotionTypeFactory promotionType,
             IHttpContextAccessor accessor,
             ILogger<CreatePromotionParticipantHandler> logger) : base(accessor)
         {
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
             _promotionParticipantRepository = promotionParticipantRepository ??
                 throw new ArgumentNullException(nameof(promotionParticipantRepository));
+            _promotionType = promotionType ??
+                throw new ArgumentNullException(nameof(promotionType));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -50,6 +55,14 @@ namespace TGS.Services.Promotion.Handlers
                 _logger.LogWarning($"Promotion({request.PromotionId}) invalid.");
 
                 return CreateInvalidResponse<MessageResponse>("Promotion invalid");
+            }
+
+            if (await _promotionType.IsDepositTypeAsync(promotion.PromotionType))
+            {
+                _logger.LogWarning(
+                    $"Promotion({request.PromotionId}) Type({Consts.PromotionGroupType.Deposit}) invalid.");
+
+                return CreateInvalidResponse<MessageResponse>($"{Consts.PromotionGroupType.Deposit} invalid");
             }
 
             await _promotionParticipantRepository.CreatePromotionParticipantAsync(request.PromotionId,
