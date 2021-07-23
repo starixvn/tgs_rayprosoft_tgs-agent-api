@@ -11,8 +11,10 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Controllers.Messages.GameProvider;
 using TGS.Apis.BackendOffice.Services;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
 using TGS.Services.BackOffice.Application.Models.SubGameProvider;
@@ -83,49 +85,54 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         [Description("Upload game providers localization file")]
         public async Task<MessageResponse> UploadGameProvidersLocalizationAsync(
             IFormFile file,
-            [FromServices]
-            IGetService<UpdateGameProvidersLocalizationQuery, UpdateGameProvidersLocationInfo>
-                updateGameLocalizationQueryService)
+            [FromServices] IQueryService<ReadSubGameProviderExcelQuery, UploadSubGameProvidersLocalizationModel> readService,
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+            [FromServices] IQueryService<UpdateGameProvidersLocalizationCommand, string> updateService)
         {
-            var uploadedResult = await _uploadService.GetUploadedExcelAsync<UploadGameProvidersLocalizationModel>(file);
+            using var fs = file.OpenReadStream();
+            var rows = readService.QueryAsync(new ReadSubGameProviderExcelQuery(fs));
 
-            var gameProviders = uploadedResult
-                .Where(p => !string.IsNullOrEmpty(p.Id))
-                .Select(x => new GameProvidersLocalizationModel
+            var serializerOptions = jsonOptionsAccessor.Value.JsonSerializerOptions;
+
+            var gameProviders = rows
+                .Where(row => !string.IsNullOrWhiteSpace(row.Code))
+                .Select(row => new SubGameProvidersLocalizationModel
                 {
-                    Id = new Guid(x.Id),
-                    Name = x.Name,
-                    Localization = new Dictionary<string, JsonDocument>
-                    {
-                        {"en-US", JsonDocument.Parse("{ \"name\": \"" + x.EnUS + "\" }")},
-                        {"zh-CN", JsonDocument.Parse("{ \"name\": \"" + x.ZhCN + "\" }")},
-                        {"zh-TW", JsonDocument.Parse("{ \"name\": \"" + x.ZhTW + "\" }")},
-                        {"id-ID", JsonDocument.Parse("{ \"name\": \"" + x.IdID + "\" }")},
-                        {"th-TH", JsonDocument.Parse("{ \"name\": \"" + x.ThTH + "\" }")},
-                        {"vi-VN", JsonDocument.Parse("{ \"name\": \"" + x.ViVN + "\" }")},
-                        {"ko-KR", JsonDocument.Parse("{ \"name\": \"" + x.KoKR + "\" }")},
-                        {"ja-JP", JsonDocument.Parse("{ \"name\": \"" + x.JaJP + "\" }")}
-                    }
-                })
-                .ToList();
+                    Code = row.Code,
+                    Name = row.Name,
+                    Localization = row.Localization
+                        .Select(p => new
+                        {
+                            Key = p.Key,
+                            Value = jsonSerializationProvider.SerializeToString(
+                                new
+                                {
+                                    Name = p.Value
+                                },
+                                serializerOptions)
+                        })
+                        .ToDictionary(
+                            item => item.Key,
+                            item => jsonSerializationProvider.DeserializeFromString<JsonDocument>(item.Value))
+                });
 
-            var query = new UpdateGameProvidersLocalizationQuery
-            {
-                GameProviders = gameProviders,
-                EditorUsername = Username
-            };
+            var command = new UpdateGameProvidersLocalizationCommand(
+                gameProviders.ToEnumerable(),
+                Username);
 
-            var info = await updateGameLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
+            var diffSubGameProvidersIds = await updateService
+                .QueryAsync(command)
+                .ToArrayAsync()
+                .ConfigureAwait(false);
 
-            var diffGameProviders = info.DiffGameProviderIds;
-
-            if (diffGameProviders.Any())
+            if (diffSubGameProvidersIds.Any())
             {
                 return new MessageResponse
                 {
                     Valid = false,
                     Message = "GameProviders Not Found",
-                    Errors = diffGameProviders.Select(x => x.ToString()).ToArray()
+                    Errors = diffSubGameProvidersIds
                 };
             }
 

@@ -1,56 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.GameProviders
 {
-    internal class
-        UpdateGameProvidersLocalizationQueryService : IGetService<UpdateGameProvidersLocalizationQuery,
-            UpdateGameProvidersLocationInfo>
+    internal class UpdateGameProvidersLocalizationQueryService
+        : IQueryService<UpdateGameProvidersLocalizationCommand, string>
     {
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _tgsRepository;
 
-        public UpdateGameProvidersLocalizationQueryService(ITgsRepository tgsRepository)
+        public UpdateGameProvidersLocalizationQueryService(
+            ITgsRepository tgsRepository,
+            IJsonSerializationProvider jsonSerializationProvider)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
-        public async ValueTask<UpdateGameProvidersLocationInfo>
-            GetAsync(UpdateGameProvidersLocalizationQuery query,
-                CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<string> QueryAsync(
+            UpdateGameProvidersLocalizationCommand query,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var queryGameProviderIds = query.GameProviders.Select(x => x.Id).ToList();
-
-            var existGameProviderIds = await _tgsRepository.GameProviders.AsAsyncEnumerable()
-                .Where(p => queryGameProviderIds.Contains(p.Id))
-                .Select(p => p.Id)
-                .ToArrayAsync(cancellationToken);
-
-            var diffGameProviders =
-                query.GameProviders.Select(x => x.Id).ToArray().Except(existGameProviderIds).ToArray();
-
-            if (diffGameProviders.Length == 0)
+            foreach (var subGp in query.SubGameProviders)
             {
-                foreach (var item in existGameProviderIds)
+                var game = await _tgsRepository.SubGameProviders
+                    .FirstOrDefaultAsync(x => x.Code == subGp.Code, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (game == null)
                 {
-                    var model = query.GameProviders.First(x => x.Id == item);
-                    var game = await _tgsRepository.GameProviders.FirstOrDefaultAsync(x => x.Id == item,
-                        cancellationToken);
-                    game.Localization = model.Localization.ToJson();
-                    game.UpdatedByUsername = query.EditorUsername;
-                    game.UpdatedOn = DateTimeOffset.Now;
+                    yield return subGp.Code;
+                    continue;
                 }
 
-                await _tgsRepository.SaveChangesAsync(cancellationToken);
-
-                return new UpdateGameProvidersLocationInfo {DiffGameProviderIds = Array.Empty<Guid>()};
+                game.Localization = _jsonSerializationProvider.SerializeToString(subGp.Localization);
+                game.UpdatedByUsername = query.EditorUserName;
+                game.UpdatedOn = DateTimeOffset.Now;
             }
 
-            return new UpdateGameProvidersLocationInfo {DiffGameProviderIds = diffGameProviders};
+            await _tgsRepository
+                .SaveChangesAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
     }
 }
