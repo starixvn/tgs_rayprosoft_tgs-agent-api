@@ -7,7 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Migrations;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Services.BackOffice.Application.Queries.GameProviderHandlers;
 using TGS.Services.BackOffice.Application.Queries.GameProviders;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
@@ -23,37 +25,54 @@ namespace TGS.Tests.BackendOffice.UnitTests
             dbContextOptionsBuilder
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+            var repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
-            var gameProviderLanguages = new List<CoreModels.GameProviderLanguage>();
+            await repository.GameProviderLanguages.AddRangeAsync(
+                new CoreModels.GameProviderLanguage()
+                {
+                    GameProviderId = Guid.NewGuid(),
+                    CultureCode = "en-US"
+                },
+                new CoreModels.GameProviderLanguage()
+                {
+                    GameProviderId = Guid.NewGuid(),
+                    CultureCode = "en-US"
+                },
+                new CoreModels.GameProviderLanguage()
+                {
+                    GameProviderId = Guid.NewGuid(),
+                    CultureCode = "zh-CN"
+                });
+            await repository.SaveChangesAsync();
 
-            gameProviderLanguages.Add(new CoreModels.GameProviderLanguage()
-            {
-                GameProviderId = Guid.NewGuid(),
-                CultureCode = "en-US"
-            });
+            var sut = new GetAllSupportLanguagesQueryService(repository);
 
-            gameProviderLanguages.Add(new CoreModels.GameProviderLanguage()
-            {
-                GameProviderId = Guid.NewGuid(),
-                CultureCode = "en-US"
-            });
+            var actual = await sut.QueryAsync(new GetAllSupportLanguagesQuery()).CountAsync();
 
-            gameProviderLanguages.Add(new CoreModels.GameProviderLanguage()
-            {
-                GameProviderId = Guid.NewGuid(),
-                CultureCode = "zh-CN"
-            });
+            Assert.AreEqual(2, actual);
+        }
 
-            await repository.GameProviderLanguages.AddRangeAsync(gameProviderLanguages);
+        [Test]
+        public async Task Can_Query_SubGameProvider_Data()
+        {
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            var repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+            await repository.SubGameProviders.AddRangeAsync(
+                new CoreModels.SubGameProvider
+                {
+                    Code = "Test"
+                });
             await repository.SaveChangesAsync();
 
             var sut = new GetGameProvidersLocalizationQueryService(repository);
 
-            var info = await sut.GetAsync(default, default);
-            var actual = info.Languages.Count();
+            var actual = await sut.QueryAsync(new GetGameProvidersLocalizationQuery()).CountAsync();
 
-            Assert.AreEqual(2, actual);
+            Assert.AreEqual(1, actual);
         }
 
         [Test]

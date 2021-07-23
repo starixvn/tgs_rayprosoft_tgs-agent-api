@@ -1,0 +1,28 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using TGS.Core.DataServices.Tgs;
+using TGS.ServiceUtility;
+
+namespace TGS.Services.BackOffice.Application.Queries.GameProviderHandlers
+{
+    internal class GetAllSupportLanguagesQueryService : IQueryService<GetAllSupportLanguagesQuery, string>
+    {
+        private readonly ITgsRepository _tgsRepository;
+
+        public GetAllSupportLanguagesQueryService(ITgsRepository tgsRepository)
+        {
+            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        }
+
+        public IAsyncEnumerable<string> QueryAsync(
+            GetAllSupportLanguagesQuery query,
+            CancellationToken cancellationToken = default)
+            => _tgsRepository.GameProviderLanguages.AsAsyncEnumerable()
+                .Select(x => x.CultureCode)
+                .Distinct()
+                .ToEnumerable()
+                .ToAsyncEnumerable();
+    }
+}

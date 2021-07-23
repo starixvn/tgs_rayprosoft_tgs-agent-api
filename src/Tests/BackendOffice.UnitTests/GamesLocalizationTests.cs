@@ -52,10 +52,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var sut = new GetLocalizationQueryService(repository);
 
-            var query = new GetGameLocalizationQuery()
-            {
-                GameProviderCode = gameProviderCode
-            };
+            var query = new GetGameLocalizationQuery(gameProviderCode);
             var info = await sut.GetAsync(query, default);
 
             Assert.AreEqual(gpLangs.Count, info.Languages.Count());
