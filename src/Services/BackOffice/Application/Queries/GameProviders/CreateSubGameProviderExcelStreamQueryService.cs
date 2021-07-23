@@ -52,7 +52,7 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviders
                     row.Append(
                         new Cell
                         {
-                            CellValue = new CellValue(item.Replace("-", "")),
+                            CellValue = new CellValue(item),
                             DataType = CellValues.String
                         });
                 }
