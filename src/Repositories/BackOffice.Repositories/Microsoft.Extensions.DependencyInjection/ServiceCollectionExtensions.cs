@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddTransient<ISettingRepository, SettingRepository>();
             services.AddTransient<ISystemPaymentRepository, SystemPaymentRepository>();
+            services.AddTransient<IBackOfficeRepository, BackOfficeRepository>();
 
             return services;
         }
