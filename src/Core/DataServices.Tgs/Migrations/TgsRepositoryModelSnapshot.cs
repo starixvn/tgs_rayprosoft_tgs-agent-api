@@ -5087,6 +5087,31 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("sub_game_providers");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SystemLocalization", b =>
+                {
+                    b.Property<string>("SystemCode")
+                        .HasColumnType("text")
+                        .HasColumnName("system_code");
+
+                    b.Property<string>("CultureCode")
+                        .HasColumnType("text")
+                        .HasColumnName("culture_code");
+
+                    b.Property<string>("MessageId")
+                        .HasColumnType("text")
+                        .HasColumnName("message_id");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("text");
+
+                    b.HasKey("SystemCode", "CultureCode", "MessageId")
+                        .HasName("pk_system_localizations");
+
+                    b.ToTable("system_localizations");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Transaction", b =>
                 {
                     b.Property<Guid>("Id")
