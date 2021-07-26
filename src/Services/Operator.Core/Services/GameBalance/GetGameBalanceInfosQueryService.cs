@@ -21,65 +21,27 @@ namespace TGS.Services.Operator.Services.GameBalance
         public async IAsyncEnumerable<GameBalanceRecord> QueryAsync(GetGameBalanceInfosQuery query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var transactions = _tgsRepository.Transactions
-               .AsEnumerable()
-               .Where(x => x.BrandId == query.BrandId
-                   && x.PlayerCode == query.PlayerCode
-                   && (x.Type == TransactionType.GameProviderFundOut
-                       || x.Type == TransactionType.GameProviderFundIn));
-
-            if (query.RecordOnRange != null)
-                transactions = transactions.Where(x => x.RecordedOn <= query.RecordOnRange.Value.Begin
-                   && x.RecordedOn < query.RecordOnRange.Value.End);
-
-            transactions = transactions.ToList();
-
             var brand = await _tgsRepository.Brands.FirstAsync(x => x.Id == query.BrandId);
             var brandName = brand.Name;
 
-            var transactionIds = transactions.Select(x => x.Id).ToArray();
+            var records = from trans in _tgsRepository.Transactions.AsQueryable()
+                          where trans.BrandId == query.BrandId
+                            && trans.PlayerCode == query.PlayerCode
+                            && trans.Type >= TransactionType.GameProviderFundOut
+                            && trans.Type <= TransactionType.GameProviderFundIn
+                          join gpftt in _tgsRepository.GameProviderFundTransferTransactions on trans.Id equals gpftt.TransactionId
+                          join gp in _tgsRepository.GameProviders on gpftt.GameProviderId equals gp.Id
+                          select new GameBalanceRecord()
+                          {
+                              Amount = trans.Amount,
+                              From = trans.Type == TransactionType.GameProviderFundIn ? gp.Name : brandName,
+                              To = trans.Type == TransactionType.GameProviderFundIn ? brandName : gp.Name,
+                              BalanceTime = trans.RecordedOn
+                          };
 
-            var gameProviderFundTransferTrans = _tgsRepository.GameProviderFundTransferTransactions
-                .AsAsyncEnumerable()
-                .Where(x => transactionIds.Contains(x.TransactionId.Value));
-
-            var gameProviderIds = await gameProviderFundTransferTrans
-                .GroupBy(x => x.GameProviderId)
-                .Select(x => x.Key)
-                .ToListAsync();
-
-            var gameProviders = await _tgsRepository.GameProviders
-                .AsAsyncEnumerable()
-                .Where(x => gameProviderIds.Contains(x.Id))
-                .ToListAsync();
-
-            foreach (var transaction in transactions)
+            foreach (var item in records)
             {
-                var gameProviderFundTransferTransaction = await gameProviderFundTransferTrans
-                    .FirstAsync(x => x.TransactionId == transaction.Id);
-                var from = string.Empty;
-                var to = string.Empty;
-                var gameProvider = gameProviders
-                    .First(x => x.Id == gameProviderFundTransferTransaction.GameProviderId);
-
-                if (transaction.Type == TransactionType.GameProviderFundIn)
-                {
-                    from = gameProvider.Name;
-                    to = brandName;
-                }
-                else
-                {
-                    from = brandName;
-                    to = gameProvider.Name;
-                }
-
-                yield return new GameBalanceRecord()
-                {
-                    From = from,
-                    To = to,
-                    Amount = Math.Abs(transaction.Amount),
-                    BalanceTime = transaction.RecordedOn
-                };
+                yield return item;
             }
         }
     }
