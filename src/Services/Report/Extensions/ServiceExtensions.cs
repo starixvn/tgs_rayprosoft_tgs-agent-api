@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Services.Report.Infrastructure.DataService;
 
-namespace TGS.Services.Report.Application.Extensions
+namespace TGS.Services.Report.Extensions
 {
     public static class ServiceExtensions
     {
