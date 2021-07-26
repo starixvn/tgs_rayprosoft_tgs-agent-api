@@ -14,6 +14,7 @@ namespace TGS.Core.DataServices.Tgs.Models
         public string Description { get; set; }
         public string Exception { get; set; }
         public string StackTrace { get; set; }
+        public string InnerException { get; set; }
         public string ServerName { get; set; }
         public string RequestHeaders { get; set; }
         public string RequestContent { get; set; }
@@ -41,7 +42,8 @@ namespace TGS.Core.DataServices.Tgs.Models
                 ResponseCode = a.responsecode,
                 ExecutionTimeMs = a.executiontimems,
                 RecordedOn = a.recordedon,
-                StackTrace = a.StackTrace ?? string.Empty
+                StackTrace = a.StackTrace ?? string.Empty,
+                InnerException = a.InnerException ?? string.Empty
             };
     }
 }
