@@ -43,7 +43,7 @@ namespace TGS.Apis.BackendOffice.Services
                     obj.TryAdd(header, reader.GetValue(i));
                     //var dictionary = (IDictionary<string, object>) obj;
                     //dictionary.Add(header, reader.GetValue(i)?.ToString());
-                    ((IDictionary<string, object>) obj)[header] = reader.GetValue(i)?.ToString();
+                    ((IDictionary<string, object>)obj)[header] = reader.GetValue(i)?.ToString();
 
                     //var propInfo = obj.GetType().GetProperty(header[i], BindingFlags.Public | BindingFlags.Instance);
                     //propInfo.SetValue(this, reader.GetValue(i)?.ToString());
