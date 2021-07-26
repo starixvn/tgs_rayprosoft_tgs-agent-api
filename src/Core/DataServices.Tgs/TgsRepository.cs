@@ -39,6 +39,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<LocalizedString> LocalizedStrings { get; set; }
 
+        DbSet<SystemLocalization> SystemLocalizations { get; set; }
+
         DbSet<Player> Players { get; set; }
 
         DbSet<Wallet> Wallets { get; set; }
@@ -221,6 +223,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<BrandGroupGame> BrandGroupGames { get; set; }
 
         public DbSet<LocalizedString> LocalizedStrings { get; set; }
+
+        public DbSet<SystemLocalization> SystemLocalizations { get; set; }
 
         public DbSet<Player> Players { get; set; }
 
