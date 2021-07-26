@@ -24,12 +24,11 @@ namespace TGS.Services.Operator.Services.GameBalance
             var brand = await _tgsRepository.Brands.FirstAsync(x => x.Id == query.BrandId);
             var brandName = brand.Name;
 
-            var records = from trans in _tgsRepository.Transactions
-                        .AsQueryable()
-                        .Where(x => x.BrandId == query.BrandId
-                            && x.PlayerCode == query.PlayerCode
-                            && (x.Type >= TransactionType.GameProviderFundOut
-                                && x.Type <= TransactionType.GameProviderFundIn))
+            var records = from trans in _tgsRepository.Transactions.AsQueryable()
+                          where trans.BrandId == query.BrandId
+                            && trans.PlayerCode == query.PlayerCode
+                            && trans.Type >= TransactionType.GameProviderFundOut
+                            && trans.Type <= TransactionType.GameProviderFundIn
                           join gpftt in _tgsRepository.GameProviderFundTransferTransactions on trans.Id equals gpftt.TransactionId
                           join gp in _tgsRepository.GameProviders on gpftt.GameProviderId equals gp.Id
                           select new GameBalanceRecord()
