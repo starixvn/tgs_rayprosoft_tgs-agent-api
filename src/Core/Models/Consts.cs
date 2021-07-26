@@ -153,5 +153,12 @@ namespace TGS.Core.Models
                 MessengerQRCode
             };
         }
+
+        public static class PromotionGroupType
+        {
+            public const string Deposit = "Deposit";
+            public const string Turnover = "Turnover";
+            public const string ReliefMoney = "ReliefMoney";
+        }
     }
 }
