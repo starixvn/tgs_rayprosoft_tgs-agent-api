@@ -65,7 +65,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 adminLogEvent.responseheaders = httpContext.Response.Headers.ToDetailString();
 
                 adminLogEvent.recordedon = DateTimeOffset.Now;
-                adminLogEvent.StackTrace = string.Empty;
+                adminLogEvent.stackTrace = string.Empty;
                 adminLogEvent.exception = string.Empty;
 
                 var (resMessage, ms) = await GetResponseMessageAsync(httpContext, next);
@@ -89,8 +89,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 _systemLogger.LogError(ex, "Error!");
 
                 adminLogEvent.exception = ex.Message.NoLongerThan(4000);
-                adminLogEvent.StackTrace = ex.StackTrace;
-                adminLogEvent.InnerException = ex.InnerException?.Message;
+                adminLogEvent.stackTrace = ex.StackTrace;
+                adminLogEvent.innerException = ex.InnerException?.Message;
                 adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
 
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
