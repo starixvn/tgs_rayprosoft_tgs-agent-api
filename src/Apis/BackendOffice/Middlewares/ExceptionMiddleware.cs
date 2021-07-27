@@ -90,6 +90,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
 
                 adminLogEvent.exception = ex.Message.NoLongerThan(4000);
                 adminLogEvent.StackTrace = ex.StackTrace;
+                adminLogEvent.InnerException = ex.InnerException?.Message;
                 adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
 
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
@@ -97,7 +98,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
 
                 var message = new ErrorDetails
                 {
-                    StatusCode = (int)HttpStatusCode.InternalServerError, Message = "Internal Server Error."
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Message = "Internal Server Error."
                 };
 
                 if (_env.IsDevelopment())
@@ -109,7 +111,13 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(result));
             }
 
-            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
+            var defaultBypassRouting = new[]
+            {
+                "/health",
+                "/metrics",
+                "/favicon.ico",
+                "/swagger"
+            };
 
             if (adminLogEvent.path is null || !defaultBypassRouting.Any(x => adminLogEvent.path.Contains(x)))
             {
