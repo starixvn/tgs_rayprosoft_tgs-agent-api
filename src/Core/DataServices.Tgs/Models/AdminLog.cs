@@ -42,8 +42,8 @@ namespace TGS.Core.DataServices.Tgs.Models
                 ResponseCode = a.responsecode,
                 ExecutionTimeMs = a.executiontimems,
                 RecordedOn = a.recordedon,
-                StackTrace = a.stackTrace ?? string.Empty,
-                InnerException = a.innerException ?? string.Empty
+                StackTrace = a.stacktrace ?? string.Empty,
+                InnerException = a.innerexception ?? string.Empty
             };
     }
 }
