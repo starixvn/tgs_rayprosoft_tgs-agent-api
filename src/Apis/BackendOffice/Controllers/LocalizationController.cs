@@ -22,7 +22,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             string systemCode,
             [FromForm(Name = "file")] IFormFile file)
         {
-            using var fs = file.OpenReadStream();
+            await using var fs = file.OpenReadStream();
 
             var command = new ImportLocalizationFileCommand(systemCode, fs);
 
