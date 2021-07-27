@@ -12,6 +12,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Log
         public string Description { get; set; }
         public string Exception { get; set; }
         public string StackTrace { get; set; }
+        public string InnerException { get; set; }
         public string ServerName { get; set; }
         public string RequestHeaders { get; set; }
         public string RequestContent { get; set; }
