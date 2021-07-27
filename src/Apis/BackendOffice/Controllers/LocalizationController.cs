@@ -34,7 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             [FromServices] IGetService<ExportLocalizationFileCommand, Stream> exportService,
             string systemCode)
         {
-            using var fs = await exportService
+            await using var fs = await exportService
                 .GetAsync(new ExportLocalizationFileCommand(systemCode))
                 .ConfigureAwait(false);
 

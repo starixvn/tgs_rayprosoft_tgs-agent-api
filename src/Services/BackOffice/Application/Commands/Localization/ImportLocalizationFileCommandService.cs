@@ -21,13 +21,11 @@ namespace TGS.Services.BackOffice.Application.Commands.Localization
         }
 
         public ValueTask ExecuteAsync(ImportLocalizationFileCommand command, CancellationToken cancellationToken = default)
-        {
-            return _backOfficeRepository.ImportLocalizationStringsAsync(
+            => _backOfficeRepository.ImportLocalizationStringsAsync(
                 command.SystemCode,
                 ReadLocalizationFileAsync(
                     command.SystemCode,
                     command.FileStream).ToEnumerable());
-        }
 
         private async IAsyncEnumerable<LocalizationStringInfo> ReadLocalizationFileAsync(string systemCode, Stream fileStream)
         {
