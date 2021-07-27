@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using Amazon.Runtime.Internal.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Services.BackOffice.Application.Commands.Localization;
@@ -16,19 +13,6 @@ namespace TGS.Apis.BackendOffice.Controllers
     [ApiController]
     public class LocalizationController : ControllerBase
     {
-        [HttpPost("import/{systemCode}")]
-        public async Task ImportLocalizationFileAsync(
-            [FromServices] ICommandService<ImportLocalizationFileCommand> importService,
-            string systemCode,
-            [FromForm(Name = "file")] IFormFile file)
-        {
-            await using var fs = file.OpenReadStream();
-
-            var command = new ImportLocalizationFileCommand(systemCode, fs);
-
-            await importService.ExecuteAsync(command).ConfigureAwait(false);
-        }
-
         [HttpGet("export/{systemCode}")]
         public async Task<FileContentResult> ExportLocalizationFileAsync(
             [FromServices] IGetService<ExportLocalizationFileCommand, Stream> exportService,
@@ -45,6 +29,19 @@ namespace TGS.Apis.BackendOffice.Controllers
             return File(
                 content,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        }
+
+        [HttpPost("import/{systemCode}")]
+        public async Task ImportLocalizationFileAsync(
+            [FromServices] ICommandService<ImportLocalizationFileCommand> importService,
+            string systemCode,
+            [FromForm(Name = "file")] IFormFile file)
+        {
+            await using var fs = file.OpenReadStream();
+
+            var command = new ImportLocalizationFileCommand(systemCode, fs);
+
+            await importService.ExecuteAsync(command).ConfigureAwait(false);
         }
     }
 }
