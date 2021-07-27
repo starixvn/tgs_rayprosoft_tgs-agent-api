@@ -43,6 +43,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("execution_time_ms");
 
+                    b.Property<string>("InnerException")
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("inner_exception");
+
                     b.Property<string>("Ip")
                         .IsRequired()
                         .HasMaxLength(50)
