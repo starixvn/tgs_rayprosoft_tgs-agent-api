@@ -17,6 +17,16 @@ namespace TGS.BackOffice.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
+        public IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode)
+            => _tgsRepository.SystemLocalizations.AsQueryable()
+                .Where(loc => loc.SystemCode == systemCode)
+                .Select(loc => new LocalizationStringInfo(
+                    loc.SystemCode,
+                    loc.CultureCode,
+                    loc.MessageId,
+                    loc.Text))
+                .ToAsyncEnumerable();
+
         public async ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings)
         {
             var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
