@@ -29,7 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         void CheckingSign(string sourceSign, string Sign);
         ValueTask<CachedPlayer> GetCachedPlayerAsync(string playerCode);
         ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
-        ValueTask<(Guid TransactionsId, Guid TransactionGameProviderId, decimal Balance)> TransferAsync(Guid gameProviderId, string playerCode, string gameProviderTransactionId, decimal amount);
+        ValueTask<GameProviderDepositWithdrawalResponse> TransferAsync(Guid gameProviderId, string playerCode, string gameProviderTransactionId, decimal amount);
     }
     internal sealed class BigGamingServices : IBigGamingServices
     {
@@ -140,18 +140,28 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return player;
         }
 
-        async ValueTask<(Guid TransactionsId, Guid TransactionGameProviderId, decimal Balance)> IBigGamingServices.TransferAsync(Guid gameProviderId, string playerCode, string gameProviderTransactionId, decimal amount)
+        async ValueTask<GameProviderDepositWithdrawalResponse> IBigGamingServices.TransferAsync(Guid gameProviderId, string playerCode, string gameProviderTransactionId, decimal amount)
         {
-            var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
+            var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
+
+            var request = new GameProviderDepositWithdrawalRequest()
+            {
+                GameProviderId = gameProviderId,
+                BrandId = player.BrandId,
+                PlayerCode = player.PlayerCode,
+                PlayerWalletId = player.DefaultWalletId,
+                GameProviderTransactionId = gameProviderTransactionId,
+                Amount = amount
+            };
 
             if (amount < 0)
             {
-                return await _gameProviderDepositWithdrawalService.GameProviderDepositAsync(gameProviderId, player, gameProviderTransactionId, amount).ConfigureAwait(false);
+                return await _gameProviderDepositWithdrawalService.GameProviderDepositAsync(request).ConfigureAwait(false);
 
             }
             else
             {
-                return await _gameProviderDepositWithdrawalService.GameProviderWithdrawalAsync(gameProviderId, player, gameProviderTransactionId, amount).ConfigureAwait(false);
+                return await _gameProviderDepositWithdrawalService.GameProviderWithdrawalAsync(request).ConfigureAwait(false);
 
             }
         }
