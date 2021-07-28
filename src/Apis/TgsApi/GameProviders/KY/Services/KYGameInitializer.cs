@@ -72,7 +72,10 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 var cachedGame = await _gameProviderOperations.GetCachedGameAsync(gameProviderId, request.GameId).ConfigureAwait(false);
                 if (cachedGame != null)
                 {
-                    externalID = Convert.ToInt32(cachedGame.ExternalId);
+                    if (cachedGame.Type != Core.Models.Enums.GameType.CardGameLobby)
+                    {
+                        externalID = Convert.ToInt32(cachedGame.ExternalId);
+                    }
                 }
             }
 
