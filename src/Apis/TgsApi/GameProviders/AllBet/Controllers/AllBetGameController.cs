@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.AllBet.Services;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -148,6 +149,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
                 .ConfigureAwait(false);
 
+            var betExists = externalIds.Any(t => t.GameActionType == GameActionType.PlaceBet &&
+                t.ExternalBetId.IgnoreCaseEquals(detail.BetNumber.ToString()));
+
+            if (!betExists)
+            {
+                throw new InvalidGameActionException($"Bet with number '{detail.BetNumber}' is not found",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+
             var settledBetIds = externalIds.Where(t => t.GameActionType.IsSettleBet())
                 .Select(t => t.ExternalBetId).ToArray();
 
@@ -183,6 +193,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
             var externalIds = await _services
                 .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
                 .ConfigureAwait(false);
+
+            var betExists = externalIds.Any(t => t.GameActionType == GameActionType.PlaceBet &&
+                t.ExternalBetId.IgnoreCaseEquals(detail.BetNumber.ToString()));
+
+            if (!betExists)
+            {
+                throw new InvalidGameActionException($"Bet with number '{detail.BetNumber}' is not found",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
 
             return detail.Status switch
             {
