@@ -12,6 +12,8 @@
         GameProviderFundOut = 7,
         GameProviderFundIn = 8,
         CancelWithdrawal = 9,
+        GameProviderDeposit = 10,
+        GameProviderWithdrawal = 11,
         Other = 99
     }
 }
