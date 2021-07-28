@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {

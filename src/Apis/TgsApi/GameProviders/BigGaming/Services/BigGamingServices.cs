@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.BigGaming;
+using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
@@ -20,8 +23,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<decimal> GetPlayerBalanceAsync(string playerCode);
         ValueTask<BigGamingBrandMerchant> GetBrandMerchant(string currencyCode);
-        ValueTask<Guid> GetGameProviderId();
+        ValueTask<Guid> GetGameProviderIdAsync();
         ValueTask<BigGamingOrderStatus> GetOrderStatusAsync(Guid gameProviderId, string playerCode, string orderId);
+        void CheckingSign(string sourceSign, string Sign);
+        Task<CachedPlayer> GetCachedPlayerAsync(string playerCode);
+        Task<Player> GetPlayerByCodeAsync(string playerCode);
     }
     internal sealed class BigGamingServices : IBigGamingServices
     {
@@ -96,11 +102,38 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return configuration.BrandMerchants.Where(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode) && x.Status).First();
         }
 
-        async ValueTask<Guid> IBigGamingServices.GetGameProviderId()
+        async ValueTask<Guid> IBigGamingServices.GetGameProviderIdAsync()
         {
             return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.BigGaming).ConfigureAwait(false);
         }
 
+        void IBigGamingServices.CheckingSign(string sourceSign, string Sign)
+        {
+            if (sourceSign.IgnoreCaseNotEquals(Sign))
+            {
+                throw new MissingTokenException($"Authentication encryption failed({sourceSign})");
+            }
+        }
+
+        async Task<CachedPlayer> IBigGamingServices.GetCachedPlayerAsync(string playerCode)
+        {
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
+            if (player == null)
+            {
+                throw new PlayerLoginExpiredException();
+            }
+            return player;
+        }
+
+        async Task<Player> IBigGamingServices.GetPlayerByCodeAsync(string playerCode)
+        {
+            var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
+            if (player == null)
+            {
+                throw new PlayerLoginExpiredException();
+            }
+            return player;
+        }
 
         private BigGamingOrderStatus GetBGOrderStatus(GameActionType gameActionType) => gameActionType switch
         {

@@ -16,7 +16,7 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
-using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Enums;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
 
@@ -131,7 +131,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var betData = _map.Request(gameProviderConfigurationData, data, configuration.OppositeBets);
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
-            var result = new BigGamingBetResponse
+            var result = new BigGamingResultResponse
             {
                 UserId = data.UserId,
                 Sn = data.Sn,
@@ -213,7 +213,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 }
             }
 
-            var result = new BigGamingSettleResponse
+            var result = new BigGamingResultResponse
             {
                 UserId = data.UserId,
                 Sn = data.Sn,
@@ -263,6 +263,27 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 Jsonrpc = baseRequest.Jsonrpc
             };
         }
+
+        [HttpPost("transfer")]
+        public async Task<BigGamingResponse> TransferAsync(
+           BigGamingRequest baseRequest)
+        {
+            var data = _jsonSerializationProvider.DeserializeFromString<BigGamingTransferRequest>(
+                _jsonSerializationProvider.SerializeToString(baseRequest.Params), _jsonSerializerOptions);
+
+            var items = HttpContext.Items;
+            var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+
+            return new()
+            {
+                Id = baseRequest.Id,
+                Result = JsonDocument.Parse(JsonSerializer.Serialize(getBalance.Balance)),
+                Error = null,
+                Jsonrpc = baseRequest.Jsonrpc
+            };
+        }
+
 
         [HttpPost("ping")]
         public Task<BigGamingResponse> PingAsync(

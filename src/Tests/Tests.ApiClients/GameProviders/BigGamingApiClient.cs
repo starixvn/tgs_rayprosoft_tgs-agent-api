@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Shared.Game.Models.BigGaming.Common;
-using TGS.Shared.Game.Models.BigGaming.Incoming;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 
 namespace TGS.Tests.ApiClients.GameProviders
 {

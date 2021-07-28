@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.BigGaming.Common
+namespace TGS.Shared.Game.Models.BigGaming.Commons
 {
     public record BigGamingRequest
     {
