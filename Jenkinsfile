@@ -228,7 +228,7 @@ pipeline {
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
@@ -254,7 +254,7 @@ pipeline {
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
@@ -280,7 +280,7 @@ pipeline {
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
@@ -306,7 +306,7 @@ pipeline {
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
@@ -332,8 +332,8 @@ pipeline {
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-							--set \\"notifyPath=\\${tgs_notifyPath}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"notifyPath=\\${tgs_notifyPath}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
@@ -359,7 +359,7 @@ pipeline {
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
@@ -385,7 +385,7 @@ pipeline {
                             --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
@@ -419,7 +419,7 @@ pipeline {
                             --set \\"aws.private.externalUrl=\\${tgs_file_private_external}\\" \
                             --set \\"aws.private.serviceUrl=\\${tgs_file_private_service}\\" \
                             --set \\"aws.private.bucket=\\${tgs_file_private_bucket}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
@@ -446,7 +446,7 @@ pipeline {
                             --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
                             --set \\"connectionStrings.mongo=\\${tgs_mongo}\\" \
                             --set \\"nats.urls=\\${tgs_nats}\\" \
-							--set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
+                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
                         | tee /dev/stdout \
                         | kubectl apply -f -
                     '''
