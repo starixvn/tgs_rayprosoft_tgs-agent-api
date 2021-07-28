@@ -58,6 +58,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 {"open.operator.order.transfer", BetAsync},
                 {"open.operator.calc.transfer", SettleAsync},
                 {"open.operator.order.status", OrderStatusAsync},
+                {"open.operator.user.transfer", TransferAsync},
                 {"open.operator.ping", PingAsync}
             };
             _jsonSerializerOptions = new()
@@ -273,12 +274,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
 
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+            var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+
+            var transfer = await _services.TransferAsync(gameProviderId, playerCode, data.BizId.ToString(), data.Amount).ConfigureAwait(false);
 
             return new()
             {
                 Id = baseRequest.Id,
-                Result = JsonDocument.Parse(JsonSerializer.Serialize(getBalance.Balance)),
+                Result = JsonDocument.Parse(JsonSerializer.Serialize(transfer.Balance)),
                 Error = null,
                 Jsonrpc = baseRequest.Jsonrpc
             };

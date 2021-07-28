@@ -7,5 +7,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
     {
         [JsonPropertyName("amount")]
         public decimal Amount { get; set; }
+        [JsonPropertyName("bizId")]
+        public long BizId { get; set; }
     }
 }

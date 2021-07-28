@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
@@ -26,8 +27,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         ValueTask<Guid> GetGameProviderIdAsync();
         ValueTask<BigGamingOrderStatus> GetOrderStatusAsync(Guid gameProviderId, string playerCode, string orderId);
         void CheckingSign(string sourceSign, string Sign);
-        Task<CachedPlayer> GetCachedPlayerAsync(string playerCode);
-        Task<Player> GetPlayerByCodeAsync(string playerCode);
+        ValueTask<CachedPlayer> GetCachedPlayerAsync(string playerCode);
+        ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
+        ValueTask<(Guid TransactionsId, Guid TransactionGameProviderId, decimal Balance)> TransferAsync(Guid gameProviderId, string playerCode, string gameProviderTransactionId, decimal amount);
     }
     internal sealed class BigGamingServices : IBigGamingServices
     {
@@ -35,17 +37,20 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IGameProviderDepositWithdrawalService _gameProviderDepositWithdrawalService;
 
         public BigGamingServices(
             ISettingOperations settingOperations,
             IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries,
-            IPlayerOperations playerOperations)
+            IPlayerOperations playerOperations,
+            IGameProviderDepositWithdrawalService gameProviderDepositWithdrawalService)
         {
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;
             _playerOperations = playerOperations;
+            _gameProviderDepositWithdrawalService = gameProviderDepositWithdrawalService ?? throw new ArgumentNullException(nameof(gameProviderDepositWithdrawalService));
         }
 
 
@@ -115,7 +120,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             }
         }
 
-        async Task<CachedPlayer> IBigGamingServices.GetCachedPlayerAsync(string playerCode)
+        async ValueTask<CachedPlayer> IBigGamingServices.GetCachedPlayerAsync(string playerCode)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
             if (player == null)
@@ -125,7 +130,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             return player;
         }
 
-        async Task<Player> IBigGamingServices.GetPlayerByCodeAsync(string playerCode)
+        async ValueTask<Player> IBigGamingServices.GetPlayerByCodeAsync(string playerCode)
         {
             var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
             if (player == null)
@@ -133,6 +138,22 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 throw new PlayerLoginExpiredException();
             }
             return player;
+        }
+
+        async ValueTask<(Guid TransactionsId, Guid TransactionGameProviderId, decimal Balance)> IBigGamingServices.TransferAsync(Guid gameProviderId, string playerCode, string gameProviderTransactionId, decimal amount)
+        {
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
+
+            if (amount < 0)
+            {
+                return await _gameProviderDepositWithdrawalService.GameProviderDepositAsync(gameProviderId, player, gameProviderTransactionId, amount).ConfigureAwait(false);
+
+            }
+            else
+            {
+                return await _gameProviderDepositWithdrawalService.GameProviderWithdrawalAsync(gameProviderId, player, gameProviderTransactionId, amount).ConfigureAwait(false);
+
+            }
         }
 
         private BigGamingOrderStatus GetBGOrderStatus(GameActionType gameActionType) => gameActionType switch
