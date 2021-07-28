@@ -1,2 +1,2 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-IMESports,,,ESPORTSBULL,ESports,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+IMESports,,,ESPORTSBULL,ESports,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,IMES

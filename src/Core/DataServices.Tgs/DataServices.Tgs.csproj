@@ -33,7 +33,6 @@
     <EmbeddedResource Include="DataInitializers\Games\SABA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SBO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\HABA.csv" />
-    <EmbeddedResource Include="DataInitializers\Games\RT.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\EVO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SW.csv" />
@@ -102,8 +101,7 @@
 
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="26.1.0" />
-    <PackageReference Include="JoyMoe.Common.Json" Version="0.5.156242" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

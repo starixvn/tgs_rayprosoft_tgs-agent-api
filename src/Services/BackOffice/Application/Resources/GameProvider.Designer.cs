@@ -124,11 +124,20 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Games existed already..
+        ///   Looks up a localized string similar to Games existed already : {0}.
         /// </summary>
         public static string GamesExisted {
             get {
                 return ResourceManager.GetString("GamesExisted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sub game provider codes is invalid : {0}.
+        /// </summary>
+        public static string InvalidSubGameProviderCode {
+            get {
+                return ResourceManager.GetString("InvalidSubGameProviderCode", resourceCulture);
             }
         }
         

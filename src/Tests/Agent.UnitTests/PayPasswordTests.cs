@@ -31,10 +31,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var agent = new AgentInfo(
                 Guid.NewGuid(),
                 "TestAgent",
+                null,
+                null,
                 Guid.NewGuid(),
                 "test@gmail.com",
                 null,
-                null);
+                null,
+                "aaabbb",
+                null,
+                1,
+                Array.Empty<byte>(),
+                Array.Empty<byte>());
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -69,10 +76,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var agent = new AgentInfo(
                 Guid.NewGuid(),
                 "TestAgent",
+                null,
+                null,
                 Guid.NewGuid(),
                 "test@gmail.com",
                 null,
-                null);
+                null,
+                "aaabbb",
+                null,
+                1,
+                Array.Empty<byte>(),
+                Array.Empty<byte>());
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -116,10 +130,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(new AgentInfo(
                     Guid.NewGuid(),
                     "TestAgent",
+                    null,
+                    null,
                     Guid.NewGuid(),
                     "test@gmail.com",
+                    null,
+                    null,
+                    "aaabbb",
+                    null,
+                    1,
                     new byte[] { 1, 2, 3 },
-                    null));
+                    Array.Empty<byte>()));
 
             Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
         }
@@ -143,10 +164,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(new AgentInfo(
                     Guid.NewGuid(),
                     "TestAgent",
+                    null,
+                    null,
                     Guid.NewGuid(),
                     "test@gmail.com",
                     null,
-                    null));
+                    null,
+                    "aaabbb",
+                    null,
+                    1,
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>()));
 
             await sut.ExecuteAsync(command);
 
@@ -172,10 +200,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var agent = new AgentInfo(
                 Guid.NewGuid(),
                 "TestAgent",
+                null,
+                null,
                 Guid.NewGuid(),
                 email,
                 null,
-                null);
+                null,
+                "aaabbb",
+                null,
+                1,
+                Array.Empty<byte>(),
+                Array.Empty<byte>());
 
             var command = new StartChangePayPasswordCommand(agent.Id, CultureInfo.GetCultureInfo("en-US"));
 
@@ -213,10 +248,17 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var agent = new AgentInfo(
                 Guid.NewGuid(),
                 "TestAgent",
+                null,
+                null,
                 Guid.NewGuid(),
                 null,
                 null,
-                null);
+                null,
+                "aaabbb",
+                null,
+                1,
+                Array.Empty<byte>(),
+                Array.Empty<byte>());
             fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();

@@ -24,5 +24,6 @@ namespace TGS.Services.BackOffice.Application.Models.Game
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }
+        public string SubGpCode { get; set; }
     }
 }

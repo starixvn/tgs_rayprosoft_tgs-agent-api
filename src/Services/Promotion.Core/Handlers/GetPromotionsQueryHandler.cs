@@ -29,6 +29,8 @@ namespace TGS.Services.Promotion.Handlers
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(request.Status, x => x.Status == request.Status)
                 .Where(request.Name, x => x.Name == request.Name)
+                .Where(request.From, x => x.To >= request.From)
+                .Where(request.To, x => x.From <= request.To)
                 .Select(x => new PromotionModel
                 {
                     Id = x.Id,

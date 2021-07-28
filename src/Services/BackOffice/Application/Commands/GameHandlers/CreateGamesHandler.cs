@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -12,12 +14,15 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
     {
         private readonly IGameService _gameService;
         private readonly IGameProviderService _service;
+        private readonly ISubGameProviderService _subGameProviderService;
 
         public CreateGamesHandler(IGameProviderService service, IGameService gameService,
+            ISubGameProviderService subGameProviderService,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
             _gameService = gameService;
+            _subGameProviderService = subGameProviderService;
         }
 
         public override async Task<CreateGamesResponse> Handle(CreateGamesRequest request,
@@ -27,8 +32,23 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 
             var gameCodesExisted = gameProvider.Games.Select(x => x.Code).Intersect(request.Games.Select(x => x.Code))
                 .ToArray();
+
+            if (gameCodesExisted.Length > 0)
+            {
+                var response = CreateInvalidResponse<CreateGamesResponse>(GameProvider.CodeExisted);
+                response.DuplicateIds = gameCodesExisted;
+                return response;
+            }
+
             var gameExternalIdsExisted = gameProvider.Games.Select(x => x.ExternalId)
                 .Intersect(request.Games.Select(x => x.ExternalId)).ToArray();
+
+            if (gameExternalIdsExisted.Length > 0)
+            {
+                var response = CreateInvalidResponse<CreateGamesResponse>(GameProvider.ExternalIdExisted);
+                response.DuplicateIds = gameExternalIdsExisted;
+                return response;
+            }
 
             var games = request.Games.GroupBy(x => x.ExternalId).Where(x => x.Count() > 1)
                 .Select(x => x.Key).ToArray();
@@ -40,18 +60,19 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
                 return response;
             }
 
-            if (gameExternalIdsExisted.Length > 0)
-            {
-                var response = CreateInvalidResponse<CreateGamesResponse>(GameProvider.ExternalIdExisted);
-                response.DuplicateIds = gameExternalIdsExisted;
-                return response;
-            }
+            var subGameProviders = await _subGameProviderService
+                .GetSubGameProviderQueries(q => q.Where(x => x.GameProviderId == request.GameProviderId))
+                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
-            if (gameCodesExisted.Length > 0)
+            var subGameProviderCodes = subGameProviders.Select(x => x.Code).ToArray();
+
+            var invalidSubGameProviderCode =
+                request.Games.Where(x => !subGameProviderCodes.Contains(x.SubGpCode)).ToArray();
+
+            if (invalidSubGameProviderCode.Any())
             {
-                var response = CreateInvalidResponse<CreateGamesResponse>(GameProvider.CodeExisted);
-                response.DuplicateIds = gameCodesExisted;
-                return response;
+                return CreateInvalidResponse<CreateGamesResponse>(string.Format(GameProvider.InvalidSubGameProviderCode,
+                    invalidSubGameProviderCode.JoinAsStringByComma()));
             }
 
             await _gameService.CreateGamesAsync(gameProvider, request);

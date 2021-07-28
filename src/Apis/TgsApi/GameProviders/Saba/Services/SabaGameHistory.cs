@@ -27,11 +27,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba.Services
         public SabaGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations,
             ISettingOperations settingOperations,
             IJsonSerializationProvider json,
-            ISabaApiClient client) :
-            base(roundQueries, gameProviderOperations, localizationOperations)
+            ISabaApiClient client)
+            : base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
             _json = json;

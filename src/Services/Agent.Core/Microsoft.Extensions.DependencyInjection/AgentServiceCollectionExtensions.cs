@@ -18,16 +18,13 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .AddOptions<AgentOptions>()
                 .Services
-                .AddHttpClient<ValidateCodeServiceClient>()
-                .ConfigureHttpClient((sp, httpClient) =>
+                .AddValidateCodeClient((options, sp) =>
                 {
-                    var options = sp.GetRequiredService<IOptions<AgentOptions>>().Value;
+                    var agentOptions = sp.GetRequiredService<IOptions<AgentOptions>>().Value;
 
-                    httpClient.BaseAddress = options.ValidateCodeBaseUrl;
+                    options.ValidateCodeBaseUrl = agentOptions.ValidateCodeBaseUrl;
                 })
-                .Services
                 .AddTransient<IValidateCodeOperator, RestValidateCodeOperator>()
-                .AddTransient<IValidateCodeServiceClient>(sp => sp.GetRequiredService<ValidateCodeServiceClient>())
                 .AddSingleton<IValidateCodeGenerator, RandomValidateCodeGenerator>()
                 .AddMail();
 

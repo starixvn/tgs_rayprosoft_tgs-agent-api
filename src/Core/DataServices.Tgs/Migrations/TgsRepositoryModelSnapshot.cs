@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 .HasDefaultSchema("dbo")
                 .HasPostgresExtension("pg_trgm")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.4")
+                .HasAnnotation("ProductVersion", "5.0.8")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AdminLog", b =>
@@ -42,6 +42,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<int>("ExecutionTimeMs")
                         .HasColumnType("integer")
                         .HasColumnName("execution_time_ms");
+
+                    b.Property<string>("InnerException")
+                        .IsUnicode(true)
+                        .HasColumnType("text")
+                        .HasColumnName("inner_exception");
 
                     b.Property<string>("Ip")
                         .IsRequired()
@@ -781,6 +786,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("from");
 
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
+
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
@@ -1111,6 +1120,46 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_brand_bet_limits_bet_limit_id");
 
                     b.ToTable("brand_bet_limits");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCommunication", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("AppId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("app_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("phone");
+
+                    b.Property<string>("QRCodeUrl")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)")
+                        .HasColumnName("qr_code_url");
+
+                    b.Property<string>("Type")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id")
+                        .HasName("pk_brand_communications");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_brand_communications_brand_id");
+
+                    b.ToTable("brand_communications");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCurrency", b =>
@@ -4226,19 +4275,32 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PromotionParticipant", b =>
                 {
-                    b.Property<Guid>("PromotionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("promotion_id");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on");
 
                     b.Property<string>("PlayerCode")
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
-                    b.HasKey("PromotionId", "PlayerCode")
-                        .HasName("pk_promotion_participants");
+                    b.Property<Guid>("PromotionId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("promotion_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_promotion_participants_id");
 
                     b.HasIndex("PlayerCode")
                         .HasDatabaseName("ix_promotion_participant_player_code");
+
+                    b.HasIndex("PromotionId")
+                        .HasDatabaseName("ix_promotion_participants_promotion_id");
 
                     b.ToTable("promotion_participants");
                 });
@@ -4906,6 +4968,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
+
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
@@ -5024,6 +5090,31 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_sub_game_providers_game_provider_id");
 
                     b.ToTable("sub_game_providers");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.SystemLocalization", b =>
+                {
+                    b.Property<string>("SystemCode")
+                        .HasColumnType("text")
+                        .HasColumnName("system_code");
+
+                    b.Property<string>("CultureCode")
+                        .HasColumnType("text")
+                        .HasColumnName("culture_code");
+
+                    b.Property<string>("MessageId")
+                        .HasColumnType("text")
+                        .HasColumnName("message_id");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("text");
+
+                    b.HasKey("SystemCode", "CultureCode", "MessageId")
+                        .HasName("pk_system_localizations");
+
+                    b.ToTable("system_localizations");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Transaction", b =>
@@ -5729,6 +5820,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Brand");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCommunication", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_brand_communications_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandCurrency", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
@@ -5995,13 +6098,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Department", b =>
                 {
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brands")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
                         .WithMany("Departments")
                         .HasForeignKey("BrandId")
                         .HasConstraintName("fk_departments_brands_brand_id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Licensee", "Licensees")
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Licensee", "Licensee")
                         .WithMany("Departments")
                         .HasForeignKey("LicenseeId")
                         .HasConstraintName("fk_departments_licensees_licensee_id")
@@ -6013,9 +6116,9 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasConstraintName("fk_departments_resellers_reseller_id")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("Brands");
+                    b.Navigation("Brand");
 
-                    b.Navigation("Licensees");
+                    b.Navigation("Licensee");
 
                     b.Navigation("Reseller");
                 });
@@ -6528,9 +6631,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
                         .WithMany()
                         .HasForeignKey("PlayerCode")
-                        .HasConstraintName("fk_promotion_participant_player_code")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasConstraintName("fk_promotion_participant_player_code");
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Promotion", "Promotion")
                         .WithMany("PromotionParticipants")

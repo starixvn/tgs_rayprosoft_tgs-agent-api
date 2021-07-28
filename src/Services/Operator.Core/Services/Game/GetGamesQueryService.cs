@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -13,7 +12,8 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operations.Queries;
+using TGS.Services.Operator.GameProviders;
+using TGS.Services.Operator.Games;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Game
@@ -21,33 +21,35 @@ namespace TGS.Services.Operator.Services.Game
     internal class GetGamesQueryService : IQueryService<GetGamesQuery, GameInfo>
     {
         private readonly IBrandCurrencyCodeMapper _brandCurrencyCodeMapper;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly IBrandOperations _brandOperations;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
-        private readonly IGameQueries _gameQueries;
-        private readonly IValidStatus<Status> _validStatus;
+        private readonly IBrandOperations _brandOperations;
+        private readonly IGameProviderRepository _gameProviderRepository;
+        private readonly IGameRepository _gameRepository;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<GameStatus> _validGameStatus;
+        private readonly IValidStatus<Status> _validStatus;
 
         public GetGamesQueryService(
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
-            IGameProviderOperations gameProviderOperations,
             IBrandOperations brandOperations,
             IPlayerOperations playerOperations,
             IBrandLanguageCodeMapper brandLanguageCodeMapper,
-            IGameQueries gameQueries,
             IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus
-            )
+            IValidStatus<GameStatus> validGameStatus,
+            IGameProviderRepository gameProviderRepository,
+            IGameRepository gameRepository)
         {
-            _brandCurrencyCodeMapper = brandCurrencyCodeMapper ?? throw new System.ArgumentNullException(nameof(brandCurrencyCodeMapper));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _brandCurrencyCodeMapper = brandCurrencyCodeMapper ??
+                throw new ArgumentNullException(nameof(brandCurrencyCodeMapper));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandLanguageCodeMapper = brandLanguageCodeMapper ?? throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
-            _gameQueries = gameQueries ?? throw new ArgumentNullException(nameof(gameQueries));
+            _brandLanguageCodeMapper = brandLanguageCodeMapper ??
+                throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
             _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
+            _gameProviderRepository =
+                gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+            _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
         }
 
         public async IAsyncEnumerable<GameInfo> QueryAsync(
@@ -55,20 +57,8 @@ namespace TGS.Services.Operator.Services.Game
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var playerTokenData = query.PlayerTokenData;
-            var currencyCode = await _brandCurrencyCodeMapper.ExternalToInternalAsync(query.CurrencyCode, query.BrandId);
-
-            Guid[] gameProviderIds;
-            if (!string.IsNullOrEmpty(query.GameProviderCode))
-            {
-                var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(query.GameProviderCode);
-                gameProviderIds = new Guid[] { gameProviderId };
-            }
-            else
-            {
-                gameProviderIds = (await _brandOperations.GetBrandGameProvidersAsync(query.BrandId))
-                    .Select(x => x.GameProviderId)
-                    .ToArray();
-            }
+            var currencyCode =
+                await _brandCurrencyCodeMapper.ExternalToInternalAsync(query.CurrencyCode, query.BrandId);
 
             CachedPlayer? cachedPlayer = null;
 
@@ -87,117 +77,141 @@ namespace TGS.Services.Operator.Services.Game
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var types = query.Types ?? Array.Empty<GameType>();
             var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, query.BrandId);
 
-            var translatedGames = new List<GameInfo>();
-            foreach (var gameProviderId in gameProviderIds)
-            {
-                var games = await GetGameModelsAsync(query.BrandId, gameProviderId, query.PlatformType, currencyCode, playerType);
-                var store = await _gameQueries.GetGamesLocalizationByGameIdsAsync(games.Select(x => x.Id).ToArray());
+            var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
+            var statuses = _validStatus.GetStatus(playerType);
+            var gameStatuses = _validGameStatus.GetStatus(playerType);
 
-                var translatedGame = games
-                    .Where(g => types.Length == 0 || types.Contains(g.Type))
-                    .Select(g =>
+            var subGameProviderCode = query.GameProviderCode;
+            var brandGameProviders =
+                await _brandOperations.GetBrandGameProvidersAsync(query.BrandId).ConfigureAwait(false);
+            var brandGames = await _brandOperations.GetBrandGamesAsync(query.BrandId).ConfigureAwait(false);
+
+            var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync(subGameProviderCode)
+                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            var gameProviderIds = (from bgp in brandGameProviders
+                                   join sbp in subGameProviders on bgp.GameProviderId equals sbp.GameProviderId
+                                   select sbp.GameProviderId).ToArray();
+
+            var gameProviders =
+                await _gameProviderRepository.QueryGameProvidersAsync(
+                        gameProviderIds,
+                        new[]
+                        {
+                            Status.Active,
+                            Status.Maintenance
+                        })
+                    .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            var availableGameProviderIds = gameProviders.Select(gp => gp.Id).ToArray();
+            var gameProviderCurrencies = await _gameProviderRepository
+                .QueryGameProviderCurrenciesAsync(availableGameProviderIds)
+                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            var queryGameProviderIds = (from bg in brandGames
+                                        join c in gameProviderCurrencies on bg.GameProviderId equals c.GameProviderId
+                                        where gamePlatformTypes.Contains(bg.PlatformType) &&
+                                            (string.IsNullOrEmpty(currencyCode) ||
+                                                c.CurrencyCode.IgnoreCaseEquals(currencyCode))
+                                        select bg.GameProviderId).Distinct().ToArray();
+
+            var games = await _gameRepository.QueryGamesAsync(
+                    queryGameProviderIds,
+                    new[]
                     {
-                        var key = g.Id.ToString();
+                        GameStatus.Active,
+                        GameStatus.Testing,
+                        GameStatus.Maintenance
+                    },
+                    gamePlatformTypes)
+                .ToArrayAsync(cancellationToken).ConfigureAwait(true);
 
-                        var gameName = g.Name;
-                        var gameDesc = g.Description;
+            var gameTypes = query.Types;
+            var infos = from g in games
+                        join bg in brandGames on g.Id equals bg.GameId
+                        let availableCurrencies = !string.IsNullOrEmpty(g.AvailableCurrencies)
+                            ? g.AvailableCurrencies.SplitByComma()
+                            : Array.Empty<string>()
+                        let gp = gameProviders.First(gp => gp.Id == bg.GameProviderId)
+                        let bgp = brandGameProviders.First(bgp => bgp.GameProviderId == bg.GameProviderId)
+                        where g.AvailableToBrand &&
+                            (gameTypes.Length == 0 ||
+                                gameTypes.Contains(g.Type)) &&
+                            (availableCurrencies.Length == 0 ||
+                                availableCurrencies.IgnoreCaseContains(currencyCode)) &&
+                            (string.IsNullOrEmpty(subGameProviderCode) ||
+                                g.SubGameProviderCode.IgnoreCaseEquals(subGameProviderCode))
+                        let isActive = statuses.Contains(gp.Status) &&
+                            statuses.Contains(bgp.BrandGameProviderStatus) &&
+                            gameStatuses.Contains(bg.BrandGameStatus) &&
+                            gameStatuses.Contains(g.Status)
+                        select GetGameModels(g, bg, isActive, cultureCode);
 
-                        if (store.TryGetValue(g.Id, out var value))
-                        {
-                            var localization = JsonDocument.Parse(value);
-
-                            localization.RootElement.TryGetProperty(query.LanguageCode, out var langName);
-                            if (langName.ValueKind != JsonValueKind.Undefined)
-                            {
-                                if (langName.TryGetProperty("name", out var localizationName)
-                                    && !string.IsNullOrEmpty(localizationName.GetString()))
-                                    gameName = localizationName.GetString();
-                                if (langName.TryGetProperty("description", out var localizationDesc)
-                                    && !string.IsNullOrEmpty(localizationDesc.GetString()))
-                                    gameDesc = localizationDesc.GetString();
-                            }
-                        }
-                        return g with
-                        {
-                            Name = gameName!,
-                            Description = gameDesc!
-                        };
-                    }).ToArray();
-
-                translatedGames.AddRange(translatedGame);
-            }
-
-            foreach (var item in translatedGames)
+            foreach (var item in infos.OrderBy(g => g.Id))
             {
                 yield return item;
 
                 if (cancellationToken.IsCancellationRequested)
+                {
                     yield break;
+                }
             }
         }
 
-        private async Task<GameInfo[]> GetGameModelsAsync(
-            Guid brandId,
-            Guid gameProviderId,
-            PlatformType platformType,
-            string currencyCode,
-            PlayerType playerType)
+        private static GameInfo GetGameModels(
+            GameDataInfo game,
+            CachedBrandGame brandGame,
+            bool isActive,
+            string cultureCode)
         {
-            var statuses = _validStatus.GetStatus(playerType);
-            var gameStatuses = _validGameStatus.GetStatus(playerType);
-
-            if (currencyCode.IsNotNullOrEmpty())
+            var info = new GameInfo
             {
-                var isCurrencySupported =
-                    await _gameProviderOperations.CurrencySupportedAsync(gameProviderId, currencyCode);
-
-                if (!isCurrencySupported)
+                Id = game.Id,
+                Code = game.Code,
+                Name = game.Name,
+                Description = game.Description,
+                GameProviderCode = game.SubGameProviderCode,
+                Type = game.Type,
+                IsActive = isActive,
+                Tag = new TagInfo
                 {
-                    return Array.Empty<GameInfo>();
-                }
+                    New = brandGame.Tag.IsNew(),
+                    Hot = brandGame.Tag.IsHot(),
+                    Recommend = brandGame.Tag.IsRecommend()
+                },
+                DisplayOrder = brandGame.DisplayOrder
+            };
+
+            if (string.IsNullOrEmpty(game.Localization))
+            {
+                return info;
             }
 
-            var gamePlatformTypes = platformType.ToGamePlatformTypes();
-            var brandGameProviderStatus =
-                await _brandOperations.GetBrandGameProviderStatusAsync(brandId, gameProviderId) ?? Status.Active;
-            var brandGames = await _brandOperations.GetBrandGamesAsync(brandId, gamePlatformTypes);
-            var cachedGameProvider = await _gameProviderOperations.GetCachedGameProviderAsync(gameProviderId);
-            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId);
+            var localization = JsonDocument.Parse(game.Localization);
+            if (!localization.RootElement.TryGetProperty(cultureCode, out var lang) ||
+                lang.ValueKind == JsonValueKind.Undefined)
+            {
+                return info;
+            }
 
-            cachedGames = cachedGames
-                .Where(g => g.Status != GameStatus.Inactive
-                    && g.Status != GameStatus.Archived)
-                .ToArray();
+            return info with
+            {
+                Name = GetLocalization(lang, "name", info.Name),
+                Description = GetLocalization(lang, "description", info.Name)
+            };
+        }
 
-            return (from bg in brandGames.Where(g => g.GameProviderId == gameProviderId)
-                    join g in cachedGames on bg.GameId equals g.Id
-                    where g.AvailableToBrand
-                        && (g.AvailableCurrencies.Length == 0
-                            || g.AvailableCurrencies.Contains(currencyCode, StringComparer.OrdinalIgnoreCase))
-                    select new GameInfo
-                    {
-                        Id = bg.GameId,
-                        Code = g.Code,
-                        Name = g.Name,
-                        Description = g.Description,
-                        GameProviderCode = cachedGameProvider.Code,
-                        Type = g.Type,
-                        IsActive = statuses.Contains(cachedGameProvider.Status)
-                            && gameStatuses.Contains(g.Status)
-                            && statuses.Contains(brandGameProviderStatus)
-                            && gameStatuses.Contains(bg.BrandGameStatus),
-                        Tag = new TagInfo()
-                        {
-                            New = bg.Tag.IsNew(),
-                            Hot = bg.Tag.IsHot(),
-                            Recommend = bg.Tag.IsRecommend()
-                        },
-                        DisplayOrder = bg.DisplayOrder
-                    })
-                .ToArray();
+        private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
+        {
+            if (!element.TryGetProperty(propertyName, out var value))
+            {
+                return defaultValue;
+            }
+
+            var val = value.GetString();
+            return string.IsNullOrEmpty(val) ? defaultValue : val;
         }
     }
 }

@@ -6,19 +6,22 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Roles
 {
     public class RoleModel
     {
-        public Guid Id { get; set; }
-        public RoleType RoleType { get; set; }
-        public Guid? ResellerId { get; set; }
-        public Guid? LicenseeId { get; set; }
-        public Guid? BrandId { get; set; }
-        public string Name { get; set; }
-        public string DisplayName { get; set; }
-        public string Description { get; set; }
-        public bool IsRoot { get; set; }
-        public MenuSetting[] Menus { get; set; }
-        public string CreatedByUsername { get; set; }
-        public string UpdatedByUsername { get; set; }
-        public DateTimeOffset CreatedOn { get; set; }
-        public DateTimeOffset UpdatedOn { get; set; }
+        public Guid Id { get; init; }
+        public RoleType RoleType { get; init; }
+        public Guid? ResellerId { get; init; }
+        public Guid? LicenseeId { get; init; }
+        public Guid? BrandId { get; init; }
+        public string ResellerName { get; init; }
+        public string LicenseeName { get; init; }
+        public string BrandName { get; init; }
+        public string Name { get; init; }
+        public string DisplayName { get; init; }
+        public string Description { get; init; }
+        public bool IsRoot { get; init; }
+        public MenuSetting[] Menus { get; init; }
+        public string CreatedByUsername { get; init; }
+        public string UpdatedByUsername { get; init; }
+        public DateTimeOffset CreatedOn { get; init; }
+        public DateTimeOffset UpdatedOn { get; init; }
     }
 }

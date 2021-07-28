@@ -12,6 +12,7 @@ namespace TGS.Clients.Report.Client.Models.Round
         public Guid GameProviderId { get; set; }
         public string GameProviderCode { get; set; }
         public string GameProviderName { get; set; }
+        public string SubGameProviderName { get; set; }
         public string PlayerName { get; set; }
         public string PlayerCode { get; set; }
         public string ExternalPlayerCode { get; set; }

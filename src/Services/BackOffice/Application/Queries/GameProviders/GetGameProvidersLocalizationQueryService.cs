@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
+using TGS.Services.BackOffice.Application.Models.SubGameProvider;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.GameProviders
 {
-    internal class GetGameProvidersLocalizationQueryService : IGetService<GetGameProvidersLocalizationQuery, GameProvidersLocalizationInfo>
+    internal class GetGameProvidersLocalizationQueryService
+        : IQueryService<GetGameProvidersLocalizationQuery, SubGameProviderData>
     {
         private readonly ITgsRepository _tgsRepository;
 
@@ -16,28 +18,17 @@ namespace TGS.Services.BackOffice.Application.Queries.GameProviders
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<GameProvidersLocalizationInfo> GetAsync(
+        public IAsyncEnumerable<SubGameProviderData> QueryAsync(
             GetGameProvidersLocalizationQuery query,
             CancellationToken cancellationToken = default)
-        {
-            var languages = await _tgsRepository.GameProviderLanguages
-                .AsAsyncEnumerable()
-                .GroupBy(x => x.CultureCode)
-                .Select(x => x.Key)
-                .ToArrayAsync();
-            var gameProviders = await _tgsRepository.GameProviders.ToArrayAsync();
-
-            return new GameProvidersLocalizationInfo()
-            {
-                Languages = languages,
-                GameProviders = gameProviders.Select(x =>
-                    new GameProviderData()
-                    {
-                        GameProviderId = x.Id,
-                        GameProviderName = x.Name,
-                        Localization = x.Localization
-                    })
-            };
-        }
+            => _tgsRepository.SubGameProviders.AsAsyncEnumerable()
+                .Select(x => new SubGameProviderData
+                {
+                    SubGameProviderCode = x.Code,
+                    SubGameProviderName = x.Name,
+                    Localization = x.Localization
+                })
+                .ToEnumerable()
+                .ToAsyncEnumerable();
     }
 }

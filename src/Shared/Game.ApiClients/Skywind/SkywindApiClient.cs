@@ -37,7 +37,7 @@ namespace TGS.Shared.Game.ApiClients.Skywind
 
         async ValueTask<SkywindGameUrlResponse> ISkywindApiClient.GetGameUrlAsync(SkywindConfiguration configuration, SkywindGameUrlRequest request)
         {
-            var path = $"/players/{request.PlayerCode}/games/{request.GameCode}?ticket={request.Ticket}&language{request.Language}";
+            var path = $"/players/{request.PlayerCode}/games/{request.GameCode}?ticket={request.Ticket}&language={request.Language}";
             var getaccessToken = await GetAccessTokenAsync(configuration).ConfigureAwait(false);
 
             var heard = new Dictionary<string, string> {

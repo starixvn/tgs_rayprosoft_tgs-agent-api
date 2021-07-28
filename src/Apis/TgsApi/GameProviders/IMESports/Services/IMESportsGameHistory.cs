@@ -37,10 +37,10 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports.Services
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
-            ILocalizationOperations localizationOperations,
             IJsonSerializationProvider json,
             IIMESportsApiClient client,
-            IIMESportsServices services) : base(roundQueries, gameProviderOperations, localizationOperations)
+            IIMESportsServices services)
+            : base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;

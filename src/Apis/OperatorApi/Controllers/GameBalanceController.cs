@@ -1,8 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Models.Messages;
+using TGS.Paging;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.GameBalance;
 using TGS.ServiceUtility;
@@ -22,7 +26,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpGet("{gpCode}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async Task<GetGameBalanceResponse> GetGameBalanceAsync(
             [FromServices] IGetService<GetGameBalanceQuery, GameBalanceInfo> getGameBalanceService,
             [FromServices] IGameProviderStatusValidator gameStatusValidator,
@@ -46,6 +49,37 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
+        /// Transfer wallet fund in(GP -> Tgs)
+        /// </summary>
+        /// <param name="submitGameBalanceFundInCommandService"></param>
+        /// <param name="gameStatusValidator"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPut("fund/in")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SubmitGameBalanceFundInRequestAsync(
+            [FromServices] ICommandService<SubmitGameBalanceFundInCommand> submitGameBalanceFundInCommandService,
+            [FromServices] IGameProviderStatusValidator gameStatusValidator,
+            [FromBody] SubmitGameBalanceFundInRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, request.GameProviderCode, brandId);
+
+            var command = new SubmitGameBalanceFundInCommand
+            (
+                request.GameProviderCode,
+                playerTokenData.PlayerCode,
+                request.Amount
+            );
+
+            await submitGameBalanceFundInCommandService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Transfer wallet fund out(Tgs -> Gp)
         /// </summary>
         /// <param name="submitGameBalanceFundOutCommandService"></param>
@@ -54,7 +88,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <returns></returns>
         [HttpPut("fund/out")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
         public async ValueTask SubmitGameBalanceFundOutRequestAsync(
             [FromServices] ICommandService<SubmitGameBalanceFundOutCommand> submitGameBalanceFundOutCommandService,
             [FromServices] IGameProviderStatusValidator gameStatusValidator,
@@ -77,36 +110,58 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Transfer wallet fund in(GP -> Tgs)
-        /// </summary>
-        /// <param name="submitGameBalanceFundInCommandService"></param>
-        /// <param name="gameStatusValidator"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [HttpPut("fund/in")]
+        [HttpGet("list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        [TgsResponseWrapper]
-        public async ValueTask SubmitGameBalanceFundInRequestAsync(
-            [FromServices] ICommandService<SubmitGameBalanceFundInCommand> submitGameBalanceFundInCommandService,
-            [FromServices] IGameProviderStatusValidator gameStatusValidator,
-            [FromBody] SubmitGameBalanceFundInRequest request)
+        public async Task<PagedResponse<GameBalanceInfosViewModel>> GetGameBalanceInfosAsync(
+            [FromServices] IQueryService<GetGameBalanceInfosQuery, GameBalanceRecord> queryService,
+            [FromQuery] GetGameBalanceInfosRequest request,
+            [FromQuery] PageableRequest pageableRequest)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
-            await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, request.GameProviderCode, brandId);
+            var recordOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
 
-            var command = new SubmitGameBalanceFundInCommand
-            (
-                request.GameProviderCode,
-                playerTokenData.PlayerCode,
-                request.Amount
-            );
+            if (request.BeginRecordOn != null && request.EndRecordOn != null)
+                recordOnRange = (request.BeginRecordOn.Value, request.EndRecordOn.Value);
 
-            await submitGameBalanceFundInCommandService
-                .ExecuteAsync(command)
-                .ConfigureAwait(false);
+            var query = new GetGameBalanceInfosQuery(brandId, playerTokenData.PlayerCode, recordOnRange);
+
+            var gameBalanceRecords = queryService.QueryAsync(query);
+
+            var paging = new Paging<GameBalanceInfosViewModel>();
+
+            if (!string.IsNullOrWhiteSpace(pageableRequest.SortBy))
+            {
+                paging.SortByPropertyName(pageableRequest.SortBy, pageableRequest.IsDesc);
+            }
+
+            if (!pageableRequest.ShowAll)
+            {
+                return new PagedResponse<GameBalanceInfosViewModel>
+                {
+                    TotalCount = await gameBalanceRecords.CountAsync().ConfigureAwait(false),
+                    Items = await gameBalanceRecords
+                        .Select(x => new GameBalanceInfosViewModel(x))
+                        .ApplyOrderBy(paging)
+                        .ToArrayAsync()
+                        .ConfigureAwait(false)
+                };
+            }
+
+            paging.Page = pageableRequest.Page;
+            paging.RowCount = pageableRequest.Rows;
+
+            return new PagedResponse<GameBalanceInfosViewModel>()
+            {
+                TotalCount = await gameBalanceRecords.CountAsync().ConfigureAwait(false),
+                Items = await gameBalanceRecords
+                    .Select(x => new GameBalanceInfosViewModel(x))
+                    .ApplyOrderBy(paging)
+                    .ApplyPaging(paging)
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
+            };
         }
     }
 }

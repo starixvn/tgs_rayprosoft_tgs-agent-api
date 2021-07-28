@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Agent;
@@ -23,8 +24,15 @@ namespace TGS.Agent.Repositories
             return new AgentInfo(
                 agent.Id,
                 agent.Username,
+                agent.RealName,
+                agent.Phone,
                 agent.DefaultWalletId,
                 agent.Email,
+                agent.QQ,
+                agent.Wechat,
+                agent.InvitationCode,
+                agent.Brand.Domains.FirstOrDefault()?.Url,
+                (int)agent.LevelType,
                 agent.WithdrawPassword,
                 agent.WithdrawSalt);
         }

@@ -2,7 +2,6 @@
 using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
@@ -15,17 +14,14 @@ namespace TGS.Apis.TgsApi.Commons.Services.BetHistory
     public abstract class BaseBetHistory : IGameHistory
     {
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ILocalizationOperations _localizationOperations;
         private readonly IRoundQueries _roundQueries;
 
         protected BaseBetHistory(
             IRoundQueries roundQueries,
-            IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations)
+            IGameProviderOperations gameProviderOperations)
         {
             _roundQueries = roundQueries;
             _gameProviderOperations = gameProviderOperations;
-            _localizationOperations = localizationOperations;
         }
 
         async ValueTask<GetRoundHistoryResponse> IGameHistory.GetRoundHistoryAsync(GetRoundHistoryRequest request)
@@ -54,17 +50,10 @@ namespace TGS.Apis.TgsApi.Commons.Services.BetHistory
             var result =
                 await GetGameProviderBetHistoryAsync(playerCode, round, cachedGameProvider, cachedGame, language);
 
-            var store = await _localizationOperations.GetLocalizationByGameProviderIdAsync(gameProviderId, language)
-                .ConfigureAwait(false);
-
             return new()
             {
-                GameProviderName =
-                    _localizationOperations.Parse(store, gameProviderId.ToString(),
-                        Consts.LocalizationContext.GameProviderName, cachedGameProvider.Name),
-                GameName =
-                    _localizationOperations.Parse(store, cachedGame.Id.ToString(),
-                        Consts.LocalizationContext.GameName, cachedGame.Name),
+                GameProviderName = cachedGameProvider.Name,
+                GameName = cachedGame.Name,
                 BetAmount = result.BetAmount,
                 Winloss = result.Winloss,
                 Turnover = result.Turnover,

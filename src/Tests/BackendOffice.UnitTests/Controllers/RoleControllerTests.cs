@@ -33,6 +33,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 _roleQueriesMock.Object,
                 _settingQueriesMock.Object,
                 _roleCommandsMock.Object,
+                _resellerQueriesMock.Object,
+                _licenseeQueriesMock.Object,
+                _brandQueriesMock.Object,
                 _jsonSerializationProviderMock.Object);
             _controller.ControllerContext.HttpContext = HttpContextMock.Object;
         }
@@ -41,6 +44,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private readonly Mock<ITgsQueries<Role>> _roleQueriesMock = new();
         private readonly Mock<ITgsQueries<Setting>> _settingQueriesMock = new();
         private readonly Mock<ITgsCommands<Role>> _roleCommandsMock = new();
+        private readonly Mock<ITgsQueries<Reseller>> _resellerQueriesMock = new();
+        private readonly Mock<ITgsQueries<Licensee>> _licenseeQueriesMock = new();
+        private readonly Mock<ITgsQueries<Brand>> _brandQueriesMock = new();
 
         private readonly Mock<IJsonSerializationProvider> _jsonSerializationProviderMock =
             new();
@@ -63,6 +69,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .AsQueryable()
                 .BuildMock().Object;
 
+            var resellers = CreateResellerFixture().CreateMany<Reseller>(10).AsQueryable().BuildMock().Object;
+            var licensees = CreateLicenseeFixture().CreateMany<Licensee>(10).AsQueryable().BuildMock().Object;
+            var brands = CreateBrandFixture().CreateMany<Brand>(10).AsQueryable().BuildMock().Object;
+
             var (skip, take) = GetPage(request);
             var orderedRoles = roles.OrderByDescending(p => p.Name);
 
@@ -70,6 +80,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _roleQueriesMock.Setup(x => x.GetQueries())
                 .Returns(roles);
+            _resellerQueriesMock.Setup(x => x.GetQueries())
+                .Returns(resellers);
+            _licenseeQueriesMock.Setup(x => x.GetQueries())
+                .Returns(licensees);
+            _brandQueriesMock.Setup(x => x.GetQueries())
+                .Returns(brands);
 
             var response = await _controller.GetListAsync(request);
             response.Valid.Should().BeTrue();
@@ -582,7 +598,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<Role>(u => u
-                .With(s => s.Users, new User[] { })
+                .With(s => s.Users, new User[]
+                {
+                })
                 .With(s => s.MenuSetting));
             return fixture;
         }
@@ -591,7 +609,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<MenuSetting>(u => u
-                .With(s => s.SubMenus, new MenuSetting[] { }));
+                .With(s => s.SubMenus, new MenuSetting[]
+                {
+                }));
 
 
             fixture.Customize<MenuSetting>(u => u
@@ -603,7 +623,9 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<CreateRoleRequest>(u => u
-                .With(s => s.Menus, new MenuSetting[] { }));
+                .With(s => s.Menus, new MenuSetting[]
+                {
+                }));
             return fixture;
         }
 
@@ -611,7 +633,110 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<UpdateRoleRequest>(u => u
-                .With(s => s.Menus, new MenuSetting[] { }));
+                .With(s => s.Menus, new MenuSetting[]
+                {
+                }));
+            return fixture;
+        }
+
+        private Fixture CreateResellerFixture()
+        {
+            var fixture = new Fixture();
+            fixture.Customize<Reseller>(u => u
+                .With(s => s.GameProviders, new ResellerGameProvider[]
+                {
+                })
+                .With(s => s.Languages, new ResellerLanguage[]
+                {
+                })
+                .With(s => s.Currencies, new ResellerCurrency[]
+                {
+                })
+                .With(s => s.BetLimits, new ResellerBetLimit[]
+                {
+                })
+                .With(s => s.Licensees, new Licensee[]
+                {
+                })
+                .With(s => s.Departments, new Department[]
+                {
+                }));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            return fixture;
+        }
+
+        private Fixture CreateLicenseeFixture()
+        {
+            var fixture = new Fixture();
+            fixture.Customize<Licensee>(u => u
+                .With(s => s.Reseller, new Reseller())
+                .With(s => s.Brands, new Brand[]
+                {
+                })
+                .With(s => s.GameProviders, new LicenseeGameProvider[]
+                {
+                })
+                .With(s => s.Languages, new LicenseeLanguage[]
+                {
+                })
+                .With(s => s.Currencies, new LicenseeCurrency[]
+                {
+                })
+                .With(s => s.BetLimits, new LicenseeBetLimit[]
+                {
+                })
+                .With(s => s.Departments, new Department[]
+                {
+                }));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            return fixture;
+        }
+
+        private Fixture CreateBrandFixture()
+        {
+            var fixture = new Fixture();
+            fixture.Customize<Brand>(u => u
+                .With(s => s.Licensee, new Licensee())
+                .With(s => s.GameProviders, new BrandGameProvider[]
+                {
+                })
+                .With(s => s.Languages, new BrandLanguage[]
+                {
+                })
+                .With(s => s.Currencies, new BrandCurrency[]
+                {
+                })
+                .With(s => s.Players, new Player[]
+                {
+                })
+                .With(s => s.Games, new BrandGame[]
+                {
+                })
+                .With(s => s.BetLimits, new BrandBetLimit[]
+                {
+                })
+                .With(s => s.BrandGroups, new BrandGroup[]
+                {
+                })
+                .With(s => s.PlayerLoginRecords, new PlayerLoginRecord[]
+                {
+                })
+                .With(s => s.Announcements, new Announcement[]
+                {
+                })
+                .With(s => s.StationLetters, new StationLetter[]
+                {
+                })
+                .With(s => s.VipLevels, new VipLevel[]
+                {
+                })
+                .With(s => s.Departments, new Department[]
+                {
+                })
+                .With(s => s.Domains, new BrandDomain[]
+                {
+                }));
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
     }

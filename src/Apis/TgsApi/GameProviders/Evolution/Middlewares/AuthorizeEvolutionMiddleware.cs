@@ -6,9 +6,10 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Shared.Game.Models.Evolution.Commons;
+using TGS.Shared.Game.Models.Evolution.Enums;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
 {
@@ -16,7 +17,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
     {
         private readonly IBrandOperations _brandOperations;
         private readonly IPlayerOperations _playerOperations;
-        private readonly ISettingOperations _settingOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IEvolutionServices _services;
         private readonly IEvolutionRedisCacheService _redisCacheService;
@@ -24,14 +24,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
         public AuthorizeEvolutionMiddleware(
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
-            ISettingOperations settingOperations,
             IJsonSerializationProvider jsonSerializationProvider,
             IEvolutionServices services,
             IEvolutionRedisCacheService redisCacheService)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _services = services ?? throw new ArgumentNullException(nameof(services));
             _redisCacheService = redisCacheService ?? throw new ArgumentNullException(nameof(redisCacheService));
@@ -39,6 +37,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
 
         async Task IMiddleware.InvokeAsync(HttpContext context, RequestDelegate next)
         {
+
+            string authToken = context.Request.Query["authToken"];
+            var config = await _services.GetConfigurationAsync().ConfigureAwait(false);
+
+            if (authToken.IgnoreCaseNotEquals(config.OwAuthToken))
+            {
+                throw new InvalidCaptchaException(GameApiError.InvalidTokenId.Description());
+            }
+
             var body = await context.Request.ReadAsStringAsync();
             var baseRequest = _jsonSerializationProvider.DeserializeFromString<EvolutionBaseRequest>(body);
 

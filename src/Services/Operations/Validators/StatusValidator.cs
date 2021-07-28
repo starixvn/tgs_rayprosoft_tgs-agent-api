@@ -48,7 +48,7 @@ namespace TGS.Services.Operations.Validators
 
             if (!statuses.Contains(Status.Maintenance) && status == Status.Maintenance)
             {
-                throw new BrandUnderMaintenanceException();
+                throw new BrandUnderMaintenanceException("Brand is put into maintenance");
             }
 
             if (!statuses.Contains(status.Value))

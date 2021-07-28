@@ -49,15 +49,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VND1000Currency("VND"),
-                new IDR1000Currency("IDR"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new MYRCurrency("MYR"),
-                new THBCurrency("THB"), new GBPCurrency("GBP")
+                new CNYCurrency("CNY"),
+                new USDCurrency("USD"),
+                new VND1000Currency("VND"),
+                new IDR1000Currency("IDR"),
+                new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"),
+                new THBCurrency("THB"),
+                new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("zh-cn"), new IDLanguage("id-id"), new JPLanguage("ja-jp"),
-                new KRLanguage("ko-kr"), new THLanguage("th-th"), new VNLanguage("vi-vn"), new TWLanguage("zh-tw")
+                new USLanguage("en"),
+                new CNLanguage("zh-cn"),
+                new IDLanguage("id-id"),
+                new JPLanguage("ja-jp"),
+                new KRLanguage("ko-kr"),
+                new THLanguage("th-th"),
+                new VNLanguage("vi-vn"),
+                new TWLanguage("zh-tw")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -96,7 +108,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ApiUrl = new("https://ex-api-demo-yy.568win.com"),
                     EnableCancelFailedTransactionsJob = false,
                     DelaySecondsForPlaceBet = 0,
-                    BypassPlayerCodes = new[] {"4ud6wst6shvx"}
+                    BypassPlayerCodes = new[]
+                    {
+                        "4ud6wst6shvx"
+                    }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new()
@@ -114,6 +129,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {"Handicap", "1"},
                 {"Odd_Even", "2"},
                 {"Over_Under", "3"}
+            };
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.SBOBET, "SBOBET")
             };
         }
 

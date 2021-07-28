@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using NUnit.Framework;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -13,6 +17,7 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.Services.GameBalance;
 using TGS.Services.PluggableServices;
 using TGS.Services.PluggableServices.Models;
+using CoreModesl = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -298,6 +303,35 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             // assert
             Assert.ThrowsAsync<GameProviderUnderMaintenanceException>(async () => await sut.CheckGameProviderStatusAsync(playerTokenData, gameProviderCode, brandId));
+        }
+
+        [Test]
+        public async Task Player_Can_Get_Game_Balance_Infos()
+        {
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+            var brandId = Guid.NewGuid();
+
+            repository.Brands.Add(new CoreModesl.Brand()
+            {
+                Id = brandId,
+                Name = "brandName"
+            });
+            await repository.SaveChangesAsync();
+
+            var sut = new GetGameBalanceInfosQueryService(repository);
+
+            var query = new GetGameBalanceInfosQuery(
+                BrandId: brandId,
+                PlayerCode: "playerCode",
+                RecordOnRange: null);
+
+            var info = await sut.QueryAsync(query).ToArrayAsync();
+
+            Assert.IsTrue(info.Length >= 0);
         }
     }
 }

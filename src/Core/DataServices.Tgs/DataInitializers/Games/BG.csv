@@ -1,15 +1,15 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-BigGaming Lobby,Lobby,,0,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Baccarat,Baccarat,,1,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Roulette,Roulette,,2,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Sicbo,Sicbo,,3,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Dragontiger,Dragontiger,,4,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,FALSE,TRUE,
-RedBlack,RedBlack,,5,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-SpeedSicBo,SpeedSicBo,,6,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-SpeedBaccarat,SpeedBaccarat,,7,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-SeDie,SeDie,,8,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-MiCardBaccarat,MiCardBaccarat,,10,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-FullColorBaccarat,FullColorBaccarat,,11,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-BullBull,BullBull,,13,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-WinThreeCards,WinThreeCards,,14,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-CasinoWar,CasinoWar,,15,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+BigGaming Lobby,Lobby,,0,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,BG
+Baccarat,Baccarat,,1,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+Roulette,Roulette,,2,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+Sicbo,Sicbo,,3,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+Dragontiger,Dragontiger,,4,LiveDealer,DesktopAndMobile,TRUE,,,TRUE,FALSE,TRUE,,BG
+RedBlack,RedBlack,,5,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+SpeedSicBo,SpeedSicBo,,6,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+SpeedBaccarat,SpeedBaccarat,,7,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+SeDie,SeDie,,8,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+MiCardBaccarat,MiCardBaccarat,,10,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+FullColorBaccarat,FullColorBaccarat,,11,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+BullBull,BullBull,,13,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+WinThreeCards,WinThreeCards,,14,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG
+CasinoWar,CasinoWar,,15,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,BG

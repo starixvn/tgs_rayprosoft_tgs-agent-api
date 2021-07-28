@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
@@ -12,5 +13,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         public long From { get; init; }
         [JsonPropertyName("to")]
         public long To { get; init; }
+        [JsonPropertyName("localization")]
+        public JsonDocument Localization { get; init; }
     }
 }

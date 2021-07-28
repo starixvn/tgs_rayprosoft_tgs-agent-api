@@ -29,7 +29,6 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("rounds")]
         [Description("Get rounds")]
         [Consumes(MediaTypeNames.Application.Json)]
-        [TgsResponseWrapper]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<RoundModel>> GetRoundsAsync(
             [FromQuery] GetPlayerRoundReportRequest request)
@@ -52,7 +51,11 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var response = await _client.GetRoundsAsync(roundsRequest);
 
-            return new PagingResponse<RoundModel>() { TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<RoundModel>() };
+            return new PagingResponse<RoundModel>()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<RoundModel>()
+            };
         }
     }
 }
