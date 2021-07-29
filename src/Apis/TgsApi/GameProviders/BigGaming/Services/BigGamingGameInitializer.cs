@@ -39,7 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
-            var gameProviderId = await _bigGamingServices.GetGameProviderId().ConfigureAwait(false);
+            var gameProviderId = await _bigGamingServices.GetGameProviderIdAsync().ConfigureAwait(false);
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
             var brandId = player.BrandId;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);

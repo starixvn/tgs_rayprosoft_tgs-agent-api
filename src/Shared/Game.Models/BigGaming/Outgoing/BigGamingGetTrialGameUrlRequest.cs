@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using TGS.Shared.Game.Models.BigGaming.Common;
+﻿using System.Text.Json.Serialization;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
