@@ -43,7 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
             var brandId = player.BrandId;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
-
+            /*
             var data = new BigGamingGetGameUrlRequest()
             {
                 Random = GuidExtensions.NewSequentialGuid().ToString(),
@@ -56,7 +56,20 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 FromIp = string.Empty,
 
             };
+            */
+            var data = new BigGamingGetGameUrlFishRequest()
+            {
+                Random = GuidExtensions.NewSequentialGuid().ToString(),
+                Sn = brandMerchant.SecretCode,
+                LoginId = player.PlayerCode,
+                Locale = cultureCode,
+                IsMobileUrl = 0,
+                IsHttpsUrl = 0,
+                ReturnUrl = string.Empty,
+                FromIp = string.Empty,
+                GameType = "411"
 
+            };
             var url = default(string);
             var responseGameUrl = await _client.GetGameUrlAsync(brandMerchant, data).ConfigureAwait(false);
             if (responseGameUrl.Error != null)
@@ -66,16 +79,17 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 {
                     await _bigGamingGamePlayerCreate.CreatePlayerAsync(player);
 
-                    data = new BigGamingGetGameUrlRequest()
+                    data = new BigGamingGetGameUrlFishRequest()
                     {
                         Random = GuidExtensions.NewSequentialGuid().ToString(),
                         Sn = brandMerchant.SecretCode,
                         LoginId = player.PlayerCode,
                         Locale = cultureCode,
-                        IsMobileUrl = Convert.ToInt32(request.Token.PlatformType == PlatformType.Mobile),
+                        IsMobileUrl = 0,
                         IsHttpsUrl = 0,
                         ReturnUrl = string.Empty,
                         FromIp = string.Empty,
+                        GameType = "411"
 
                     };
 
