@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DocumentFormat.OpenXml;
@@ -54,6 +56,11 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         [Description("Upload games")]
         public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request)
             => _mediator.Send(request);
+
+        [HttpGet("export/{gameProviderId}")]
+        [Description("Export games")]
+        public Task<HttpResponseMessage> ExportGamesAsync(Guid gameProviderId)
+            => _mediator.Send(new ExportGamesRequest(gameProviderId));
 
         [HttpGet("localization/export")]
         [Description("Export game localization for example")]
