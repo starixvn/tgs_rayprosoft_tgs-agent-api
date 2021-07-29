@@ -12,7 +12,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 table: "station_letters",
                 type: "jsonb",
                 nullable: false,
-                defaultValueSql: "{}",
+                defaultValue: "{}",
                 oldClrType: typeof(string),
                 oldType: "jsonb",
                 oldNullable: true);
@@ -23,7 +23,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 table: "announcements",
                 type: "jsonb",
                 nullable: false,
-                defaultValueSql: "{}",
+                defaultValue: "{}",
                 oldClrType: typeof(string),
                 oldType: "jsonb",
                 oldNullable: true);
@@ -39,7 +39,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "jsonb",
-                oldDefaultValueSql: "{}");
+                oldDefaultValue: "{}");
 
             migrationBuilder.AlterColumn<string>(
                 name: "localization",
@@ -49,7 +49,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                 nullable: true,
                 oldClrType: typeof(string),
                 oldType: "jsonb",
-                oldDefaultValueSql: "{}");
+                oldDefaultValue: "{}");
         }
     }
 }
