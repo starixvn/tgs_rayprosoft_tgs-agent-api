@@ -160,7 +160,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 throw new PlayerNotFoundException($"{source.UserId }");
             }
 
-            var sid = new Guid().ToString("N");
+            var sid = Guid.NewGuid().ToString("N");
             await _redisCacheService.AddSidAsync(sid, player).ConfigureAwait(false);
 
             return new EvolutionCheckUserResponse()
