@@ -7,7 +7,7 @@
         public string RuleUrl { get; set; }
         public string ExternalId { get; set; }
         public string Type { get; set; }
-        public string PlatformType { get; set; }
+        public string Platform { get; set; }
         public bool? HasTurnoverOnTieBet { get; set; }
         public string EndpointPath { get; set; }
         public string Description { get; set; }
