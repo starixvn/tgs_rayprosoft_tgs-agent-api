@@ -21,7 +21,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
     {
         BalanceResponse Response(GetBalanceResult result);
 
-        BalanceResponse Response(BetResult result);
+        BalanceResponse Response(BetResult result, TransferType? type = null);
 
         BetData BetRequest(string playerCode, GameProviderConfigurationData data, TransferRequest request);
 
@@ -49,9 +49,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
         }
 
         BalanceResponse IAllBetActionModelMapper.Response(GetBalanceResult result)
-            => GetBalanceResponse(result.Balance);
-
-        BalanceResponse IAllBetActionModelMapper.Response(BetResult result)
             => GetBalanceResponse(result.Balance);
 
         BetData IAllBetActionModelMapper.BetRequest(string playerCode, GameProviderConfigurationData data,
@@ -275,6 +272,26 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             }).ToArray();
 
             return GetBetData(playerCode, data, transactions, request.CurrencyCode);
+        }
+
+        BalanceResponse IAllBetActionModelMapper.Response(BetResult result, TransferType? type)
+        {
+            if (type is not TransferType.ManuelSettle and not TransferType.Settle)
+            {
+                return GetBalanceResponse(result.Balance);
+            }
+
+            var hasDuplicateTransactions = result.Transactions.Any(t => t.IsDuplicate);
+            if (hasDuplicateTransactions)
+            {
+                return new BalanceResponse
+                {
+                    ErrorCode = (int)GameApiError.InvalidGameActionOperation,
+                    ErrorMessage = "Transaction is duplicated"
+                };
+            }
+
+            return GetBalanceResponse(result.Balance);
         }
 
         private static GameActionType GetGameActionType(decimal betAmount, decimal winOrLossAmount)

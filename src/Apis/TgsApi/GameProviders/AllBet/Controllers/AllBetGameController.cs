@@ -91,7 +91,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
 
             var result = await func(playerCode, data, request);
 
-            return _map.Response(result);
+            return _map.Response(result, request.Type);
         }
 
         /// <summary>
