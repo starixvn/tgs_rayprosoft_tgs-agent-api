@@ -21,7 +21,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(4000);
 
             builder.Property(c => c.Localization)
-                .HasColumnType(ColumnTypes.Jsonb);
+                .HasColumnType(ColumnTypes.Jsonb)
+                .IsRequired()
+                .HasDefaultValueSql("{}");
 
             builder.Property(c => c.Remarks)
                 .HasMaxLength(512);

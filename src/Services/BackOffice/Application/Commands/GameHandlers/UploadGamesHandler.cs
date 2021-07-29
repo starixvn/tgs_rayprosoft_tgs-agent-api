@@ -35,14 +35,15 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
             var existedGames = uploadedResult
                 .Where(x => gameProvider?.Games.Any(g =>
                     g.ExternalId == x.ExternalId &&
-                    Enum.Parse(typeof(GamePlatformType), x.PlatformType, true).Equals(g.PlatformType)) ?? false)
+                    Enum.Parse(typeof(GamePlatformType), x.Platform, true).Equals(g.PlatformType)) ?? false)
                 .ToArray();
 
             return existedGames.Length > 0
                 ? new()
                 {
                     Valid = false,
-                    Message = string.Format(GameProvider.GamesExisted, existedGames.JoinAsStringByComma())
+                    Message = string.Format(GameProvider.GamesExisted,
+                        existedGames.Select(x => x.Code).JoinAsStringByComma())
                 }
                 : new UploadGamesResponse
                 {
