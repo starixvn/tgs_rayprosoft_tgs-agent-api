@@ -787,8 +787,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("from");
 
                     b.Property<string>("Localization")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
-                        .HasColumnName("localization");
+                        .HasColumnName("localization")
+                        .HasDefaultValueSql("{}");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
@@ -4969,8 +4972,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on");
 
                     b.Property<string>("Localization")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
-                        .HasColumnName("localization");
+                        .HasColumnName("localization")
+                        .HasDefaultValueSql("{}");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
