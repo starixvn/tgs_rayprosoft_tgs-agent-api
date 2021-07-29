@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.ServiceUtility;
+
+//using System.Linq.Dynamic;
 
 namespace TGS.Services.Operator.Services.GameBalance
 {
@@ -38,6 +41,12 @@ namespace TGS.Services.Operator.Services.GameBalance
                               To = trans.Type == TransactionType.GameProviderFundIn ? brandName : gp.Name,
                               BalanceTime = trans.RecordedOn
                           };
+
+            if (query.RecordOnRange != null)
+            {
+                records = records.Where(x => query.RecordOnRange.Value.Begin <= x.BalanceTime
+                    && x.BalanceTime < query.RecordOnRange.Value.End);
+            }
 
             foreach (var item in records)
             {
