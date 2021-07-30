@@ -41,7 +41,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpPost]
         [Description("Create games")]
-        public Task<CreateGamesResponse> CreateGamesAsync(CreateGamesRequest request) =>
+        public Task<MessageResponse> CreateGamesAsync(CreateGamesRequest request) =>
             _mediator.Send(request);
 
         [HttpPut("{id}")]
