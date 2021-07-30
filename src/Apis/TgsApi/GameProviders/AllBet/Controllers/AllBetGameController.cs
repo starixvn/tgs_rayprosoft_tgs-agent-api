@@ -182,12 +182,26 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
                 .ConfigureAwait(false);
 
-            CheckIfBetExists(externalIds, detail.BetNumber.ToString());
+            var betNumber = detail.BetNumber.ToString();
+            CheckIfBetExists(externalIds, betNumber);
 
-            var settledBetIds = externalIds.Where(t => t.GameActionType.IsSettleBet())
-                .Select(t => t.ExternalBetId).ToArray();
+            var settles = externalIds.Where(t => t.GameActionType.IsSettleBet()).ToArray();
 
-            if (settledBetIds.Length != 0)
+            if (request.IsRetry)
+            {
+                var transId = request.TransactionId.ToString();
+                var exists = settles.Any(t =>
+                    t.ExternalGameActionGroupId.IgnoreCaseEquals(transId) &&
+                    t.ExternalBetId.IgnoreCaseEquals(betNumber));
+
+                if (exists)
+                {
+                    throw new InvalidGameActionException("Transactions are duplicated",
+                        InvalidGameActionErrorCode.Duplicate);
+                }
+            }
+
+            if (settles.Length != 0)
             {
                 return detail.Status switch
                 {
@@ -200,7 +214,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 };
             }
 
-            var forceCloseRound = GetForceCloseRoundFlag(externalIds, settledBetIds);
+            var settleIds = settles.Select(t => t.ExternalBetId).ToArray();
+            var forceCloseRound = GetForceCloseRoundFlag(externalIds, settleIds);
             var betData = _map.SettleBetRequest(playerCode, data, externalIds, request, forceCloseRound);
 
             return await _actions.SettleBetAsync(betData).ConfigureAwait(false);
