@@ -790,8 +790,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
-                        .HasColumnName("localization")
-                        .HasDefaultValue("{}");
+                        .HasDefaultValue("{}")
+                        .HasColumnName("localization");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
@@ -3826,6 +3826,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_game_rebate_aggregates", "report");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameSetting", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<bool>("IsAutoTransferToGame")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_auto_transfer_to_game");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_game_settings");
+
+                    b.ToTable("player_game_settings");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4975,8 +4993,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
-                        .HasColumnName("localization")
-                        .HasDefaultValue("{}");
+                        .HasDefaultValue("{}")
+                        .HasColumnName("localization");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
@@ -6540,6 +6558,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Player");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameSetting", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithOne("GameSetting")
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerGameSetting", "PlayerCode")
+                        .HasConstraintName("fk_player_game_settings_players")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
@@ -7205,6 +7235,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Banks");
 
                     b.Navigation("BrandPaymentPlayers");
+
+                    b.Navigation("GameSetting");
 
                     b.Navigation("Letters");
 
