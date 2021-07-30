@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Security;
@@ -17,7 +18,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     public interface IEvolutionServices
     {
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
+        ValueTask<bool> ExistGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes);
+        ValueTask<bool> NotExistBetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, string externalGameId);
         ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId, string playerCode, string externalGameActionGroupId);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
@@ -49,6 +52,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 
         async ValueTask<GameActionExternalIds> IEvolutionServices.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
+
+        async ValueTask<bool> IEvolutionServices.ExistGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
+            => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false) != null;
 
         async ValueTask<GameActionExternalIds[]> IEvolutionServices.GetGameActionExternalIdsAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId, GameActionType[] gameActionTypes)
            => await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, gameActionTypes).ConfigureAwait(false);
@@ -91,6 +97,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Evolution).ConfigureAwait(false);
         }
 
-
+        async ValueTask<bool> IEvolutionServices.NotExistBetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, string externalGameId)
+        {
+            var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId).ConfigureAwait(false);
+            var cachedGame = cachedGames.First();
+            return (await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, cachedGame.Id, new[] { GameActionType.PlaceBet }).ConfigureAwait(false)) == null;
+        }
     }
 }

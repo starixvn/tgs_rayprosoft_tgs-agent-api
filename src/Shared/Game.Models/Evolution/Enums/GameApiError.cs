@@ -54,7 +54,7 @@ namespace TGS.Shared.Game.Models.Evolution.Enums
         /// <summary>
         /// INSUFFICIENT_FUNDS
         /// </summary>
-        [Description("if we ask to debit a player more than he has")]
+        [Description("INSUFFICIENT_FUNDS")]
         InsufficientFunds = 10008,
         /// <summary>
         /// FINAL_ERROR_ACTION_FAILED
