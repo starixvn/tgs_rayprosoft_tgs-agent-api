@@ -101,7 +101,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         {
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId).ConfigureAwait(false);
             var cachedGame = cachedGames.First();
-            return (await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, cachedGame.Id, new[] { GameActionType.PlaceBet }).ConfigureAwait(false)) == null;
+            var datas = await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, cachedGame.Id, new[] { GameActionType.PlaceBet }).ConfigureAwait(false);
+            return datas.Length == 0;
         }
     }
 }
