@@ -47,12 +47,13 @@ namespace TGS.Shared.Game.Models.Evolution.Enums
         [Description("if we send a fake user id")]
         InvalidParameter = 10002,
         /// <summary>
-        /// BET_DOES_NOT_EXIST
+        /// 1.when transaction.refId in /credit request can't be mapped to an open debit transaction
+        /// 2.when transaction.Id in /cancel request can't be mapped to an open debit transaction
         /// </summary>
-        [Description("1.when transaction.refId in /credit request can't be mapped to an open debit transaction 2.when transaction.Id in / cancel request can't be mapped to an open debit transaction")]
+        [Description("BET_DOES_NOT_EXIST")]
         BetDoesNotExist = 10005,
         /// <summary>
-        /// INSUFFICIENT_FUNDS
+        /// if we ask to debit a player more than he has
         /// </summary>
         [Description("INSUFFICIENT_FUNDS")]
         InsufficientFunds = 10008,
@@ -101,14 +102,14 @@ namespace TGS.Shared.Game.Models.Evolution.Enums
         [Description("Transaction is being process and no result is currently available.")]
         OperationInProcess = 2003,
         /// <summary>
-        /// BET_ALREADY_EXIST
+        /// when receive a repeat /debit request, judgeing by transaction.id
         /// </summary>
-        [Description("when receive a repeat /debit request, judgeing by transaction.id")]
+        [Description("BET_ALREADY_EXIST")]
         BetAlreadyExist = 4,
         /// <summary>
-        /// BET_ALREADY_SETTLED
+        /// when receive a repeat /credit or /cancel request, , judgeing by transaction.id
         /// </summary>
-        [Description("when receive a repeat /credit or /cancel request, , judgeing by transaction.id")]
+        [Description("BET_ALREADY_SETTLED")]
         BetAlreadySettled = 5,
     }
 }
