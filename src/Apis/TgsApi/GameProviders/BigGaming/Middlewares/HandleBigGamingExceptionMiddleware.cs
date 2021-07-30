@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Commons.Middlewares;
-using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.GameOperations;
-using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Enums;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
 
@@ -126,7 +124,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private Task<BigGamingResponse> GetResponseBetAsync(BigGamingRequest baseRequest, GameApiError error, string message)
         {
             var data = JsonSerializer.Deserialize<BigGamingBetRequest>(JsonSerializer.Serialize(baseRequest.Params));
-            var result = new BigGamingBetResponse()
+            var result = new BigGamingResultResponse()
             {
                 UserId = data.UserId,
                 Sn = data.Sn,
@@ -158,7 +156,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private Task<BigGamingResponse> GetResponseSettleAsync(BigGamingRequest baseRequest, GameApiError error, string message)
         {
             var data = JsonSerializer.Deserialize<BigGamingSettleRequest>(JsonSerializer.Serialize(baseRequest.Params));
-            var result = new BigGamingSettleResponse()
+            var result = new BigGamingResultResponse()
             {
                 UserId = data.UserId,
                 Sn = data.Sn,

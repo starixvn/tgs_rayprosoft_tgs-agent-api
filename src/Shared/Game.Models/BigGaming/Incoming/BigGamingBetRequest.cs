@@ -1,14 +1,12 @@
 ﻿using System.Text.Json.Serialization;
-using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BigGamingBetRequest : BigGamingParamsSignRequest
+    public record BigGamingBetRequest : BigGamingParamsSignLoginIdRequest
     {
         [JsonPropertyName("userId")]
         public int UserId { get; set; }
-        [JsonPropertyName("loginId")]
-        public string LoginId { get; set; }
         [JsonPropertyName("amount")]
         public string Amount { get; set; }
         [JsonPropertyName("moduleId")]

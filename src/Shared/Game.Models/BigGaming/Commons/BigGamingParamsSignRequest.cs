@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.BigGaming.Common
+namespace TGS.Shared.Game.Models.BigGaming.Commons
 {
     public record BigGamingParamsSignRequest
     {

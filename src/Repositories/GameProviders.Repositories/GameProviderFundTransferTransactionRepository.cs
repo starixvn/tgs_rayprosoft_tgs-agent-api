@@ -95,6 +95,36 @@ namespace TGS.GameProviders.Repositories
         }
 
         /// <summary>
+        /// Gets the by game provider transaction identifier.
+        /// </summary>
+        /// <param name="gameProviderId">The game provider identifier.</param>
+        /// <param name="gameProviderTransactionId">The game provider transaction identifier.</param>
+        /// <returns></returns>
+        public GetGameProviderFundTransferTransactionResponse[] GetByGameProviderTransactionId(Guid gameProviderId, string gameProviderTransactionId)
+        {
+            return (from GameProviderFundTransferTransactions in _repository.GameProviderFundTransferTransactions.AsQueryable()
+                    where GameProviderFundTransferTransactions.GameProviderId == gameProviderId && GameProviderFundTransferTransactions.GameProviderTransactionId == gameProviderTransactionId
+                    select new GetGameProviderFundTransferTransactionResponse()
+                    {
+                        GameProviderFundTransferTransactionId = GameProviderFundTransferTransactions.GameProviderFundTransferTransactionId,
+                        TransactionId = GameProviderFundTransferTransactions.TransactionId,
+                        GameProviderId = GameProviderFundTransferTransactions.GameProviderId,
+                        WalletId = GameProviderFundTransferTransactions.WalletId,
+                        GameProviderTransactionId = GameProviderFundTransferTransactions.GameProviderTransactionId,
+                        PlayerCode = GameProviderFundTransferTransactions.PlayerCode,
+                        FundSource = GameProviderFundTransferTransactions.FundSource,
+                        FromWallet = GameProviderFundTransferTransactions.FromWallet,
+                        ToWallet = GameProviderFundTransferTransactions.ToWallet,
+                        Status = GameProviderFundTransferTransactions.Status,
+                        Amount = GameProviderFundTransferTransactions.Amount,
+                        Balance = GameProviderFundTransferTransactions.Balance,
+                        CreatedOn = GameProviderFundTransferTransactions.CreatedOn,
+                        UpdatedOn = GameProviderFundTransferTransactions.UpdatedOn,
+                        Description = GameProviderFundTransferTransactions.Description,
+                    }).ToArray();
+        }
+
+        /// <summary>
         /// Updates the asynchronous.
         /// </summary>
         /// <param name="request">The request.</param>

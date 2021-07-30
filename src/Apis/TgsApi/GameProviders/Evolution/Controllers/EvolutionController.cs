@@ -160,12 +160,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 throw new PlayerNotFoundException($"{source.UserId }");
             }
 
-            await _redisCacheService.AddSidAsync(source.Sid, player).ConfigureAwait(false);
+            var sid = Guid.NewGuid().ToString("N");
+            await _redisCacheService.AddSidAsync(sid, player).ConfigureAwait(false);
 
             return new EvolutionCheckUserResponse()
             {
                 Status = GameApiError.OK.Description(),
-                Sid = source.Sid,
+                Sid = sid,
                 Uuid = source.Uuid
             };
         }

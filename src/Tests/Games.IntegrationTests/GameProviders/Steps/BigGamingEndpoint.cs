@@ -21,7 +21,7 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.BigGaming;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations.Extensions;
-using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
 using TGS.Tests.ApiClients.Operators;

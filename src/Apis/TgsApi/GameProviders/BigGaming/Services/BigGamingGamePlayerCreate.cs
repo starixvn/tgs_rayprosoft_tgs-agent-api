@@ -7,7 +7,7 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Shared.Game.ApiClients.BigGaming;
-using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services

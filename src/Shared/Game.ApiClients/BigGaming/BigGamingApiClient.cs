@@ -3,7 +3,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
-using TGS.Shared.Game.Models.BigGaming.Common;
 using TGS.Shared.Game.Models.BigGaming.Outgoing;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
@@ -11,6 +10,7 @@ using TGS.Core.Infrastructures.Extensions;
 using System.Text.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings.BigGaming;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 
 namespace TGS.Shared.Game.ApiClients.BigGaming
 {
