@@ -8,7 +8,7 @@ using TGS.Shared.Game.Models.BigGaming.Commons;
 
 namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BigGamingGetGameUrlFishRequest : BigGamingParamsSignRequest
+    public record BigGamingGetGameUrlFishingRequest : BigGamingParamsSignRequest
     {
         [JsonPropertyName("loginId")]
         public string LoginId { get; init; }

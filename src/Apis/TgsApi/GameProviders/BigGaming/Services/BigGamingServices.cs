@@ -14,7 +14,11 @@ using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
+using TGS.Services.PluggableServices.Models;
+using TGS.Shared.Game.ApiClients.BigGaming;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Enums;
+using TGS.Shared.Game.Models.BigGaming.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 {
@@ -30,6 +34,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         ValueTask<CachedPlayer> GetCachedPlayerAsync(string playerCode);
         ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
         ValueTask<GameProviderDepositWithdrawalResponse> TransferAsync(Guid gameProviderId, string playerCode, string gameProviderTransactionId, decimal amount);
+        ValueTask<CachedGame> GetCachedGameAsync(int gameId);
+        ValueTask<BigGamingResponse> GetGameUrlAsync(GetGameUrlRequest request, BigGamingBrandMerchant brandMerchant, CachedPlayer player, CachedGame game, string cultureCode);
+
     }
     internal sealed class BigGamingServices : IBigGamingServices
     {
@@ -38,21 +45,22 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IGameProviderDepositWithdrawalService _gameProviderDepositWithdrawalService;
-
+        private readonly IBigGamingApiClient _client;
         public BigGamingServices(
             ISettingOperations settingOperations,
             IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries,
             IPlayerOperations playerOperations,
-            IGameProviderDepositWithdrawalService gameProviderDepositWithdrawalService)
+            IGameProviderDepositWithdrawalService gameProviderDepositWithdrawalService,
+            IBigGamingApiClient client)
         {
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _gameProviderOperations = gameProviderOperations;
             _gameActionQueries = gameActionQueries;
             _playerOperations = playerOperations;
             _gameProviderDepositWithdrawalService = gameProviderDepositWithdrawalService ?? throw new ArgumentNullException(nameof(gameProviderDepositWithdrawalService));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
-
 
         async ValueTask<GameActionExternalIds> IBigGamingServices.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
@@ -164,6 +172,53 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 return await _gameProviderDepositWithdrawalService.GameProviderWithdrawalAsync(request).ConfigureAwait(false);
 
             }
+        }
+
+        async ValueTask<CachedGame> IBigGamingServices.GetCachedGameAsync(int gameId)
+        {
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.BigGaming).ConfigureAwait(false);
+            return await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameId).ConfigureAwait(false);
+        }
+
+        async ValueTask<BigGamingResponse> IBigGamingServices.GetGameUrlAsync(GetGameUrlRequest request, BigGamingBrandMerchant brandMerchant, CachedPlayer player, CachedGame game, string cultureCode) => game.Type
+           switch
+        {
+            GameType.Fishing => await GetGameUrlFishingAsync(request, brandMerchant, player, game.ExternalId, cultureCode).ConfigureAwait(false),
+            _ => await GetGameUrlLiveDealerAsync(request, brandMerchant, player, game.ExternalId, cultureCode).ConfigureAwait(false)
+        };
+
+        private async ValueTask<BigGamingResponse> GetGameUrlFishingAsync(GetGameUrlRequest request, BigGamingBrandMerchant brandMerchant, CachedPlayer player, string externalId, string cultureCode)
+        {
+            var data = new BigGamingGetGameUrlFishingRequest()
+            {
+                Random = GuidExtensions.NewSequentialGuid().ToString(),
+                Sn = brandMerchant.SecretCode,
+                LoginId = player.PlayerCode,
+                Locale = cultureCode,
+                IsMobileUrl = 0,
+                IsHttpsUrl = 0,
+                ReturnUrl = string.Empty,
+                FromIp = string.Empty,
+                GameType = externalId
+
+            };
+            return await _client.GetGameUrlAsync(brandMerchant, data).ConfigureAwait(false);
+        }
+
+        private async ValueTask<BigGamingResponse> GetGameUrlLiveDealerAsync(GetGameUrlRequest request, BigGamingBrandMerchant brandMerchant, CachedPlayer player, string externalId, string cultureCode)
+        {
+            var data = new BigGamingGetGameUrlRequest()
+            {
+                Random = GuidExtensions.NewSequentialGuid().ToString(),
+                Sn = brandMerchant.SecretCode,
+                LoginId = player.PlayerCode,
+                Locale = cultureCode,
+                IsMobileUrl = 0,
+                IsHttpsUrl = 0,
+                ReturnUrl = string.Empty,
+                FromIp = string.Empty,
+            };
+            return await _client.GetGameUrlAsync(brandMerchant, data).ConfigureAwait(false);
         }
 
         private BigGamingOrderStatus GetBGOrderStatus(GameActionType gameActionType) => gameActionType switch
