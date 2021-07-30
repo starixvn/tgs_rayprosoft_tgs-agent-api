@@ -23,7 +23,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.Localization)
                 .HasColumnType(ColumnTypes.Jsonb)
                 .IsRequired()
-                .HasDefaultValueSql("{}");
+                .HasDefaultValue("{}");
 
             builder.Property(c => c.Remarks)
                 .HasMaxLength(512);

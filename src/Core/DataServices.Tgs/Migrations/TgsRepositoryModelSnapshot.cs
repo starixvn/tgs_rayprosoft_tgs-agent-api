@@ -791,7 +791,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
                         .HasColumnName("localization")
-                        .HasDefaultValueSql("{}");
+                        .HasDefaultValue("{}");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
@@ -4976,7 +4976,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
                         .HasColumnName("localization")
-                        .HasDefaultValueSql("{}");
+                        .HasDefaultValue("{}");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
