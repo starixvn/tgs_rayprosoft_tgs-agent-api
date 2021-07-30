@@ -7,6 +7,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -280,11 +281,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
 
             if (allTransactionsDuplicated)
             {
-                return new BalanceResponse
-                {
-                    ErrorCode = (int)GameApiError.InvalidGameActionOperation,
-                    ErrorMessage = "Transactions are duplicated"
-                };
+                throw new InvalidGameActionException("Transactions are duplicated",
+                    InvalidGameActionErrorCode.Duplicate);
             }
 
             return GetBalanceResponse(result.Balance);
