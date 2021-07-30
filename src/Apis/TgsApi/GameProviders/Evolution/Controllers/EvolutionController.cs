@@ -125,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            if (await _services.NotExistBetGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.Id, source.Game.Id))
+            if (await _services.NotExistBetGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.Id, source.Game.GameDetail.GameTable.Id))
             {
                 var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
