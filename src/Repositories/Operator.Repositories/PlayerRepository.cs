@@ -4,21 +4,17 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Enums;
-using TGS.Core.Infrastructures.Json;
 using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories
 {
-    internal class WalletRepository : IPlayerRepository
+    internal class PlayerRepository : IPlayerRepository
     {
         private readonly ITgsRepository _tgsRepository;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
 
-        public WalletRepository(ITgsRepository tgsRepository, IJsonSerializationProvider jsonSerializationProvider)
+        public PlayerRepository(ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async ValueTask<BalanceInfo> GetBalanceInfoAsync(string playerCode)
@@ -31,6 +27,15 @@ namespace TGS.Operator.Repositories
             return new BalanceInfo(playerWallet.Balance);
         }
 
+        public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
+        {
+            var settingData = await _tgsRepository.PlayerGameSettings
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            return settingData?.IsAutoTransferToGame == true;
+        }
+
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
         {
             var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
@@ -41,6 +46,24 @@ namespace TGS.Operator.Repositories
                 playerData.IdentityAuthentication,
                 playerData.PhoneAuthentication,
                 playerData.VipId);
+        }
+
+        public async ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode)
+        {
+            var settingData = await _tgsRepository.PlayerGameSettings
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            if (settingData == null)
+                settingData = new PlayerGameSetting
+                {
+                    PlayerCode = playerCode,
+                    IsAutoTransferToGame = false
+                };
+
+            settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
