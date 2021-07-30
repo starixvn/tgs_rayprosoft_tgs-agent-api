@@ -21,6 +21,8 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
         Task<BigGamingResponse> InfoPlayerAsync(BigGamingBrandMerchant brandMerchant, BigGamingInfoPlayerRequest request);
         Task<BigGamingResponse> KickPlayerAsync(BigGamingBrandMerchant brandMerchant, BigGamingKickPlayerRequest request);
         Task<BigGamingResponse> GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlRequest request);
+        Task<BigGamingResponse> GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlFishingRequest request);
+
         Task<BigGamingResponse> GetTrialGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetTrialGameUrlRequest request);
         Task<BigGamingResponse> GetVideoOrderDetailAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderDetailRequest request);
         Task<BigGamingResponse> GetVideoRoundQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoRoundQueryRequest request);
@@ -73,6 +75,13 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.video.game.url", prefix).ConfigureAwait(false);
         }
 
+        async Task<BigGamingResponse> IBigGamingApiClient.GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlFishingRequest request)
+        {
+            request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
+            var prefix = $"{_gameProvider}.GetGameUrlFish";
+            return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.game.bg.url", prefix).ConfigureAwait(false);
+        }
+
         async Task<BigGamingResponse> IBigGamingApiClient.GetTrialGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetTrialGameUrlRequest request)
         {
             request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
@@ -114,5 +123,7 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return ExecuteJsonRequestAsync<BigGamingRequest, BigGamingResponse>(HttpMethod.Post, apiUrl, string.Empty, request, logPrefix: prefix);
 
         }
+
+
     }
 }
