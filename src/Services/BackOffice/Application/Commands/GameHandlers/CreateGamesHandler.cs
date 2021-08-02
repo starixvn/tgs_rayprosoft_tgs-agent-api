@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 {
-    public class CreateGamesHandler : Handler<CreateGamesRequest, CreateGamesResponse>
+    public class CreateGamesHandler : Handler<CreateGamesRequest, MessageResponse>
     {
         private readonly IGameService _gameService;
         private readonly IGameProviderService _service;
@@ -25,7 +26,7 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
             _subGameProviderService = subGameProviderService;
         }
 
-        public override async Task<CreateGamesResponse> Handle(CreateGamesRequest request,
+        public override async Task<MessageResponse> Handle(CreateGamesRequest request,
             CancellationToken cancellationToken)
         {
             var gameProvider = await _service.GetGameProviderAsync(x => x.Id == request.GameProviderId);
@@ -35,9 +36,8 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 
             if (gameCodesExisted.Length > 0)
             {
-                var response = CreateInvalidResponse<CreateGamesResponse>(GameProvider.CodeExisted);
-                response.DuplicateIds = gameCodesExisted;
-                return response;
+                return CreateInvalidResponse<MessageResponse>(string.Format(GameProvider.CodeExisted,
+                    gameCodesExisted.JoinAsStringByComma()));
             }
 
             var gameExternalIdsExisted = gameProvider.Games.Select(x => x.ExternalId)
@@ -45,9 +45,8 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 
             if (gameExternalIdsExisted.Length > 0)
             {
-                var response = CreateInvalidResponse<CreateGamesResponse>(GameProvider.ExternalIdExisted);
-                response.DuplicateIds = gameExternalIdsExisted;
-                return response;
+                return CreateInvalidResponse<MessageResponse>(string.Format(GameProvider.ExternalIdExisted,
+                    gameExternalIdsExisted.JoinAsStringByComma()));
             }
 
             var games = request.Games.GroupBy(x => x.ExternalId).Where(x => x.Count() > 1)
@@ -55,9 +54,8 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 
             if (games.Length > 0)
             {
-                var response = CreateInvalidResponse<CreateGamesResponse>(GameProvider.DuplicateGames);
-                response.DuplicateIds = games;
-                return response;
+                return CreateInvalidResponse<MessageResponse>(string.Format(GameProvider.DuplicateGames,
+                    games.JoinAsStringByComma()));
             }
 
             var subGameProviders = await _subGameProviderService
@@ -67,17 +65,19 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
             var subGameProviderCodes = subGameProviders.Select(x => x.Code).ToArray();
 
             var invalidSubGameProviderCode =
-                request.Games.Where(x => !subGameProviderCodes.Contains(x.SubGpCode)).ToArray();
+                request.Games.Where(x => !subGameProviderCodes.Contains(x.SubGpCode)).Select(x => x.SubGpCode)
+                    .Distinct()
+                    .ToArray();
 
             if (invalidSubGameProviderCode.Any())
             {
-                return CreateInvalidResponse<CreateGamesResponse>(string.Format(GameProvider.InvalidSubGameProviderCode,
+                return CreateInvalidResponse<MessageResponse>(string.Format(GameProvider.InvalidSubGameProviderCode,
                     invalidSubGameProviderCode.JoinAsStringByComma()));
             }
 
             await _gameService.CreateGamesAsync(gameProvider, request);
 
-            return CreateValidResponse<CreateGamesResponse>();
+            return CreateValidResponse<MessageResponse>();
         }
     }
 }

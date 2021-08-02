@@ -26,13 +26,13 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 
             if (game is null)
             {
-                return CreateInvalidResponse<CreateGamesResponse>(GameProvider.GameRequired);
+                return CreateInvalidResponse<MessageResponse>(GameProvider.GameRequired);
             }
 
             if (await _gameService.ExistsAsync(x =>
                 x.GameProviderId == game.GameProviderId && x.Code != game.Code && request.ExternalId == x.ExternalId))
             {
-                return CreateInvalidResponse<CreateGamesResponse>(GameProvider.ExternalIdExisted);
+                return CreateInvalidResponse<MessageResponse>(GameProvider.ExternalIdExisted);
             }
 
             game.Name = request.Name;
@@ -54,7 +54,7 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 
             await _gameService.UpdateGameAsync(game);
 
-            return CreateValidResponse<CreateGamesResponse>();
+            return CreateValidResponse<MessageResponse>();
         }
     }
 }

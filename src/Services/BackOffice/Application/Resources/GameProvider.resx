@@ -139,7 +139,7 @@
     <value>Language is required.</value>
   </data>
   <data name="CodeExisted" xml:space="preserve">
-    <value>Code existed already.</value>
+    <value>Code existed already : {0}</value>
   </data>
   <data name="NameExisted" xml:space="preserve">
     <value>Name existed already.</value>
@@ -151,10 +151,10 @@
     <value>Games existed already : {0}</value>
   </data>
   <data name="DuplicateGames" xml:space="preserve">
-    <value>Duplicate games, please check game list.</value>
+    <value>Duplicate games, please check game list : {0}</value>
   </data>
   <data name="ExternalIdExisted" xml:space="preserve">
-    <value>External id existed already.</value>
+    <value>External id existed already : {0}</value>
   </data>
   <data name="InvalidSubGameProviderCode" xml:space="preserve">
     <value>Sub game provider codes is invalid : {0}</value>

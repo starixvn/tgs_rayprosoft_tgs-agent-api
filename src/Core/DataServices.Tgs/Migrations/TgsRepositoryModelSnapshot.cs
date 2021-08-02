@@ -1523,6 +1523,27 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("brand_languages");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandLiveChat", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("ChatName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("chat_name");
+
+                    b.Property<string>("ChatSetting")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("chat_setting");
+
+                    b.HasKey("BrandId")
+                        .HasName("pk_brand_live_chats");
+
+                    b.ToTable("brand_live_chats");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6055,6 +6076,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Brand");
 
                     b.Navigation("Language");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandLiveChat", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.BrandLiveChat", "BrandId")
+                        .HasConstraintName("fk_brand_live_chats_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>

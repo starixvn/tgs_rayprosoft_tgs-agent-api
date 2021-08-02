@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -41,10 +41,12 @@ namespace TGS.Services.BackOffice.Infrastructure.Services
             for (var i = 0; i < reader.FieldCount; i++)
             {
                 var header = reader.GetValue(i)?.ToString();
-                if (header != null) {
+                if (header != null)
+                {
                     headers.Add(header);
                 }
             }
+
             var fieldCount = headers.Count;
             while (reader.Read()) //Each row of the file
             {
@@ -54,18 +56,32 @@ namespace TGS.Services.BackOffice.Infrastructure.Services
                 {
                     var header = headers[i];
                     var value = reader.GetValue(i);
-                    if (value != null) {
-                        Type fieldType = reader.GetFieldType(i);
-                        if (fieldType == typeof(bool)) {
+                    if (value != null)
+                    {
+                        var fieldType = reader.GetFieldType(i);
+                        if (fieldType == typeof(bool))
+                        {
                             obj.TryAdd(header, value);
-                        } else {
+                        }
+                        else
+                        {
                             obj.TryAdd(header, value.ToString());
                         }
                     }
                 }
 
-                var json = _jsonSerializationProvider.SerializeToString(obj, new JsonSerializerOptions { IgnoreNullValues = true });
-                result.Add(_jsonSerializationProvider.DeserializeFromString<T>(json));
+                var json = _jsonSerializationProvider.SerializeToString(obj,
+                    new JsonSerializerOptions {IgnoreNullValues = true});
+
+                var model = _jsonSerializationProvider.DeserializeFromString<T>(json);
+
+                var isNull = model.GetType().GetProperties().All(p =>
+                    p.GetValue(model) == null);
+
+                if (!isNull)
+                {
+                    result.Add(_jsonSerializationProvider.DeserializeFromString<T>(json));
+                }
             }
 
             return result;
