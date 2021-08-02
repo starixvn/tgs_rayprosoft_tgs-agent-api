@@ -287,7 +287,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             };
         }
 
-
         [HttpPost("ping")]
         public Task<BigGamingResponse> PingAsync(
             BigGamingRequest baseRequest)
@@ -301,6 +300,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             }));
         }
 
-
+        [HttpPost("gamerecordfishing")]
+        public Task GameRecordFishingAsync()
+        {
+            return null;
+        }
     }
 }
