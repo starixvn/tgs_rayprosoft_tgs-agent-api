@@ -37,6 +37,7 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.IncorrectFormat] = StatusCodes.Status400BadRequest,
                 [TgsApiError.UnderMaintenance] = StatusCodes.Status503ServiceUnavailable,
                 [TgsApiError.InvalidStatus] = StatusCodes.Status500InternalServerError,
+                [TgsApiError.LoginFail] = StatusCodes.Status400BadRequest,
 
                 [TgsApiError.SystemError] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.OperationNotAllowed] = StatusCodes.Status405MethodNotAllowed,
@@ -71,6 +72,7 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.DuplicateTransaction] = "DuplicateTransaction",
                 [TgsApiError.InvalidAmount] = "InvalidAmount",
 
+                [TgsApiError.LoginFail] = "LoginFail",
                 [TgsApiError.InvalidArguments] = "InvalidArguments",
                 [TgsApiError.IncorrectFormat] = "IncorrectFormat",
                 [TgsApiError.UnderMaintenance] = "UnderMaintenance",
@@ -124,7 +126,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(InsufficientBucketException)] = TgsApiError.InsufficientBucket,
                 [typeof(CannotJoinPromotionException)] = TgsApiError.PromotionCannotJoin,
                 [typeof(GameBalanceFundInFailedException)] = TgsApiError.GameBalanceFundInFailed,
-                [typeof(GameBalanceFundOutFailedException)] = TgsApiError.GameBalanceFundOutFailed
+                [typeof(GameBalanceFundOutFailedException)] = TgsApiError.GameBalanceFundOutFailed,
+                [typeof(LoginFailException)] = TgsApiError.LoginFail
             };
 
         public bool CanProcess(Exception exception)
