@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
@@ -16,11 +17,13 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AnnouncementController : ControllerBase
     {
+        [HttpGet("announcement/list")]
         [HttpGet("announcement/list/{language}")]
         public IAsyncEnumerable<Announcement> GetAnnouncementsAsync(
             [FromServices] IQueryService<GetAnnouncementQuery, AnnouncementInfo> getAnnouncementQueryService,
-            string language)
+            string language = "en-US")
         {
+            var currentCultureName = CultureInfo.CurrentUICulture.Name;
             var brandId = HttpContext.Items.GetBrandId();
 
             var query = new GetAnnouncementQuery(brandId);
@@ -32,8 +35,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     From = item.From,
                     To = item.To,
                     Subject = item.Subject,
-                    Localization = item.Localization.ContainsKey(language) == true
-                        ? item.Localization[language]
+                    Localization = item.Localization.ContainsKey(currentCultureName) == true
+                        ? item.Localization[currentCultureName]
                         : JsonDocument.Parse("{}")
                 });
         }
