@@ -10,7 +10,6 @@ using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
@@ -18,6 +17,7 @@ using TGS.Services.Operator.Services.Player;
 using TGS.ServiceUtility;
 
 using CoreExceptions = TGS.Core.Models.Exceptions;
+using PlayerNotFoundException = TGS.Services.Operator.PlayerNotFoundException;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
