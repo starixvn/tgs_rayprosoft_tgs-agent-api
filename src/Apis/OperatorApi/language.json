@@ -20,6 +20,7 @@
   "IncorrectFormat": "The format of request is invalid.",
   "UnderMaintenance": "Reseller / Licensee / Brand / GameProvider / Game is under maintenace.",
   "InvalidStatus": "Brand / GameProvider / Game / GPC status is not valid.",
+  "LoginFail": "Account or password invalid.",
 
   "SystemError": "System error can't be indicated.",
   "OperationNotAllowed": "For api function is restricted for some reason.",

@@ -25,6 +25,7 @@
         RoundIdNotFound = 304,
         InvalidAmount = 305,
 
+        LoginFail = 400,
         InvalidArguments = 401,
         IncorrectFormat = 402,
         UnderMaintenance = 403,

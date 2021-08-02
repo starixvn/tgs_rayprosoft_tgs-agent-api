@@ -10,7 +10,6 @@ using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.GameProvider;
 using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Models.Messages;
-using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
 using TGS.Services.BackOffice.Application.Resources;
 
@@ -31,7 +30,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
         private GameProviderController _controller;
         private readonly Mock<IMediator> _mediatorMock = new();
-        private readonly Mock<IUploadService> _uploadMock = new ();
+        private readonly Mock<IUploadService> _uploadMock = new();
 
         [TestCase(true)]
         [TestCase(false)]
@@ -89,7 +88,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new CreateGamesResponse
+                .ReturnsAsync(new MessageResponse
                 {
                     Valid = false,
                     Message = GameProvider.CodeExisted
@@ -109,7 +108,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<CreateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new CreateGamesResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse {Valid = true});
 
             var response = await _controller.CreateGameProviderAsync(request);
             response.Valid.Should().BeTrue();
@@ -125,7 +124,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _mediatorMock
                 .Setup(m => m.Send(It.IsAny<UpdateGameProviderRequest>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(new CreateGamesResponse {Valid = true});
+                .ReturnsAsync(new MessageResponse {Valid = true});
 
             var response = await _controller.UpdateGameProviderAsync(brand.Id, request);
 
@@ -137,8 +136,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var fixture = new Fixture();
             fixture.Customize<GameProviderModel>(u => u
-                .With(s => s.Languages, new GameProviderLanguageModel[] { })
-                .With(s => s.Currencies, new GameProviderCurrencyModel[] { }));
+                .With(s => s.Languages, new GameProviderLanguageModel[]
+                {
+                })
+                .With(s => s.Currencies, new GameProviderCurrencyModel[]
+                {
+                }));
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             return fixture;
         }
