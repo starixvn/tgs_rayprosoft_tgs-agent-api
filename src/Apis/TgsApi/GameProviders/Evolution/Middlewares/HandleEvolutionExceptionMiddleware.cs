@@ -9,7 +9,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.Evolution.Commons;
-using TGS.Shared.Game.Models.SexyGaming.Enums;
+using TGS.Shared.Game.Models.Evolution.Enums;
 
 namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
 {
@@ -22,7 +22,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
             ITgsLog log,
             IGamePlayActions action,
             IJsonSerializationProvider jsonSerializationProvider)
-            : base(mapper, Consts.GameProvider.SexyGaming, log, "evolution")
+            : base(mapper, Consts.GameProvider.Evolution, log, "evolution")
         {
             _action = action ?? throw new ArgumentNullException(nameof(action));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
@@ -32,7 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
             Exception exception)
         {
             var error = (GameApiError)errorCode;
-            var message = ErrorMapper.GetMessageByException(exception);
+            var message = error.Description();
 
             var body = await context.Request.ReadAsStringAsync();
             var baseRequest = _jsonSerializationProvider.DeserializeFromString<EvolutionBaseRequest>(body);

@@ -26,6 +26,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
         ValueTask<EvolutionConfiguration> GetConfigurationAsync();
         ValueTask<Guid> GetGameProviderIdAsync();
+        void IgnoreCaseNotEqualsUserId(string userId, string playerCode);
     }
 
     public class EvolutionServices : IEvolutionServices
@@ -104,6 +105,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             var datas = await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, cachedGame.Id, new[] { GameActionType.PlaceBet }).ConfigureAwait(false);
             var data = datas.Where(x => x.ExternalGameActionGroupId == externalGameActionGroupId).SingleOrDefault();
             return data == null;
+        }
+
+        void IEvolutionServices.IgnoreCaseNotEqualsUserId(string userId, string playerCode)
+        {
+            if (userId.IgnoreCaseNotEquals(playerCode))
+            {
+                throw new ArgumentException();
+            }
         }
     }
 }
