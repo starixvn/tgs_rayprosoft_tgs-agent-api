@@ -20,6 +20,7 @@
   "IncorrectFormat": "格式錯誤: 請按照格式要求輸入內容。",
   "UnderMaintenance": "維護中: 該總公司/公司/平台/遊戲商/遊戲正在維護中。",
   "InvalidStatus": "無效狀態: 該平台/遊戲商/遊戲/遊戲商配置的狀態為無效的。",
+  "LoginFail": "帳號或密碼錯誤。",
 
   "SystemError": "系統錯誤: 系統錯誤無法被標示。",
   "OperationNotAllowed": "不允許操作: 該api 功能已被某些原因限制住。",
