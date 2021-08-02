@@ -88,7 +88,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            if (await _services.ExistGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.Id))
+            if (await _services.ExistGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.ExternalTransactionId))
             {
                 var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
@@ -125,7 +125,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
-            if (await _services.NotExistBetGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.Id, source.Game.GameDetail.GameTable.Id))
+            if (await _services.NotExistBetGameActionExternalIdAsync(gameProviderId, playerCode, source.Game.ExternalRoundId, source.Game.GameDetail.GameTable.ExternalGameId, source.Transaction.ExternalGameActionGroupId))
             {
                 var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
@@ -136,7 +136,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Controllers
                 };
             }
 
-            if (await _services.ExistGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.Id))
+            if (await _services.ExistGameActionExternalIdAsync(gameProviderId, playerCode, source.Transaction.ExternalTransactionId))
             {
                 var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.Evolution, playerCode).ConfigureAwait(false);
                 return new EvolutionStandardResponse()
