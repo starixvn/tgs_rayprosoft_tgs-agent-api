@@ -48,8 +48,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             var cacheKeys = new[]
             {
-                new CacheKey {CacheType = RedisCacheType.Games, Key = gameProvider.Id},
-                new CacheKey {CacheType = RedisCacheType.SubGames, Key = gameProvider.Id}
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.Games,
+                    Key = gameProvider.Id
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.SubGames,
+                    Key = gameProvider.Id
+                }
             };
 
             await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
@@ -61,8 +69,16 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             var cacheKeys = new[]
             {
-                new CacheKey {CacheType = RedisCacheType.Games, Key = game.GameProviderId},
-                new CacheKey {CacheType = RedisCacheType.SubGames, Key = game.GameProviderId}
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.Games,
+                    Key = game.GameProviderId
+                },
+                new CacheKey
+                {
+                    CacheType = RedisCacheType.SubGames,
+                    Key = game.GameProviderId
+                }
             };
 
             await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
@@ -80,13 +96,13 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             CreateGamesRequest request)
         {
             var maxNumberStr = gameProvider.Games.Count > 0
-            ? gameProvider.Games.Max(x => x.Id).ToString()
-            : 0.ToString();
+                ? gameProvider.Games.Max(x => x.Id).ToString()
+                : "00000";
             var maxNumber = int.Parse(maxNumberStr[^5..]);
 
             var currentMaxGameNumber = gameProvider.UniqueId * (int)Math.Pow(10, 5) + maxNumber;
 
-            var games = request.Games.Select((x, index) => 
+            var games = request.Games.Select((x, index) =>
             {
                 var originGame = gameProvider.Games.FirstOrDefault(g => g.Id == x.Id);
                 var id = originGame == null ? currentMaxGameNumber + 1 + index : x.Id;
