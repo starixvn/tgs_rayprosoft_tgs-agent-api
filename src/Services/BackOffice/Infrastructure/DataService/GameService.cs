@@ -110,6 +110,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 {
                     Id = id,
                     GameProviderId = gameProvider.Id,
+                    SubGameProviderCode = x.SubGpCode,
                     Code = x.Code,
                     Name = x.Name,
                     Status = x.Status,
