@@ -6,7 +6,6 @@ pipeline {
 	environment {
         Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
         BuildConfiguration='Debug'
-        k8s_config='stag-k8s-config'
 	}
 
     stages {
@@ -14,6 +13,7 @@ pipeline {
             steps {
                 sh "echo 'Process components: $Components'";
                 sh "echo 'Branch: $GIT_BRANCH'";
+
                 script {
                     switch(env.GIT_BRANCH)
                     {
@@ -22,10 +22,11 @@ pipeline {
                             break;
                         case 'origin/release':
                             env.kube_ns = "staging";
+                            env.k8s_config = 'stag-k8s-config';
                             break;
                         default:
                             env.kube_ns = "dev";
-                            k8s_config='k8s-kube-config' 
+                            env.k8s_config='k8s-kube-config' 
                             break;
                     }
                 }
@@ -221,7 +222,7 @@ pipeline {
                 ImageName="${Registry}operator-api"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/operator-api \
                             --set image.tag=${TAG} \
@@ -248,7 +249,7 @@ pipeline {
                 ImageName="${Registry}agent-api"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/agent-api \
                             --set image.tag=${TAG} \
@@ -274,7 +275,7 @@ pipeline {
                 ImageName="${Registry}backoffice-api"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/backoffice-api \
                             --set image.tag=${TAG} \
@@ -300,7 +301,7 @@ pipeline {
                 ImageName="${Registry}global-api"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/global-api \
                             --set image.tag=${TAG} \
@@ -326,7 +327,7 @@ pipeline {
                 ImageName="${Registry}log-api"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/log-api \
                             --set image.tag=${TAG} \
@@ -353,7 +354,7 @@ pipeline {
                 ImageName="${Registry}report-api"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/report-api \
                             --set image.tag=${TAG} \
@@ -379,7 +380,7 @@ pipeline {
                 ImageName="${Registry}promotion-api"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/promotion-api \
                             --set image.tag=${TAG} \
@@ -405,7 +406,7 @@ pipeline {
                 ImageName="${Registry}file-service"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/file-service \
                             --set image.tag=${TAG} \
@@ -439,7 +440,7 @@ pipeline {
                 ImageName="${Registry}schedulers"
             }
             steps {
-                withKubeConfig([credentialsId: '${k8s_config}']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/schedulers \
                             --set image.tag=${TAG} \
