@@ -71,6 +71,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
                     playerInfo = await CheckingTokenAsync(gameProviderId, baseRequest.Sid).ConfigureAwait(false);
                 }
 
+                _services.IgnoreCaseNotEqualsUserId(baseRequest.UserId, playerInfo.PlayerCode);
+
                 context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, playerInfo.GameProviderConfigurationId);
                 context.Items.Add(Consts.ContextItems.PlayerCode, playerInfo.PlayerCode);
                 context.Items.Add(Consts.ContextItems.PlatformType, playerInfo.PlatformType);
