@@ -19,6 +19,7 @@ pipeline {
                     {
                         case 'origin/master':
                             env.kube_ns = "prod";
+                            env.k8s_config = 'stag-k8s-config';
                             break;
                         case 'origin/release':
                             env.kube_ns = "staging";
