@@ -6,9 +6,9 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TGS.Shared.Game.Models.BigGaming.Commons;
 
-namespace TGS.Shared.Game.Models.BigGaming.Incoming
+namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BigGamingGPGameRecordFishingRequest : BigGamingParamsSignRequest
+    public record BigGamingGameRecordFishingRequest : BigGamingParamsSignRequest
     {
         [JsonPropertyName("gameType")]
         public int GameType => 1;
@@ -19,6 +19,6 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
         [JsonPropertyName("pageIndex")]
         public string PageIndex { get; set; }
         [JsonPropertyName("pageSize")]
-        public int PageSize => 500;
+        public int PageSize { get; set; }
     }
 }

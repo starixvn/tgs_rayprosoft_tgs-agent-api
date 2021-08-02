@@ -5,9 +5,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace TGS.Shared.Game.Models.BigGaming.Incoming
+namespace TGS.Shared.Game.Models.BigGaming.Outgoing
 {
-    public record BigGamingGPGameRecordFishingResponse
+    public record BigGamingGameRecordFishingResponse
     {
         [JsonPropertyName("sn")]
         public string Sn { get; set; }

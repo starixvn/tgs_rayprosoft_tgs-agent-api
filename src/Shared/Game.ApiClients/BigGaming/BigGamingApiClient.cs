@@ -28,7 +28,7 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
         Task<BigGamingResponse> GetVideoOrderDetailAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderDetailRequest request);
         Task<BigGamingResponse> GetVideoRoundQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoRoundQueryRequest request);
         Task<BigGamingResponse> GetVideoOrderQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderQueryRequest request);
-        Task<BigGamingResponse> GetGameRecordAsync(BigGamingBrandMerchant brandMerchant, BigGamingGPGameRecordFishingRequest request);
+        Task<BigGamingResponse> GetGameRecordAsync(BigGamingBrandMerchant brandMerchant, BigGamingGameRecordFishingRequest request);
     }
 
     public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
@@ -112,7 +112,7 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.order.query", prefix).ConfigureAwait(false);
         }
 
-        async Task<BigGamingResponse> IBigGamingApiClient.GetGameRecordAsync(BigGamingBrandMerchant brandMerchant, BigGamingGPGameRecordFishingRequest request)
+        async Task<BigGamingResponse> IBigGamingApiClient.GetGameRecordAsync(BigGamingBrandMerchant brandMerchant, BigGamingGameRecordFishingRequest request)
         {
             request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
             var prefix = $"{_gameProvider}.GetGameRecordFishing";

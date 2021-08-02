@@ -16,9 +16,11 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
+using TGS.Shared.Game.ApiClients.BigGaming;
 using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Enums;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
+using TGS.Shared.Game.Models.BigGaming.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
 {
@@ -37,11 +39,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         private readonly IReadOnlyDictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>> _methodMapper;
         private readonly IBigGamingServices _services;
         private readonly ISettingOperations _settingOperations;
-
+        private readonly IBigGamingApiClient _client;
         public BigGamingController(
             IBigGamingModelActionMapper map,
             IGamePlayActions actions,
             IBigGamingServices services,
+            IBigGamingApiClient client,
             IJsonSerializationProvider jsonSerializationProvider,
             ISettingOperations settingOperations
         )
@@ -49,6 +52,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
             _jsonSerializationProvider = jsonSerializationProvider ??
                 throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
@@ -301,9 +305,26 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("gamerecordfishing")]
-        public Task GameRecordFishingAsync()
+        public async Task GameRecordFishingAsync(BigGamingGPGameRecordRequest source)
         {
-            return null;
+            var brandMerchant = await _services.GetBrandMerchant(source.CurrencyCode).ConfigureAwait(false);
+            var request = new BigGamingGameRecordFishingRequest()
+            {
+                StartTime = source.StartTime.UtcDateTime.AddHours(-4),
+                EndTime = source.EndTime.UtcDateTime.AddHours(-4),
+                PageIndex = source.Page.ToString(),
+                PageSize = source.Rows
+            };
+            var response = await _client.GetGameRecordAsync(brandMerchant, request).ConfigureAwait(false);
+            if (response.Error != null)
+            {
+            }
+            else
+            {
+                var gameRecords = JsonSerializer.Deserialize<BigGamingResultGameRecordResponse<BigGamingGameRecordFishingResponse>>(JsonSerializer.Serialize(response.Result));
+
+            }
+
         }
     }
 }
