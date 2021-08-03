@@ -18,20 +18,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IEvolutionServices _services;
+        private readonly IEvolutionService _service;
         private readonly IEvolutionRedisCacheService _redisCacheService;
 
         public AuthorizeEvolutionMiddleware(
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             IJsonSerializationProvider jsonSerializationProvider,
-            IEvolutionServices services,
+            IEvolutionService service,
             IEvolutionRedisCacheService redisCacheService)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _redisCacheService = redisCacheService ?? throw new ArgumentNullException(nameof(redisCacheService));
         }
 
@@ -39,7 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
         {
 
             string authToken = context.Request.Query["authToken"];
-            var config = await _services.GetConfigurationAsync().ConfigureAwait(false);
+            var config = await _service.GetConfigurationAsync().ConfigureAwait(false);
 
             if (authToken.IgnoreCaseNotEquals(config.OwAuthToken))
             {
@@ -49,7 +49,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
             var body = await context.Request.ReadAsStringAsync();
             var baseRequest = _jsonSerializationProvider.DeserializeFromString<EvolutionBaseRequest>(body);
 
-            var gameProviderId = await _services.GetGameProviderIdAsync();
+            var gameProviderId = await _service.GetGameProviderIdAsync();
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
 
             if (context.Request.Path.Value.IgnoreCaseContains("evo/api/balance")
@@ -71,6 +71,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
                     playerInfo = await CheckingTokenAsync(gameProviderId, baseRequest.Sid).ConfigureAwait(false);
                 }
 
+                _service.IgnoreCaseNotEqualsUserId(baseRequest.UserId, playerInfo.PlayerCode);
+
                 context.Items.Add(Consts.ContextItems.GameProviderConfigurationId, playerInfo.GameProviderConfigurationId);
                 context.Items.Add(Consts.ContextItems.PlayerCode, playerInfo.PlayerCode);
                 context.Items.Add(Consts.ContextItems.PlatformType, playerInfo.PlatformType);
@@ -81,7 +83,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Middlewares
 
         private async Task<EvolutionGetPlayerInfo> CheckingTokenAsync(Guid gameProviderId, string token)
         {
-            var loginRecord = await _services.DecryptTokenAsync(token);
+            var loginRecord = await _service.DecryptTokenAsync(token);
 
             var playerCode = loginRecord.PlayerCode;
             var platformType = loginRecord.PlatformType;

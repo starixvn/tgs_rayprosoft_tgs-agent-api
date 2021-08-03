@@ -42,9 +42,9 @@ namespace TGS.Shared.Game.Models.Evolution.Enums
         [Description("Please contact Customer Support for assistance.")]
         UnknownError = 1049,
         /// <summary>
-        /// INVALID_PARAMETER
+        /// if we send a fake user id
         /// </summary>
-        [Description("if we send a fake user id")]
+        [Description("INVALID_PARAMETER")]
         InvalidParameter = 10002,
         /// <summary>
         /// 1.when transaction.refId in /credit request can't be mapped to an open debit transaction

@@ -23,26 +23,26 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     public sealed class EvolutionGameHistory : BaseBetHistory
     {
         private readonly IEvolutionApiClient _client;
-        private readonly IEvolutionServices _services;
+        private readonly IEvolutionService _service;
         private readonly IEvolutionGameHistoryService _gameHistoryService;
 
         public EvolutionGameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
             IEvolutionApiClient client,
-            IEvolutionServices services,
+            IEvolutionService service,
             IEvolutionGameHistoryService gameHistoryService
         ) : base(roundQueries, gameProviderOperations)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _gameHistoryService = gameHistoryService ?? throw new ArgumentNullException(nameof(gameHistoryService));
         }
 
         protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
-            var configuration = await _services.GetConfigurationAsync().ConfigureAwait(false);
+            var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
             var response = await _client.GetGamHistoryRoundAsync(configuration,
                 new EvolutionGamHistoryRoundRequest
                 {
