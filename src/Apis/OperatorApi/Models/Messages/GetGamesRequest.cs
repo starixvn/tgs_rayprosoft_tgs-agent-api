@@ -8,7 +8,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
     public record GetGamesRequest
     {
         [BindProperty(Name = "gpcode")]
-        public string GameProviderCode { get; init; }
+        public string SubGameProviderCode { get; init; }
 
         [Required]
         [BindProperty(Name = "platformtype")]

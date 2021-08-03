@@ -18,7 +18,6 @@ namespace TGS.Services.Operator.Services.Game
 {
     internal class GetGameUrlQueryService : IGetService<GetGameUrlQuery, GameUrlInfo>
     {
-        private readonly IBrandLanguageCodeMapper _brandLanguageCodeMapper;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
         private readonly IPluggalbeGameProviderApiClient _pluggableApiClient;
@@ -32,7 +31,6 @@ namespace TGS.Services.Operator.Services.Game
             IGameProviderOperations gameProviderOperations,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
-            IBrandLanguageCodeMapper brandLanguageCodeMapper,
             IPluggableOperations pluggableOperations,
             IPluggalbeGameProviderApiClient pluggableApiClient,
             IGameProviderRepository gameProviderRepository)
@@ -42,8 +40,6 @@ namespace TGS.Services.Operator.Services.Game
                 gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
-            _brandLanguageCodeMapper = brandLanguageCodeMapper ??
-                throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
             _pluggableOperations = pluggableOperations ?? throw new ArgumentNullException(nameof(pluggableOperations));
             _pluggableApiClient = pluggableApiClient ?? throw new ArgumentNullException(nameof(pluggableApiClient));
             _gameProviderRepository = gameProviderRepository;
@@ -55,7 +51,7 @@ namespace TGS.Services.Operator.Services.Game
         {
             var playerTokenData = query.PlayerTokenData;
             var platformType = playerTokenData.PlatformType;
-            var subGameProviderCode = query.GameProviderCode;
+            var subGameProviderCode = query.SubGameProviderCode;
             var gameId = query.GameId;
 
             var subGp = await _gameProviderRepository
@@ -104,9 +100,6 @@ namespace TGS.Services.Operator.Services.Game
                 throw new InvalidOperationException(msg);
             }
 
-            var language = await _brandLanguageCodeMapper
-                .ExternalToInternalAsync(query.LanguageCode, query.BrandId)
-                .ConfigureAwait(false);
             var serviceUrl = await _pluggableOperations
                 .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
                 .ConfigureAwait(false);
@@ -119,7 +112,7 @@ namespace TGS.Services.Operator.Services.Game
                         Token = playerTokenData,
                         GameProviderCode = gameProviderCode,
                         GameId = gameId,
-                        Language = language,
+                        Language = query.LanguageCode,
                         ExtendedData = query.ExtendedData
                     })
                 .ConfigureAwait(false);

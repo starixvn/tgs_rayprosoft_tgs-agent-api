@@ -9,7 +9,7 @@ namespace TGS.Services.Operator.Services.Game
         Guid BrandId,
         PlayerTokenData PlayerTokenData,
         PlayerType PlayerType,
-        string GameProviderCode,
+        string SubGameProviderCode,
         int GameId,
         string LanguageCode,
         JsonDocument? ExtendedData);

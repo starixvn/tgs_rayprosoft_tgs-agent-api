@@ -10,7 +10,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [Required]
         [JsonPropertyName("gpcode")]
         [BindProperty(Name = "gpcode")]
-        public string GameProviderCode { get; init; }
+        public string SubGameProviderCode { get; init; }
 
         [Required]
         [JsonPropertyName("gid")]
