@@ -185,6 +185,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<BrandCommunication> BrandCommunications { get; set; }
 
+        DbSet<BrandLiveChat> BrandLiveChats { get; set; }
+
         DbSet<SubGameProvider> SubGameProviders { get; set; }
     }
 
@@ -368,6 +370,7 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
         public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
         public DbSet<BrandCommunication> BrandCommunications { get; set; }
+        public DbSet<BrandLiveChat> BrandLiveChats { get; set; }
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 
