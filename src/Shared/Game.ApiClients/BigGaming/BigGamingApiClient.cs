@@ -29,6 +29,7 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
         Task<BigGamingResponse> GetVideoRoundQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoRoundQueryRequest request);
         Task<BigGamingResponse> GetVideoOrderQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderQueryRequest request);
         Task<BigGamingResponse> GetGameRecordAsync(BigGamingBrandMerchant brandMerchant, BigGamingGameRecordFishingRequest request);
+        ValueTask<BigGamingGPGameRecordResponse> GameRecordAsync(Uri apiUrl, BigGamingGPGameRecordRequest request);
     }
 
     public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
@@ -133,6 +134,8 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
 
         }
 
+        ValueTask<BigGamingGPGameRecordResponse> IBigGamingApiClient.GameRecordAsync(Uri apiUrl, BigGamingGPGameRecordRequest request) =>
+           ExecuteJsonRequestAsync<BigGamingGPGameRecordRequest, BigGamingGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/bg/gamerecordfishing", request);
 
     }
 }

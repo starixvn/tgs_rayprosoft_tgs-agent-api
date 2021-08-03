@@ -13,9 +13,9 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
         [JsonPropertyName("gameType")]
         public int GameType => 1;
         [JsonPropertyName("startTime")]
-        public DateTime StartTime { get; set; }
+        public string StartTime { get; set; }
         [JsonPropertyName("endTime")]
-        public DateTime EndTime { get; set; }
+        public string EndTime { get; set; }
         [JsonPropertyName("pageIndex")]
         public string PageIndex { get; set; }
         [JsonPropertyName("pageSize")]

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
@@ -39,9 +40,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         async ValueTask<BigGamingGPGameRecordResponse> IBigGamingGPGameHistoryService.GameRecordFishingAsync(BigGamingGPGameRecordRequest source)
         {
             var brandMerchant = await _service.GetBrandMerchantAsync(source.CurrencyCode).ConfigureAwait(false); ;
-
-
-
             int pageIndex = 1;
             int pageSize = 500;
             var gameProviderId = await _service.GetGameProviderIdAsync();
@@ -53,15 +51,17 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var failCount = 0;
             var lastGameRecordTime = default(DateTimeOffset?);
             var sysDateTimeOffset = DateTime.UtcNow;
+            var request = new BigGamingGameRecordFishingRequest()
+            {
+                Random = GuidExtensions.NewSequentialGuid().ToString(),
+                Sn = brandMerchant.SecretCode,
+                StartTime = source.StartTime.UtcDateTime.AddHours(-4).ToString("yyyy-MM-dd HH:mm:ss"),
+                EndTime = source.EndTime.UtcDateTime.AddHours(-4).ToString("yyyy-MM-dd HH:mm:ss"),
+                PageIndex = pageIndex.ToString(),
+                PageSize = pageSize
+            };
             while (true)
             {
-                var request = new BigGamingGameRecordFishingRequest()
-                {
-                    StartTime = source.StartTime.UtcDateTime.AddHours(-4),
-                    EndTime = source.EndTime.UtcDateTime.AddHours(-4),
-                    PageIndex = pageIndex.ToString(),
-                    PageSize = pageSize
-                };
                 var response = await _client.GetGameRecordAsync(brandMerchant, request).ConfigureAwait(false);
                 if (response.Error != null)
                 {
@@ -76,8 +76,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 {
                     break;
                 }
-
                 pageIndex++;
+                request.PageIndex = pageIndex.ToString();
                 var gameRecordItems = gameRecords.Items;
                 for (int i = 0; i < gameRecordItems.Length; i++)
                 {
