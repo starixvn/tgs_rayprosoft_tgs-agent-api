@@ -25,6 +25,7 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public decimal CardGameRebatePercentage { get; init; }
         public decimal SportsRebatePercentage { get; init; }
         public decimal VirtualSportsRebatePercentage { get; init; }
+        public decimal AccumulatedProfitSharing { get; init; }
         public string Email { get; set; }
         public string Phone { get; set; }
         public string QQ { get; set; }

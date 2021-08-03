@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using ExpectedObjects;
 using Moq;
 using NUnit.Framework;
-using TGS.Core.Models.Enums;
-using TGS.Core.Models.Services.Caches;
-using TGS.Services.Agent.Services.Wallet;
 using TGS.Services.Agent;
-using TGS.Services.Operations;
+using TGS.Services.Agent.Services.Wallet;
 using TGS.Services.WalletService;
-using ExpectedObjects;
 
 namespace Agent.UnitTests
 {
@@ -45,7 +38,8 @@ namespace Agent.UnitTests
                     null,
                     1,
                     Array.Empty<byte>(),
-                    Array.Empty<byte>())));
+                    Array.Empty<byte>(),
+                    0M)));
             var expected = new BalanceInfo(10000M).ToExpectedObject();
 
             moqAgentWalletRepository
