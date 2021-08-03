@@ -11,7 +11,6 @@ using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operator.GameProviders;
-using TGS.Services.Operator.Games;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Game
@@ -20,7 +19,6 @@ namespace TGS.Services.Operator.Services.Game
     {
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
-        private readonly IGameRepository _gameRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<GameStatus> _validGameStatus;
@@ -32,7 +30,6 @@ namespace TGS.Services.Operator.Services.Game
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
             IGameProviderRepository gameProviderRepository,
-            IGameRepository gameRepository,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
@@ -40,7 +37,6 @@ namespace TGS.Services.Operator.Services.Game
             _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
             _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-            _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
@@ -91,7 +87,7 @@ namespace TGS.Services.Operator.Services.Game
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            var games = await _gameRepository.QueryGamesAsync(
+            var games = await _gameProviderRepository.QueryGamesAsync(
                     gameProviderIds,
                     new[]
                     {

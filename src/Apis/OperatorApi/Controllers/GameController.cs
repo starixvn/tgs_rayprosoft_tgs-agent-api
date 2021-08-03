@@ -16,6 +16,7 @@ using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
+using TGS.Services.Operator.Services.GameBalance;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -136,10 +137,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<GetGameUrlResponse> GetGameUrlForPostAsync(
             [FromServices] IPlayerOperations playerOperations,
             [FromServices] IStatusValidator playerStatusValidator,
-            [FromServices] IValidStatus<Status> validStatus,
-            [FromServices] IValidStatus<GameStatus> validGameStatus,
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
+            [FromServices] IGetService<GetGpCodeQuery, string> getGpCodeService,
             [FromServices] IGetService<GetGameUrlQuery, GameUrlInfo> getGameUrlQueryService,
+            [FromServices] ICommandService<FundInBeforeEnterGameCommand> fundService,
             [FromBody] GetGameUrlRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -155,6 +156,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ExternalToInternalAsync(currentCultureInfo.Name, cachedPlayer.BrandId)
                 .ConfigureAwait(false);
 
+            var gpCode = await getGpCodeService
+                .GetAsync(new GetGpCodeQuery(request.SubGameProviderCode))
+                .ConfigureAwait(false);
+
             var query = new GetGameUrlQuery(
                 cachedPlayer.BrandId,
                 playerTokenData,
@@ -166,6 +171,13 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var info = await getGameUrlQueryService
                 .GetAsync(query)
+                .ConfigureAwait(false);
+
+            await fundService
+                .ExecuteAsync(new FundInBeforeEnterGameCommand(
+                    cachedPlayer.BrandId,
+                    playerTokenData.PlayerCode,
+                    gpCode))
                 .ConfigureAwait(false);
 
             return new GetGameUrlResponse

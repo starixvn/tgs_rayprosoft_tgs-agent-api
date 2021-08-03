@@ -1,19 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 using System.Threading;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models;
-using TGS.Core.Models.Enums;
-using TGS.Core.Models.Exceptions;
-using TGS.Core.Models.Extensions;
-using TGS.Core.Models.Services.Caches;
-using TGS.Services.Operations;
-using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operator.GameProviders;
-using TGS.Services.Operator.Games;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Game
@@ -37,7 +25,6 @@ namespace TGS.Services.Operator.Services.Game
                 query.PlayerTokenData,
                 query.PlatformType,
                 query.Types);
-
 
             var allGames = _queryService.QueryAsync(allQuery, cancellationToken);
 

@@ -15,8 +15,9 @@ using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.GameProviders;
-using TGS.Services.Operator.Games;
 using TGS.Services.Operator.Services.Game;
+using TGS.Services.Operator.Services.GameBalance;
+using TGS.Services.Operator.Services.Wallet;
 using TGS.Services.PluggableServices;
 using TGS.ServiceUtility;
 using PluggableModels = TGS.Services.PluggableServices.Models;
@@ -27,6 +28,128 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class GameTests
     {
         [Test]
+        public async Task Enter_Game_If_Flag_Is_False_Not_FundIn_Wallet_Amount()
+        {
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeFundOutService = Substitute.For<ICommandService<FundOutAllGameBalanceCommand>>();
+            var fakeGetPlayerBalanceService = Substitute.For<IGetService<GetBalanceQuery, BalanceInfo>>();
+            var fakeFundInService = Substitute.For<ICommandService<SubmitGameBalanceFundInCommand>>();
+
+            var sut = new FundInBeforeEnterGameCommandService(
+                fakePlayerRepository,
+                fakeFundOutService,
+                fakeGetPlayerBalanceService,
+                fakeFundInService);
+
+            var command = new FundInBeforeEnterGameCommand(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                "gp1");
+
+            fakePlayerRepository.GetPlayerAutoTransferFlagAsync(Arg.Is(command.PlayerCode))
+                .Returns(false);
+
+            fakeGetPlayerBalanceService.GetAsync(Arg.Any<GetBalanceQuery>())
+                .Returns(new BalanceInfo(1000M));
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeFundInService.Received(0)
+                .ExecuteAsync(Arg.Any<SubmitGameBalanceFundInCommand>());
+        }
+
+        [Test]
+        public async Task Enter_Game_If_Flag_Is_True_Should_FundIn_Wallet_Amount()
+        {
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeFundOutService = Substitute.For<ICommandService<FundOutAllGameBalanceCommand>>();
+            var fakeGetPlayerBalanceService = Substitute.For<IGetService<GetBalanceQuery, BalanceInfo>>();
+            var fakeFundInService = Substitute.For<ICommandService<SubmitGameBalanceFundInCommand>>();
+
+            var sut = new FundInBeforeEnterGameCommandService(
+                fakePlayerRepository,
+                fakeFundOutService,
+                fakeGetPlayerBalanceService,
+                fakeFundInService);
+
+            var command = new FundInBeforeEnterGameCommand(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                "gp1");
+
+            fakePlayerRepository.GetPlayerAutoTransferFlagAsync(Arg.Is(command.PlayerCode))
+                .Returns(true);
+
+            fakeGetPlayerBalanceService.GetAsync(Arg.Any<GetBalanceQuery>())
+                .Returns(new BalanceInfo(1000M));
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeFundInService.Received(1)
+                .ExecuteAsync(Arg.Is<SubmitGameBalanceFundInCommand>(
+                    cmd => cmd.PlayerCode == command.PlayerCode
+                        && cmd.Amount == 1000));
+        }
+
+        [Test]
+        public async Task FundOutAllGameBalance_Should_Call_All_GP_FundOut()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, GameBalanceInfo>>();
+            var fakeGameFundOutService = Substitute.For<ICommandService<SubmitGameBalanceFundOutCommand>>();
+
+            var sut = new FundOutAllGameBalanceCommandService(
+                fakeGameProviderRepository,
+                fakeGetGameBalanceService,
+                fakeGameFundOutService);
+
+            var command = new FundOutAllGameBalanceCommand(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                "GpCode");
+
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
+                .Returns(new[] {
+                    new BrandSubGameProviderInfo(
+                        "sub1",
+                        "sub1",
+                        "sub1",
+                        Guid.NewGuid(),
+                        "gp1",
+                        true,
+                        Status.Active),
+                    new BrandSubGameProviderInfo(
+                        "sub2",
+                        "sub2",
+                        "sub2",
+                        Guid.NewGuid(),
+                        "gp1",
+                        true,
+                        Status.Active),
+                    new BrandSubGameProviderInfo(
+                        "sub3",
+                        "sub3",
+                        "sub3",
+                        Guid.NewGuid(),
+                        "gp2",
+                        true,
+                        Status.Active)
+                }.ToAsyncEnumerable());
+
+            fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
+                .Returns(new GameBalanceInfo
+                {
+                    Balance = 100M,
+                    Error = 0
+                });
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeGameFundOutService.Received(2)
+                .ExecuteAsync(Arg.Any<SubmitGameBalanceFundOutCommand>());
+        }
+
+        [Test]
         public async Task Get_Game_List_Of_All_GameProviders()
         {
             // arrange
@@ -35,7 +158,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-            var fakeGameRepository = Substitute.For<IGameRepository>();
 
             var brandId = Guid.NewGuid();
             var gameProviderCode = string.Empty;
@@ -183,7 +305,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeGameProviderRepository.QueryGameProvidersAsync()
                 .Returns(gameProviders.ToAsyncEnumerable());
 
-            fakeGameRepository.QueryGamesAsync(
+            fakeGameProviderRepository.QueryGamesAsync(
                     Arg.Any<IEnumerable<Guid>>(),
                     Arg.Any<IEnumerable<GameStatus>>(),
                     Arg.Any<IEnumerable<GamePlatformType>>())
@@ -201,7 +323,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidStatus,
                 fakeValidGameStatus,
                 fakeGameProviderRepository,
-                fakeGameRepository,
                 new JsonSerializationProvider());
 
             // act
@@ -262,7 +383,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-            var fakeGameRepository = Substitute.For<IGameRepository>();
 
             var brandId = Guid.NewGuid();
             var gameProviderCode = string.Empty;
@@ -410,7 +530,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeGameProviderRepository.QueryGameProvidersAsync()
                 .Returns(gameProviders.ToAsyncEnumerable());
 
-            fakeGameRepository.QueryGamesAsync(
+            fakeGameProviderRepository.QueryGamesAsync(
                     Arg.Any<IEnumerable<Guid>>(),
                     Arg.Any<IEnumerable<GameStatus>>(),
                     Arg.Any<IEnumerable<GamePlatformType>>())
@@ -422,7 +542,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidStatus,
                 fakeValidGameStatus,
                 fakeGameProviderRepository,
-                fakeGameRepository,
                 new JsonSerializationProvider());
 
             var gameTypes = new[]

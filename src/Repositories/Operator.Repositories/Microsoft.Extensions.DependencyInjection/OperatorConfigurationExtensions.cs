@@ -12,7 +12,6 @@ namespace Microsoft.Extensions.DependencyInjection
                 .UseWalletRepository<PlayerRepository>()
                 .UseStationLetterRepository<StationLetterRepository>()
                 .UseGameProviderRepository<GameProviderRepository>()
-                .UseGameRepository<GameRepository>()
                 .UseMaintenanceRedisRepository<MaintenanceRedisRepository>();
     }
 }
