@@ -95,14 +95,15 @@ namespace TGS.Services.Operator.Services.GameProvider
             var gameProviderIds = brandGameProviders.Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus))
                 .Select(bgp => bgp.GameProviderId).Distinct().ToArray();
 
-            var gameProviders =
-                await _gameProviderRepository.QueryGameProvidersAsync(gameProviderIds, statuses)
-                    .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+            var gameProviders = await _gameProviderRepository
+                    .QueryGameProvidersAsync()
+                    .Where(gp => gameProviderIds.Contains(gp.Id)
+                        && statuses.Contains(gp.Status))
+                    .ToArrayAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
-            var gameProviderCurrencies = await _gameProviderRepository.QueryGameProviderCurrenciesAsync(gameProviderIds)
-                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
-
-            var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync(gameProviderIds)
+            var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync()
+                .Where(sgp => gameProviderIds.Contains(sgp.GameProviderId))
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
             var gameTypeInfos = await _gameRepository
@@ -111,14 +112,6 @@ namespace TGS.Services.Operator.Services.GameProvider
 
             foreach (var gp in gameProviders)
             {
-                var isCurrencySupported = gameProviderCurrencies.Any(c
-                    => c.GameProviderId == gp.Id && c.CurrencyCode.IgnoreCaseEquals(currencyCode));
-
-                if (!isCurrencySupported)
-                {
-                    continue;
-                }
-
                 foreach (var sgp in subGameProviders.Where(sgp => sgp.GameProviderId == gp.Id))
                 {
                     var gameTypes = gameTypeInfos.Where(g => g.SubGameProviderCode.IgnoreCaseEquals(sgp.Code))

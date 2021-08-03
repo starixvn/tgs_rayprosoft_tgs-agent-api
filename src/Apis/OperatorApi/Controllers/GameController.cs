@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Services.Operations;
+using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
 using TGS.ServiceUtility;
@@ -66,7 +69,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     })
                 .ToArray();
 
-            return new GetGamesResponse {Games = games};
+            return new GetGamesResponse { Games = games };
         }
 
         /// <summary>
@@ -75,17 +78,31 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetGameUrlResponse> GetGameUrlForPostAsync(
+            [FromServices] IPlayerOperations playerOperations,
+            [FromServices] IStatusValidator playerStatusValidator,
+            [FromServices] IValidStatus<Status> validStatus,
+            [FromServices] IValidStatus<GameStatus> validGameStatus,
             [FromServices] IGetService<GetGameUrlQuery, GameUrlInfo> getGameUrlQueryService,
             [FromBody] GetGameUrlRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
+            var cachedPlayer = await playerOperations
+                .GetCachedPlayerAsync(playerTokenData.PlayerCode)
+                .ConfigureAwait(false);
+
+            playerStatusValidator.ThrowIfPlayerDisabled(cachedPlayer.Status);
+
+
             var query = new GetGameUrlQuery(
+                cachedPlayer.BrandId,
                 playerTokenData,
+                cachedPlayer.Type,
                 request.GameProviderCode,
                 request.GameId,
                 request.LanguageCode,
                 request.ExtendedData);
+
             var info = await getGameUrlQueryService
                 .GetAsync(query)
                 .ConfigureAwait(false);
@@ -104,14 +121,24 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetGameUrlResponse> GetLobbyGameUrlForPostAsync(
+            [FromServices] IPlayerOperations playerOperations,
+            [FromServices] IStatusValidator playerStatusValidator,
             [FromServices] IGetService<GetLobbyGameUrlQuery, LobbyGameUrlInfo> getLobbyGameUrlQueryService,
             [FromBody] GetLobbyGameUrlRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
+            var cachedPlayer = await playerOperations
+                .GetCachedPlayerAsync(playerTokenData.PlayerCode)
+                .ConfigureAwait(false);
+
+            playerStatusValidator.ThrowIfPlayerDisabled(cachedPlayer.Status);
+
             var query = new GetLobbyGameUrlQuery(
+                cachedPlayer.BrandId,
                 request.GameProviderCode,
                 playerTokenData,
+                cachedPlayer.Type,
                 request.GameType,
                 request.LanguageCode,
                 request.Extends);

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 using TGS.Services.Operator.GameProviders;
 
@@ -18,59 +18,73 @@ namespace TGS.Operator.Repositories
             _tgsRepository = tgsRepository;
         }
 
-        public IAsyncEnumerable<SubGameProviderWithLocationDataInfo> QuerySubGameProvidersAsync(
-            IEnumerable<Guid> gameProviderIds)
+        public async ValueTask<GameProviderDataInfo?> GetGameProviderByIdAsync(Guid gameProviderId)
         {
-            var query = _tgsRepository.SubGameProviders.AsQueryable()
-                .Where(sgp => gameProviderIds.Contains(sgp.GameProviderId))
-                .Select(sgp =>
-                    new SubGameProviderWithLocationDataInfo(
-                        sgp.GameProviderId,
-                        sgp.Code,
-                        sgp.Name,
-                        sgp.Description,
-                        sgp.Localization));
+            var gp = await _tgsRepository.GameProviders
+                .FindAsync(gameProviderId)
+                .ConfigureAwait(false);
 
-            return query.AsAsyncEnumerable();
+            if (gp == null)
+                return null;
+
+            return new GameProviderDataInfo(
+                gp.Id,
+                gp.Code,
+                gp.Status,
+                gp.TransferWallet);
         }
 
-        public IAsyncEnumerable<GameProviderDataInfo> QueryGameProvidersAsync(IEnumerable<Guid> gameProviderIds,
-            IEnumerable<Status> statuses)
+        public async ValueTask<SubGameProviderWithLocationDataInfo?> GetSubGameProviderDataInfoAsync(string subGpCode)
+            => await _tgsRepository.SubGameProviders
+                .Include(sgp => sgp.GameProvider)
+                .Where(sgp => sgp.Code == subGpCode)
+                .Select(sgp => new SubGameProviderWithLocationDataInfo(
+                    sgp.GameProviderId,
+                    sgp.GameProvider.Code,
+                    sgp.Code,
+                    sgp.Name,
+                    sgp.Description,
+                    sgp.Localization))
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+        public IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(Guid gameProviderId)
+        {
+            var query = from gpc in _tgsRepository.GameProviderCurrencies.AsQueryable()
+                        where gpc.GameProviderId == gameProviderId
+                        select new GameProviderCurrencyDataInfo(
+                            gpc.GameProviderId,
+                            gpc.CurrencyCode);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<GameProviderDataInfo> QueryGameProvidersAsync()
         {
             var query = from gp in _tgsRepository.GameProviders.AsQueryable()
-                        where gameProviderIds.Contains(gp.Id) &&
-                            statuses.Contains(gp.Status)
                         select new GameProviderDataInfo(
                             gp.Id,
                             gp.Code,
                             gp.Status,
                             gp.TransferWallet);
 
-            return query.AsAsyncEnumerable();
+            return query.ToAsyncEnumerable();
         }
 
-        public IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(
-            IEnumerable<Guid> gameProviderIds)
+        public IAsyncEnumerable<SubGameProviderWithLocationDataInfo> QuerySubGameProvidersAsync()
         {
-            var query = _tgsRepository.GameProviderCurrencies.AsQueryable()
-                .Where(c => gameProviderIds.Contains(c.GameProviderId))
-                .Select(c => new GameProviderCurrencyDataInfo(c.GameProviderId, c.CurrencyCode));
+            var query = from sgp in _tgsRepository.SubGameProviders
+                            .AsQueryable()
+                            .Include(sgp => sgp.GameProvider)
+                        select new SubGameProviderWithLocationDataInfo(
+                            sgp.GameProviderId,
+                            sgp.GameProvider.Code,
+                            sgp.Code,
+                            sgp.Name,
+                            sgp.Description,
+                            sgp.Localization);
 
-            return query.AsAsyncEnumerable();
-        }
-
-        public IAsyncEnumerable<SubGameProviderDataInfo> QuerySubGameProvidersAsync(string? subGameProviderCode = null)
-        {
-            var query = _tgsRepository.SubGameProviders.AsQueryable();
-
-            if (!string.IsNullOrEmpty(subGameProviderCode))
-            {
-                query = query.Where(sgp => sgp.Code == subGameProviderCode);
-            }
-
-            var info = query.Select(sgp => new SubGameProviderDataInfo(sgp.GameProviderId, sgp.Code));
-
-            return info.AsAsyncEnumerable();
+            return query.ToAsyncEnumerable();
         }
     }
 }

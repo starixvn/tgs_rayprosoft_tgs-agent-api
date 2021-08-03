@@ -24,6 +24,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("extends")]
         [BindProperty(SupportsGet = false)]
-        public JsonDocument ExtendedData { get; set; }
+        public JsonDocument ExtendedData { get; init; }
     }
 }

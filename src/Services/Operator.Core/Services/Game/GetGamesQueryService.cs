@@ -57,65 +57,67 @@ namespace TGS.Services.Operator.Services.Game
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var playerTokenData = query.PlayerTokenData;
-            var currencyCode =
-                await _brandCurrencyCodeMapper.ExternalToInternalAsync(query.CurrencyCode, query.BrandId);
+            var currencyCode = await _brandCurrencyCodeMapper
+                .ExternalToInternalAsync(query.CurrencyCode, query.BrandId)
+                .ConfigureAwait(false);
 
             CachedPlayer? cachedPlayer = null;
 
             if (playerTokenData != null)
             {
                 if (playerTokenData.PlatformType != query.PlatformType)
-                {
-                    throw new InvalidOperationException("request platform is not matched with player login platform.");
-                }
+                    throw new InvalidOperationException(
+                        "request platform is not matched with player login platform.");
 
                 cachedPlayer = await _playerOperations.GetCachedPlayerAsync(playerTokenData.PlayerCode);
-                if (cachedPlayer != null && cachedPlayer.DefaultWalletCurrencyCode.IgnoreCaseNotEquals(currencyCode))
-                {
+
+                if (cachedPlayer != null
+                    && cachedPlayer.DefaultWalletCurrencyCode.IgnoreCaseNotEquals(currencyCode))
                     throw new CurrencyNotMatchingException(cachedPlayer.DefaultWalletCurrencyCode, currencyCode);
-                }
             }
 
             var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-            var cultureCode = await _brandLanguageCodeMapper.ExternalToInternalAsync(query.LanguageCode, query.BrandId);
+            var cultureCode = await _brandLanguageCodeMapper
+                .ExternalToInternalAsync(query.LanguageCode, query.BrandId)
+                .ConfigureAwait(false);
 
             var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
             var statuses = _validStatus.GetStatus(playerType);
             var gameStatuses = _validGameStatus.GetStatus(playerType);
 
             var subGameProviderCode = query.GameProviderCode;
-            var brandGameProviders =
-                await _brandOperations.GetBrandGameProvidersAsync(query.BrandId).ConfigureAwait(false);
-            var brandGames = await _brandOperations.GetBrandGamesAsync(query.BrandId).ConfigureAwait(false);
+            var brandGameProviders = await _brandOperations
+                .GetBrandGameProvidersAsync(query.BrandId)
+                .ConfigureAwait(false);
+            var brandGames = await _brandOperations
+                .GetBrandGamesAsync(query.BrandId)
+                .ConfigureAwait(false);
 
-            var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync(subGameProviderCode)
-                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+            var subGp = await _gameProviderRepository
+                .GetSubGameProviderDataInfoAsync(subGameProviderCode)
+                .ConfigureAwait(false);
 
             var gameProviderIds = (from bgp in brandGameProviders
-                                   join sbp in subGameProviders on bgp.GameProviderId equals sbp.GameProviderId
-                                   select sbp.GameProviderId).ToArray();
+                                   where bgp.GameProviderId == subGp?.GameProviderId
+                                   select bgp.GameProviderId).ToArray();
+            var gameStatus = new[]
+            {
+                Status.Active,
+                Status.Maintenance
+            };
 
-            var gameProviders =
-                await _gameProviderRepository.QueryGameProvidersAsync(
-                        gameProviderIds,
-                        new[]
-                        {
-                            Status.Active,
-                            Status.Maintenance
-                        })
-                    .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+            var gameProviders = await _gameProviderRepository
+                .QueryGameProvidersAsync()
+                .Where(gp => gameProviderIds.Contains(gp.Id)
+                    && gameStatus.Contains(gp.Status))
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             var availableGameProviderIds = gameProviders.Select(gp => gp.Id).ToArray();
-            var gameProviderCurrencies = await _gameProviderRepository
-                .QueryGameProviderCurrenciesAsync(availableGameProviderIds)
-                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
             var queryGameProviderIds = (from bg in brandGames
-                                        join c in gameProviderCurrencies on bg.GameProviderId equals c.GameProviderId
-                                        where gamePlatformTypes.Contains(bg.PlatformType) &&
-                                            (string.IsNullOrEmpty(currencyCode) ||
-                                                c.CurrencyCode.IgnoreCaseEquals(currencyCode))
-                                        select bg.GameProviderId).Distinct().ToArray();
+                                        where gamePlatformTypes.Contains(bg.PlatformType)
+                                        select bg.GameProviderId).ToArray();
 
             var games = await _gameRepository.QueryGamesAsync(
                     queryGameProviderIds,
@@ -131,22 +133,17 @@ namespace TGS.Services.Operator.Services.Game
             var gameTypes = query.Types;
             var infos = from g in games
                         join bg in brandGames on g.Id equals bg.GameId
-                        let availableCurrencies = !string.IsNullOrEmpty(g.AvailableCurrencies)
-                            ? g.AvailableCurrencies.SplitByComma()
-                            : Array.Empty<string>()
                         let gp = gameProviders.First(gp => gp.Id == bg.GameProviderId)
                         let bgp = brandGameProviders.First(bgp => bgp.GameProviderId == bg.GameProviderId)
-                        where g.AvailableToBrand &&
-                            (gameTypes.Length == 0 ||
-                                gameTypes.Contains(g.Type)) &&
-                            (availableCurrencies.Length == 0 ||
-                                availableCurrencies.IgnoreCaseContains(currencyCode)) &&
-                            (string.IsNullOrEmpty(subGameProviderCode) ||
-                                g.SubGameProviderCode.IgnoreCaseEquals(subGameProviderCode))
-                        let isActive = statuses.Contains(gp.Status) &&
-                            statuses.Contains(bgp.BrandGameProviderStatus) &&
-                            gameStatuses.Contains(bg.BrandGameStatus) &&
-                            gameStatuses.Contains(g.Status)
+                        where g.AvailableToBrand
+                            && (gameTypes.Length == 0
+                                || gameTypes.Contains(g.Type))
+                            && (string.IsNullOrEmpty(subGameProviderCode)
+                                || g.SubGameProviderCode.IgnoreCaseEquals(subGameProviderCode))
+                        let isActive = statuses.Contains(gp.Status)
+                            && statuses.Contains(bgp.BrandGameProviderStatus)
+                            && gameStatuses.Contains(bg.BrandGameStatus)
+                            && gameStatuses.Contains(g.Status)
                         select GetGameModels(g, bg, isActive, cultureCode);
 
             foreach (var item in infos.OrderBy(g => g.Id))

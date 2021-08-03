@@ -70,8 +70,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
             await sut.QueryAsync(query).ToArrayAsync();
 
             _ = fakeGameProviderRepository.Received(1)
-                .QueryGameProvidersAsync(Arg.Any<Guid[]>(), Arg.Any<Status[]>());
-            _ = fakeGameProviderRepository.Received(1).QuerySubGameProvidersAsync(Arg.Any<Guid[]>());
+                .QueryGameProvidersAsync();
+            _ = fakeGameProviderRepository.Received(1)
+                .QuerySubGameProvidersAsync();
         }
     }
 }

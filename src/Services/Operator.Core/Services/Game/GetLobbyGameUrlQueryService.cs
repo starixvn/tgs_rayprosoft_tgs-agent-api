@@ -40,7 +40,9 @@ namespace TGS.Services.Operator.Services.Game
             var gameId = games[0].Id;
 
             var getGameUrlQuery = new GetGameUrlQuery(
+                query.BrandId,
                 playerTokenData,
+                query.PlayerType,
                 gameProviderCode,
                 gameId,
                 query.LanguageCode,
