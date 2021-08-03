@@ -63,28 +63,30 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
             }
             */
-
-            var checkingSign = request.Method.ToLower() switch
+            if (request.Method != null)
             {
-                "open.operator.user.balance" => await CheckingSignBalanceAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingBalanceRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
-                "open.operator.order.transfer" => await CheckingSignBetAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingBetRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
-                "open.operator.calc.transfer" => await CheckingSignSettleAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingSettleRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
-                "open.operator.order.status" => await CheckingSignOrderStatusAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingOrderStatusRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
-                "open.operator.user.transfer" => await CheckingSignTransferAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingTransferRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
-                "open.operator.ping" => new(true, default, null, default),
-                _ => new(false, default, null, default)
-            };
+                var checkingSign = request.Method.ToLower() switch
+                {
+                    "open.operator.user.balance" => await CheckingSignBalanceAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingBalanceRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
+                    "open.operator.order.transfer" => await CheckingSignBetAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingBetRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
+                    "open.operator.calc.transfer" => await CheckingSignSettleAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingSettleRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
+                    "open.operator.order.status" => await CheckingSignOrderStatusAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingOrderStatusRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
+                    "open.operator.user.transfer" => await CheckingSignTransferAsync(_jsonSerializationProvider.DeserializeFromString<BigGamingTransferRequest>(_jsonSerializationProvider.SerializeToString(request.Params))).ConfigureAwait(false),
+                    "open.operator.ping" => new(true, default, null, default),
+                    _ => new(false, default, null, default)
+                };
 
-            var gameProviderId = await _service.GetGameProviderIdAsync();
-            context.Items.Add(ContextItems.GameProviderId, gameProviderId);
+                var gameProviderId = await _service.GetGameProviderIdAsync();
+                context.Items.Add(ContextItems.GameProviderId, gameProviderId);
 
-            if (checkingSign.Success && !string.IsNullOrEmpty(checkingSign.PlayerCode))
-            {
-                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(checkingSign.BrandId, gameProviderId);
-                context.Items.Add(ContextItems.PlayerCode, checkingSign.PlayerCode);
-                context.Items.Add(ContextItems.PlatformType, checkingSign.PlatformType);
-                context.Items.Add(ContextItems.BrandId, checkingSign.BrandId);
-                context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+                if (checkingSign.Success && !string.IsNullOrEmpty(checkingSign.PlayerCode))
+                {
+                    var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(checkingSign.BrandId, gameProviderId);
+                    context.Items.Add(ContextItems.PlayerCode, checkingSign.PlayerCode);
+                    context.Items.Add(ContextItems.PlatformType, checkingSign.PlatformType);
+                    context.Items.Add(ContextItems.BrandId, checkingSign.BrandId);
+                    context.Items.Add(ContextItems.GameProviderConfigurationId, bgpc.GameProviderConfigurationId);
+                }
             }
             await next(context);
         }
