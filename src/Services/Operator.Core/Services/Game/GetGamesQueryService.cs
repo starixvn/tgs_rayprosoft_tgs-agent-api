@@ -93,14 +93,24 @@ namespace TGS.Services.Operator.Services.Game
                 .GetBrandGamesAsync(query.BrandId)
                 .ConfigureAwait(false);
 
-            var subGp = await _gameProviderRepository
-                .GetSubGameProviderDataInfoAsync(subGameProviderCode)
+            var subGps = await _gameProviderRepository
+                .QuerySubGameProvidersAsync()
+                .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            var gameProviderIds = (from bgp in brandGameProviders
-                                   where bgp.GameProviderId == subGp?.GameProviderId
-                                   select bgp.GameProviderId).ToArray();
-            var gameStatus = new[]
+            if (!string.IsNullOrEmpty(subGameProviderCode))
+            {
+                subGps = subGps.Where(sgp =>
+                    sgp.Code == subGameProviderCode).ToArray();
+            }
+
+            var gameProviderIds = (from bg in brandGames
+                                   where gamePlatformTypes.Contains(bg.PlatformType)
+                                   from subGp in subGps
+                                   where bg.GameProviderId == subGp.GameProviderId
+                                   select bg.GameProviderId).Distinct().ToArray();
+
+            var gpStatuses = new[]
             {
                 Status.Active,
                 Status.Maintenance
@@ -109,18 +119,12 @@ namespace TGS.Services.Operator.Services.Game
             var gameProviders = await _gameProviderRepository
                 .QueryGameProvidersAsync()
                 .Where(gp => gameProviderIds.Contains(gp.Id)
-                    && gameStatus.Contains(gp.Status))
+                    && gpStatuses.Contains(gp.Status))
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            var availableGameProviderIds = gameProviders.Select(gp => gp.Id).ToArray();
-
-            var queryGameProviderIds = (from bg in brandGames
-                                        where gamePlatformTypes.Contains(bg.PlatformType)
-                                        select bg.GameProviderId).ToArray();
-
             var games = await _gameRepository.QueryGamesAsync(
-                    queryGameProviderIds,
+                    gameProviderIds,
                     new[]
                     {
                         GameStatus.Active,
