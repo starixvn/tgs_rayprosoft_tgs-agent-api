@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,11 +17,12 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandLiveChat
             _tgsQueries = tgsQueries ?? throw new ArgumentNullException(nameof(tgsQueries));
         }
 
-        public async ValueTask<BrandLiveChatInfo> GetAsync(BrandLiveChatQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<BrandLiveChatInfo> GetAsync(
+            BrandLiveChatQuery query,
+            CancellationToken cancellationToken = default)
         {
-            var result = await _tgsQueries.GetQueries()
-                .ToAsyncEnumerable()
-                .FirstOrDefaultAsync(x => x.BrandId == query.BrandId);
+            var result = await _tgsQueries.GetSingleAsync(x => x.BrandId == query.BrandId);
+
             return new BrandLiveChatInfo()
             {
                 ChatName = result.ChatName,
