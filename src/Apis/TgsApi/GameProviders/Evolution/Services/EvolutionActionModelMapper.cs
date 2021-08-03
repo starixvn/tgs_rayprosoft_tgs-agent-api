@@ -22,15 +22,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     public class EvolutionActionModelMapper : IEvolutionActionModelMapper
     {
         private readonly string _gameProviderCode = Consts.GameProvider.Evolution;
-        private readonly IEvolutionServices _services;
+        private readonly IEvolutionService _service;
         private readonly IGameProviderOperations _gameProviderOperations;
 
         public EvolutionActionModelMapper(
-            IEvolutionServices services,
+            IEvolutionService service,
              IGameProviderOperations gameProviderOperations
             )
         {
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
@@ -57,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, source.Game.GameDetail.GameTable.ExternalGameId).ConfigureAwait(false);
 
             var cachedGame = cachedGames.First();
-            var orders = await _services.GetGameActionExternalIdsAsync(data.GameProviderId, playCode, source.Game.ExternalRoundId, cachedGame.Id, new GameActionType[] { GameActionType.PlaceBet }).ConfigureAwait(false);
+            var orders = await _service.GetGameActionExternalIdsAsync(data.GameProviderId, playCode, source.Game.ExternalRoundId, cachedGame.Id, new GameActionType[] { GameActionType.PlaceBet }).ConfigureAwait(false);
             var order = orders.Where(x => x.ExternalBetId == source.Transaction.ExternalGameActionGroupId).First();
             var transactions = new TransactionData
             {
@@ -79,12 +79,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
         {
             var transactions = default(TransactionData);
 
-            var orders = await _services.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(data.GameProviderId, playCode, source.Transaction.ExternalGameActionGroupId).ConfigureAwait(false);
+            var orders = await _service.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(data.GameProviderId, playCode, source.Transaction.ExternalGameActionGroupId).ConfigureAwait(false);
             var order = orders.Where(x => x.ExternalTransactionId == source.Transaction.ExternalTransactionId).First();
 
             if (order != null)
             {
-                string action = (order.GameActionType == GameActionType.PlaceBet) ? "cancel_bet" : "cancel_settle";
+                string action = _service.GetActionCancel(order.GameActionType);
                 transactions = new TransactionData()
                 {
                     Amount = Math.Abs(source.Transaction.Amount),
