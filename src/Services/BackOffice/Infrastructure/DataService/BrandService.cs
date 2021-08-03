@@ -40,8 +40,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
     {
         private readonly IRedisCacheManager _cacheManager;
         private readonly ICredentialGenerator _credentialGenerator;
-        private readonly ITgsRepository _repository;
         private readonly IMaintenanceRedisService _maintenanceRedisService;
+        private readonly ITgsRepository _repository;
 
         public BrandService(
             ITgsRepository tgsRepository,
@@ -53,7 +53,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             _repository = tgsRepository;
             _credentialGenerator = credentialGenerator;
             _cacheManager = cacheManager;
-            _maintenanceRedisService = maintenanceRedisService ?? throw new ArgumentNullException(nameof(maintenanceRedisService));
+            _maintenanceRedisService = maintenanceRedisService ??
+                throw new ArgumentNullException(nameof(maintenanceRedisService));
         }
 
         async Task IBrandService.ChangeStatusAsync(Brand brand, UpdateBrandStatusRequest request)
@@ -68,7 +69,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 var licensee = _repository.Licensees.AsQueryable().Where(x => x.Id == brand.LicenseeId).First();
                 var reseller = _repository.Resellers.AsQueryable().Where(x => x.Id == licensee.ResellerId).First();
-                var isMaintenance = reseller.Status is Status.Active && licensee.Status is Status.Active && request.Status is Status.Active;
+                var isMaintenance = reseller.Status is Status.Active && licensee.Status is Status.Active &&
+                    request.Status is Status.Active;
                 if (isMaintenance)
                 {
                     await _maintenanceRedisService.CleartBrandMaintenanceAsync(brand.Id).ConfigureAwait(false);
@@ -223,10 +225,17 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             var brand = await _repository.Brands.AsQueryable().FirstOrDefaultAsync(x => x.Id == brandId);
 
+            var brandCurrencies = brand.Currencies.Select(bc => bc.CurrencyCode);
+
             var baseGames = await _repository.Games.AsQueryable()
                 .Where(x => x.AvailableToBrand)
                 .Where(x => brand.GameProviders.Select(g => g.GameProviderId).Contains(x.GameProviderId))
+                .Where(x => x.GameProvider.Currencies.Any(c => brandCurrencies.Contains(c.CurrencyCode)))
                 .ToArrayAsync();
+
+            baseGames = baseGames.Where(x
+                => x.AvailableCurrencies.IsNotNullOrEmpty() ||
+                x.AvailableCurrencies.Split(",").Any(c => brandCurrencies.Contains(c))).ToArray();
 
             var baseGameIds = baseGames.Select(x => x.Id).ToArray();
             var brandGameIds = brand.Games.Select(x => x.GameId).ToArray();
