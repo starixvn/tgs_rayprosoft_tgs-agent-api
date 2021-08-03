@@ -46,7 +46,8 @@ namespace Agent.UnitTests
                     null,
                     1,
                     Array.Empty<byte>(),
-                    Array.Empty<byte>()));
+                    Array.Empty<byte>(),
+                    0M));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
@@ -59,7 +60,7 @@ namespace Agent.UnitTests
                 BrandId = command.BrandId,
                 UserId = command.AgentId.ToString(),
                 UserName = "ThisIsAgentName",
-                UserType = UserType.Agent,
+                UserType = UserType.Agent
             }.ToExpectedObject();
 
             fakePaymentServiceClient
@@ -73,12 +74,12 @@ namespace Agent.UnitTests
                 });
 
             fakeWalletRepository.ExchangeAsync(
-                Arg.Any<Guid>(),
-                Arg.Any<Guid>(),
-                Arg.Any<Guid>(),
-                Arg.Any<TransactionTypes>(),
-                Arg.Any<decimal>(),
-                Arg.Any<string>())
+                    Arg.Any<Guid>(),
+                    Arg.Any<Guid>(),
+                    Arg.Any<Guid>(),
+                    Arg.Any<TransactionTypes>(),
+                    Arg.Any<decimal>(),
+                    Arg.Any<string>())
                 .Returns(ValueTask.FromResult(
                     (Guid.NewGuid(), -100M)));
 
@@ -124,7 +125,8 @@ namespace Agent.UnitTests
                     null,
                     1,
                     Array.Empty<byte>(),
-                    Array.Empty<byte>()));
+                    Array.Empty<byte>(),
+                    0M));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
