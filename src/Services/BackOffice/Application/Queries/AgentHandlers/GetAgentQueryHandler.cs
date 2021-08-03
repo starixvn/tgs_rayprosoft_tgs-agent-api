@@ -24,10 +24,10 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
         public override async Task<GetAgentResponse> Handle(GetAgentRequest request,
             CancellationToken cancellationToken)
         {
-            var agent = await _service.GetAgentAsync(x => x.Id == request.Id);
+            var agent = await _service.GetAgentAsync(x => x.Id == request.Id).ConfigureAwait(false);
 
             var dividend = await _agentDividendService.GetAgentDividends().Where(x => x.SentOn == null)
-                .SumAsync(x => x.AgentDividendAmount, cancellationToken);
+                .SumAsync(x => x.AgentDividendAmount, cancellationToken).ConfigureAwait(false);
 
             if (agent == null)
             {
