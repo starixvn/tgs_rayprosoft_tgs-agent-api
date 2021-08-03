@@ -18,9 +18,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 {
     public sealed class BigGamingGameHistory : BaseBetHistory
     {
-        private readonly IBigGamingServices _bigGamingServices;
-        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
-
+        private readonly IBigGamingService _service;
         private readonly IBigGamingApiClient _client;
         private readonly IPlayerOperations _playerOperations;
         private Dictionary<int, string> pokerMapper;
@@ -29,16 +27,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations,
             IBigGamingApiClient client,
-            IBigGamingServices bigGamingServices,
-            IPlayerOperations playerOperations,
-            IBrandGameProviderOperations brandGameProviderOperations
+            IBigGamingService service,
+            IPlayerOperations playerOperations
         ) : base(roundQueries, gameProviderOperations)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
-            _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _brandGameProviderOperations = brandGameProviderOperations ??
-                throw new ArgumentNullException(nameof(brandGameProviderOperations));
             InitoPoker();
         }
 
@@ -46,10 +41,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(round.PlayerCode);
-            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode)
+            var brandMerchant = await _service.GetBrandMerchantAsync(player.DefaultWalletCurrencyCode)
                 .ConfigureAwait(false);
-            var cultureCode =
-                await _brandGameProviderOperations.MapCultureAsync(round.GameProviderId, round.BrandId, language);
 
             var request = new BigGamingVideoRoundQueryRequest
             {
@@ -86,17 +79,17 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         private string GetGameHistory(BigGamingVideoRoundQueryItemResponse source) => source.GameType switch
         {
-            2  => source.Result,                                                                //轮盘
-            3  => GetSicboGameHistory(Convert.ToInt32(source.Result)),                          //骰宝
-            4  => GetDragontigerGameHistory(Convert.ToInt32(source.Result)),                    //龙虎
-            5  => source.Baccarat64,                                                            //红黑
-            6  => source.Result,                                                                //极速骰宝
-            8  => source.Result,                                                                //色碟
+            2 => source.Result,                                                                //轮盘
+            3 => GetSicboGameHistory(Convert.ToInt32(source.Result)),                          //骰宝
+            4 => GetDragontigerGameHistory(Convert.ToInt32(source.Result)),                    //龙虎
+            5 => source.Baccarat64,                                                            //红黑
+            6 => source.Result,                                                                //极速骰宝
+            8 => source.Result,                                                                //色碟
             11 => GetFullColorBaccaratGameHistory(Convert.FromBase64String(source.Baccarat64)), //多彩百家乐
             13 => GetBullBullGameHistory(Convert.FromBase64String(source.Baccarat64)),          //牛牛
             14 => GetWinThreeCardsGameHistory(Convert.FromBase64String(source.Baccarat64)),     //炸金花
             15 => source.Result,                                                                //赌场战争
-            _  => GetBaccaratGameHistory(Convert.FromBase64String(source.Baccarat64))           //百家樂相關
+            _ => GetBaccaratGameHistory(Convert.FromBase64String(source.Baccarat64))           //百家樂相關
         };
 
         private string GetSicboGameHistory(int value) => JsonSerializer.Serialize(
@@ -220,8 +213,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         private void InitoPoker()
         {
-            pokerMapper = new Dictionary<int, string>();
-            pokerMapper.Add(0, "00");
+            pokerMapper = new Dictionary<int, string>
+            {
+                { 0, "00" }
+            };
             var i = 0;
             for (var card = 0; card < 4; card++)
             {
@@ -245,11 +240,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
         private string GetNumber(int value) => value switch
         {
-            1  => "A",
+            1 => "A",
             11 => "J",
             12 => "Q",
             13 => "K",
-            _  => value.ToString()
+            _ => value.ToString()
         };
 
         private string GetFullColor(int value)

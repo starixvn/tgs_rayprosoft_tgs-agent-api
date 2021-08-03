@@ -27,19 +27,19 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly IHashProvider _hashProvider;
-        private readonly IBigGamingServices _bigGamingServices;
+        private readonly IBigGamingService _service;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         public AuthorizeBigGamingMiddleware(
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations,
             IHashProvider hashProvider,
-            IBigGamingServices bigGamingServices,
+            IBigGamingService service,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
-            _bigGamingServices = bigGamingServices ?? throw new ArgumentNullException(nameof(bigGamingServices));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
@@ -75,7 +75,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 _ => new(false, default, null, default)
             };
 
-            var gameProviderId = await _bigGamingServices.GetGameProviderIdAsync();
+            var gameProviderId = await _service.GetGameProviderIdAsync();
             context.Items.Add(ContextItems.GameProviderId, gameProviderId);
 
             if (checkingSign.Success && !string.IsNullOrEmpty(checkingSign.PlayerCode))
@@ -91,15 +91,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
         private async Task<(bool Success, Guid BrandId, string PlayerCode, PlatformType PlatformType)> CheckingSignBalanceAsync(BigGamingBalanceRequest request)
         {
-            var player = await _bigGamingServices.GetCachedPlayerAsync(request.LoginId);
+            var player = await _service.GetCachedPlayerAsync(request.LoginId);
             if (player == null)
             {
                 throw new PlayerNotFoundException($"{request.LoginId }");
             }
 
-            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+            var brandMerchant = await _service.GetBrandMerchantAsync(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            _bigGamingServices.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
+            _service.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(request.LoginId).ConfigureAwait(false);
 
@@ -108,15 +108,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
         private async Task<(bool Success, Guid BrandId, string PlayerCode, PlatformType PlatformType)> CheckingSignBetAsync(BigGamingBetRequest request)
         {
-            var player = await _bigGamingServices.GetCachedPlayerAsync(request.LoginId);
+            var player = await _service.GetCachedPlayerAsync(request.LoginId);
             if (player == null)
             {
                 throw new PlayerNotFoundException($"{request.LoginId }");
             }
 
-            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+            var brandMerchant = await _service.GetBrandMerchantAsync(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            _bigGamingServices.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
+            _service.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
 
             var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(request.LoginId).ConfigureAwait(false);
@@ -126,15 +126,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
 
         private async Task<(bool Success, Guid BrandId, string PlayerCode, PlatformType PlatformType)> CheckingSignSettleAsync(BigGamingSettleRequest request)
         {
-            var player = await _bigGamingServices.GetPlayerByCodeAsync(request.LoginId);
+            var player = await _service.GetPlayerByCodeAsync(request.LoginId);
             if (player == null)
             {
                 throw new PlayerNotFoundException($"{request.LoginId }");
             }
 
-            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+            var brandMerchant = await _service.GetBrandMerchantAsync(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            _bigGamingServices.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
+            _service.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{player.PlayerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(player.PlayerCode);
 
@@ -152,7 +152,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             //TGS->GP
             if (request.Amount > 0)
             {
-                var player = await _bigGamingServices.GetCachedPlayerAsync(request.LoginId);
+                var player = await _service.GetCachedPlayerAsync(request.LoginId);
                 if (player == null)
                 {
                     throw new PlayerNotFoundException($"{ request.LoginId }");
@@ -166,7 +166,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             }
             else
             {
-                var player = await _bigGamingServices.GetPlayerByCodeAsync(request.LoginId);
+                var player = await _service.GetPlayerByCodeAsync(request.LoginId);
                 if (player == null)
                 {
                     throw new PlayerNotFoundException($"{ request.LoginId}");
@@ -176,9 +176,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
                 defaultWalletCurrencyCode = player.DefaultWalletCurrencyCode;
             }
 
-            var brandMerchant = await _bigGamingServices.GetBrandMerchant(defaultWalletCurrencyCode).ConfigureAwait(false);
+            var brandMerchant = await _service.GetBrandMerchantAsync(defaultWalletCurrencyCode).ConfigureAwait(false);
 
-            _bigGamingServices.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{request.Sn}{playerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
+            _service.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{request.Sn}{playerCode}{request.Amount}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
             var loginRecord = await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode);
 
@@ -189,15 +189,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         {
             var loginId = request.OrderMap.Last().LoginId;
 
-            var player = await _bigGamingServices.GetPlayerByCodeAsync(loginId);
+            var player = await _service.GetPlayerByCodeAsync(loginId);
             if (player == null)
             {
                 throw new MissingTokenException(request.Sign);
             }
 
-            var brandMerchant = await _bigGamingServices.GetBrandMerchant(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
+            var brandMerchant = await _service.GetBrandMerchantAsync(player.DefaultWalletCurrencyCode).ConfigureAwait(false);
 
-            _bigGamingServices.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
+            _service.CheckingSign(request.Sign, _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5));
 
 
             return new(true, player.BrandId, player.PlayerCode, PlatformType.Desktop);

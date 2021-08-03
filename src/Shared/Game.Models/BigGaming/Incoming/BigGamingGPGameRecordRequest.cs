@@ -9,10 +9,11 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
     public record BigGamingGPGameRecordRequest
     {
+        [JsonPropertyName("currencyCode")]
         public string CurrencyCode { get; set; }
+        [JsonPropertyName("startTime")]
         public DateTimeOffset StartTime { get; init; }
+        [JsonPropertyName("endTime")]
         public DateTimeOffset EndTime { get; init; }
-        public int Page { get; set; }
-        public int Rows { get; set; }
     }
 }

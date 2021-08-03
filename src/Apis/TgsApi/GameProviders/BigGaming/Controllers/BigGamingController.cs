@@ -16,11 +16,9 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
-using TGS.Shared.Game.ApiClients.BigGaming;
 using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Enums;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
-using TGS.Shared.Game.Models.BigGaming.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
 {
@@ -37,25 +35,26 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IBigGamingModelActionMapper _map;
         private readonly IReadOnlyDictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>> _methodMapper;
-        private readonly IBigGamingServices _services;
+        private readonly IBigGamingService _service;
         private readonly ISettingOperations _settingOperations;
-        private readonly IBigGamingApiClient _client;
+        private readonly IBigGamingGPGameHistoryService _bigGamingGPGameHistoryService;
+
         public BigGamingController(
             IBigGamingModelActionMapper map,
             IGamePlayActions actions,
-            IBigGamingServices services,
-            IBigGamingApiClient client,
+            IBigGamingService services,
             IJsonSerializationProvider jsonSerializationProvider,
-            ISettingOperations settingOperations
+            ISettingOperations settingOperations,
+            IBigGamingGPGameHistoryService bigGamingGPGameHistoryService
         )
         {
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-            _services = services ?? throw new ArgumentNullException(nameof(services));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _service = services ?? throw new ArgumentNullException(nameof(services));
             _jsonSerializationProvider = jsonSerializationProvider ??
                 throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            _bigGamingGPGameHistoryService = bigGamingGPGameHistoryService ?? throw new ArgumentNullException(nameof(bigGamingGPGameHistoryService));
             _methodMapper = new Dictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>>
             {
                 {"open.operator.user.balance", GetBalanceAsync},
@@ -125,7 +124,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
+            var gameProviderConfigurationData = await _service
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
@@ -166,7 +165,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
+            var gameProviderConfigurationData = await _service
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
@@ -251,7 +250,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 orderStatusResultResponse.Add(new()
                 {
                     OrderId = order.OrderId,
-                    Status = (int)await _services
+                    Status = (int)await _service
                         .GetOrderStatusAsync(gameProviderId, order.LoginId, order.OrderId.ToString())
                         .ConfigureAwait(false)
                 });
@@ -280,7 +279,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
 
-            var transfer = await _services.TransferAsync(gameProviderId, playerCode, data.BizId.ToString(), data.Amount).ConfigureAwait(false);
+            var transfer = await _service.TransferAsync(gameProviderId, playerCode, data.BizId.ToString(), data.Amount).ConfigureAwait(false);
 
             return new()
             {
@@ -305,26 +304,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         }
 
         [HttpPost("gamerecordfishing")]
-        public async Task GameRecordFishingAsync(BigGamingGPGameRecordRequest source)
+        public async Task<BigGamingGPGameRecordResponse> GameRecordFishingAsync(BigGamingGPGameRecordRequest source)
         {
-            var brandMerchant = await _services.GetBrandMerchant(source.CurrencyCode).ConfigureAwait(false);
-            var request = new BigGamingGameRecordFishingRequest()
-            {
-                StartTime = source.StartTime.UtcDateTime.AddHours(-4),
-                EndTime = source.EndTime.UtcDateTime.AddHours(-4),
-                PageIndex = source.Page.ToString(),
-                PageSize = source.Rows
-            };
-            var response = await _client.GetGameRecordAsync(brandMerchant, request).ConfigureAwait(false);
-            if (response.Error != null)
-            {
-            }
-            else
-            {
-                var gameRecords = JsonSerializer.Deserialize<BigGamingResultGameRecordResponse<BigGamingGameRecordFishingResponse>>(JsonSerializer.Serialize(response.Result));
-
-            }
-
+            return await _bigGamingGPGameHistoryService.GameRecordFishingAsync(source).ConfigureAwait(false);
         }
     }
 }

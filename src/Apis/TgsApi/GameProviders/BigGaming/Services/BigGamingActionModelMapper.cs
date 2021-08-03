@@ -27,15 +27,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
     public class BigGamingActionModelMapper : IBigGamingModelActionMapper
     {
-        private const string GameProviderCode = Consts.GameProvider.BigGaming;
-        private readonly IBigGamingServices _services;
+        private readonly IBigGamingService _service;
         private readonly Dictionary<string, decimal> _bullBullOddsMapper;
 
         public BigGamingActionModelMapper(
-            IBigGamingServices services
+            IBigGamingService service
         )
         {
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _bullBullOddsMapper = new Dictionary<string, decimal>() {
                 {"0xD0000001",1 } //下注闲1平倍
                 ,{"0xD0000002",5 }//下注闲1翻倍
@@ -106,7 +105,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
             foreach (var order in request.Orders)
             {
-                var gameActionExternalIds = await _services
+                var gameActionExternalIds = await _service
                     .GetGameActionExternalIdAsync(data.GameProviderId, playerCode, $"{order.OrderId}_settle")
                     .ConfigureAwait(false);
 
@@ -159,7 +158,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private async Task<TransactionData> GetTransactionDataAsync(Guid gameProviderId, string playerCode,
             BigGamingSettleOrderRequest order, bool resettle = false)
         {
-            var gameActionExternal = await _services
+            var gameActionExternal = await _service
                 .GetGameActionExternalIdAsync(gameProviderId, playerCode, order.OrderId.ToString())
                 .ConfigureAwait(false);
 
@@ -223,7 +222,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 PlatformType = data.PlatformType,
                 GameProviderId = data.GameProviderId,
                 GameProviderConfigurationId = data.GameProviderConfigurationId,
-                GameProviderCode = GameProviderCode,
+                GameProviderCode = Consts.GameProvider.BigGaming,
                 HasCurrencyFromGameProvider = false,
                 AutoCloseRound = data.AutoCloseRound,
                 AllowCancelCancelTransaction = false,

@@ -18,9 +18,9 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
         [JsonPropertyName("gameType")]
         public int GameType { get; set; }
         [JsonPropertyName("issueId")]
-        public string IssueId { get; set; }
+        public string ExternalRoundId { get; set; }
         [JsonPropertyName("betId")]
-        public string BetId { get; set; }
+        public string ExternalId { get; set; }
         [JsonPropertyName("fireCount")]
         public int FireCount { get; set; }
         [JsonPropertyName("betAmount")]
