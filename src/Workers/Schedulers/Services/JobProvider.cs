@@ -4,6 +4,7 @@ using Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
+using TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming;
 using TGS.Workers.Schedulers.Jobs.GameProviders.KY;
 using TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET;
 using TGS.Workers.Schedulers.Jobs.GameProviders.VR;
@@ -54,6 +55,8 @@ namespace TGS.Workers.Schedulers.Services
                     typeof(KYGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("F239A243-86CB-3D47-4667-F49A2BF874B4"), Cron.Minutely(), null,
                     typeof(VRGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
+                new JobDescription(new("DBABFBE2-D7A1-9619-86E5-D5B23220EBF1"), Cron.Minutely(), null,
+                    typeof(BigGamingGameRecordFishingJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("321E2BEE-0028-4D82-8CA7-BB1F1B83C4E0"), Cron.Monthly(1, 0, 0), null,
                     typeof(PlatformCreditBalanceWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
             )

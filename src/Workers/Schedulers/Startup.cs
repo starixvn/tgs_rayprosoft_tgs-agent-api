@@ -15,6 +15,7 @@ using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
+using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -88,6 +89,7 @@ namespace TGS.Workers.Schedulers
                 .AddTgsLog()
                 .AddSystemJsonSerializer()
                 .AddRedis()
+                .AddSecurity()
                 .AddTransactions()
                 .AddApiClient()
                 .AddGameApiClients()
