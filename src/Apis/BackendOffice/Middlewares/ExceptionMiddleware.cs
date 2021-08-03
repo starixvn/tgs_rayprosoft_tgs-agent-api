@@ -65,7 +65,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 adminLogEvent.responseheaders = httpContext.Response.Headers.ToDetailString();
 
                 adminLogEvent.recordedon = DateTimeOffset.Now;
-                adminLogEvent.StackTrace = string.Empty;
+                adminLogEvent.stacktrace = string.Empty;
                 adminLogEvent.exception = string.Empty;
 
                 var (resMessage, ms) = await GetResponseMessageAsync(httpContext, next);
@@ -89,7 +89,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 _systemLogger.LogError(ex, "Error!");
 
                 adminLogEvent.exception = ex.Message.NoLongerThan(4000);
-                adminLogEvent.StackTrace = ex.StackTrace;
+                adminLogEvent.stacktrace = ex.StackTrace;
+                adminLogEvent.innerexception = ex.InnerException?.Message;
                 adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
 
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
@@ -97,7 +98,8 @@ namespace TGS.Apis.BackendOffice.Middlewares
 
                 var message = new ErrorDetails
                 {
-                    StatusCode = (int)HttpStatusCode.InternalServerError, Message = "Internal Server Error."
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Message = "Internal Server Error."
                 };
 
                 if (_env.IsDevelopment())
@@ -109,7 +111,13 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 await httpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(result));
             }
 
-            var defaultBypassRouting = new[] {"/health", "/metrics", "/favicon.ico", "/swagger"};
+            var defaultBypassRouting = new[]
+            {
+                "/health",
+                "/metrics",
+                "/favicon.ico",
+                "/swagger"
+            };
 
             if (adminLogEvent.path is null || !defaultBypassRouting.Any(x => adminLogEvent.path.Contains(x)))
             {

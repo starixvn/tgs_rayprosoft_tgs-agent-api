@@ -6,8 +6,11 @@ using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Clients.Report.Client;
+using TGS.Core.Models;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
+using TGS.Services.Operations.Validators;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.AgentApi.Controllers
@@ -26,29 +29,11 @@ namespace TGS.Apis.AgentApi.Controllers
             _client = client;
         }
 
-        /// <summary>
-        ///     Agent login
-        /// </summary>
-        [HttpPost]
-        [Route("login")]
-        [Consumes(MediaTypeNames.Application.Json)]
-        public Task<LoginResponse> LoginAsync(LoginRequest request) =>
-            _mediator.Send(request);
-
-        /// <summary>
-        ///     Get an agent information
-        /// </summary>
-        [HttpGet]
-        [Route("info")]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public Task<GetAgentResponse> GetPlayerAsync() =>
-            _mediator.Send(new GetAgentRequest());
-
         [HttpPost("create")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<CreateAgentResponse> CreateAgentAsync(
-            [FromServices] IGetService<GetCreateAgentQuery, CreateAgentInfo> getCreateAgentQueryService,
-            [FromBody] CreateAgentRequest request)
+                    [FromServices] IGetService<GetCreateAgentQuery, CreateAgentInfo> getCreateAgentQueryService,
+                    [FromBody] CreateAgentRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
@@ -56,10 +41,20 @@ namespace TGS.Apis.AgentApi.Controllers
             var query = new GetCreateAgentQuery()
             {
                 BrandId = brandId,
+                CardGameRebatePercentage = request.CardGameRebatePercentage,
+                DividendPercentage = request.DividendPercentage,
+                LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
+                LotteryRebatePercentage = request.LotteryRebatePercentage,
                 ParentAgentId = agentTokenData.AgentId,
-                UserName = request.UserName,
                 Password = request.Password,
-                Remarks = request.Remarks
+                RealName = request.RealName,
+                Email = request.Email,
+                Phone = request.Phone,
+                Remarks = request.Remarks,
+                SlotRebatePercentage = request.SlotRebatePercentage,
+                SportsRebatePercentage = request.SportsRebatePercentage,
+                UserName = request.UserName,
+                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage
             };
 
             var info = await getCreateAgentQueryService
@@ -73,5 +68,54 @@ namespace TGS.Apis.AgentApi.Controllers
                 Message = info.Message
             };
         }
+
+        /// <summary>
+        /// Get an agent information
+        /// </summary>
+        [HttpGet("info")]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<GetAgentResponse> GetAgentInfoAsync(
+            [FromServices] IStatusValidator statusValidator,
+            [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+            await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
+
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+            var agentId = agentTokenData.AgentId;
+
+            var agentInfo = await getAgentService.GetAsync(new GetAgentInfoQuery(agentId));
+
+            if (agentInfo == null)
+            {
+                throw new PlayerNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
+            }
+
+            return new GetAgentResponse
+            {
+                Data = new AgentData
+                {
+                    Username = agentInfo.UserName,
+                    RealName = agentInfo.RealName,
+                    Email = agentInfo.Email,
+                    Phone = agentInfo.Phone,
+                    QQ = agentInfo.QQ,
+                    Wechat = agentInfo.Wechat,
+                    InvitationCode = agentInfo.InvitationCode,
+                    BrandUrl = agentInfo.BrandUrl,
+                    IsSetPayPassword = agentInfo.PayPassword.Length > 0,
+                    AgentLevel = agentInfo.AgentLevel
+                }
+            };
+        }
+
+        /// <summary>
+        ///     Agent login
+        /// </summary>
+        [HttpPost]
+        [Route("login")]
+        [Consumes(MediaTypeNames.Application.Json)]
+        public Task<LoginResponse> LoginAsync(LoginRequest request) =>
+            _mediator.Send(request);
     }
 }

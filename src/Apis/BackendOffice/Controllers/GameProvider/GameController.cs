@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DocumentFormat.OpenXml;
@@ -39,7 +41,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpPost]
         [Description("Create games")]
-        public Task<CreateGamesResponse> CreateGamesAsync(CreateGamesRequest request) =>
+        public Task<MessageResponse> CreateGamesAsync(CreateGamesRequest request) =>
             _mediator.Send(request);
 
         [HttpPut("{id}")]
@@ -52,8 +54,13 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpPost("upload")]
         [Description("Upload games")]
-        public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request) =>
-            _mediator.Send(request);
+        public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request)
+            => _mediator.Send(request);
+
+        [HttpGet("export/{gameProviderId}")]
+        [Description("Export games")]
+        public Task<HttpResponseMessage> ExportGamesAsync(Guid gameProviderId)
+            => _mediator.Send(new ExportGamesRequest(gameProviderId));
 
         [HttpGet("localization/export")]
         [Description("Export game localization for example")]
@@ -62,7 +69,7 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
             [FromQuery] ExportGameLocalizationRequest request
         )
         {
-            var query = new GetGameLocalizationQuery {GameProviderCode = request.GameProviderCode};
+            var query = new GetGameLocalizationQuery(request.GameProviderCode);
             var info = await getLocalizationQueryService.GetAsync(query).ConfigureAwait(false);
 
             var memoryStream = new MemoryStream();
@@ -153,7 +160,8 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
             }
 
             memoryStream.Seek(0, SeekOrigin.Begin);
-            return new FileStreamResult(memoryStream,
+            return new FileStreamResult(
+                memoryStream,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
 

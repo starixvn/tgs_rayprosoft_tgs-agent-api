@@ -33,9 +33,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET.Services
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
-            ILocalizationOperations localizationOperations,
             IJsonSerializationProvider json,
-            ISBOApiClient client) : base(roundQueries, gameProviderOperations, localizationOperations)
+            ISBOApiClient client) : base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;

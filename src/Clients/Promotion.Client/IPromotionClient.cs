@@ -23,5 +23,7 @@ namespace TGS.Clients.Promotion.Client
         Task TagPlayerDepositAsync(string playerCode);
 
         Task<MessageResponse> UpdatePromotionAsync(UpdatePromotionRequest request);
+
+        Task<PagedResponse<JoinedPromotionModel>> GetJoinedPromotionsAsync(GetJoinedPromotionsRequest request);
     }
 }

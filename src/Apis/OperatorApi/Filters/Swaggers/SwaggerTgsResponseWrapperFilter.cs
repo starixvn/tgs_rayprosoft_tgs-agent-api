@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Models;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.OperatorApi.Filters.Swaggers
 {
@@ -10,27 +10,20 @@ namespace TGS.Apis.OperatorApi.Filters.Swaggers
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var responseAdjustments = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
-                .Union(context.MethodInfo.GetCustomAttributes(true))
-                .OfType<TgsResponseWrapperAttribute>();
-
-            if (responseAdjustments.Any())
+            foreach (var response in operation.Responses)
             {
-                foreach (var response in operation.Responses)
+                var resType = context.ApiDescription.SupportedResponseTypes
+                    .Where(r => r.StatusCode.ToString() == response.Key)
+                    .FirstOrDefault();
+
+                foreach (var content in response.Value.Content)
                 {
-                    var resType = context.ApiDescription.SupportedResponseTypes
-                        .Where(r => r.StatusCode.ToString() == response.Key)
-                        .FirstOrDefault();
-
-                    foreach (var content in response.Value.Content)
+                    if (resType != null && !resType.Type.IsSubclassOf(typeof(TgsResponse)))
                     {
-                        if (resType != null)
-                        {
-                            var type = typeof(SuccessResponse<>).MakeGenericType(resType.Type);
-                            var schema = context.SchemaGenerator.GenerateSchema(type, context.SchemaRepository);
+                        var type = typeof(SuccessResponse<>).MakeGenericType(resType.Type);
+                        var schema = context.SchemaGenerator.GenerateSchema(type, context.SchemaRepository);
 
-                            content.Value.Schema = schema;
-                        }
+                        content.Value.Schema = schema;
                     }
                 }
             }

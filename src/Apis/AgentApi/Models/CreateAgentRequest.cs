@@ -6,6 +6,11 @@
 
         public string Password { get; init; }
 
+        public string RealName { get; set; }
+
+        public string Email { get; set; }
+        public string Phone { get; set; }
+
         public decimal DividendPercentage { get; init; }
 
         public decimal LiveDealerRebatePercentage { get; init; }

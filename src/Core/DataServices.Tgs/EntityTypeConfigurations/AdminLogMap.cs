@@ -59,6 +59,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.StackTrace)
                 .IsUnicode();
 
+            builder.Property(c => c.InnerException)
+                .IsUnicode();
+
             builder.Property(c => c.ResponseCode)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();

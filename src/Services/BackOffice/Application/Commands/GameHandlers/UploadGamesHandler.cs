@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Application.Resources;
@@ -38,8 +39,17 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
                 .ToArray();
 
             return existedGames.Length > 0
-                ? new() {Valid = false, Message = GameProvider.GamesExisted, Games = existedGames}
-                : new UploadGamesResponse {Valid = true, Games = uploadedResult.ToArray()};
+                ? new()
+                {
+                    Valid = false,
+                    Message = string.Format(GameProvider.GamesExisted,
+                        existedGames.Select(x => x.Code).JoinAsStringByComma())
+                }
+                : new UploadGamesResponse
+                {
+                    Valid = true,
+                    Games = uploadedResult.ToArray()
+                };
         }
     }
 }

@@ -21,15 +21,15 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 {
     public sealed class AsiaGamingGameHistory : BaseBetHistory
     {
-        private readonly ISettingOperations _settingOperations;
         private readonly IJsonSerializationProvider _json;
-        
+        private readonly ISettingOperations _settingOperations;
+
         public AsiaGamingGameHistory(
             IRoundQueries roundQueries,
             ISettingOperations settingOperations,
             IGameProviderOperations gameProviderOperations,
-            ILocalizationOperations localizationOperations,
-            IJsonSerializationProvider json) : base(roundQueries, gameProviderOperations, localizationOperations)
+            IJsonSerializationProvider json)
+            : base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
             _json = json;
@@ -45,10 +45,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
             var gameType = cachedGame.ExternalId.SplitByUnderscore()[2];
             var gameHistoryType =
                 configuration.GameHistoryTypes?.FirstOrDefault(h => h.GameTypes.IgnoreCaseContains(gameType));
-            var history = gameHistoryType == null ? 
-                round.RoundDetail.AdditionalData : 
-                GetGameHistory(gameHistoryType, round.RoundDetail.AdditionalData);
-            
+            var history = gameHistoryType == null
+                ? round.RoundDetail.AdditionalData
+                : GetGameHistory(gameHistoryType, round.RoundDetail.AdditionalData);
+
             return new RoundResult
             {
                 BetAmount = round.BetAmount ?? 0,
@@ -65,7 +65,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
         {
             var gameHistory = _json.DeserializeFromString<GameHistory>(roundDetail);
             var datas = gameHistory.RoundResult.SplitByColon();
-            
+
             var historyData = new Dictionary<string, string>();
             foreach (var data in datas)
             {
@@ -88,7 +88,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
 
             return details.JoinAsStringBySemicolon();
         }
-        
+
         private string GetCard(string cardCode)
         {
             if (cardCode.Length < 2)
@@ -102,7 +102,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming.Services
                 "C" => "♣",
                 "D" => "♦",
                 "H" => "♥",
-                _ => "♠",
+                _   => "♠"
             };
 
             return cardCode.Replace(agCode, code);

@@ -52,15 +52,26 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VND1000Currency("VND2"),
-                new IDR1000Currency("IDR2"), new JPYCurrency("JPY"), new KRWCurrency("KRW"), new MYRCurrency("MYR"),
-                new THBCurrency("THB"), new GBPCurrency("GBP")
+                new CNYCurrency("CNY"),
+                new USDCurrency("USD"),
+                new VND1000Currency("VND2"),
+                new IDR1000Currency("IDR2"),
+                new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"),
+                new THBCurrency("THB"),
+                new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("3"), new CNLanguage("1"), new IDLanguage("11"), new JPLanguage("4"),
-                new KRLanguage("5"), new THLanguage("6"), new VNLanguage("8")
+                new USLanguage("3"),
+                new CNLanguage("1"),
+                new IDLanguage("11"),
+                new JPLanguage("4"),
+                new KRLanguage("5"),
+                new THLanguage("6"),
+                new VNLanguage("8")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -78,7 +89,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new("http://game-ag") : new("http://localhost:62330"),
                     AgentCode = "JH2_AGIN",
                     ProductionId = "JH2",
-                    LockGameTypes = new[] {"ROU"},
+                    LockGameTypes = new[]
+                    {
+                        "ROU"
+                    },
                     DesKey = "jh2hnM6K",
                     Md5Key = "jh2bKFbpLZuW",
                     GameHistoryTypes =
@@ -86,17 +100,36 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             new AsiaGamingGameHistoryType
                             {
-                                GameTypes = new[] {"BAC", "LBAC", "CBAC"},
-                                Descriptions = new Dictionary<string, string> {{"P", "Player"}, {"B", "Banker"}}
+                                GameTypes = new[]
+                                {
+                                    "BAC",
+                                    "LBAC",
+                                    "CBAC"
+                                },
+                                Descriptions = new Dictionary<string, string>
+                                {
+                                    {"P", "Player"},
+                                    {"B", "Banker"}
+                                }
                             },
                             new AsiaGamingGameHistoryType
                             {
-                                GameTypes = new[] {"DT"},
-                                Descriptions = new Dictionary<string, string> {{"D", "Dragon"}, {"T", "Tiger"}}
+                                GameTypes = new[]
+                                {
+                                    "DT"
+                                },
+                                Descriptions = new Dictionary<string, string>
+                                {
+                                    {"D", "Dragon"},
+                                    {"T", "Tiger"}
+                                }
                             },
                             new AsiaGamingGameHistoryType
                             {
-                                GameTypes = new[] {"NN"},
+                                GameTypes = new[]
+                                {
+                                    "NN"
+                                },
                                 Descriptions = new Dictionary<string, string>
                                 {
                                     {"F", "First"},
@@ -108,23 +141,35 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             },
                             new AsiaGamingGameHistoryType
                             {
-                                GameTypes = new[] {"ZJH"},
+                                GameTypes = new[]
+                                {
+                                    "ZJH"
+                                },
                                 Descriptions = new Dictionary<string, string>
                                 {
-                                    {"D", "Dragon"}, {"P", "Phoenix"}
+                                    {"D", "Dragon"},
+                                    {"P", "Phoenix"}
                                 }
                             },
                             new AsiaGamingGameHistoryType
                             {
-                                GameTypes = new[] {"BF"},
+                                GameTypes = new[]
+                                {
+                                    "BF"
+                                },
                                 Descriptions = new Dictionary<string, string>
                                 {
-                                    {"B", "BlackBull"}, {"R", "RedBull"}
+                                    {"B", "BlackBull"},
+                                    {"R", "RedBull"}
                                 }
                             },
                             new AsiaGamingGameHistoryType
                             {
-                                GameTypes = new[] {"BJ", "SG"},
+                                GameTypes = new[]
+                                {
+                                    "BJ",
+                                    "SG"
+                                },
                                 Descriptions = new Dictionary<string, string>
                                 {
                                     {"B", "Banker"},
@@ -146,52 +191,95 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             Games = new[]
                             {
-                                "AGIN_AGQ_BAC", "AGIN_AGQ_LBAC", "AGIN_AGQ_CBAC", "AGIN_DSP_BAC",
-                                "AGIN_DSP_LBAC", "AGIN_DSP_CBAC", "AGIN_EMA_BAC", "AGIN_EMA_LBAC",
-                                "AGIN_EMA_CBAC", "AGIN_LED_BAC", "AGIN_LED_LBAC", "AGIN_LED_CBAC",
-                                "AGIN_VIP_BAC", "AGIN_VIP_LBAC", "AGIN_VIP_CBAC", "AGIN_AGNW_BAC",
-                                "AGIN_AGNW_LBAC", "AGIN_AGNW_CBAC"
+                                "AGIN_AGQ_BAC",
+                                "AGIN_AGQ_LBAC",
+                                "AGIN_AGQ_CBAC",
+                                "AGIN_DSP_BAC",
+                                "AGIN_DSP_LBAC",
+                                "AGIN_DSP_CBAC",
+                                "AGIN_EMA_BAC",
+                                "AGIN_EMA_LBAC",
+                                "AGIN_EMA_CBAC",
+                                "AGIN_LED_BAC",
+                                "AGIN_LED_LBAC",
+                                "AGIN_LED_CBAC",
+                                "AGIN_VIP_BAC",
+                                "AGIN_VIP_LBAC",
+                                "AGIN_VIP_CBAC",
+                                "AGIN_AGNW_BAC",
+                                "AGIN_AGNW_LBAC",
+                                "AGIN_AGNW_CBAC"
                             },
                             Patterns = new OppositeBetSetting.Pattern[]
                             {
-                                new("1", 1), new("2", 1), new("6", 2), new("7", 2)
+                                new("1", 1),
+                                new("2", 1),
+                                new("6", 2),
+                                new("7", 2)
                             }
                         },
                         new()
                         {
                             Games = new[]
                             {
-                                "AGIN_AGQ_DT", "AGIN_DSP_DT", "AGIN_EMA_DT", "AGIN_LED_DT", "AGIN_VIP_DT",
+                                "AGIN_AGQ_DT",
+                                "AGIN_DSP_DT",
+                                "AGIN_EMA_DT",
+                                "AGIN_LED_DT",
+                                "AGIN_VIP_DT",
                                 "AGIN_AGNW_DT"
                             },
                             Patterns = new OppositeBetSetting.Pattern[]
                             {
-                                new("21", 1), new("22", 1), new("130", 2), new("132", 2), new("131", 3),
-                                new("133", 3), new("134", 4), new("136", 4), new("135", 5), new("137", 5)
+                                new("21", 1),
+                                new("22", 1),
+                                new("130", 2),
+                                new("132", 2),
+                                new("131", 3),
+                                new("133", 3),
+                                new("134", 4),
+                                new("136", 4),
+                                new("135", 5),
+                                new("137", 5)
                             }
                         },
                         new()
                         {
                             Games = new[]
                             {
-                                "AGIN_AGQ_SHB", "AGIN_DSP_SHB", "AGIN_EMA_SHB", "AGIN_LED_SHB",
-                                "AGIN_VIP_SHB", "AGIN_AGNW_SHB"
+                                "AGIN_AGQ_SHB",
+                                "AGIN_DSP_SHB",
+                                "AGIN_EMA_SHB",
+                                "AGIN_LED_SHB",
+                                "AGIN_VIP_SHB",
+                                "AGIN_AGNW_SHB"
                             },
                             Patterns = new OppositeBetSetting.Pattern[]
                             {
-                                new("41", 1), new("42", 1), new("43", 2), new("44", 2)
+                                new("41", 1),
+                                new("42", 1),
+                                new("43", 2),
+                                new("44", 2)
                             }
                         },
                         new()
                         {
                             Games = new[]
                             {
-                                "AGIN_AGQ_ROU", "AGIN_DSP_ROU", "AGIN_EMA_ROU", "AGIN_LED_ROU",
-                                "AGIN_VIP_ROU", "AGIN_AGNW_ROU"
+                                "AGIN_AGQ_ROU",
+                                "AGIN_DSP_ROU",
+                                "AGIN_EMA_ROU",
+                                "AGIN_LED_ROU",
+                                "AGIN_VIP_ROU",
+                                "AGIN_AGNW_ROU"
                             },
                             Patterns = new OppositeBetSetting.Pattern[]
                             {
-                                new("114", 1), new("115", 1), new("116", 2), new("117", 2), new("118", 2),
+                                new("114", 1),
+                                new("115", 1),
+                                new("116", 2),
+                                new("117", 2),
+                                new("118", 2),
                                 new("119", 2)
                             }
                         },
@@ -199,39 +287,71 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         {
                             Games = new[]
                             {
-                                "AGIN_DSP_ZJH", "AGIN_LED_ZJH", "AGIN_VIP_ZJH", "AGIN_AGQ_ZJH",
-                                "AGIN_AGNW_ZJH", "AGIN_EMA_ZJH"
+                                "AGIN_DSP_ZJH",
+                                "AGIN_LED_ZJH",
+                                "AGIN_VIP_ZJH",
+                                "AGIN_AGQ_ZJH",
+                                "AGIN_AGNW_ZJH",
+                                "AGIN_EMA_ZJH"
                             },
-                            Patterns = new OppositeBetSetting.Pattern[] {new("260", 1), new("261", 1)}
+                            Patterns = new OppositeBetSetting.Pattern[]
+                            {
+                                new("260", 1),
+                                new("261", 1)
+                            }
                         },
                         new()
                         {
                             Games = new[]
                             {
-                                "AGIN_DSP_ZJH", "AGIN_LED_ZJH", "AGIN_VIP_ZJH", "AGIN_AGQ_ZJH",
-                                "AGIN_AGNW_ZJH", "AGIN_EMA_ZJH"
+                                "AGIN_DSP_ZJH",
+                                "AGIN_LED_ZJH",
+                                "AGIN_VIP_ZJH",
+                                "AGIN_AGQ_ZJH",
+                                "AGIN_AGNW_ZJH",
+                                "AGIN_EMA_ZJH"
                             },
-                            Patterns = new OppositeBetSetting.Pattern[] {new("260", 1), new("261", 1)}
+                            Patterns = new OppositeBetSetting.Pattern[]
+                            {
+                                new("260", 1),
+                                new("261", 1)
+                            }
                         },
                         new()
                         {
                             Games = new[]
                             {
-                                "AGIN_DSP_BF", "AGIN_AGQ_BF", "AGIN_LED_BF", "AGIN_VIP_BF", "AGIN_EMA_BF",
+                                "AGIN_DSP_BF",
+                                "AGIN_AGQ_BF",
+                                "AGIN_LED_BF",
+                                "AGIN_VIP_BF",
+                                "AGIN_EMA_BF",
                                 "AGIN_AGNW_BF"
                             },
-                            Patterns = new OppositeBetSetting.Pattern[] {new("270", 1), new("271", 1)}
+                            Patterns = new OppositeBetSetting.Pattern[]
+                            {
+                                new("270", 1),
+                                new("271", 1)
+                            }
                         },
                         new()
                         {
                             Games = new[]
                             {
-                                "AGIN_DSP_SG", "AGIN_AGQ_SG", "AGIN_LED_SG", "AGIN_VIP_SG", "AGIN_EMA_SG",
+                                "AGIN_DSP_SG",
+                                "AGIN_AGQ_SG",
+                                "AGIN_LED_SG",
+                                "AGIN_VIP_SG",
+                                "AGIN_EMA_SG",
                                 "AGIN_AGNW_SG"
                             },
                             Patterns = new OppositeBetSetting.Pattern[]
                             {
-                                new("320", 1), new("321", 1), new("323", 2), new("324", 2), new("326", 3),
+                                new("320", 1),
+                                new("321", 1),
+                                new("323", 2),
+                                new("324", 2),
+                                new("326", 3),
                                 new("327", 3)
                             }
                         }
@@ -241,6 +361,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Dictionary<string, string> IGameProvider.SportTypes => new();
 
             Dictionary<string, string> IGameProvider.MarketTypes => new();
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.AsiaGaming, "AsiaGaming")
+            };
         }
 
         internal record AsiaGamingGameProviderConfiguration : IGameProviderConfiguration

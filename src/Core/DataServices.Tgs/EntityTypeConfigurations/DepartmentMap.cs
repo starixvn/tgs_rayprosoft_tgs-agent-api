@@ -39,7 +39,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.UpdatedOn)
                 .IsRequired();
 
-            builder.HasOne(c => c.Brands)
+            builder.HasOne(c => c.Brand)
                 .WithMany(c => c.Departments)
                 .HasForeignKey(c => c.BrandId)
                 .HasConstraintName("fk_departments_brands_brand_id")
@@ -48,7 +48,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.HasIndex(c => c.BrandId)
                 .HasDatabaseName("ix_departments_brand_id");
 
-            builder.HasOne(c => c.Licensees)
+            builder.HasOne(c => c.Licensee)
                 .WithMany(c => c.Departments)
                 .HasForeignKey(c => c.LicenseeId)
                 .HasConstraintName("fk_departments_licensees_licensee_id")

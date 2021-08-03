@@ -139,7 +139,7 @@
     <value>语系必填</value>
   </data>
   <data name="CodeExisted" xml:space="preserve">
-    <value>代码已存在</value>
+    <value>代码已存在：{0}</value>
   </data>
   <data name="NameExisted" xml:space="preserve">
     <value>名称已存在</value>
@@ -148,9 +148,15 @@
     <value>包网商使用的游戏</value>
   </data>
   <data name="DuplicateGames" xml:space="preserve">
-    <value>游戏重复，请检查游戏列表。</value>
+    <value>游戏重复，请检查游戏列表：{0}</value>
   </data>
   <data name="ExternalIdExisted" xml:space="preserve">
-    <value>外部的代码已存在</value>
+    <value>外部的代码已存在：{0}</value>
+  </data>
+  <data name="GamesExisted" xml:space="preserve">
+    <value>游戏已经已存在：{0}</value>
+  </data>
+  <data name="InvalidSubGameProviderCode" xml:space="preserve">
+    <value>子游戏提供商代码无效：{0}</value>
   </data>
 </root>

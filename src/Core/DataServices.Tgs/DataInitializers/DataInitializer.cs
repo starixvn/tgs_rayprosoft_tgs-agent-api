@@ -183,7 +183,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new PromotionParticipant
                                 {
                                     PlayerCode = p.PlayerCode,
-                                    PromotionId = promotionId
+                                    PromotionId = promotionId,
+                                    CreatedOn = now
                                 })
                             .ToHashSet(),
                     CreatedOn = DateTimeOffset.Now,
@@ -666,6 +667,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     IsDefault = idx == 0
                 }).ToHashSet();
 
+            gp.SubGameProviders = gameProvider.SubGameProviders.Select(sgp => new Models.SubGameProvider
+            {
+                Code = sgp.Code,
+                Name = sgp.Name,
+                CreatedOn = Now,
+                UpdatedOn = Now,
+                CreatedByUsername = AdminUsername,
+                UpdatedByUsername = AdminUsername
+            }).ToHashSet();
+
             gp.Games = gameProvider.Games.Select((g, idx) => new Models.Game
             {
                 Id = int.Parse($"{gp.UniqueId}{idx + 1:00000}"),
@@ -688,7 +699,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 UpdatedOn = Now,
                 CreatedByUsername = AdminUsername,
                 UpdatedByUsername = AdminUsername,
-                AvailableCurrencies = g.AvailableCurrencies
+                AvailableCurrencies = g.AvailableCurrencies,
+                SubGameProviderCode = g.SubGameProviderCode
             }).ToHashSet();
 
             gp.BetLimits = gameProvider.BetLimits.Select(b => new Models.GameProviderBetLimit

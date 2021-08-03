@@ -27,10 +27,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             IPlayerOperations playerOperations,
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
-            ILocalizationOperations localizationOperations,
             ISettingOperations settingOperations,
             IHashProvider hashProvider) :
-            base(roundQueries, gameProviderOperations, localizationOperations)
+            base(roundQueries, gameProviderOperations)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
@@ -67,7 +66,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 Winloss = (round.WinLoss ?? 0).Negate(),
                 Turnover = round.Turnover ?? 0,
                 GameResult = round.ClientStatus.ToString(),
-                Data = new BaseData[] {new UrlData {Url = url}}
+                Data = new BaseData[]
+                {
+                    new UrlData {Url = url}
+                }
             };
         }
     }

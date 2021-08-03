@@ -4,15 +4,14 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Agent.Properties;
-using TGS.Services.Agent.ValidateCode;
-using TGS.Services.Agent;
+using TGS.Services.ValidateCode.Clients;
 
 namespace TGS.Services.Agent.ValidateCode
 {
     internal class RestValidateCodeOperator : IValidateCodeOperator
     {
-        private readonly IValidateCodeServiceClient _validateCodeServiceClient;
         private readonly IEmailClient _emailClient;
+        private readonly IValidateCodeServiceClient _validateCodeServiceClient;
 
         public RestValidateCodeOperator(
             IValidateCodeServiceClient validateCodeServiceClient,
@@ -20,12 +19,6 @@ namespace TGS.Services.Agent.ValidateCode
         {
             _validateCodeServiceClient = validateCodeServiceClient ?? throw new ArgumentNullException(nameof(validateCodeServiceClient));
             _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
-        }
-
-        public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
-        {
-            return _validateCodeServiceClient
-                .SaveValidateCodeDataAsync(validateCode, token, SerializeValidateCodeData(data));
         }
 
         public async ValueTask<TData?> GetValidateCodeDataAsync<TData>(string validateCode, string token)
@@ -40,9 +33,11 @@ namespace TGS.Services.Agent.ValidateCode
             return DeserializeValidateCodeData<TData>(result);
         }
 
-        private TData? DeserializeValidateCodeData<TData>(string json) => JsonSerializer.Deserialize<TData>(json);
-
-        private string SerializeValidateCodeData<TData>(TData data) => JsonSerializer.Serialize(data);
+        public ValueTask<bool> SaveValidateDataAsync<TData>(string validateCode, string token, TData data)
+        {
+            return _validateCodeServiceClient
+                .SaveValidateCodeDataAsync(validateCode, token, SerializeValidateCodeData(data));
+        }
 
         public async ValueTask SendEmailAsync(CultureInfo cultureInfo, string email, string validateCode)
         {
@@ -58,5 +53,9 @@ namespace TGS.Services.Agent.ValidateCode
 
             await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
         }
+
+        private TData? DeserializeValidateCodeData<TData>(string json) => JsonSerializer.Deserialize<TData>(json);
+
+        private string SerializeValidateCodeData<TData>(TData data) => JsonSerializer.Serialize(data);
     }
 }

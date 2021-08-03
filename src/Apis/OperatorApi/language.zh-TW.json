@@ -1,0 +1,35 @@
+{
+  "InvalidCredentials": "無效憑證: 驗證平台令牌失敗，該令牌可能已過期或無法被加密。",
+  "InvalidOrExpiredPlayerToken": "玩家令牌無效或已過期: 驗證玩家令牌失敗，可能已過期或已遺失。",
+  "InvalidCaptcha": "無效驗證碼: 驗證碼驗證失敗。",
+  "ClientIdNotFound": "客戶端ID不存在: 找不到該客戶端ID。",
+
+  "PlayerNotFound": "玩家不存在: 系統中找不到該玩家。",
+  "UserBlocked": "用戶已屏蔽: 該玩家已遭禁用。",
+  "CountryRestricted": "被限制的國家: 該玩家的IP在受到限制的國家中，無法瀏覽該網站。",
+  "CurrencyMismatch": "貨幣不匹配: 輸入的幣別與該玩家使用的貨幣不匹配。",
+  "InsufficientFunds": "餘額不足: 該玩家的餘額不足。",
+  "InvalidInvitationCode": "無效邀請碼: 該邀請碼驗證失敗。",
+
+  "InvalidGameAction": "無效遊戲動作: 遊戲動作程序中發生錯誤。",
+  "TransactionIdNotFound": "交易ID不存在: 找不到該交易或參考交易 (包含結算和取消)。",
+  "DuplicateTransaction": "重複交易: 該交易程序已重複。",
+  "InvalidAmount": "無效金額: 輸入的金額是無效的 (請輸入數字, 正數等等)。",
+
+  "InvalidArguments": "無效參數: 輸入的參數是無效的。",
+  "IncorrectFormat": "格式錯誤: 請按照格式要求輸入內容。",
+  "UnderMaintenance": "維護中: 該總公司/公司/平台/遊戲商/遊戲正在維護中。",
+  "InvalidStatus": "無效狀態: 該平台/遊戲商/遊戲/遊戲商配置的狀態為無效的。",
+  "LoginFail": "帳號或密碼錯誤。",
+
+  "SystemError": "系統錯誤: 系統錯誤無法被標示。",
+  "OperationNotAllowed": "不允許操作: 該api 功能已被某些原因限制住。",
+  "ProviderApiError": "遊戲商api錯誤: 遊戲商api返回錯誤訊息。",
+
+  "ValidateCodeNotVerify": "無效驗證碼: 驗證碼驗證失敗。",
+  "EmailNotVerify": "未驗證的電子郵件: 電子郵件未驗證。",
+  "InsufficientBucket": "水桶未滿: 尚未達到該水桶標準。",
+  "PromotionCannotJoin": "活動無法參加: 不能參加該活動。",
+  "GameBalanceFundInFailed": "遊戲餘額轉入失敗: 餘額轉入該遊戲失敗。",
+  "GameBalanceFundOutFailed": "遊戲餘額轉出失敗: 餘額轉出該遊戲失敗。"
+}

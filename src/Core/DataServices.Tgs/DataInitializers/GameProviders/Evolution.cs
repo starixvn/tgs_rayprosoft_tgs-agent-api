@@ -29,7 +29,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with { EndpointPath = string.Empty };
+                        return (Game)g with {EndpointPath = string.Empty};
                     })
                     .ToArray();
 
@@ -49,15 +49,29 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VNDCurrency("VND"), new VND1000Currency("VN2"),
-                new IDRCurrency("IDR"), new IDR1000Currency("ID2"),new JPYCurrency("JPY"), new KRWCurrency("KRW"),
-                new MYRCurrency("MYR"), new THBCurrency("THB"), new EURCurrency("EUR"), new HKDCurrency("HKD")
+                new CNYCurrency("CNY"),
+                new USDCurrency("USD"),
+                new VNDCurrency("VND"),
+                new VND1000Currency("VN2"),
+                new IDRCurrency("IDR"),
+                new IDR1000Currency("ID2"),
+                new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"),
+                new THBCurrency("THB"),
+                new EURCurrency("EUR"),
+                new HKDCurrency("HKD")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("cn"), new THLanguage("th"), new KRLanguage("ko"),
-                new IDLanguage("id"), new VNLanguage("vi"), new TWLanguage("b5")
+                new USLanguage("en"),
+                new CNLanguage("cn"),
+                new THLanguage("th"),
+                new KRLanguage("ko"),
+                new IDLanguage("id"),
+                new VNLanguage("vi"),
+                new TWLanguage("b5")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -67,7 +81,6 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             bool IGameProvider.TransferWallet => false;
 
             ushort IGameProvider.UniqueId => 14;
-
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
@@ -88,6 +101,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Dictionary<string, string> IGameProvider.SportTypes => new();
 
             Dictionary<string, string> IGameProvider.MarketTypes => new();
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.Evolution, "Evolution"),
+                new("NT", "Netent"),
+                new("RT", "Red Tiger")
+            };
         }
 
         internal record EvolutionGameProviderConfiguration : IGameProviderConfiguration

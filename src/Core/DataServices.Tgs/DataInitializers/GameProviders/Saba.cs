@@ -52,15 +52,27 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("13"), new USDCurrency("3"), new VND1000Currency("51"), new IDR1000Currency("15"),
-                new JPYCurrency("32"), new KRWCurrency("45"), new MYRCurrency("2"), new THBCurrency("4"),
+                new CNYCurrency("13"),
+                new USDCurrency("3"),
+                new VND1000Currency("51"),
+                new IDR1000Currency("15"),
+                new JPYCurrency("32"),
+                new KRWCurrency("45"),
+                new MYRCurrency("2"),
+                new THBCurrency("4"),
                 new GBPCurrency("12")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("cs"), new IDLanguage("id"), new JPLanguage("jp"),
-                new KRLanguage("ko"), new THLanguage("th"), new VNLanguage("vn"), new TWLanguage("ch")
+                new USLanguage("en"),
+                new CNLanguage("cs"),
+                new IDLanguage("id"),
+                new JPLanguage("jp"),
+                new KRLanguage("ko"),
+                new THLanguage("th"),
+                new VNLanguage("vn"),
+                new TWLanguage("ch")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -80,12 +92,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     VendorId = "zzdaa12nu1",
                     SecretKey = "zzdaa12nu1",
                     ApiUrl = new("http://t829tsa.bw6688.com"),
-                    TestEnvironments = new[] {"development", "staging"}
+                    TestEnvironments = new[]
+                    {
+                        "development",
+                        "staging"
+                    }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();
 
             Dictionary<string, string> IGameProvider.MarketTypes => new();
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.Saba, "Saba Sports")
+            };
         }
 
         internal record SabaGameProviderConfiguration : IGameProviderConfiguration

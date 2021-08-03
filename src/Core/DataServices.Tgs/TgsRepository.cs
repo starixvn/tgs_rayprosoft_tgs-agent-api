@@ -39,6 +39,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<LocalizedString> LocalizedStrings { get; set; }
 
+        DbSet<SystemLocalization> SystemLocalizations { get; set; }
+
         DbSet<Player> Players { get; set; }
 
         DbSet<Wallet> Wallets { get; set; }
@@ -180,6 +182,10 @@ namespace TGS.Core.DataServices.Tgs
         DbSet<LogRecord> LogRecords { get; set; }
 
         DbSet<AdminLog> AdminLogs { get; set; }
+
+        DbSet<BrandCommunication> BrandCommunications { get; set; }
+
+        DbSet<SubGameProvider> SubGameProviders { get; set; }
     }
 
     public class TgsRepository : DbContext, ITgsRepository
@@ -217,6 +223,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<BrandGroupGame> BrandGroupGames { get; set; }
 
         public DbSet<LocalizedString> LocalizedStrings { get; set; }
+
+        public DbSet<SystemLocalization> SystemLocalizations { get; set; }
 
         public DbSet<Player> Players { get; set; }
 
@@ -344,6 +352,7 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
         public DbSet<PlatformCredit> PlatformCredits { get; set; }
         public DbSet<PlatformPayRecord> PlatformPayRecords { get; set; }
+        public DbSet<SubGameProvider> SubGameProviders { get; set; }
 
         public DbSet<ApiLog> ApiLogs { get; set; }
 
@@ -358,6 +367,7 @@ namespace TGS.Core.DataServices.Tgs
 
         public DbSet<WithdrawForm> WithdrawForms { get; set; }
         public DbSet<AgentBankInfo> AgentBankInfos { get; set; }
+        public DbSet<BrandCommunication> BrandCommunications { get; set; }
 
         public Task<bool> CanConnectionAsync() => Database.CanConnectAsync();
 

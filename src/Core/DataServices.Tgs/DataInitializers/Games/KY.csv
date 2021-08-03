@@ -1,44 +1,44 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-Lobby,Lobby,,0,CardGameLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,
-Texas Hold'em Poker,Texas_Hold_em_Poker,,620,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Two-Eight Bar,Two_Eight_Bar,,720,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Banker Bull-Bull,Banker_Bull_Bull,,830,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Golden Flower,Golden_Flower,,220,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Three-Facecard,Three_Facecard,,860,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Dragon-Tiger,Dragon_Tiger,,900,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Black Jack,Black_Jack,,600,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Casino Bull-Bull,Casino_Bull_Bull,,870,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Happy Red Packets,Happy_Red_Packets,,880,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Speed Golden Flower,Speed_Golden_Flower,,230,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Paigow,Paigow,,730,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Pineapple Poker,Pineapple_Poker,,630,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-lucky 5 cards,lucky_5_cards,,380,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Landlord,Landlord,,610,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Dragon Gate,Dragon_Gate,,390,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Baccarat,Baccarat,,910,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Forest Party,Forest_Party,,920,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Niu - niu for thousands person,Niu_niu_for_thousands_person,,930,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Golden Flower for thousands,Golden_Flower_for_thousands,,1950,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Bleeding Mahjong,Bleeding_Mahjong,,650,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-2 Persons' Mahjong,2_Persons_Mahjong,,740,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Banker Bull-Bull After Check Card,Banker_Bull_Bull_After_Check_Card,,890,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Lucky Dial,Lucky_Dial,,1350,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Gold Shark & Silver Shark,Gold_Shark_Silver_Shark,,1940,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Benz & BMW,Benz_BMW,,1960,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Sic Bo,Sic_Bo,,1980,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-1v1 Bull-Bull,1v1_Bull_Bull,,1810,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Golden Bull,Golden_Bull,,1990,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Bet 3 Players Bull-Bull,Bet_3_Players_Bull_Bull,,1850,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Karmic Mahjong,Karmic_Mahjong,,1660,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Give A Bet,Give_A_Bet,,1355,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Five Stars,Five_Stars,,1970,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Casino Poker,Casino_Poker,,1860,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Hong Kong Stud,Hong_Kong_Stud,,1370,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Karmic SicBo,Karmic_SicBo,,1690,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Fruit Machine,Fruit_Machine,,1890,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Lucky Treasure,Lucky_Treasure,,1610,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Fish-Prawn-Crab Dice,Fish_Prawn_Crab_Dice,,1930,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Run Fast,Run_Fast,,8130,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Red & Black War,Red__Black_War,,950,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Crazy Banker Bull-Bull,Crazy_Banker_Bull_Bull,,840,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
-Horse Fight,Horse_Fight,,1710,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Lobby,Lobby,,0,CardGameLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,KY
+Texas Hold'em Poker,Texas_Hold_em_Poker,,620,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Two-Eight Bar,Two_Eight_Bar,,720,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Banker Bull-Bull,Banker_Bull_Bull,,830,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Golden Flower,Golden_Flower,,220,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Three-Facecard,Three_Facecard,,860,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Dragon-Tiger,Dragon_Tiger,,900,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Black Jack,Black_Jack,,600,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Casino Bull-Bull,Casino_Bull_Bull,,870,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Happy Red Packets,Happy_Red_Packets,,880,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Speed Golden Flower,Speed_Golden_Flower,,230,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Paigow,Paigow,,730,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Pineapple Poker,Pineapple_Poker,,630,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+lucky 5 cards,lucky_5_cards,,380,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Landlord,Landlord,,610,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Dragon Gate,Dragon_Gate,,390,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Baccarat,Baccarat,,910,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Forest Party,Forest_Party,,920,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Niu - niu for thousands person,Niu_niu_for_thousands_person,,930,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Golden Flower for thousands,Golden_Flower_for_thousands,,1950,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Bleeding Mahjong,Bleeding_Mahjong,,650,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+2 Persons' Mahjong,2_Persons_Mahjong,,740,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Banker Bull-Bull After Check Card,Banker_Bull_Bull_After_Check_Card,,890,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Lucky Dial,Lucky_Dial,,1350,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Gold Shark & Silver Shark,Gold_Shark_Silver_Shark,,1940,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Benz & BMW,Benz_BMW,,1960,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Sic Bo,Sic_Bo,,1980,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+1v1 Bull-Bull,1v1_Bull_Bull,,1810,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Golden Bull,Golden_Bull,,1990,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Bet 3 Players Bull-Bull,Bet_3_Players_Bull_Bull,,1850,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Karmic Mahjong,Karmic_Mahjong,,1660,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Give A Bet,Give_A_Bet,,1355,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Five Stars,Five_Stars,,1970,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Casino Poker,Casino_Poker,,1860,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Hong Kong Stud,Hong_Kong_Stud,,1370,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Karmic SicBo,Karmic_SicBo,,1690,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Fruit Machine,Fruit_Machine,,1890,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Lucky Treasure,Lucky_Treasure,,1610,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Fish-Prawn-Crab Dice,Fish_Prawn_Crab_Dice,,1930,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Run Fast,Run_Fast,,8130,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Red & Black War,Red__Black_War,,950,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Crazy Banker Bull-Bull,Crazy_Banker_Bull_Bull,,840,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY
+Horse Fight,Horse_Fight,,1710,CardGame,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,KY

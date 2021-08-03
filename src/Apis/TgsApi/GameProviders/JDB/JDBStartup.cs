@@ -25,7 +25,10 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] {typeof(JDBErrorMapper)},
+                new[]
+                {
+                    typeof(JDBErrorMapper)
+                },
                 (provider, key) => key switch
                 {
                     GameProvider.JDB => provider.GetRequiredService<JDBErrorMapper>(),
@@ -39,11 +42,17 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
             services.AddScoped<IJDBServices, JDBServices>();
             services.AddSingleton<IJDBActionModelMapper, JDBActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(JDBGameInitializer)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(JDBGameInitializer)
+            }, (provider, _) =>
                 provider.GetRequiredService<JDBGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(JDBBetHistory)}, (provider, _) =>
-                provider.GetRequiredService<JDBBetHistory>());
+            services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(JDBGameHistory)
+            }, (provider, _) =>
+                provider.GetRequiredService<JDBGameHistory>());
         }
 
         protected override void UseCustomMiddlewares(IApplicationBuilder app)

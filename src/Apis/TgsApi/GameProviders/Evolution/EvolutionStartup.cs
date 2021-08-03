@@ -38,6 +38,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution
             services.AddScoped<IEvolutionServices, EvolutionServices>();
             services.AddScoped<IEvolutionActionModelMapper, EvolutionActionModelMapper>();
             services.AddScoped<IEvolutionRedisCacheService, EvolutionRedisCacheService>();
+            services.AddScoped<IEvolutionGameHistoryService, EvolutionGameHistoryService>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(EvolutionGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<EvolutionGameInitializer>());

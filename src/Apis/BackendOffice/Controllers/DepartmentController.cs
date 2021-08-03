@@ -44,6 +44,9 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ResellerId = d.ResellerId,
                     LicenseeId = d.LicenseeId,
                     BrandId = d.BrandId,
+                    ResellerName = d.Reseller.Name,
+                    LicenseeName = d.Licensee.Name,
+                    BrandName = d.Brand.Name,
                     Name = d.Name
                 })
                 .CreatePagedResponseAsync(request);

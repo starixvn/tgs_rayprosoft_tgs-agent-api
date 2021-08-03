@@ -1,2 +1,2 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies
-Sportsbook,,,1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,FALSE,
+Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Sportsbook,,,1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,FALSE,,SABA

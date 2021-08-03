@@ -50,15 +50,29 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             ICurrency[] IGameProvider.Currencies => new ICurrency[]
             {
-                new CNYCurrency("CNY"), new USDCurrency("USD"), new VNDCurrency("VND"), new IDRCurrency("IDR"),
-                new VND1000Currency("VND2"), new IDR1000Currency("IDR2"), new JPYCurrency("JPY"),
-                new KRWCurrency("KRW"), new MYRCurrency("MYR"), new THBCurrency("THB"), new GBPCurrency("GBP")
+                new CNYCurrency("CNY"),
+                new USDCurrency("USD"),
+                new VNDCurrency("VND"),
+                new IDRCurrency("IDR"),
+                new VND1000Currency("VND2"),
+                new IDR1000Currency("IDR2"),
+                new JPYCurrency("JPY"),
+                new KRWCurrency("KRW"),
+                new MYRCurrency("MYR"),
+                new THBCurrency("THB"),
+                new GBPCurrency("GBP")
             };
 
             ILanguage[] IGameProvider.Languages => new ILanguage[]
             {
-                new USLanguage("en"), new CNLanguage("zh-CN"), new IDLanguage("id"), new JPLanguage("ja"),
-                new KRLanguage("ko"), new THLanguage("th"), new VNLanguage("vi"), new TWLanguage("zh-TW")
+                new USLanguage("en"),
+                new CNLanguage("zh-CN"),
+                new IDLanguage("id"),
+                new JPLanguage("ja"),
+                new KRLanguage("ko"),
+                new THLanguage("th"),
+                new VNLanguage("vi"),
+                new TWLanguage("zh-TW")
             };
 
             IGame[] IGameProvider.Games => _games;
@@ -82,6 +96,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             Dictionary<string, string> IGameProvider.SportTypes => new();
 
             Dictionary<string, string> IGameProvider.MarketTypes => new();
+
+            SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
+            {
+                new(GameProviderConst.Habanero, "Habanero")
+            };
         }
 
         internal record HabaneroGameProviderConfiguration : IGameProviderConfiguration

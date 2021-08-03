@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
@@ -18,6 +19,11 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.Content)
                 .HasMaxLength(4000);
+
+            builder.Property(c => c.Localization)
+                .HasColumnType(ColumnTypes.Jsonb)
+                .IsRequired()
+                .HasDefaultValue("{}");
 
             builder.Property(c => c.Remarks)
                 .HasMaxLength(512);

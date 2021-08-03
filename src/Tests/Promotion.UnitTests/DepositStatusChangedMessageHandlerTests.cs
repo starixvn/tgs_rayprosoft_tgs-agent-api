@@ -22,6 +22,7 @@ namespace Promotion.UnitTests
 
             var fakeServiceProvider = Substitute.For<IServiceProvider>();
             var fakePromotionChecker = Substitute.For<IPromotionChecker>();
+            var fakePromotionParticipantRepository = Substitute.For<IPromotionParticipantRepository>();
 
             fakeServiceProvider.GetService(Arg.Any<Type>())
                 .Returns(fakePromotionChecker);
@@ -40,6 +41,7 @@ namespace Promotion.UnitTests
                 fakePaymentServiceClient,
                 fakeCheckFactory,
                 fakePlayerService,
+                fakePromotionParticipantRepository,
                 NullLogger<DepositStatusChangedMessageHandler>.Instance);
 
             var formEvent = new FormEvent
@@ -73,6 +75,7 @@ namespace Promotion.UnitTests
 
             var fakeServiceProvider = Substitute.For<IServiceProvider>();
             var fakePromotionChecker = Substitute.For<IPromotionChecker>();
+            var fakePromotionParticipantRepository = Substitute.For<IPromotionParticipantRepository>();
 
             fakeServiceProvider.GetService(Arg.Any<Type>())
                 .Returns(fakePromotionChecker);
@@ -91,6 +94,7 @@ namespace Promotion.UnitTests
                 fakePaymentServiceClient,
                 fakeCheckFactory,
                 fakePlayerService,
+                fakePromotionParticipantRepository,
                 NullLogger<DepositStatusChangedMessageHandler>.Instance);
 
             var formEvent = new FormEvent
@@ -107,7 +111,7 @@ namespace Promotion.UnitTests
                     Status = PaymentFlowState.Reject,
                     CreatedOn = DateTimeOffset.UtcNow
                 });
-            
+
             await sut.HandleAsync(formEvent.ToByteArray());
 
             _ = fakePromotionChecker.Received(2)

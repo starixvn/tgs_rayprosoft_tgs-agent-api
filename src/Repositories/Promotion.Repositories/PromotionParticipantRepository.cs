@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Services.Promotion.Models.Promotion;
 using TGS.Services.Promotion;
+using TGS.Services.Promotion.Models.Promotion;
 
 namespace TGS.Promotion.Repositories
 {
@@ -34,7 +34,12 @@ namespace TGS.Promotion.Repositories
         async Task IPromotionParticipantRepository.CreatePromotionParticipantAsync(Guid promotionId, string playerCode)
         {
             var promotionParticipant =
-                new PromotionParticipant {PlayerCode = playerCode, PromotionId = promotionId};
+                new PromotionParticipant
+                {
+                    PlayerCode = playerCode,
+                    PromotionId = promotionId,
+                    CreatedOn = DateTimeOffset.Now
+                };
 
             await CreateEntityAsync(promotionParticipant);
         }
@@ -46,22 +51,31 @@ namespace TGS.Promotion.Repositories
             GetEntityFirstOrDefaultAsync(predicate, preQuery);
 
         private HashSet<PromotionGameProvider> GeneratePromotionGameProviders(
-            TGS.Core.DataServices.Tgs.Models.Promotion promotion,
+            Core.DataServices.Tgs.Models.Promotion promotion,
             CreatePromotionRequest request)
         {
             var promotionGameProviders = _repository.GameProviders.AsQueryable()
                 .Where(x => request.GameProviderIds.Contains(x.Id)).Select(x =>
-                    new PromotionGameProvider {PromotionId = promotion.Id, GameProviderId = x.Id});
+                    new PromotionGameProvider
+                    {
+                        PromotionId = promotion.Id,
+                        GameProviderId = x.Id
+                    });
             return new(promotionGameProviders);
         }
 
         private HashSet<PromotionVipLevel> GeneratePromotionVipLevels(
-            TGS.Core.DataServices.Tgs.Models.Promotion promotion,
+            Core.DataServices.Tgs.Models.Promotion promotion,
             CreatePromotionRequest request)
         {
             var promotionVipLevels = _repository.VipLevels.AsQueryable()
                 .Where(x => x.BrandId == promotion.BrandId && request.VipLevels.Contains(x.Level)).Select(x =>
-                    new PromotionVipLevel {PromotionId = promotion.Id, VipLevelId = x.Id, Level = x.Level});
+                    new PromotionVipLevel
+                    {
+                        PromotionId = promotion.Id,
+                        VipLevelId = x.Id,
+                        Level = x.Level
+                    });
             return new(promotionVipLevels);
         }
     }

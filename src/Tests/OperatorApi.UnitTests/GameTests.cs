@@ -11,9 +11,10 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
+using TGS.Services.Operator.GameProviders;
+using TGS.Services.Operator.Games;
 using TGS.Services.Operator.Services.Game;
 using TGS.Services.PluggableServices;
 using TGS.ServiceUtility;
@@ -29,84 +30,458 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var brandId = Guid.NewGuid();
+            var currencyCode = "CNY";
             var gameProviderCode = string.Empty;
+
+            var gameProviders = new GameProviderDataInfo[]
+            {
+                new(Guid.NewGuid(), "EVO", Status.Active, false),
+                new(Guid.NewGuid(), "SBO", Status.Active, false)
+            };
+
+            var subGameProviders = GetSubGameProviders(gameProviders).ToArray();
+            var games = GetGames(subGameProviders).ToArray();
+
+            var brandGameProviders = gameProviders.Select(gp => new CachedBrandGameProvider
+            {
+                GameProviderId = gp.Id,
+                GameProviderCode = gp.Code,
+                GameProviderConfigurationId = Guid.NewGuid(),
+                BrandGameProviderStatus = Status.Active
+            }).ToArray();
+
+            var brandGames = games.Select(g => new CachedBrandGame
+            {
+                GameId = g.Id,
+                GameProviderId = subGameProviders.Where(sbp => sbp.Code == g.SubGameProviderCode)
+                    .Select(sbp => sbp.GameProviderId).First(),
+                PlatformType = g.PlatformType,
+                BrandGameStatus = g.Status,
+                Tag = GameTag.None,
+                DisplayOrder = 99,
+                ExternalGameId = g.Id.ToString()
+            }).ToArray();
+
+            var currencies = gameProviders.Select(gp => new GameProviderCurrencyDataInfo(gp.Id, currencyCode))
+                .ToArray();
 
             var query = new GetGamesQuery(
                 brandId,
-                CurrencyCode: "CNY",
+                currencyCode,
                 gameProviderCode,
                 new PlayerTokenData(),
                 PlatformType.Desktop,
-                Types: Array.Empty<GameType>(),
-                LanguageCode: "zh-CN");
+                Array.Empty<GameType>(),
+                "zh-CN");
 
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();            
-            var fakeIGameQueries = Substitute.For<IGameQueries>();
+            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGameRepository = Substitute.For<IGameRepository>();
+
+            fakeBrandOperations.GetBrandGameProvidersAsync(query.BrandId)
+                .Returns(Task.FromResult(brandGameProviders));
+
+            fakeBrandOperations.GetBrandGamesAsync(query.BrandId)
+                .Returns(Task.FromResult(brandGames));
+
+            fakeGameProviderRepository.QuerySubGameProvidersAsync(
+                    Arg.Any<string>())
+                .Returns(subGameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryGameProvidersAsync(
+                    Arg.Any<IEnumerable<Guid>>(),
+                    Arg.Any<IEnumerable<Status>>())
+                .Returns(gameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryGameProviderCurrenciesAsync(Arg.Any<IEnumerable<Guid>>())
+                .Returns(currencies.ToAsyncEnumerable());
+
+            fakeGameRepository.QueryGamesAsync(
+                    Arg.Any<IEnumerable<Guid>>(),
+                    Arg.Any<IEnumerable<GameStatus>>(),
+                    Arg.Any<IEnumerable<GamePlatformType>>())
+                .Returns(games.ToAsyncEnumerable());
 
             var sut = new GetGamesQueryService(
                 fakeBrandCurrencyCodeMapper,
-                fakeGameProviderOperations,
                 fakeBrandOperations,
                 fakePlayerOperations,
                 fakeBrandLanguageCodeMapper,
-                fakeIGameQueries,
                 fakeValidStatus,
-                fakeValidGameStatus);
+                fakeValidGameStatus,
+                fakeGameProviderRepository,
+                fakeGameRepository);
 
             // act
-            await sut.QueryAsync(query, default).ToArrayAsync();
+            var result = await sut.QueryAsync(query).ToArrayAsync();
 
             // assert
-            // 驗證沒傳gpcode時 會執行一次 _brandOperations.GetBrandGameProvidersAsync 取得全部gameProviderId
-            _ = fakeBrandOperations.Received(1).GetBrandGameProvidersAsync(Arg.Is(brandId));
+            Assert.AreEqual(games.Length, result.Length);
+
+            static IEnumerable<SubGameProviderDataInfo> GetSubGameProviders(
+                IEnumerable<GameProviderDataInfo> gameProviders)
+            {
+                foreach (var gp in gameProviders)
+                {
+                    if (gp.Code == "EVO")
+                    {
+                        yield return new SubGameProviderDataInfo(gp.Id, "EVO");
+                        yield return new SubGameProviderDataInfo(gp.Id, "NT");
+                        yield return new SubGameProviderDataInfo(gp.Id, "RT");
+                    }
+                    else
+                    {
+                        yield return new SubGameProviderDataInfo(gp.Id, gp.Code);
+                    }
+                }
+            }
+
+            static IEnumerable<GameDataInfo> GetGames(IEnumerable<SubGameProviderDataInfo> subGameProviders)
+            {
+                var gameId = 0;
+                foreach (var gp in subGameProviders)
+                {
+                    for (var i = 0; i < 10; i++)
+                    {
+                        gameId++;
+
+                        var gameType = gp.Code switch
+                        {
+                            "SBO" => GameType.Sportsbook,
+                            "EVO" => GameType.LiveDealer,
+                            _     => GameType.Slot
+                        };
+
+                        yield return new GameDataInfo(
+                            gameId,
+                            gameId.ToString(),
+                            gameId.ToString(),
+                            string.Empty,
+                            gp.Code,
+                            GameStatus.Active,
+                            gameType,
+                            GamePlatformType.DesktopAndMobile,
+                            true,
+                            string.Empty,
+                            string.Empty);
+                    }
+                }
+            }
         }
 
         [Test]
         public async Task Get_Game_List_Of_Specific_GameProvider()
         {
             // arrange
+            var brandId = Guid.NewGuid();
+            var currencyCode = "CNY";
+            var gameProviderCode = "RT";
+
+            var gameProviders = new GameProviderDataInfo[]
+            {
+                new(Guid.NewGuid(), "EVO", Status.Active, false),
+                new(Guid.NewGuid(), "SBO", Status.Active, false)
+            };
+
+            var subGameProviders = GetSubGameProviders(gameProviders).ToArray();
+            var games = GetGames(subGameProviders).ToArray();
+
+            var brandGameProviders = gameProviders.Select(gp => new CachedBrandGameProvider
+            {
+                GameProviderId = gp.Id,
+                GameProviderCode = gp.Code,
+                GameProviderConfigurationId = Guid.NewGuid(),
+                BrandGameProviderStatus = Status.Active
+            }).ToArray();
+
+            var brandGames = games.Select(g => new CachedBrandGame
+            {
+                GameId = g.Id,
+                GameProviderId = subGameProviders.Where(sbp => sbp.Code == g.SubGameProviderCode)
+                    .Select(sbp => sbp.GameProviderId).First(),
+                PlatformType = g.PlatformType,
+                BrandGameStatus = g.Status,
+                Tag = GameTag.None,
+                DisplayOrder = 99,
+                ExternalGameId = g.Id.ToString()
+            }).ToArray();
+
+            var currencies = gameProviders.Select(gp => new GameProviderCurrencyDataInfo(gp.Id, currencyCode))
+                .ToArray();
+
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
-            var fakeIGameQueries = Substitute.For<IGameQueries>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
-
-            var sut = new GetGamesQueryService(
-                fakeBrandCurrencyCodeMapper,
-                fakeGameProviderOperations,
-                fakeBrandOperations,
-                fakePlayerOperations,
-                fakeBrandLanguageCodeMapper,
-                fakeIGameQueries,
-                fakeValidStatus,
-                fakeValidGameStatus);
-
-            var gameProviderCode = "SBO";
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGameRepository = Substitute.For<IGameRepository>();
 
             var query = new GetGamesQuery(
-                BrandId: Guid.NewGuid(),
-                CurrencyCode: "CNY",
+                brandId,
+                currencyCode,
                 gameProviderCode,
                 new PlayerTokenData(),
                 PlatformType.Desktop,
-                Types: Array.Empty<GameType>(),
-                LanguageCode: "zh-CN");
+                Array.Empty<GameType>(),
+                "zh-CN");
+
+            fakeBrandOperations.GetBrandGameProvidersAsync(query.BrandId)
+                .Returns(Task.FromResult(brandGameProviders));
+
+            fakeBrandOperations.GetBrandGamesAsync(query.BrandId)
+                .Returns(Task.FromResult(brandGames));
+
+            fakeGameProviderRepository.QuerySubGameProvidersAsync(
+                    Arg.Any<string>())
+                .Returns(subGameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryGameProvidersAsync(
+                    Arg.Any<IEnumerable<Guid>>(),
+                    Arg.Any<IEnumerable<Status>>())
+                .Returns(gameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryGameProviderCurrenciesAsync(Arg.Any<IEnumerable<Guid>>())
+                .Returns(currencies.ToAsyncEnumerable());
+
+            fakeGameRepository.QueryGamesAsync(
+                    Arg.Any<IEnumerable<Guid>>(),
+                    Arg.Any<IEnumerable<GameStatus>>(),
+                    Arg.Any<IEnumerable<GamePlatformType>>())
+                .Returns(games.ToAsyncEnumerable());
+
+            var sut = new GetGamesQueryService(
+                fakeBrandCurrencyCodeMapper,
+                fakeBrandOperations,
+                fakePlayerOperations,
+                fakeBrandLanguageCodeMapper,
+                fakeValidStatus,
+                fakeValidGameStatus,
+                fakeGameProviderRepository,
+                fakeGameRepository);
 
             // act
-            await sut.QueryAsync(query, default).ToArrayAsync();
+            var result = await sut.QueryAsync(query).ToArrayAsync();
 
             // assert
-            // 驗證有傳gpcode時 會執行一次 _gameProviderOperations.GetGameProviderIdByCodeAsync 取得gameProviderId
-            _ = fakeGameProviderOperations.Received(1).GetGameProviderIdByCodeAsync(Arg.Is(gameProviderCode));
+            foreach (var r in result)
+            {
+                Assert.AreEqual(gameProviderCode, r.GameProviderCode);
+            }
+
+            static IEnumerable<SubGameProviderDataInfo> GetSubGameProviders(
+                IEnumerable<GameProviderDataInfo> gameProviders)
+            {
+                foreach (var gp in gameProviders)
+                {
+                    if (gp.Code == "EVO")
+                    {
+                        yield return new SubGameProviderDataInfo(gp.Id, "EVO");
+                        yield return new SubGameProviderDataInfo(gp.Id, "NT");
+                        yield return new SubGameProviderDataInfo(gp.Id, "RT");
+                    }
+                    else
+                    {
+                        yield return new SubGameProviderDataInfo(gp.Id, gp.Code);
+                    }
+                }
+            }
+
+            static IEnumerable<GameDataInfo> GetGames(IEnumerable<SubGameProviderDataInfo> subGameProviders)
+            {
+                var gameId = 0;
+                foreach (var gp in subGameProviders)
+                {
+                    for (var i = 0; i < 10; i++)
+                    {
+                        gameId++;
+
+                        var gameType = gp.Code switch
+                        {
+                            "SBO" => GameType.Sportsbook,
+                            "EVO" => GameType.LiveDealer,
+                            _     => GameType.Slot
+                        };
+
+                        yield return new GameDataInfo(
+                            gameId,
+                            gameId.ToString(),
+                            gameId.ToString(),
+                            string.Empty,
+                            gp.Code,
+                            GameStatus.Active,
+                            gameType,
+                            GamePlatformType.DesktopAndMobile,
+                            true,
+                            string.Empty,
+                            string.Empty);
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public async Task Get_Game_List_Of_Specific_GameTypes()
+        {
+            // arrange
+            var brandId = Guid.NewGuid();
+            var currencyCode = "CNY";
+            var gameProviderCode = string.Empty;
+
+            var gameProviders = new GameProviderDataInfo[]
+            {
+                new(Guid.NewGuid(), "EVO", Status.Active, false),
+                new(Guid.NewGuid(), "SBO", Status.Active, false)
+            };
+
+            var subGameProviders = GetSubGameProviders(gameProviders).ToArray();
+            var games = GetGames(subGameProviders).ToArray();
+
+            var brandGameProviders = gameProviders.Select(gp => new CachedBrandGameProvider
+            {
+                GameProviderId = gp.Id,
+                GameProviderCode = gp.Code,
+                GameProviderConfigurationId = Guid.NewGuid(),
+                BrandGameProviderStatus = Status.Active
+            }).ToArray();
+
+            var brandGames = games.Select(g => new CachedBrandGame
+            {
+                GameId = g.Id,
+                GameProviderId = subGameProviders.Where(sbp => sbp.Code == g.SubGameProviderCode)
+                    .Select(sbp => sbp.GameProviderId).First(),
+                PlatformType = g.PlatformType,
+                BrandGameStatus = g.Status,
+                Tag = GameTag.None,
+                DisplayOrder = 99,
+                ExternalGameId = g.Id.ToString()
+            }).ToArray();
+
+            var currencies = gameProviders.Select(gp => new GameProviderCurrencyDataInfo(gp.Id, currencyCode))
+                .ToArray();
+
+            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
+            var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
+            var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGameRepository = Substitute.For<IGameRepository>();
+
+            var gameTypes = new[]
+            {
+                GameType.Sportsbook,
+                GameType.Slot
+            };
+
+            var query = new GetGamesQuery(
+                brandId,
+                currencyCode,
+                gameProviderCode,
+                new PlayerTokenData(),
+                PlatformType.Desktop,
+                gameTypes,
+                "zh-CN");
+
+            fakeBrandOperations.GetBrandGameProvidersAsync(query.BrandId)
+                .Returns(Task.FromResult(brandGameProviders));
+
+            fakeBrandOperations.GetBrandGamesAsync(query.BrandId)
+                .Returns(Task.FromResult(brandGames));
+
+            fakeGameProviderRepository.QuerySubGameProvidersAsync(
+                    Arg.Any<string>())
+                .Returns(subGameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryGameProvidersAsync(
+                    Arg.Any<IEnumerable<Guid>>(),
+                    Arg.Any<IEnumerable<Status>>())
+                .Returns(gameProviders.ToAsyncEnumerable());
+
+            fakeGameProviderRepository.QueryGameProviderCurrenciesAsync(Arg.Any<IEnumerable<Guid>>())
+                .Returns(currencies.ToAsyncEnumerable());
+
+            fakeGameRepository.QueryGamesAsync(
+                    Arg.Any<IEnumerable<Guid>>(),
+                    Arg.Any<IEnumerable<GameStatus>>(),
+                    Arg.Any<IEnumerable<GamePlatformType>>())
+                .Returns(games.ToAsyncEnumerable());
+
+            var sut = new GetGamesQueryService(
+                fakeBrandCurrencyCodeMapper,
+                fakeBrandOperations,
+                fakePlayerOperations,
+                fakeBrandLanguageCodeMapper,
+                fakeValidStatus,
+                fakeValidGameStatus,
+                fakeGameProviderRepository,
+                fakeGameRepository);
+
+            // act
+            var result = await sut.QueryAsync(query).ToArrayAsync();
+
+            // assert
+            foreach (var r in result)
+            {
+                Assert.That(gameTypes.Contains(r.Type));
+            }
+
+            static IEnumerable<SubGameProviderDataInfo> GetSubGameProviders(
+                IEnumerable<GameProviderDataInfo> gameProviders)
+            {
+                foreach (var gp in gameProviders)
+                {
+                    if (gp.Code == "EVO")
+                    {
+                        yield return new SubGameProviderDataInfo(gp.Id, "EVO");
+                        yield return new SubGameProviderDataInfo(gp.Id, "NT");
+                        yield return new SubGameProviderDataInfo(gp.Id, "RT");
+                    }
+                    else
+                    {
+                        yield return new SubGameProviderDataInfo(gp.Id, gp.Code);
+                    }
+                }
+            }
+
+            static IEnumerable<GameDataInfo> GetGames(IEnumerable<SubGameProviderDataInfo> subGameProviders)
+            {
+                var gameId = 0;
+                foreach (var gp in subGameProviders)
+                {
+                    for (var i = 0; i < 10; i++)
+                    {
+                        gameId++;
+
+                        var gameType = gp.Code switch
+                        {
+                            "SBO" => GameType.Sportsbook,
+                            "EVO" => GameType.LiveDealer,
+                            _     => GameType.Slot
+                        };
+
+                        yield return new GameDataInfo(
+                            gameId,
+                            gameId.ToString(),
+                            gameId.ToString(),
+                            string.Empty,
+                            gp.Code,
+                            GameStatus.Active,
+                            gameType,
+                            GamePlatformType.DesktopAndMobile,
+                            true,
+                            string.Empty,
+                            string.Empty);
+                    }
+                }
+            }
         }
 
         [Test]
@@ -115,8 +490,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             // arrange
             var playerCode = "playerCode";
             var languageCode = "zh-CN";
-            var brandId = Guid.NewGuid();
-            var gameProviderCode = "KY";
+            var subGameProviderCode = "RT";
             var gameProviderId = new Guid("a0f49ce0-2c1d-4f50-9fc5-58b610a30bf5");
             var gameId = 1000012;
             var uri = new Uri("http://www.fakeurl.com");
@@ -129,6 +503,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlatformType = PlatformType.Desktop
             };
 
+            var subGameProviders = new SubGameProviderDataInfo[]
+            {
+                new(gameProviderId, "RT")
+            };
+
+            var gameProvider = new CachedGameProvider
+            {
+                Id = gameProviderId,
+                Code = "EVO",
+                Status = Status.Active
+            };
+
             var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
@@ -138,47 +524,44 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeExpirationValidator = Substitute.For<IExpirationValidator>();
             var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
             var fakePluggableOperations = Substitute.For<IPluggableOperations>();
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            fakeGameProviderRepository.QuerySubGameProvidersAsync(subGameProviderCode)
+                .Returns(subGameProviders.ToAsyncEnumerable());
 
             fakeGameProviderOperations
-                .GetGameProviderIdByCodeAsync(gameProviderCode)
-                .Returns(gameProviderId);
+                .GetCachedGameProviderAsync(gameProviderId)
+                .Returns(Task.FromResult(gameProvider));
+
             fakeGameProviderOperations
                 .GetGamePlatformTypeAsync(gameProviderId, gameId)
                 .Returns(GamePlatformType.Desktop);
 
             fakePlayerOperations
                 .GetCachedPlayerAsync(playerCode)
-                .Returns(new CachedPlayer()
-                {
-                    Status = PlayerStatus.Enabled
-                });
+                .Returns(new CachedPlayer {Status = PlayerStatus.Enabled});
 
             fakePluggableOperations
-                .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
-                .Returns(uri);
-            var req = new PluggableModels.GetGameUrlRequest()
-            {
-                ExtendedData = null,
-                GameId = gameId,
-                GameProviderCode = gameProviderCode,
-                Language = null,
-                Token = playerToken
-            };
+                .GetEndpointUrlByGameProviderCodeAsync(gameProvider.Code)
+                .Returns(Task.FromResult(uri));
+
             fakePluggalbeGameProviderApiClient
-                .GetGameUrlAsync(uri, Arg.Any<PluggableModels.GetGameUrlRequest>())
-                .Returns(new PluggableModels.GetGameUrlResponse()
-                {
-                    Url = "http://www.lobbyURL.com",
-                    Error = 0,
-                    ErrorMessage = string.Empty
-                });
+                .GetGameUrlAsync(Arg.Is(uri), Arg.Any<PluggableModels.GetGameUrlRequest>())
+                .Returns(
+                    ValueTask.FromResult(
+                        new PluggableModels.GetGameUrlResponse
+                        {
+                            Url = "http://www.lobbyURL.com",
+                            Error = 0,
+                            ErrorMessage = string.Empty
+                        }));
 
             var query = new GetGameUrlQuery(
-               playerToken,
-               gameProviderCode,
-               gameId,
-               languageCode,
-               extendedData);
+                playerToken,
+                subGameProviderCode,
+                gameId,
+                languageCode,
+                extendedData);
 
             var sut = new GetGameUrlQueryService(
                 fakePlayerOperations,
@@ -189,10 +572,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeValidGameStatus,
                 fakeBrandLanguageCodeMapper,
                 fakePluggableOperations,
-                fakePluggalbeGameProviderApiClient);
+                fakePluggalbeGameProviderApiClient,
+                fakeGameProviderRepository);
 
             // act
-            await sut.GetAsync(query, default);
+            await sut.GetAsync(query);
 
             // assert
             _ = fakePluggalbeGameProviderApiClient
@@ -201,7 +585,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     uri,
                     Arg.Is<PluggableModels.GetGameUrlRequest>(
                         d => d.GameId == gameId
-                            && d.GameProviderCode == gameProviderCode
+                            && d.GameProviderCode == gameProvider.Code
                             && d.ExtendedData != null));
         }
 
@@ -234,7 +618,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var externalGameId = "CardGameLobby";
             var cachedGameList = new List<CachedGame>
             {
-                new CachedGame()
+                new CachedGame
                 {
                     Id = gameId,
                     ExternalId = externalGameId,
@@ -242,7 +626,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Type = gameType,
                     AvailableToBrand = true,
                     Status = GameStatus.Active,
-                    SubGame = false,
+                    SubGame = false
                 }
             };
 
@@ -252,7 +636,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(cachedGames);
 
             fakeGetGameUrlQueryService
-                .GetAsync(Arg.Any<GetGameUrlQuery>(), default)
+                .GetAsync(Arg.Any<GetGameUrlQuery>())
                 .Returns(new GameUrlInfo(0, "", "http://www.lobbyURL.com"));
 
             var query = new GetLobbyGameUrlQuery(
@@ -265,8 +649,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var sut = new GetLobbyGameUrlQueryService(
                 fakeGameProviderOperations,
                 fakeGetGameUrlQueryService);
+
             // act
-            var actual = await sut.GetAsync(query, default);
+            var actual = await sut.GetAsync(query);
 
             // assert
             Assert.AreEqual("http://www.lobbyURL.com", actual.Url);
