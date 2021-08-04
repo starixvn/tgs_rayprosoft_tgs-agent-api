@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210804060024_AddPlayerFavoriteGamesTable")]
+    [Migration("20210804064504_AddPlayerFavoriteGamesTable")]
     partial class AddPlayerFavoriteGamesTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3736,13 +3736,13 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
 
-                    b.Property<Guid>("BrandId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("brand_id");
-
                     b.Property<int>("GameId")
                         .HasColumnType("integer")
                         .HasColumnName("game_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
 
                     b.Property<int>("GameType")
                         .HasColumnType("integer")
@@ -3753,12 +3753,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("sub_game_provider_code");
 
-                    b.HasKey("PlayerCode")
+                    b.HasKey("PlayerCode", "GameId")
                         .HasName("pk_player_favorite_games");
 
                     b.HasIndex("BrandId")
                         .IsUnique()
                         .HasDatabaseName("ix_player_favorite_games_brand_id");
+
+                    b.HasIndex("PlayerCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_player_favorite_games_player_code");
 
                     b.ToTable("player_favorite_games");
                 });

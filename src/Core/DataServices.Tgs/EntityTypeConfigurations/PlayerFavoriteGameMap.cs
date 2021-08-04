@@ -10,7 +10,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
         {
             builder.ToTable("player_favorite_games");
 
-            builder.HasKey(fg => fg.PlayerCode)
+            builder.HasKey(fg => new { fg.PlayerCode, fg.GameId })
                 .HasName("pk_player_favorite_games");
 
             builder.Property(fg => fg.BrandId)
