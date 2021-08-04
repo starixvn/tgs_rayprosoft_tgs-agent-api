@@ -3728,6 +3728,44 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_bucket_histories");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<int>("GameType")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_type");
+
+                    b.Property<string>("SubGameProviderCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("sub_game_provider_code");
+
+                    b.HasKey("PlayerCode", "GameId")
+                        .HasName("pk_player_favorite_games");
+
+                    b.HasIndex("BrandId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_player_favorite_games_brand_id");
+
+                    b.HasIndex("PlayerCode")
+                        .IsUnique()
+                        .HasDatabaseName("ix_player_favorite_games_player_code");
+
+                    b.ToTable("player_favorite_games");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameAggregate", b =>
                 {
                     b.Property<int>("Id")
@@ -6589,6 +6627,23 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", "BrandId")
+                        .HasConstraintName("fk_player_favorite_games_brand_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", "PlayerCode")
+                        .HasConstraintName("fk_player_favorite_games_player_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameSetting", b =>
