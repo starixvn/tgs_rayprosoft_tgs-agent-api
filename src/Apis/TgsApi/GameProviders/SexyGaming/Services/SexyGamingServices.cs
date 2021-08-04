@@ -5,11 +5,15 @@ using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
+using TGS.Shared.Game.ApiClients.SexyGaming;
+using TGS.Shared.Game.Models.SexyGaming.Enums;
+using TGS.Shared.Game.Models.SexyGaming.Outgoing;
 
 namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
@@ -21,6 +25,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         ValueTask<Guid> GetGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
         ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
+        ValueTask<SexyGamingGameUrlResponse> GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request);
     }
     internal sealed class SexyGamingServices : ISexyGamingServices
     {
@@ -29,13 +34,14 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private readonly IBrandOperations _brandOperations;
         private readonly IPlayerOperations _playerOperations;
         private readonly ITokenProvider _tokenProvider;
-
+        private readonly ISexyGamingApiClient _client;
         public SexyGamingServices(
             IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries,
             IBrandOperations brandOperations,
             IPlayerOperations playerOperations,
-            ITokenProvider tokenProvider
+            ITokenProvider tokenProvider,
+            ISexyGamingApiClient client
             )
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
@@ -43,6 +49,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         async ValueTask<Guid> ISexyGamingServices.GetBrandIdByPlayerCodeAsync(string playerCode)
@@ -85,6 +92,27 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId).ConfigureAwait(false);
+        }
+
+        async ValueTask<SexyGamingGameUrlResponse> ISexyGamingServices.GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request)
+        {
+            int count = 0;
+            int tryCount = 3;
+            while (count < tryCount)
+            {
+                var response = await _client.GetGameUrlAsync(configuration, request).ConfigureAwait(false);
+
+                if (response.Status.IgnoreCaseEquals(((int)GameApiError.UnableToProceedPleaseTryAgainLater).ToString("d4")))
+                {
+                    count++;
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
+                else
+                {
+                    return response;
+                }
+            }
+            throw new GameProviderApiErrorException("Failed to execute 3 times to obtain SexyGaming game URL.(取得SexyGaming遊戲網址執行3次失敗。)");
         }
     }
 }
