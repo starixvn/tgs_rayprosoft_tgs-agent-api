@@ -93,7 +93,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                     };
                     await _client.CreatePlayerAsync(configuration, createMemberRequest).ConfigureAwait(false);
                     responseGameUrl = await _service.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
-                    if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.AccountIsNotExists).ToString("d4")))
+                    if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.Success).ToString("d4")))
                     {
                         url = responseGameUrl.Url;
                     }
