@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Polly;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -14,6 +19,7 @@ using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.SexyGaming;
 using TGS.Shared.Game.Models.SexyGaming.Enums;
 using TGS.Shared.Game.Models.SexyGaming.Outgoing;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 {
@@ -35,13 +41,17 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private readonly IPlayerOperations _playerOperations;
         private readonly ITokenProvider _tokenProvider;
         private readonly ISexyGamingApiClient _client;
+        private readonly ILogger<SexyGamingServices> _logger;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         public SexyGamingServices(
             IGameProviderOperations gameProviderOperations,
             IGameActionQueries gameActionQueries,
             IBrandOperations brandOperations,
             IPlayerOperations playerOperations,
             ITokenProvider tokenProvider,
-            ISexyGamingApiClient client
+            ISexyGamingApiClient client,
+            ILogger<SexyGamingServices> logger,
+            IJsonSerializationProvider jsonSerializationProvider
             )
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
@@ -50,6 +60,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _client = client ?? throw new ArgumentNullException(nameof(client));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         async ValueTask<Guid> ISexyGamingServices.GetBrandIdByPlayerCodeAsync(string playerCode)
@@ -96,23 +108,24 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
 
         async ValueTask<SexyGamingGameUrlResponse> ISexyGamingServices.GetGameUrlAsync(SexyGamingConfiguration configuration, SexyGamingLoginGameRequest request)
         {
-            int count = 0;
             int tryCount = 3;
-            while (count < tryCount)
-            {
-                var response = await _client.GetGameUrlAsync(configuration, request).ConfigureAwait(false);
-
-                if (response.Status.IgnoreCaseEquals(((int)GameApiError.UnableToProceedPleaseTryAgainLater).ToString("d4")))
-                {
-                    count++;
-                    await Task.Delay(TimeSpan.FromSeconds(1));
-                }
-                else
-                {
-                    return response;
-                }
-            }
-            throw new GameProviderApiErrorException("Failed to execute 3 times to obtain SexyGaming game URL.(取得SexyGaming遊戲網址執行3次失敗。)");
+            int seconds = 1;
+            var retryPolicy = Policy.HandleResult<SexyGamingGameUrlResponse>(r => r.Status.IgnoreCaseEquals(((int)GameApiError.UnableToProceedPleaseTryAgainLater).ToString("d4")))
+                            .WaitAndRetryAsync(tryCount,
+                                          retryAttempt => TimeSpan.FromSeconds(seconds),
+                                          (response, retryTime, context) =>
+                                          {
+                                              var data = new
+                                              {
+                                                  GameProviderCode = GameProvider.SexyGaming,
+                                                  Request = request,
+                                                  Response = response,
+                                                  Delay = retryTime,
+                                                  CreationTime = DateTimeOffset.UtcNow
+                                              };
+                                              _logger.LogWarning(_jsonSerializationProvider.SerializeToString(data));
+                                          });
+            return await retryPolicy.ExecuteAsync(async () => await _client.GetGameUrlAsync(configuration, request).ConfigureAwait(false));
         }
     }
 }
