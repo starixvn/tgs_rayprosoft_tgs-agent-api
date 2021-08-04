@@ -234,7 +234,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 .ToArrayAsync();
 
             baseGames = baseGames.Where(x
-                => x.AvailableCurrencies.IsNotNullOrEmpty() ||
+                => x.AvailableCurrencies.IsNullOrEmpty() ||
                 x.AvailableCurrencies.Split(",").Any(c => brandCurrencies.Contains(c))).ToArray();
 
             var baseGameIds = baseGames.Select(x => x.Id).ToArray();
