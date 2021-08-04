@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Agent;
 
@@ -21,6 +22,9 @@ namespace TGS.Agent.Repositories
                 .FindAsync(id)
                 .ConfigureAwait(false);
 
+            var dividend = await _tgsRepository.AgentDividends.AsQueryable().Where(x => x.SentOn == null)
+                .SumAsync(x => x.AgentDividendAmount).ConfigureAwait(false);
+
             return new AgentInfo(
                 agent.Id,
                 agent.Username,
@@ -34,10 +38,12 @@ namespace TGS.Agent.Repositories
                 agent.Brand.Domains.FirstOrDefault()?.Url,
                 (int)agent.LevelType,
                 agent.WithdrawPassword,
-                agent.WithdrawSalt);
+                agent.WithdrawSalt,
+                dividend);
         }
 
-        public async ValueTask SetPayPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
+        public async ValueTask SetPayPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt,
+            DateTimeOffset updatedOn)
         {
             var agent = await _tgsRepository.Agents
                 .FindAsync(agentId)

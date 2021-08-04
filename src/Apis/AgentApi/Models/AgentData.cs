@@ -33,5 +33,8 @@ namespace TGS.Apis.AgentApi.Models
 
         [JsonPropertyName("agentlevel")]
         public int AgentLevel { get; init; }
+
+        [JsonPropertyName("accumulatedprofitsharing")]
+        public decimal AccumulatedProfitSharing { get; init; }
     }
 }

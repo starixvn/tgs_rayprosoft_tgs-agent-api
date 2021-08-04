@@ -1,0 +1,37 @@
+﻿using System.ComponentModel;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
+using TGS.Services.Operator.Services.BrandLiveChat;
+using TGS.ServiceUtility;
+
+namespace TGS.Apis.OperatorApi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BrandLiveChatController : ControllerBase
+    {
+        [HttpGet]
+        [Description("Get a brand's live chat")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+        public async Task<BrandLiveChatModel> GetBrandLiveChatAsync(
+            [FromServices] IGetService<BrandLiveChatQuery, BrandLiveChatInfo> queryService)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new BrandLiveChatQuery(brandId);
+
+            var info = await queryService.GetAsync(query).ConfigureAwait(false);
+
+            return new BrandLiveChatModel()
+            {
+                Name = info.Name,
+                Setting = JsonDocument.Parse(info.Setting)
+            };
+        }
+    }
+}

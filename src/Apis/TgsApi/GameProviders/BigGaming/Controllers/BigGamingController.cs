@@ -35,23 +35,26 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
         private readonly JsonSerializerOptions _jsonSerializerOptions;
         private readonly IBigGamingModelActionMapper _map;
         private readonly IReadOnlyDictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>> _methodMapper;
-        private readonly IBigGamingServices _services;
+        private readonly IBigGamingService _service;
         private readonly ISettingOperations _settingOperations;
+        private readonly IBigGamingGPGameHistoryService _bigGamingGPGameHistoryService;
 
         public BigGamingController(
             IBigGamingModelActionMapper map,
             IGamePlayActions actions,
-            IBigGamingServices services,
+            IBigGamingService services,
             IJsonSerializationProvider jsonSerializationProvider,
-            ISettingOperations settingOperations
+            ISettingOperations settingOperations,
+            IBigGamingGPGameHistoryService bigGamingGPGameHistoryService
         )
         {
             _map = map ?? throw new ArgumentNullException(nameof(map));
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _service = services ?? throw new ArgumentNullException(nameof(services));
             _jsonSerializationProvider = jsonSerializationProvider ??
                 throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            _bigGamingGPGameHistoryService = bigGamingGPGameHistoryService ?? throw new ArgumentNullException(nameof(bigGamingGPGameHistoryService));
             _methodMapper = new Dictionary<string, Func<BigGamingRequest, Task<BigGamingResponse>>>
             {
                 {"open.operator.user.balance", GetBalanceAsync},
@@ -121,7 +124,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
+            var gameProviderConfigurationData = await _service
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
@@ -162,7 +165,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
+            var gameProviderConfigurationData = await _service
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
@@ -247,7 +250,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 orderStatusResultResponse.Add(new()
                 {
                     OrderId = order.OrderId,
-                    Status = (int)await _services
+                    Status = (int)await _service
                         .GetOrderStatusAsync(gameProviderId, order.LoginId, order.OrderId.ToString())
                         .ConfigureAwait(false)
                 });
@@ -276,7 +279,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
 
-            var transfer = await _services.TransferAsync(gameProviderId, playerCode, data.BizId.ToString(), data.Amount).ConfigureAwait(false);
+            var transfer = await _service.TransferAsync(gameProviderId, playerCode, data.BizId.ToString(), data.Amount).ConfigureAwait(false);
 
             return new()
             {
@@ -286,7 +289,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
                 Jsonrpc = baseRequest.Jsonrpc
             };
         }
-
 
         [HttpPost("ping")]
         public Task<BigGamingResponse> PingAsync(
@@ -301,6 +303,10 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             }));
         }
 
-
+        [HttpPost("gamerecordfishing")]
+        public async Task<BigGamingGPGameRecordResponse> GameRecordFishingAsync(BigGamingGPGameRecordRequest source)
+        {
+            return await _bigGamingGPGameHistoryService.GameRecordFishingAsync(source).ConfigureAwait(false);
+        }
     }
 }

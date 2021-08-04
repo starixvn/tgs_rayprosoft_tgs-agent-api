@@ -9,8 +9,9 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using TGS.Services.Operator;
 using TGS.Services.Operator.GameProviders;
-using TGS.Services.Operator.Games;
+using TGS.Services.Operator.Services.Game;
 using TGS.Services.Operator.Services.GameProvider;
 
 namespace TGS.Tests.OperatorApi.UnitTests
@@ -18,6 +19,34 @@ namespace TGS.Tests.OperatorApi.UnitTests
     [TestFixture]
     public class GameProviderTests
     {
+        [Test]
+        public async Task Can_Find_GpCode_By_SubGpCode()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
+
+            var sut = new GetGpCodeQueryService(
+                fakeGameProviderRepository,
+                fakeGameProviderOperations);
+
+            var query = new GetGpCodeQuery("SubGpCode");
+
+            fakeGameProviderRepository.GetSubGameProviderDataInfoAsync(Arg.Is(query.SubGpCode))
+                .Returns(new SubGameProviderWithLocationDataInfo(
+                    Guid.NewGuid(),
+                    "GpCode",
+                    "SubGpCode",
+                    "test",
+                    "test",
+                    "{}"));
+
+            var expected = "GpCode";
+
+            var actual = await sut.GetAsync(query);
+
+            Assert.AreEqual(expected, actual);
+        }
+
         [Test]
         public async Task Get_GameProvider_List()
         {
@@ -51,7 +80,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-            var fakeGameRepository = Substitute.For<IGameRepository>();
 
             var sut = new GetGameProvidersQueryService(
                 fakeBrandCurrencyCodeMapper,
@@ -60,8 +88,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakeValidStatus,
                 fakeValidGameStatus,
-                fakeGameProviderRepository,
-                fakeGameRepository);
+                fakeGameProviderRepository);
 
             fakeBrandOperations.GetBrandGameProvidersAsync(brandId)
                 .Returns(Task.FromResult(brandGameProviders));
@@ -70,8 +97,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
             await sut.QueryAsync(query).ToArrayAsync();
 
             _ = fakeGameProviderRepository.Received(1)
-                .QueryGameProvidersAsync(Arg.Any<Guid[]>(), Arg.Any<Status[]>());
-            _ = fakeGameProviderRepository.Received(1).QuerySubGameProvidersAsync(Arg.Any<Guid[]>());
+                .QueryGameProvidersAsync();
+            _ = fakeGameProviderRepository.Received(1)
+                .QuerySubGameProvidersAsync();
         }
     }
 }
