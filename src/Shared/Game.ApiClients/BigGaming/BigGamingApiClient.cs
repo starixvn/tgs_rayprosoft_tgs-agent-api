@@ -11,6 +11,7 @@ using System.Text.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings.BigGaming;
 using TGS.Shared.Game.Models.BigGaming.Commons;
+using TGS.Shared.Game.Models.BigGaming.Incoming;
 
 namespace TGS.Shared.Game.ApiClients.BigGaming
 {
@@ -21,10 +22,14 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
         Task<BigGamingResponse> InfoPlayerAsync(BigGamingBrandMerchant brandMerchant, BigGamingInfoPlayerRequest request);
         Task<BigGamingResponse> KickPlayerAsync(BigGamingBrandMerchant brandMerchant, BigGamingKickPlayerRequest request);
         Task<BigGamingResponse> GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlRequest request);
+        Task<BigGamingResponse> GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlFishingRequest request);
+
         Task<BigGamingResponse> GetTrialGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetTrialGameUrlRequest request);
         Task<BigGamingResponse> GetVideoOrderDetailAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderDetailRequest request);
         Task<BigGamingResponse> GetVideoRoundQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoRoundQueryRequest request);
         Task<BigGamingResponse> GetVideoOrderQueryAsync(BigGamingBrandMerchant brandMerchant, BigGamingVideoOrderQueryRequest request);
+        Task<BigGamingResponse> GetGameRecordAsync(BigGamingBrandMerchant brandMerchant, BigGamingGameRecordFishingRequest request);
+        ValueTask<BigGamingGPGameRecordResponse> GameRecordAsync(Uri apiUrl, BigGamingGPGameRecordRequest request);
     }
 
     public sealed class BigGamingApiClient : BaseApiClient, IBigGamingApiClient
@@ -73,6 +78,13 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.video.game.url", prefix).ConfigureAwait(false);
         }
 
+        async Task<BigGamingResponse> IBigGamingApiClient.GetGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetGameUrlFishingRequest request)
+        {
+            request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
+            var prefix = $"{_gameProvider}.GetGameUrlFish";
+            return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.game.bg.url", prefix).ConfigureAwait(false);
+        }
+
         async Task<BigGamingResponse> IBigGamingApiClient.GetTrialGameUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGetTrialGameUrlRequest request)
         {
             request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
@@ -101,6 +113,13 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.order.query", prefix).ConfigureAwait(false);
         }
 
+        async Task<BigGamingResponse> IBigGamingApiClient.GetGameRecordAsync(BigGamingBrandMerchant brandMerchant, BigGamingGameRecordFishingRequest request)
+        {
+            request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
+            var prefix = $"{_gameProvider}.GetGameRecordFishing";
+            return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.order.bg.query", prefix).ConfigureAwait(false);
+        }
+
         private ValueTask<BigGamingResponse> GetAPIAsync<TSource>(Uri apiUrl, TSource source, string method, string prefix)
         {
 
@@ -114,5 +133,9 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
             return ExecuteJsonRequestAsync<BigGamingRequest, BigGamingResponse>(HttpMethod.Post, apiUrl, string.Empty, request, logPrefix: prefix);
 
         }
+
+        ValueTask<BigGamingGPGameRecordResponse> IBigGamingApiClient.GameRecordAsync(Uri apiUrl, BigGamingGPGameRecordRequest request) =>
+           ExecuteJsonRequestAsync<BigGamingGPGameRecordRequest, BigGamingGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/bg/gamerecordfishing", request);
+
     }
 }

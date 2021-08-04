@@ -59,6 +59,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<BrandLanguage> BrandLanguages { get; set; }
 
+        DbSet<BrandLiveChat> BrandLiveChats { get; set; }
+
         DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 
         DbSet<BrandPayment> BrandPayments { get; set; }
@@ -251,6 +253,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<BrandGroup> BrandGroups { get; set; }
 
         public DbSet<BrandLanguage> BrandLanguages { get; set; }
+
+        public DbSet<BrandLiveChat> BrandLiveChats { get; set; }
 
         public DbSet<BrandPaymentPlayer> BrandPaymentPlayers { get; set; }
 

@@ -8,7 +8,7 @@ namespace TGS.Shared.Game.Models.Evolution.Commons
         public decimal Balance { get; set; }
         [JsonPropertyName("bonus")]
         public decimal Bonus { get; set; }
-        [JsonPropertyName("retransmission")]
-        public bool Retransmission { get; set; } = false;
+        //[JsonPropertyName("retransmission")]
+        //public bool Retransmission { get; set; } = false;
     }
 }

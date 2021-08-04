@@ -41,7 +41,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 1,
                 Array.Empty<byte>(),
-                Array.Empty<byte>());
+                Array.Empty<byte>(),
+                0M);
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -86,7 +87,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 1,
                 Array.Empty<byte>(),
-                Array.Empty<byte>());
+                Array.Empty<byte>(),
+                0M);
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -139,8 +141,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "aaabbb",
                     null,
                     1,
-                    new byte[] { 1, 2, 3 },
-                    Array.Empty<byte>()));
+                    new byte[]
+                    {
+                        1,
+                        2,
+                        3
+                    },
+                    Array.Empty<byte>(),
+                    0M));
 
             Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
         }
@@ -174,7 +182,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     null,
                     1,
                     Array.Empty<byte>(),
-                    Array.Empty<byte>()));
+                    Array.Empty<byte>(),
+                    0M));
 
             await sut.ExecuteAsync(command);
 
@@ -210,7 +219,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 1,
                 Array.Empty<byte>(),
-                Array.Empty<byte>());
+                Array.Empty<byte>(),
+                0M);
 
             var command = new StartChangePayPasswordCommand(agent.Id, CultureInfo.GetCultureInfo("en-US"));
 
@@ -258,7 +268,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 null,
                 1,
                 Array.Empty<byte>(),
-                Array.Empty<byte>());
+                Array.Empty<byte>(),
+                0M);
             fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
@@ -278,10 +289,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
-            var request = new ChangePayPasswordRequest()
-            {
-                NewPassword = "123456789012345678901"
-            };
+            var request = new ChangePayPasswordRequest {NewPassword = "123456789012345678901"};
 
             // act
             var actual = sut.TestValidate(request);
@@ -295,10 +303,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
-            var request = new ChangePayPasswordRequest()
-            {
-                NewPassword = "12345"
-            };
+            var request = new ChangePayPasswordRequest {NewPassword = "12345"};
 
             // act
             var actual = sut.TestValidate(request);
@@ -312,10 +317,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
-            var request = new ChangePayPasswordRequest()
-            {
-                NewPassword = string.Empty
-            };
+            var request = new ChangePayPasswordRequest {NewPassword = string.Empty};
 
             // act
             var actual = sut.TestValidate(request);
@@ -329,10 +331,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
-            {
-                Password = "123456789012345678901"
-            };
+            var request = new SetPayPasswordRequest {Password = "123456789012345678901"};
 
             // act
             var actual = sut.TestValidate(request);
@@ -346,10 +345,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
-            {
-                Password = "12345"
-            };
+            var request = new SetPayPasswordRequest {Password = "12345"};
 
             // act
             var actual = sut.TestValidate(request);
@@ -363,10 +359,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
-            {
-                Password = string.Empty
-            };
+            var request = new SetPayPasswordRequest {Password = string.Empty};
 
             // act
             var actual = sut.TestValidate(request);

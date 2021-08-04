@@ -18,14 +18,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
     public sealed class EvolutionGameHistoryService : IEvolutionGameHistoryService
     {
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IEvolutionServices _services;
+        private readonly IEvolutionService _service;
 
         public EvolutionGameHistoryService(
             IJsonSerializationProvider jsonSerializationProvider,
-            IEvolutionServices services)
+            IEvolutionService service)
         {
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         string IEvolutionGameHistoryService.GetGameHistory(EvolutionGamHistoryRoundResponse source) => source.Data.GameType.ToLower() switch

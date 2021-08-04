@@ -1,10 +1,13 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.IdentityVerifiers;
@@ -12,7 +15,9 @@ using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
 using TGS.ServiceUtility;
+
 using CoreExceptions = TGS.Core.Models.Exceptions;
+using PlayerNotFoundException = TGS.Services.Operator.PlayerNotFoundException;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -21,6 +26,13 @@ namespace TGS.Apis.OperatorApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public partial class PlayerController : ControllerBase
     {
+        private readonly ILogger<PlayerController> _logger;
+
+        public PlayerController(ILogger<PlayerController> logger)
+        {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         /// <summary>
         /// Player changes password, player login is needed when use this
         /// </summary>
@@ -218,6 +230,25 @@ namespace TGS.Apis.OperatorApi.Controllers
             catch (CoreExceptions.InvalidCredentialsException)
             {
                 throw new CoreExceptions.InvalidCredentialsException(Resources.Player.PasswordMismatched);
+            }
+            catch (Exception ex)
+            {
+                switch (ex)
+                {
+                    case CoreExceptions.PlayerNotFoundException playerNotFoundException:
+                        _logger.LogWarning(playerNotFoundException, $"{request.Username} not found.");
+                        break;
+
+                    case CoreExceptions.InvalidCredentialsException invalidCredException:
+                        _logger.LogWarning(invalidCredException, Resources.Player.PasswordMismatched);
+                        break;
+
+                    default:
+                        _logger.LogWarning(ex, "Login fail!");
+                        break;
+                }
+
+                throw new LoginFailException();
             }
 
             return new LoginResponse()

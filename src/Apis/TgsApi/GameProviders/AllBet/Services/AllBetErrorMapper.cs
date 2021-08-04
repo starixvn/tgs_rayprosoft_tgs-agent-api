@@ -41,9 +41,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             _ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
-                    {Cancelled, Success},
-                    {Settled, Success},
-                    {Duplicate, Success},
                     {TransactionNotFound, TransactionIsNotFound},
                     {TransactionBeingCancelledNotFound, TransactionIsNotFound},
                     {TransactionBeingReferencedNotFound, TransactionIsNotFound},

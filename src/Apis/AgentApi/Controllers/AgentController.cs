@@ -32,13 +32,13 @@ namespace TGS.Apis.AgentApi.Controllers
         [HttpPost("create")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<CreateAgentResponse> CreateAgentAsync(
-                    [FromServices] IGetService<GetCreateAgentQuery, CreateAgentInfo> getCreateAgentQueryService,
-                    [FromBody] CreateAgentRequest request)
+            [FromServices] IGetService<GetCreateAgentQuery, CreateAgentInfo> getCreateAgentQueryService,
+            [FromBody] CreateAgentRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var agentTokenData = HttpContext.Items.GetAgentTokenData();
 
-            var query = new GetCreateAgentQuery()
+            var query = new GetCreateAgentQuery
             {
                 BrandId = brandId,
                 CardGameRebatePercentage = request.CardGameRebatePercentage,
@@ -61,7 +61,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            return new CreateAgentResponse()
+            return new CreateAgentResponse
             {
                 IsNew = info.IsNew,
                 AgentId = info.AgentId,
@@ -70,7 +70,7 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         /// <summary>
-        /// Get an agent information
+        ///     Get an agent information
         /// </summary>
         [HttpGet("info")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -104,7 +104,8 @@ namespace TGS.Apis.AgentApi.Controllers
                     InvitationCode = agentInfo.InvitationCode,
                     BrandUrl = agentInfo.BrandUrl,
                     IsSetPayPassword = agentInfo.PayPassword.Length > 0,
-                    AgentLevel = agentInfo.AgentLevel
+                    AgentLevel = agentInfo.AgentLevel,
+                    AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing
                 }
             };
         }
