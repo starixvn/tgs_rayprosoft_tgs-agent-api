@@ -16,7 +16,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     player_code = table.Column<string>(type: "character varying(16)", nullable: false),
                     brand_id = table.Column<Guid>(type: "uuid", nullable: false),
                     game_type = table.Column<int>(type: "integer", nullable: false),
-                    sub_game_provider_code = table.Column<string>(type: "text", nullable: false)
+                    sub_game_provider_code = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false)
                 },
                 constraints: table =>
                 {

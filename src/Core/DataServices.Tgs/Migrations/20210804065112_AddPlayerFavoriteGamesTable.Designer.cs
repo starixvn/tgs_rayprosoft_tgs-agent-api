@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210804064504_AddPlayerFavoriteGamesTable")]
+    [Migration("20210804065112_AddPlayerFavoriteGamesTable")]
     partial class AddPlayerFavoriteGamesTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -3750,7 +3750,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("SubGameProviderCode")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("sub_game_provider_code");
 
                     b.HasKey("PlayerCode", "GameId")

@@ -23,7 +23,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(fg => fg.SubGameProviderCode)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(16);
 
             builder.HasOne<Brand>()
                 .WithOne()

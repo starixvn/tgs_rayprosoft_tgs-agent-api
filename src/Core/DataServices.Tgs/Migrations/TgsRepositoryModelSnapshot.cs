@@ -3748,7 +3748,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
                     b.Property<string>("SubGameProviderCode")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
                         .HasColumnName("sub_game_provider_code");
 
                     b.HasKey("PlayerCode", "GameId")
