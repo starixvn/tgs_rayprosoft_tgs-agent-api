@@ -165,7 +165,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("info")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetPlayerResponse> GetPlayerAsync(
-            [FromServices] IGetService<GetPlayerQuery, PlayerDataInfo> getPlayerQueryService)
+            [FromServices] IGetService<GetPlayerQuery, PlayerDataInfo> getPlayerQueryService,
+            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getAutoTransFlagService)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -186,6 +187,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerData.Wechat = player.Wechat;
                 playerData.IsSetPayPassword = player.IsSetPayPassword;
                 playerData.IdentityAuthentication = player.IdentityAuthentication;
+                playerData.IsAutoTransferToGame = await getAutoTransFlagService
+                    .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
+                    .ConfigureAwait(false);
             }
             catch (PlayerNotFoundException)
             {

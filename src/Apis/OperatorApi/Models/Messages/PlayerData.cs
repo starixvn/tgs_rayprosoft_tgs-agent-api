@@ -27,5 +27,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("identityauthentication")]
         public bool IdentityAuthentication { get; set; }
+
+        [JsonPropertyName("autotransfertogame")]
+        public bool IsAutoTransferToGame { get;set; }
     }
 }
