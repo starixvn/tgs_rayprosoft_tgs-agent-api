@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -196,7 +195,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<GetGameUrlResponse> GetLobbyGameUrlForPostAsync(
             [FromServices] IPlayerOperations playerOperations,
             [FromServices] IStatusValidator playerStatusValidator,
+            [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
+            [FromServices] IGetService<GetGpCodeQuery, string> getGpCodeService,
             [FromServices] IGetService<GetLobbyGameUrlQuery, LobbyGameUrlInfo> getLobbyGameUrlQueryService,
+            [FromServices] ICommandService<FundInBeforeEnterGameCommand> fundService,
             [FromBody] GetLobbyGameUrlRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -207,17 +209,33 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             playerStatusValidator.ThrowIfPlayerDisabled(cachedPlayer.Status);
 
+            var gpCode = await getGpCodeService
+                .GetAsync(new GetGpCodeQuery(request.SubGameProviderCode))
+                .ConfigureAwait(false);
+
+            var currentCultureInfo = CultureInfo.CurrentUICulture;
+            var language = await brandLanguageCodeMapper
+                .ExternalToInternalAsync(currentCultureInfo.Name, cachedPlayer.BrandId)
+                .ConfigureAwait(false);
+
             var query = new GetLobbyGameUrlQuery(
                 cachedPlayer.BrandId,
-                request.GameProviderCode,
+                request.SubGameProviderCode,
                 playerTokenData,
                 cachedPlayer.Type,
                 request.GameType,
-                request.LanguageCode,
+                language,
                 request.Extends);
 
             var info = await getLobbyGameUrlQueryService
                 .GetAsync(query)
+                .ConfigureAwait(false);
+
+            await fundService
+                .ExecuteAsync(new FundInBeforeEnterGameCommand(
+                    cachedPlayer.BrandId,
+                    playerTokenData.PlayerCode,
+                    gpCode))
                 .ConfigureAwait(false);
 
             return new GetGameUrlResponse
