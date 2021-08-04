@@ -443,5 +443,29 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             return commitPlayerPhoneService.ExecuteAsync(command);
         }
+
+        [HttpPost("game/auto-transfer")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask ToggleAutoTransferToGameFlagAsync(
+            [FromServices] ICommandService<TogglePlayerIsAutoTransferToGameCommand> toggleService)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new TogglePlayerIsAutoTransferToGameCommand(playerTokenData.PlayerCode);
+
+            return toggleService.ExecuteAsync(command);
+        }
+
+        [HttpGet("game/auto-transfer")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask<bool> GetAutoTransferToGameFlagAsync(
+            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var query = new GetPlayerIsAutoTransferToGameQuery(playerTokenData.PlayerCode);
+
+            return getService.GetAsync(query);
+        }
     }
 }
