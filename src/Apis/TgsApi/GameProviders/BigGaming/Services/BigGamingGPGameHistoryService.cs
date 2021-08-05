@@ -41,7 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         {
             var brandMerchant = await _service.GetBrandMerchantAsync(source.CurrencyCode).ConfigureAwait(false); ;
             int pageIndex = 1;
-            int pageSize = 1;
+            int pageSize = 500;
             var gameProviderId = await _service.GetGameProviderIdAsync();
             var players = new Dictionary<string, Player>();
             var gameIds = new Dictionary<int, CachedGame>();
@@ -72,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }
 
                 var gameRecords = _jsonSerializationProvider.DeserializeFromString<BigGamingResultGameRecordResponse<BigGamingGameRecordFishingResponse>>(_jsonSerializationProvider.SerializeToString(response.Result));
-                if (gameRecords.Items==null)
+                if (gameRecords.Items==null || gameRecords.Items.Length==0)
                 {
                     break;
                 }
