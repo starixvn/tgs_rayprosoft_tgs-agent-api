@@ -13,6 +13,7 @@
     <None Remove="SqlScripts\Functions\game_action_get_game_actions_by_external_group_id.sql" />
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <None Remove="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
+    <None Remove="SqlScripts\Indexes\round_createdon.sql" />
     <None Remove="SqlScripts\PaymentInitial\applepay.sql" />
   </ItemGroup>
 
@@ -59,6 +60,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\promotion_update_amount_used.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\admin_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\api_logs.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\round_createdon.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\brands.sql" />
