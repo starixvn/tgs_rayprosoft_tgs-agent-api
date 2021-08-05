@@ -150,9 +150,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
             Guid brandId;
             string playerCode;
             string defaultWalletCurrencyCode;
-
+            var amount = decimal.Parse(request.Amount);
             //TGS->GP
-            if (request.Amount > 0)
+            if (amount > 0)
             {
                 var player = await _service.GetCachedPlayerAsync(request.LoginId);
                 if (player == null)

@@ -6,7 +6,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Incoming
     public record BigGamingTransferRequest : BigGamingParamsSignLoginIdRequest
     {
         [JsonPropertyName("amount")]
-        public decimal Amount { get; set; }
+        public string Amount { get; set; }
         [JsonPropertyName("bizId")]
         public long BizId { get; set; }
     }
