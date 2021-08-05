@@ -72,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }
 
                 var gameRecords = _jsonSerializationProvider.DeserializeFromString<BigGamingResultGameRecordResponse<BigGamingGameRecordFishingResponse>>(_jsonSerializationProvider.SerializeToString(response.Result));
-                if (gameRecords.Items.Length == 0)
+                if (gameRecords.Items==null)
                 {
                     break;
                 }
