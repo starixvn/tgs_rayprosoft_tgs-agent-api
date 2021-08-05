@@ -20,20 +20,17 @@ namespace TGS.Services.Operator.Services.Game
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IValidStatus<Status> _validStatus;
 
         public GetAllGamesByGameTypeQueryService(
             IBrandOperations brandOperations,
-            IPlayerOperations playerOperations,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
             IGameProviderRepository gameProviderRepository,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
             _gameProviderRepository =
@@ -46,20 +43,9 @@ namespace TGS.Services.Operator.Services.Game
             GetAllGamesByGameTypeQuery query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var playerTokenData = query.PlayerTokenData;
-
-            var cachedPlayer = playerTokenData == null
-                ? null
-                : await _playerOperations
-                    .GetCachedPlayerAsync(playerTokenData.PlayerCode)
-                    .ConfigureAwait(false);
-
-            var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-
-            var platformType = playerTokenData == null ? query.PlatformType : playerTokenData.PlatformType;
-            var gamePlatformTypes = platformType.ToGamePlatformTypes();
-            var statuses = _validStatus.GetStatus(playerType);
-            var gameStatuses = _validGameStatus.GetStatus(playerType);
+            var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
+            var statuses = _validStatus.GetStatus(query.PlayerType);
+            var gameStatuses = _validGameStatus.GetStatus(query.PlayerType);
 
             var brandGameProviders = await _brandOperations
                 .GetBrandGameProvidersAsync(query.BrandId)
@@ -132,7 +118,8 @@ namespace TGS.Services.Operator.Services.Game
             CachedBrandGame brandGame,
             bool isActive)
         {
-            var info = new GameInfo {
+            var info = new GameInfo
+            {
                 Id = game.Id,
                 Code = game.Code,
                 Name = game.Name,
@@ -140,7 +127,8 @@ namespace TGS.Services.Operator.Services.Game
                 GameProviderCode = game.SubGameProviderCode,
                 Type = game.Type,
                 IsActive = isActive,
-                Tag = new TagInfo {
+                Tag = new TagInfo
+                {
                     New = brandGame.Tag.IsNew(),
                     Hot = brandGame.Tag.IsHot(),
                     Recommend = brandGame.Tag.IsRecommend()

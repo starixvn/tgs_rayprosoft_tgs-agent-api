@@ -22,7 +22,7 @@ namespace TGS.Services.Operator.Services.Game
         {
             var allQuery = new GetAllGamesByGameTypeQuery(
                 query.BrandId,
-                query.PlayerTokenData,
+                query.PlayerType,
                 query.PlatformType,
                 query.Types);
 

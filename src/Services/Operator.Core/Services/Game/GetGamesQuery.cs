@@ -7,7 +7,7 @@ namespace TGS.Services.Operator.Services.Game
     public record GetGamesQuery(
         Guid BrandId,
         string SubGameProviderCode,
-        PlayerTokenData PlayerTokenData,
+        PlayerType PlayerType,
         PlatformType PlatformType,
         GameType[] Types);
 }
