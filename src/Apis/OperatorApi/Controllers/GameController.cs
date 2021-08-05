@@ -34,6 +34,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
             [FromServices] IQueryService<GetGamesQuery, GameInfo> getGamesQueryService,
             [FromServices] IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryAllGameService,
+            [FromServices] IPlayerOperations playerOperations,
             [FromQuery] GetGamesRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
@@ -45,18 +46,31 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ExternalToInternalAsync(currentCultureInfo.Name, brandId)
                 .ConfigureAwait(false);
 
+            var playerType = PlayerType.RealPlayer;
+            var platformType = request.PlatformType;
+
+            if (playerTokenData != null)
+            {
+                var cachedPlayer = await playerOperations
+                    .GetCachedPlayerAsync(playerTokenData.PlayerCode)
+                    .ConfigureAwait(false);
+
+                playerType = cachedPlayer.Type;
+                platformType = playerTokenData.PlatformType;
+            }
+
             if (string.IsNullOrWhiteSpace(request.SubGameProviderCode))
             {
                 var query = new GetAllGamesByGameTypeQuery(
                     brandId,
-                    playerTokenData,
-                    request.PlatformType,
+                    playerType,
+                    platformType,
                     request.Types ?? Array.Empty<GameType>());
 
                 var games = from info in queryAllGameService.QueryAsync(query)
                             let lang = info.Localization.ContainsKey(cultureCode)
                                 ? info.Localization[cultureCode]
-                                : null
+                                : JsonDocument.Parse("{}")
                             orderby info.DisplayOrder, info.Code
                             select new GameModel
                             {
@@ -90,14 +104,14 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var query = new GetGamesQuery(
                     brandId,
                     request.SubGameProviderCode,
-                    playerTokenData,
-                    request.PlatformType,
+                    playerType,
+                    platformType,
                     request.Types ?? Array.Empty<GameType>());
 
                 var games = from info in getGamesQueryService.QueryAsync(query)
                             let lang = info.Localization.ContainsKey(cultureCode)
                                 ? info.Localization[cultureCode]
-                                : null
+                                : JsonDocument.Parse("{}")
                             orderby info.DisplayOrder, info.Code
                             select new GameModel
                             {

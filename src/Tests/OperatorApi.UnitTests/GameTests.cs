@@ -109,7 +109,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "GpCode");
 
             fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
-                .Returns(new[] {
+                .Returns(new[]
+                {
                     new BrandSubGameProviderInfo(
                         "sub1",
                         "sub1",
@@ -154,13 +155,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
             var brandId = Guid.NewGuid();
-            var gameProviderCode = string.Empty;
 
             var evoGp = new GameProviderDataInfo(Guid.NewGuid(), "EVO", Status.Active, false);
             var sboGp = new GameProviderDataInfo(Guid.NewGuid(), "SBO", Status.Active, false);
@@ -313,13 +312,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var query = new GetAllGamesByGameTypeQuery(
                 brandId,
-                new PlayerTokenData(),
+                PlayerType.RealPlayer,
                 PlatformType.Desktop,
                 Array.Empty<GameType>());
 
             var sut = new GetAllGamesByGameTypeQueryService(
                 fakeBrandOperations,
-                fakePlayerOperations,
                 fakeValidStatus,
                 fakeValidGameStatus,
                 fakeGameProviderRepository,
@@ -343,23 +341,24 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var query = new GetGamesQuery(
                 Guid.NewGuid(),
                 "Test",
-                new PlayerTokenData(),
+                PlayerType.RealPlayer,
                 PlatformType.Desktop,
                 Array.Empty<GameType>());
 
             fakeQueryAllService.QueryAsync(Arg.Any<GetAllGamesByGameTypeQuery>())
-                .Returns(new[] {
+                .Returns(new[]
+                {
                     new GameInfo
                     {
                         Id = 1,
-                        Code= "test",
+                        Code = "test",
                         Name = "test",
                         GameProviderCode = "Test"
                     },
                     new GameInfo
                     {
                         Id = 2,
-                        Code= "test",
+                        Code = "test",
                         Name = "test",
                         GameProviderCode = "ABC"
                     }
@@ -378,7 +377,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             // arrange
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
@@ -538,7 +536,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var sut = new GetAllGamesByGameTypeQueryService(
                 fakeBrandOperations,
-                fakePlayerOperations,
                 fakeValidStatus,
                 fakeValidGameStatus,
                 fakeGameProviderRepository,
@@ -552,7 +549,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var query = new GetAllGamesByGameTypeQuery(
                 brandId,
-                new PlayerTokenData(),
+                PlayerType.RealPlayer,
                 PlatformType.Desktop,
                 gameTypes);
 

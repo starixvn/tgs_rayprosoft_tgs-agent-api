@@ -20,45 +20,37 @@ namespace TGS.Services.Operator.Services.Game
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IValidStatus<Status> _validStatus;
 
         public GetAllGamesByGameTypeQueryService(
             IBrandOperations brandOperations,
-            IPlayerOperations playerOperations,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
             IGameProviderRepository gameProviderRepository,
             IJsonSerializationProvider jsonSerializationProvider)
         {
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
             _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
-            _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+            _gameProviderRepository =
+                gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+            _jsonSerializationProvider = jsonSerializationProvider ??
+                throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async IAsyncEnumerable<GameInfo> QueryAsync(
             GetAllGamesByGameTypeQuery query,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var playerTokenData = query.PlayerTokenData;
-
-            var cachedPlayer = await _playerOperations
-                .GetCachedPlayerAsync(playerTokenData.PlayerCode)
-                .ConfigureAwait(false);
-
-            var playerType = cachedPlayer?.Type ?? PlayerType.RealPlayer;
-
             var gamePlatformTypes = query.PlatformType.ToGamePlatformTypes();
-            var statuses = _validStatus.GetStatus(playerType);
-            var gameStatuses = _validGameStatus.GetStatus(playerType);
+            var statuses = _validStatus.GetStatus(query.PlayerType);
+            var gameStatuses = _validGameStatus.GetStatus(query.PlayerType);
 
             var brandGameProviders = await _brandOperations
                 .GetBrandGameProvidersAsync(query.BrandId)
                 .ConfigureAwait(false);
+
             var brandGames = await _brandOperations
                 .GetBrandGamesAsync(query.BrandId)
                 .ConfigureAwait(false);
@@ -74,8 +66,7 @@ namespace TGS.Services.Operator.Services.Game
                                    where bg.GameProviderId == subGp.GameProviderId
                                    select bg.GameProviderId).Distinct().ToArray();
 
-            var gpStatuses = new[]
-            {
+            var gpStatuses = new[] {
                 Status.Active,
                 Status.Maintenance
             };
@@ -89,8 +80,7 @@ namespace TGS.Services.Operator.Services.Game
 
             var games = await _gameProviderRepository.QueryGamesAsync(
                     gameProviderIds,
-                    new[]
-                    {
+                    new[] {
                         GameStatus.Active,
                         GameStatus.Testing,
                         GameStatus.Maintenance
@@ -147,8 +137,7 @@ namespace TGS.Services.Operator.Services.Game
                 Localization = string.IsNullOrEmpty(game.Localization)
                     ? new Dictionary<string, JsonDocument>()
                     : _jsonSerializationProvider.DeserializeFromString<Dictionary<string, JsonDocument>>(
-                        game.Localization,
-                        null)
+                        game.Localization)
             };
 
             return info;
