@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Amazon.S3.Model;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -17,6 +18,7 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
 using TGS.Services.Operator.Services.GameBalance;
 using TGS.ServiceUtility;
+using Tag = TGS.Apis.OperatorApi.Models.Messages.Tag;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -244,6 +246,38 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ErrorMessage = info.ErrorMessage,
                 Url = info.Url
             };
+        }
+
+        [HttpPut("favorite/{gameId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask SetGameToFavoriteAsync(
+            [FromServices] ICommandService<SetFavoriteGameCommand> setService,
+            int gameId)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var command = new SetFavoriteGameCommand(
+                brandId,
+                playerTokenData.PlayerCode,
+                gameId);
+
+            return setService.ExecuteAsync(command);
+        }
+
+        [HttpDelete("favorite/{gameId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask RemoveGameFromFavoriteAsync(
+            [FromServices] ICommandService<RemoveFavoriteGameCommand> removeService,
+            int gameId)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new RemoveFavoriteGameCommand(
+                playerTokenData.PlayerCode,
+                gameId);
+
+            return removeService.ExecuteAsync(command);
         }
 
         private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
