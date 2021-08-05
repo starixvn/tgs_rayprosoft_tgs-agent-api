@@ -796,5 +796,23 @@ namespace TGS.Tests.OperatorApi.UnitTests
             _ = fakeGameProviderRepository.Received(1)
                 .RemoveFavoriteGameAsync(Arg.Is(command.PlayerCode), Arg.Is(command.GameId));
         }
+
+        [Test]
+        public void Player_Can_List_Favorite_Games()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new ListFavoriteGameIdsQueryService(fakeGameProviderRepository);
+
+            var query = new ListFavoriteGameIdsQuery(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                GameType.Arcade);
+
+            sut.QueryAsync(query);
+
+            fakeGameProviderRepository.Received(1)
+                .QueryPlayerFavoriteGamesAsync(query.BrandId, query.PlayerCode);
+        }
     }
 }

@@ -280,6 +280,24 @@ namespace TGS.Apis.OperatorApi.Controllers
             return removeService.ExecuteAsync(command);
         }
 
+        [HttpGet("favorite/{gameType}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public IAsyncEnumerable<int> GetFavoriteGamesAsync(
+            [FromServices] IQueryService<ListFavoriteGameIdsQuery, FavoriteGameInfo> listService,
+            GameType gameType)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new ListFavoriteGameIdsQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                gameType);
+
+            return listService.QueryAsync(query)
+                .Select(fg => fg.GameId);
+        }
+
         private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)
         {
             if (!element.TryGetProperty(propertyName, out var value))
