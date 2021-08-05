@@ -32,7 +32,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
         [JsonPropertyName("payout")]
         public decimal Payout { get; set; }
         [JsonPropertyName("orderTime")]
-        public DateTime OrderTime { get; set; }
+        public string OrderTime { get; set; }
         [JsonPropertyName("jackpot")]
         public string Jackpot { get; set; }
         [JsonPropertyName("jackpotType")]
@@ -42,6 +42,6 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
         [JsonPropertyName("orderFrom")]
         public string OrderFrom { get; set; }
         [JsonPropertyName("gameBalance")]
-        public decimal GameBalance { get; set; }
+        public string GameBalance { get; set; }
     }
 }

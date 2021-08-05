@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
 {
-    public record BigGamingGPGameRecordResponse
+    public record BigGamingGPGameRecordResponse : TgsResponse
     {
         [JsonPropertyName("success")]
         public bool Success { get; init; }
