@@ -41,7 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         {
             var brandMerchant = await _service.GetBrandMerchantAsync(source.CurrencyCode).ConfigureAwait(false); ;
             int pageIndex = 1;
-            int pageSize = 500;
+            int pageSize = 1;
             var gameProviderId = await _service.GetGameProviderIdAsync();
             var players = new Dictionary<string, Player>();
             var gameIds = new Dictionary<int, CachedGame>();
@@ -94,7 +94,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         players.Add(gameRecord.LoginId, player);
                     }
 
-                    if (brandGameProviderConfigurationIds.TryGetValue(player.BrandId, out Guid gameProviderConfigurationId))
+                    if (!brandGameProviderConfigurationIds.TryGetValue(player.BrandId, out Guid gameProviderConfigurationId))
                     {
                         gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId).ConfigureAwait(false);
                         brandGameProviderConfigurationIds.Add(player.BrandId, gameProviderConfigurationId);
@@ -130,6 +130,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
                     try
                     {
+                        var orderTime = new DateTimeOffset(DateTime.Parse(gameRecord.OrderTime), TimeSpan.FromHours(-4));
                         var result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                         {
                             ExternalRoundId = gameRecord.ExternalRoundId,
@@ -146,8 +147,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                             ClosedOn = sysDateTimeOffset,
                             UpdatedOn = sysDateTimeOffset,
                             BrandId = (player == null) ? Guid.Empty : player.BrandId,
-                            ExternalCreatedOn = new DateTimeOffset(gameRecord.OrderTime, TimeSpan.FromHours(-4)),
-                            ExternalClosedOn = sysDateTimeOffset,
+                            ExternalCreatedOn = orderTime,
+                            ExternalClosedOn = orderTime,
                             BetAmount = gameRecord.BetAmount,
                             ValidBetAmount = gameRecord.ValidAmount,
                             PlayerWinLoss = gameRecord.Payout,
@@ -159,7 +160,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                             AdditionalData = _jsonSerializationProvider.SerializeToString(gameRecord),
                             Success = success
                         });
-                        lastGameRecordTime = new DateTimeOffset(gameRecord.OrderTime, TimeSpan.FromHours(-4));
+                        lastGameRecordTime = orderTime;
                     }
                     catch
                     {
