@@ -56,7 +56,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var games = from info in queryAllGameService.QueryAsync(query)
                             let lang = info.Localization.ContainsKey(cultureCode)
                                 ? info.Localization[cultureCode]
-                                : null
+                                : JsonDocument.Parse("{}")
                             orderby info.DisplayOrder, info.Code
                             select new GameModel
                             {
@@ -97,7 +97,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var games = from info in getGamesQueryService.QueryAsync(query)
                             let lang = info.Localization.ContainsKey(cultureCode)
                                 ? info.Localization[cultureCode]
-                                : null
+                                : JsonDocument.Parse("{}")
                             orderby info.DisplayOrder, info.Code
                             select new GameModel
                             {

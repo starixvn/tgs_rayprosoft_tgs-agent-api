@@ -6,7 +6,7 @@ namespace TGS.Services.Operator.Services.Game
 {
     public record GetAllGamesByGameTypeQuery(
         Guid BrandId,
-        PlayerTokenData PlayerTokenData,
+        PlayerTokenData? PlayerTokenData,
         PlatformType PlatformType,
         GameType[] Types);
 }
