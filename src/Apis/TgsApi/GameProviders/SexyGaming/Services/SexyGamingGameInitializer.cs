@@ -23,7 +23,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly ISexyGamingApiClient _client;
         private readonly IPlayerOperations _playerOperations;
-        private readonly ISexyGamingServices _sexyGamingServices;
+        private readonly ISexyGamingServices _service;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ISettingOperations _settingOperations;
         private readonly IGameProviderCurrencyCodeMapper _currencyCodeMapper;
@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             IBrandGameProviderOperations brandGameProviderOperations,
             ISexyGamingApiClient client,
             IPlayerOperations playerOperations,
-            ISexyGamingServices sexyGamingServices,
+            ISexyGamingServices service,
             IJsonSerializationProvider jsonSerializationProvider,
             ISettingOperations settingOperations,
             IGameProviderCurrencyCodeMapper currencyCodeMapper,
@@ -43,7 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _sexyGamingServices = sexyGamingServices ?? throw new ArgumentNullException(nameof(sexyGamingServices));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _currencyCodeMapper = currencyCodeMapper ?? throw new ArgumentNullException(nameof(currencyCodeMapper));
@@ -56,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             var loginTokenId = token.LoginRecordId;
             var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
-            var gameProviderId = await _sexyGamingServices.GetGameProviderId().ConfigureAwait(false);
+            var gameProviderId = await _service.GetGameProviderId().ConfigureAwait(false);
             var brandId = player.BrandId;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
             var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<SexyGamingConfiguration>(SettingConsts.GameProviderConfigurations.SexyGaming);
@@ -69,10 +69,9 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
             };
 
             var url = default(string);
-            var responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
+            var responseGameUrl = await _service.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
             if (responseGameUrl.Status.IgnoreCaseNotEquals(((int)GameApiError.Success).ToString("d4")))
             {
-
                 if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.AccountIsNotExists).ToString("d4")))
                 {
 
@@ -93,17 +92,8 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Services
                         Language = cultureCode
                     };
                     await _client.CreatePlayerAsync(configuration, createMemberRequest).ConfigureAwait(false);
-
-                    data = new SexyGamingLoginGameRequest()
-                    {
-                        UserId = player.PlayerCode,
-                        IsMobileLogin = request.Token.PlatformType == Core.Models.Enums.PlatformType.Mobile,
-                        Language = cultureCode,
-                        Extension1 = _jsonSerializationProvider.SerializeToString(new { token = request.Token.LoginRecordId }),
-                    };
-
-                    responseGameUrl = await _client.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
-                    if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.AccountIsNotExists).ToString("d4")))
+                    responseGameUrl = await _service.GetGameUrlAsync(configuration, data).ConfigureAwait(false);
+                    if (responseGameUrl.Status.IgnoreCaseEquals(((int)GameApiError.Success).ToString("d4")))
                     {
                         url = responseGameUrl.Url;
                     }
