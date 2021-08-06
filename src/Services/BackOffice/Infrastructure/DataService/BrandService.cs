@@ -136,6 +136,18 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             await CreateEntityAsync(platformCredit);
 
+            var vipLevel = new VipLevel
+            {
+                BrandId = brand.Id,
+                Level = 1,
+                CreatedByUsername = request.EditorUsername,
+                UpdatedByUsername = request.EditorUsername,
+                CreatedOn = DateTimeOffset.Now,
+                UpdatedOn = DateTimeOffset.Now
+            };
+
+            await CreateEntityAsync(vipLevel);
+
             scope.Complete();
         }
 
