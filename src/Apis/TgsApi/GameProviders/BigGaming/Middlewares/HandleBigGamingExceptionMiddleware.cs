@@ -10,6 +10,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
+using TGS.Core.Models.Messages;
 using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Enums;
@@ -48,20 +49,21 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
             Exception exception)
         {
-            if (context.Request.Path.Value.IgnoreCaseContains("api/bg/gamerecordfishing"))
+            if (context.Request.Path.Value.IgnoreCaseContains("api/Pluggable/gameurl") ||
+                context.Request.Path.Value.IgnoreCaseContains("api/Pluggable/history/round") ||
+                context.Request.Path.Value.IgnoreCaseContains("api/Pluggable/player/balance") ||
+                context.Request.Path.Value.IgnoreCaseContains("api/bg/gamerecordfishing"))
             {
-                var response = new BigGamingGPGameRecordResponse()
+                var message = ErrorMapper.GetMessageByException(exception);
+
+                var response = new TgsResponse
                 {
-                    Success = false,
-                    Count = 0,
-                    FailCount = 0,
-                    SuccessCount = 0,
-                    LastGameRecorTime = null,
-                    Error = (int)TGS.Core.Models.Enums.TgsApiError.SystemError,
-                    ErrorMessage = exception.Message,
+                    Error = (int)TGS.Core.Models.Enums.TgsApiError.ProviderApiError,
+                    ErrorMessage = message,
                 };
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                await context.Response.WriteAsJsonAsync(response, response.GetType());
+
+                context.Response.StatusCode = statusCode;
+                await context.Response.WriteAsJsonAsync(response);
             }
             else
             {

@@ -72,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }
 
                 var gameRecords = _jsonSerializationProvider.DeserializeFromString<BigGamingResultGameRecordResponse<BigGamingGameRecordFishingResponse>>(_jsonSerializationProvider.SerializeToString(response.Result));
-                if (gameRecords.Items==null || gameRecords.Items.Length==0)
+                if (gameRecords.Items == null || gameRecords.Items.Length == 0)
                 {
                     break;
                 }
@@ -128,44 +128,39 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         successCount++;
                     }
 
-                    try
+
+                    var orderTime = new DateTimeOffset(DateTime.Parse(gameRecord.OrderTime), TimeSpan.FromHours(-4));
+                    await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                     {
-                        var orderTime = new DateTimeOffset(DateTime.Parse(gameRecord.OrderTime), TimeSpan.FromHours(-4));
-                        var result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
-                        {
-                            ExternalRoundId = gameRecord.ExternalRoundId,
-                            GameProviderId = gameProviderId,
-                            GameProviderCode = _service.GetGameProviderCode(),
-                            PlayerCode = (player == null) ? string.Empty : player.PlayerCode,
-                            GameId = gameId.GetValueOrDefault(-1),
-                            ExternalId = gameRecord.ExternalId.ToString(),
-                            CurrencyCode = player.DefaultWalletCurrencyCode,
-                            Status = RoundStatus.Closed,
-                            GameProviderConfigurationId = gameProviderConfigurationId,
-                            WalletId = (player == null) ? Guid.Empty : player.DefaultWalletId,
-                            CreatedOn = sysDateTimeOffset,
-                            ClosedOn = sysDateTimeOffset,
-                            UpdatedOn = sysDateTimeOffset,
-                            BrandId = (player == null) ? Guid.Empty : player.BrandId,
-                            ExternalCreatedOn = orderTime,
-                            ExternalClosedOn = orderTime,
-                            BetAmount = gameRecord.BetAmount,
-                            ValidBetAmount = gameRecord.ValidAmount,
-                            PlayerWinLoss = gameRecord.Payout,
-                            Commission = gameRecord.Extend,
-                            Turnover = gameRecord.ValidAmount,
-                            SettleAmount = gameRecord.ValidAmount + gameRecord.Payout,
-                            TieBetAdjustment = null,
-                            ClientStatus = GetClientRound(gameRecord.Payout),
-                            AdditionalData = _jsonSerializationProvider.SerializeToString(gameRecord),
-                            Success = success
-                        });
-                        lastGameRecordTime = orderTime;
-                    }
-                    catch
-                    {
-                        break;
-                    }
+                        ExternalRoundId = gameRecord.ExternalRoundId,
+                        GameProviderId = gameProviderId,
+                        GameProviderCode = _service.GetGameProviderCode(),
+                        PlayerCode = (player == null) ? string.Empty : player.PlayerCode,
+                        GameId = gameId.GetValueOrDefault(-1),
+                        ExternalId = gameRecord.ExternalId.ToString(),
+                        CurrencyCode = player.DefaultWalletCurrencyCode,
+                        Status = RoundStatus.Closed,
+                        GameProviderConfigurationId = gameProviderConfigurationId,
+                        WalletId = (player == null) ? Guid.Empty : player.DefaultWalletId,
+                        CreatedOn = sysDateTimeOffset,
+                        ClosedOn = sysDateTimeOffset,
+                        UpdatedOn = sysDateTimeOffset,
+                        BrandId = (player == null) ? Guid.Empty : player.BrandId,
+                        ExternalCreatedOn = orderTime,
+                        ExternalClosedOn = orderTime,
+                        BetAmount = gameRecord.BetAmount,
+                        ValidBetAmount = gameRecord.ValidAmount,
+                        PlayerWinLoss = gameRecord.Payout,
+                        Commission = gameRecord.Extend,
+                        Turnover = gameRecord.ValidAmount,
+                        SettleAmount = gameRecord.ValidAmount + gameRecord.Payout,
+                        TieBetAdjustment = null,
+                        ClientStatus = _service.GetClientRound(gameRecord.Payout),
+                        AdditionalData = _jsonSerializationProvider.SerializeToString(gameRecord),
+                        Success = success
+                    });
+                    lastGameRecordTime = orderTime;
+
                 }
             }
             return new BigGamingGPGameRecordResponse()
@@ -178,16 +173,5 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             };
 
         }
-
-        private ClientRoundStatus GetClientRound(decimal playerWinLoss)
-        {
-            return playerWinLoss switch
-            {
-                > 0 => ClientRoundStatus.Win,
-                < 0 => ClientRoundStatus.Loss,
-                0 => ClientRoundStatus.Draw
-            };
-        }
-
     }
 }

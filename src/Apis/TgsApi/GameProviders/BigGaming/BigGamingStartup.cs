@@ -38,6 +38,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
             services.AddScoped<IGameProviderDepositWithdrawalService, GameProviderDepositWithdrawalService>();
             services.AddScoped<IBigGamingGPGameHistoryService, BigGamingGPGameHistoryService>();
             services.AddScoped<IBigGamingModelActionMapper, BigGamingActionModelMapper>();
+            services.AddScoped<IBigGamingGameHistoryService, BigGamingGameHistoryService>();
             services.AddTransient<IBigGamingGamePlayerCreate, BigGamingGamePlayerCreate>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(BigGamingGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<BigGamingGameInitializer>());
