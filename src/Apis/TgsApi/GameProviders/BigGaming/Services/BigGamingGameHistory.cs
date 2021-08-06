@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
@@ -65,8 +63,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 if (response.Error == null)
                 {
                     var gamingVideoRoundQueryResponse =
-                        JsonSerializer.Deserialize<BigGamingVideoRoundQueryResponse>(
-                            JsonSerializer.Serialize(response.Result));
+                        _jsonSerializationProvider.DeserializeFromString<BigGamingVideoRoundQueryResponse>(
+                            _jsonSerializationProvider.SerializeToString(response.Result));
                     if (gamingVideoRoundQueryResponse != null)
                     {
                         value = _bigGamingGameHistoryService.GetGameHistory(gamingVideoRoundQueryResponse.Items.First());

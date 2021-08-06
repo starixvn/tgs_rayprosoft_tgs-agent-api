@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Json;
 using TGS.Shared.Game.Models.BigGaming.Outgoing;
 
@@ -165,32 +164,28 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var i = 0;
             for (var card = 0; card < 4; card++)
             {
-                var cardString = GetCard(card);
+                var cardString = card switch
+                {
+                    1 => "♥",
+                    2 => "♣",
+                    3 => "♦",
+                    _ => "♠"
+                };
                 for (var number = 0; number < 13; number++)
                 {
-                    var numberString = GetNumber(number + 1);
+                    var numberString = (number + 1) switch
+                    {
+                        1 => "A",
+                        11 => "J",
+                        12 => "Q",
+                        13 => "K",
+                        _ => (number + 1).ToString()
+                    };
                     pokerMapper.Add(i + 1, cardString + numberString);
                     i++;
                 }
             }
         }
-
-        private static string GetCard(int cardIndex) => cardIndex switch
-        {
-            1 => "♥",
-            2 => "♣",
-            3 => "♦",
-            _ => "♠"
-        };
-
-        private static string GetNumber(int value) => value switch
-        {
-            1 => "A",
-            11 => "J",
-            12 => "Q",
-            13 => "K",
-            _ => value.ToString()
-        };
 
         private static string GetFullColor(int value)
         {
