@@ -23,6 +23,9 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandLiveChat
         {
             var result = await _tgsQueries.GetSingleAsync(x => x.BrandId == query.BrandId);
 
+            if (result == null)
+                return null;
+
             return new BrandLiveChatInfo()
             {
                 ChatName = result.ChatName,
