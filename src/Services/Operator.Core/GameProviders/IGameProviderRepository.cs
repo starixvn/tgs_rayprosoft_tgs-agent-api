@@ -7,6 +7,8 @@ namespace TGS.Services.Operator.GameProviders
 {
     public interface IGameProviderRepository
     {
+        ValueTask AddFavoriteGameAsync(Guid brandId, FavoriteGameInfo gameInfo);
+
         ValueTask<GameProviderDataInfo?> GetGameProviderByIdAsync(Guid gameProviderId);
 
         ValueTask<SubGameProviderWithLocationDataInfo?> GetSubGameProviderDataInfoAsync(string subGpCode);
@@ -33,6 +35,10 @@ namespace TGS.Services.Operator.GameProviders
             IEnumerable<GameStatus> statuses,
             IEnumerable<GamePlatformType> gamePlatformTypes);
 
+        IAsyncEnumerable<FavoriteGameInfo> QueryPlayerFavoriteGamesAsync(Guid brandId, string playerCode);
+
         IAsyncEnumerable<SubGameProviderWithLocationDataInfo> QuerySubGameProvidersAsync();
+
+        ValueTask RemoveFavoriteGameAsync(string playerCode, int gameId);
     }
 }

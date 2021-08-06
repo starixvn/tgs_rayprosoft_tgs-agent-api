@@ -279,7 +279,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Controllers
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
 
-            var transfer = await _service.TransferAsync(gameProviderId, playerCode, data.BizId.ToString(), data.Amount).ConfigureAwait(false);
+            var transfer = await _service.TransferAsync(gameProviderId, playerCode, data.BizId.ToString(), decimal.Parse(data.Amount)).ConfigureAwait(false);
 
             return new()
             {

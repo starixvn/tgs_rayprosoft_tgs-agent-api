@@ -5,9 +5,11 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Amazon.S3.Model;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
@@ -17,6 +19,7 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
 using TGS.Services.Operator.Services.GameBalance;
 using TGS.ServiceUtility;
+using Tag = TGS.Apis.OperatorApi.Models.Messages.Tag;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -34,6 +37,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
             [FromServices] IQueryService<GetGamesQuery, GameInfo> getGamesQueryService,
             [FromServices] IQueryService<GetAllGamesByGameTypeQuery, GameInfo> queryAllGameService,
+            [FromServices] IPlayerOperations playerOperations,
             [FromQuery] GetGamesRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
@@ -45,18 +49,31 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ExternalToInternalAsync(currentCultureInfo.Name, brandId)
                 .ConfigureAwait(false);
 
+            var playerType = PlayerType.RealPlayer;
+            var platformType = request.PlatformType;
+
+            if (playerTokenData != null)
+            {
+                var cachedPlayer = await playerOperations
+                    .GetCachedPlayerAsync(playerTokenData.PlayerCode)
+                    .ConfigureAwait(false);
+
+                playerType = cachedPlayer.Type;
+                platformType = playerTokenData.PlatformType;
+            }
+
             if (string.IsNullOrWhiteSpace(request.SubGameProviderCode))
             {
                 var query = new GetAllGamesByGameTypeQuery(
                     brandId,
-                    playerTokenData,
-                    request.PlatformType,
+                    playerType,
+                    platformType,
                     request.Types ?? Array.Empty<GameType>());
 
                 var games = from info in queryAllGameService.QueryAsync(query)
                             let lang = info.Localization.ContainsKey(cultureCode)
                                 ? info.Localization[cultureCode]
-                                : null
+                                : JsonDocument.Parse("{}")
                             orderby info.DisplayOrder, info.Code
                             select new GameModel
                             {
@@ -90,14 +107,14 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var query = new GetGamesQuery(
                     brandId,
                     request.SubGameProviderCode,
-                    playerTokenData,
-                    request.PlatformType,
+                    playerType,
+                    platformType,
                     request.Types ?? Array.Empty<GameType>());
 
                 var games = from info in getGamesQueryService.QueryAsync(query)
                             let lang = info.Localization.ContainsKey(cultureCode)
                                 ? info.Localization[cultureCode]
-                                : null
+                                : JsonDocument.Parse("{}")
                             orderby info.DisplayOrder, info.Code
                             select new GameModel
                             {
@@ -244,6 +261,68 @@ namespace TGS.Apis.OperatorApi.Controllers
                 ErrorMessage = info.ErrorMessage,
                 Url = info.Url
             };
+        }
+
+        [HttpPut("favorite/{gameId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask SetGameToFavoriteAsync(
+            [FromServices] ICommandService<SetFavoriteGameCommand> setService,
+            [FromServices] IGetService<CountPlayerFavoriteGameQuery, int> countService,
+            int gameId)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var count = await countService
+                .GetAsync(new CountPlayerFavoriteGameQuery(
+                    brandId,
+                    playerTokenData.PlayerCode))
+                .ConfigureAwait(false);
+
+            if (count >= 100)
+                throw new FavoriteCountFullException();
+
+            var command = new SetFavoriteGameCommand(
+                brandId,
+                playerTokenData.PlayerCode,
+                gameId);
+
+            await setService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+        }
+
+        [HttpDelete("favorite/{gameId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask RemoveGameFromFavoriteAsync(
+            [FromServices] ICommandService<RemoveFavoriteGameCommand> removeService,
+            int gameId)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var command = new RemoveFavoriteGameCommand(
+                playerTokenData.PlayerCode,
+                gameId);
+
+            return removeService.ExecuteAsync(command);
+        }
+
+        [HttpGet("favorite/{gameType}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public IAsyncEnumerable<int> GetFavoriteGamesAsync(
+            [FromServices] IQueryService<ListFavoriteGameIdsQuery, FavoriteGameInfo> listService,
+            GameType gameType)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new ListFavoriteGameIdsQuery(
+                brandId,
+                playerTokenData.PlayerCode,
+                gameType);
+
+            return listService.QueryAsync(query)
+                .Select(fg => fg.GameId);
         }
 
         private static string GetLocalization(JsonElement element, string propertyName, string defaultValue)

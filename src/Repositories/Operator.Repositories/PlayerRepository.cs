@@ -55,11 +55,17 @@ namespace TGS.Operator.Repositories
                 .ConfigureAwait(false);
 
             if (settingData == null)
+            {
                 settingData = new PlayerGameSetting
                 {
                     PlayerCode = playerCode,
                     IsAutoTransferToGame = false
                 };
+
+                await _tgsRepository.PlayerGameSettings
+                    .AddAsync(settingData)
+                    .ConfigureAwait(false);
+            }
 
             settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
 

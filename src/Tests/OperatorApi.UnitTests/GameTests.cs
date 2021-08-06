@@ -109,7 +109,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 "GpCode");
 
             fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
-                .Returns(new[] {
+                .Returns(new[]
+                {
                     new BrandSubGameProviderInfo(
                         "sub1",
                         "sub1",
@@ -154,13 +155,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
             var brandId = Guid.NewGuid();
-            var gameProviderCode = string.Empty;
 
             var evoGp = new GameProviderDataInfo(Guid.NewGuid(), "EVO", Status.Active, false);
             var sboGp = new GameProviderDataInfo(Guid.NewGuid(), "SBO", Status.Active, false);
@@ -313,13 +312,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var query = new GetAllGamesByGameTypeQuery(
                 brandId,
-                new PlayerTokenData(),
+                PlayerType.RealPlayer,
                 PlatformType.Desktop,
                 Array.Empty<GameType>());
 
             var sut = new GetAllGamesByGameTypeQueryService(
                 fakeBrandOperations,
-                fakePlayerOperations,
                 fakeValidStatus,
                 fakeValidGameStatus,
                 fakeGameProviderRepository,
@@ -343,23 +341,24 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var query = new GetGamesQuery(
                 Guid.NewGuid(),
                 "Test",
-                new PlayerTokenData(),
+                PlayerType.RealPlayer,
                 PlatformType.Desktop,
                 Array.Empty<GameType>());
 
             fakeQueryAllService.QueryAsync(Arg.Any<GetAllGamesByGameTypeQuery>())
-                .Returns(new[] {
+                .Returns(new[]
+                {
                     new GameInfo
                     {
                         Id = 1,
-                        Code= "test",
+                        Code = "test",
                         Name = "test",
                         GameProviderCode = "Test"
                     },
                     new GameInfo
                     {
                         Id = 2,
-                        Code= "test",
+                        Code = "test",
                         Name = "test",
                         GameProviderCode = "ABC"
                     }
@@ -378,7 +377,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             // arrange
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
             var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
             var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
@@ -538,7 +536,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var sut = new GetAllGamesByGameTypeQueryService(
                 fakeBrandOperations,
-                fakePlayerOperations,
                 fakeValidStatus,
                 fakeValidGameStatus,
                 fakeGameProviderRepository,
@@ -552,7 +549,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var query = new GetAllGamesByGameTypeQuery(
                 brandId,
-                new PlayerTokenData(),
+                PlayerType.RealPlayer,
                 PlatformType.Desktop,
                 gameTypes);
 
@@ -746,6 +743,94 @@ namespace TGS.Tests.OperatorApi.UnitTests
             // assert
             Assert.AreEqual("http://www.lobbyURL.com", actual.Url);
             Assert.AreEqual(0, actual.Error);
+        }
+
+        [Test]
+        public async Task Player_Can_Add_Favorite_Game()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new SetFavoriteGameCommandService(fakeGameProviderRepository);
+
+            var command = new SetFavoriteGameCommand(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                1000);
+
+            fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(command.BrandId))
+                .Returns(new[] {
+                    new BrandGameInfo(
+                        command.GameId,
+                        "code1",
+                        "name1",
+                        "test",
+                        "subgp1",
+                        Guid.NewGuid(),
+                        "gp1",
+                        GameType.Arcade,
+                        new TagInfo(),
+                        0,
+                        new Dictionary<string, JsonDocument>())
+                }.ToAsyncEnumerable());
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeGameProviderRepository.Received(1)
+                .AddFavoriteGameAsync(Arg.Is(command.BrandId), Arg.Any<FavoriteGameInfo>());
+        }
+
+        [Test]
+        public async Task Player_Can_Remove_Favorite_Game()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new RemoveFavoriteGameCommandService(fakeGameProviderRepository);
+
+            var command = new RemoveFavoriteGameCommand("ThisIsPlayerCode", 1000);
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeGameProviderRepository.Received(1)
+                .RemoveFavoriteGameAsync(Arg.Is(command.PlayerCode), Arg.Is(command.GameId));
+        }
+
+        [Test]
+        public void Player_Can_List_Favorite_Games()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new ListFavoriteGameIdsQueryService(fakeGameProviderRepository);
+
+            var query = new ListFavoriteGameIdsQuery(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                GameType.Arcade);
+
+            sut.QueryAsync(query);
+
+            fakeGameProviderRepository.Received(1)
+                .QueryPlayerFavoriteGamesAsync(
+                    Arg.Is(query.BrandId),
+                    Arg.Is(query.PlayerCode));
+        }
+
+        [Test]
+        public async Task Can_Count_Player_Favorite_Games()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new CountPlayerFavoriteGameQueryService(fakeGameProviderRepository);
+
+            var query = new CountPlayerFavoriteGameQuery(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode");
+
+            await sut.GetAsync(query);
+
+            fakeGameProviderRepository.Received(1)
+                .QueryPlayerFavoriteGamesAsync(
+                    Arg.Is(query.BrandId),
+                    Arg.Is(query.PlayerCode));
         }
     }
 }

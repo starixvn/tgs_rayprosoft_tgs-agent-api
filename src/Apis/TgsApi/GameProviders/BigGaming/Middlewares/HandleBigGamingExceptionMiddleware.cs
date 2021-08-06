@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -47,16 +48,34 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
             Exception exception)
         {
-            var error = (GameApiError)errorCode;
-            var message = ErrorMapper.GetMessageByException(exception);
+            if (context.Request.Path.Value.IgnoreCaseContains("api/bg/gamerecordfishing"))
+            {
+                var response = new BigGamingGPGameRecordResponse()
+                {
+                    Success = false,
+                    Count = 0,
+                    FailCount = 0,
+                    SuccessCount = 0,
+                    LastGameRecorTime = null,
+                    Error = (int)TGS.Core.Models.Enums.TgsApiError.SystemError,
+                    ErrorMessage = exception.Message,
+                };
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                await context.Response.WriteAsJsonAsync(response, response.GetType());
+            }
+            else
+            {
+                var error = (GameApiError)errorCode;
+                var message = ErrorMapper.GetMessageByException(exception);
 
-            var value = await context.Request.ReadAsStringAsync();
-            var baseRequest = JsonSerializer.Deserialize<BigGamingRequest>(value);
+                var value = await context.Request.ReadAsStringAsync();
+                var baseRequest = JsonSerializer.Deserialize<BigGamingRequest>(value);
 
-            var response = await GetResponseAsync(baseRequest, error, message).ConfigureAwait(false);
+                var response = await GetResponseAsync(baseRequest, error, message).ConfigureAwait(false);
 
-            context.Response.StatusCode = statusCode;
-            await context.Response.WriteAsJsonAsync(response, response.GetType());
+                context.Response.StatusCode = statusCode;
+                await context.Response.WriteAsJsonAsync(response, response.GetType());
+            }
         }
 
         #region Private Method
