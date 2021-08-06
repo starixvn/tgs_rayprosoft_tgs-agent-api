@@ -43,6 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         GameActionType GetGameAction(BigGamingOrderStatus betStatus);
         string GetBetType(string playId);
         decimal GetAmount(int externalGameId, string playId, decimal amount);
+        ClientRoundStatus GetClientRound(decimal settleAmount);
     }
     internal sealed class BigGamingService : IBigGamingService
     {
@@ -265,6 +266,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             }
             return amount;
         }
+
+        ClientRoundStatus IBigGamingService.GetClientRound(decimal settleAmount)
+            => settleAmount switch
+            {
+                > 0 => ClientRoundStatus.Win,
+                < 0 => ClientRoundStatus.Loss,
+                0 => ClientRoundStatus.Draw
+            };
 
         private async ValueTask<BigGamingBrandMerchant> GetBrandMerchantAsync(string currencyCode)
         {
