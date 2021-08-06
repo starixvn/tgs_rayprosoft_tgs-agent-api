@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Dragon Fishing,Dragon_Fishing,,7_7001,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
 Dragon Fishing II,Dragon_Fishing_II,,7_7002,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB
 Cai Shen Fishing,Cai_Shen_Fishing,,7_7003,Fishing,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,JDB

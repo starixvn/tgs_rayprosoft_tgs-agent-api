@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Lobby,Lobby,,0,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,BG
 Baccarat,Baccarat,,1,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,BG
 Roulette,Roulette,,2,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,BG

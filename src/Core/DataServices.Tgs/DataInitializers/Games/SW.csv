@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 3 Card Brag,3_Card_Brag,,sw_tcb,TableGame,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,SW
 8 Treasures 1 Queen,8_Treasures_1_Queen,,sw_8tr1qu,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,SW
 88 Shi fu,88_Shi_fu,,sw_88sf,Slot,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,SW
