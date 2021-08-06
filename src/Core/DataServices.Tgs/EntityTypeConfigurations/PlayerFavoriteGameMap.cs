@@ -27,14 +27,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(16);
 
             builder.HasOne<Brand>()
-                .WithOne()
-                .HasForeignKey<PlayerFavoriteGame>(fg => fg.BrandId)
+                .WithMany()
+                .HasForeignKey(fg => fg.BrandId)
                 .HasConstraintName("fk_player_favorite_games_brand_brand_id")
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne<Player>()
-                .WithOne()
-                .HasForeignKey<PlayerFavoriteGame>(fg => fg.PlayerCode)
+                .WithMany()
+                .HasForeignKey(fg => fg.PlayerCode)
                 .HasConstraintName("fk_player_favorite_games_player_player_code")
                 .OnDelete(DeleteBehavior.Cascade);
         }

@@ -3756,12 +3756,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_player_favorite_games");
 
                     b.HasIndex("BrandId")
-                        .IsUnique()
                         .HasDatabaseName("ix_player_favorite_games_brand_id");
-
-                    b.HasIndex("PlayerCode")
-                        .IsUnique()
-                        .HasDatabaseName("ix_player_favorite_games_player_code");
 
                     b.ToTable("player_favorite_games");
                 });
@@ -6632,15 +6627,15 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
-                        .WithOne()
-                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", "BrandId")
+                        .WithMany()
+                        .HasForeignKey("BrandId")
                         .HasConstraintName("fk_player_favorite_games_brand_brand_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
-                        .WithOne()
-                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", "PlayerCode")
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
                         .HasConstraintName("fk_player_favorite_games_player_player_code")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
