@@ -85,11 +85,12 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             }
             else
             {
+                var record = _jsonSerializationProvider.DeserializeFromString<BigGamingGameRecordFishingResponse>(round.RoundDetail.AdditionalData);
                 var request = new BigGamingGameRecordFishingUrlRequest
                 {
                     Random = GuidExtensions.NewSequentialGuid().ToString(),
                     Sn = brandMerchant.SecretCode,
-                    ExternalRoundId = long.Parse(round.ExternalRoundId),
+                    ExternalId = long.Parse(record.ExternalId),
                     GameId = int.Parse(cachedGame.ExternalId)
                 };
 

@@ -14,7 +14,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
         /// The order identifier
         /// </summary>
         [JsonPropertyName("orderId")]
-        public long ExternalRoundId { get; set; }
+        public long ExternalId { get; set; }
         /// <summary>
         /// The game identifier
         /// </summary>
