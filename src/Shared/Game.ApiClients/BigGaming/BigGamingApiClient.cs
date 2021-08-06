@@ -122,9 +122,9 @@ namespace TGS.Shared.Game.ApiClients.BigGaming
 
         async ValueTask<BigGamingResponse> IBigGamingApiClient.GetGameRecordFishingUrlAsync(BigGamingBrandMerchant brandMerchant, BigGamingGameRecordFishingUrlRequest request)
         {
-            request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{request.ExternalRoundId}{request.GameId}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
+            request.Sign = _hashProvider.Hash($"{request.Random }{brandMerchant.SecretCode}{request.ExternalId}{request.GameId}{brandMerchant.SecretKey}", HashAlgorithmKind.Md5);
             var prefix = $"{_gameProvider}.GetGameRecordFishingUrl";
-            return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.sn.game.order.detail.url.get", prefix).ConfigureAwait(false);
+            return await GetAPIAsync(brandMerchant.ApiUrl, request, "open.sn.bg.order.detail.url.get", prefix).ConfigureAwait(false);
         }
 
         ValueTask<BigGamingResponse> GetAPIAsync<TSource>(Uri apiUrl, TSource source, string method, string prefix)
