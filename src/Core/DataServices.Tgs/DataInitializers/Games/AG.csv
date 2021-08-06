@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Asia Gaming Lobby,Asia_Gaming_Lobby,,asiagaminglobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,AG
 AGIN Baccarat,AGIN_Baccarat,,AGIN_DSP_BAC,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,AG
 AGIN Dragon Tiger,AGIN_Dragon_Tiger,,AGIN_DSP_DT,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,AG

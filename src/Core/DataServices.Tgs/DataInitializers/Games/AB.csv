@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Lobby,Lobby,,AllbetLobby,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,AB
 Normal Baccarat,Normal_Baccarat,,101,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AB
 VIP Baccarat,VIP_Baccarat,,102,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,AB
