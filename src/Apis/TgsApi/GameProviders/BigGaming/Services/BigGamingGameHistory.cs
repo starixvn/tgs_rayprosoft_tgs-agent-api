@@ -89,7 +89,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 {
                     Random = GuidExtensions.NewSequentialGuid().ToString(),
                     Sn = brandMerchant.SecretCode,
-                    ExternalRoundId = long.Parse(round.ExternalRoundId)
+                    ExternalRoundId = long.Parse(round.ExternalRoundId),
+                    GameId = int.Parse(cachedGame.ExternalId)
                 };
 
                 var response = await _client.GetGameRecordFishingUrlAsync(brandMerchant, request).ConfigureAwait(false);
