@@ -744,5 +744,93 @@ namespace TGS.Tests.OperatorApi.UnitTests
             Assert.AreEqual("http://www.lobbyURL.com", actual.Url);
             Assert.AreEqual(0, actual.Error);
         }
+
+        [Test]
+        public async Task Player_Can_Add_Favorite_Game()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new SetFavoriteGameCommandService(fakeGameProviderRepository);
+
+            var command = new SetFavoriteGameCommand(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                1000);
+
+            fakeGameProviderRepository.QueryAllGamesAsync(Arg.Is(command.BrandId))
+                .Returns(new[] {
+                    new BrandGameInfo(
+                        command.GameId,
+                        "code1",
+                        "name1",
+                        "test",
+                        "subgp1",
+                        Guid.NewGuid(),
+                        "gp1",
+                        GameType.Arcade,
+                        new TagInfo(),
+                        0,
+                        new Dictionary<string, JsonDocument>())
+                }.ToAsyncEnumerable());
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeGameProviderRepository.Received(1)
+                .AddFavoriteGameAsync(Arg.Is(command.BrandId), Arg.Any<FavoriteGameInfo>());
+        }
+
+        [Test]
+        public async Task Player_Can_Remove_Favorite_Game()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new RemoveFavoriteGameCommandService(fakeGameProviderRepository);
+
+            var command = new RemoveFavoriteGameCommand("ThisIsPlayerCode", 1000);
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeGameProviderRepository.Received(1)
+                .RemoveFavoriteGameAsync(Arg.Is(command.PlayerCode), Arg.Is(command.GameId));
+        }
+
+        [Test]
+        public void Player_Can_List_Favorite_Games()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new ListFavoriteGameIdsQueryService(fakeGameProviderRepository);
+
+            var query = new ListFavoriteGameIdsQuery(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                GameType.Arcade);
+
+            sut.QueryAsync(query);
+
+            fakeGameProviderRepository.Received(1)
+                .QueryPlayerFavoriteGamesAsync(
+                    Arg.Is(query.BrandId),
+                    Arg.Is(query.PlayerCode));
+        }
+
+        [Test]
+        public async Task Can_Count_Player_Favorite_Games()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new CountPlayerFavoriteGameQueryService(fakeGameProviderRepository);
+
+            var query = new CountPlayerFavoriteGameQuery(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode");
+
+            await sut.GetAsync(query);
+
+            fakeGameProviderRepository.Received(1)
+                .QueryPlayerFavoriteGamesAsync(
+                    Arg.Is(query.BrandId),
+                    Arg.Is(query.PlayerCode));
+        }
     }
 }

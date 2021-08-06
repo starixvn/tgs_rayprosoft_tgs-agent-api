@@ -31,5 +31,6 @@
   "InsufficientBucket": "水桶未满: 尚未达到该水桶标准。",
   "PromotionCannotJoin": "活动无法参加: 不能参加该活动。",
   "GameBalanceFundInFailed": "游戏馀额转入失败: 馀额转入该游戏失败。",
-  "GameBalanceFundOutFailed": "游戏馀额转出失败: 馀额转出该游戏失败。"
+  "GameBalanceFundOutFailed": "游戏馀额转出失败: 馀额转出该游戏失败。",
+  "FavoriteAlreadyFull": "我的最爱数量已满。"
 }
