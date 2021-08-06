@@ -17,17 +17,23 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
     {
         [HttpGet("{brandId}")]
         [Description("Get a brand's live chat")]
-        public async Task<BrandLiveChatModel> GetBrandLiveChatAsync(
+        public async Task<GetBrandLiveChatResponse> GetBrandLiveChatAsync(
             Guid brandId,
             [FromServices] IGetService<BrandLiveChatQuery, BrandLiveChatInfo> queryService)
         {
             var query = new BrandLiveChatQuery(brandId);
             var info = await queryService.GetAsync(query).ConfigureAwait(false);
 
-            return new BrandLiveChatModel()
+            if (info == null)
+                return new GetBrandLiveChatResponse();
+
+            return new GetBrandLiveChatResponse()
             {
-                Name = info.ChatName,
-                Setting = info.ChatSetting
+                Data = new BrandLiveChatModel()
+                {
+                    Name = info.ChatName,
+                    Setting = info.ChatSetting
+                }
             };
         }
 
