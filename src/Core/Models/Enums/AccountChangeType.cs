@@ -12,6 +12,8 @@
         GameProviderFundOut = 7,
         GameProviderFundIn = 8,
         CancelWithdrawal = 9,
+        GameProviderDeposit = 10,
+        GameProviderWithdrawal = 11,
         PlaceBet = 100,
         WinBet = 101,
         LoseBet = 102,
