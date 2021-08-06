@@ -94,7 +94,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 {
                     Random = GuidExtensions.NewSequentialGuid().ToString(),
                     Sn = brandMerchant.SecretCode,
-                    ExternalRoundId = long.Parse(round.ExternalRoundId),
+                    ExternalRoundId = long.Parse(record.ExternalBetId),
                     GameId = int.Parse(cachedGame.ExternalId),
                     Locale = culture
                 };

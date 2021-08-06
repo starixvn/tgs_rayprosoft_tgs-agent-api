@@ -137,7 +137,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         GameProviderCode = _service.GetGameProviderCode(),
                         PlayerCode = (player == null) ? string.Empty : player.PlayerCode,
                         GameId = gameId.GetValueOrDefault(-1),
-                        ExternalId = gameRecord.ExternalId.ToString(),
+                        ExternalId = gameRecord.ExternalBetId.ToString(),
                         CurrencyCode = player.DefaultWalletCurrencyCode,
                         Status = RoundStatus.Closed,
                         GameProviderConfigurationId = gameProviderConfigurationId,
