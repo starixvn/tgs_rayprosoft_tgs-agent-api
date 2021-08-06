@@ -137,6 +137,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PlayerBucket> PlayerBuckets { get; set; }
 
+        DbSet<PlayerFavoriteGame> PlayerFavoriteGames { get; set; }
+
         DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
 
         DbSet<PlayerGameSetting> PlayerGameSettings { get; set; }
@@ -334,6 +336,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<PlayerBucketHistory> PlayerBucketHistories { get; set; }
 
         public DbSet<PlayerBucket> PlayerBuckets { get; set; }
+
+        public DbSet<PlayerFavoriteGame> PlayerFavoriteGames { get; set; }
 
         public DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
 

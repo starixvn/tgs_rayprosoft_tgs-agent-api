@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
@@ -15,8 +16,8 @@ namespace TGS.Operator.Repositories
 {
     internal class GameProviderRepository : IGameProviderRepository
     {
-        private readonly ITgsRepository _tgsRepository;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly ITgsRepository _tgsRepository;
 
         public GameProviderRepository(
             ITgsRepository tgsRepository,
@@ -24,6 +25,24 @@ namespace TGS.Operator.Repositories
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+        }
+
+        public async ValueTask AddFavoriteGameAsync(Guid brandId, FavoriteGameInfo gameInfo)
+        {
+            var fg = new PlayerFavoriteGame
+            {
+                PlayerCode = gameInfo.PlayerCode,
+                BrandId = brandId,
+                GameId = gameInfo.GameId,
+                GameType = gameInfo.GameType,
+                SubGameProviderCode = gameInfo.SubGpCode
+            };
+
+            await _tgsRepository.PlayerFavoriteGames
+                .AddAsync(fg)
+                .ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async ValueTask<GameProviderDataInfo?> GetGameProviderByIdAsync(Guid gameProviderId)
@@ -56,65 +75,6 @@ namespace TGS.Operator.Repositories
                 .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
-        public IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId)
-        {
-            var query = from brandGp in _tgsRepository.BrandGameProviders.AsQueryable()
-                        from gp in _tgsRepository.GameProviders
-                        from subGp in _tgsRepository.SubGameProviders
-                        where brandGp.GameProviderId == gp.Id
-                            && brandGp.GameProviderId == subGp.GameProviderId
-                            && brandGp.BrandId == brandId
-                        select new BrandSubGameProviderInfo(
-                            subGp.Code,
-                            subGp.Name,
-                            subGp.Description,
-                            gp.Id,
-                            gp.Code,
-                            gp.TransferWallet,
-                            gp.Status);
-
-            return query.ToAsyncEnumerable();
-        }
-
-        public IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(Guid gameProviderId)
-        {
-            var query = from gpc in _tgsRepository.GameProviderCurrencies.AsQueryable()
-                        where gpc.GameProviderId == gameProviderId
-                        select new GameProviderCurrencyDataInfo(
-                            gpc.GameProviderId,
-                            gpc.CurrencyCode);
-
-            return query.ToAsyncEnumerable();
-        }
-
-        public IAsyncEnumerable<GameProviderDataInfo> QueryGameProvidersAsync()
-        {
-            var query = from gp in _tgsRepository.GameProviders.AsQueryable()
-                        select new GameProviderDataInfo(
-                            gp.Id,
-                            gp.Code,
-                            gp.Status,
-                            gp.TransferWallet);
-
-            return query.ToAsyncEnumerable();
-        }
-
-        public IAsyncEnumerable<SubGameProviderWithLocationDataInfo> QuerySubGameProvidersAsync()
-        {
-            var query = from sgp in _tgsRepository.SubGameProviders
-                            .AsQueryable()
-                            .Include(sgp => sgp.GameProvider)
-                        select new SubGameProviderWithLocationDataInfo(
-                            sgp.GameProviderId,
-                            sgp.GameProvider.Code,
-                            sgp.Code,
-                            sgp.Name,
-                            sgp.Description,
-                            sgp.Localization);
-
-            return query.ToAsyncEnumerable();
-        }
-
         public IAsyncEnumerable<GameDataInfo> QueryAllGamesAsync(Guid brandId, IEnumerable<GameStatus> statuses)
         {
             var statusesFilter = statuses.ToArray();
@@ -137,50 +97,6 @@ namespace TGS.Operator.Repositories
                             game.AvailableToBrand,
                             game.AvailableCurrencies,
                             game.Localization);
-
-            return query.ToAsyncEnumerable();
-        }
-
-        public IAsyncEnumerable<GameDataInfo> QueryGamesAsync(
-            IEnumerable<Guid> gameProviderIds,
-            IEnumerable<GameStatus> statuses,
-            IEnumerable<GamePlatformType> gamePlatformTypes)
-        {
-            var query = _tgsRepository.Games.AsQueryable()
-                .Where(g => gameProviderIds.Contains(g.GameProviderId) &&
-                    statuses.Contains(g.Status) &&
-                    gamePlatformTypes.Contains(g.PlatformType))
-                .Select(g =>
-                    new GameDataInfo(
-                        g.Id,
-                        g.Code,
-                        g.Name,
-                        g.Description,
-                        g.SubGameProviderCode,
-                        g.Status,
-                        g.Type,
-                        g.PlatformType,
-                        g.AvailableToBrand,
-                        g.AvailableCurrencies,
-                        g.Localization));
-
-            return query.ToAsyncEnumerable();
-        }
-
-        public IAsyncEnumerable<GameTypeDataInfo> QueryGameTypeInfosAsync(
-            IEnumerable<Guid> gameProviderIds,
-            IEnumerable<GameStatus> statuses,
-            IEnumerable<GamePlatformType> gamePlatformTypes)
-        {
-            var query = _tgsRepository.Games.AsQueryable()
-                .Where(g => gameProviderIds.Contains(g.GameProviderId) &&
-                    statuses.Contains(g.Status) &&
-                    gamePlatformTypes.Contains(g.PlatformType))
-                .Select(g => new GameTypeDataInfo(
-                    g.GameProviderId,
-                    g.Type,
-                    g.SubGameProviderCode))
-                .Distinct();
 
             return query.ToAsyncEnumerable();
         }
@@ -240,6 +156,134 @@ namespace TGS.Operator.Repositories
                         : _jsonSerializationProvider.DeserializeFromString<Dictionary<string, JsonDocument>>(
                             info.Localization,
                             null)));
+        }
+
+        public IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId)
+        {
+            var query = from brandGp in _tgsRepository.BrandGameProviders.AsQueryable()
+                        from gp in _tgsRepository.GameProviders
+                        from subGp in _tgsRepository.SubGameProviders
+                        where brandGp.GameProviderId == gp.Id
+                            && brandGp.GameProviderId == subGp.GameProviderId
+                            && brandGp.BrandId == brandId
+                        select new BrandSubGameProviderInfo(
+                            subGp.Code,
+                            subGp.Name,
+                            subGp.Description,
+                            gp.Id,
+                            gp.Code,
+                            gp.TransferWallet,
+                            gp.Status);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<GameProviderCurrencyDataInfo> QueryGameProviderCurrenciesAsync(Guid gameProviderId)
+        {
+            var query = from gpc in _tgsRepository.GameProviderCurrencies.AsQueryable()
+                        where gpc.GameProviderId == gameProviderId
+                        select new GameProviderCurrencyDataInfo(
+                            gpc.GameProviderId,
+                            gpc.CurrencyCode);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<GameProviderDataInfo> QueryGameProvidersAsync()
+        {
+            var query = from gp in _tgsRepository.GameProviders.AsQueryable()
+                        select new GameProviderDataInfo(
+                            gp.Id,
+                            gp.Code,
+                            gp.Status,
+                            gp.TransferWallet);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<GameDataInfo> QueryGamesAsync(
+            IEnumerable<Guid> gameProviderIds,
+            IEnumerable<GameStatus> statuses,
+            IEnumerable<GamePlatformType> gamePlatformTypes)
+        {
+            var query = _tgsRepository.Games.AsQueryable()
+                .Where(g => gameProviderIds.Contains(g.GameProviderId) &&
+                    statuses.Contains(g.Status) &&
+                    gamePlatformTypes.Contains(g.PlatformType))
+                .Select(g =>
+                    new GameDataInfo(
+                        g.Id,
+                        g.Code,
+                        g.Name,
+                        g.Description,
+                        g.SubGameProviderCode,
+                        g.Status,
+                        g.Type,
+                        g.PlatformType,
+                        g.AvailableToBrand,
+                        g.AvailableCurrencies,
+                        g.Localization));
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<GameTypeDataInfo> QueryGameTypeInfosAsync(
+            IEnumerable<Guid> gameProviderIds,
+            IEnumerable<GameStatus> statuses,
+            IEnumerable<GamePlatformType> gamePlatformTypes)
+        {
+            var query = _tgsRepository.Games.AsQueryable()
+                .Where(g => gameProviderIds.Contains(g.GameProviderId) &&
+                    statuses.Contains(g.Status) &&
+                    gamePlatformTypes.Contains(g.PlatformType))
+                .Select(g => new GameTypeDataInfo(
+                    g.GameProviderId,
+                    g.Type,
+                    g.SubGameProviderCode))
+                .Distinct();
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<FavoriteGameInfo> QueryPlayerFavoriteGamesAsync(Guid brandId, string playerCode)
+        {
+            var query = from fg in _tgsRepository.PlayerFavoriteGames.AsQueryable()
+                        where fg.BrandId == brandId && fg.PlayerCode == playerCode
+                        select fg;
+
+            return query.ToAsyncEnumerable()
+                .Select(fg => new FavoriteGameInfo(
+                    fg.PlayerCode,
+                    fg.GameId,
+                    fg.GameType,
+                    fg.SubGameProviderCode));
+        }
+
+        public IAsyncEnumerable<SubGameProviderWithLocationDataInfo> QuerySubGameProvidersAsync()
+        {
+            var query = from sgp in _tgsRepository.SubGameProviders
+                            .AsQueryable()
+                            .Include(sgp => sgp.GameProvider)
+                        select new SubGameProviderWithLocationDataInfo(
+                            sgp.GameProviderId,
+                            sgp.GameProvider.Code,
+                            sgp.Code,
+                            sgp.Name,
+                            sgp.Description,
+                            sgp.Localization);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public async ValueTask RemoveFavoriteGameAsync(string playerCode, int gameId)
+        {
+            var fg = await _tgsRepository.PlayerFavoriteGames
+                .FindAsync(playerCode, gameId)
+                .ConfigureAwait(false);
+
+            _tgsRepository.PlayerFavoriteGames.Remove(fg);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

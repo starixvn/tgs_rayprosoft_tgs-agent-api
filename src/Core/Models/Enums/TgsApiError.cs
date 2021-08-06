@@ -33,6 +33,7 @@
         ValidateCodeNotVerify = 405,
         EmailNotVerify = 406,
         PromotionCannotJoin = 407,
+        FavoriteFull = 408,
 
         SystemError = 900,
         OperationNotAllowed = 901,
