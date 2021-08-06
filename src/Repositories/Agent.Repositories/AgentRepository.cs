@@ -22,7 +22,8 @@ namespace TGS.Agent.Repositories
                 .FindAsync(id)
                 .ConfigureAwait(false);
 
-            var dividend = await _tgsRepository.AgentDividends.AsQueryable().Where(x => x.SentOn == null)
+            var dividend = await _tgsRepository.AgentDividends.AsQueryable()
+                .Where(x => x.AgentId == id && x.SentOn == null)
                 .SumAsync(x => x.AgentDividendAmount).ConfigureAwait(false);
 
             return new AgentInfo(
