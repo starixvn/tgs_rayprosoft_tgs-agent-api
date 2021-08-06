@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Baccarat Classic,Baccarat_Classic,,MX-LIVE-001,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,SG
 Baccarat,Baccarat,,MX-LIVE-002,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,SG
 Baccarat Insurance,Baccarat_Insurance,,MX-LIVE-003,LiveDealer,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,SG

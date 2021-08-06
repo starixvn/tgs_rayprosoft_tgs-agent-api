@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 1v1 Bull-Bull,1v1_Bull_Bull,,1810,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,KY
 2 Persons' Mahjong,2_Persons_Mahjong,,740,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,KY
 Baccarat,Baccarat,,910,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,KY
