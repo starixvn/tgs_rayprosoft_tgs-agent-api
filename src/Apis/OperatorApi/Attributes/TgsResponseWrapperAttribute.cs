@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -21,6 +22,90 @@ namespace TGS.Apis.OperatorApi.Attributes
                     break;
 
                 case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<object> ae:
+                    {
+                        var adjustResult = new ObjectResult(new SuccessResponse<object>
+                        {
+                            Data = ae.ToEnumerable()
+                        });
+
+                        adjustResult.StatusCode = result.StatusCode;
+                        adjustResult.Formatters = result.Formatters;
+
+                        context.Result = adjustResult;
+                    }
+                    break;
+
+                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<int> ae:
+                    {
+                        var adjustResult = new ObjectResult(new SuccessResponse<object>
+                        {
+                            Data = ae.ToEnumerable()
+                        });
+
+                        adjustResult.StatusCode = result.StatusCode;
+                        adjustResult.Formatters = result.Formatters;
+
+                        context.Result = adjustResult;
+                    }
+                    break;
+
+                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<long> ae:
+                    {
+                        var adjustResult = new ObjectResult(new SuccessResponse<object>
+                        {
+                            Data = ae.ToEnumerable()
+                        });
+
+                        adjustResult.StatusCode = result.StatusCode;
+                        adjustResult.Formatters = result.Formatters;
+
+                        context.Result = adjustResult;
+                    }
+                    break;
+
+                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<float> ae:
+                    {
+                        var adjustResult = new ObjectResult(new SuccessResponse<object>
+                        {
+                            Data = ae.ToEnumerable()
+                        });
+
+                        adjustResult.StatusCode = result.StatusCode;
+                        adjustResult.Formatters = result.Formatters;
+
+                        context.Result = adjustResult;
+                    }
+                    break;
+
+                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<double> ae:
+                    {
+                        var adjustResult = new ObjectResult(new SuccessResponse<object>
+                        {
+                            Data = ae.ToEnumerable()
+                        });
+
+                        adjustResult.StatusCode = result.StatusCode;
+                        adjustResult.Formatters = result.Formatters;
+
+                        context.Result = adjustResult;
+                    }
+                    break;
+
+                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<decimal> ae:
+                    {
+                        var adjustResult = new ObjectResult(new SuccessResponse<object>
+                        {
+                            Data = ae.ToEnumerable()
+                        });
+
+                        adjustResult.StatusCode = result.StatusCode;
+                        adjustResult.Formatters = result.Formatters;
+
+                        context.Result = adjustResult;
+                    }
+                    break;
+
+                case ObjectResult result when result.Value is not TgsResponse && result.Value is IAsyncEnumerable<Guid> ae:
                     {
                         var adjustResult = new ObjectResult(new SuccessResponse<object>
                         {
