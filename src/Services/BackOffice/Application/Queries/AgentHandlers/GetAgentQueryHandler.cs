@@ -26,7 +26,8 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
         {
             var agent = await _service.GetAgentAsync(x => x.Id == request.Id).ConfigureAwait(false);
 
-            var dividend = await _agentDividendService.GetAgentDividends().Where(x => x.SentOn == null)
+            var dividend = await _agentDividendService.GetAgentDividends()
+                .Where(x => x.AgentId == request.Id && x.SentOn == null)
                 .SumAsync(x => x.AgentDividendAmount, cancellationToken).ConfigureAwait(false);
 
             if (agent == null)
