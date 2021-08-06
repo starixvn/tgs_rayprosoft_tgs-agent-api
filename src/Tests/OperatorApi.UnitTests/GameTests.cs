@@ -812,7 +812,28 @@ namespace TGS.Tests.OperatorApi.UnitTests
             sut.QueryAsync(query);
 
             fakeGameProviderRepository.Received(1)
-                .QueryPlayerFavoriteGamesAsync(query.BrandId, query.PlayerCode);
+                .QueryPlayerFavoriteGamesAsync(
+                    Arg.Is(query.BrandId),
+                    Arg.Is(query.PlayerCode));
+        }
+
+        [Test]
+        public async Task Can_Count_Player_Favorite_Games()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+
+            var sut = new CountPlayerFavoriteGameQueryService(fakeGameProviderRepository);
+
+            var query = new CountPlayerFavoriteGameQuery(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode");
+
+            await sut.GetAsync(query);
+
+            fakeGameProviderRepository.Received(1)
+                .QueryPlayerFavoriteGamesAsync(
+                    Arg.Is(query.BrandId),
+                    Arg.Is(query.PlayerCode));
         }
     }
 }

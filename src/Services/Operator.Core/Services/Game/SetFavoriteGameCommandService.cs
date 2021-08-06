@@ -11,7 +11,8 @@ namespace TGS.Services.Operator.Services.Game
     {
         private readonly IGameProviderRepository _gameProviderRepository;
 
-        public SetFavoriteGameCommandService(IGameProviderRepository gameProviderRepository)
+        public SetFavoriteGameCommandService(
+            IGameProviderRepository gameProviderRepository)
         {
             _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
         }

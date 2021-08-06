@@ -9,6 +9,7 @@ using Amazon.S3.Model;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Enums;
 using TGS.Services.Operations;
@@ -250,19 +251,31 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPut("favorite/{gameId}")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask SetGameToFavoriteAsync(
+        public async ValueTask SetGameToFavoriteAsync(
             [FromServices] ICommandService<SetFavoriteGameCommand> setService,
+            [FromServices] IGetService<CountPlayerFavoriteGameQuery, int> countService,
             int gameId)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
             var brandId = HttpContext.Items.GetBrandId();
+
+            var count = await countService
+                .GetAsync(new CountPlayerFavoriteGameQuery(
+                    brandId,
+                    playerTokenData.PlayerCode))
+                .ConfigureAwait(false);
+
+            if (count >= 100)
+                throw new FavoriteCountFullException();
 
             var command = new SetFavoriteGameCommand(
                 brandId,
                 playerTokenData.PlayerCode,
                 gameId);
 
-            return setService.ExecuteAsync(command);
+            await setService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
         }
 
         [HttpDelete("favorite/{gameId}")]
