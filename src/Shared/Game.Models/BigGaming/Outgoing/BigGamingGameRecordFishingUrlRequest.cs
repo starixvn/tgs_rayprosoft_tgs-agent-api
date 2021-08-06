@@ -11,14 +11,19 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
     public record BigGamingGameRecordFishingUrlRequest : BigGamingParamsSignRequest
     {
         /// <summary>
-        /// The order identifier
+        /// The external round identifier
         /// </summary>
         [JsonPropertyName("orderId")]
-        public long ExternalId { get; set; }
+        public long ExternalRoundId { get; set; }
         /// <summary>
         /// The game identifier
         /// </summary>
-        [JsonPropertyName("gameId")]
+        [JsonPropertyName("gameType")]
         public int GameId { get; set; }
+        /// <summary>
+        /// The locale
+        /// </summary>
+        [JsonPropertyName("locale")]
+        public string Locale;
     }
 }

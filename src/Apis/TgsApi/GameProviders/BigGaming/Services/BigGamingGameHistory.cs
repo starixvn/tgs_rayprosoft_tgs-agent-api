@@ -22,6 +22,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IPlayerOperations _playerOperations;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IBigGamingGameHistoryService _bigGamingGameHistoryService;
+        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
 
         public BigGamingGameHistory(
             IRoundQueries roundQueries,
@@ -30,6 +31,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             IBigGamingService service,
             IPlayerOperations playerOperations,
             IBigGamingGameHistoryService bigGamingGameHistoryService,
+            IBrandGameProviderOperations brandGameProviderOperations,
             IJsonSerializationProvider jsonSerializationProvider
         ) : base(roundQueries, gameProviderOperations)
         {
@@ -37,6 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _bigGamingGameHistoryService = bigGamingGameHistoryService ?? throw new ArgumentNullException(nameof(bigGamingGameHistoryService));
+            _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
 
         }
@@ -85,13 +88,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             }
             else
             {
+                var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, round.BrandId, language);
                 var record = _jsonSerializationProvider.DeserializeFromString<BigGamingGameRecordFishingResponse>(round.RoundDetail.AdditionalData);
                 var request = new BigGamingGameRecordFishingUrlRequest
                 {
                     Random = GuidExtensions.NewSequentialGuid().ToString(),
                     Sn = brandMerchant.SecretCode,
-                    ExternalId = long.Parse(record.ExternalId),
-                    GameId = int.Parse(cachedGame.ExternalId)
+                    ExternalRoundId = long.Parse(round.ExternalRoundId),
+                    GameId = int.Parse(cachedGame.ExternalId),
+                    Locale = culture
                 };
 
                 var response = await _client.GetGameRecordFishingUrlAsync(brandMerchant, request).ConfigureAwait(false);
