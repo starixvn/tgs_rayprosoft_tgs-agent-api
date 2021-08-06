@@ -39,7 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
             var cachedGame = await _service.GetCachedGameAsync(request.GameId).ConfigureAwait(false);
 
-            var responseGameUrl = await _service.GetGameUrlAsync(request, brandMerchant, player, cachedGame, cultureCode).ConfigureAwait(false);
+            var responseGameUrl = await _service.GetGameUrlAsync(brandMerchant, player, cachedGame, cultureCode).ConfigureAwait(false);
             string url;
             if (responseGameUrl.Error != null)
             {
@@ -47,9 +47,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 {
                     await _bigGamingGamePlayerCreate.CreatePlayerAsync(player);
 
-                    responseGameUrl = await _service.GetGameUrlAsync(request, brandMerchant, player, cachedGame, cultureCode).ConfigureAwait(false);
-
-                    if (responseGameUrl.Result != null)
+                    responseGameUrl = await _service.GetGameUrlAsync(brandMerchant, player, cachedGame, cultureCode).ConfigureAwait(false);
+                    if (responseGameUrl.Error == null)
                     {
                         url = JsonSerializer.Deserialize<string>(JsonSerializer.Serialize(responseGameUrl.Result));
                     }
