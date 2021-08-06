@@ -18,6 +18,7 @@ namespace TGS.Shared.Game.Models.BigGaming.Outgoing
         /// <summary>
         /// The game identifier
         /// </summary>
+        [JsonPropertyName("gameId")]
         public int GameId { get; set; }
     }
 }
