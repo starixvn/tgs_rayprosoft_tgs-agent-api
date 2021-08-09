@@ -146,7 +146,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        ///     get game launch url via game id
+        /// get game launch url via game id
         /// </summary>
         [HttpPost("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -154,12 +154,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IPlayerOperations playerOperations,
             [FromServices] IStatusValidator playerStatusValidator,
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-            [FromServices] IGetService<GetGpCodeQuery, string> getGpCodeService,
+            [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
             [FromServices] IGetService<GetGameUrlQuery, GameUrlInfo> getGameUrlQueryService,
             [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
             [FromBody] GetGameUrlRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
 
             var cachedPlayer = await playerOperations
                 .GetCachedPlayerAsync(playerTokenData.PlayerCode)
@@ -172,8 +173,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ExternalToInternalAsync(currentCultureInfo.Name, cachedPlayer.BrandId)
                 .ConfigureAwait(false);
 
-            var gpCode = await getGpCodeService
-                .GetAsync(new GetGpCodeQuery(request.SubGameProviderCode))
+            var subGp = await getGpCodeService
+                .GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
                 .ConfigureAwait(false);
 
             var query = new GetGameUrlQuery(
@@ -189,12 +190,13 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            await fundService
-                .ExecuteAsync(new FundOutBeforeEnterGameCommand(
-                    cachedPlayer.BrandId,
-                    playerTokenData.PlayerCode,
-                    gpCode))
-                .ConfigureAwait(false);
+            if (subGp.IsTransferWallet)
+                await fundService
+                    .ExecuteAsync(new FundOutBeforeEnterGameCommand(
+                        cachedPlayer.BrandId,
+                        playerTokenData.PlayerCode,
+                        subGp.Code))
+                    .ConfigureAwait(false);
 
             return new GetGameUrlResponse
             {
@@ -205,7 +207,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        ///     get game launch url for lobby type game.
+        /// get game launch url for lobby type game.
         /// </summary>
         [HttpPost("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -213,12 +215,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IPlayerOperations playerOperations,
             [FromServices] IStatusValidator playerStatusValidator,
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
-            [FromServices] IGetService<GetGpCodeQuery, string> getGpCodeService,
+            [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
             [FromServices] IGetService<GetLobbyGameUrlQuery, LobbyGameUrlInfo> getLobbyGameUrlQueryService,
             [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
             [FromBody] GetLobbyGameUrlRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
 
             var cachedPlayer = await playerOperations
                 .GetCachedPlayerAsync(playerTokenData.PlayerCode)
@@ -226,8 +229,8 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             playerStatusValidator.ThrowIfPlayerDisabled(cachedPlayer.Status);
 
-            var gpCode = await getGpCodeService
-                .GetAsync(new GetGpCodeQuery(request.SubGameProviderCode))
+            var subGp = await getGpCodeService
+                .GetAsync(new GetGpCodeQuery(brandId, request.SubGameProviderCode))
                 .ConfigureAwait(false);
 
             var currentCultureInfo = CultureInfo.CurrentUICulture;
@@ -248,12 +251,13 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            await fundService
-                .ExecuteAsync(new FundOutBeforeEnterGameCommand(
-                    cachedPlayer.BrandId,
-                    playerTokenData.PlayerCode,
-                    gpCode))
-                .ConfigureAwait(false);
+            if (subGp.IsTransferWallet)
+                await fundService
+                    .ExecuteAsync(new FundOutBeforeEnterGameCommand(
+                        cachedPlayer.BrandId,
+                        playerTokenData.PlayerCode,
+                        subGp.Code))
+                    .ConfigureAwait(false);
 
             return new GetGameUrlResponse
             {

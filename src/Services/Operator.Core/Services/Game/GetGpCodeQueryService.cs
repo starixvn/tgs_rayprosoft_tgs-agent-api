@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
@@ -7,30 +8,31 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Game
 {
-    internal class GetGpCodeQueryService : IGetService<GetGpCodeQuery, string>
+    internal class GetGpCodeQueryService : IGetService<GetGpCodeQuery, BrandSubGameProviderInfo>
     {
-        private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
 
         public GetGpCodeQueryService(
-            IGameProviderRepository gameProviderRepository,
-            IGameProviderOperations gameProviderOperations)
+            IGameProviderRepository gameProviderRepository)
         {
             _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
         }
 
-        public async ValueTask<string> GetAsync(GetGpCodeQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<BrandSubGameProviderInfo> GetAsync(
+            GetGpCodeQuery query,
+            CancellationToken cancellationToken = default)
         {
             var subGp = await _gameProviderRepository
-                .GetSubGameProviderDataInfoAsync(query.SubGpCode)
+                .QueryAllSubGameProvidersAsync(query.BrandId)
+                .Where(bgp => bgp.Code == query.SubGpCode)
+                .FirstOrDefaultAsync()
                 .ConfigureAwait(false);
 
             if (subGp == null)
                 throw new ArgumentException(
                     $"No game provider of code '{query.SubGpCode}' is found");
 
-            return subGp.GpCode;
+            return subGp;
         }
     }
 }

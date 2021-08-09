@@ -1,4 +1,6 @@
-﻿namespace TGS.Services.Operator.Services.Game
+﻿using System;
+
+namespace TGS.Services.Operator.Services.Game
 {
-    public record GetGpCodeQuery(string SubGpCode);
+    public record GetGpCodeQuery(Guid BrandId, string SubGpCode);
 }
