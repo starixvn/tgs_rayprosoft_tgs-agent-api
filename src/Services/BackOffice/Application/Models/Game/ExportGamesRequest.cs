@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Net.Http;
+using System.IO;
 using MediatR;
 
 namespace TGS.Services.BackOffice.Application.Models.Game
 {
-    public record ExportGamesRequest(Guid Id) : IRequest<HttpResponseMessage>;
+    public record ExportGamesRequest(Guid Id) : IRequest<MemoryStream>;
 }
