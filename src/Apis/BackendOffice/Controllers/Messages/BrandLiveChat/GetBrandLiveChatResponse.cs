@@ -6,6 +6,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.BrandLiveChat
     {
         [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
         [JsonPropertyName("data")]
-        public BrandLiveChatModel? Data { get; set; }
+        public BrandLiveChatModel Data { get; set; }
     }
 }

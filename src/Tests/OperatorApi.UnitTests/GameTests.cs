@@ -28,20 +28,20 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class GameTests
     {
         [Test]
-        public async Task Enter_Game_If_Flag_Is_False_Not_FundIn_Wallet_Amount()
+        public async Task Enter_Game_If_Flag_Is_False_Not_FundOut_Wallet_Amount()
         {
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeFundOutService = Substitute.For<ICommandService<FundOutAllGameBalanceCommand>>();
+            var fakeFundInAllService = Substitute.For<ICommandService<FundInAllGameBalanceCommand>>();
             var fakeGetPlayerBalanceService = Substitute.For<IGetService<GetBalanceQuery, BalanceInfo>>();
-            var fakeFundInService = Substitute.For<ICommandService<SubmitGameBalanceFundInCommand>>();
+            var fakeFundOutService = Substitute.For<ICommandService<FundOutGameBalanceCommand>>();
 
-            var sut = new FundInBeforeEnterGameCommandService(
+            var sut = new FundOutBeforeEnterGameCommandService(
                 fakePlayerRepository,
-                fakeFundOutService,
+                fakeFundInAllService,
                 fakeGetPlayerBalanceService,
-                fakeFundInService);
+                fakeFundOutService);
 
-            var command = new FundInBeforeEnterGameCommand(
+            var command = new FundOutBeforeEnterGameCommand(
                 Guid.NewGuid(),
                 "ThisIsPlayerCode",
                 "gp1");
@@ -54,25 +54,25 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakeFundInService.Received(0)
-                .ExecuteAsync(Arg.Any<SubmitGameBalanceFundInCommand>());
+            _ = fakeFundOutService.Received(0)
+                .ExecuteAsync(Arg.Any<FundOutGameBalanceCommand>());
         }
 
         [Test]
-        public async Task Enter_Game_If_Flag_Is_True_Should_FundIn_Wallet_Amount()
+        public async Task Enter_Game_If_Flag_Is_True_Should_FundOut_Wallet_Amount()
         {
             var fakePlayerRepository = Substitute.For<IPlayerRepository>();
-            var fakeFundOutService = Substitute.For<ICommandService<FundOutAllGameBalanceCommand>>();
+            var fakeFundInAllService = Substitute.For<ICommandService<FundInAllGameBalanceCommand>>();
             var fakeGetPlayerBalanceService = Substitute.For<IGetService<GetBalanceQuery, BalanceInfo>>();
-            var fakeFundInService = Substitute.For<ICommandService<SubmitGameBalanceFundInCommand>>();
+            var fakeFundOutService = Substitute.For<ICommandService<FundOutGameBalanceCommand>>();
 
-            var sut = new FundInBeforeEnterGameCommandService(
+            var sut = new FundOutBeforeEnterGameCommandService(
                 fakePlayerRepository,
-                fakeFundOutService,
+                fakeFundInAllService,
                 fakeGetPlayerBalanceService,
-                fakeFundInService);
+                fakeFundOutService);
 
-            var command = new FundInBeforeEnterGameCommand(
+            var command = new FundOutBeforeEnterGameCommand(
                 Guid.NewGuid(),
                 "ThisIsPlayerCode",
                 "gp1");
@@ -85,25 +85,25 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakeFundInService.Received(1)
-                .ExecuteAsync(Arg.Is<SubmitGameBalanceFundInCommand>(
+            _ = fakeFundOutService.Received(1)
+                .ExecuteAsync(Arg.Is<FundOutGameBalanceCommand>(
                     cmd => cmd.PlayerCode == command.PlayerCode
                         && cmd.Amount == 1000));
         }
 
         [Test]
-        public async Task FundOutAllGameBalance_Should_Call_All_GP_FundOut()
+        public async Task FundInAllGameBalance_Should_Call_All_GP_FundIn()
         {
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
             var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, GameBalanceInfo>>();
-            var fakeGameFundOutService = Substitute.For<ICommandService<SubmitGameBalanceFundOutCommand>>();
+            var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
 
-            var sut = new FundOutAllGameBalanceCommandService(
+            var sut = new FundInAllGameBalanceCommandService(
                 fakeGameProviderRepository,
                 fakeGetGameBalanceService,
-                fakeGameFundOutService);
+                fakeGameFundInService);
 
-            var command = new FundOutAllGameBalanceCommand(
+            var command = new FundInAllGameBalanceCommand(
                 Guid.NewGuid(),
                 "ThisIsPlayerCode",
                 "GpCode");
@@ -146,8 +146,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            _ = fakeGameFundOutService.Received(2)
-                .ExecuteAsync(Arg.Any<SubmitGameBalanceFundOutCommand>());
+            _ = fakeGameFundInService.Received(2)
+                .ExecuteAsync(Arg.Any<FundInGameBalanceCommand>());
         }
 
         [Test]
