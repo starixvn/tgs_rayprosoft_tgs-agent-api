@@ -156,7 +156,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
             [FromServices] IGetService<GetGpCodeQuery, string> getGpCodeService,
             [FromServices] IGetService<GetGameUrlQuery, GameUrlInfo> getGameUrlQueryService,
-            [FromServices] ICommandService<FundInBeforeEnterGameCommand> fundService,
+            [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
             [FromBody] GetGameUrlRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -190,7 +190,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
             await fundService
-                .ExecuteAsync(new FundInBeforeEnterGameCommand(
+                .ExecuteAsync(new FundOutBeforeEnterGameCommand(
                     cachedPlayer.BrandId,
                     playerTokenData.PlayerCode,
                     gpCode))
@@ -215,7 +215,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
             [FromServices] IGetService<GetGpCodeQuery, string> getGpCodeService,
             [FromServices] IGetService<GetLobbyGameUrlQuery, LobbyGameUrlInfo> getLobbyGameUrlQueryService,
-            [FromServices] ICommandService<FundInBeforeEnterGameCommand> fundService,
+            [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
             [FromBody] GetLobbyGameUrlRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
@@ -249,7 +249,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
             await fundService
-                .ExecuteAsync(new FundInBeforeEnterGameCommand(
+                .ExecuteAsync(new FundOutBeforeEnterGameCommand(
                     cachedPlayer.BrandId,
                     playerTokenData.PlayerCode,
                     gpCode))

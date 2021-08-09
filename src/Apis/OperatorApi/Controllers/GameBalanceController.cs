@@ -58,7 +58,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPut("fund/in")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask SubmitGameBalanceFundInRequestAsync(
-            [FromServices] ICommandService<SubmitGameBalanceFundInCommand> submitGameBalanceFundInCommandService,
+            [FromServices] ICommandService<FundInGameBalanceCommand> submitGameBalanceFundInCommandService,
             [FromServices] IGameProviderStatusValidator gameStatusValidator,
             [FromBody] SubmitGameBalanceFundInRequest request)
         {
@@ -67,7 +67,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, request.GameProviderCode, brandId);
 
-            var command = new SubmitGameBalanceFundInCommand
+            var command = new FundInGameBalanceCommand
             (
                 request.GameProviderCode,
                 playerTokenData.PlayerCode,
@@ -89,7 +89,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPut("fund/out")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async ValueTask SubmitGameBalanceFundOutRequestAsync(
-            [FromServices] ICommandService<SubmitGameBalanceFundOutCommand> submitGameBalanceFundOutCommandService,
+            [FromServices] ICommandService<FundOutGameBalanceCommand> submitGameBalanceFundOutCommandService,
             [FromServices] IGameProviderStatusValidator gameStatusValidator,
             [FromBody] SubmitGameBalanceFundOutRequest request)
         {
@@ -98,7 +98,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             await gameStatusValidator.CheckGameProviderStatusAsync(playerTokenData, request.GameProviderCode, brandId);
 
-            var command = new SubmitGameBalanceFundOutCommand
+            var command = new FundOutGameBalanceCommand
             (
                 request.GameProviderCode,
                 playerTokenData.PlayerCode,

@@ -6,26 +6,26 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameBalance
 {
-    internal class FundInBeforeEnterGameCommandService : ICommandService<FundInBeforeEnterGameCommand>
+    internal class FundOutBeforeEnterGameCommandService : ICommandService<FundOutBeforeEnterGameCommand>
     {
-        private readonly ICommandService<SubmitGameBalanceFundInCommand> _fundInService;
+        private readonly ICommandService<FundOutGameBalanceCommand> _fundOutService;
         private readonly IPlayerRepository _playerRepository;
-        private readonly ICommandService<FundOutAllGameBalanceCommand> _fundOutService;
+        private readonly ICommandService<FundInAllGameBalanceCommand> _fundInAllService;
         private readonly IGetService<GetBalanceQuery, BalanceInfo> _getPlayerBalanceService;
 
-        public FundInBeforeEnterGameCommandService(
+        public FundOutBeforeEnterGameCommandService(
             IPlayerRepository playerRepository,
-            ICommandService<FundOutAllGameBalanceCommand> fundOutService,
+            ICommandService<FundInAllGameBalanceCommand> fundInAllService,
             IGetService<GetBalanceQuery, BalanceInfo> getPlayerBalanceService,
-            ICommandService<SubmitGameBalanceFundInCommand> fundInService)
+            ICommandService<FundOutGameBalanceCommand> fundInService)
         {
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-            _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
+            _fundInAllService = fundInAllService ?? throw new ArgumentNullException(nameof(fundInAllService));
             _getPlayerBalanceService = getPlayerBalanceService ?? throw new ArgumentNullException(nameof(getPlayerBalanceService));
-            _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
+            _fundOutService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         }
 
-        public async ValueTask ExecuteAsync(FundInBeforeEnterGameCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(FundOutBeforeEnterGameCommand command, CancellationToken cancellationToken = default)
         {
             var isAutoTransfer = await _playerRepository
                 .GetPlayerAutoTransferFlagAsync(command.PlayerCode)
@@ -34,8 +34,8 @@ namespace TGS.Services.Operator.Services.GameBalance
             if (!isAutoTransfer)
                 return;
 
-            await _fundOutService
-                .ExecuteAsync(new FundOutAllGameBalanceCommand(
+            await _fundInAllService
+                .ExecuteAsync(new FundInAllGameBalanceCommand(
                     command.BrandId,
                     command.PlayerCode,
                     command.GpCode))
@@ -45,8 +45,8 @@ namespace TGS.Services.Operator.Services.GameBalance
                 .GetAsync(new GetBalanceQuery(command.PlayerCode))
                 .ConfigureAwait(false);
 
-            await _fundInService
-                .ExecuteAsync(new SubmitGameBalanceFundInCommand(
+            await _fundOutService
+                .ExecuteAsync(new FundOutGameBalanceCommand(
                     command.GpCode,
                     command.PlayerCode,
                     (int)Math.Floor(playerBalance.Main)))

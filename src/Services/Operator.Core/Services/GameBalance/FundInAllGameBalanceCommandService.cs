@@ -7,23 +7,23 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameBalance
 {
-    internal class FundOutAllGameBalanceCommandService : ICommandService<FundOutAllGameBalanceCommand>
+    internal class FundInAllGameBalanceCommandService : ICommandService<FundInAllGameBalanceCommand>
     {
-        private readonly ICommandService<SubmitGameBalanceFundOutCommand> _fundOutService;
+        private readonly ICommandService<FundInGameBalanceCommand> _fundInService;
         private readonly IGameProviderRepository _gameProviderRepository;
         private readonly IGetService<GetGameBalanceQuery, GameBalanceInfo> _getGameBalanceService;
 
-        public FundOutAllGameBalanceCommandService(
+        public FundInAllGameBalanceCommandService(
             IGameProviderRepository gameProviderRepository,
             IGetService<GetGameBalanceQuery, GameBalanceInfo> getGameBalanceService,
-            ICommandService<SubmitGameBalanceFundOutCommand> fundOutService)
+            ICommandService<FundInGameBalanceCommand> fundInService)
         {
             _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
             _getGameBalanceService = getGameBalanceService ?? throw new ArgumentNullException(nameof(getGameBalanceService));
-            _fundOutService = fundOutService ?? throw new ArgumentNullException(nameof(fundOutService));
+            _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         }
 
-        public async ValueTask ExecuteAsync(FundOutAllGameBalanceCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(FundInAllGameBalanceCommand command, CancellationToken cancellationToken = default)
         {
             var processGps = _gameProviderRepository
                 .QueryAllSubGameProvidersAsync(command.BrandId)
@@ -46,8 +46,8 @@ namespace TGS.Services.Operator.Services.GameBalance
 
                     if (balance.Error == 0)
                     {
-                        await _fundOutService
-                            .ExecuteAsync(new SubmitGameBalanceFundOutCommand(
+                        await _fundInService
+                            .ExecuteAsync(new FundInGameBalanceCommand(
                                 gpCode,
                                 command.PlayerCode,
                                 (int)Math.Floor(balance.Balance)))

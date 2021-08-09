@@ -9,26 +9,26 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameBalance
 {
-    internal class SubmitGameBalanceFundOutCommandService : ICommandService<SubmitGameBalanceFundOutCommand>
+    internal class FundInGameBalanceCommandService : ICommandService<FundInGameBalanceCommand>
     {
         private readonly IPluggalbeGameProviderApiClient _pluggalbe;
         private readonly IPluggableOperations _pluggableOperations;
-        private readonly ILogger<SubmitGameBalanceFundOutCommandService> _logger;
+        private readonly ILogger<FundInGameBalanceCommandService> _logger;
 
-        public SubmitGameBalanceFundOutCommandService(IPluggalbeGameProviderApiClient pluggalbe, IPluggableOperations pluggableOperations, ILogger<SubmitGameBalanceFundOutCommandService> logger)
+        public FundInGameBalanceCommandService(IPluggalbeGameProviderApiClient pluggalbe, IPluggableOperations pluggableOperations, ILogger<FundInGameBalanceCommandService> logger)
         {
             _pluggalbe = pluggalbe ?? throw new ArgumentNullException(nameof(pluggalbe));
             _pluggableOperations = pluggableOperations ?? throw new ArgumentNullException(nameof(pluggableOperations));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async ValueTask ExecuteAsync(SubmitGameBalanceFundOutCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(FundInGameBalanceCommand command, CancellationToken cancellationToken = default)
         {
             var serviceUrl = await _pluggableOperations.GetEndpointUrlByGameProviderCodeAsync(command.GameProviderCode);
 
             _logger.LogInformation("Get Service Url From Pluggable Operations");
 
-            var response = await _pluggalbe.FundOutAsync(serviceUrl, new GameProviderWalletFundRequest()
+            var response = await _pluggalbe.FundInAsync(serviceUrl, new GameProviderWalletFundRequest()
             {
                 GameProviderCode = command.GameProviderCode,
                 PlayerCode = command.PlayerCode,
@@ -38,11 +38,11 @@ namespace TGS.Services.Operator.Services.GameBalance
 
             if (response.Error != (int)TgsApiError.None)
             {
-                _logger.LogInformation("Pluggable Fund Out Has Error");
-                throw new GameBalanceFundOutFailedException(response.ErrorMessage);
+                _logger.LogInformation("Pluggable Fund In Has Error");
+                throw new GameBalanceFundInFailedException(response.ErrorMessage);
             }
 
-            _logger.LogInformation("Pluggable Fund Out OK");
+            _logger.LogInformation("Pluggable Fund In OK");
         }
     }
 }
