@@ -27,6 +27,9 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var info = await queryService.GetAsync(query).ConfigureAwait(false);
 
+            if (info == null)
+                return null;
+
             return new BrandLiveChatModel()
             {
                 Name = info.Name,

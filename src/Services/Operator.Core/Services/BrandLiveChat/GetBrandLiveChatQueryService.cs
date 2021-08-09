@@ -7,7 +7,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.BrandLiveChat
 {
-    internal class GetBrandLiveChatQueryService : IGetService<BrandLiveChatQuery, BrandLiveChatInfo>
+    internal class GetBrandLiveChatQueryService : IGetService<BrandLiveChatQuery, BrandLiveChatInfo?>
     {
         private readonly ITgsRepository _tgsRepository;
 
@@ -16,12 +16,16 @@ namespace TGS.Services.Operator.Services.BrandLiveChat
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<BrandLiveChatInfo> GetAsync(
+        public async ValueTask<BrandLiveChatInfo?> GetAsync(
             BrandLiveChatQuery query,
             CancellationToken cancellationToken = default)
         {
             var brandLiveChat = await _tgsRepository.BrandLiveChats
-                .FirstAsync(x => x.BrandId == query.BrandId);
+                .FirstOrDefaultAsync(x => x.BrandId == query.BrandId);
+            if (brandLiveChat == null)
+            {
+                return null;
+            }
 
             return new BrandLiveChatInfo()
             {
