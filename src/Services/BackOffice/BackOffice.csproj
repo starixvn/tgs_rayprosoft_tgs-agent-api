@@ -32,7 +32,7 @@
     </PackageReference>
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />    
     <PackageReference Include="Tgs.Payment.Client" Version="0.1.5" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.15" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.17" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 

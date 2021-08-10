@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using System.Threading.Tasks;
+using Moq;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Queries.PaymentChannel;
@@ -8,6 +9,22 @@ namespace TGS.Tests.BackendOffice.UnitTests
     [TestFixture]
     public class PaymentChannelTests
     {
+        [Test]
+        public async Task User_Can_Create_PaymentChannel()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+
+            var sut = new CreatePaymentChannelCommandService(moqPaymentServiceClient.Object);
+
+            var command = new CreatePaymentChannelCommand("ChannelCode");
+
+            await sut.ExecuteAsync(command);
+
+            moqPaymentServiceClient.Verify(
+                fake => fake.CreatePaymentChannelAsync(command.Code),
+                Times.Exactly(1));
+        }
+
         [Test]
         public void User_Can_Get_All_PaymentChannels()
         {

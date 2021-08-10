@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentMethod;
-using TGS.Core.DataServices.Base.Extensions;
-using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -18,35 +15,39 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
     [ApiController]
     public class PaymentMethodController : BaseContextController
     {
-        private readonly ITgsCommands<PaymentMethod> _commands;
-        private readonly ITgsQueries<PaymentMethod> _queries;
-
-        public PaymentMethodController(
-            ITgsQueries<PaymentMethod> queries,
-            ITgsCommands<PaymentMethod> commands)
+        /// <summary>
+        /// Creates the payment method asynchronous.
+        /// </summary>
+        /// <param name="createService">The create service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPut]
+        public ValueTask CreatePaymentMethodAsync(
+            [FromServices] ICommandService<CreatePaymentMethodCommand> createService,
+            [FromBody] CreatePaymentMethodRequest request)
         {
-            _queries = queries;
-            _commands = commands;
+            var command = new CreatePaymentMethodCommand(request.Code, request.BankType);
+
+            return createService.ExecuteAsync(command);
         }
 
         [HttpGet]
         [Description("Get PaymentMethods")]
-        public GenericResponse<IEnumerable<PaymentMethodModel>> GetAllPaymentMethods()
+        public GenericResponse<IEnumerable<PaymentMethodModel>> GetAllPaymentMethods(
+            [FromServices] IQueryService<PaymentMethodQuery, PaymentMethodInfo> queryService)
         {
             return new GenericResponse<IEnumerable<PaymentMethodModel>>
             {
                 Valid = true,
-                Data = _queries.GetQueries()
-                    .Select(q => new PaymentMethodModel
+                Data = queryService.QueryAsync(new PaymentMethodQuery())
+                    .Select(pm => new PaymentMethodModel
                     {
-                        Id = q.Id,
-                        Code = q.Code,
-                        BankType = q.BankType
+                        Id = pm.Id,
+                        Code = pm.Name,
+                        BankType = pm.BankType
                     })
-                    .AsNoTracking()
-                    .ToArray()
+                    .ToEnumerable()
             };
         }
-
     }
 }
