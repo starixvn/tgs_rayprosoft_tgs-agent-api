@@ -35,7 +35,9 @@ namespace TGS.Apis.AgentApi.Controllers
             return new BrandLiveChatModel()
             {
                 Name = info.Name,
-                Setting = JsonDocument.Parse(info.Setting)
+                Setting = string.IsNullOrEmpty(info.Setting)
+                    ? JsonDocument.Parse("{}")
+                    : JsonDocument.Parse(info.Setting)
             };
         }
     }
