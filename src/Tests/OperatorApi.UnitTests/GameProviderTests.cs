@@ -23,28 +23,31 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Can_Find_GpCode_By_SubGpCode()
         {
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
-            var fakeGameProviderOperations = Substitute.For<IGameProviderOperations>();
 
             var sut = new GetGpCodeQueryService(
-                fakeGameProviderRepository,
-                fakeGameProviderOperations);
+                fakeGameProviderRepository);
 
-            var query = new GetGpCodeQuery("SubGpCode");
+            var query = new GetGpCodeQuery(Guid.NewGuid(), "SubGpCode");
 
-            fakeGameProviderRepository.GetSubGameProviderDataInfoAsync(Arg.Is(query.SubGpCode))
-                .Returns(new SubGameProviderWithLocationDataInfo(
-                    Guid.NewGuid(),
-                    "GpCode",
-                    "SubGpCode",
-                    "test",
-                    "test",
-                    "{}"));
+            fakeGameProviderRepository
+                .QueryAllSubGameProvidersAsync(Arg.Is(query.BrandId))
+                .Returns(
+                    new[]{
+                        new BrandSubGameProviderInfo(
+                            "SubGpCode",
+                            "SubGpCode",
+                            "SubGpCode",
+                            Guid.NewGuid(),
+                            "GpCode",
+                            true,
+                            Status.Active)
+                    }.ToAsyncEnumerable());
 
             var expected = "GpCode";
 
             var actual = await sut.GetAsync(query);
 
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(expected, actual.GpCode);
         }
 
         [Test]
