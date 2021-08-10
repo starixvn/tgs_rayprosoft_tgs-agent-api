@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.PaymentChannel;
-using TGS.Core.DataServices.Base.Interfaces;
-using TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.BackOffice.Application.Queries.PaymentChannel;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
 {
@@ -14,32 +15,37 @@ namespace TGS.Apis.BackendOffice.Controllers.BrandPayment
     [ApiController]
     public class PaymentChannelController : BaseContextController
     {
-        private readonly ITgsCommands<PaymentChannel> _commands;
-        private readonly ITgsQueries<PaymentChannel> _queries;
-
-        public PaymentChannelController(
-            ITgsQueries<PaymentChannel> queries,
-            ITgsCommands<PaymentChannel> commands)
+        /// <summary>
+        /// Creates the payment channel asynchronous.
+        /// </summary>
+        /// <param name="createService">The create service.</param>
+        /// <param name="code">The code.</param>
+        /// <returns></returns>
+        [HttpPut]
+        public ValueTask CreatePaymentChannelAsync(
+            [FromServices] ICommandService<CreatePaymentChannelCommand> createService,
+            [FromBody] string code)
         {
-            _queries = queries;
-            _commands = commands;
+            var command = new CreatePaymentChannelCommand(code);
+
+            return createService.ExecuteAsync(command);
         }
 
         [HttpGet]
         [Description("Get PaymentChannels")]
-        public GenericResponse<IEnumerable<PaymentChannelModel>> GetAllPaymentChannels()
+        public GenericResponse<IEnumerable<PaymentChannelModel>> GetAllPaymentChannels(
+            [FromServices] IQueryService<PaymentChannelQuery, PaymentChannelInfo> queryService)
         {
             return new GenericResponse<IEnumerable<PaymentChannelModel>>
             {
                 Valid = true,
-                Data = _queries.GetQueries()
-                    .Select(q => new PaymentChannelModel
+                Data = queryService.QueryAsync(new PaymentChannelQuery())
+                    .Select(pc => new PaymentChannelModel
                     {
-                        Id = q.Id,
-                        Code = q.Code,
+                        Id = pc.Id,
+                        Code = pc.Name
                     })
-                    .AsNoTracking()
-                    .ToArray()
+                    .ToEnumerable()
             };
         }
     }
