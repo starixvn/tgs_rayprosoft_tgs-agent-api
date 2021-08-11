@@ -71,6 +71,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             PluggableConfigurationBase IGameProvider.GetConfiguration() => new WGSportsConfiguration
             {
+                AmountMaximum = ((decimal)Math.Pow(10, 12)) - 1,
+                AmountFormat = "12,2",
                 ServiceEndpointUrl =
                     _env.IsDocker() ? new Uri("http://game-WGSportsfm") : new("http://localhost:62330"),
                 ApiUrl = new("https://api.jsc080.net/index.php"),
