@@ -15,5 +15,6 @@ namespace TGS.Services.Agent
         string? BrandUrl,
         int AgentLevel,
         byte[] PayPassword,
-        byte[] PaySalt);
+        byte[] PaySalt,
+        decimal AccumulatedProfitSharing);
 }

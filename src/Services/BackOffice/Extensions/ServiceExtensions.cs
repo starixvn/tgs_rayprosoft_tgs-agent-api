@@ -41,6 +41,7 @@ namespace TGS.Services.BackOffice.Extensions
             services.AddTransient<IPlatformCreditService, PlatformCreditService>();
             services.AddTransient<ISubGameProviderService, SubGameProviderService>();
             services.AddTransient<IMaintenanceRedisService, MaintenanceRedisService>();
+            services.AddTransient<IAgentDividendService, AgentDividendService>();
             services.AddTgsTransactionRepositoriesServices();
 
             return services;

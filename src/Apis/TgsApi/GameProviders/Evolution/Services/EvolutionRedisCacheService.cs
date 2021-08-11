@@ -26,7 +26,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
 
         async ValueTask IEvolutionRedisCacheService.AddSidAsync(string sid, Player player)
         {
-            await _redisCacheManager.SafeCacheAsync(_sidCacheType, sid, TimeSpan.FromDays(1), player.PlayerCode).ConfigureAwait(false);
+            await _redisCacheManager.SafeCacheForeverAsync(_sidCacheType, sid, player.PlayerCode).ConfigureAwait(false);
         }
 
         async ValueTask<string> IEvolutionRedisCacheService.GetPlayerCodeAsync(string sid)

@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using System.Threading.Tasks;
+using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Queries.PaymentMethod;
@@ -8,6 +10,22 @@ namespace TGS.Tests.BackendOffice.UnitTests
     [TestFixture]
     public class PaymentMethodTests
     {
+        [Test]
+        public async Task User_Can_Create_PaymentMethod()
+        {
+            var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
+
+            var sut = new CreatePaymentMethodCommandService(moqPaymentServiceClient.Object);
+
+            var command = new CreatePaymentMethodCommand("MethodCode", "Bank");
+
+            await sut.ExecuteAsync(command);
+
+            moqPaymentServiceClient.Verify(
+                fake => fake.CreatePaymentMethodAsync(It.IsAny<PaymentMethodCreateInfo>()),
+                Times.Exactly(1));
+        }
+
         [Test]
         public void User_Can_Get_All_PaymentMethods()
         {

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages.Game;
@@ -57,10 +57,17 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
         public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request)
             => _mediator.Send(request);
 
+        [AllowAnonymous]
         [HttpGet("export/{gameProviderId}")]
         [Description("Export games")]
-        public Task<HttpResponseMessage> ExportGamesAsync(Guid gameProviderId)
-            => _mediator.Send(new ExportGamesRequest(gameProviderId));
+        public async Task<IActionResult> ExportGamesAsync(Guid gameProviderId)
+        {
+            var fileStream = await _mediator.Send(new ExportGamesRequest(gameProviderId)).ConfigureAwait(false);
+
+            return File(
+                fileStream,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Games.xlsx");
+        }
 
         [HttpGet("localization/export")]
         [Description("Export game localization for example")]

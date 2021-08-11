@@ -7,6 +7,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
@@ -49,9 +50,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
         }
 
         BalanceResponse IAllBetActionModelMapper.Response(GetBalanceResult result)
-            => GetBalanceResponse(result.Balance);
-
-        BalanceResponse IAllBetActionModelMapper.Response(BetResult result)
             => GetBalanceResponse(result.Balance);
 
         BetData IAllBetActionModelMapper.BetRequest(string playerCode, GameProviderConfigurationData data,
@@ -275,6 +273,19 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             }).ToArray();
 
             return GetBetData(playerCode, data, transactions, request.CurrencyCode);
+        }
+
+        BalanceResponse IAllBetActionModelMapper.Response(BetResult result)
+        {
+            var allTransactionsDuplicated = result.Transactions.All(t => t.IsDuplicate);
+
+            if (allTransactionsDuplicated)
+            {
+                throw new InvalidGameActionException("Transactions are duplicated",
+                    InvalidGameActionErrorCode.Duplicate);
+            }
+
+            return GetBalanceResponse(result.Balance);
         }
 
         private static GameActionType GetGameActionType(decimal betAmount, decimal winOrLossAmount)

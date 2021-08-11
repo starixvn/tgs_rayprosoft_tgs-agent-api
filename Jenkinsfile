@@ -4,7 +4,7 @@ pipeline {
     agent any
 	
 	environment {
-		Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
+        Registry = "registry.gitlab.com/rayprosoft/turnkey-gaming-system/"
         BuildConfiguration='Debug'
 	}
 
@@ -13,17 +13,21 @@ pipeline {
             steps {
                 sh "echo 'Process components: $Components'";
                 sh "echo 'Branch: $GIT_BRANCH'";
+
                 script {
                     switch(env.GIT_BRANCH)
                     {
                         case 'origin/master':
                             env.kube_ns = "prod";
+                            env.k8s_config = 'stag-k8s-config';
                             break;
                         case 'origin/release':
                             env.kube_ns = "staging";
+                            env.k8s_config = 'stag-k8s-config';
                             break;
                         default:
                             env.kube_ns = "dev";
+                            env.k8s_config='k8s-kube-config' 
                             break;
                     }
                 }
@@ -219,18 +223,26 @@ pipeline {
                 ImageName="${Registry}operator-api"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/operator-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
                             --set validateCodeTestEnabled=${tgs_validateCodeTestEnabled} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" 
+
+                        helm template deployment/k8s/operator-api \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set validateCodeTestEnabled=${tgs_validateCodeTestEnabled} \
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
 			}
@@ -246,17 +258,24 @@ pipeline {
                 ImageName="${Registry}agent-api"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/agent-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
+
+                        helm template deployment/k8s/agent-api \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"  \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
             }
@@ -272,17 +291,24 @@ pipeline {
                 ImageName="${Registry}backoffice-api"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/backoffice-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
+
+                        helm template deployment/k8s/backoffice-api \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
             }
@@ -298,17 +324,24 @@ pipeline {
                 ImageName="${Registry}global-api"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/global-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
+
+                        helm template deployment/k8s/global-api \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
             }
@@ -324,18 +357,26 @@ pipeline {
                 ImageName="${Registry}log-api"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/log-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                            --set \\"notifyPath=\\${tgs_notifyPath}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                            --set notifyPath="$tgs_notifyPath"
+
+                        helm template deployment/k8s/log-api \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                            --set notifyPath="$tgs_notifyPath" \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
             }
@@ -351,17 +392,24 @@ pipeline {
                 ImageName="${Registry}report-api"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/report-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
+
+                        helm template deployment/k8s/report-api \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
             }
@@ -377,17 +425,24 @@ pipeline {
                 ImageName="${Registry}promotion-api"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/promotion-api \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
+
+                        helm template deployment/k8s/promotion-api \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
             }
@@ -403,25 +458,40 @@ pipeline {
                 ImageName="${Registry}file-service"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/file-service \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.mongo=\\${tgs_mongo}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aws.accessKey=\\${tgs_aws_access_key}\\" \
-                            --set \\"aws.Secret=\\${tgs_aws_access_secret}\\" \
-                            --set \\"aws.region=\\${tgs_aws_region}\\" \
-                            --set \\"aws.public.externalUrl=\\${tgs_file_public_external}\\" \
-                            --set \\"aws.public.serviceUrl=\\${file_public_service}\\" \
-                            --set \\"aws.public.bucket=\\${tgs_file_public_bucket}\\" \
-                            --set \\"aws.private.externalUrl=\\${tgs_file_private_external}\\" \
-                            --set \\"aws.private.serviceUrl=\\${tgs_file_private_service}\\" \
-                            --set \\"aws.private.bucket=\\${tgs_file_private_bucket}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.mongo="$tgs_mongo" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aws.accessKey="$tgs_aws_access_key" \
+                            --set aws.Secret="$tgs_aws_access_secret" \
+                            --set aws.region="$tgs_aws_region" \
+                            --set aws.public.externalUrl="$tgs_file_public_external" \
+                            --set aws.public.serviceUrl="$file_public_service" \
+                            --set aws.public.bucket="$tgs_file_public_bucket" \
+                            --set aws.private.externalUrl="$tgs_file_private_external" \
+                            --set aws.private.serviceUrl="$tgs_file_private_service" \
+                            --set aws.private.bucket="$tgs_file_private_bucket" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
+
+                        helm template deployment/k8s/file-service \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set connectionStrings.mongo="$tgs_mongo" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aws.accessKey="$tgs_aws_access_key" \
+                            --set aws.Secret="$tgs_aws_access_secret" \
+                            --set aws.region="$tgs_aws_region" \
+                            --set aws.public.externalUrl="$tgs_file_public_external" \
+                            --set aws.public.serviceUrl="$file_public_service" \
+                            --set aws.public.bucket="$tgs_file_public_bucket" \
+                            --set aws.private.externalUrl="$tgs_file_private_external" \
+                            --set aws.private.serviceUrl="$tgs_file_private_service" \
+                            --set aws.private.bucket="$tgs_file_private_bucket" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
             }
@@ -437,18 +507,26 @@ pipeline {
                 ImageName="${Registry}schedulers"
             }
             steps {
-                withKubeConfig([credentialsId: 'k8s-kube-config']) {
+                withKubeConfig([credentialsId: env.k8s_config]) {
                     sh '''
                         helm template deployment/k8s/schedulers \
                             --set image.tag=${TAG} \
                             --set namespace=${kube_ns} \
-                            --set \\"connectionStrings.tgs=\\${tgs_tgs}\\" \
-                            --set \\"connectionStrings.redis=\\${tgs_redis}\\" \
-                            --set \\"connectionStrings.mongo=\\${tgs_mongo}\\" \
-                            --set \\"nats.urls=\\${tgs_nats}\\" \
-                            --set \\"aspNetCoreEnvironment=\\${tgs_aspNetCoreEnvironment}\\" \
-                        | tee /dev/stdout \
-                        | kubectl apply -f -
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set connectionStrings.mongo="$tgs_mongo" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
+                            
+                        helm template deployment/k8s/schedulers \
+                            --set image.tag=${TAG} \
+                            --set namespace=${kube_ns} \
+                            --set connectionStrings.tgs="$tgs_tgs" \
+                            --set connectionStrings.redis="$tgs_redis" \
+                            --set connectionStrings.mongo="$tgs_mongo" \
+                            --set nats.urls="$tgs_nats" \
+                            --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
+                        | kubectl -n ${kube_ns} apply -f -
                     '''
                 }
             }

@@ -27,23 +27,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
     public class BigGamingActionModelMapper : IBigGamingModelActionMapper
     {
-        private const string GameProviderCode = Consts.GameProvider.BigGaming;
-        private readonly IBigGamingServices _services;
-        private readonly Dictionary<string, decimal> _bullBullOddsMapper;
+        private readonly IBigGamingService _service;
 
         public BigGamingActionModelMapper(
-            IBigGamingServices services
+            IBigGamingService service
         )
         {
-            _services = services ?? throw new ArgumentNullException(nameof(services));
-            _bullBullOddsMapper = new Dictionary<string, decimal>() {
-                {"0xD0000001",1 } //下注闲1平倍
-                ,{"0xD0000002",5 }//下注闲1翻倍
-                ,{"0xD0000004",1 }//下注闲2平倍
-                ,{"0xD0000008",5 }//下注闲2翻倍
-                ,{"0xD0000010",1 }//下注闲3平倍
-                ,{"0xD0000020",5 }//下注闲3翻倍
-            };
+            _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
 
@@ -53,7 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             var transactions = (from order in request.Orders
                                 select new TransactionData
                                 {
-                                    Amount = GetAmount(order.ExternalGameId, GetBetType(order.PlayId), Math.Abs(order.Amount)),
+                                    Amount = _service.GetAmount(order.ExternalGameId, _service.GetBetType(order.PlayId), Math.Abs(order.Amount)),
                                     ExternalTransactionId = order.OrderId.ToString(),
                                     ExternalRoundId = order.IssueId,
                                     ExternalBetId = order.OrderId.ToString(),
@@ -61,7 +51,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                                     ExternalGameId = order.ExternalGameId.ToString(),
                                     GameActionType = GameActionType.PlaceBet,
                                     TimeStamp = DateTimeOffset.UtcNow,
-                                    BetType = GetBetType(order.PlayId)
+                                    BetType = _service.GetBetType(order.PlayId)
                                 }).ToArray();
 
             return GetBetData(data, request.LoginId, transactions, oppositeBetSettings: oppositeBetSettings);
@@ -76,7 +66,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
             foreach (var order in request.Orders)
             {
-                var gameActionType = GetGameAction(order.OrderStatus);
+                var gameActionType = _service.GetGameAction(order.OrderStatus);
 
                 if (gameActionType != GameActionType.CancelTransaction)
                 {
@@ -106,7 +96,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
             foreach (var order in request.Orders)
             {
-                var gameActionExternalIds = await _services
+                var gameActionExternalIds = await _service
                     .GetGameActionExternalIdAsync(data.GameProviderId, playerCode, $"{order.OrderId}_settle")
                     .ConfigureAwait(false);
 
@@ -128,7 +118,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }
 
 
-                var gameActionType = GetGameAction(order.OrderStatus);
+                var gameActionType = _service.GetGameAction(order.OrderStatus);
 
                 if (gameActionType != GameActionType.CancelTransaction)
                 {
@@ -154,16 +144,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             );
         }
 
-        #region Private Methods
-
         private async Task<TransactionData> GetTransactionDataAsync(Guid gameProviderId, string playerCode,
             BigGamingSettleOrderRequest order, bool resettle = false)
         {
-            var gameActionExternal = await _services
+            var gameActionExternal = await _service
                 .GetGameActionExternalIdAsync(gameProviderId, playerCode, order.OrderId.ToString())
                 .ConfigureAwait(false);
 
-            var gameActionType = GetGameAction(order.OrderStatus);
+            var gameActionType = _service.GetGameAction(order.OrderStatus);
 
             //牛牛特殊案例
             if (order.Amount > 0 && gameActionExternal.ExternalGameId == "13")
@@ -205,15 +193,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             };
         }
 
-        private GameActionType GetGameAction(BigGamingOrderStatus betStatus) => betStatus switch
-        {
-            BigGamingOrderStatus.Running => GameActionType.PlaceBet,
-            BigGamingOrderStatus.Win => GameActionType.WinBet,
-            BigGamingOrderStatus.Tie => GameActionType.TieBet,
-            BigGamingOrderStatus.Lose => GameActionType.LoseBet,
-            _ => GameActionType.CancelTransaction
-        };
-
         private static BetData GetBetData(GameProviderConfigurationData data, string playerCode,
             TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false,
             OppositeBetSetting[] oppositeBetSettings = null) =>
@@ -223,7 +202,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 PlatformType = data.PlatformType,
                 GameProviderId = data.GameProviderId,
                 GameProviderConfigurationId = data.GameProviderConfigurationId,
-                GameProviderCode = GameProviderCode,
+                GameProviderCode = Consts.GameProvider.BigGaming,
                 HasCurrencyFromGameProvider = false,
                 AutoCloseRound = data.AutoCloseRound,
                 AllowCancelCancelTransaction = false,
@@ -235,20 +214,5 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     Patterns = o.Patterns?.Select(p => new OppositeBetRule.Pattern(p.BetType, p.GroupId)).ToArray()
                 }).ToArray()
             };
-
-        private decimal GetAmount(int externalGameId, string playId, decimal amount)
-        {
-            if (externalGameId == 13)
-            {
-                var Odds = _bullBullOddsMapper.Where(x => x.Key.IgnoreCaseEquals(playId)).First().Value;
-                return amount * Odds;
-            }
-            return amount;
-        }
-
-
-        private string GetBetType(string playId) =>
-            $"0x{Convert.ToString(Convert.ToInt64(playId), 16).ToUpper()}";
-        #endregion
     }
 }

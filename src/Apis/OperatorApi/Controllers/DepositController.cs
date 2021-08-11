@@ -77,7 +77,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                     PaymentCode = paymentInfo.Code,
                     MethodId = bp.MethodId,
                     MethodCode = paymentMethod.Name,
-                    BankType = paymentMethod.BankType
+                    BankType = paymentMethod.BankType,
+                    DisplayOrder = bp.DisplayOrder
                 };
             }
         }

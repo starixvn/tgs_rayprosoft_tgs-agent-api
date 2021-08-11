@@ -35,10 +35,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution.Services
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
                     {None, UnknownError},
-                    { Duplicate, SessionAlreadyClosed},
-                    { Cancelled, SessionAlreadyClosed},
-                    { Settled, SessionAlreadyClosed},
-                    { InvalidGameActionErrorCode.TransactionNotFound,GameApiError. SessionAlreadyClosed},
+                    { Duplicate, BetAlreadyExist},
+                    { Cancelled, BetDoesNotExist},
+                    { Settled, BetDoesNotExist},
+                    { InvalidGameActionErrorCode.TransactionNotFound,GameApiError.BetDoesNotExist},
                     { TransactionBeingCancelledNotFound, SessionAlreadyClosed},
                     { TransactionBeingReferencedNotFound, SessionAlreadyClosed},
                     { RoundNotFound ,GameApiError.SessionAlreadyClosed},

@@ -31,5 +31,6 @@
   "InsufficientBucket": "The bucket insufficient.",
   "PromotionCannotJoin": "Can't join the promotion.",
   "GameBalanceFundInFailed": "Fund in to game failed.",
-  "GameBalanceFundOutFailed": "Fund out from game failed."
+  "GameBalanceFundOutFailed": "Fund out from game failed.",
+  "FavoriteAlreadyFull": "Favorite game count already full."
 }

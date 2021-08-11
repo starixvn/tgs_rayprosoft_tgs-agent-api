@@ -61,7 +61,7 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Code existed already : {0}.
+        ///   Looks up a localized string similar to Code existed already..
         /// </summary>
         public static string CodeExisted {
             get {
@@ -97,11 +97,29 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to External id existed already : {0}.
+        ///   Looks up a localized string similar to External id existed already..
         /// </summary>
         public static string ExternalIdExisted {
             get {
                 return ResourceManager.GetString("ExternalIdExisted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External id existed already : {0}.
+        /// </summary>
+        public static string ExternalIdsExisted {
+            get {
+                return ResourceManager.GetString("ExternalIdsExisted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game codes existed already : {0}.
+        /// </summary>
+        public static string GameCodesExisted {
+            get {
+                return ResourceManager.GetString("GameCodesExisted", resourceCulture);
             }
         }
         

@@ -1,8 +1,7 @@
-﻿using System.Linq;
-using System.Net.Http;
+﻿using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using ClosedXML.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Utility;
@@ -11,19 +10,17 @@ using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 {
-    public class ExportGamesHandler : Handler<ExportGamesRequest, HttpResponseMessage>
+    public class ExportGamesHandler : Handler<ExportGamesRequest, MemoryStream>
     {
-        private readonly IGameProviderService _gameProviderService;
         private readonly IGameService _gameService;
 
-        public ExportGamesHandler(IGameService gameService, IGameProviderService gameProviderService,
+        public ExportGamesHandler(IGameService gameService,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _gameService = gameService;
-            _gameProviderService = gameProviderService;
         }
 
-        public override async Task<HttpResponseMessage> Handle(ExportGamesRequest request,
+        public override async Task<MemoryStream> Handle(ExportGamesRequest request,
             CancellationToken cancellationToken)
         {
             var games = await _gameService.GetGameQueries(q => q.Where(x => x.GameProviderId == request.Id))
@@ -47,8 +44,9 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
                 .ToArrayAsync(cancellationToken);
 
             var xlsx = games.Export("games");
-
-            return xlsx.Deliver("Games.xlsx");
+            await using var stream = new MemoryStream();
+            xlsx.SaveAs(stream);
+            return new MemoryStream(stream.ToArray());
         }
     }
 }

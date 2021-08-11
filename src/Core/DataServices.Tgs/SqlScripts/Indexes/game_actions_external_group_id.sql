@@ -1,0 +1,3 @@
+﻿DROP INDEX IF EXISTS bet.ix_game_actions_external_game_action_group_id;
+
+CREATE INDEX ix_game_actions_external_game_action_group_id ON bet.game_actions USING btree (external_game_action_group_id)

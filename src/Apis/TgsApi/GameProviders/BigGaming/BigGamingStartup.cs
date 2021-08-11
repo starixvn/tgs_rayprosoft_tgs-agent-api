@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -33,8 +34,11 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
 
             services.AddScoped<AuthorizeBigGamingMiddleware>();
             services.AddScoped<HandleBigGamingExceptionMiddleware>();
-            services.AddScoped<IBigGamingServices, BigGamingServices>();
+            services.AddScoped<IBigGamingService, BigGamingService>();
+            services.AddScoped<IGameProviderDepositWithdrawalService, GameProviderDepositWithdrawalService>();
+            services.AddScoped<IBigGamingGPGameHistoryService, BigGamingGPGameHistoryService>();
             services.AddScoped<IBigGamingModelActionMapper, BigGamingActionModelMapper>();
+            services.AddScoped<IBigGamingGameHistoryService, BigGamingGameHistoryService>();
             services.AddTransient<IBigGamingGamePlayerCreate, BigGamingGamePlayerCreate>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(BigGamingGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<BigGamingGameInitializer>());

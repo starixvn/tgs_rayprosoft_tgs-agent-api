@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Lobby,Lobby,,0,LotteryLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,VR
 VRSSCA,VRSSCA,,1,Lottery,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,VR
 VRPK10A,VRPK10A,,2,Lottery,DesktopAndMobile,FALSE,,,TRUE,FALSE,TRUE,,VR

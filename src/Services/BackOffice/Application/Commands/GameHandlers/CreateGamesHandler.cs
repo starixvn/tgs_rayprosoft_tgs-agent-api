@@ -36,7 +36,7 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 
             if (gameCodesExisted.Length > 0)
             {
-                return CreateInvalidResponse<MessageResponse>(string.Format(GameProvider.CodeExisted,
+                return CreateInvalidResponse<MessageResponse>(string.Format(GameProvider.GameCodesExisted,
                     gameCodesExisted.JoinAsStringByComma()));
             }
 
@@ -45,7 +45,7 @@ namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
 
             if (gameExternalIdsExisted.Length > 0)
             {
-                return CreateInvalidResponse<MessageResponse>(string.Format(GameProvider.ExternalIdExisted,
+                return CreateInvalidResponse<MessageResponse>(string.Format(GameProvider.ExternalIdsExisted,
                     gameExternalIdsExisted.JoinAsStringByComma()));
             }
 

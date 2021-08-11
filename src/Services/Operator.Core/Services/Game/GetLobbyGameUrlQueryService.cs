@@ -27,10 +27,18 @@ namespace TGS.Services.Operator.Services.Game
             var gameProviderCode = query.GameProviderCode;
             var gameType = query.GameType;
 
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(gameProviderCode);
+            var gameProviderId = await _gameProviderOperations
+                .GetGameProviderIdByCodeAsync(gameProviderCode)
+                .ConfigureAwait(false);
 
             var gamePlatformTypes = platformType.ToGamePlatformTypes();
-            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, gamePlatformTypes, gameType);
+            var games = await _gameProviderOperations
+                .GetCachedGamesAsync(
+                    gameProviderId,
+                    gamePlatformTypes,
+                    gameType)
+                .ConfigureAwait(false);
+
             if (games.Length != 1)
             {
                 throw new InvalidOperationException(
@@ -40,11 +48,14 @@ namespace TGS.Services.Operator.Services.Game
             var gameId = games[0].Id;
 
             var getGameUrlQuery = new GetGameUrlQuery(
+                query.BrandId,
                 playerTokenData,
+                query.PlayerType,
                 gameProviderCode,
                 gameId,
                 query.LanguageCode,
                 query.Extends);
+
             var gameUrlInfo = await _getGameUrlQueryService
                 .GetAsync(getGameUrlQuery)
                 .ConfigureAwait(false);
