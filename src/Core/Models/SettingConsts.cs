@@ -30,6 +30,7 @@ namespace TGS.Core.Models
             public static readonly string Skywind = string.Format(Template, Consts.GameProvider.Skywind);
             public static readonly string AllBet = string.Format(Template, Consts.GameProvider.AllBet);
             public static readonly string Evolution = string.Format(Template, Consts.GameProvider.Evolution);
+            public static readonly string WGSports = string.Format(Template, Consts.GameProvider.WGSports);
         }
     }
 }
