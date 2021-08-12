@@ -18,9 +18,9 @@ namespace TGS.Shared.Game.Models.WGSports.Commons
         [JsonPropertyName("valid")]
         public string Valid { get; set; }
         [JsonPropertyName("live_status")]
-        public string Live_status { get; set; }
+        public string LiveStatus { get; set; }
         [JsonPropertyName("plan_no")]
-        public string Plan_no { get; set; }
+        public string PlanNo { get; set; }
         [JsonPropertyName("part")]
         public string Part { get; set; }
         [JsonPropertyName("win")]
