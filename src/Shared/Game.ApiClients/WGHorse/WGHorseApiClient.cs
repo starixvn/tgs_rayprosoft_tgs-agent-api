@@ -52,7 +52,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
 
         ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source)
         {
-            var data = $"{source.PlayerCode}|{source.AmountType}|{source.OrderId}|{source.Amount}";
+            var data = $"{source.PlayerCode}|{(int)source.AmountType}|{source.OrderId}|{source.Amount}";
             var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoney&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }_AccessMoney";
