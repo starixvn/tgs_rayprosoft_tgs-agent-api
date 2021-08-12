@@ -10,6 +10,7 @@
     <None Remove="DataInitializers\Games\AB.csv" />
     <None Remove="DataInitializers\Games\EVO.csv" />
     <None Remove="DataInitializers\Games\SW.csv" />
+    <None Remove="DataInitializers\Games\WGFM.csv" />
     <None Remove="SqlScripts\Functions\game_action_get_game_actions_by_external_group_id.sql" />
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <None Remove="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
@@ -40,6 +41,7 @@
     <EmbeddedResource Include="DataInitializers\Games\SG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\EVO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SW.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\WGFM.csv" />
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />
     <EmbeddedResource Include="Migrations\RefactorWithdrawForm.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\brand_get_brand_game_provider_configuration_for_cache.sql" />
