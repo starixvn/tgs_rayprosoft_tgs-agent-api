@@ -39,7 +39,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IGameProvider.Code => GameProviderConst.WGSports;
 
-            string IGameProvider.Name => "WGSports Sports";
+            string IGameProvider.Name => "WG Sports";
 
             IGameProviderConfiguration[] IGameProvider.GameProviderConfigurations =>
                 new IGameProviderConfiguration[]
@@ -74,7 +74,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 AmountMaximum = ((decimal)Math.Pow(10, 12)) - 1,
                 AmountFormat = "12,2",
                 ServiceEndpointUrl =
-                    _env.IsDocker() ? new Uri("http://game-WGSportsfm") : new("http://localhost:62330"),
+                    _env.IsDocker() ? new Uri("http://game-wgfm") : new("http://localhost:62330"),
                 ApiUrl = new("https://api.jsc080.net/index.php"),
                 PartnerCode = "TA",
                 PartnerKey = "abc1238888888888",
@@ -93,9 +93,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             Guid IGameProviderConfiguration.Id => new("AA0ADEE9-FE0D-D1F8-AF4B-30B04B3D455D");
 
-            string IGameProviderConfiguration.Name => "Configuration WGSports Sports";
+            string IGameProviderConfiguration.Name => "Configuration WG Sports";
 
-            string IGameProviderConfiguration.ClientId => "WGSportsFM-PG";
+            string IGameProviderConfiguration.ClientId => "WGFM-PG";
 
             string IGameProviderConfiguration.SecretKey => "zfxesctcpfgwklpxksvlckpfxutmcvsj";
 
