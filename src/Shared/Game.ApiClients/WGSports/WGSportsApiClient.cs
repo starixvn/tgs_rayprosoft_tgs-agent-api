@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Shared.Game.Models.WGSports.Commons;
+using TGS.Shared.Game.Models.WGSports.Incoming;
 using TGS.Shared.Game.Models.WGSports.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.WGSports
@@ -22,6 +25,10 @@ namespace TGS.Shared.Game.ApiClients.WGSports
         ValueTask<WGSportsAccessMoneyQueryResponse> AccessMoneyQueryAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyQueryRequest source);
 
         ValueTask<WGSportsGetBalanceResponse> GetBalanceAsync(WGSportsConfiguration configuration, WGSportsGetBalanceRequest source);
+
+        ValueTask<WGSportsGameRecordResponse> GetGameRecordAsync(WGSportsConfiguration configuration, WGSportsGameRecordRequest request);
+
+        ValueTask<WGSportsGPGameRecordResponse> GameRecordAsync(Uri apiUrl, WGSportsGPGameRecordRequest request);
 
     }
     public class WGSportsApiClient : BaseApiClient, IWGSportsApiClient
@@ -82,5 +89,18 @@ namespace TGS.Shared.Game.ApiClients.WGSports
 
             return ExecuteJsonRequestAsync<object, WGSportsGetBalanceResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
+
+        ValueTask<WGSportsGameRecordResponse> IWGSportsApiClient.GetGameRecordAsync(WGSportsConfiguration configuration, WGSportsGameRecordRequest request)
+        {
+            var data = $"|{request.GameRecordTime.Description()}|{request.StartTime:yyyy-MM-dd HH:mm:ss}|{request.EndTime:yyyy-MM-dd HH:mm:ss}";
+            var dataEncrypt = WGSportsUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var path = $"{configuration.ApiUrl}?m=api&c=index&a=ShowBetList&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
+            var prefix = $"{_gameProviderCode }.ShowBetList";
+
+            return ExecuteJsonRequestAsync<object, WGSportsGameRecordResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
+        }
+
+        ValueTask<WGSportsGPGameRecordResponse> IWGSportsApiClient.GameRecordAsync(Uri apiUrl, WGSportsGPGameRecordRequest request) =>
+            ExecuteJsonRequestAsync<WGSportsGPGameRecordRequest, WGSportsGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/wgfm/gamerecord", request);
     }
 }
