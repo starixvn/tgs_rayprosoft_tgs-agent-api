@@ -68,9 +68,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             var response = await GetGameUrlAsync(playerId, language, configuration.ApiUrl, agent)
                 .ConfigureAwait(false);
 
-            if (response.ErrorCode.IgnoreCaseEquals(_ResultOk))
+            if (response.ErrorCode.IgnoreCaseEquals(_ResultOk) && response is LoginResponse loginResponse)
             {
-                var loginResponse = (LoginResponse)response;
                 return new GetGameUrlResponse {Url = loginResponse.Data.Url};
             }
 
@@ -78,7 +77,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
                 ? response.ErrorCode
                 : response.ErrorMessage;
 
-            throw new GameProviderApiErrorException(errorMessage);
+            throw new GameProviderApiErrorException($"{response.GetType().Name}:{errorMessage}");
         }
 
         private ValueTask<CheckOrCreateMemberResponse> CheckOrCreateMemberAsync(string playerId, Uri apiUrl,
@@ -127,7 +126,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             var checkOrCreateMemberResponse = await CheckOrCreateMemberAsync(playerId, apiUrl, agent)
                 .ConfigureAwait(false);
 
-            if (checkOrCreateMemberResponse.ErrorCode.IgnoreCaseNotEquals(_ResultOk) ||
+            if (checkOrCreateMemberResponse.ErrorCode.IgnoreCaseNotEquals(_ResultOk) &&
                 checkOrCreateMemberResponse.ErrorCode.IgnoreCaseNotEquals(ServiceApiError.PLAYER_EXIST.ToString()))
             {
                 return checkOrCreateMemberResponse;
