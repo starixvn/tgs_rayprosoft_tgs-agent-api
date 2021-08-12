@@ -398,7 +398,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     UpdatedOn = DateTimeOffset.Now
                 };
                 brandGroup.BrandGames =
-                    GenerateWithUpdateBrandGroupGames(brand, brandGroup, x.BrandGames.Select(g => g.GameId));
+                    GenerateWithUpdateBrandGroupGames(brand, brandGroup, x.BrandGames?.Select(g => g.GameId));
                 brandGroup.BrandGroupBetLimits =
                     GenerateWithUpdateBrandGroupBetLimits(brand, brandGroup, x.GameProviderBetLimits);
 
@@ -450,14 +450,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             IEnumerable<int> brandGameIds)
         {
             var brandGamePoolIds = brand.Games.Select(x => x.GameId).ToArray();
-            var brandGroupGames = brandGameIds
+            var brandGroupGames = brandGameIds?
                 .Where(brandGameId => brandGamePoolIds.Contains(brandGameId)).Select(brandGameId =>
                     new BrandGroupGame
                     {
                         BrandGroup = brandGroup,
                         BrandGameId = brand.Games.First(g => g.GameId == brandGameId).Id
                     });
-            return new(brandGroupGames);
+            return new(brandGroupGames ?? Array.Empty<BrandGroupGame>());
         }
 
         private static HashSet<BrandGroupGame> GenerateBrandGroupGames(Brand brand, Guid brandGroupId,
@@ -603,7 +603,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         private static HashSet<BrandGroupGameProviderBetLimit> GenerateWithUpdateGameProviderBetLimits(
             BrandGroupBetLimit brandGroupBetLimit, BrandGroupGameProviderBetLimitModel[] models)
         {
-            var brandGroupGameProviderBetLimits = models.Where(x => x.BrandBetLimitId == brandGroupBetLimit.BetLimitId)
+            var brandGroupGameProviderBetLimits = models?.Where(x => x.BrandBetLimitId == brandGroupBetLimit.BetLimitId)
                 .Select(x =>
                     new BrandGroupGameProviderBetLimit
                     {
@@ -611,7 +611,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                         GameProviderBetLimitId = x.GameProviderBetLimitId
                     });
 
-            return new(brandGroupGameProviderBetLimits);
+            return new(brandGroupGameProviderBetLimits ?? Array.Empty<BrandGroupGameProviderBetLimit>());
         }
     }
 }
