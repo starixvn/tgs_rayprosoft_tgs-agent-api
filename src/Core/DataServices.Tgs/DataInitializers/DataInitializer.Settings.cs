@@ -54,10 +54,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Key = key,
                 Value = value,
                 Description = description,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                CreatedOn = Now,
-                UpdatedOn = Now
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
+                CreatedOn = _Now,
+                UpdatedOn = _Now
             };
 
         private static ArrearsEmail GetArrearsEmail() =>

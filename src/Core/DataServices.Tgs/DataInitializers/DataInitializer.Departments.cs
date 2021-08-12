@@ -22,7 +22,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private async Task GenerateDepartmentsAsync()
         {
-            Departments = Resellers.SelectMany(x =>
+            Departments = _Resellers.SelectMany(x =>
             {
                 var resellerDepartments = new Department
                 {
@@ -30,8 +30,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Name = $"{x.Name}-{MarketDepartment}",
                     Description = MarketDepartment,
                     ResellerId = x.Id,
-                    CreatedByUsername = AdminUsername,
-                    UpdatedByUsername = AdminUsername,
+                    CreatedByUsername = _AdminUsername,
+                    UpdatedByUsername = _AdminUsername,
                     CreatedOn = DateTimeOffset.Now,
                     UpdatedOn = DateTimeOffset.Now
                 };
@@ -42,8 +42,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Description = MarketDepartment,
                     ResellerId = x.Id,
                     LicenseeId = l.Id,
-                    CreatedByUsername = AdminUsername,
-                    UpdatedByUsername = AdminUsername,
+                    CreatedByUsername = _AdminUsername,
+                    UpdatedByUsername = _AdminUsername,
                     CreatedOn = DateTimeOffset.Now,
                     UpdatedOn = DateTimeOffset.Now
                 });
@@ -58,8 +58,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         ResellerId = x.Id,
                         LicenseeId = l.Id,
                         BrandId = b.Id,
-                        CreatedByUsername = AdminUsername,
-                        UpdatedByUsername = AdminUsername,
+                        CreatedByUsername = _AdminUsername,
+                        UpdatedByUsername = _AdminUsername,
                         CreatedOn = DateTimeOffset.Now,
                         UpdatedOn = DateTimeOffset.Now
                     });
@@ -72,8 +72,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Id = p.Value,
                 Name = p.Key,
                 Description = p.Key,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now
             }).ToArray();
