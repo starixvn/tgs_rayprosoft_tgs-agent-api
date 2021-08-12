@@ -74,9 +74,11 @@ namespace TGS.Apis.BackendOffice.Controllers
                 BrandId = request.BrandId,
                 Subject = request.Subject,
                 Content = request.Content,
-                Localization = jsonSerializationProvider.SerializeToString(
-                    request.Localization,
-                    jsonOptions.JsonSerializerOptions),
+                Localization = request.Localization == null
+                    ? "{}"
+                    : jsonSerializationProvider.SerializeToString(
+                        request.Localization,
+                        jsonOptions.JsonSerializerOptions),
                 AssignedAllPlayers = request.AssignedAllPlayers,
                 Status = StationLetterStatus.InVerify,
                 CreatedByUsername = Username,
@@ -170,9 +172,11 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             stationLetter.Subject = request.Subject;
             stationLetter.Content = request.Content;
-            stationLetter.Localization = jsonSerializationProvider.SerializeToString(
-                request.Localization,
-                jsonOptions.JsonSerializerOptions);
+            stationLetter.Localization = request.Localization == null
+                ? "{}"
+                : jsonSerializationProvider.SerializeToString(
+                    request.Localization,
+                    jsonOptions.JsonSerializerOptions);
             stationLetter.UpdatedByUsername = Username;
             stationLetter.UpdatedOn = DateTimeOffset.Now;
 
