@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
@@ -42,7 +43,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
 
             var prepareLoginResponse = await _client.GetPrepareLoginAsync(configuration, prepareLoginRequest).ConfigureAwait(false);
 
-            if (prepareLoginResponse.ReturnCode != 1)
+            if (prepareLoginResponse.ReturnCode.ToString().IgnoreCaseNotEquals("1"))
             {
                 throw new GameProviderApiErrorException(prepareLoginResponse.ReturnCode.ToString());
             }
@@ -56,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
 
             var loginResponse = await _client.GetLoginAsync(configuration, sportsLoginRequest).ConfigureAwait(false);
 
-            if (loginResponse.ReturnCode != 1)
+            if (loginResponse.ReturnCode.ToString().IgnoreCaseNotEquals("1"))
             {
                 throw new GameProviderApiErrorException(prepareLoginResponse.ReturnCode.ToString());
             }

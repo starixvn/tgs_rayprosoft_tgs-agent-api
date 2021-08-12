@@ -16,7 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports
         {
         }
 
-        protected override string LogPrefix => "wg";
+        protected override string LogPrefix => "wgsports";
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
@@ -25,7 +25,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports
             services.AddTransient<IWGSportsService, WGSportsService>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(WGSportsGameInitializer) }, (provider, _) =>
-              provider.GetRequiredService<WGSportsGameInitializer>());
+            provider.GetRequiredService<WGSportsGameInitializer>());
+
+            services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(WGSportsGameProviderWalletAction) }, (provider, _) =>
+            provider.GetRequiredService<WGSportsGameProviderWalletAction>());
 
         }
     }

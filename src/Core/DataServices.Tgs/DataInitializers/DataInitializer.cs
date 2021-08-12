@@ -101,7 +101,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SkywindGameProvider(env),
                 new AllBetGameProvider(env),
                 new EvolutionGameProvider(env),
-                new WGSportsGameProvider(env)
+                new WGSportsGameProvider(env),
+                new WGHorseGameProvider(env)
             };
         }
 

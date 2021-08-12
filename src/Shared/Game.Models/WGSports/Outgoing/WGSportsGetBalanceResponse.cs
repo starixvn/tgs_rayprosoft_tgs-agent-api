@@ -8,10 +8,12 @@ using TGS.Shared.Game.Models.WGSports.Commons;
 
 namespace TGS.Shared.Game.Models.WGSports.Outgoing
 {
-    public record WGSportsGetBalanceResponse : WGSportsResponse
+    public record WGSportsGetBalanceResponse
     {
+        [JsonPropertyName("ReturnCode")]
+        public int ReturnCode { get; init; }
         [JsonPropertyName("Balance")]
-        public decimal Balance { get; init; }
+        public string Balance { get; init; }
         [JsonPropertyName("Currency")]
         public string Currency { get; init; }
     }

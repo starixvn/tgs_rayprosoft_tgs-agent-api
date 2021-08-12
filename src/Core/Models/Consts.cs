@@ -95,6 +95,7 @@ namespace TGS.Core.Models
             public const string AllBet = "AB";
             public const string Evolution = "EVO";
             public const string WGSports = "WGFM";
+            public const string WGHorse = "WGVIA";
         }
 
         public static class EnvironmentVariable
