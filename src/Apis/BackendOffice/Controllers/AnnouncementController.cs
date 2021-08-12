@@ -101,9 +101,11 @@ namespace TGS.Apis.BackendOffice.Controllers
                 DisplayOrder = 99,
                 Subject = request.Subject,
                 Content = request.Content,
-                Localization = jsonSerializationProvider.SerializeToString(
-                    request.Localization,
-                    serializerOptions),
+                Localization = request.Localization == null
+                    ? "{}"
+                    : jsonSerializationProvider.SerializeToString(
+                        request.Localization,
+                        serializerOptions),
                 From = request.From,
                 To = request.To,
                 Status = AnnounceStatus.InVerify,
@@ -178,9 +180,11 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             announcement.Subject = request.Subject;
             announcement.Content = request.Content;
-            announcement.Localization = jsonSerializationProvider.SerializeToString(
-                request.Localization,
-                serializerOptions);
+            announcement.Localization = request.Localization == null
+                ? "{}"
+                : jsonSerializationProvider.SerializeToString(
+                    request.Localization,
+                    serializerOptions);
             announcement.From = request.From;
             announcement.To = request.To;
             announcement.UpdatedByUsername = Username;
