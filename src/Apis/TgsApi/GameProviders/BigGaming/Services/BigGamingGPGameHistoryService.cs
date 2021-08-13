@@ -61,6 +61,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             };
             while (true)
             {
+
                 var response = await _client.GetGameRecordAsync(brandMerchant, request).ConfigureAwait(false);
                 if (response.Error != null)
                 {
@@ -71,6 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }
 
                 var gameRecords = _jsonSerializationProvider.DeserializeFromString<BigGamingResultGameRecordResponse<BigGamingGameRecordFishingResponse>>(_jsonSerializationProvider.SerializeToString(response.Result));
+
                 if (gameRecords.Items == null || gameRecords.Items.Length == 0)
                 {
                     break;
@@ -128,9 +130,9 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         PlayerCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.PlayerCode,
                         GameId = game != null ? game.Id : -1,
                         ExternalId = gameRecord.ExternalBetId.ToString(),
-                        CurrencyCode = playerInfo.Player.DefaultWalletCurrencyCode,
+                        CurrencyCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.DefaultWalletCurrencyCode,
                         Status = RoundStatus.Closed,
-                        GameProviderConfigurationId = playerInfo.BrandGameProviderConfigurationIds.GetValueOrDefault(),
+                        GameProviderConfigurationId = playerInfo.BrandGameProviderConfigurationIds.GetValueOrDefault(Guid.Empty),
                         WalletId = (playerInfo.Player == null) ? Guid.Empty : playerInfo.Player.DefaultWalletId,
                         CreatedOn = sysDateTimeOffset,
                         ClosedOn = sysDateTimeOffset,
