@@ -58,20 +58,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
         }
 
         async ValueTask<Player> IWGHorseService.GetPlayerByCodeAsync(string playerCode)
-        {
-            var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
-            if (player == null)
-            {
-                throw new PlayerLoginExpiredException();
-            }
-            return player;
-        }
+            => await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
 
         async ValueTask<string> IWGHorseService.GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language)
             => await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, language).ConfigureAwait(false);
 
         async ValueTask<string> IWGHorseService.GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode)
             => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId).ConfigureAwait(false);
-
     }
 }
