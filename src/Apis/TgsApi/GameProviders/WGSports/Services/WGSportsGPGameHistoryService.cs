@@ -170,7 +170,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                     PlayerCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.PlayerCode,
                     GameId = (game == null) ? -1 : game.Id,
                     ExternalId = gameRecord.Reference.ToString(),
-                    CurrencyCode = playerInfo.Player.DefaultWalletCurrencyCode,
+                    CurrencyCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.DefaultWalletCurrencyCode,
                     Status = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? Core.Models.Enums.RoundStatus.Open : Core.Models.Enums.RoundStatus.Closed,
                     GameProviderConfigurationId = playerInfo.GameProviderConfigurationId.GetValueOrDefault(),
                     WalletId = (playerInfo.Player == null) ? Guid.Empty : playerInfo.Player.DefaultWalletId,
