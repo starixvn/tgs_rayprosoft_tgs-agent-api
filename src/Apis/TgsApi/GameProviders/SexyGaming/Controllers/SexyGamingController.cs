@@ -85,7 +85,7 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming.Controllers
         {
             var items = HttpContext.Items;
             var playerCode = items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
+            var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.SexyGaming, playerCode).ConfigureAwait(false);
 
             return JsonDocument.Parse(_jsonSerializationProvider.SerializeToString(new SexyGamingGetBalanceResponse()
             {
