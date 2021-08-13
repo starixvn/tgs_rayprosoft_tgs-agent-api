@@ -92,9 +92,13 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         {
                             players.Add(gameRecord.LoginId, playerInfo);
                         }
-                        var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId).ConfigureAwait(false);
-                        playerInfo = (player, gameProviderConfigurationId);
-                        players.Add(gameRecord.LoginId, playerInfo);
+                        else
+                        {
+                            var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId).ConfigureAwait(false);
+                            playerInfo = (player, gameProviderConfigurationId);
+                            players.Add(gameRecord.LoginId, playerInfo);
+                        }
+
                     }
 
 
