@@ -126,9 +126,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         }
 
         async ValueTask<Guid> IBigGamingService.GetGameProviderIdAsync()
-        {
-            return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.BigGaming).ConfigureAwait(false);
-        }
+            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.BigGaming).ConfigureAwait(false);
 
         void IBigGamingService.CheckingSign(string sourceSign, string Sign)
         {
@@ -149,14 +147,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         }
 
         async ValueTask<Player> IBigGamingService.GetPlayerByCodeAsync(string playerCode)
-        {
-            var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
-            if (player == null)
-            {
-                throw new PlayerLoginExpiredException();
-            }
-            return player;
-        }
+           => await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
 
         async ValueTask<GameProviderDepositWithdrawalResponse> IBigGamingService.TransferAsync(Guid gameProviderId, string playerCode, string gameProviderTransactionId, decimal amount)
         {
