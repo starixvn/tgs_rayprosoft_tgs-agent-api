@@ -135,7 +135,13 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 Description = (fundTransferStatus == FundTransferTransactionStatus.Success) ? string.Empty : (wallet.Exception == null) ? string.Empty : wallet.Exception.Message
             });
 
-            return new() { GameProviderTransactionId = orderId, TransactionsId = wallet.TransactionId };
+            return new()
+            {
+                Error = (fundTransferStatus == FundTransferTransactionStatus.Success) ? (int)TgsApiError.None : (int)TgsApiError.GameBalanceFundOutFailed,
+                ErrorMessage = (fundTransferStatus == FundTransferTransactionStatus.Success) ? string.Empty : fundTransferStatus.Description("Failed to transfer the main wallet to GP.(主錢包轉入GP失敗。)"),
+                GameProviderTransactionId = orderId,
+                TransactionsId = wallet.TransactionId
+            };
         }
 
         /// <summary>
@@ -242,7 +248,13 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             });
 
 
-            return new() { GameProviderTransactionId = response.OrderId, TransactionsId = transactionsId };
+            return new()
+            {
+                Error = (fundTransferStatus == FundTransferTransactionStatus.Success) ? (int)TgsApiError.None : (int)TgsApiError.GameBalanceFundInFailed,
+                ErrorMessage = (fundTransferStatus == FundTransferTransactionStatus.Success) ? string.Empty : fundTransferStatus.Description("GP failed to transfer out of the main wallet.(GP轉出主錢包失敗。)"),
+                GameProviderTransactionId = response.OrderId,
+                TransactionsId = transactionsId
+            };
         }
 
         /// <summary>

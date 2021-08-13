@@ -16,7 +16,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
 
         ValueTask<WGHorseLoginResponse> GetLoginAsync(WGHorseConfiguration configuration, WGHorseLoginRequest source);
 
-        ValueTask<WGHorseResponse> AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source);
+        ValueTask<WGHorseAccessMoneyResponse> AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source);
 
         ValueTask<WGHorseResponse> AccessMoneyQueryAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyQueryRequest source);
 
@@ -37,7 +37,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
             var data = $"{source.Timestamp}|{source.PlayerCode}|{source.PlayerNickname}|{source.CurrencyCode}";
             var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=PrepareLogin&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
-            var prefix = $"{_gameProviderCode }_PrepareLogin";
+            var prefix = $"{_gameProviderCode }.PrepareLogin";
 
             return ExecuteJsonRequestAsync<object, WGHorsePrepareLoginResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
@@ -45,19 +45,19 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
         ValueTask<WGHorseLoginResponse> IWGHorseApiClient.GetLoginAsync(WGHorseConfiguration configuration, WGHorseLoginRequest source)
         {
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=Login&Token={System.Web.HttpUtility.UrlEncode(source.Token)}&PartnerCode={configuration.PartnerCode}&Lang={source.Lang}";
-            var prefix = $"{_gameProviderCode }_Login";
+            var prefix = $"{_gameProviderCode }.Login";
 
             return ExecuteJsonRequestAsync<object, WGHorseLoginResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
 
-        ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source)
+        ValueTask<WGHorseAccessMoneyResponse> IWGHorseApiClient.AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source)
         {
             var data = $"{source.PlayerCode}|{(int)source.AmountType}|{source.OrderId}|{source.Amount}";
             var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoney&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
-            var prefix = $"{_gameProviderCode }_AccessMoney";
+            var prefix = $"{_gameProviderCode }.AccessMoney";
 
-            return ExecuteJsonRequestAsync<object, WGHorseResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
+            return ExecuteJsonRequestAsync<object, WGHorseAccessMoneyResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
 
         ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyQueryAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyQueryRequest source)
@@ -65,7 +65,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
             var data = source.OrderId;
             var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoneyQuery&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
-            var prefix = $"{_gameProviderCode }_AccessMoneyQuery";
+            var prefix = $"{_gameProviderCode }.AccessMoneyQuery";
 
             return ExecuteJsonRequestAsync<object, WGHorseResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
@@ -75,7 +75,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
             var data = source.PlayerCode;
             var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=GetBalance&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
-            var prefix = $"{_gameProviderCode }_GetBalance";
+            var prefix = $"{_gameProviderCode }.GetBalance";
 
             return ExecuteJsonRequestAsync<object, WGHorseGetBalanceResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }

@@ -1,2 +1,3 @@
 Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Lobby,Lobby,,0,VirtualSportsLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WGVIA
+Horse,Horse,,1,VirtualSports,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,WGVIA
