@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -132,7 +131,9 @@ namespace TGS.Apis.TgsApi.Commons
         {
         }
 
-        private void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app) => throw new NotImplementedException();
+        protected virtual void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
+        {
+        }
 
         protected virtual void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
