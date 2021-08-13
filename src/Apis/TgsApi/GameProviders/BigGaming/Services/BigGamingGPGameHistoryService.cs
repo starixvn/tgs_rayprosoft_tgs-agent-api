@@ -94,7 +94,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         players.Add(gameRecord.LoginId, player);
                     }
                     Guid gameProviderConfigurationId = Guid.Empty;
-                    if (players != null)
+                    if (player != null)
                     {
                         if (!brandGameProviderConfigurationIds.TryGetValue(player.BrandId, out gameProviderConfigurationId))
                         {
