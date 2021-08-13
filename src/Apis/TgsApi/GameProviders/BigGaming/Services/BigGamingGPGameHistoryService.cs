@@ -93,11 +93,14 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         player = await _service.GetPlayerByCodeAsync(gameRecord.LoginId).ConfigureAwait(false);
                         players.Add(gameRecord.LoginId, player);
                     }
-
-                    if (!brandGameProviderConfigurationIds.TryGetValue(player.BrandId, out Guid gameProviderConfigurationId))
+                    Guid gameProviderConfigurationId = Guid.Empty;
+                    if (player != null)
                     {
-                        gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId).ConfigureAwait(false);
-                        brandGameProviderConfigurationIds.Add(player.BrandId, gameProviderConfigurationId);
+                        if (!brandGameProviderConfigurationIds.TryGetValue(player.BrandId, out gameProviderConfigurationId))
+                        {
+                            gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId).ConfigureAwait(false);
+                            brandGameProviderConfigurationIds.Add(player.BrandId, gameProviderConfigurationId);
+                        }
                     }
                     #endregion
 
