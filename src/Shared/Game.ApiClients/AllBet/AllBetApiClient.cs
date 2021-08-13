@@ -11,6 +11,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
+using TGS.Core.Models;
 using TGS.Shared.Game.Models.AllBet.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.AllBet
@@ -46,8 +47,9 @@ namespace TGS.Shared.Game.ApiClients.AllBet
             var path = "/Login";
             var (headers, contentHeaders) = GetHeaders(method, propertyId, apiKey, path, request);
 
+            var prefix = $"{Consts.GameProvider.AllBet}.Login";
             return ExecuteJsonRequestAsync<LoginRequest, LoginResponse>(method, apiUrl, path,
-                request, headers, contentHeaders, options: _options);
+                request, headers, contentHeaders, options: _options, logPrefix: prefix);
         }
 
         ValueTask<CheckOrCreateMemberResponse> IAllBetApiClient.CheckOrCreateMemberAsync(Uri apiUrl, string propertyId,
@@ -57,8 +59,9 @@ namespace TGS.Shared.Game.ApiClients.AllBet
             var path = "/CheckOrCreate";
             var (headers, contentHeaders) = GetHeaders(method, propertyId, apiKey, path, request);
 
+            var prefix = $"{Consts.GameProvider.Saba}.CheckOrCreateMember";
             return ExecuteJsonRequestAsync<CheckOrCreateMemberRequest, CheckOrCreateMemberResponse>(
-                method, apiUrl, path, request, headers, contentHeaders, options: _options);
+                method, apiUrl, path, request, headers, contentHeaders, options: _options, logPrefix: prefix);
         }
 
         private (IReadOnlyDictionary<string, string> Headers, IReadOnlyDictionary<string, string> ContentHeaders)
