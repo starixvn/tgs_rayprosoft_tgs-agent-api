@@ -82,7 +82,6 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 {
                     count++;
 
-
                     var success = true;
                     var gameRecord = gameRecordItems[i];
 
