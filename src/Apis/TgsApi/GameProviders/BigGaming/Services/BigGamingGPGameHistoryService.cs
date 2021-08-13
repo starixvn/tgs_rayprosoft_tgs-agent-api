@@ -43,9 +43,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             int pageIndex = 1;
             int pageSize = 500;
             var gameProviderId = await _service.GetGameProviderIdAsync();
-            var players = new Dictionary<string, Player>();
+            var players = new Dictionary<string, (Player Player, Guid? BrandGameProviderConfigurationIds)>();
             var gameIds = new Dictionary<int, CachedGame>();
-            var brandGameProviderConfigurationIds = new Dictionary<Guid, Guid>();
             var count = 0;
             var successCount = 0;
             var failCount = 0;
@@ -62,6 +61,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
             };
             while (true)
             {
+
                 var response = await _client.GetGameRecordAsync(brandMerchant, request).ConfigureAwait(false);
                 if (response.Error != null)
                 {
@@ -72,6 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 }
 
                 var gameRecords = _jsonSerializationProvider.DeserializeFromString<BigGamingResultGameRecordResponse<BigGamingGameRecordFishingResponse>>(_jsonSerializationProvider.SerializeToString(response.Result));
+
                 if (gameRecords.Items == null || gameRecords.Items.Length == 0)
                 {
                     break;
@@ -83,45 +84,34 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                 {
                     count++;
 
-                    var gameId = default(int?);
-
                     var success = true;
                     var gameRecord = gameRecordItems[i];
-                    #region Get Player
-                    if (!players.TryGetValue(gameRecord.LoginId, out Player player))
-                    {
-                        player = await _service.GetPlayerByCodeAsync(gameRecord.LoginId).ConfigureAwait(false);
-                        players.Add(gameRecord.LoginId, player);
-                    }
-                    Guid gameProviderConfigurationId = Guid.Empty;
-                    if (player != null)
-                    {
-                        if (!brandGameProviderConfigurationIds.TryGetValue(player.BrandId, out gameProviderConfigurationId))
-                        {
-                            gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId).ConfigureAwait(false);
-                            brandGameProviderConfigurationIds.Add(player.BrandId, gameProviderConfigurationId);
-                        }
-                    }
-                    #endregion
 
-                    #region Get Game
-                    if (gameIds.TryGetValue(gameRecord.GameType, out CachedGame game))
+                    if (!players.TryGetValue(gameRecord.LoginId, out (Player Player, Guid? BrandGameProviderConfigurationIds) playerInfo))
                     {
-                        gameId = game.Id;
+                        var player = await _service.GetPlayerByCodeAsync(gameRecord.LoginId).ConfigureAwait(false);
+                        if (player == null)
+                        {
+                            players.Add(gameRecord.LoginId, playerInfo);
+                        }
+                        else
+                        {
+                            var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId).ConfigureAwait(false);
+                            playerInfo = (player, gameProviderConfigurationId);
+                            players.Add(gameRecord.LoginId, playerInfo);
+                        }
+
                     }
-                    else
+
+
+                    if (!gameIds.TryGetValue(gameRecord.GameType, out CachedGame game))
                     {
                         game = await _service.GetCachedGameAsync(gameProviderId, gameRecord.GameType.ToString()).ConfigureAwait(false);
-
-                        if (game != null)
-                        {
-                            gameId = game.Id;
-                            gameIds.Add(gameRecord.GameType, game);
-                        }
+                        gameIds.Add(gameRecord.GameType, game);
                     }
-                    #endregion
 
-                    if (player == null || !gameId.HasValue)
+
+                    if (playerInfo.Player == null || game == null)
                     {
                         success = false;
                         failCount++;
@@ -131,24 +121,23 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                         successCount++;
                     }
 
-
                     var orderTime = new DateTimeOffset(DateTime.Parse(gameRecord.OrderTime), TimeSpan.FromHours(-4));
                     await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                     {
                         ExternalRoundId = gameRecord.ExternalRoundId,
                         GameProviderId = gameProviderId,
                         GameProviderCode = _service.GetGameProviderCode(),
-                        PlayerCode = (player == null) ? string.Empty : player.PlayerCode,
-                        GameId = gameId.GetValueOrDefault(-1),
+                        PlayerCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.PlayerCode,
+                        GameId = game != null ? game.Id : -1,
                         ExternalId = gameRecord.ExternalBetId.ToString(),
-                        CurrencyCode = player.DefaultWalletCurrencyCode,
+                        CurrencyCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.DefaultWalletCurrencyCode,
                         Status = RoundStatus.Closed,
-                        GameProviderConfigurationId = gameProviderConfigurationId,
-                        WalletId = (player == null) ? Guid.Empty : player.DefaultWalletId,
+                        GameProviderConfigurationId = playerInfo.BrandGameProviderConfigurationIds.GetValueOrDefault(Guid.Empty),
+                        WalletId = (playerInfo.Player == null) ? Guid.Empty : playerInfo.Player.DefaultWalletId,
                         CreatedOn = sysDateTimeOffset,
                         ClosedOn = sysDateTimeOffset,
                         UpdatedOn = sysDateTimeOffset,
-                        BrandId = (player == null) ? Guid.Empty : player.BrandId,
+                        BrandId = (playerInfo.Player == null) ? Guid.Empty : playerInfo.Player.BrandId,
                         ExternalCreatedOn = orderTime,
                         ExternalClosedOn = orderTime,
                         BetAmount = gameRecord.BetAmount,
