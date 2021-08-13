@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
@@ -28,9 +29,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
         private readonly IWGSportsService _service;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IGameRoundsProcessor _gameRoundsProcessor;
+        private readonly IGameProviderRecordService _gameProviderRecordService;
         private WGSportsConfiguration _configuration;
         private Guid _gameProviderId;
-        private Dictionary<string, Player> _players;
+        private Dictionary<string, (Player Player, Guid? GameProviderConfigurationId)> _players;
         private Dictionary<string, CachedGame> _gameIds;
         private Dictionary<Guid, Guid> _brandGameProviderConfigurationIds;
 
@@ -38,19 +40,21 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             IWGSportsApiClient client,
             IWGSportsService service,
             IJsonSerializationProvider jsonSerializationProvider,
-            IGameRoundsProcessor gameRoundsProcessor)
+            IGameRoundsProcessor gameRoundsProcessor,
+            IGameProviderRecordService gameProviderRecordService)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _gameRoundsProcessor = gameRoundsProcessor ?? throw new ArgumentNullException(nameof(gameRoundsProcessor));
+            _gameProviderRecordService = gameProviderRecordService ?? throw new ArgumentNullException(nameof(gameProviderRecordService));
         }
 
         async ValueTask<WGSportsGPGameRecordResponse> IWGSportsGPGameHistoryService.GameRecordAsync(WGSportsGPGameRecordRequest source)
         {
             _configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
             _gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
-            _players = new Dictionary<string, Player>();
+            _players = new Dictionary<string, (Player Player, Guid? GameProviderConfigurationId)>();
             _gameIds = new Dictionary<string, CachedGame>();
             _brandGameProviderConfigurationIds = new Dictionary<Guid, Guid>();
 
@@ -130,43 +134,23 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             for (int i = 0; i < betInfos.Length; i++)
             {
                 count++;
-
-                var gameId = default(int?);
-
                 var success = true;
                 var gameRecord = betInfos[i];
-                #region Get Player
-                if (!_players.TryGetValue(gameRecord.Username, out Player player))
+
+                if (!_players.TryGetValue(gameRecord.Username, out (Player Player, Guid? GameProviderConfigurationId) playerInfo))
                 {
-                    player = await _service.GetPlayerByCodeAsync(gameRecord.Username).ConfigureAwait(false);
-                    _players.Add(gameRecord.Username, player);
+                    playerInfo = await _gameProviderRecordService.GetPlayerInfoAsync(_gameProviderId, gameRecord.Username).ConfigureAwait(false);
+                    _players.Add(gameRecord.Username, playerInfo);
                 }
 
-                if (!_brandGameProviderConfigurationIds.TryGetValue(player.BrandId, out Guid gameProviderConfigurationId))
-                {
-                    gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, _gameProviderId).ConfigureAwait(false);
-                    _brandGameProviderConfigurationIds.Add(player.BrandId, gameProviderConfigurationId);
-                }
-                #endregion
 
-                #region Get Game
-                if (_gameIds.TryGetValue(gameRecord.InitData.FB, out CachedGame game))
-                {
-                    gameId = game.Id;
-                }
-                else
+                if (!_gameIds.TryGetValue(gameRecord.InitData.FB, out CachedGame game))
                 {
                     game = await _service.GetCachedGameAsync(_gameProviderId, gameRecord.InitData.FB).ConfigureAwait(false);
-
-                    if (game != null)
-                    {
-                        gameId = game.Id;
-                        _gameIds.Add(gameRecord.InitData.FB, game);
-                    }
+                    _gameIds.Add(gameRecord.InitData.FB, game);
                 }
-                #endregion
 
-                if (player == null || !gameId.HasValue)
+                if (playerInfo.Player == null || game == null)
                 {
                     success = false;
                     failCount++;
@@ -183,17 +167,17 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                     ExternalRoundId = gameRecord.Reference,
                     GameProviderId = _gameProviderId,
                     GameProviderCode = _service.GetGameProviderCode(),
-                    PlayerCode = (player == null) ? string.Empty : player.PlayerCode,
-                    GameId = gameId.GetValueOrDefault(-1),
+                    PlayerCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.PlayerCode,
+                    GameId = (game == null) ? -1 : game.Id,
                     ExternalId = gameRecord.Reference.ToString(),
-                    CurrencyCode = player.DefaultWalletCurrencyCode,
+                    CurrencyCode = playerInfo.Player.DefaultWalletCurrencyCode,
                     Status = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? Core.Models.Enums.RoundStatus.Open : Core.Models.Enums.RoundStatus.Closed,
-                    GameProviderConfigurationId = gameProviderConfigurationId,
-                    WalletId = (player == null) ? Guid.Empty : player.DefaultWalletId,
+                    GameProviderConfigurationId = playerInfo.GameProviderConfigurationId.GetValueOrDefault(),
+                    WalletId = (playerInfo.Player == null) ? Guid.Empty : playerInfo.Player.DefaultWalletId,
                     CreatedOn = sysDateTimeOffset,
                     ClosedOn = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? null : sysDateTimeOffset,
                     UpdatedOn = sysDateTimeOffset,
-                    BrandId = (player == null) ? Guid.Empty : player.BrandId,
+                    BrandId = (playerInfo.Player == null) ? Guid.Empty : playerInfo.Player.BrandId,
                     ExternalCreatedOn = createdOn,
                     ExternalClosedOn = externalClosedOn,
                     BetAmount = decimal.Parse(gameRecord.BetAmount),
