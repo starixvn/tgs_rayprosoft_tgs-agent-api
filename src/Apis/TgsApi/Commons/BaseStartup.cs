@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -90,11 +91,13 @@ namespace TGS.Apis.TgsApi.Commons
                 "/metrics"
             });
 
+            UseCustomMiddlewaresBeforeRouting(app);
+
             app.UseRouting();
 
             app.UseHttpMetrics();
 
-            UseCustomMiddlewares(app);
+            UseCustomMiddlewaresAfterRouting(app);
 
             app.UseEndpoints(endpoints =>
             {
@@ -122,13 +125,16 @@ namespace TGS.Apis.TgsApi.Commons
             });
         }
 
+
         #region Abstract and Virtual Methods
 
         protected virtual void AddCustomDependencyServices(IServiceCollection services)
         {
         }
 
-        protected virtual void UseCustomMiddlewares(IApplicationBuilder app)
+        private void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app) => throw new NotImplementedException();
+
+        protected virtual void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
         }
 
