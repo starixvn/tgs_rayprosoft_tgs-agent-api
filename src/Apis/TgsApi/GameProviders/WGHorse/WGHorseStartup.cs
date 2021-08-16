@@ -33,6 +33,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse
             services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(WGHorseGameProviderWalletAction) }, (provider, _) =>
             provider.GetRequiredService<WGHorseGameProviderWalletAction>());
 
+            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(WGHorseGameHistory) }, (provider, _) =>
+            provider.GetRequiredService<WGHorseGameHistory>());
         }
     }
 }

@@ -123,6 +123,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
                 {
                     break;
                 }
+
                 var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new WGHorseGPGameRecordRequest()
                 {
                     StartTime = config.StartTime,
@@ -149,11 +150,15 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// <returns></returns>
         private async Task<(GameProviderSchedule gameProviderSchedule, WGHorseGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProviderId)
         {
+            var intervalDayMax = 60;
+            var intervalDay = 30;
             var sysTime = DateTimeOffset.UtcNow;
             var config = new WGHorseGameProviderScheduleConfig()
             {
+                IntervalDayMax = intervalDayMax,
+                IntervalDay = intervalDay,
                 LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+0)),
-                StartTime = DateTimeOffset.Parse(DateTime.Now.ToString("yyyy-MM-dd")),
+                StartTime = DateTimeOffset.Parse(DateTime.Now.ToString("yyyy-MM-dd")).AddDays(intervalDay * -1),
                 EndTime = DateTimeOffset.Parse(DateTime.Now.ToString("yyyy-MM-dd")),
             };
 
@@ -183,9 +188,9 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// <returns></returns>
         private async Task<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, WGHorseGameProviderScheduleConfig config, WGHorseGPGameRecordResponse responses, DateTimeOffset sysTime)
         {
-            if (config.EndTime > sysTime)
+            if (config.EndTime > sysTime || (sysTime - config.EndTime).TotalDays < (double)config.IntervalDay)
             {
-                config.StartTime = sysTime;
+                config.StartTime = sysTime.AddDays((double)config.IntervalDay * -1);
                 config.EndTime = sysTime;
             }
             else
