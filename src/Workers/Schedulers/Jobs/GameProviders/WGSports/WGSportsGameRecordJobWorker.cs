@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Hangfire;
@@ -13,16 +12,13 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Messages;
 using TGS.GameProviders.Repositories;
 using TGS.GameProviders.Repositories.Models;
-using TGS.GameProviders.Repositories.Models.ScheduleConfig.VR;
 using TGS.GameProviders.Repositories.Models.ScheduleConfig.WGSports;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.WGSports;
-using TGS.Shared.Game.Models.VR.Incoming;
 using TGS.Shared.Game.Models.WGSports.Incoming;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
-
 
 namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
 {

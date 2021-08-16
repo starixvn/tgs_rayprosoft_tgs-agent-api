@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
@@ -20,6 +21,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
         ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
         ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language);
         ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode);
+        ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
+        string GetGameProviderCode();
+        ClientRoundStatus GetClientRound(decimal settleAmount);
     }
     public class WGHorseService : IWGHorseService
     {
@@ -65,5 +69,23 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
         async ValueTask<string> IWGHorseService.GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode)
             => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId).ConfigureAwait(false);
+
+        async ValueTask<CachedGame> IWGHorseService.GetCachedGameAsync(Guid gameProviderId, string externalGameId)
+        {
+            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId).ConfigureAwait(false);
+            return games.FirstOrDefault();
+        }
+
+        string IWGHorseService.GetGameProviderCode()
+        {
+            return Consts.GameProvider.WGHorse;
+        }
+
+        ClientRoundStatus IWGHorseService.GetClientRound(decimal settleAmount)
+          => settleAmount switch
+          {
+              > 0 => ClientRoundStatus.Win,
+              <= 0 => ClientRoundStatus.Loss,
+          };
     }
 }

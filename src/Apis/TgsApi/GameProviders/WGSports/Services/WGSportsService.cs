@@ -87,15 +87,14 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
 
         string IWGSportsService.GetGameProviderCode()
         {
-            return Consts.GameProvider.BigGaming;
+            return Consts.GameProvider.WGSports;
         }
 
         ClientRoundStatus IWGSportsService.GetClientRound(decimal settleAmount)
            => settleAmount switch
            {
                > 0 => ClientRoundStatus.Win,
-               < 0 => ClientRoundStatus.Loss,
-               0 => ClientRoundStatus.Draw
+               <= 0 => ClientRoundStatus.Loss,
            };
     }
 }

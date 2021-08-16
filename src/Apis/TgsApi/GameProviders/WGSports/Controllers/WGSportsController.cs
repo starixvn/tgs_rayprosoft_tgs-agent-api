@@ -18,7 +18,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     [AllowAnonymous]
     [FeatureGate(Consts.GameProvider.WGSports)]
-    public class WGSportsController
+    public class WGSportsController : ControllerBase
     {
         private readonly IWGSportsGPGameHistoryService _gameHistoryService;
 
