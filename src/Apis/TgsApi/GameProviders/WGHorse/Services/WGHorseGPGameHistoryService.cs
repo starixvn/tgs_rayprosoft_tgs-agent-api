@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
         private WGHorseConfiguration _configuration;
         private Guid _gameProviderId;
         private Dictionary<string, (Player Player, Guid? GameProviderConfigurationId)> _players;
-        private Dictionary<string, CachedGame> _gameIds;
+        private CachedGame _game;
         private Dictionary<Guid, Guid> _brandGameProviderConfigurationIds;
 
         public WGHorseGPGameHistoryService(
@@ -57,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
             _configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
             _gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             _players = new Dictionary<string, (Player Player, Guid? GameProviderConfigurationId)>();
-            _gameIds = new Dictionary<string, CachedGame>();
+            _game = await _service.GetCachedGameAsync(_gameProviderId, WGHorseConsts.ExternalGameId).ConfigureAwait(false);
             _brandGameProviderConfigurationIds = new Dictionary<Guid, Guid>();
             var game = await _service.GetCachedGameAsync(_gameProviderId, "1").ConfigureAwait(false);
             var count = 0;

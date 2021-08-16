@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
         private WGSportsConfiguration _configuration;
         private Guid _gameProviderId;
         private Dictionary<string, (Player Player, Guid? GameProviderConfigurationId)> _players;
-        private Dictionary<string, CachedGame> _gameIds;
+        private CachedGame _game;
         private Dictionary<Guid, Guid> _brandGameProviderConfigurationIds;
 
         public WGSportsGPGameHistoryService(
@@ -55,7 +55,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             _configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
             _gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             _players = new Dictionary<string, (Player Player, Guid? GameProviderConfigurationId)>();
-            _gameIds = new Dictionary<string, CachedGame>();
+            _game = await _service.GetCachedGameAsync(_gameProviderId, WGSportsConsts.ExternalGameId).ConfigureAwait(false);
             _brandGameProviderConfigurationIds = new Dictionary<Guid, Guid>();
 
             var responseUnSettle = await UnSettleAsync(source).ConfigureAwait(false);
@@ -143,14 +143,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                     _players.Add(gameRecord.Username, playerInfo);
                 }
 
-
-                if (!_gameIds.TryGetValue(gameRecord.InitData.FB, out CachedGame game))
-                {
-                    game = await _service.GetCachedGameAsync(_gameProviderId, gameRecord.InitData.FB).ConfigureAwait(false);
-                    _gameIds.Add(gameRecord.InitData.FB, game);
-                }
-
-                if (playerInfo.Player == null || game == null)
+                if (playerInfo.Player == null || _game == null)
                 {
                     success = false;
                     failCount++;
@@ -168,7 +161,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                     GameProviderId = _gameProviderId,
                     GameProviderCode = _service.GetGameProviderCode(),
                     PlayerCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.PlayerCode,
-                    GameId = (game == null) ? -1 : game.Id,
+                    GameId = (_game == null) ? -1 : _game.Id,
                     ExternalId = gameRecord.Reference.ToString(),
                     CurrencyCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.DefaultWalletCurrencyCode,
                     Status = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? Core.Models.Enums.RoundStatus.Open : Core.Models.Enums.RoundStatus.Closed,

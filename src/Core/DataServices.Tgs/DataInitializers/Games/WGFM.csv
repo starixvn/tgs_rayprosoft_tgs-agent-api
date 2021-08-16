@@ -1,3 +1,2 @@
 Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
-Basketball,Basketball,,1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WGFM
-Football,Football,,2,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WGFM
+Sportsbook,Sportsbook,,1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WGFM
