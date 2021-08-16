@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Mime;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -33,9 +34,11 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                 });
 
             services.AddScoped<WMCasinoDispatcherMiddleware>();
+            services.AddScoped<AuthorizeWMCasinoMiddleware>();
             services.AddScoped<HandleWMCasinoExceptionMiddleware>();
 
-            //services.AddScoped<ISabaServices, SabaServices>();
+            services.AddScoped<IWMCasinoServices, WMCasinoServices>();
+            services.AddScoped<IWMCasinoAgentMapper, WMCasinoAgentMapper>();
             services.AddScoped<IWMCasinoActionModelMapper, WMCasinoActionModelMapper>();
 
             //services.AddScopedWithResolver<IGameInitializer>(new[]
@@ -53,9 +56,11 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 
         protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
         {
-            const string Route = "/api/wm/entrance";
+            const string route = "/api/wm/entrance";
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase) &&
+            app.UseWhen(
+                context =>
+                    context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
                     HttpMethods.IsPost(context.Request.Method),
                 builder =>
                 {
@@ -66,23 +71,16 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
-            const string Route = "/api/wm";
+            const string route = "/api/wm";
 
-            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+            app.UseWhen(
+                context =>
+                    context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
+                    context.Request.ContentType == MediaTypeNames.Application.Json,
                 builder =>
                 {
-                    //builder.UseMiddleware<AuthorizeSabaMiddleware>();
+                    builder.UseMiddleware<AuthorizeWMCasinoMiddleware>();
                 });
-
-            //app.UseWhen(context
-            //        => context.Request.Path.StartsWithSegments(Route,
-            //            StringComparison.OrdinalIgnoreCase,
-            //            out var remaining) &&
-            //        !remaining.StartsWithSegments("entrance", StringComparison.OrdinalIgnoreCase),
-            //    builder =>
-            //    {
-            //        //builder.UseMiddleware<AuthorizeSabaMiddleware>();
-            //    });
         }
     }
 }

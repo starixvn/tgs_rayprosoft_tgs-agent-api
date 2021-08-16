@@ -6,18 +6,18 @@ namespace TGS.Shared.Game.Models.WMCasino.Incoming
     {
         [JsonPropertyName("result")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public Result Data { get; set; }
+        public Result Data { get; init; }
 
         public class Result
         {
             [JsonPropertyName("user")]
-            public string PlayerCode { get; set; }
+            public string PlayerCode { get; init; }
 
             [JsonPropertyName("money")]
-            public decimal Balance { get; set; }
+            public decimal Balance { get; init; }
 
             [JsonPropertyName("responseDate")]
-            public string Timestamp { get; set; }
+            public string Timestamp { get; init; }
         }
     }
 }

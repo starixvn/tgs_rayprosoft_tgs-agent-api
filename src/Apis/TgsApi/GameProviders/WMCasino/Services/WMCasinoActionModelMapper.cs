@@ -9,6 +9,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
     public interface IWMCasinoActionModelMapper
     {
         GetBalanceResponse Response(string playerCode, GetBalanceResult r);
+        WalletTransferResponse Response(WalletTransferRequest request, decimal balance);
     }
 
     public class WMCasinoActionModelMapper : IWMCasinoActionModelMapper
@@ -17,7 +18,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         private const string _GameProviderCode = Consts.GameProvider.WMCasino;
         private static readonly TimeSpan _Offset = TimeSpan.FromHours(8);
 
-        GetBalanceResponse IWMCasinoActionModelMapper.Response(string playerCode, GetBalanceResult r)
+        public GetBalanceResponse Response(string playerCode, GetBalanceResult r)
             => new GetBalanceResponse
             {
                 ErrorCode = (int)GameApiError.Success,
@@ -25,6 +26,19 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 {
                     PlayerCode = playerCode,
                     Balance = r.Balance,
+                    Timestamp = GetTimestamp()
+                }
+            };
+
+        public WalletTransferResponse Response(WalletTransferRequest request, decimal balance)
+            => new WalletTransferResponse
+            {
+                ErrorCode = (int)GameApiError.Success,
+                Data = new WalletTransferResponse.Result
+                {
+                    Amount = request.Amount,
+                    Balance = balance,
+                    DealId = request.DealId,
                     Timestamp = GetTimestamp()
                 }
             };

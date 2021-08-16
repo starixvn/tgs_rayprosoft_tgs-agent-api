@@ -5,9 +5,9 @@ namespace TGS.Shared.Game.Models.WMCasino.Incoming
     public record ErrorResponse
     {
         [JsonPropertyName("errorCode")]
-        public int ErrorCode { get; set; }
+        public int ErrorCode { get; init; }
 
         [JsonPropertyName("errorMessage")]
-        public string ErrorMessage { get; set; } = string.Empty;
+        public string ErrorMessage { get; init; } = string.Empty;
     }
 }

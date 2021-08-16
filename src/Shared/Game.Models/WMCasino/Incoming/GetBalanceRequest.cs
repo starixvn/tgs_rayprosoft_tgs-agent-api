@@ -5,6 +5,6 @@ namespace TGS.Shared.Game.Models.WMCasino.Incoming
     public record GetBalanceRequest : BaseRequest
     {
         [JsonPropertyName("user")]
-        public string PlayerCode { get; set; }
+        public string User { get; set; }
     }
 }
