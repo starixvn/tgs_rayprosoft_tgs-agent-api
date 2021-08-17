@@ -3,12 +3,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using TGS.Apis.FileService.Clients;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Settings;
+using Tgs.FileService.Clients;
 using TGS.Services.Promotion.Models.Promotion;
 
 namespace TGS.Services.Promotion.Handlers

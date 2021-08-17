@@ -2,9 +2,9 @@
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using Tgs.Payment.Clients;
-using TGS.Apis.FileService.Clients;
 using TGS.Core.Infrastructures.Utility;
+using Tgs.FileService.Clients;
+using Tgs.Payment.Clients;
 using TGS.Payment.ManualDeposit;
 using TGS.ServiceUtility;
 
@@ -21,12 +21,14 @@ namespace TGS.Services.Operator.Services.Deposit
             IFileServiceClient fileServiceClient,
             ManualDepositSerializer serializer)
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _paymentServiceClient =
+                paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
             _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
-        public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command,
+            CancellationToken cancellationToken = default)
         {
             var randomFileName = StringGenerator.GenerateAlphanumericString(32);
 
