@@ -1,10 +1,10 @@
 ﻿using System.Data;
 using System.Threading.Tasks;
-using TGS.Apis.FileService.Clients;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
+using Tgs.FileService.Clients;
 
 namespace TGS.Apis.BackendOffice.DataService.Services
 {
