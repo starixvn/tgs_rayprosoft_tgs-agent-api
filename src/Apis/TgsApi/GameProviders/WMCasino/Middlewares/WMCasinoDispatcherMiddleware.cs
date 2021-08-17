@@ -21,10 +21,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
 
         private static readonly IReadOnlyDictionary<string, string> _Routes = new Dictionary<string, string>
         {
-            {"CallBalance", "/api/wm/balance"},
-            {"PointInout", "/api/wm/transfer"},
-            {"TimeoutBetReturn", "api/wm/canceltransfer"},
-            {"SendMemberReport", "api/bets/postbetdetails"}
+            { "CallBalance", "/api/wm/balance" },
+            { "PointInout", "/api/wm/transfer" },
+            { "TimeoutBetReturn", "/api/wm/canceltransfer" },
+            { "SendMemberReport", "/api/bets/postbetdetails" }
         };
 
         private static readonly RecyclableMemoryStreamManager _RecyclableMemoryStreamManager =
