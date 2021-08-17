@@ -50,6 +50,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 AdjustmentAmount = model.AdjustmentAmount.Truncate(2),
                 BonusAmount = model.BonusAmount.Truncate(2),
                 RebateAmount = model.RebateAmount.Truncate(2),
+                PromotionAmount = model.PromotionAmount.Truncate(2),
+                DividendAmount = model.DividendAmount.Truncate(2),
                 BetAmount = model.BetAmount.Truncate(2),
                 Turnover = model.Turnover.Truncate(2),
                 WinLossAmount = model.WinLossAmount.Truncate(2),
