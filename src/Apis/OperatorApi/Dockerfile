@@ -26,7 +26,6 @@ COPY ["src/Services/Bucket/PlayerBucket.Core.csproj", "src/Services/Bucket/"]
 COPY ["src/Repositories/Operator.Repositories/Operator.Repositories.csproj", "src/Repositories/Operator.Repositories/"]
 COPY ["src/Services/Operator.Core/Operator.Core.csproj", "src/Services/Operator.Core/"]
 COPY ["src/Clients/Promotion.Client/Promotion.Client.csproj", "src/Clients/Promotion.Client/"]
-COPY ["src/Clients/FileService.Client/FileService.Client.csproj", "src/Clients/FileService.Client/"]
 COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
 COPY ["src/Libraries/IdentityVerifiers/IdentityVerifiers.csproj", "src/Libraries/IdentityVerifiers/"]
 RUN dotnet restore "src/Apis/OperatorApi/OperatorApi.csproj"
