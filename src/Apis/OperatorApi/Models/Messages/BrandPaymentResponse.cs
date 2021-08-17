@@ -38,5 +38,8 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("transferlimit")]
         public ValueRange<decimal> TransferLimit { get; init; }
+
+        [JsonPropertyName("displayorder")]
+        public int DisplayOrder { get; init; }
     }
 }

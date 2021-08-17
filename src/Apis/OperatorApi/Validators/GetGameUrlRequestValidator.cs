@@ -8,9 +8,9 @@ namespace TGS.Apis.OperatorApi.Validators
     {
         public GetGameUrlRequestValidator()
         {
-            RuleFor(x => x.GameProviderCode)
+            RuleFor(x => x.SubGameProviderCode)
                 .NotEmpty()
-                .WithName(x => GetBindPropertyName(x, nameof(x.GameProviderCode)));
+                .WithName(x => GetBindPropertyName(x, nameof(x.SubGameProviderCode)));
 
             RuleFor(x => x.GameId)
                 .NotEmpty()

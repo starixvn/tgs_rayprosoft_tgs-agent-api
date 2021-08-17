@@ -13,7 +13,6 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operator.GameProviders;
-using TGS.Services.Operator.Games;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.GameProvider
@@ -25,7 +24,6 @@ namespace TGS.Services.Operator.Services.GameProvider
 
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
-        private readonly IGameRepository _gameRepository;
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidStatus<GameStatus> _validGameStatus;
         private readonly IValidStatus<Status> _validStatus;
@@ -37,8 +35,7 @@ namespace TGS.Services.Operator.Services.GameProvider
             IBrandOperations brandOperations,
             IValidStatus<Status> validStatus,
             IValidStatus<GameStatus> validGameStatus,
-            IGameProviderRepository gameProviderRepository,
-            IGameRepository gameRepository)
+            IGameProviderRepository gameProviderRepository)
         {
             _brandCurrencyCodeMapper = brandCurrencyCodeMapper ??
                 throw new ArgumentNullException(nameof(brandCurrencyCodeMapper));
@@ -51,7 +48,6 @@ namespace TGS.Services.Operator.Services.GameProvider
 
             _gameProviderRepository =
                 gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-            _gameRepository = gameRepository ?? throw new ArgumentNullException(nameof(gameRepository));
         }
 
         public async IAsyncEnumerable<GameProviderInfo> QueryAsync(
@@ -95,30 +91,23 @@ namespace TGS.Services.Operator.Services.GameProvider
             var gameProviderIds = brandGameProviders.Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus))
                 .Select(bgp => bgp.GameProviderId).Distinct().ToArray();
 
-            var gameProviders =
-                await _gameProviderRepository.QueryGameProvidersAsync(gameProviderIds, statuses)
-                    .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+            var gameProviders = await _gameProviderRepository
+                    .QueryGameProvidersAsync()
+                    .Where(gp => gameProviderIds.Contains(gp.Id)
+                        && statuses.Contains(gp.Status))
+                    .ToArrayAsync(cancellationToken)
+                    .ConfigureAwait(false);
 
-            var gameProviderCurrencies = await _gameProviderRepository.QueryGameProviderCurrenciesAsync(gameProviderIds)
+            var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync()
+                .Where(sgp => gameProviderIds.Contains(sgp.GameProviderId))
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
-            var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync(gameProviderIds)
-                .ToArrayAsync(cancellationToken).ConfigureAwait(false);
-
-            var gameTypeInfos = await _gameRepository
+            var gameTypeInfos = await _gameProviderRepository
                 .QueryGameTypeInfosAsync(gameProviderIds, gameStatuses, gamePlatformTypes)
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
             foreach (var gp in gameProviders)
             {
-                var isCurrencySupported = gameProviderCurrencies.Any(c
-                    => c.GameProviderId == gp.Id && c.CurrencyCode.IgnoreCaseEquals(currencyCode));
-
-                if (!isCurrencySupported)
-                {
-                    continue;
-                }
-
                 foreach (var sgp in subGameProviders.Where(sgp => sgp.GameProviderId == gp.Id))
                 {
                     var gameTypes = gameTypeInfos.Where(g => g.SubGameProviderCode.IgnoreCaseEquals(sgp.Code))

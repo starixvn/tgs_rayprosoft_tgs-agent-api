@@ -30,7 +30,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             // arrange
             var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
             var fakePluggableOperations = Substitute.For<IPluggableOperations>();
-            var fakeLogger = new NullLogger<SubmitGameBalanceFundInCommandService>();
+            var fakeLogger = new NullLogger<FundInGameBalanceCommandService>();
 
             var gameProviderCode = "KY";
             var playerCode = "playerCode";
@@ -54,10 +54,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     ErrorMessage = string.Empty
                 });
 
-            var sut = new SubmitGameBalanceFundInCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
+            var sut = new FundInGameBalanceCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
 
             // act
-            var command = new SubmitGameBalanceFundInCommand(gameProviderCode, playerCode, amount);
+            var command = new FundInGameBalanceCommand(gameProviderCode, playerCode, amount);
             await sut.ExecuteAsync(command, default);
 
             // assert
@@ -77,7 +77,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var fakePluggalbeGameProviderApiClient = Substitute.For<IPluggalbeGameProviderApiClient>();
             var fakePluggableOperations = Substitute.For<IPluggableOperations>();
-            var fakeLogger = new NullLogger<SubmitGameBalanceFundOutCommandService>();
+            var fakeLogger = new NullLogger<FundOutGameBalanceCommandService>();
 
             fakePluggableOperations
                 .GetEndpointUrlByGameProviderCodeAsync(gameProviderCode)
@@ -97,10 +97,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 PlayerCode = playerCode,
                 Amount = amount
             };
-            var sut = new SubmitGameBalanceFundOutCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
+            var sut = new FundOutGameBalanceCommandService(fakePluggalbeGameProviderApiClient, fakePluggableOperations, fakeLogger);
 
             // act
-            var command = new SubmitGameBalanceFundOutCommand(gameProviderCode, playerCode, amount);
+            var command = new FundOutGameBalanceCommand(gameProviderCode, playerCode, amount);
             await sut.ExecuteAsync(command, default);
 
             // assert

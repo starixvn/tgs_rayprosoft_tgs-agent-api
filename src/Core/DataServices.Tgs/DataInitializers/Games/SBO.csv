@@ -1,4 +1,4 @@
-Name,Code,RuleUrl,ExternalId,GameType,Platform,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
 Sportsbook,,,1_1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,FALSE,,SBO
 Virtual Sports Lobby,,,VirtualSportsLobby,VirtualSportsLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,FALSE,,SBO
 Virtual Sports,,,5_200000,VirtualSports,DesktopAndMobile,FALSE,,,TRUE,TRUE,FALSE,,SBO

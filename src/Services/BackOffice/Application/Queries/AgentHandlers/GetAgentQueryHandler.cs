@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -10,17 +11,24 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
 {
     public class GetAgentQueryHandler : Handler<GetAgentRequest, GetAgentResponse>
     {
+        private readonly IAgentDividendService _agentDividendService;
         private readonly IAgentService _service;
 
-        public GetAgentQueryHandler(IAgentService service, IHttpContextAccessor accessor) : base(accessor)
+        public GetAgentQueryHandler(IAgentService service, IAgentDividendService agentDividendService,
+            IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
+            _agentDividendService = agentDividendService;
         }
 
         public override async Task<GetAgentResponse> Handle(GetAgentRequest request,
             CancellationToken cancellationToken)
         {
-            var agent = await _service.GetAgentAsync(x => x.Id == request.Id);
+            var agent = await _service.GetAgentAsync(x => x.Id == request.Id).ConfigureAwait(false);
+
+            var dividend = await _agentDividendService.GetAgentDividends()
+                .Where(x => x.AgentId == request.Id && x.SentOn == null)
+                .SumAsync(x => x.AgentDividendAmount, cancellationToken).ConfigureAwait(false);
 
             if (agent == null)
             {
@@ -58,8 +66,12 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
                     Remarks = agent.Remarks,
                     Banks = agent.Banks.Select(b => new AgentBankModel
                     {
-                        Id = b.Id, RealName = b.RealName, BankName = b.BankName, BankAccount = b.BankAccount
-                    }).ToArray()
+                        Id = b.Id,
+                        RealName = b.RealName,
+                        BankName = b.BankName,
+                        BankAccount = b.BankAccount
+                    }).ToArray(),
+                    AccumulatedProfitSharing = dividend
                 }
             };
         }

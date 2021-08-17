@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.AllBet.Services;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -148,21 +149,18 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
                 .ConfigureAwait(false);
 
+            CheckIfBetExists(externalIds, detail.BetNumber.ToString());
+
             var settledBetIds = externalIds.Where(t => t.GameActionType.IsSettleBet())
                 .Select(t => t.ExternalBetId).ToArray();
 
-            var unsettles = externalIds
-                .Where(t => t.GameActionType == GameActionType.PlaceBet &&
-                    !settledBetIds.Contains(t.ExternalBetId))
-                .Select(t => t.ExternalBetId)
-                .Distinct().ToArray();
-
-            var forceCloseRound = unsettles.Length == 1;
+            var forceCloseRound = GetForceCloseRoundFlag(externalIds, settledBetIds);
 
             var betData = _map.SettleBetRequest(playerCode, data, externalIds, request, forceCloseRound);
 
             return await _actions.SettleBetAsync(betData).ConfigureAwait(false);
         }
+
 
         private async ValueTask<BetResult> ManuelSettleAsync(string playerCode, GameProviderConfigurationData data,
             TransferRequest request)
@@ -184,13 +182,43 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
                 .GetValidGameActionExternalIdsAsync(data.GameProviderId, playerCode, roundId, gameId.Value)
                 .ConfigureAwait(false);
 
-            return detail.Status switch
+            var betNumber = detail.BetNumber.ToString();
+            CheckIfBetExists(externalIds, betNumber);
+
+            var settles = externalIds.Where(t => t.GameActionType.IsSettleBet()).ToArray();
+
+            if (request.IsRetry)
             {
-                BetStatus.Settled => await ResettleAsync(playerCode, data, externalIds, request).ConfigureAwait(false),
-                BetStatus.Refund  => await VoidRoundAsync(playerCode, data, externalIds, request).ConfigureAwait(false),
-                _ => throw new InvalidGameActionException(
-                    $"Unexpected status '{(int)detail.Status}' of action {(int)request.Type}")
-            };
+                var transId = request.TransactionId.ToString();
+                var exists = settles.Any(t =>
+                    t.ExternalGameActionGroupId.IgnoreCaseEquals(transId) &&
+                    t.ExternalBetId.IgnoreCaseEquals(betNumber));
+
+                if (exists)
+                {
+                    throw new InvalidGameActionException("Transactions are duplicated",
+                        InvalidGameActionErrorCode.Duplicate);
+                }
+            }
+
+            if (settles.Length != 0)
+            {
+                return detail.Status switch
+                {
+                    BetStatus.Settled => await ResettleAsync(playerCode, data, externalIds, request)
+                        .ConfigureAwait(false),
+                    BetStatus.Refund => await VoidRoundAsync(playerCode, data, externalIds, request)
+                        .ConfigureAwait(false),
+                    _ => throw new InvalidGameActionException(
+                        $"Unexpected status '{(int)detail.Status}' of action {(int)request.Type}")
+                };
+            }
+
+            var settleIds = settles.Select(t => t.ExternalBetId).ToArray();
+            var forceCloseRound = GetForceCloseRoundFlag(externalIds, settleIds);
+            var betData = _map.SettleBetRequest(playerCode, data, externalIds, request, forceCloseRound);
+
+            return await _actions.SettleBetAsync(betData).ConfigureAwait(false);
         }
 
         private ValueTask<BetResult> VoidRoundAsync(string playerCode, GameProviderConfigurationData data,
@@ -205,6 +233,29 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         {
             var betData = _map.ResettleBetRequest(playerCode, data, externalIds, request);
             return _actions.SettleBetAsync(betData);
+        }
+
+        private static void CheckIfBetExists(GameActionExternalIds[] externalIds, string betNumber)
+        {
+            var betExists = externalIds.Any(t => t.GameActionType == GameActionType.PlaceBet &&
+                t.ExternalBetId.IgnoreCaseEquals(betNumber));
+
+            if (!betExists)
+            {
+                throw new InvalidGameActionException($"Bet with number '{betNumber}' is not found",
+                    InvalidGameActionErrorCode.TransactionNotFound);
+            }
+        }
+
+        private static bool GetForceCloseRoundFlag(GameActionExternalIds[] externalIds, string[] settledBetIds)
+        {
+            var unsettles = externalIds
+                .Where(t => t.GameActionType == GameActionType.PlaceBet &&
+                    !settledBetIds.Contains(t.ExternalBetId))
+                .Select(t => t.ExternalBetId)
+                .Distinct().ToArray();
+
+            return unsettles.Length == 1;
         }
     }
 }

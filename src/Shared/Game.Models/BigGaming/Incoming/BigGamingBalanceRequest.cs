@@ -1,11 +1,9 @@
 ﻿using System.Text.Json.Serialization;
-using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 
 namespace TGS.Shared.Game.Models.BigGaming.Incoming
-{
-    public record BigGamingBalanceRequest : BigGamingParamsSignRequest
+{                                    
+    public record BigGamingBalanceRequest : BigGamingParamsSignLoginIdRequest
     {
-        [JsonPropertyName("loginId")]
-        public string LoginId { get; set; }
     }
 }

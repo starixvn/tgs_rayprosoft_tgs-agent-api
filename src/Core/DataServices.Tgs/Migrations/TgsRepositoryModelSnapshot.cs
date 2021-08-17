@@ -790,8 +790,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
-                        .HasColumnName("localization")
-                        .HasDefaultValue("{}");
+                        .HasDefaultValue("{}")
+                        .HasColumnName("localization");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
@@ -1521,6 +1521,27 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_brand_languages_culture_code");
 
                     b.ToTable("brand_languages");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandLiveChat", b =>
+                {
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("ChatName")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("chat_name");
+
+                    b.Property<string>("ChatSetting")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("chat_setting");
+
+                    b.HasKey("BrandId")
+                        .HasName("pk_brand_live_chats");
+
+                    b.ToTable("brand_live_chats");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>
@@ -3707,6 +3728,39 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_bucket_histories");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_id");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<int>("GameType")
+                        .HasColumnType("integer")
+                        .HasColumnName("game_type");
+
+                    b.Property<string>("SubGameProviderCode")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("sub_game_provider_code");
+
+                    b.HasKey("PlayerCode", "GameId")
+                        .HasName("pk_player_favorite_games");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_player_favorite_games_brand_id");
+
+                    b.ToTable("player_favorite_games");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameAggregate", b =>
                 {
                     b.Property<int>("Id")
@@ -3824,6 +3878,24 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_player_code");
 
                     b.ToTable("player_game_rebate_aggregates", "report");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameSetting", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<bool>("IsAutoTransferToGame")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_auto_transfer_to_game");
+
+                    b.HasKey("PlayerCode")
+                        .HasName("pk_player_game_settings");
+
+                    b.ToTable("player_game_settings");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
@@ -4975,8 +5047,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasColumnType("jsonb")
-                        .HasColumnName("localization")
-                        .HasDefaultValue("{}");
+                        .HasDefaultValue("{}")
+                        .HasColumnName("localization");
 
                     b.Property<string>("Remarks")
                         .HasMaxLength(512)
@@ -6039,6 +6111,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Language");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandLiveChat", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
+                        .WithOne()
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.BrandLiveChat", "BrandId")
+                        .HasConstraintName("fk_brand_live_chats_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BrandPayment", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", "Brand")
@@ -6534,6 +6618,35 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .WithMany("PlayerBuckets")
                         .HasForeignKey("PlayerCode")
                         .HasConstraintName("fk_player_buckets_players_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerFavoriteGame", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_player_favorite_games_brand_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_player_favorite_games_player_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerGameSetting", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", "Player")
+                        .WithOne("GameSetting")
+                        .HasForeignKey("TGS.Core.DataServices.Tgs.Models.PlayerGameSetting", "PlayerCode")
+                        .HasConstraintName("fk_player_game_settings_players")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -7205,6 +7318,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Banks");
 
                     b.Navigation("BrandPaymentPlayers");
+
+                    b.Navigation("GameSetting");
 
                     b.Navigation("Letters");
 

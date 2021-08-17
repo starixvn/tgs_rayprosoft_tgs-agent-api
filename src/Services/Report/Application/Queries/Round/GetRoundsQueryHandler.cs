@@ -28,19 +28,50 @@ namespace TGS.Services.Report.Application.Queries.Round
                     .Where(request.Status, x => request.Status == x.ClientStatus)
                     .Where(request.RoundId, x => x.Id == request.RoundId)
                     .Where(request.PlayerCode, x => x.PlayerCode == request.PlayerCode)
+                    .Where(request.ExternalRoundId, x => x.ExternalRoundId == request.ExternalRoundId)
                 )
                 .GroupJoin(
                     _service.TgsRepository.Players,
                     round => round.PlayerCode, player => player.PlayerCode,
-                    (round, player) => new {round, player})
-                .SelectMany(x => x.player.DefaultIfEmpty(), (x, player) => new {x.round, player})
+                    (round, player) => new
+                    {
+                        round,
+                        player
+                    })
+                .SelectMany(x => x.player.DefaultIfEmpty(), (x, player) => new
+                {
+                    x.round,
+                    player
+                })
                 .GroupJoin(_service.TgsRepository.Games,
                     combine => combine.round.GameId, game => game.Id,
-                    (combine, game) => new {combine.round, combine.player, game})
-                .SelectMany(x => x.game.DefaultIfEmpty(), (x, game) => new {x.round, x.player, game})
+                    (combine, game) => new
+                    {
+                        combine.round,
+                        combine.player,
+                        game
+                    })
+                .SelectMany(x => x.game.DefaultIfEmpty(), (x, game) => new
+                {
+                    x.round,
+                    x.player,
+                    game
+                })
                 .GroupJoin(_service.TgsRepository.RoundDetails, c => c.round.Id, detail => detail.RoundId,
-                    (combine, detail) => new {combine.round, combine.player, combine.game, detail})
-                .SelectMany(x => x.detail.DefaultIfEmpty(), (x, detail) => new {x.round, x.player, x.game, detail})
+                    (combine, detail) => new
+                    {
+                        combine.round,
+                        combine.player,
+                        combine.game,
+                        detail
+                    })
+                .SelectMany(x => x.detail.DefaultIfEmpty(), (x, detail) => new
+                {
+                    x.round,
+                    x.player,
+                    x.game,
+                    detail
+                })
                 .Where(request.Username, x => request.Username == x.player.Username)
                 .Where(request.GameType, x => x.game.Type == request.GameType)
                 .GroupJoin(_service.TgsRepository.GameProviders, combine => combine.round.GameProviderId,
@@ -63,8 +94,16 @@ namespace TGS.Services.Report.Application.Queries.Round
                         gameProvider
                     })
                 .GroupJoin(_service.TgsRepository.BrandGames,
-                    roundGroup => new {roundGroup.round.BrandId, roundGroup.round.GameId},
-                    brandGame => new {brandGame.BrandId, brandGame.GameId},
+                    roundGroup => new
+                    {
+                        roundGroup.round.BrandId,
+                        roundGroup.round.GameId
+                    },
+                    brandGame => new
+                    {
+                        brandGame.BrandId,
+                        brandGame.GameId
+                    },
                     (roundGroup, brandGame) => new
                     {
                         roundGroup.round,
@@ -94,7 +133,7 @@ namespace TGS.Services.Report.Application.Queries.Round
                     GameProviderId = combine.round.GameProviderId,
                     GameProviderCode = combine.game.GameProvider.Code,
                     GameProviderName = combine.gameProvider.Name,
-                    SubGameProviderName =combine.game.SubGameProvider.Name,
+                    SubGameProviderName = combine.game.SubGameProvider.Name,
                     GameId = combine.game.Id,
                     GameName = combine.game.Name,
                     ExternalRoundId = combine.round.ExternalRoundId,

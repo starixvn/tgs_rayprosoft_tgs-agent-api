@@ -35,7 +35,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Evolution
             services.AddScoped<HandleEvolutionExceptionMiddleware>();
             services.AddScoped<AuthorizeEvolutionMiddleware>();
 
-            services.AddScoped<IEvolutionServices, EvolutionServices>();
+            services.AddScoped<IEvolutionService, EvolutionService>();
             services.AddScoped<IEvolutionActionModelMapper, EvolutionActionModelMapper>();
             services.AddScoped<IEvolutionRedisCacheService, EvolutionRedisCacheService>();
             services.AddScoped<IEvolutionGameHistoryService, EvolutionGameHistoryService>();

@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.Commons.Middlewares;
-using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
 using TGS.Core.Models.Interfaces;
+using TGS.Core.Models.Messages;
 using TGS.Services.GameOperations;
-using TGS.Shared.Game.Models.BigGaming.Common;
+using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Enums;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
 
@@ -49,16 +49,35 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         protected override async Task CreateResponseAsync(HttpContext context, int statusCode, int errorCode,
             Exception exception)
         {
-            var error = (GameApiError)errorCode;
-            var message = ErrorMapper.GetMessageByException(exception);
+            if (context.Request.Path.Value.IgnoreCaseContains("api/Pluggable/gameurl") ||
+                context.Request.Path.Value.IgnoreCaseContains("api/Pluggable/history/round") ||
+                context.Request.Path.Value.IgnoreCaseContains("api/Pluggable/player/balance") ||
+                context.Request.Path.Value.IgnoreCaseContains("api/bg/gamerecordfishing"))
+            {
+                var message = ErrorMapper.GetMessageByException(exception);
 
-            var value = await context.Request.ReadAsStringAsync();
-            var baseRequest = JsonSerializer.Deserialize<BigGamingRequest>(value);
+                var response = new TgsResponse
+                {
+                    Error = (int)TGS.Core.Models.Enums.TgsApiError.ProviderApiError,
+                    ErrorMessage = message,
+                };
 
-            var response = await GetResponseAsync(baseRequest, error, message).ConfigureAwait(false);
+                context.Response.StatusCode = statusCode;
+                await context.Response.WriteAsJsonAsync(response);
+            }
+            else
+            {
+                var error = (GameApiError)errorCode;
+                var message = ErrorMapper.GetMessageByException(exception);
 
-            context.Response.StatusCode = statusCode;
-            await context.Response.WriteAsJsonAsync(response, response.GetType());
+                var value = await context.Request.ReadAsStringAsync();
+                var baseRequest = JsonSerializer.Deserialize<BigGamingRequest>(value);
+
+                var response = await GetResponseAsync(baseRequest, error, message).ConfigureAwait(false);
+
+                context.Response.StatusCode = statusCode;
+                await context.Response.WriteAsJsonAsync(response, response.GetType());
+            }
         }
 
         #region Private Method
@@ -126,7 +145,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private Task<BigGamingResponse> GetResponseBetAsync(BigGamingRequest baseRequest, GameApiError error, string message)
         {
             var data = JsonSerializer.Deserialize<BigGamingBetRequest>(JsonSerializer.Serialize(baseRequest.Params));
-            var result = new BigGamingBetResponse()
+            var result = new BigGamingResultResponse()
             {
                 UserId = data.UserId,
                 Sn = data.Sn,
@@ -158,7 +177,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares
         private Task<BigGamingResponse> GetResponseSettleAsync(BigGamingRequest baseRequest, GameApiError error, string message)
         {
             var data = JsonSerializer.Deserialize<BigGamingSettleRequest>(JsonSerializer.Serialize(baseRequest.Params));
-            var result = new BigGamingSettleResponse()
+            var result = new BigGamingResultResponse()
             {
                 UserId = data.UserId,
                 Sn = data.Sn,

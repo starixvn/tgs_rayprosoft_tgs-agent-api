@@ -1,9 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using TGS.Core.Infrastructures.Mail;
 using Tgs.Payment.Clients;
+using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operator.GameProviders;
-using TGS.Services.Operator.Games;
 using TGS.Services.Operator.StationLetters;
 using TGS.Services.WalletService.Configuration;
 
@@ -11,12 +10,12 @@ namespace TGS.Services.Operator.Configuration
 {
     public class OperatorConfiguration
     {
+        public IServiceCollection Services { get; }
+
         public OperatorConfiguration(IServiceCollection services)
         {
             Services = services ?? throw new ArgumentNullException(nameof(services));
         }
-
-        public IServiceCollection Services { get; }
 
         public OperatorConfiguration AddPaymentServiceClient(
             Action<PaymentServiceClientOptions, IServiceProvider> configure)
@@ -53,8 +52,24 @@ namespace TGS.Services.Operator.Configuration
             return this;
         }
 
+        public OperatorConfiguration UseGameProviderRepository<TGameProviderRepository>()
+            where TGameProviderRepository : class, IGameProviderRepository
+        {
+            Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration UseMaintenanceRedisRepository<TMaintenanceRedisRepository>() where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
+        {
+            Services
+                .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
+
+            return this;
+        }
+
         public OperatorConfiguration UseStationLetterRepository<TStationLetterRepository>()
-            where TStationLetterRepository : class, IStationLetterRepository
+                            where TStationLetterRepository : class, IStationLetterRepository
         {
             Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
 
@@ -66,30 +81,6 @@ namespace TGS.Services.Operator.Configuration
         {
             Services
                 .AddTransient<IPlayerRepository, TWalletRepository>();
-
-            return this;
-        }
-
-        public OperatorConfiguration UseGameProviderRepository<TGameProviderRepository>()
-            where TGameProviderRepository : class, IGameProviderRepository
-        {
-            Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
-
-            return this;
-        }
-
-        public OperatorConfiguration UseGameRepository<TGameRepository>()
-            where TGameRepository : class, IGameRepository
-        {
-            Services.AddTransient<IGameRepository, TGameRepository>();
-
-            return this;
-        }
-
-        public OperatorConfiguration UseMaintenanceRedisRepository<TMaintenanceRedisRepository>() where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
-        {
-            Services
-                .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
 
             return this;
         }

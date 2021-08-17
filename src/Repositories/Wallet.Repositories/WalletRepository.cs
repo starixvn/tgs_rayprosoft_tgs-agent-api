@@ -63,6 +63,8 @@ namespace TGS.Wallet.Repositories
                         TransactionTypes.GameProviderFundIn => TransactionType.GameProviderFundIn,
                         TransactionTypes.GameProviderFundOut => TransactionType.GameProviderFundOut,
                         TransactionTypes.CancelWithdrawal => TransactionType.CancelWithdrawal,
+                        TransactionTypes.GameProviderDeposit => TransactionType.GameProviderDeposit,
+                        TransactionTypes.GameProviderWithdrawal => TransactionType.GameProviderWithdrawal,
                         _ => TransactionType.Other
                     },
                     Description = description,

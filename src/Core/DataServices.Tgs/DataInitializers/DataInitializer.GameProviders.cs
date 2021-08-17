@@ -123,7 +123,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             [Name("SubGpCode")]
             public string SubGameProviderCode { get; init; }
 
-            [Name("Platform")]
+            [Name("PlatformType")]
             public GamePlatformType PlatformType { get; init; }
 
             [Name("Name")]
@@ -153,7 +153,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             [Name("Description")]
             public string Description { get; init; }
 
-            [Name("GameType")]
+            [Name("Type")]
             public GameType GameTypeCode { get; init; }
 
             [Name("HasTurnoverOnTieBet")]

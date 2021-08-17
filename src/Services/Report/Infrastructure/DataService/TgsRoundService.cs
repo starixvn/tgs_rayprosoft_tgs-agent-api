@@ -18,12 +18,13 @@ namespace TGS.Services.Report.Infrastructure.DataService
             bool tracking = false);
 
         Task<RoundAggregateModel[]> GenerateRoundAggregateAsync(DateTimeOffset start, DateTimeOffset end);
+
         Task<RoundAggregateModel[]> GetMinuteRoundAggregateAsync(DateTimeOffset start, DateTimeOffset end);
     }
 
     public class TgsRoundService : BaseRepositoryOperations<ITgsRepository>, ITgsRoundService
     {
-        public readonly ITgsRepository _repository;
+        private readonly ITgsRepository _repository;
 
         public TgsRoundService(ITgsRepository repository) : base(repository)
         {
@@ -47,10 +48,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     {
                         {"_from", start},
                         {"_to", end},
-                        {
-                            "_report_date",
-                            new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset)
-                        },
+                        {"_report_date", new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset)},
                         {"_created_on", DateTimeOffset.Now.ToOffset(start.Offset)},
                         {"_hour", start.Hour},
                         {"_minute", start.Minute}
@@ -68,10 +66,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     {
                         {"_from", start},
                         {"_to", end},
-                        {
-                            "_report_date",
-                            new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset)
-                        },
+                        {"_report_date", new DateTimeOffset(start.Year, start.Month, start.Day, 0, 0, 0, start.Offset)},
                         {"_hour", start.Hour},
                         {"_minute", start.Minute}
                     });

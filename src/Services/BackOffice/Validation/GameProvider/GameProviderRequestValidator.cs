@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Linq;
+using FluentValidation;
 using TGS.Services.BackOffice.Application.Models.GameProvider;
 
 namespace TGS.Services.BackOffice.Validation.GameProvider
@@ -20,8 +21,17 @@ namespace TGS.Services.BackOffice.Validation.GameProvider
                 .WithMessage(Application.Resources.GameProvider.StatusRequired);
 
             RuleFor(x => x.Currencies)
-                .NotEmpty()
+                .Must(x => x != null && x.Any())
                 .WithMessage(Application.Resources.GameProvider.CurrencyRequired);
+
+            RuleForEach(x => x.Currencies)
+                .ChildRules(currencies =>
+                {
+                    currencies.RuleFor(x => x.Code).NotEmpty()
+                        .WithMessage(Application.Resources.GameProvider.CurrencyRequired);
+                    currencies.RuleFor(x => x.GameProviderCurrencyCode).NotEmpty()
+                        .WithMessage(Application.Resources.GameProvider.CurrencyRequired);
+                });
 
             RuleFor(x => x.Languages)
                 .NotEmpty()

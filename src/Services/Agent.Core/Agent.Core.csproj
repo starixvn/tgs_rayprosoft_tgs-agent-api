@@ -14,7 +14,7 @@
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
     <PackageReference Include="TGS.Core.Infrastructures.Mail" Version="0.0.6" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.15" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.17" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
     <PackageReference Include="Tgs.ValidateCode.Client" Version="1.0.0" />
   </ItemGroup>

@@ -39,17 +39,19 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
             TransactionType? transactionType = request.AccountChangeType switch
             {
-                AccountChangeType.Deposit    => TransactionType.Deposit,
-                AccountChangeType.Withdrawal => TransactionType.Withdrawal,
-                AccountChangeType.Adjust     => TransactionType.Adjust,
-                AccountChangeType.Bonus      => TransactionType.Bonus,
-                AccountChangeType.Rebate     => TransactionType.Rebate,
-                AccountChangeType.Dividend   => TransactionType.Dividend,
-                AccountChangeType.Promotion  => TransactionType.Promotion,
-                AccountChangeType.GameProviderFundOut =>  TransactionType.GameProviderFundOut,
-                AccountChangeType.GameProviderFundIn => TransactionType.GameProviderFundIn,
-                AccountChangeType.CancelWithdrawal => TransactionType.CancelWithdrawal,
-                _                            => null
+                AccountChangeType.Deposit                => TransactionType.Deposit,
+                AccountChangeType.Withdrawal             => TransactionType.Withdrawal,
+                AccountChangeType.Adjust                 => TransactionType.Adjust,
+                AccountChangeType.Bonus                  => TransactionType.Bonus,
+                AccountChangeType.Rebate                 => TransactionType.Rebate,
+                AccountChangeType.Dividend               => TransactionType.Dividend,
+                AccountChangeType.Promotion              => TransactionType.Promotion,
+                AccountChangeType.GameProviderFundOut    => TransactionType.GameProviderFundOut,
+                AccountChangeType.GameProviderFundIn     => TransactionType.GameProviderFundIn,
+                AccountChangeType.CancelWithdrawal       => TransactionType.CancelWithdrawal,
+                AccountChangeType.GameProviderDeposit    => TransactionType.GameProviderDeposit,
+                AccountChangeType.GameProviderWithdrawal => TransactionType.GameProviderWithdrawal,
+                _                                        => null
             };
 
             GameActionType? gameActionType = request.AccountChangeType switch
