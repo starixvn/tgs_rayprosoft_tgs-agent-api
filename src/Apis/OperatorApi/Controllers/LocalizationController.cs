@@ -1,11 +1,11 @@
-﻿using System.Threading;
-using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using Microsoft.Extensions.FileProviders;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.FileProviders;
+using TGS.Services.Operator.Services.Localization;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -17,19 +17,14 @@ namespace TGS.Apis.OperatorApi.Controllers
             new PhysicalFileProvider(Environment.CurrentDirectory);
 
         [HttpGet]
-        public async Task<JsonDocument> GetLocalizeDictionaryAsync()
+        public ValueTask<IDictionary<string, string>> GetLocalizeDictionaryAsync(
+            [FromServices] IGetService<GetAllLocalizationStringsQuery, IDictionary<string, string>> getService)
         {
             var currentCultureName = CultureInfo.CurrentUICulture.Name;
-            var fileInfo = _FileProvider.GetFileInfo($"language.{currentCultureName}.json");
 
-            if (!fileInfo.Exists)
-                fileInfo = _FileProvider.GetFileInfo("language.json");
+            var query = new GetAllLocalizationStringsQuery(currentCultureName);
 
-            using var fileStream = fileInfo.CreateReadStream();
-
-            var jsonDoc = await JsonDocument.ParseAsync(fileStream).ConfigureAwait(false);
-
-            return jsonDoc;
+            return getService.GetAsync(query);
         }
     }
 }
