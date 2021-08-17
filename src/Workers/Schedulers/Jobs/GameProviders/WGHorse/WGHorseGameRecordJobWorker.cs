@@ -87,31 +87,44 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// <returns></returns>
         private async Task GameRecordAsync(WGHorseConfiguration configuration, GameProviderSchedule gameProviderSchedule)
         {
-            var sysTime = DateTimeOffset.UtcNow;
-
-            while (gameProviderSchedule != null)
+            try
             {
-                var config = _service.GetGameProviderScheduleConfig(gameProviderSchedule);
+                var sysTime = DateTimeOffset.UtcNow;
 
-                if (config.EndTime >= sysTime)
+                while (gameProviderSchedule != null)
                 {
-                    break;
-                }
+                    var config = _service.GetGameProviderScheduleConfig(gameProviderSchedule);
 
-                var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new WGHorseGPGameRecordRequest()
-                {
-                    StartTime = config.StartTime,
-                    EndTime = config.EndTime
-                }).ConfigureAwait(false);
+                    if (config.EndTime >= sysTime)
+                    {
+                        break;
+                    }
 
-                if (responses.Success)
-                {
-                    gameProviderSchedule = await _service.GameProviderScheduleUpdateAsync(gameProviderSchedule, responses, sysTime).ConfigureAwait(false);
+                    var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new WGHorseGPGameRecordRequest()
+                    {
+                        StartTime = config.StartTime,
+                        EndTime = config.EndTime
+                    }).ConfigureAwait(false);
+
+                    if (responses.Success)
+                    {
+                        gameProviderSchedule = await _service.GameProviderScheduleUpdateAsync(gameProviderSchedule, responses, sysTime).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                else
+            }
+            catch (Exception e)
+            {
+                _log.LogError("Execute job with error:", e);
+
+                return new()
                 {
-                    break;
-                }
+                    Error = (int)TgsApiError.SystemError,
+                    ErrorMessage = e.Message
+                };
             }
         }
     }
