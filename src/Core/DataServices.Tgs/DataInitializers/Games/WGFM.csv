@@ -1,4 +1,2 @@
 Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
-Lobby,Lobby,,0,VirtualSportsLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WGFM
-Football,Football,,1,VirtualSports,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,WGFM
-Basketball,Basketball,,2,VirtualSports,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,WGFM
+Sportsbook,Sportsbook,,1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WGFM

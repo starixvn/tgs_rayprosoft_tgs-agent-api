@@ -66,14 +66,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
         }
 
         async ValueTask<Player> IWGSportsService.GetPlayerByCodeAsync(string playerCode)
-        {
-            var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
-            if (player == null)
-            {
-                throw new PlayerLoginExpiredException();
-            }
-            return player;
-        }
+            => await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
 
         async ValueTask<string> IWGSportsService.GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language)
             => await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, language).ConfigureAwait(false);
@@ -94,15 +87,14 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
 
         string IWGSportsService.GetGameProviderCode()
         {
-            return Consts.GameProvider.BigGaming;
+            return Consts.GameProvider.WGSports;
         }
 
         ClientRoundStatus IWGSportsService.GetClientRound(decimal settleAmount)
            => settleAmount switch
            {
                > 0 => ClientRoundStatus.Win,
-               < 0 => ClientRoundStatus.Loss,
-               0 => ClientRoundStatus.Draw
+               <= 0 => ClientRoundStatus.Loss,
            };
     }
 }

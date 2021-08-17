@@ -6,7 +6,7 @@ namespace TGS.Shared.Game.Models.WGHorse.Outgoing
     public record WGHorseGetBalanceResponse : WGHorseResponse
     {
         [JsonPropertyName("Balance")]
-        public decimal Balance { get; init; }
+        public string Balance { get; init; }
         [JsonPropertyName("Currency")]
         public string Currency { get; init; }
     }
