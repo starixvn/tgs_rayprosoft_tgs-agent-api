@@ -82,16 +82,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming
                     Task t = Task.Run(async () =>
                     {
                         var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, string.Empty, string.Empty, brand.CurrencyCode).ConfigureAwait(false);
-                        var config = default(BigGamingGameProviderScheduleConfig);
                         if (gameProviderSchedule == null)
                         {
                             var result = await GameProviderScheduleInit(gameProvider, brand.CurrencyCode).ConfigureAwait(false);
                             gameProviderSchedule = result.gameProviderSchedule;
-                            config = result.gameProviderScheduleConfig;
-                        }
-                        else
-                        {
-                            config = JsonSerializer.Deserialize<BigGamingGameProviderScheduleConfig>(gameProviderSchedule.Config);
                         }
                         await GameRecordAsync(configuration, gameProviderSchedule);
                     });
