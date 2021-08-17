@@ -119,12 +119,6 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
             catch (Exception e)
             {
                 _log.LogError("Execute job with error:", e);
-
-                return new()
-                {
-                    Error = (int)TgsApiError.SystemError,
-                    ErrorMessage = e.Message
-                };
             }
         }
     }
