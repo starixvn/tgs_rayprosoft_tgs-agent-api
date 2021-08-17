@@ -83,16 +83,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                         Task t = Task.Run(async () =>
                         {
                             var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, brand.BrandCode, agent.AgentId, agent.CurrencyCode).ConfigureAwait(false);
-                            var config = default(KYGameProviderScheduleConfig);
                             if (gameProviderSchedule == null)
                             {
                                 var result = await GameProviderScheduleInit(gameProvider, brand.BrandCode, agent.AgentId, agent.CurrencyCode).ConfigureAwait(false);
                                 gameProviderSchedule = result.gameProviderSchedule;
-                                config = result.gameProviderScheduleConfig;
-                            }
-                            else
-                            {
-                                config = JsonSerializer.Deserialize<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
                             }
                             await GameRecordAsync(configuration, gameProviderSchedule);
                         });

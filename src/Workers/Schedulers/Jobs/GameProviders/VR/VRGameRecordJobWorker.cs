@@ -82,16 +82,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
                     Task t = Task.Run(async () =>
                     {
                         var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, brand.BrandCode, brand.Merchantid, string.Empty).ConfigureAwait(false);
-                        var config = default(VRGameProviderScheduleConfig);
                         if (gameProviderSchedule == null)
                         {
                             var result = await GameProviderScheduleInit(gameProvider, brand.BrandCode, brand.Merchantid).ConfigureAwait(false);
                             gameProviderSchedule = result.gameProviderSchedule;
-                            config = result.gameProviderScheduleConfig;
-                        }
-                        else
-                        {
-                            config = JsonSerializer.Deserialize<VRGameProviderScheduleConfig>(gameProviderSchedule.Config);
                         }
                         await GameRecordAsync(configuration, gameProviderSchedule);
                     });

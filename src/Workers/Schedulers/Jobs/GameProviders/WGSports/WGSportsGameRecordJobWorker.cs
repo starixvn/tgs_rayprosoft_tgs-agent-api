@@ -25,33 +25,19 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
     [Queue(Consts.Queue.GameProvider)]
     public sealed class WGSportsGameRecordJobWorker : BaseWork<TgsResponse>
     {
-        private readonly string _gameProviderCode = GameProviderConst.WGSports;
-        private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.WGSports;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IRoundQueries _roundQueries;
-        private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
-        private readonly IWGSportsApiClient _client;
         private readonly ITgsLog _log;
-        private readonly IGameProviderScheduleRepository _gameProviderScheduleRepository;
+        private readonly IWGSportsApiClient _client;
+        private readonly IWGSportsGameProviderService _service;
 
         public WGSportsGameRecordJobWorker(
-           IGameProviderOperations gameProviderOperations,
-           ISettingOperations settingOperations,
-           IRoundQueries roundQueries,
-           IGameProviderCurrencyCodeMapper currencyMapper,
-           IWGSportsApiClient client,
-           ITgsLog log,
-           IGameProviderScheduleRepository gameProviderScheduleRepository
+             ITgsLog log,
+             IWGSportsApiClient client,
+             IWGSportsGameProviderService service
            )
         {
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
-            _currencyMapper = currencyMapper ?? throw new ArgumentNullException(nameof(currencyMapper));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _gameProviderScheduleRepository = gameProviderScheduleRepository ?? throw new ArgumentNullException(nameof(gameProviderScheduleRepository));
             _log = log.SetLogger(nameof(WGSportsGameRecordJobWorker));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         /// <summary>
@@ -63,30 +49,20 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         {
             try
             {
-                var configuration =
-                   await _settingOperations
-                   .GetValueFromJsonByKeyAsync<WGSportsConfiguration>(_gameProviderConfigurations)
-                   .ConfigureAwait(false);
-                var gameProvider = await _gameProviderOperations
-                      .GetGameProviderIdByCodeAsync(_gameProviderCode)
-                      .ConfigureAwait(false);
+                var configuration = await _service.GetSettingConfiguration().ConfigureAwait(false);
+
+                var gameProviderId = await _service.GetGameProviderId().ConfigureAwait(false);
 
                 var tasks = new List<Task>();
 
                 Task t = Task.Run(async () =>
                 {
-                    var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
-                    var config = default(WGSportsGameProviderScheduleConfig);
+                    var gameProviderSchedule = await _service.GetGameProviderSchedule(gameProviderId).ConfigureAwait(false);
                     if (gameProviderSchedule == null)
                     {
-                        var result = await GameProviderScheduleInit(gameProvider).ConfigureAwait(false);
-                        gameProviderSchedule = result.gameProviderSchedule;
-                        config = result.gameProviderScheduleConfig;
+                        gameProviderSchedule = await _service.GameProviderScheduleInit(gameProviderId).ConfigureAwait(false);
                     }
-                    else
-                    {
-                        config = JsonSerializer.Deserialize<WGSportsGameProviderScheduleConfig>(gameProviderSchedule.Config);
-                    }
+
                     await GameRecordAsync(configuration, gameProviderSchedule);
                 });
                 tasks.Add(t);
@@ -108,9 +84,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         /// <summary>
         /// Games the record asynchronous.
         /// </summary>
-        /// <param name="gameProvider">The game provider.</param>
         /// <param name="configuration">The configuration.</param>
-        /// <param name="currency">The currency.</param>
+        /// <param name="gameProviderSchedule">The game provider schedule.</param>
         /// <returns></returns>
         private async Task GameRecordAsync(WGSportsConfiguration configuration, GameProviderSchedule gameProviderSchedule)
         {
@@ -118,98 +93,27 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
 
             while (gameProviderSchedule != null)
             {
-                var config = JsonSerializer.Deserialize<WGSportsGameProviderScheduleConfig>(gameProviderSchedule.Config);
+                var config = _service.GetGameProviderScheduleConfig(gameProviderSchedule);
+
                 if (config.EndTime >= sysTime)
                 {
                     break;
                 }
+
                 var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new WGSportsGPGameRecordRequest()
                 {
                     StartTime = config.StartTime,
                     EndTime = config.EndTime
                 }).ConfigureAwait(false);
+
                 if (responses.Success)
                 {
-                    gameProviderSchedule = await GameProviderScheduleUpdateAsync(gameProviderSchedule, config, responses, sysTime).ConfigureAwait(false);
+                    gameProviderSchedule = await _service.GameProviderScheduleUpdateAsync(gameProviderSchedule, responses, sysTime).ConfigureAwait(false);
                 }
                 else
                 {
                     break;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Games the provider schedule initialize.
-        /// </summary>
-        /// <param name="gameProviderId">The game provider identifier.</param>
-        /// <param name="brandCode">The brand code.</param>
-        /// <param name="AgentId">The agent identifier.</param>
-        /// <param name="currencyCode">The currency code.</param>
-        /// <returns></returns>
-        private async Task<(GameProviderSchedule gameProviderSchedule, WGSportsGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProviderId)
-        {
-            var sysTime = DateTimeOffset.UtcNow;
-            var intervalMinuteMax = 24 * 60m;
-            var intervalMinute = 20m;
-            var config = new WGSportsGameProviderScheduleConfig()
-            {
-                IntervalMinuteMax = intervalMinuteMax,
-                IntervalMinute = intervalMinute,
-                LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+0)),
-                StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1),
-                EndTime = sysTime
-            };
-
-            var gameProviderSchedule = new GameProviderSchedule()
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                GameProviderId = gameProviderId,
-                GameProviderCode = _gameProviderCode,
-                BrandCode = string.Empty,
-                AgentId = string.Empty,
-                CurrencyCode = string.Empty,
-                Config = JsonSerializer.Serialize(config),
-                CreatedOn = sysTime,
-                UpdatedOn = sysTime
-            };
-            await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
-
-            return (gameProviderSchedule, config);
-        }
-
-        /// <summary>
-        /// Games the provider schedule update asynchronous.
-        /// </summary>
-        /// <param name="gameProviderSchedule">The game provider schedule.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="responses">The responses.</param>
-        /// <returns></returns>
-        private async Task<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, WGSportsGameProviderScheduleConfig config, WGSportsGPGameRecordResponse responses, DateTimeOffset sysTime)
-        {
-            if (config.EndTime > sysTime || (sysTime - config.EndTime).TotalSeconds < (double)config.IntervalMinute * 60)
-            {
-                config.StartTime = sysTime.AddSeconds((double)config.IntervalMinute * 60 * -1);
-                config.EndTime = sysTime;
-            }
-            else
-            {
-                var endTime = config.EndTime.AddSeconds((double)config.IntervalMinute * 60);
-                config.StartTime = config.EndTime;
-                config.EndTime = (endTime > sysTime) ? sysTime : endTime;
-            }
-            config.LastGameRecordTime = (responses.LastGameRecorTime.HasValue) ? responses.LastGameRecorTime.Value : config.LastGameRecordTime;
-            gameProviderSchedule.Config = JsonSerializer.Serialize(config);
-            gameProviderSchedule.UpdatedOn = DateTimeOffset.UtcNow;
-
-            var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
-            if (updateResult.ModifiedCount > 0)
-            {
-                return gameProviderSchedule;
-            }
-            else
-            {
-                return null;
             }
         }
     }

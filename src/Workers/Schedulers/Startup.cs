@@ -23,6 +23,8 @@ using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.ApiClients.Extensions;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
+using TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse;
+using TGS.Workers.Schedulers.Jobs.GameProviders.WGSports;
 using TGS.Workers.Schedulers.Jobs.Players;
 using TGS.Workers.Schedulers.Jobs.Promotion;
 using TGS.Workers.Schedulers.Jobs.Reports;
@@ -140,6 +142,10 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IPromotionSettlementWeeklyWorkerService, PromotionSettlementWeeklyWorkerService>();
             services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
             services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
+
+            // GameProviders Services 
+            services.AddTransient<IWGSportsGameProviderService, WGSportsGameProviderService>();
+            services.AddTransient<IWGHorseGameProviderService, WGHorseGameProviderService>();
         }
 
         private static Type[] GetModuleTypes() =>
