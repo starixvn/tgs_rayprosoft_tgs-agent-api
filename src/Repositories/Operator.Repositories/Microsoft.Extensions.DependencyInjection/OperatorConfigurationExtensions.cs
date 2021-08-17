@@ -9,9 +9,10 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration) =>
             configuration
-                .UseWalletRepository<PlayerRepository>()
-                .UseStationLetterRepository<StationLetterRepository>()
-                .UseGameProviderRepository<GameProviderRepository>()
-                .UseMaintenanceRedisRepository<MaintenanceRedisRepository>();
+                .AddWalletRepository<PlayerRepository>()
+                .AddStationLetterRepository<StationLetterRepository>()
+                .AddGameProviderRepository<GameProviderRepository>()
+                .AddMaintenanceRedisRepository<MaintenanceRedisRepository>()
+                .AddSysRepository<SysRepository>();
     }
 }
