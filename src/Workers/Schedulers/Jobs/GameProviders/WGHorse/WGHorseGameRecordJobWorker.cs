@@ -52,7 +52,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
                 var gameProviderId = await _service.GetGameProviderId().ConfigureAwait(false);
 
                 var tasks = new List<Task>();
-
+                _log.LogError($"MongoConnectionString:{_service.GetMongoConnectionString()}");
                 Task t = Task.Run(async () =>
                 {
                     var gameProviderSchedule = await _service.GetGameProviderSchedule(gameProviderId).ConfigureAwait(false);
