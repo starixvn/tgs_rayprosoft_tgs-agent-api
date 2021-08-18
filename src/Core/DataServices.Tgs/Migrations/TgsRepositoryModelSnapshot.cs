@@ -3471,6 +3471,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
+                    b.Property<decimal>("DividendAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("dividend_amount");
+
                     b.Property<int>("FirstFundInCount")
                         .HasColumnType("integer")
                         .HasColumnName("first_fund_in_count");
@@ -3483,16 +3488,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("minute");
 
-                    b.Property<decimal>("NetProfit")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("net_profit");
-
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
+
+                    b.Property<decimal>("PromotionAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("promotion_amount");
+
+                    b.Property<decimal>("RebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rebate_amount");
 
                     b.Property<int>("RegisteredCount")
                         .HasColumnType("integer")

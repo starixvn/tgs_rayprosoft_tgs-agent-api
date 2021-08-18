@@ -121,8 +121,16 @@ namespace TGS.Services.Report.Application.Commands.Agent
         {
             var agents = await _agentService
                 .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id && x.ParentAgentId != null))
-                .GroupBy(x => new {x.Id, x.ParentAgentId},
-                    (a, list) => new {a.Id, a.ParentAgentId})
+                .GroupBy(x => new
+                    {
+                        x.Id,
+                        x.ParentAgentId
+                    },
+                    (a, list) => new
+                    {
+                        a.Id,
+                        a.ParentAgentId
+                    })
                 .ToArrayAsync();
 
             var agentDividendGroup = await _playerAggregateService.GetPlayerAggregateQueries()
@@ -130,7 +138,12 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 .Where(x => x.BrandId == brand.Id)
                 .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
                     x.ReportDate <= brand.CurrentSettlementTo)
-                .GroupBy(x => new {x.BrandId, x.AgentId, x.AgentDividendPercentage},
+                .GroupBy(x => new
+                    {
+                        x.BrandId,
+                        x.AgentId,
+                        x.AgentDividendPercentage
+                    },
                     (groupItem, playerAggregates) => new
                     {
                         groupItem.AgentId,
@@ -139,19 +152,34 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         DepositAmount = playerAggregates.Sum(p => p.DepositAmount),
                         WithdrawalAmount = playerAggregates.Sum(p => p.WithdrawalAmount),
                         AdjustmentAmount = playerAggregates.Sum(p => p.AdjustmentAmount),
-                        BonusAmount = playerAggregates.Sum(p => p.BonusAmount),
+                        BonusAmount = playerAggregates.Sum(p => p.RebateAmount + p.PromotionAmount),
                         BetAmount = playerAggregates.Sum(p => p.BetAmount),
                         Turnover = playerAggregates.Sum(p => p.Turnover),
                         WinLossAmount = playerAggregates.Sum(p => p.WinLossAmount),
-                        NetProfit = playerAggregates.Sum(p => p.NetProfit)
+                        NetProfit = playerAggregates.Sum(p
+                            => p.WinLossAmount - p.AdjustmentAmount - p.RebateAmount - p.PromotionAmount)
                     }).GroupJoin(_playerAggregateService.Repository.PlayerGameAggregates.AsQueryable()
                         .Where(x => x.AgentId != null)
                         .Where(x => x.BrandId == brand.Id)
                         .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
                             x.ReportDate <= brand.CurrentSettlementTo),
-                    p => new {p.BrandId, p.AgentId, p.AgentDividendPercentage},
-                    pg => new {pg.BrandId, pg.AgentId, pg.AgentDividendPercentage},
-                    (agent, playerGameAggregates) => new {agent, playerGameAggregates})
+                    p => new
+                    {
+                        p.BrandId,
+                        p.AgentId,
+                        p.AgentDividendPercentage
+                    },
+                    pg => new
+                    {
+                        pg.BrandId,
+                        pg.AgentId,
+                        pg.AgentDividendPercentage
+                    },
+                    (agent, playerGameAggregates) => new
+                    {
+                        agent,
+                        playerGameAggregates
+                    })
                 .SelectMany(x => x.playerGameAggregates.DefaultIfEmpty(),
                     (x, playerGameAggregate) => new
                     {
@@ -256,7 +284,12 @@ namespace TGS.Services.Report.Application.Commands.Agent
                             AgentDividendAmount = x.AgentDividendPercentage * x.NetProfit / 100M
                         };
                     })
-                .GroupBy(x => new {x.AgentId, x.BrandId, x.AgentDividendPercentage},
+                .GroupBy(x => new
+                    {
+                        x.AgentId,
+                        x.BrandId,
+                        x.AgentDividendPercentage
+                    },
                     (x, models) => new CreateAgentDividendModel
                     {
                         AgentId = x.AgentId.Value,
@@ -288,7 +321,13 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                 var childAgentPlayers = agentDividendGroup
                                     .Where(a =>
                                         a.AgentId == child.Id).GroupBy(
-                                        g => new {g.AgentId, g.BrandId, g.AgentDividendPercentage, g.NetProfit},
+                                        g => new
+                                        {
+                                            g.AgentId,
+                                            g.BrandId,
+                                            g.AgentDividendPercentage,
+                                            g.NetProfit
+                                        },
                                         (agent, childAgents) => new
                                         {
                                             agent.AgentId,
