@@ -177,7 +177,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                     ValidBetAmount = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? decimal.Parse(gameRecord.BetAmount) : decimal.Parse(gameRecord.ActiveAmount),
                     PlayerWinLoss = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? null : decimal.Parse(gameRecord.Result),
                     Commission = 0,
-                    Turnover = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? null : decimal.Parse(gameRecord.Result),
+                    Turnover = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? null : decimal.Parse(gameRecord.ActiveAmount),
                     SettleAmount = decimal.Parse(gameRecord.Result) + decimal.Parse(gameRecord.ActiveAmount),
                     TieBetAdjustment = null,
                     ClientStatus = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? Core.Models.Enums.ClientRoundStatus.Open : _service.GetClientRound(decimal.Parse(gameRecord.Result)),
