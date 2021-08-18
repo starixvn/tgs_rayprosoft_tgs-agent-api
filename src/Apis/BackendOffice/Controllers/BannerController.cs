@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TGS.Apis.BackendOffice.Controllers.Messages.Banner;
+using TGS.Core.Infrastructures.Json;
+using TGS.Services.BackOffice.Application.Services;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -9,10 +14,26 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class BannerController : BaseContextController
     {
         [HttpPut("{brandId}")]
-        public void CreateBanner(
+        public ValueTask CreateBannerAsync(
+            [FromServices] ICommandService<CreateBannerCommand> createService,
+            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
             Guid brandId,
             [FromBody] BannerModifyRequest request)
         {
+            var jsonOptions = jsonOptionsAccessor.Value;
+
+            var command = new CreateBannerCommand(
+                brandId,
+                request.Title,
+                request.BeginTime,
+                request.EndTime,
+                jsonSerializationProvider.SerializeToString(
+                    request.Localization,
+                    jsonOptions.JsonSerializerOptions),
+                this.Username);
+
+            return createService.ExecuteAsync(command);
         }
     }
 }

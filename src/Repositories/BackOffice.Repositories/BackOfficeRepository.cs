@@ -17,8 +17,32 @@ namespace TGS.BackOffice.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
+        public async ValueTask<Guid> CreateBannerAsync(BannerCreateInfo createInfo, string Modifier)
+        {
+            var createBanner = new Banner
+            {
+                Id = Guid.NewGuid(),
+                BrandId = createInfo.BrandId,
+                BeginTime = createInfo.BeginTime,
+                CreatedByUserName = Modifier,
+                UpdatedByUserName = Modifier,
+                IsEnabled = true,
+                EndTime = createInfo.EndTime,
+                Localization = createInfo.Localization,
+                Title = createInfo.Title
+            };
+
+            await _tgsRepository.Banners
+                .AddAsync(createBanner)
+                .ConfigureAwait(false);
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+
+            return createBanner.Id;
+        }
+
         public IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode)
-            => _tgsRepository.SystemLocalizations.AsQueryable()
+                    => _tgsRepository.SystemLocalizations.AsQueryable()
                 .Where(loc => loc.SystemCode == systemCode)
                 .Select(loc => new LocalizationStringInfo(
                     loc.SystemCode,
