@@ -57,6 +57,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// <returns></returns>
         WGHorseGameProviderScheduleConfig GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule);
 
+        string GetMongoConnectionString();
+
     }
     public class WGHorseGameProviderService : IWGHorseGameProviderService
     {
@@ -181,5 +183,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// <returns></returns>
         WGHorseGameProviderScheduleConfig IWGHorseGameProviderService.GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule)
         => _json.DeserializeFromString<WGHorseGameProviderScheduleConfig>(gameProviderSchedule.Config);
+
+        string IWGHorseGameProviderService.GetMongoConnectionString()
+        {
+            return _gameProviderScheduleRepository.GetMongoConnectionString();
+        }
     }
 }

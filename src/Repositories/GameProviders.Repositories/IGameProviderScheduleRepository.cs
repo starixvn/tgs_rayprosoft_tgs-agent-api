@@ -7,6 +7,8 @@ namespace TGS.GameProviders.Repositories
 {
     public interface IGameProviderScheduleRepository
     {
+        string GetMongoConnectionString();
+
         ValueTask<GameProviderSchedule> GetAsync(Guid gameProviderId, string brandCode, string agentId, string currencyCode);
 
         ValueTask<UpdateResult> MergeAsync(GameProviderSchedule data);
