@@ -27,11 +27,6 @@ namespace TGS.GameProviders.Repositories
 
         }
 
-        public string GetMongoConnectionString()
-        {
-            return _gameProvidersOption.MongoConnectionString;
-        }
-
         public async ValueTask<GameProviderSchedule> GetAsync(
             Guid gameProviderId,
             string brandCode,

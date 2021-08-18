@@ -52,7 +52,6 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
                 var gameProviderId = await _service.GetGameProviderId().ConfigureAwait(false);
 
                 var tasks = new List<Task>();
-                _log.LogError($"MongoConnectionString:{_service.GetMongoConnectionString()}");
                 Task t = Task.Run(async () =>
                 {
                     var gameProviderSchedule = await _service.GetGameProviderSchedule(gameProviderId).ConfigureAwait(false);
@@ -87,38 +86,31 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// <returns></returns>
         private async Task GameRecordAsync(WGHorseConfiguration configuration, GameProviderSchedule gameProviderSchedule)
         {
-            try
-            {
-                var sysTime = DateTimeOffset.UtcNow;
+            var sysTime = DateTimeOffset.UtcNow;
 
-                while (gameProviderSchedule != null)
+            while (gameProviderSchedule != null)
+            {
+                var config = _service.GetGameProviderScheduleConfig(gameProviderSchedule);
+
+                if (config.EndTime >= sysTime)
                 {
-                    var config = _service.GetGameProviderScheduleConfig(gameProviderSchedule);
-
-                    if (config.EndTime >= sysTime)
-                    {
-                        break;
-                    }
-
-                    var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new WGHorseGPGameRecordRequest()
-                    {
-                        StartTime = config.StartTime,
-                        EndTime = config.EndTime
-                    }).ConfigureAwait(false);
-
-                    if (responses.Success)
-                    {
-                        gameProviderSchedule = await _service.GameProviderScheduleUpdateAsync(gameProviderSchedule, responses, sysTime).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    break;
                 }
-            }
-            catch (Exception e)
-            {
-                _log.LogError("Execute job with error:", e);
+
+                var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new WGHorseGPGameRecordRequest()
+                {
+                    StartTime = config.StartTime,
+                    EndTime = config.EndTime
+                }).ConfigureAwait(false);
+
+                if (responses.Success)
+                {
+                    gameProviderSchedule = await _service.GameProviderScheduleUpdateAsync(gameProviderSchedule, responses, sysTime).ConfigureAwait(false);
+                }
+                else
+                {
+                    break;
+                }
             }
         }
     }
