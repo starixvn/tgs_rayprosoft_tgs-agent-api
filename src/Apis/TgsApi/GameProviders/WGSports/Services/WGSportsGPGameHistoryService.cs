@@ -175,7 +175,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                     ExternalClosedOn = externalClosedOn,
                     BetAmount = decimal.Parse(gameRecord.BetAmount),
                     ValidBetAmount = decimal.Parse(gameRecord.ActiveAmount),
-                    PlayerWinLoss = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? null : decimal.Parse(gameRecord.ResultScore),
+                    PlayerWinLoss = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? null : decimal.Parse(gameRecord.Result) - decimal.Parse(gameRecord.ActiveAmount),
                     Commission = 0,
                     Turnover = decimal.Parse(gameRecord.ActiveAmount),
                     SettleAmount = decimal.Parse(gameRecord.Result),
