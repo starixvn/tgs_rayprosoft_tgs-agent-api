@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TGS.Core.DataServices.Base;
 using TGS.Core.DataServices.Tgs.Models;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 {
@@ -31,6 +30,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDefaultValue(0);
             builder.Property(b => b.Localization)
                 .HasColumnType(ColumnTypes.Jsonb);
+            builder.Property(b => b.Remark);
 
             builder.Property(b => b.CreatedByUserName)
                 .IsRequired();
