@@ -60,5 +60,35 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             return updateService.ExecuteAsync(command);
         }
+
+        [HttpPatch("enable/{brandId}/{bannerId}")]
+        public ValueTask EnableBannerAsync(
+            [FromServices] ICommandService<SetIsEanbleBannerCommand> setService,
+            Guid brandId,
+            Guid bannerId)
+        {
+            var command = new SetIsEanbleBannerCommand(
+                brandId,
+                bannerId,
+                true,
+                Username);
+
+            return setService.ExecuteAsync(command);
+        }
+
+        [HttpPatch("disable/{brandId}/{bannerId}")]
+        public ValueTask DisableBannerAsync(
+            [FromServices] ICommandService<SetIsEanbleBannerCommand> setService,
+            Guid brandId,
+            Guid bannerId)
+        {
+            var command = new SetIsEanbleBannerCommand(
+                brandId,
+                bannerId,
+                false,
+                Username);
+
+            return setService.ExecuteAsync(command);
+        }
     }
 }

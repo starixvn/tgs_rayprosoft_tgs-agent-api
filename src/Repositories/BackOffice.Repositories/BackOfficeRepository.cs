@@ -17,15 +17,15 @@ namespace TGS.BackOffice.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string Modifier)
+        public async ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier)
         {
             var createBanner = new Banner
             {
                 Id = Guid.NewGuid(),
                 BrandId = createInfo.BrandId,
                 BeginTime = createInfo.BeginTime,
-                CreatedByUserName = Modifier,
-                UpdatedByUserName = Modifier,
+                CreatedByUserName = modifier,
+                UpdatedByUserName = modifier,
                 IsEnabled = true,
                 EndTime = createInfo.EndTime,
                 Localization = createInfo.Localization,
@@ -88,7 +88,21 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string Modifier)
+        public async ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier)
+        {
+            var banner = await _tgsRepository.Banners
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            banner.IsEnabled = isEnable;
+
+            banner.UpdatedByUserName = modifier;
+            banner.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier)
         {
             var banner = await _tgsRepository.Banners
                 .FindAsync(id)
@@ -99,7 +113,7 @@ namespace TGS.BackOffice.Repositories
             banner.EndTime = updateInfo.EndTime;
             banner.Localization = updateInfo.Localization;
 
-            banner.UpdatedByUserName = Modifier;
+            banner.UpdatedByUserName = modifier;
             banner.UpdatedOn = DateTimeOffset.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);

@@ -59,5 +59,28 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<string>(x => x == command.Modifier)),
                 Times.Exactly(1));
         }
+
+        [Test]
+        public async Task User_Can_Set_Enable_Banner()
+        {
+            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+            var sut = new SetIsEanbleBannerCommandService(moqBackOfficeRepository.Object);
+
+            var command = new SetIsEanbleBannerCommand(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                true,
+                "User1");
+
+            await sut.ExecuteAsync(command);
+
+            moqBackOfficeRepository.Verify(
+                fake => fake.SetIsEnableBannerAsync(
+                    It.Is<Guid>(x => x == command.BannerId),
+                    It.Is<bool>(x => x == command.IsEnable),
+                    It.Is<string>(x => x == command.Modifier)),
+                Times.Exactly(1));
+        }
     }
 }

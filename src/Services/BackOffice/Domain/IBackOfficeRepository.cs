@@ -6,12 +6,14 @@ namespace TGS.Services.BackOffice.Domain
 {
     public interface IBackOfficeRepository
     {
-        ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string Modifier);
+        ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier);
 
         IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode);
 
         ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings);
 
-        ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string Modifier);
+        ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier);
+
+        ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
     }
 }
