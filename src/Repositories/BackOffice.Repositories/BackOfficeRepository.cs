@@ -17,7 +17,7 @@ namespace TGS.BackOffice.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<Guid> CreateBannerAsync(BannerCreateInfo createInfo, string Modifier)
+        public async ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string Modifier)
         {
             var createBanner = new Banner
             {
@@ -84,6 +84,23 @@ namespace TGS.BackOffice.Repositories
                         }).ConfigureAwait(false);
                 }
             }
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string Modifier)
+        {
+            var banner = await _tgsRepository.Banners
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            banner.Title = updateInfo.Title;
+            banner.BeginTime = updateInfo.BeginTime;
+            banner.EndTime = updateInfo.EndTime;
+            banner.Localization = updateInfo.Localization;
+
+            banner.UpdatedByUserName = Modifier;
+            banner.UpdatedOn = DateTimeOffset.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

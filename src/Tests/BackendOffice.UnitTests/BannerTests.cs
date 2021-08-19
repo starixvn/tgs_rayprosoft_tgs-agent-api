@@ -29,7 +29,33 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             moqBackOfficeRepository.Verify(
                 fake => fake.CreateBannerAsync(
-                    It.IsAny<BannerCreateInfo>(),
+                    It.IsAny<BannerModifyInfo>(),
+                    It.Is<string>(x => x == command.Modifier)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task User_Can_Update_Banner_Data()
+        {
+            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+            var sut = new UpdateBannerCommandService(moqBackOfficeRepository.Object);
+
+            var command = new UpdateBannerCommand(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                "TestTitle",
+                DateTimeOffset.Now,
+                null,
+                null,
+                "User1");
+
+            await sut.ExecuteAsync(command);
+
+            moqBackOfficeRepository.Verify(
+                fake => fake.UpdateBannerAsync(
+                    It.Is<Guid>(x => x == command.BannerId),
+                    It.IsAny<BannerModifyInfo>(),
                     It.Is<string>(x => x == command.Modifier)),
                 Times.Exactly(1));
         }

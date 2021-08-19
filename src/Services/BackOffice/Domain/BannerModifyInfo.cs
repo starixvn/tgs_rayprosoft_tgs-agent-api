@@ -2,7 +2,7 @@
 
 namespace TGS.Services.BackOffice.Domain
 {
-    public record BannerCreateInfo(
+    public record BannerModifyInfo(
         Guid BrandId,
         string Title,
         DateTimeOffset BeginTime,

@@ -35,5 +35,30 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             return createService.ExecuteAsync(command);
         }
+
+        [HttpPatch("{brandId}/{bannerId}")]
+        public ValueTask UpdateBannerAsync(
+            [FromServices] ICommandService<UpdateBannerCommand> updateService,
+            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+            Guid brandId,
+            Guid bannerId,
+            [FromBody] BannerModifyRequest request)
+        {
+            var jsonOptions = jsonOptionsAccessor.Value;
+
+            var command = new UpdateBannerCommand(
+                brandId,
+                bannerId,
+                request.Title,
+                request.BeginTime,
+                request.EndTime,
+                jsonSerializationProvider.SerializeToString(
+                    request.Localization,
+                    jsonOptions.JsonSerializerOptions),
+                Username);
+
+            return updateService.ExecuteAsync(command);
+        }
     }
 }

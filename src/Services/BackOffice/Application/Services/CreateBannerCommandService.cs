@@ -17,7 +17,7 @@ namespace TGS.Services.BackOffice.Application.Services
 
         public async ValueTask ExecuteAsync(CreateBannerCommand command, CancellationToken cancellationToken = default)
         {
-            var createInfo = new BannerCreateInfo(
+            var createInfo = new BannerModifyInfo(
                 command.BrandId,
                 command.Title,
                 command.BeginTime,
