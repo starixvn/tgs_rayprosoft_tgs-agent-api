@@ -1,14 +1,21 @@
-﻿using System.Net.Mime;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
+using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
+using TGS.Services.Operations;
 using TGS.Shared.Game.Models.WMCasino.Enums;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
+using BetResult = TGS.Shared.Game.Models.WMCasino.Incoming.BetResult;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 {
@@ -19,20 +26,27 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
     [FeatureGate(Consts.GameProvider.WMCasino)]
     public class WMCasinoController : ControllerBase
     {
-        private static readonly string _GameProviderCode = Consts.GameProvider.WMCasino;
-
         private readonly IGamePlayActions _actions;
+        private readonly IBrandOperations _brandOperations;
         private readonly IWMCasinoActionModelMapper _map;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IWMCasinoServices _services;
+        private readonly IWMCasinoUtility _utility;
 
         public WMCasinoController(
             IGamePlayActions actions,
             IWMCasinoServices services,
-            IWMCasinoActionModelMapper map)
+            IWMCasinoActionModelMapper map,
+            IWMCasinoUtility utility,
+            IPlayerOperations playerOperations,
+            IBrandOperations brandOperations)
         {
             _actions = actions;
             _services = services;
             _map = map;
+            _utility = utility;
+            _playerOperations = playerOperations;
+            _brandOperations = brandOperations;
         }
 
         [Consumes("application/x-www-form-urlencoded")]
@@ -78,10 +92,72 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             return _map.Response(request, r.Balance);
         }
 
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HttpPost("betdetail")]
+        public async Task<ErrorResponse> BetDetailsAsync(BetDetailRequest request)
+        {
+            var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+
+            var results = (from r in request.Results
+                           group r by r.PlayerCode
+                           into g
+                           select g)
+                .ToDictionary(g => g.Key, g => g.ToArray());
+
+            var configurationIds = new Dictionary<Guid, Guid>();
+
+            var tasks = results.Select(async r =>
+            {
+                var playerCode = r.Key;
+                var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
+
+                if (configurationIds.TryGetValue(brandId, out var gameProviderConfigurationId))
+                {
+                    return new
+                    {
+                        PlayerCode = playerCode,
+                        Response = await ExecuteBetResultsByRoundAsync(
+                                gameProviderId, gameProviderConfigurationId, playerCode, r.Value)
+                            .ConfigureAwait(false)
+                    };
+                }
+
+                var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId)
+                    .ConfigureAwait(false);
+
+                gameProviderConfigurationId = bgpc.GameProviderConfigurationId;
+                configurationIds[brandId] = gameProviderConfigurationId;
+
+                return new
+                {
+                    PlayerCode = playerCode,
+                    Response = await ExecuteBetResultsByRoundAsync(
+                            gameProviderId, gameProviderConfigurationId, playerCode, r.Value)
+                        .ConfigureAwait(false)
+                };
+            });
+
+            var responses = await Task.WhenAll(tasks);
+
+            var message = responses
+                .Where(r => r.Response.ErrorCode != (int)GameApiError.Success)
+                .Select(r => $"user {r.PlayerCode} with error: {r.Response.ErrorMessage}")
+                .ToArray().JoinAsStringByComma();
+
+            return message.IsNullOrEmpty()
+                ? _map.Response(GameApiError.Success, string.Empty)
+                : _map.Response(GameApiError.SystemError, message);
+        }
+
         private async ValueTask<WalletTransferResponse> LockAmountAsync(WalletTransferRequest request)
         {
+            var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = HttpContext.Items.Get(
+                Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var data = await _services.GetGameProviderConfigurationDataAsync(playerCode, request.ExternalGameId)
+            var data = await _services.GetGameProviderConfigurationDataAsync(
+                    gameProviderId, gameProviderConfigurationId, playerCode, request.ExternalGameId)
                 .ConfigureAwait(false);
 
             var betData = _map.LockAmountRequest(playerCode, data, request);
@@ -91,13 +167,45 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 
         private async ValueTask<CancelWalletTransferResponse> CancelLockAmountAsync(CancelWalletTransferRequest request)
         {
+            var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+            var gameProviderConfigurationId = HttpContext.Items.Get(
+                Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var data = await _services.GetGameProviderConfigurationDataAsync(playerCode, request.ExternalGameId)
+            var data = await _services.GetGameProviderConfigurationDataAsync(gameProviderId,
+                    gameProviderConfigurationId, playerCode, request.ExternalGameId)
                 .ConfigureAwait(false);
 
             var betData = _map.CancelLockAmountRequest(playerCode, data, request);
             var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
             return _map.Response(request, r.Balance);
+        }
+
+        private async ValueTask<ErrorResponse> ExecuteBetResultsByRoundAsync(Guid gameProviderId,
+            Guid gameProviderConfigurationId, string playerCode, BetResult[] betResults, bool isManual = false)
+        {
+            var data = await _services
+                .GetGameProviderConfigurationDataWithDesktopPlatformAsync(gameProviderId, gameProviderConfigurationId)
+                .ConfigureAwait(false);
+
+            await PlaceAndSettleBetAsync(data, playerCode, betResults, isManual);
+
+            return _map.Response(GameApiError.Success, string.Empty);
+        }
+
+        private async ValueTask PlaceAndSettleBetAsync(GameProviderConfigurationData data,
+            string playerCode, BetResult[] betResults, bool isManual)
+        {
+            var betResult = betResults.First();
+            var externalGameActionGroupId =
+                _utility.GetExternalRoundIdByBetResult(betResult.RoundId, betResult.SubRoundId);
+
+            var externalIds =
+                await _services.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(data.GameProviderId,
+                    playerCode, externalGameActionGroupId).ConfigureAwait(false);
+
+            var betData = _map.PlaceAndSettleBetRequest(data, playerCode, betResults, externalIds, isManual);
+            await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
         }
     }
 }

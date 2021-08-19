@@ -29,7 +29,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             return g;
                         }
 
-                        return (Game)g with {EndpointPath = string.Empty};
+                        return (Game)g with { EndpointPath = string.Empty };
                     })
                     .ToArray();
 
@@ -93,6 +93,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-wm") : new("http://localhost:62330"),
                     ApiUrl = new("https://api.a45.me/api/wallet/Gateway.php"),
+                    MaxResultCount = 25,
                     BrandMerchants = new WMCasinoBrandMerchant[]
                     {
                         new()

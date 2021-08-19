@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using TGS.Apis.TgsApi.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
+using TGS.Services.Operations.Queries;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
@@ -17,42 +17,43 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
     {
         ValueTask<GetBalanceResult> GetBalanceAsync(string playerCode);
 
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(string playerCode,
-            string externalGameId);
+        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
+            Guid gameProviderConfigurationId, string playerCode, string externalGameId);
+
+        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataWithDesktopPlatformAsync(
+            Guid gameProviderId, Guid gameProviderConfigurationId);
+
+        ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(Guid gameProviderId,
+            string playerCode, string externalGameActionGroupId);
     }
 
     public class WMCasinoServices : IWMCasinoServices
     {
         private static readonly string _GameProviderCode = Consts.GameProvider.WMCasino;
         private readonly IGamePlayActions _actions;
+        private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly HttpContext _httpContext;
         private readonly IPlayerOperations _playerOperations;
 
         public WMCasinoServices(
-            IHttpContextAccessor httpContextAccessor,
             IGamePlayActions actions,
             IGameProviderOperations gameProviderOperations,
-            IPlayerOperations playerOperations
+            IPlayerOperations playerOperations,
+            IGameActionQueries gameActionQueries
         )
         {
-            _httpContext = httpContextAccessor.HttpContext;
             _actions = actions;
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
+            _gameActionQueries = gameActionQueries;
         }
 
         public ValueTask<GetBalanceResult> GetBalanceAsync(string playerCode)
             => _actions.GetBalanceAsync(_GameProviderCode, playerCode);
 
-        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(string playerCode,
-            string externalGameId)
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
+            Guid gameProviderConfigurationId, string playerCode, string externalGameId)
         {
-            var gameProviderId =
-                _httpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId =
-                _httpContext.Items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
                 .ConfigureAwait(false);
 
@@ -67,6 +68,26 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 PlatformType = platformType
             };
         }
+
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataWithDesktopPlatformAsync(
+            Guid gameProviderId, Guid gameProviderConfigurationId)
+        {
+            var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
+                .ConfigureAwait(false);
+
+            return new GameProviderConfigurationData
+            {
+                GameProviderId = gameProviderId,
+                GameProviderConfigurationId = gameProviderConfigurationId,
+                AutoCloseRound = autoCloseRound,
+                PlatformType = PlatformType.Desktop
+            };
+        }
+
+        public ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
+            Guid gameProviderId, string playerCode, string externalGameActionGroupId)
+            => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(gameProviderId, playerCode,
+                externalGameActionGroupId);
 
         private async ValueTask<PlatformType> GetPlatformTypeAsync(
             Guid gameProviderId, string externalGameId, string playerCode)

@@ -40,6 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
             services.AddScoped<IWMCasinoServices, WMCasinoServices>();
             services.AddScoped<IWMCasinoAgentMapper, WMCasinoAgentMapper>();
             services.AddScoped<IWMCasinoActionModelMapper, WMCasinoActionModelMapper>();
+            services.AddScoped<IWMCasinoUtility, WMCasinoUtility>();
 
             //services.AddScopedWithResolver<IGameInitializer>(new[]
             //    {

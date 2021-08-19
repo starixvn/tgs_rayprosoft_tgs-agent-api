@@ -25,7 +25,7 @@ namespace TGS.Shared.Game.Models.WMCasino.Incoming
         public IReadOnlyDictionary<string, decimal> BetDetail { get; init; }
 
         [JsonPropertyName("gameno")]
-        public string ExternalRoundId { get; init; }
+        public string GameNo { get; init; }
 
         [JsonPropertyName("walletactiontype")]
         public WalletActionType ActionType { get; init; }

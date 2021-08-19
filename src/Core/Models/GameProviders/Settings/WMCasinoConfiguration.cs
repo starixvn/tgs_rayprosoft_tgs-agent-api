@@ -8,5 +8,7 @@ namespace TGS.Core.Models.GameProviders.Settings
         public Uri ApiUrl { get; init; }
 
         public WMCasinoBrandMerchant[] BrandMerchants { get; init; }
+
+        public int MaxResultCount { get; init; }
     }
 }
