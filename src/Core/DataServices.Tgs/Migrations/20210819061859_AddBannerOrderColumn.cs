@@ -2,12 +2,12 @@
 
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
-    public partial class BannerAddOrderColumn : Migration
+    public partial class AddBannerOrderColumn : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "order",
+                name: "display_order",
                 schema: "dbo",
                 table: "banners",
                 type: "integer",
@@ -18,7 +18,7 @@ namespace TGS.Core.DataServices.Tgs.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "order",
+                name: "display_order",
                 schema: "dbo",
                 table: "banners");
         }

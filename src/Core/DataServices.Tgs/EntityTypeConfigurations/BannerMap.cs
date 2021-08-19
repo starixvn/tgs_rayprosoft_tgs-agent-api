@@ -31,7 +31,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(b => b.Localization)
                 .HasColumnType(ColumnTypes.Jsonb);
             builder.Property(b => b.Remark);
-            builder.Property(b => b.Order)
+            builder.Property(b => b.DisplayOrder)
                 .IsRequired()
                 .HasDefaultValue(1);
 

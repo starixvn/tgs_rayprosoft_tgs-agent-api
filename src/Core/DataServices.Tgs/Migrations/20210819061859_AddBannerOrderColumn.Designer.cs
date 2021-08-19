@@ -10,8 +10,8 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210819061107_BannerAddOrderColumn")]
-    partial class BannerAddOrderColumn
+    [Migration("20210819061859_AddBannerOrderColumn")]
+    partial class AddBannerOrderColumn
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -950,6 +950,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("display_order");
+
                     b.Property<DateTimeOffset?>("EndTime")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_time");
@@ -963,12 +969,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Localization")
                         .HasColumnType("jsonb")
                         .HasColumnName("localization");
-
-                    b.Property<int>("Order")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1)
-                        .HasColumnName("order");
 
                     b.Property<string>("Remark")
                         .HasColumnType("text")
