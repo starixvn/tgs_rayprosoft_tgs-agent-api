@@ -12,5 +12,9 @@ namespace TGS.Services.BackOffice.Domain
         string Title,
         DateTimeOffset BeginTime,
         DateTimeOffset? EndTime,
-        string Localization);
+        string Localization,
+        int Status,
+        bool IsEnabled,
+        string Updater,
+        DateTimeOffset UpdatedOn);
 }

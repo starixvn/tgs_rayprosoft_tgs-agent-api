@@ -107,5 +107,12 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             return updateService.ExecuteAsync(command);
         }
+
+        [HttpGet("reviewing/{brandId}")]
+        public void GetReviewingBanners(
+            Guid brandId)
+        {
+
+        }
     }
 }

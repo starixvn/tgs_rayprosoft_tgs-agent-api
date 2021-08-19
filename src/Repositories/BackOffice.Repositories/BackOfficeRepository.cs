@@ -10,11 +10,13 @@ namespace TGS.BackOffice.Repositories
 {
     internal class BackOfficeRepository : IBackOfficeRepository
     {
+        private readonly ISystemClock _systemClock;
         private readonly ITgsRepository _tgsRepository;
 
-        public BackOfficeRepository(ITgsRepository tgsRepository)
+        public BackOfficeRepository(ITgsRepository tgsRepository, ISystemClock systemClock)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+            _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         }
 
         public async ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier)
@@ -88,6 +90,92 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
+        {
+            var currentTime = _systemClock.UtcNow;
+
+            var query = from banner in _tgsRepository.Banners.AsQueryable()
+                        where banner.BrandId == brandId
+                            && banner.Status == 1000
+                            && banner.EndTime <= currentTime
+                        select new BannerInfo(
+                            banner.Id,
+                            banner.BrandId,
+                            banner.Title,
+                            banner.BeginTime,
+                            banner.EndTime,
+                            banner.Localization,
+                            banner.Status,
+                            banner.IsEnabled,
+                            banner.UpdatedByUserName,
+                            banner.UpdatedOn);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<BannerInfo> QueryRejectedBannersAsync(Guid brandId)
+        {
+            var query = from banner in _tgsRepository.Banners.AsQueryable()
+                        where banner.BrandId == brandId
+                            && banner.Status == 2000
+                        select new BannerInfo(
+                            banner.Id,
+                            banner.BrandId,
+                            banner.Title,
+                            banner.BeginTime,
+                            banner.EndTime,
+                            banner.Localization,
+                            banner.Status,
+                            banner.IsEnabled,
+                            banner.UpdatedByUserName,
+                            banner.UpdatedOn);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<BannerInfo> QueryReviewingBannersAsync(Guid brandId)
+        {
+            var query = from banner in _tgsRepository.Banners.AsQueryable()
+                        where banner.BrandId == brandId
+                            && banner.Status == 0
+                        select new BannerInfo(
+                            banner.Id,
+                            banner.BrandId,
+                            banner.Title,
+                            banner.BeginTime,
+                            banner.EndTime,
+                            banner.Localization,
+                            banner.Status,
+                            banner.IsEnabled,
+                            banner.UpdatedByUserName,
+                            banner.UpdatedOn);
+
+            return query.ToAsyncEnumerable();
+        }
+
+        public IAsyncEnumerable<BannerInfo> QueryValidBannersAsync(Guid brandId)
+        {
+            var currentTime = _systemClock.UtcNow;
+
+            var query = from banner in _tgsRepository.Banners.AsQueryable()
+                        where banner.BrandId == brandId
+                            && banner.Status == 1000
+                            && (banner.EndTime == null || banner.EndTime > currentTime)
+                        select new BannerInfo(
+                            banner.Id,
+                            banner.BrandId,
+                            banner.Title,
+                            banner.BeginTime,
+                            banner.EndTime,
+                            banner.Localization,
+                            banner.Status,
+                            banner.IsEnabled,
+                            banner.UpdatedByUserName,
+                            banner.UpdatedOn);
+
+            return query.ToAsyncEnumerable();
+        }
+
         public async ValueTask ReviewBannerAsync(Guid id, BannerReviewState reviewState, string remark, string reviewer)
         {
             var banner = await _tgsRepository.Banners
@@ -102,7 +190,7 @@ namespace TGS.BackOffice.Repositories
             };
 
             banner.UpdatedByUserName = reviewer;
-            banner.UpdatedOn = DateTimeOffset.UtcNow;
+            banner.UpdatedOn = _systemClock.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -116,7 +204,7 @@ namespace TGS.BackOffice.Repositories
             banner.IsEnabled = isEnable;
 
             banner.UpdatedByUserName = modifier;
-            banner.UpdatedOn = DateTimeOffset.UtcNow;
+            banner.UpdatedOn = _systemClock.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -133,7 +221,7 @@ namespace TGS.BackOffice.Repositories
             banner.Localization = updateInfo.Localization;
 
             banner.UpdatedByUserName = modifier;
-            banner.UpdatedOn = DateTimeOffset.UtcNow;
+            banner.UpdatedOn = _systemClock.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

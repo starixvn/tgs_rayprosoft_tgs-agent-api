@@ -17,5 +17,13 @@ namespace TGS.Services.BackOffice.Domain
         ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier);
 
         ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
+
+        IAsyncEnumerable<BannerInfo> QueryReviewingBannersAsync(Guid brandId);
+
+        IAsyncEnumerable<BannerInfo> QueryValidBannersAsync(Guid brandId);
+
+        IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);
+
+        IAsyncEnumerable<BannerInfo> QueryRejectedBannersAsync(Guid brandId);
     }
 }
