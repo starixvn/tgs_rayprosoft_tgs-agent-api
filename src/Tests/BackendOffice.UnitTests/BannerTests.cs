@@ -35,28 +35,27 @@ namespace TGS.Tests.BackendOffice.UnitTests
         }
 
         [Test]
-        public async Task User_Can_Update_Banner_Data()
+        public async Task User_Can_Review_Banner()
         {
             var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
 
-            var sut = new UpdateBannerCommandService(moqBackOfficeRepository.Object);
+            var sut = new ReviewBannerCommandService(moqBackOfficeRepository.Object);
 
-            var command = new UpdateBannerCommand(
+            var command = new ReviewBannerCommand(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                "TestTitle",
-                DateTimeOffset.Now,
-                null,
+                BannerReviewState.Approve,
                 null,
                 "User1");
 
             await sut.ExecuteAsync(command);
 
             moqBackOfficeRepository.Verify(
-                fake => fake.UpdateBannerAsync(
+                fake => fake.ReviewBannerAsync(
                     It.Is<Guid>(x => x == command.BannerId),
-                    It.IsAny<BannerModifyInfo>(),
-                    It.Is<string>(x => x == command.Modifier)),
+                    It.Is<BannerReviewState>(x => x == command.ReviewState),
+                    It.Is<string>(x => x == command.Remark),
+                    It.Is<string>(x => x == command.Reviewer)),
                 Times.Exactly(1));
         }
 
@@ -79,6 +78,32 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fake => fake.SetIsEnableBannerAsync(
                     It.Is<Guid>(x => x == command.BannerId),
                     It.Is<bool>(x => x == command.IsEnable),
+                    It.Is<string>(x => x == command.Modifier)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task User_Can_Update_Banner_Data()
+        {
+            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+            var sut = new UpdateBannerCommandService(moqBackOfficeRepository.Object);
+
+            var command = new UpdateBannerCommand(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                "TestTitle",
+                DateTimeOffset.Now,
+                null,
+                null,
+                "User1");
+
+            await sut.ExecuteAsync(command);
+
+            moqBackOfficeRepository.Verify(
+                fake => fake.UpdateBannerAsync(
+                    It.Is<Guid>(x => x == command.BannerId),
+                    It.IsAny<BannerModifyInfo>(),
                     It.Is<string>(x => x == command.Modifier)),
                 Times.Exactly(1));
         }

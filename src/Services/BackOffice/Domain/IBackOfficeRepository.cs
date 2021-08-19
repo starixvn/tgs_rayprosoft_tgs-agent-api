@@ -12,6 +12,8 @@ namespace TGS.Services.BackOffice.Domain
 
         ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings);
 
+        ValueTask ReviewBannerAsync(Guid id, BannerReviewState reviewState, string remark, string reviewer);
+
         ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier);
 
         ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);

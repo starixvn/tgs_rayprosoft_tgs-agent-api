@@ -88,6 +88,25 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public async ValueTask ReviewBannerAsync(Guid id, BannerReviewState reviewState, string remark, string reviewer)
+        {
+            var banner = await _tgsRepository.Banners
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            banner.Status = reviewState switch
+            {
+                BannerReviewState.Approve => 1000,
+                BannerReviewState.Reject => 2000,
+                _ => 9000
+            };
+
+            banner.UpdatedByUserName = reviewer;
+            banner.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
         public async ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier)
         {
             var banner = await _tgsRepository.Banners

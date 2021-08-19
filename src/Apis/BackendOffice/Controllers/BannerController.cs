@@ -36,6 +36,53 @@ namespace TGS.Apis.BackendOffice.Controllers
             return createService.ExecuteAsync(command);
         }
 
+        [HttpPatch("disable/{brandId}/{bannerId}")]
+        public ValueTask DisableBannerAsync(
+            [FromServices] ICommandService<SetIsEanbleBannerCommand> setService,
+            Guid brandId,
+            Guid bannerId)
+        {
+            var command = new SetIsEanbleBannerCommand(
+                brandId,
+                bannerId,
+                false,
+                Username);
+
+            return setService.ExecuteAsync(command);
+        }
+
+        [HttpPatch("enable/{brandId}/{bannerId}")]
+        public ValueTask EnableBannerAsync(
+            [FromServices] ICommandService<SetIsEanbleBannerCommand> setService,
+            Guid brandId,
+            Guid bannerId)
+        {
+            var command = new SetIsEanbleBannerCommand(
+                brandId,
+                bannerId,
+                true,
+                Username);
+
+            return setService.ExecuteAsync(command);
+        }
+
+        [HttpPost("{brandId}/{bannerId}")]
+        public ValueTask ReviewBannerAsync(
+            [FromServices] ICommandService<ReviewBannerCommand> reviewService,
+            Guid brandId,
+            Guid bannerId,
+            [FromBody] ReviewBannerRequest request)
+        {
+            var command = new ReviewBannerCommand(
+                brandId,
+                bannerId,
+                request.ReviewState,
+                request.Remark,
+                Username);
+
+            return reviewService.ExecuteAsync(command);
+        }
+
         [HttpPatch("{brandId}/{bannerId}")]
         public ValueTask UpdateBannerAsync(
             [FromServices] ICommandService<UpdateBannerCommand> updateService,
@@ -59,36 +106,6 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Username);
 
             return updateService.ExecuteAsync(command);
-        }
-
-        [HttpPatch("enable/{brandId}/{bannerId}")]
-        public ValueTask EnableBannerAsync(
-            [FromServices] ICommandService<SetIsEanbleBannerCommand> setService,
-            Guid brandId,
-            Guid bannerId)
-        {
-            var command = new SetIsEanbleBannerCommand(
-                brandId,
-                bannerId,
-                true,
-                Username);
-
-            return setService.ExecuteAsync(command);
-        }
-
-        [HttpPatch("disable/{brandId}/{bannerId}")]
-        public ValueTask DisableBannerAsync(
-            [FromServices] ICommandService<SetIsEanbleBannerCommand> setService,
-            Guid brandId,
-            Guid bannerId)
-        {
-            var command = new SetIsEanbleBannerCommand(
-                brandId,
-                bannerId,
-                false,
-                Username);
-
-            return setService.ExecuteAsync(command);
         }
     }
 }
