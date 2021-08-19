@@ -124,7 +124,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     var orderTime = new DateTimeOffset(DateTime.Parse(gameRecord.OrderTime), TimeSpan.FromHours(-4));
                     await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                     {
-                        ExternalRoundId = gameRecord.ExternalRoundId,
+                        ExternalRoundId = gameRecord.ExternalBetId.ToString(),
                         GameProviderId = gameProviderId,
                         GameProviderCode = _service.GetGameProviderCode(),
                         PlayerCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.PlayerCode,
