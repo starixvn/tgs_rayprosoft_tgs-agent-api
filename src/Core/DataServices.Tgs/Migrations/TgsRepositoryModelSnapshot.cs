@@ -962,6 +962,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("localization");
 
+                    b.Property<int>("Order")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("order");
+
                     b.Property<string>("Remark")
                         .HasColumnType("text")
                         .HasColumnName("remark");
