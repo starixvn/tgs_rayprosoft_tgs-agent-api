@@ -19,6 +19,20 @@ namespace TGS.BackOffice.Repositories
             _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
         }
 
+        public async ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier)
+        {
+            var banner = await _tgsRepository.Banners
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            banner.DisplayOrder = order;
+
+            banner.UpdatedByUserName = modifier;
+            banner.UpdatedOn = _systemClock.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
         public async ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier)
         {
             var createBanner = new Banner
@@ -52,6 +66,26 @@ namespace TGS.BackOffice.Repositories
                     loc.MessageId,
                     loc.Text))
                 .ToAsyncEnumerable();
+
+        public async ValueTask<BannerInfo> GetBannerByIdAsync(Guid id)
+        {
+            var banner = await _tgsRepository.Banners
+                .FindAsync(id)
+                .ConfigureAwait(false);
+
+            return new BannerInfo(
+                banner.Id,
+                banner.BrandId,
+                banner.Title,
+                banner.BeginTime,
+                banner.EndTime,
+                banner.Localization,
+                ConvertBannerStatus(banner.Status),
+                banner.IsEnabled,
+                banner.DisplayOrder,
+                banner.UpdatedByUserName,
+                banner.UpdatedOn);
+        }
 
         public async ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings)
         {

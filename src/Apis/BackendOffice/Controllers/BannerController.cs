@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Banner;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Messages;
@@ -68,6 +70,41 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Username);
 
             return setService.ExecuteAsync(command);
+        }
+
+        [HttpGet("{brandId}/{bannerId}")]
+        public async Task<GenericResponse<BannerDetail>> GetBannerDetailAsync(
+            [FromServices] IGetService<GetBannerDetailQuery, BannerInfo> getService,
+            [FromServices] IOptions<JsonOptions> jsonOptionsAccessor,
+            [FromServices] IJsonSerializationProvider jsonSerializationProvider,
+            Guid brandId,
+            Guid bannerId)
+        {
+            var jsonOptions = jsonOptionsAccessor.Value;
+
+            var query = new GetBannerDetailQuery(brandId, bannerId);
+
+            var bannerInfo = await getService.GetAsync(query).ConfigureAwait(false);
+
+            return new GenericResponse<BannerDetail>
+            {
+                Valid = true,
+                Data = new BannerDetail
+                {
+                    Id = bannerInfo.Id,
+                    BeginTime = bannerInfo.BeginTime,
+                    EndTime = bannerInfo.EndTime,
+                    DisplayOrder = bannerInfo.DisplayOrder,
+                    IsEnabled = bannerInfo.IsEnabled,
+                    Localization = jsonSerializationProvider.DeserializeFromString<IDictionary<string, BannerContent>>(
+                        bannerInfo.Localization,
+                        jsonOptions.JsonSerializerOptions),
+                    Modifier = bannerInfo.Updater,
+                    Status = bannerInfo.Status,
+                    Title = bannerInfo.Title,
+                    UpdatedOn = bannerInfo.UpdatedOn
+                }
+            };
         }
 
         [HttpGet("expired/{brandId}")]
@@ -273,6 +310,22 @@ namespace TGS.Apis.BackendOffice.Controllers
                 Username);
 
             return reviewService.ExecuteAsync(command);
+        }
+
+        [HttpPatch("{brandId}/{bannerId}/{orderNumber}")]
+        public ValueTask SetBannerOrderAsync(
+            [FromServices] ICommandService<ChangeBannerOrderCommand> setOrderService,
+            Guid brandId,
+            Guid bannerId,
+            int orderNumber)
+        {
+            var command = new ChangeBannerOrderCommand(
+                brandId,
+                bannerId,
+                orderNumber,
+                Username);
+
+            return setOrderService.ExecuteAsync(command);
         }
 
         [HttpPatch("{brandId}/{bannerId}")]
