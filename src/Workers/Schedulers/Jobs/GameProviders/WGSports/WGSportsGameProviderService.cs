@@ -133,7 +133,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
             };
             await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
 
-            return await GetGameProviderScheduleAsync(gameProviderId).ConfigureAwait(false); ;
+            return await GetGameProviderScheduleAsync(gameProviderId).ConfigureAwait(false);
         }
 
         /// <summary>

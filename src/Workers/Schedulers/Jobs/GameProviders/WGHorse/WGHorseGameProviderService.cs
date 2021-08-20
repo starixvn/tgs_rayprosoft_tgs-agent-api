@@ -132,7 +132,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
             };
             await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
 
-            return await GetGameProviderScheduleAsync(gameProviderId).ConfigureAwait(false); ;
+            return await GetGameProviderScheduleAsync(gameProviderId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
             var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
             if (updateResult.ModifiedCount > 0)
             {
-                return await GetGameProviderScheduleAsync(gameProviderSchedule.GameProviderId).ConfigureAwait(false); ;
+                return await GetGameProviderScheduleAsync(gameProviderSchedule.GameProviderId).ConfigureAwait(false);
             }
             else
             {
