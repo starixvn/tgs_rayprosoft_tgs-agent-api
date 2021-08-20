@@ -174,7 +174,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
             if (updateResult.ModifiedCount > 0)
             {
-                return await GetGameProviderScheduleAsync(gameProviderSchedule.GameProviderId, gameProviderSchedule.BrandCode, gameProviderSchedule.AgentId, gameProviderSchedule.CurrencyCode).ConfigureAwait(false); ;
+                return await GetGameProviderScheduleAsync(gameProviderSchedule.GameProviderId, gameProviderSchedule.BrandCode, gameProviderSchedule.AgentId, gameProviderSchedule.CurrencyCode).ConfigureAwait(false);
             }
             else
             {
