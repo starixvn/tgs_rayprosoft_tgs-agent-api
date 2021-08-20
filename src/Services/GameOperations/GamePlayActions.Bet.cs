@@ -50,9 +50,9 @@ namespace TGS.Services.GameOperations
             {
                 var platformType = data.AllowPlaceBetWithDifferentPlatformToken ? null : data.PlatformType;
                 await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
-                    platformType);
+                    platformType).ConfigureAwait(false);
 
-                await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+                await ThrowIfGameIsNotTakenByBrandAsync(player, data).ConfigureAwait(false);
             });
 
         ValueTask<BetResult> IGamePlayActions.PlaceBetAsync(BetData data) =>
@@ -63,7 +63,6 @@ namespace TGS.Services.GameOperations
                     platformType).ConfigureAwait(false);
 
                 await ThrowIfGameIsNotTakenByBrandAsync(player, data).ConfigureAwait(false);
-                ;
             });
 
         ValueTask<BetResult> IGamePlayActions.SettleBetAsync(BetData data) =>
@@ -87,6 +86,11 @@ namespace TGS.Services.GameOperations
             GameActionType type = GameActionType.PlaceBet)
         {
             if (type != GameActionType.PlaceBet)
+            {
+                return;
+            }
+
+            if (data.Transactions.Length == 0)
             {
                 return;
             }

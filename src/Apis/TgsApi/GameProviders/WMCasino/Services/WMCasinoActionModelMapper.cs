@@ -27,6 +27,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             GameProviderConfigurationData data, string playerCode, BetResult[] results,
             GameActionExternalIds[] externalIds, bool isManual);
 
+        (BetData CancelBetData, BetData SettleBetData) ResettleRequest(
+            GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
+            GameActionExternalIds[] externalIds, bool isManual);
+
         GetBalanceResponse Response(string playerCode, GetBalanceResult r);
 
         WalletTransferResponse Response(WalletTransferRequest request, decimal balance);
@@ -42,7 +46,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         private const string _GameProviderCode = Consts.GameProvider.WMCasino;
         private static readonly TimeSpan _Offset = TimeSpan.FromHours(8);
 
-        private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions _SerializerOptions = new JsonSerializerOptions
         {
             WriteIndented = false
         };
@@ -116,7 +120,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             var bets = new List<TransactionData>();
             var settles = new List<TransactionData>();
 
-
             // lock amount is stored as negative in database
 
             var remainingLockAmount = CalculateRemainingLockAmount(externalIds);
@@ -167,7 +170,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                         TimeStamp = betTime,
                         ExtraData = _json.SerializeToString(
                             new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
-                            _serializerOptions)
+                            _SerializerOptions)
                     }
                 });
 
@@ -187,13 +190,79 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     RoundClosed = lockedAmount == 0,
                     ExtraData = _json.SerializeToString(
                         new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
-                        _serializerOptions),
+                        _SerializerOptions),
                     CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate())
                 });
             }
 
             var transactions = bets.Concat(settles).ToArray();
-            return GetBetData(playerCode, data, transactions, true);
+            return transactions.Length == 0 ? null : GetBetData(playerCode, data, transactions, true);
+        }
+
+
+        public (BetData CancelBetData, BetData SettleBetData) ResettleRequest(GameProviderConfigurationData data,
+            string playerCode, BetResult[] betResults, GameActionExternalIds[] externalIds, bool isManual)
+        {
+            var cancels = new List<TransactionData>();
+            var settles = new List<TransactionData>();
+
+            var remainingLockAmount = CalculateRemainingLockAmount(externalIds);
+
+            foreach (var r in betResults)
+            {
+                var betId = r.BetId;
+                var settleId = $"{betId}_settle";
+
+                if (externalIds.All(t => t.ExternalTransactionId != settleId))
+                {
+                    continue;
+                }
+
+                var betAmount = r.BetAmount;
+                var winAmount = betAmount + r.WinLoss;
+                var settleTime = ParseDateTimeOffset(r.SettleTime);
+                var externalGameId = r.ExternalGameId;
+                var externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId);
+
+                cancels.Add(new TransactionData
+                {
+                    Amount = betAmount,
+                    ExternalTransactionId = $"{settleId}_cancel",
+                    ExternalRoundId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalBetId = betId,
+                    ExternalTransactionReferenceId = settleId,
+                    ExternalGameId = externalGameId,
+                    GameActionType = GameActionType.CancelTransaction,
+                    TimeStamp = settleTime,
+                    RoundClosed = false
+                });
+
+                settles.Add(new TransactionData
+                {
+                    Amount = winAmount,
+                    ExternalTransactionId = $"{betId}_resettle",
+                    ExternalRoundId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalBetId = betId,
+                    ExternalTransactionReferenceId = betId,
+                    ExternalGameId = externalGameId,
+                    GameActionType = winAmount == 0 ? GameActionType.LoseBet :
+                        winAmount > betAmount       ? GameActionType.WinBet : GameActionType.TieBet,
+                    TimeStamp = ParseDateTimeOffset(r.SettleTime),
+                    RoundDetail = r.GameResult,
+                    RoundClosed = remainingLockAmount == 0,
+                    ExtraData = _json.SerializeToString(
+                        new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
+                        _SerializerOptions),
+                    CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate())
+                });
+            }
+
+            var cancelBetData = cancels.Count == 0 ? null : GetBetData(playerCode, data, cancels.ToArray(), true);
+            var settleBetData = settles.Count == 0 ? null : GetBetData(playerCode, data, settles.ToArray(), true);
+
+            return (cancelBetData, settleBetData);
         }
 
         public GetBalanceResponse Response(string playerCode, GetBalanceResult r)

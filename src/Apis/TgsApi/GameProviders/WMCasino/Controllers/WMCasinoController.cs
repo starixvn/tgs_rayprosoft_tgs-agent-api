@@ -10,6 +10,7 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
@@ -190,6 +191,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 
             await PlaceAndSettleBetAsync(data, playerCode, betResults, isManual);
 
+            var results = betResults.Where(b => b.Reset.IgnoreCaseEquals("Y")).ToArray();
+
+            if (results.Length > 0)
+            {
+                await ResettleOrVoidRoundAsync(data, playerCode, results, isManual);
+            }
+
             return _map.Response(GameApiError.Success, string.Empty);
         }
 
@@ -205,7 +213,58 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
                     playerCode, externalGameActionGroupId).ConfigureAwait(false);
 
             var betData = _map.PlaceAndSettleBetRequest(data, playerCode, betResults, externalIds, isManual);
-            await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
+
+            if (betData != null)
+            {
+                await _actions.PlaceAndSettleBetAsync(betData).ConfigureAwait(false);
+            }
         }
+
+        private async ValueTask ResettleOrVoidRoundAsync(GameProviderConfigurationData data,
+            string playerCode, BetResult[] betResults, bool isManual)
+        {
+            var betResult = betResults.First();
+            var externalGameActionGroupId =
+                _utility.GetExternalRoundIdByBetResult(betResult.RoundId, betResult.SubRoundId);
+
+            var externalIds =
+                await _services.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(data.GameProviderId,
+                    playerCode, externalGameActionGroupId).ConfigureAwait(false);
+
+            var groupResults = (from r in betResults
+                                group r by r.GameResult.IgnoreCaseContains("cancel")
+                                into g
+                                select g).ToDictionary(g => g.Key, g => g.ToArray());
+
+            if (groupResults.TryGetValue(false, out var resettleResults) && resettleResults.Length > 0)
+            {
+                await ResettleAsync(data, playerCode, betResults, externalIds, isManual);
+            }
+
+            if (groupResults.TryGetValue(true, out var voidResults) && voidResults.Length > 0)
+            {
+                await VoidRoundAsync(data, playerCode, betResults, externalIds, isManual);
+            }
+        }
+
+        private async ValueTask ResettleAsync(GameProviderConfigurationData data, string playerCode,
+            BetResult[] betResults, GameActionExternalIds[] externalIds, bool isManual)
+        {
+            var (cancelData, settleData) = _map.ResettleRequest(data, playerCode, betResults, externalIds, isManual);
+
+            if (cancelData != null)
+            {
+                await _actions.CancelTransactionAsync(cancelData).ConfigureAwait(false);
+            }
+
+            if (settleData != null)
+            {
+                await _actions.SettleBetAsync(settleData).ConfigureAwait(false);
+            }
+        }
+
+        private ValueTask VoidRoundAsync(GameProviderConfigurationData data, string playerCode,
+            BetResult[] betResults, GameActionExternalIds[] externalIds, bool isManual)
+            => throw new NotImplementedException();
     }
 }
