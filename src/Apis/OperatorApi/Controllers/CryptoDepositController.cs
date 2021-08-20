@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
+using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
@@ -120,6 +121,132 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 FormId = createdFormId,
                 PaymentUrl = applyInfo.Response.PaymentUrl
+            };
+        }
+
+        [HttpGet("umpay/exchangerate/{brandPaymentId}")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
+        public async Task<GetUmPayExchangeRateResponse> GetUmPayExchangeRateAsync(
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetUmPayExchangeRateQuery, string> getUmPayExchangeRateService,
+            [FromServices] UmPaySerializer serializer,
+            string brandPaymentId)
+        {
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(new Guid(brandPaymentId)))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var query = new GetUmPayExchangeRateQuery(
+                "tgs.payment.umpay.queryexchangerate",
+                serializer.Serialize(
+                    new UmPayQueryExchangeRateSettings()));
+
+            var response = await getUmPayExchangeRateService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<UmPayQueryExchangeRateApplyInfo>(response);
+
+            if (applyInfo.Response.Code == "1")
+            {
+                return new GetUmPayExchangeRateResponse
+                {
+                    Rate = applyInfo.Response.Rate
+                };
+            }
+            else
+            {
+                throw new UmPayApiException();
+            }
+        }
+
+        [HttpPost("umpay")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async ValueTask<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetUmPayExchangeRateQuery, string> getUmPayExchangeRateService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] UmPaySerializer serializer,
+            [FromBody] SubmitUmPayDepositRequest request)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var query = new GetUmPayExchangeRateQuery(
+                "tgs.payment.umpay.queryexchangerate",
+                serializer.Serialize(
+                    new UmPayQueryExchangeRateSettings()));
+
+            var response = await getUmPayExchangeRateService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            var exchangeRateApplyInfo = serializer.Deserialize<UmPayQueryExchangeRateApplyInfo>(response);
+
+            JsonDocument rateResponse;
+            if (exchangeRateApplyInfo.Response.Code == "1")
+            {
+                rateResponse = exchangeRateApplyInfo.Response.Rate;
+            }
+            else
+            {
+                throw new UmPayApiException();
+            }
+            var currency = brandPaymentInfo.RootElement.GetProperty("currency").GetString();
+            var usdt = rateResponse.RootElement.GetProperty("USDT");
+            var rate = usdt.GetProperty(currency.ToUpper()).GetProperty("rate").GetDecimal();
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.umpay.deposit",
+                request.PromotionId,
+                formId => serializer.Serialize(
+                    new UmPayDepositSettings(
+                        brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("tradeType").GetString(),
+                        "1",
+                        formId,
+                        request.Amount,
+                        Rate: rate,
+                        request.TradeDescription)));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<UmPayDepositApplyInfo>(formData.ApplyInfo!);
+
+            if (applyInfo.Response.Code != "1")
+                throw new PaymentFailException(applyInfo.Response.Msg);
+
+            return new UmPayDepositFormCreatedResponse
+            {
+                FormId = createdFormId,
+                PaymentUrl = applyInfo.Response.JumpUrl
             };
         }
     }
