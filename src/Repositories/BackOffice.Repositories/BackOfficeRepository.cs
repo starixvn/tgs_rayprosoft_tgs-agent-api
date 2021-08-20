@@ -105,8 +105,9 @@ namespace TGS.BackOffice.Repositories
                             banner.BeginTime,
                             banner.EndTime,
                             banner.Localization,
-                            banner.Status,
+                            ConvertBannerStatus(banner.Status),
                             banner.IsEnabled,
+                            banner.DisplayOrder,
                             banner.UpdatedByUserName,
                             banner.UpdatedOn);
 
@@ -125,8 +126,9 @@ namespace TGS.BackOffice.Repositories
                             banner.BeginTime,
                             banner.EndTime,
                             banner.Localization,
-                            banner.Status,
+                            ConvertBannerStatus(banner.Status),
                             banner.IsEnabled,
+                            banner.DisplayOrder,
                             banner.UpdatedByUserName,
                             banner.UpdatedOn);
 
@@ -145,8 +147,9 @@ namespace TGS.BackOffice.Repositories
                             banner.BeginTime,
                             banner.EndTime,
                             banner.Localization,
-                            banner.Status,
+                            ConvertBannerStatus(banner.Status),
                             banner.IsEnabled,
+                            banner.DisplayOrder,
                             banner.UpdatedByUserName,
                             banner.UpdatedOn);
 
@@ -168,8 +171,9 @@ namespace TGS.BackOffice.Repositories
                             banner.BeginTime,
                             banner.EndTime,
                             banner.Localization,
-                            banner.Status,
+                            ConvertBannerStatus(banner.Status),
                             banner.IsEnabled,
+                            banner.DisplayOrder,
                             banner.UpdatedByUserName,
                             banner.UpdatedOn);
 
@@ -225,5 +229,14 @@ namespace TGS.BackOffice.Repositories
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
+
+        private BannerFlowStatus ConvertBannerStatus(int status)
+            => status switch
+            {
+                0 => BannerFlowStatus.WaitApprving,
+                1000 => BannerFlowStatus.Approved,
+                2000 => BannerFlowStatus.Rejected,
+                _ => BannerFlowStatus.Unknown
+            };
     }
 }

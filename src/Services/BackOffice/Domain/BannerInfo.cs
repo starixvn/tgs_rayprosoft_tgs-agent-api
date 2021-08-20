@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TGS.Services.BackOffice.Domain
 {
@@ -13,8 +9,9 @@ namespace TGS.Services.BackOffice.Domain
         DateTimeOffset BeginTime,
         DateTimeOffset? EndTime,
         string Localization,
-        int Status,
+        BannerFlowStatus Status,
         bool IsEnabled,
+        int DisplayOrder,
         string Updater,
         DateTimeOffset UpdatedOn);
 }

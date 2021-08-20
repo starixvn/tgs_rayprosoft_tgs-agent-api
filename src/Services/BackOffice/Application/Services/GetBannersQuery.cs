@@ -5,5 +5,6 @@ namespace TGS.Services.BackOffice.Application.Services
 {
     public record GetBannersQuery(
         Guid BrandId,
-        BannerStatus BannerStatus);
+        BannerStatus BannerStatus,
+        Paging.Paging<BannerInfo> Paging);
 }
