@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.PrimePay;
+using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
@@ -149,6 +150,75 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var failResponse = (PrimePayDepositFailResponse)applyInfo.Response;
 
                 throw new PaymentFailException(failResponse.Errors);
+            }
+        }
+
+        [HttpPost("umpay")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
+            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] UmPaySerializer serializer,
+            [FromBody] SubmitUmPayDepositRequest request
+            )
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.umpay.deposit",
+                request.PromotionId,
+                formId => serializer.Serialize(
+                    new UmPayDepositSettings(
+                        brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("tradeType").GetString(),
+                        "1",
+                        formId,
+                        request.Amount,
+                        Rate: 1m,
+                        request.TradeDescription)));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<UmPayDepositApplyInfo>(formData.ApplyInfo!);
+
+            if (applyInfo.Response.Code == "1")
+            {
+                return new UmPayDepositFormCreatedResponse
+                {
+                    FormId = createdFormId,
+                    PaymentUrl = applyInfo.Response.JumpUrl.ToString(),
+                    ErrorMessage = string.Empty
+                };
+            }
+            else
+            {
+                throw new PaymentFailException(applyInfo.Response.Msg);
             }
         }
     }
