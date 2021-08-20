@@ -238,19 +238,19 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 
             if (groupResults.TryGetValue(false, out var resettleResults) && resettleResults.Length > 0)
             {
-                await ResettleAsync(data, playerCode, betResults, externalIds, isManual);
+                await ResettleAsync(data, playerCode, betResults, externalIds);
             }
 
             if (groupResults.TryGetValue(true, out var voidResults) && voidResults.Length > 0)
             {
-                await VoidRoundAsync(data, playerCode, betResults, externalIds, isManual);
+                await VoidRoundAsync(data, playerCode, betResults, externalIds);
             }
         }
 
         private async ValueTask ResettleAsync(GameProviderConfigurationData data, string playerCode,
-            BetResult[] betResults, GameActionExternalIds[] externalIds, bool isManual)
+            BetResult[] betResults, GameActionExternalIds[] externalIds)
         {
-            var (cancelData, settleData) = _map.ResettleRequest(data, playerCode, betResults, externalIds, isManual);
+            var (cancelData, settleData) = _map.ResettleRequest(data, playerCode, betResults, externalIds);
 
             if (cancelData != null)
             {
@@ -263,8 +263,15 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             }
         }
 
-        private ValueTask VoidRoundAsync(GameProviderConfigurationData data, string playerCode,
-            BetResult[] betResults, GameActionExternalIds[] externalIds, bool isManual)
-            => throw new NotImplementedException();
+        private async ValueTask VoidRoundAsync(GameProviderConfigurationData data, string playerCode,
+            BetResult[] betResults, GameActionExternalIds[] externalIds)
+        {
+            var betData = _map.VoidRoundRequest(data, playerCode, betResults, externalIds);
+
+            if (betData != null)
+            {
+                await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
+            }
+        }
     }
 }

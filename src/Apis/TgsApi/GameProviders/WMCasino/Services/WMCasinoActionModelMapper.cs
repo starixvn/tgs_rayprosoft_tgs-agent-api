@@ -29,7 +29,11 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         (BetData CancelBetData, BetData SettleBetData) ResettleRequest(
             GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
-            GameActionExternalIds[] externalIds, bool isManual);
+            GameActionExternalIds[] externalIds);
+
+        BetData VoidRoundRequest(
+            GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
+            GameActionExternalIds[] externalIds);
 
         GetBalanceResponse Response(string playerCode, GetBalanceResult r);
 
@@ -201,7 +205,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
 
         public (BetData CancelBetData, BetData SettleBetData) ResettleRequest(GameProviderConfigurationData data,
-            string playerCode, BetResult[] betResults, GameActionExternalIds[] externalIds, bool isManual)
+            string playerCode, BetResult[] betResults, GameActionExternalIds[] externalIds)
         {
             var cancels = new List<TransactionData>();
             var settles = new List<TransactionData>();
@@ -226,7 +230,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
                 cancels.Add(new TransactionData
                 {
-                    Amount = betAmount,
                     ExternalTransactionId = $"{settleId}_cancel",
                     ExternalRoundId = externalRoundId,
                     ExternalGameActionGroupId = externalRoundId,
@@ -263,6 +266,65 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             var settleBetData = settles.Count == 0 ? null : GetBetData(playerCode, data, settles.ToArray(), true);
 
             return (cancelBetData, settleBetData);
+        }
+
+        public BetData VoidRoundRequest(GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
+            GameActionExternalIds[] externalIds)
+        {
+            var existBetResults = betResults
+                .Where(r => externalIds.Any(t => t.ExternalTransactionId == r.BetId))
+                .ToArray();
+
+            if (existBetResults.Length == 0)
+            {
+                return null;
+            }
+
+            var cancellations = externalIds.Where(t => t.GameActionType == GameActionType.CancelTransaction).ToArray();
+
+            var betCount = externalIds.Count(t => t.GameActionType == GameActionType.PlaceBet &&
+                cancellations.All(c => c.ExternalReferencedTransactionId != t.ExternalTransactionId));
+
+            var transactions = existBetResults.SelectMany((r, idx) =>
+            {
+                var betId = r.BetId;
+                var settleId = $"{betId}_settle";
+                var settleTime = ParseDateTimeOffset(r.SettleTime);
+                var externalGameId = r.ExternalGameId;
+                var externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId);
+
+                var roundClosed = idx == betCount - 1;
+
+                return new[]
+                {
+                    new TransactionData
+                    {
+                        ExternalTransactionId = $"{settleId}_cancel",
+                        ExternalRoundId = externalRoundId,
+                        ExternalGameActionGroupId = externalRoundId,
+                        ExternalBetId = betId,
+                        ExternalTransactionReferenceId = settleId,
+                        ExternalGameId = externalGameId,
+                        GameActionType = GameActionType.CancelTransaction,
+                        TimeStamp = settleTime,
+                        RoundClosed = false
+                    },
+                    new TransactionData
+                    {
+                        ExternalTransactionId = $"{betId}_cancel",
+                        ExternalRoundId = externalRoundId,
+                        ExternalGameActionGroupId = externalRoundId,
+                        ExternalBetId = betId,
+                        ExternalTransactionReferenceId = betId,
+                        ExternalGameId = externalGameId,
+                        GameActionType = GameActionType.CancelTransaction,
+                        TimeStamp = settleTime,
+                        RoundClosed = roundClosed
+                    }
+                };
+            }).ToArray();
+
+            return GetBetData(playerCode, data, transactions, true);
         }
 
         public GetBalanceResponse Response(string playerCode, GetBalanceResult r)
