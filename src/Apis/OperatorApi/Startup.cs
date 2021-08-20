@@ -4,7 +4,6 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
-using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,6 +16,7 @@ using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using Tgs.Payment.PrimePay;
+using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
@@ -148,7 +148,8 @@ namespace TGS.Apis.OperatorApi
                 .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>()
                 .AddSingleton<PrimePaySerializer>()
                 .AddSingleton<ApplePaySerializer>()
-                .AddSingleton<LeePaySerializer>();
+                .AddSingleton<LeePaySerializer>()
+                .AddSingleton<UmPaySerializer>();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()
