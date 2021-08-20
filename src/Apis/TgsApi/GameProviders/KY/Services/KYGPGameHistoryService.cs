@@ -90,7 +90,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
 
             var players = new Dictionary<string, (Player Player, Guid? GameProviderConfigurationId)>();
-            var gameIds = new Dictionary<int, CachedGame>();
+            var games = new Dictionary<int, CachedGame>();
             var count = 0;
             var successCount = 0;
             var failCount = 0;
@@ -133,10 +133,10 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                     }
 
 
-                    if (!gameIds.TryGetValue(gameRecord.KindID, out CachedGame game))
+                    if (!games.TryGetValue(gameRecord.KindID, out CachedGame game))
                     {
                         game = await _service.GetCachedGameAsync(gameProviderId, gameRecord.KindID.ToString()).ConfigureAwait(false);
-                        gameIds.Add(response.Data.List.KindID[i], game);
+                        games.Add(response.Data.List.KindID[i], game);
                     }
 
                     if (playerInfo.Player == null || game == null)

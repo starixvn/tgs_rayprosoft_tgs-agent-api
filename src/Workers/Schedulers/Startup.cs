@@ -25,6 +25,7 @@ using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
 using TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming;
 using TGS.Workers.Schedulers.Jobs.GameProviders.KY;
+using TGS.Workers.Schedulers.Jobs.GameProviders.VR;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGSports;
 using TGS.Workers.Schedulers.Jobs.Players;
@@ -148,6 +149,7 @@ namespace TGS.Workers.Schedulers
             // GameProviders Services 
             services.AddTransient<IBigGamingGameRecordFishingService, BigGamingGameRecordFishingService>();
             services.AddTransient<IKYGameProviderService, KYGameProviderService>();
+            services.AddTransient<IVRGameProviderService, VRGameProviderService>();
             services.AddTransient<IWGSportsGameProviderService, WGSportsGameProviderService>();
             services.AddTransient<IWGHorseGameProviderService, WGHorseGameProviderService>();
 
