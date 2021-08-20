@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
 using TGS.Apis.TgsApi.GameProviders.KY.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -23,7 +24,10 @@ namespace TGS.Apis.TgsApi.GameProviders.KY
         {
             services.AddHttpContextAccessor();
             services.AddErrorMappers();
-            services.AddScoped<IRequestAnalyzer, RequestAnalyzer>();
+            services.AddTransient<IRequestAnalyzer, RequestAnalyzer>();
+            services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
+            services.AddTransient<IKYService, KYService>();
+            services.AddTransient<IKYGPGameHistoryService, KYGPGameHistoryService>();
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(KYGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<KYGameInitializer>());
             services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(KYGameProviderWalletAction) }, (provider, _) =>
