@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Utility;
+using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
@@ -78,16 +78,16 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     updateAgentDividends.AddRange(agentDividends);
                 }
 
-                var (currentFrom, currentTo, _, _) =
-                    BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType,
-                        brand.NextSettlementTo.Value.AddDays(1));
+                var (nextFrom, nextTo) =
+                    GetInterval(brand.SettlementIntervalType,
+                        brand.NextSettlementTo.AddDays(1), brand.SettlementDay);
 
                 brand.PreviousSettlementFrom = brand.CurrentSettlementFrom;
                 brand.PreviousSettlementTo = brand.CurrentSettlementTo;
                 brand.CurrentSettlementFrom = brand.NextSettlementFrom;
                 brand.CurrentSettlementTo = brand.NextSettlementTo;
-                brand.NextSettlementFrom = currentFrom;
-                brand.NextSettlementTo = currentTo;
+                brand.NextSettlementFrom = nextFrom;
+                brand.NextSettlementTo = nextTo;
             }
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -294,8 +294,8 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     {
                         AgentId = x.AgentId.Value,
                         BrandId = x.BrandId,
-                        From = brand.CurrentSettlementFrom.Value,
-                        To = brand.CurrentSettlementTo.Value,
+                        From = brand.CurrentSettlementFrom,
+                        To = brand.CurrentSettlementTo,
                         AgentDividendPercentage = x.AgentDividendPercentage,
                         DepositAmount = models.Sum(m => m.DepositAmount),
                         WithdrawalAmount = models.Sum(m => m.WithdrawalAmount),
@@ -386,6 +386,25 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 agentDividends.Where(x =>
                     x.AgentDividendAmount < 0 || !x.AutoSend).ToList(),
                 noSendDividends.Where(x => x.ReferencedAgentDividendId is not null).ToList());
+        }
+
+        private static (DateTimeOffset, DateTimeOffset) GetInterval(
+            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth)
+        {
+            switch (type)
+            {
+                case SettlementIntervalType.Daily:
+                    return (startDate, startDate);
+                case SettlementIntervalType.Weekly:
+                    return (DateGenerator.GetFirstDayOfWeek(startDate),
+                        DateGenerator.GetLastDayOfWeek(startDate));
+                case SettlementIntervalType.Monthly:
+                    return (startDate,
+                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
+                            dayOfMonth.Value!));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
         }
     }
 }

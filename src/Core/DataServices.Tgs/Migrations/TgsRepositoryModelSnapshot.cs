@@ -1091,11 +1091,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<DateTimeOffset?>("CurrentSettlementFrom")
+                    b.Property<DateTimeOffset>("CurrentSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_from");
 
-                    b.Property<DateTimeOffset?>("CurrentSettlementTo")
+                    b.Property<DateTimeOffset>("CurrentSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_to");
 
@@ -1114,11 +1114,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<DateTimeOffset?>("NextSettlementFrom")
+                    b.Property<DateTimeOffset>("NextSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_settlement_from");
 
-                    b.Property<DateTimeOffset?>("NextSettlementTo")
+                    b.Property<DateTimeOffset>("NextSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_settlement_to");
 
@@ -1127,11 +1127,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("operational_email");
 
-                    b.Property<DateTimeOffset?>("PreviousSettlementFrom")
+                    b.Property<DateTimeOffset>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_from");
 
-                    b.Property<DateTimeOffset?>("PreviousSettlementTo")
+                    b.Property<DateTimeOffset>("PreviousSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_to");
 
@@ -1141,8 +1141,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("secret_key");
 
-                    b.Property<int?>("SettlementIntervalType")
+                    b.Property<int?>("SettlementDay")
                         .HasColumnType("integer")
+                        .HasColumnName("settlement_day");
+
+                    b.Property<short>("SettlementIntervalType")
+                        .HasColumnType("smallint")
                         .HasColumnName("settlement_interval_type");
 
                     b.Property<short>("Status")
