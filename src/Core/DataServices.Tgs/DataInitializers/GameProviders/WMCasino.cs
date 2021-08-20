@@ -21,7 +21,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             public WMCasinoGameProvider(IWebHostEnvironment env)
             {
-                _games = LoadGamesFromCsv(GameProviderConst.WGSports)
+                _games = LoadGamesFromCsv(GameProviderConst.WMCasino)
                     .Select(g =>
                     {
                         if (g.EndpointPath.IsNotNullOrEmpty())

@@ -72,6 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 ExternalRoundId = externalRoundId,
                 ExternalTransactionId = $"{request.DealId}_lock",
                 ExternalGameActionGroupId = externalRoundId,
+                ExternalBetId = externalRoundId,
                 GameActionType = GameActionType.LockAmount,
                 TimeStamp = ParseDateTimeOffset(request.Timestamp)
             };
@@ -96,6 +97,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 ExternalTransactionId = $"{request.DealId}_lock_cancel",
                 ExternalTransactionReferenceId = $"{request.DealId}_lock",
                 ExternalGameActionGroupId = externalRoundId,
+                ExternalBetId = externalRoundId,
                 GameActionType = GameActionType.CancelTransaction,
                 TimeStamp = ParseDateTimeOffset(request.Timestamp),
                 RoundClosed = false
@@ -113,6 +115,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         {
             var bets = new List<TransactionData>();
             var settles = new List<TransactionData>();
+
+
+            // lock amount is stored as negative in database
 
             var remainingLockAmount = CalculateRemainingLockAmount(externalIds);
             var lockedAmount = remainingLockAmount;
@@ -134,7 +139,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 var externalGameId = r.ExternalGameId;
                 var externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId);
 
-                lockedAmount -= lockedAmount;
+                lockedAmount += betAmount;
 
                 bets.AddRange(new[]
                 {
@@ -142,20 +147,21 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     {
                         Amount = betAmount,
                         ExternalTransactionId = $"{betId}_unlock",
-                        ExternalGameId = externalGameId,
-                        GameActionType = GameActionType.UnlockAmount,
                         ExternalRoundId = externalRoundId,
                         ExternalGameActionGroupId = externalRoundId,
+                        ExternalBetId = externalRoundId,
+                        ExternalGameId = externalGameId,
+                        GameActionType = GameActionType.UnlockAmount,
                         TimeStamp = betTime
                     },
                     new TransactionData
                     {
                         Amount = betAmount,
+                        ExternalTransactionId = betId,
+                        ExternalRoundId = externalRoundId,
+                        ExternalGameActionGroupId = externalRoundId,
                         ExternalBetId = betId,
                         ExternalGameId = externalGameId,
-                        ExternalRoundId = externalRoundId,
-                        ExternalTransactionId = betId,
-                        ExternalGameActionGroupId = externalRoundId,
                         GameActionType = GameActionType.PlaceBet,
                         BetType = betTypeCode,
                         TimeStamp = betTime,
@@ -168,11 +174,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 settles.Add(new TransactionData
                 {
                     Amount = winAmount,
+                    ExternalTransactionId = $"{betId}_settle",
+                    ExternalRoundId = externalRoundId,
+                    ExternalGameActionGroupId = externalRoundId,
                     ExternalBetId = betId,
                     ExternalTransactionReferenceId = betId,
                     ExternalGameId = externalGameId,
-                    ExternalRoundId = externalRoundId,
-                    ExternalTransactionId = $"{betId}_settle",
                     GameActionType = winAmount == 0 ? GameActionType.LoseBet :
                         winAmount > betAmount       ? GameActionType.WinBet : GameActionType.TieBet,
                     TimeStamp = ParseDateTimeOffset(r.SettleTime),
@@ -181,7 +188,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     ExtraData = _json.SerializeToString(
                         new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
                         _serializerOptions),
-                    CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss)
+                    CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate())
                 });
             }
 

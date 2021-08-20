@@ -48,22 +48,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
                 throw new InvalidCredentialException("Missing signature");
             }
 
-            if (!document.RootElement.TryGetProperty("user", out element))
-            {
-                await next(context);
-                return;
-            }
-
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.AllBet);
-            context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
-
-            var user = element.GetString();
-            if (user.IsNullOrEmpty())
-            {
-                await next(context);
-                return;
-            }
-
             var setting =
                 await _settingOperations.GetValueFromJsonByKeyAsync<WMCasinoConfiguration>(SettingConsts
                     .GameProviderConfigurations.WMCasino);
@@ -72,6 +56,23 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
             if (agent == null)
             {
                 throw new InvalidCredentialException("No agent is found.");
+            }
+
+            var gameProviderId = await _gameProviderOperations
+                .GetGameProviderIdByCodeAsync(Consts.GameProvider.WMCasino);
+            context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
+
+            if (!document.RootElement.TryGetProperty("user", out element))
+            {
+                await next(context);
+                return;
+            }
+
+            var user = element.GetString();
+            if (user.IsNullOrEmpty())
+            {
+                await next(context);
+                return;
             }
 
             var playerCode = user;

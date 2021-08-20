@@ -10,6 +10,7 @@ using TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Models;
+using TGS.Services.GameOperations.Calculators;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 {
@@ -53,6 +54,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
             //        typeof(SabaGameHistory)
             //    },
             //    (provider, _) => provider.GetRequiredService<SabaGameHistory>());
+
+            services.AddSingleton<IBetValuesCalculator, WMCasinoBetValuesCalculator>();
         }
 
         protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
