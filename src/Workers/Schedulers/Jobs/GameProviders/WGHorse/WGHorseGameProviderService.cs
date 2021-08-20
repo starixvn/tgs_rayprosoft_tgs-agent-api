@@ -19,27 +19,27 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// Gets the setting configuration.
         /// </summary>
         /// <returns></returns>
-        ValueTask<WGHorseConfiguration> GetSettingConfiguration();
+        ValueTask<WGHorseConfiguration> GetSettingConfigurationAsync();
 
         /// <summary>
         /// Gets the game provider identifier.
         /// </summary>
         /// <returns></returns>
-        ValueTask<Guid> GetGameProviderId();
+        ValueTask<Guid> GetGameProviderIdAsync();
 
         /// <summary>
         /// Gets the game provider schedule.
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
-        ValueTask<GameProviderSchedule> GetGameProviderSchedule(Guid gameProviderId);
+        ValueTask<GameProviderSchedule> GetGameProviderScheduleAsync(Guid gameProviderId);
 
         /// <summary>
         /// Games the provider schedule initialize.
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
-        ValueTask<GameProviderSchedule> GameProviderScheduleInit(Guid gameProviderId);
+        ValueTask<GameProviderSchedule> GameProviderScheduleInitAsync(Guid gameProviderId);
 
         /// <summary>
         /// Games the provider schedule update asynchronous.
@@ -81,14 +81,14 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// Gets the setting configuration.
         /// </summary>
         /// <returns></returns>
-        async ValueTask<WGHorseConfiguration> IWGHorseGameProviderService.GetSettingConfiguration()
+        async ValueTask<WGHorseConfiguration> IWGHorseGameProviderService.GetSettingConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<WGHorseConfiguration>(SettingConsts.GameProviderConfigurations.WGHorse).ConfigureAwait(false);
 
         /// <summary>
         /// Gets the game provider identifier.
         /// </summary>
         /// <returns></returns>
-        async ValueTask<Guid> IWGHorseGameProviderService.GetGameProviderId()
+        async ValueTask<Guid> IWGHorseGameProviderService.GetGameProviderIdAsync()
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderConst.WGHorse).ConfigureAwait(false);
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
-        public async ValueTask<GameProviderSchedule> GetGameProviderSchedule(Guid gameProviderId)
+        public async ValueTask<GameProviderSchedule> GetGameProviderScheduleAsync(Guid gameProviderId)
         => await _gameProviderScheduleRepository.GetAsync(gameProviderId, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
-        async ValueTask<GameProviderSchedule> IWGHorseGameProviderService.GameProviderScheduleInit(Guid gameProviderId)
+        async ValueTask<GameProviderSchedule> IWGHorseGameProviderService.GameProviderScheduleInitAsync(Guid gameProviderId)
         {
             var intervalDayMax = 60;
             var intervalDay = 30;
@@ -132,7 +132,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
             };
             await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
 
-            return await GetGameProviderSchedule(gameProviderId).ConfigureAwait(false); ;
+            return await GetGameProviderScheduleAsync(gameProviderId).ConfigureAwait(false); ;
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
             var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
             if (updateResult.ModifiedCount > 0)
             {
-                return await GetGameProviderSchedule(gameProviderSchedule.GameProviderId).ConfigureAwait(false); ;
+                return await GetGameProviderScheduleAsync(gameProviderSchedule.GameProviderId).ConfigureAwait(false); ;
             }
             else
             {

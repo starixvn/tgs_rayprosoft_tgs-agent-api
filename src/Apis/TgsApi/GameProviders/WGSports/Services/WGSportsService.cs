@@ -24,7 +24,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
         ValueTask<Guid> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
         ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
         string GetGameProviderCode();
-        ClientRoundStatus GetClientRound(decimal settleAmount);
+        ClientRoundStatus GetClientRound(decimal playerWinLoss);
     }
     public class WGSportsService : IWGSportsService
     {
@@ -75,9 +75,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId).ConfigureAwait(false);
 
         async ValueTask<Guid> IWGSportsService.GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
-        {
-            return await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
-        }
+            => await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
 
         async ValueTask<CachedGame> IWGSportsService.GetCachedGameAsync(Guid gameProviderId, string externalGameId)
         {
@@ -90,8 +88,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             return Consts.GameProvider.WGSports;
         }
 
-        ClientRoundStatus IWGSportsService.GetClientRound(decimal settleAmount)
-           => settleAmount switch
+        ClientRoundStatus IWGSportsService.GetClientRound(decimal playerWinLoss)
+           => playerWinLoss switch
            {
                > 0 => ClientRoundStatus.Win,
                <= 0 => ClientRoundStatus.Loss,
