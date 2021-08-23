@@ -3209,18 +3209,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("channel_id");
 
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("created_by_username");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on")
-                        .HasDefaultValueSql("Now()");
-
                     b.Property<Guid>("MethodId")
                         .HasColumnType("uuid")
                         .HasColumnName("method_id");
@@ -3234,18 +3222,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("status")
                         .HasDefaultValueSql("0");
-
-                    b.Property<string>("UpdatedByUsername")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("updated_by_username");
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_on")
-                        .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
                         .HasName("pk_payment_method_channels");
