@@ -25,7 +25,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
         private readonly IAllBetCacheServices _cacheServices;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IAllBetServices _services;
+        private readonly IAllBetPlayerServices _services;
         private readonly ISettingOperations _settingOperations;
 
         public AuthorizeAllBetMiddleware(
@@ -33,7 +33,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Middlewares
             IGameProviderOperations gameProviderOperations,
             IBrandOperations brandOperations,
             IPlayerOperations playerOperations,
-            IAllBetServices services,
+            IAllBetPlayerServices services,
             IAllBetCacheServices cacheServices)
         {
             _settingOperations = settingOperations;
