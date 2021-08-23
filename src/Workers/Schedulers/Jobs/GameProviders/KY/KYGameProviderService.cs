@@ -28,6 +28,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         ValueTask<Guid> GetGameProviderIdAsync();
 
         /// <summary>
+        /// Gets the game provider code.
+        /// </summary>
+        /// <returns></returns>
+        string GetGameProviderCode();
+
+        /// <summary>
         /// Gets the game provider schedule.
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
@@ -83,36 +89,15 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             _gameProviderScheduleRepository = gameProviderScheduleRepository ?? throw new ArgumentNullException(nameof(gameProviderScheduleRepository));
         }
 
-        /// <summary>
-        /// Gets the setting configuration.
-        /// </summary>
-        /// <returns></returns>
         async ValueTask<KYConfiguration> IKYGameProviderService.GetSettingConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts.GameProviderConfigurations.KY).ConfigureAwait(false);
 
-        /// <summary>
-        /// Gets the game provider identifier.
-        /// </summary>
-        /// <returns></returns>
         async ValueTask<Guid> IKYGameProviderService.GetGameProviderIdAsync()
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderConst.KY).ConfigureAwait(false);
 
-        /// <summary>
-        /// Gets the game provider schedule.
-        /// </summary>
-        /// <param name="gameProviderId">The game provider identifier.</param>
-        /// <param name="brandCode">The brand code.</param>
-        /// <param name="agentId">The agent identifier.</param>
-        /// <param name="currencyCode">The currency code.</param>
-        /// <returns></returns>
         public async ValueTask<GameProviderSchedule> GetGameProviderScheduleAsync(Guid gameProviderId, string brandCode, string agentId, string currencyCode)
         => await _gameProviderScheduleRepository.GetAsync(gameProviderId, brandCode, agentId, currencyCode).ConfigureAwait(false);
 
-        /// <summary>
-        /// Games the provider schedule initialize.
-        /// </summary>
-        /// <param name="gameProviderId">The game provider identifier.</param>
-        /// <returns></returns>
         async ValueTask<GameProviderSchedule> IKYGameProviderService.GameProviderScheduleInitAsync(Guid gameProviderId, string brandCode, string agentId, string currencyCode)
         {
             var sysTime = DateTimeOffset.UtcNow;
@@ -144,13 +129,6 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             return gameProviderSchedule;
         }
 
-        /// <summary>
-        /// Games the provider schedule update asynchronous.
-        /// </summary>
-        /// <param name="gameProviderSchedule">The game provider schedule.</param>
-        /// <param name="responses">The responses.</param>
-        /// <param name="sysTime">The system time.</param>
-        /// <returns></returns>
         async ValueTask<GameProviderSchedule> IKYGameProviderService.GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, KYGPGameRecordResponse responses, DateTimeOffset sysTime)
         {
             var config = _json.DeserializeFromString<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
@@ -182,12 +160,11 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
             }
         }
 
-        /// <summary>
-        /// Gets the game provider schedule configuration.
-        /// </summary>
-        /// <param name="gameProviderSchedule">The game provider schedule.</param>
-        /// <returns></returns>
         KYGameProviderScheduleConfig IKYGameProviderService.GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule)
         => _json.DeserializeFromString<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
+
+        string IKYGameProviderService.GetGameProviderCode()
+            => GameProviderConst.KY;
+
     }
 }

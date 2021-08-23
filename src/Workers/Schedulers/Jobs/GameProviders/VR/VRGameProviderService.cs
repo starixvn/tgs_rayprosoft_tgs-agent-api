@@ -30,6 +30,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
         ValueTask<Guid> GetGameProviderIdAsync();
 
         /// <summary>
+        /// Gets the game provider code.
+        /// </summary>
+        /// <returns></returns>
+        string GetGameProviderCode();
+
+        /// <summary>
         /// Gets the game provider schedule asynchronous.
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
@@ -154,5 +160,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
 
         async ValueTask<VRConfiguration> IVRGameProviderService.GetSettingConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<VRConfiguration>(SettingConsts.GameProviderConfigurations.VR).ConfigureAwait(false);
+
+        string IVRGameProviderService.GetGameProviderCode()
+            => GameProviderConst.VR;
     }
 }

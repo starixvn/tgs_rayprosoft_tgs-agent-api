@@ -15,7 +15,7 @@ using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming
 {
-    public interface IBigGamingGameRecordFishingService
+    public interface IBigGamingGameProvideFishingService
     {
         /// <summary>
         /// Gets the setting configuration.
@@ -28,6 +28,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming
         /// </summary>
         /// <returns></returns>
         ValueTask<Guid> GetGameProviderIdAsync();
+
+        /// <summary>
+        /// Gets the game provider code.
+        /// </summary>
+        /// <returns></returns>
+        string GetGameProviderCode();
 
         /// <summary>
         /// Gets the game provider schedule asynchronous.
@@ -61,15 +67,14 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming
         /// <returns></returns>
         BigGamingGameProviderScheduleConfig GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule);
     }
-
-    public class BigGamingGameRecordFishingService : IBigGamingGameRecordFishingService
+    public class BigGamingGameProvideFishingService : IBigGamingGameProvideFishingService
     {
         private readonly IJsonSerializationProvider _json;
         private readonly ISettingOperations _settingOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderScheduleRepository _gameProviderScheduleRepository;
 
-        public BigGamingGameRecordFishingService(
+        public BigGamingGameProvideFishingService(
            IJsonSerializationProvider json,
            ISettingOperations settingOperations,
            IGameProviderOperations gameProviderOperations,
@@ -83,7 +88,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming
         }
 
 
-        async ValueTask<GameProviderSchedule> IBigGamingGameRecordFishingService.GameProviderScheduleInitAsync(Guid gameProviderId, string currencyCode)
+        async ValueTask<GameProviderSchedule> IBigGamingGameProvideFishingService.GameProviderScheduleInitAsync(Guid gameProviderId, string currencyCode)
         {
             var sysTime = DateTimeOffset.UtcNow;
             var intervalMinuteMax = 24 * 60m;
@@ -114,7 +119,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming
             return gameProviderSchedule;
         }
 
-        async ValueTask<GameProviderSchedule> IBigGamingGameRecordFishingService.GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, BigGamingGPGameRecordResponse responses, DateTimeOffset sysTime)
+        async ValueTask<GameProviderSchedule> IBigGamingGameProvideFishingService.GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, BigGamingGPGameRecordResponse responses, DateTimeOffset sysTime)
         {
             var config = _json.DeserializeFromString<BigGamingGameProviderScheduleConfig>(gameProviderSchedule.Config);
 
@@ -144,16 +149,19 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming
             }
         }
 
-        async ValueTask<Guid> IBigGamingGameRecordFishingService.GetGameProviderIdAsync()
+        async ValueTask<Guid> IBigGamingGameProvideFishingService.GetGameProviderIdAsync()
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderConst.BigGaming).ConfigureAwait(false);
 
         public async ValueTask<GameProviderSchedule> GetGameProviderScheduleAsync(Guid gameProviderId, string currencyCode)
           => await _gameProviderScheduleRepository.GetAsync(gameProviderId, string.Empty, string.Empty, currencyCode).ConfigureAwait(false);
 
-        BigGamingGameProviderScheduleConfig IBigGamingGameRecordFishingService.GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule)
+        BigGamingGameProviderScheduleConfig IBigGamingGameProvideFishingService.GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule)
             => _json.DeserializeFromString<BigGamingGameProviderScheduleConfig>(gameProviderSchedule.Config);
 
-        async ValueTask<BigGamingConfiguration> IBigGamingGameRecordFishingService.GetSettingConfigurationAsync()
+        async ValueTask<BigGamingConfiguration> IBigGamingGameProvideFishingService.GetSettingConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<BigGamingConfiguration>(SettingConsts.GameProviderConfigurations.BigGaming).ConfigureAwait(false);
+
+        string IBigGamingGameProvideFishingService.GetGameProviderCode()
+            => GameProviderConst.BigGaming;
     }
 }
