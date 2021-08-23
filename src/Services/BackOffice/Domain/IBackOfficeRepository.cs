@@ -10,12 +10,24 @@ namespace TGS.Services.BackOffice.Domain
 
         IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode);
 
+        ValueTask<BannerInfo> GetBannerByIdAsync(Guid id);
+
         ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings);
+
+        IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);
+
+        IAsyncEnumerable<BannerInfo> QueryRejectedBannersAsync(Guid brandId);
+
+        IAsyncEnumerable<BannerInfo> QueryReviewingBannersAsync(Guid brandId);
+
+        IAsyncEnumerable<BannerInfo> QueryValidBannersAsync(Guid brandId);
 
         ValueTask ReviewBannerAsync(Guid id, BannerReviewState reviewState, string remark, string reviewer);
 
         ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier);
 
         ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
+
+        ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier);
     }
 }
