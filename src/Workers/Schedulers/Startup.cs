@@ -148,7 +148,7 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
 
             // GameProviders Services 
-            services.AddTransient<IBigGamingGameProvideFishingService, BigGamingGameProvideFishingService>();
+            services.AddTransient<IBigGamingGameProviderFishingService, BigGamingGameProviderFishingService>();
             services.AddTransient<IKYGameProviderService, KYGameProviderService>();
             services.AddTransient<IVRGameProviderService, VRGameProviderService>();
             services.AddTransient<IWGSportsGameProviderService, WGSportsGameProviderService>();

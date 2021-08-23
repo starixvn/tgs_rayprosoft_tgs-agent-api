@@ -29,13 +29,13 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming
     {
         private readonly ITgsLog _log;
         private readonly IBigGamingApiClient _client;
-        private readonly IBigGamingGameProvideFishingService _service;
+        private readonly IBigGamingGameProviderFishingService _service;
         private readonly IGameProviderScheduleLockRepository _gameProviderScheduleLockRepository;
 
         public BigGamingGameRecordFishingJobWorker(
           ITgsLog log,
           IBigGamingApiClient client,
-          IBigGamingGameProvideFishingService service,
+          IBigGamingGameProviderFishingService service,
           IGameProviderScheduleLockRepository gameProviderScheduleLockRepository
            )
         {
