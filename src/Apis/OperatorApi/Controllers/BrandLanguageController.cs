@@ -1,0 +1,36 @@
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
+using TGS.Services.Operator.Services.BrandLanguage;
+using TGS.ServiceUtility;
+
+namespace TGS.Apis.OperatorApi.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BrandLanguageController : ControllerBase
+    {
+        [HttpGet]
+        [Description("Get a brand's languages")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
+        public IAsyncEnumerable<BrandLanguageModel> GetBrandCommunicationsAsync(
+           [FromServices] IQueryService<BrandLanguageQuery, BrandLanguageInfo> queryService)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var query = new BrandLanguageQuery(brandId);
+            var info = queryService.QueryAsync(query);
+
+            return info.Select(x =>
+                new BrandLanguageModel()
+                {
+                    CultureCode = x.CultureCode
+                });
+        }
+    }
+}
