@@ -27,7 +27,6 @@ namespace TGS.GameProviders.Repositories
 
         }
 
-
         public async ValueTask<GameProviderSchedule> GetAsync(
             Guid gameProviderId,
             string brandCode,

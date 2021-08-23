@@ -28,22 +28,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasDefaultValueSql("0")
                 .IsRequired();
 
-            builder.Property(c => c.CreatedByUsername)
-                .HasMaxLength(32)
-                .IsRequired();
-
-            builder.Property(c => c.UpdatedByUsername)
-                .HasMaxLength(32)
-                .IsRequired();
-
-            builder.Property(c => c.CreatedOn)
-                .IsRequired()
-                .HasDefaultValueSql("Now()");
-
-            builder.Property(c => c.UpdatedOn)
-                .IsRequired()
-                .HasDefaultValueSql("Now()");
-
             builder
                 .HasOne(c => c.Payment)
                 .WithMany()

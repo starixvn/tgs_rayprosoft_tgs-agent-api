@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
 using TGS.Apis.TgsApi.GameProviders.WGSports.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -23,6 +24,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports
             services.AddErrorMappers();
 
             services.AddTransient<IWGSportsService, WGSportsService>();
+            services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
+            services.AddTransient<IWGSportsGPGameHistoryService, WGSportsGPGameHistoryService>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(WGSportsGameInitializer) }, (provider, _) =>
             provider.GetRequiredService<WGSportsGameInitializer>());
@@ -30,6 +33,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports
             services.AddScopedWithResolver<IGameProviderWalletAction>(new[] { typeof(WGSportsGameProviderWalletAction) }, (provider, _) =>
             provider.GetRequiredService<WGSportsGameProviderWalletAction>());
 
+            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(WGSportsGameHistory) }, (provider, _) =>
+            provider.GetRequiredService<WGSportsGameHistory>());
         }
     }
 }

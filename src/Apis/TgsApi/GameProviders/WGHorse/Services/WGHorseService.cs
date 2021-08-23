@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.Caches;
@@ -20,6 +21,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
         ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
         ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language);
         ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode);
+        ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
+        string GetGameProviderCode();
+        ClientRoundStatus GetClientRound(decimal playerWinLoss);
     }
     public class WGHorseService : IWGHorseService
     {
@@ -41,8 +45,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
             _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
             _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
         }
-        async ValueTask<Guid> IWGHorseService.GetGameProviderIdAsync(
-            ) => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.WGHorse).ConfigureAwait(false);
+
+        async ValueTask<Guid> IWGHorseService.GetGameProviderIdAsync()
+            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.WGHorse).ConfigureAwait(false);
 
         async ValueTask<WGHorseConfiguration> IWGHorseService.GetConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<WGHorseConfiguration>(SettingConsts.GameProviderConfigurations.WGHorse);
@@ -58,14 +63,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
         }
 
         async ValueTask<Player> IWGHorseService.GetPlayerByCodeAsync(string playerCode)
-        {
-            var player = await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
-            if (player == null)
-            {
-                throw new PlayerLoginExpiredException();
-            }
-            return player;
-        }
+            => await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
 
         async ValueTask<string> IWGHorseService.GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language)
             => await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, language).ConfigureAwait(false);
@@ -73,5 +71,22 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
         async ValueTask<string> IWGHorseService.GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode)
             => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId).ConfigureAwait(false);
 
+        async ValueTask<CachedGame> IWGHorseService.GetCachedGameAsync(Guid gameProviderId, string externalGameId)
+        {
+            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId).ConfigureAwait(false);
+            return games.FirstOrDefault();
+        }
+
+        string IWGHorseService.GetGameProviderCode()
+        {
+            return Consts.GameProvider.WGHorse;
+        }
+
+        ClientRoundStatus IWGHorseService.GetClientRound(decimal playerWinLoss)
+          => playerWinLoss switch
+          {
+              > 0 => ClientRoundStatus.Win,
+              <= 0 => ClientRoundStatus.Loss,
+          };
     }
 }

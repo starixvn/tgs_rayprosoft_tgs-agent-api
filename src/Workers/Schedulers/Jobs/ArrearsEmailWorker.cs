@@ -130,7 +130,8 @@ namespace TGS.Workers.Schedulers.Jobs
                     (brandId, markets) => new
                     {
                         BrandId = brandId,
-                        NetProfit = markets.Sum(m => m.NetProfit)
+                        NetProfit = markets.Sum(m
+                            => m.WinLossAmount - m.AdjustmentAmount - m.RebateAmount - m.PromotionAmount)
                     })
                 .Where(x => x.NetProfit < 0)
                 .Join(_repository.Brands, market => market.BrandId, brand => brand.Id,

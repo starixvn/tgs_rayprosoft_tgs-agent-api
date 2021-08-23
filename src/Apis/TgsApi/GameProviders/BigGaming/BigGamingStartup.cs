@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderDepositWithdrawal;
+using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
@@ -38,6 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
 
             services.AddScoped<AuthorizeBigGamingMiddleware>();
             services.AddScoped<HandleBigGamingExceptionMiddleware>();
+            services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
             services.AddScoped<IBigGamingService, BigGamingService>();
             services.AddScoped<IGameProviderDepositWithdrawalService, GameProviderDepositWithdrawalService>();
             services.AddScoped<IBigGamingGPGameHistoryService, BigGamingGPGameHistoryService>();

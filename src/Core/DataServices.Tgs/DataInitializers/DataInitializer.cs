@@ -11,7 +11,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Utility;
+using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using static TGS.Core.Models.Enums.GameType;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -876,8 +876,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
+            var timeSpan = new TimeSpan(8, 0, 0);
+            var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
+                DateTimeOffset.Now.Day, 0,
+                0, 0, timeSpan);
+
             var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
-                BrandSettlementIntervalGenerator.GetInterval(brand.Type);
+                GetInterval(brand.Type, now, brand.SettlementDay, now);
 
             return new()
             {
@@ -1249,6 +1254,45 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 : gameProviderCodes
                     .Select(code => _gameProvidersCreated[code])
                     .ToArray();
+
+        private static (DateTimeOffset, DateTimeOffset, DateTimeOffset, DateTimeOffset) GetInterval(
+            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth, DateTimeOffset currentFromDate)
+        {
+            switch (type)
+            {
+                case SettlementIntervalType.Daily:
+                    return (startDate, startDate, startDate.AddDays(1), startDate.AddDays(1));
+                case SettlementIntervalType.Weekly:
+                    return (startDate,
+                        DateGenerator.GetLastDayOfWeek(startDate),
+                        DateGenerator.GetFirstDayOfWeek(startDate.AddDays(7)),
+                        DateGenerator.GetLastDayOfWeek(startDate.AddDays(7)));
+                case SettlementIntervalType.Monthly:
+                    if (dayOfMonth == null)
+                    {
+                        return (startDate,
+                            DateGenerator.GetLastDayOfMonth(startDate),
+                            DateGenerator.GetFirstDayOfMonth(startDate.AddMonths(1)),
+                            DateGenerator.GetLastDayOfMonth(startDate.AddMonths(1)));
+                    }
+
+                    if (startDate.Day <= dayOfMonth)
+                    {
+                        return (currentFromDate,
+                            startDate,
+                            startDate.AddDays(1),
+                            DateGenerator.GetSpecifyDayOfMonth(startDate, dayOfMonth.Value!));
+                    }
+
+                    return (currentFromDate,
+                        startDate,
+                        startDate.AddDays(1),
+                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
+                            dayOfMonth.Value!));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
     }
 
     internal class Generator

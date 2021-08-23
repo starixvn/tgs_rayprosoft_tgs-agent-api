@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Models.Exceptions;
-using TGS.Services.Operations;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.WGHorse;
 using TGS.Shared.Game.Models.WGHorse.Outgoing;

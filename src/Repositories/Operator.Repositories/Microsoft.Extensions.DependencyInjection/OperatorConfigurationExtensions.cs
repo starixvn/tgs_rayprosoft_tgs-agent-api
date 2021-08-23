@@ -7,11 +7,17 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class OperatorConfigurationExtensions
     {
-        public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration) =>
-            configuration
-                .UseWalletRepository<PlayerRepository>()
-                .UseStationLetterRepository<StationLetterRepository>()
-                .UseGameProviderRepository<GameProviderRepository>()
-                .UseMaintenanceRedisRepository<MaintenanceRedisRepository>();
+        public static OperatorConfiguration UseOperatorRepositories(this OperatorConfiguration configuration)
+        {
+            configuration.Services
+                .AddSingleton<ISystemClock, DefaultSystemClock>();
+
+            return configuration
+                .AddWalletRepository<PlayerRepository>()
+                .AddStationLetterRepository<StationLetterRepository>()
+                .AddGameProviderRepository<GameProviderRepository>()
+                .AddMaintenanceRedisRepository<MaintenanceRedisRepository>()
+                .AddSysRepository<SysRepository>();
+        }
     }
 }

@@ -384,11 +384,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                  Id = GuidExtensions.NewSequentialGuid(),
                                  PaymentId = _Payments["Manual"].Id,
                                  MethodId = _PaymentMethods["BankTransfer"].Id,
-                                 ChannelId = channel.Value,
-                                 CreatedByUsername = _AdminUsername,
-                                 CreatedOn = DateTimeOffset.Now,
-                                 UpdatedByUsername = _AdminUsername,
-                                 UpdatedOn = DateTimeOffset.Now
+                                 ChannelId = channel.Value
                              };
 
             var leepayList = new[]
@@ -399,22 +395,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     PaymentId = _Payments["LeePay"].Id,
                     MethodId = _PaymentMethods["Crypto"].Id,
                     ChannelId = _PaymentChannels["ETHEREUM"],
-                    CreatedByUsername = _AdminUsername,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedByUsername = _AdminUsername,
-                    UpdatedOn = DateTimeOffset.Now
                 },
                 new PaymentMethodChannel
                 {
                     Id = GuidExtensions.NewSequentialGuid(),
                     PaymentId = _Payments["LeePay"].Id,
                     MethodId = _PaymentMethods["Crypto"].Id,
-                    ChannelId = _PaymentChannels["TRON"],
-                    CreatedByUsername = _AdminUsername,
-                    CreatedOn = DateTimeOffset.Now,
-                    UpdatedByUsername = _AdminUsername,
-                    UpdatedOn = DateTimeOffset.Now
-                }
+                    ChannelId = _PaymentChannels["TRON"]
+                },
             };
 
             var primepayList = from channel in _PaymentChannels
@@ -428,11 +416,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                    Id = GuidExtensions.NewSequentialGuid(),
                                    PaymentId = _Payments["PrimePay"].Id,
                                    MethodId = _PaymentMethods["BankTransfer"].Id,
-                                   ChannelId = channel.Value,
-                                   CreatedByUsername = _AdminUsername,
-                                   CreatedOn = DateTimeOffset.Now,
-                                   UpdatedByUsername = _AdminUsername,
-                                   UpdatedOn = DateTimeOffset.Now
+                                   ChannelId = channel.Value
                                };
 
             await _repository.PaymentMethodChannels.AddRangeAsync(manualList.Concat(leepayList).Concat(primepayList));
@@ -441,22 +425,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Id = GuidExtensions.NewSequentialGuid(),
                 PaymentId = _Payments["Manual"].Id,
                 MethodId = _PaymentMethods["BankTransfer"].Id,
-                ChannelId = _CustomChannelId,
-                CreatedByUsername = _AdminUsername,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = _AdminUsername,
-                UpdatedOn = DateTimeOffset.Now
+                ChannelId = _CustomChannelId
             });
             await _repository.PaymentMethodChannels.AddAsync(new PaymentMethodChannel
             {
                 Id = GuidExtensions.NewSequentialGuid(),
                 PaymentId = _Payments["PrimePay"].Id,
                 MethodId = _PaymentMethods["BankTransfer"].Id,
-                ChannelId = _CustomChannelId,
-                CreatedByUsername = _AdminUsername,
-                CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = _AdminUsername,
-                UpdatedOn = DateTimeOffset.Now
+                ChannelId = _CustomChannelId
             });
             await _repository.SaveChangesAsync();
         }

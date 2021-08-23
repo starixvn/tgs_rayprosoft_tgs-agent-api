@@ -1,4 +1,5 @@
 ﻿using System;
+using TGS.Core.Infrastructures.Redis;
 using TGS.GameProviders.Repositories;
 using TGS.GameProviders.Repositories.Options;
 
@@ -21,5 +22,11 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddGameProvidersoRepository(this IServiceCollection services)
             => services
                 .AddTransient<IGameProviderFundTransferTransactionRepository, GameProviderFundTransferTransactionRepository>();
+
+        public static IServiceCollection AddGameProviderScheduleLockRepository(
+            this IServiceCollection services
+            )
+            => services
+                 .AddTransient<IGameProviderScheduleLockRepository, GameProviderScheduleLockRepository>();
     }
 }

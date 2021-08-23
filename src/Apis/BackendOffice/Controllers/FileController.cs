@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Resources;
-using TGS.Apis.FileService.Clients;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models;
+using Tgs.FileService.Clients;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -58,7 +58,11 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var fileView = await fileServiceClient.UploadPublicFileAsync(path,
                 MediaTypeHeaderValue.Parse(contentType), fileStream);
-            return new() {Valid = true, Location = fileView.ExternalUrl};
+            return new()
+            {
+                Valid = true,
+                Location = fileView.ExternalUrl
+            };
         }
     }
 }

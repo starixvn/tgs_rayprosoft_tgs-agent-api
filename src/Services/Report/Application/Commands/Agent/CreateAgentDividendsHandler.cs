@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Utility;
+using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.Agent;
@@ -78,16 +78,16 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     updateAgentDividends.AddRange(agentDividends);
                 }
 
-                var (currentFrom, currentTo, _, _) =
-                    BrandSettlementIntervalGenerator.GetInterval(brand.SettlementIntervalType,
-                        brand.NextSettlementTo.Value.AddDays(1));
+                var (nextFrom, nextTo) =
+                    GetInterval(brand.SettlementIntervalType,
+                        brand.NextSettlementTo.AddDays(1), brand.SettlementDay);
 
                 brand.PreviousSettlementFrom = brand.CurrentSettlementFrom;
                 brand.PreviousSettlementTo = brand.CurrentSettlementTo;
                 brand.CurrentSettlementFrom = brand.NextSettlementFrom;
                 brand.CurrentSettlementTo = brand.NextSettlementTo;
-                brand.NextSettlementFrom = currentFrom;
-                brand.NextSettlementTo = currentTo;
+                brand.NextSettlementFrom = nextFrom;
+                brand.NextSettlementTo = nextTo;
             }
 
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -121,8 +121,16 @@ namespace TGS.Services.Report.Application.Commands.Agent
         {
             var agents = await _agentService
                 .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id && x.ParentAgentId != null))
-                .GroupBy(x => new {x.Id, x.ParentAgentId},
-                    (a, list) => new {a.Id, a.ParentAgentId})
+                .GroupBy(x => new
+                    {
+                        x.Id,
+                        x.ParentAgentId
+                    },
+                    (a, list) => new
+                    {
+                        a.Id,
+                        a.ParentAgentId
+                    })
                 .ToArrayAsync();
 
             var agentDividendGroup = await _playerAggregateService.GetPlayerAggregateQueries()
@@ -130,7 +138,12 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 .Where(x => x.BrandId == brand.Id)
                 .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
                     x.ReportDate <= brand.CurrentSettlementTo)
-                .GroupBy(x => new {x.BrandId, x.AgentId, x.AgentDividendPercentage},
+                .GroupBy(x => new
+                    {
+                        x.BrandId,
+                        x.AgentId,
+                        x.AgentDividendPercentage
+                    },
                     (groupItem, playerAggregates) => new
                     {
                         groupItem.AgentId,
@@ -139,19 +152,34 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         DepositAmount = playerAggregates.Sum(p => p.DepositAmount),
                         WithdrawalAmount = playerAggregates.Sum(p => p.WithdrawalAmount),
                         AdjustmentAmount = playerAggregates.Sum(p => p.AdjustmentAmount),
-                        BonusAmount = playerAggregates.Sum(p => p.BonusAmount),
+                        BonusAmount = playerAggregates.Sum(p => p.RebateAmount + p.PromotionAmount),
                         BetAmount = playerAggregates.Sum(p => p.BetAmount),
                         Turnover = playerAggregates.Sum(p => p.Turnover),
                         WinLossAmount = playerAggregates.Sum(p => p.WinLossAmount),
-                        NetProfit = playerAggregates.Sum(p => p.NetProfit)
+                        NetProfit = playerAggregates.Sum(p
+                            => p.WinLossAmount - p.AdjustmentAmount - p.RebateAmount - p.PromotionAmount)
                     }).GroupJoin(_playerAggregateService.Repository.PlayerGameAggregates.AsQueryable()
                         .Where(x => x.AgentId != null)
                         .Where(x => x.BrandId == brand.Id)
                         .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
                             x.ReportDate <= brand.CurrentSettlementTo),
-                    p => new {p.BrandId, p.AgentId, p.AgentDividendPercentage},
-                    pg => new {pg.BrandId, pg.AgentId, pg.AgentDividendPercentage},
-                    (agent, playerGameAggregates) => new {agent, playerGameAggregates})
+                    p => new
+                    {
+                        p.BrandId,
+                        p.AgentId,
+                        p.AgentDividendPercentage
+                    },
+                    pg => new
+                    {
+                        pg.BrandId,
+                        pg.AgentId,
+                        pg.AgentDividendPercentage
+                    },
+                    (agent, playerGameAggregates) => new
+                    {
+                        agent,
+                        playerGameAggregates
+                    })
                 .SelectMany(x => x.playerGameAggregates.DefaultIfEmpty(),
                     (x, playerGameAggregate) => new
                     {
@@ -256,13 +284,18 @@ namespace TGS.Services.Report.Application.Commands.Agent
                             AgentDividendAmount = x.AgentDividendPercentage * x.NetProfit / 100M
                         };
                     })
-                .GroupBy(x => new {x.AgentId, x.BrandId, x.AgentDividendPercentage},
+                .GroupBy(x => new
+                    {
+                        x.AgentId,
+                        x.BrandId,
+                        x.AgentDividendPercentage
+                    },
                     (x, models) => new CreateAgentDividendModel
                     {
                         AgentId = x.AgentId.Value,
                         BrandId = x.BrandId,
-                        From = brand.CurrentSettlementFrom.Value,
-                        To = brand.CurrentSettlementTo.Value,
+                        From = brand.CurrentSettlementFrom,
+                        To = brand.CurrentSettlementTo,
                         AgentDividendPercentage = x.AgentDividendPercentage,
                         DepositAmount = models.Sum(m => m.DepositAmount),
                         WithdrawalAmount = models.Sum(m => m.WithdrawalAmount),
@@ -288,7 +321,13 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                 var childAgentPlayers = agentDividendGroup
                                     .Where(a =>
                                         a.AgentId == child.Id).GroupBy(
-                                        g => new {g.AgentId, g.BrandId, g.AgentDividendPercentage, g.NetProfit},
+                                        g => new
+                                        {
+                                            g.AgentId,
+                                            g.BrandId,
+                                            g.AgentDividendPercentage,
+                                            g.NetProfit
+                                        },
                                         (agent, childAgents) => new
                                         {
                                             agent.AgentId,
@@ -347,6 +386,25 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 agentDividends.Where(x =>
                     x.AgentDividendAmount < 0 || !x.AutoSend).ToList(),
                 noSendDividends.Where(x => x.ReferencedAgentDividendId is not null).ToList());
+        }
+
+        private static (DateTimeOffset, DateTimeOffset) GetInterval(
+            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth)
+        {
+            switch (type)
+            {
+                case SettlementIntervalType.Daily:
+                    return (startDate, startDate);
+                case SettlementIntervalType.Weekly:
+                    return (DateGenerator.GetFirstDayOfWeek(startDate),
+                        DateGenerator.GetLastDayOfWeek(startDate));
+                case SettlementIntervalType.Monthly:
+                    return (startDate,
+                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
+                            dayOfMonth.Value!));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
         }
     }
 }

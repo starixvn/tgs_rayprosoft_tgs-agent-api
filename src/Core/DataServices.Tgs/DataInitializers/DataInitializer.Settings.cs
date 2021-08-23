@@ -231,6 +231,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
+                        new MenuSetting("Banner")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Verify")
+                            }
+                        },
                         new MenuSetting("Announcement")
                         {
                             SubMenus = new[]
@@ -257,6 +267,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("View"),
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("IMSettings")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("ViewLiveChat"),
+                                new MenuSetting("UpdateLiveChat")
                             }
                         }
                     }

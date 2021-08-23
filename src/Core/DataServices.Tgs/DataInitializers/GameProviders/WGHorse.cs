@@ -76,7 +76,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 ServiceEndpointUrl =
                     _env.IsDocker() ? new Uri("http://game-wgvia") : new("http://localhost:62330"),
                 ApiUrl = new("http://61.56.84.139/via6/index.php"),
-                PartnerCode = "PartnerTest",
+                PartnerCode = "PT",
                 PartnerKey = "a888888888888888",
                 IV = "b888888888888888"
             };

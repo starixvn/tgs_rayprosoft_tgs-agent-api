@@ -22,6 +22,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IAllBetPlayerServices _playerServices;
         private readonly ISettingOperations _settingOperations;
 
         public AllBetGameInitializer(
@@ -30,7 +31,8 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             IGameProviderOperations gameProviderOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
             IAllBetApiClient apiClient,
-            IAllBetAgentMapper agentMapper)
+            IAllBetAgentMapper agentMapper,
+            IAllBetPlayerServices playerServices)
         {
             _settingOperations = settingOperations;
             _playerOperations = playerOperations;
@@ -38,6 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             _brandGameProviderOperations = brandGameProviderOperations;
             _apiClient = apiClient;
             _agentMapper = agentMapper;
+            _playerServices = playerServices;
         }
 
         async ValueTask<GetGameUrlResponse> IGameInitializer.GetGameUrlAsync(GetGameUrlRequest request)
@@ -63,22 +66,21 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             var language = await _brandGameProviderOperations
                 .MapCultureAsync(gameProviderId, player.BrandId, request.Language).ConfigureAwait(false);
 
-            var playerId = $"{player.PlayerCode}{agent.Suffix}";
+            var playerId = _playerServices.ToAllBetPlayerId(player.PlayerCode, agent.Suffix);
 
             var response = await GetGameUrlAsync(playerId, language, configuration.ApiUrl, agent)
                 .ConfigureAwait(false);
 
-            if (response.ErrorCode.IgnoreCaseEquals(_ResultOk))
+            if (response.ErrorCode.IgnoreCaseEquals(_ResultOk) && response is LoginResponse loginResponse)
             {
-                var loginResponse = (LoginResponse)response;
-                return new GetGameUrlResponse {Url = loginResponse.Data.Url};
+                return new GetGameUrlResponse { Url = loginResponse.Data.Url };
             }
 
             var errorMessage = response.ErrorMessage.IsNullOrEmpty()
                 ? response.ErrorCode
                 : response.ErrorMessage;
 
-            throw new GameProviderApiErrorException(errorMessage);
+            throw new GameProviderApiErrorException($"{response.GetType().Name}:{errorMessage}");
         }
 
         private ValueTask<CheckOrCreateMemberResponse> CheckOrCreateMemberAsync(string playerId, Uri apiUrl,
@@ -127,7 +129,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             var checkOrCreateMemberResponse = await CheckOrCreateMemberAsync(playerId, apiUrl, agent)
                 .ConfigureAwait(false);
 
-            if (checkOrCreateMemberResponse.ErrorCode.IgnoreCaseNotEquals(_ResultOk) ||
+            if (checkOrCreateMemberResponse.ErrorCode.IgnoreCaseNotEquals(_ResultOk) &&
                 checkOrCreateMemberResponse.ErrorCode.IgnoreCaseNotEquals(ServiceApiError.PLAYER_EXIST.ToString()))
             {
                 return checkOrCreateMemberResponse;

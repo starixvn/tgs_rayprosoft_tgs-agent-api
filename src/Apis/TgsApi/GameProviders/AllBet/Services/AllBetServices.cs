@@ -16,8 +16,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
         ValueTask<GameActionExternalIds[]> GetGameActionExternalIdsAsync(Guid gameProviderId,
             string playerCode, string externalGameActionGroupId);
 
-        string GetPlayerCode(string allBetPlayerId, string suffix);
-
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync();
 
         ValueTask<GameActionExternalIds[]> GetValidGameActionExternalIdsAsync(Guid gameProviderId,
@@ -65,9 +63,6 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Services
             string playerCode, string externalGameActionGroupId)
             => _gameActionQueries.GetGameActionExternalIdsByExternalGameActionGroupIdAsync(
                 gameProviderId, playerCode, externalGameActionGroupId);
-
-        string IAllBetServices.GetPlayerCode(string allBetPlayerId, string suffix)
-            => allBetPlayerId.Replace(suffix, string.Empty);
 
         ValueTask<GameActionExternalIds[]> IAllBetServices.GetValidGameActionExternalIdsAsync(Guid gameProviderId,
             string playerCode, string externalRoundId, int gameId)
