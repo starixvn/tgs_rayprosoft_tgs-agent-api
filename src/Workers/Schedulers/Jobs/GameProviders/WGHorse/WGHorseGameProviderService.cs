@@ -28,6 +28,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         ValueTask<Guid> GetGameProviderIdAsync();
 
         /// <summary>
+        /// Gets the game provider code.
+        /// </summary>
+        /// <returns></returns>
+        string GetGameProviderCode();
+
+        /// <summary>
         /// Gets the game provider schedule.
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
@@ -77,33 +83,15 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
             _gameProviderScheduleRepository = gameProviderScheduleRepository ?? throw new ArgumentNullException(nameof(gameProviderScheduleRepository));
         }
 
-        /// <summary>
-        /// Gets the setting configuration.
-        /// </summary>
-        /// <returns></returns>
         async ValueTask<WGHorseConfiguration> IWGHorseGameProviderService.GetSettingConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<WGHorseConfiguration>(SettingConsts.GameProviderConfigurations.WGHorse).ConfigureAwait(false);
 
-        /// <summary>
-        /// Gets the game provider identifier.
-        /// </summary>
-        /// <returns></returns>
         async ValueTask<Guid> IWGHorseGameProviderService.GetGameProviderIdAsync()
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderConst.WGHorse).ConfigureAwait(false);
 
-        /// <summary>
-        /// Gets the game provider schedule.
-        /// </summary>
-        /// <param name="gameProviderId">The game provider identifier.</param>
-        /// <returns></returns>
         public async ValueTask<GameProviderSchedule> GetGameProviderScheduleAsync(Guid gameProviderId)
         => await _gameProviderScheduleRepository.GetAsync(gameProviderId, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
 
-        /// <summary>
-        /// Games the provider schedule initialize.
-        /// </summary>
-        /// <param name="gameProviderId">The game provider identifier.</param>
-        /// <returns></returns>
         async ValueTask<GameProviderSchedule> IWGHorseGameProviderService.GameProviderScheduleInitAsync(Guid gameProviderId)
         {
             var intervalDayMax = 60;
@@ -135,13 +123,6 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
             return await GetGameProviderScheduleAsync(gameProviderId).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Games the provider schedule update asynchronous.
-        /// </summary>
-        /// <param name="gameProviderSchedule">The game provider schedule.</param>
-        /// <param name="responses">The responses.</param>
-        /// <param name="sysTime">The system time.</param>
-        /// <returns></returns>
         async ValueTask<GameProviderSchedule> IWGHorseGameProviderService.GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, WGHorseGPGameRecordResponse responses, DateTimeOffset sysTime)
         {
             var config = _json.DeserializeFromString<WGHorseGameProviderScheduleConfig>(gameProviderSchedule.Config);
@@ -173,12 +154,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
             }
         }
 
-        /// <summary>
-        /// Gets the game provider schedule configuration.
-        /// </summary>
-        /// <param name="gameProviderSchedule">The game provider schedule.</param>
-        /// <returns></returns>
         WGHorseGameProviderScheduleConfig IWGHorseGameProviderService.GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule)
         => _json.DeserializeFromString<WGHorseGameProviderScheduleConfig>(gameProviderSchedule.Config);
+
+        string IWGHorseGameProviderService.GetGameProviderCode()
+            => GameProviderConst.WGHorse;
     }
 }

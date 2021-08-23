@@ -28,6 +28,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         ValueTask<Guid> GetGameProviderIdAsync();
 
         /// <summary>
+        /// Gets the game provider code.
+        /// </summary>
+        /// <returns></returns>
+        string GetGameProviderCode();
+
+        /// <summary>
         /// Gets the game provider schedule.
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
@@ -180,5 +186,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         /// <returns></returns>
         WGSportsGameProviderScheduleConfig IWGSportsGameProviderService.GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule)
         => _json.DeserializeFromString<WGSportsGameProviderScheduleConfig>(gameProviderSchedule.Config);
+
+        /// <summary>
+        /// Gets the game provider code.
+        /// </summary>
+        /// <returns></returns>
+        string IWGSportsGameProviderService.GetGameProviderCode()
+            => GameProviderConst.WGSports;
     }
 }

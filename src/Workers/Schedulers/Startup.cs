@@ -125,6 +125,7 @@ namespace TGS.Workers.Schedulers
                 var url = _configuration.GetSection("Email:Url");
                 c.BaseAddress = new(url.Value);
             });
+            services.AddGameProviderScheduleLockRepository();
 
             services
                 .AddHealthChecks()
@@ -147,7 +148,7 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
 
             // GameProviders Services 
-            services.AddTransient<IBigGamingGameRecordFishingService, BigGamingGameRecordFishingService>();
+            services.AddTransient<IBigGamingGameProviderFishingService, BigGamingGameProviderFishingService>();
             services.AddTransient<IKYGameProviderService, KYGameProviderService>();
             services.AddTransient<IVRGameProviderService, VRGameProviderService>();
             services.AddTransient<IWGSportsGameProviderService, WGSportsGameProviderService>();
