@@ -18,7 +18,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet]
         [Description("Get a brand's languages")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public IAsyncEnumerable<BrandLanguageModel> GetBrandCommunicationsAsync(
+        public IAsyncEnumerable<BrandLanguageModel> GetBrandLanguagesAsync(
            [FromServices] IQueryService<BrandLanguageQuery, BrandLanguageInfo> queryService)
         {
             var brandId = HttpContext.Items.GetBrandId();
