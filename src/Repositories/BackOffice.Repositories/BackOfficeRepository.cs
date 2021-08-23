@@ -264,7 +264,7 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        private BannerFlowStatus ConvertBannerStatus(int status)
+        private static BannerFlowStatus ConvertBannerStatus(int status)
             => status switch
             {
                 0 => BannerFlowStatus.WaitApprving,
