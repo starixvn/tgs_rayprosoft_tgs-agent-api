@@ -16,6 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IWMCasinoPlayerServices _playerServices;
         private readonly ISettingOperations _settingOperations;
 
         public AuthorizeWMCasinoMiddleware(
@@ -23,13 +24,15 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
             IGameProviderOperations gameProviderOperations,
             IBrandOperations brandOperations,
             IPlayerOperations playerOperations,
-            IWMCasinoAgentMapper agentMapper)
+            IWMCasinoAgentMapper agentMapper,
+            IWMCasinoPlayerServices playerServices)
         {
             _settingOperations = settingOperations;
             _gameProviderOperations = gameProviderOperations;
             _brandOperations = brandOperations;
             _playerOperations = playerOperations;
             _agentMapper = agentMapper;
+            _playerServices = playerServices;
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -58,6 +61,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
                 throw new InvalidCredentialException("No agent is found.");
             }
 
+            context.Items.Add(WMCasinoConsts.ContextItems.Agent, agent);
+
             var gameProviderId = await _gameProviderOperations
                 .GetGameProviderIdByCodeAsync(Consts.GameProvider.WMCasino);
             context.Items.Add(Consts.ContextItems.GameProviderId, gameProviderId);
@@ -75,7 +80,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
                 return;
             }
 
-            var playerCode = user;
+            var playerCode = _playerServices.GetPlayerCode(user, agent.Prefix, agent.Suffix);
             context.Items.Add(Consts.ContextItems.PlayerCode, playerCode);
 
             if (!context.Request.Path.StartsWithSegments("/api/wm/balance"))

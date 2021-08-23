@@ -10,6 +10,7 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
+using TGS.Core.Models.GameProviders.Settings.WMCasino;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
@@ -31,6 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
         private readonly IBrandOperations _brandOperations;
         private readonly IWMCasinoActionModelMapper _map;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IWMCasinoPlayerServices _playerServices;
         private readonly IWMCasinoServices _services;
         private readonly IWMCasinoUtility _utility;
 
@@ -39,6 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             IWMCasinoServices services,
             IWMCasinoActionModelMapper map,
             IWMCasinoUtility utility,
+            IWMCasinoPlayerServices playerServices,
             IPlayerOperations playerOperations,
             IBrandOperations brandOperations)
         {
@@ -46,6 +49,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             _services = services;
             _map = map;
             _utility = utility;
+            _playerServices = playerServices;
             _playerOperations = playerOperations;
             _brandOperations = brandOperations;
         }
@@ -97,6 +101,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
         [HttpPost("betdetail")]
         public async Task<ErrorResponse> BetDetailsAsync(BetDetailRequest request)
         {
+            var agent = HttpContext.Items.Get<WMCasinoAgent>(WMCasinoConsts.ContextItems.Agent, null);
+
             var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
 
             var results = (from r in request.Results
@@ -109,7 +115,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 
             var tasks = results.Select(async r =>
             {
-                var playerCode = r.Key;
+                var playerCode = _playerServices.GetPlayerCode(r.Key, agent!.Prefix, agent!.Suffix);
                 var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
 
                 if (configurationIds.TryGetValue(brandId, out var gameProviderConfigurationId))

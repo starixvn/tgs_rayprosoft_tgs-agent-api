@@ -7,5 +7,9 @@
         public string CurrencyCode { get; init; }
 
         public string Signature { get; init; }
+
+        public string Prefix { get; init; }
+
+        public string Suffix { get; init; }
     }
 }

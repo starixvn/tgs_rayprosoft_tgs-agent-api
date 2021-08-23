@@ -15,35 +15,35 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         private static readonly IReadOnlyDictionary<Type, GameApiError> ApiErrorByException =
             new Dictionary<Type, GameApiError>
             {
-                {typeof(InvalidCredentialsException), InvalidCredential},
-                {typeof(MissingTokenException), InvalidParameter},
-                {typeof(PlayerLoginExpiredException), InvalidPlayerCode},
-                {typeof(PlayerNotFoundException), InvalidPlayerCode},
-                {typeof(PlayerDisabledException), SuspendPlayer},
-                {typeof(CountryRestrictedException), SystemError},
-                {typeof(PlayerHasInsufficientFundsException), InsufficientFunds},
-                {typeof(InvalidGameActionException), SystemError},
-                {typeof(InvalidAmountException), InvalidParameter},
-                {typeof(ArgumentException), InvalidParameter},
-                {typeof(ModelBindingException), InvalidParameter},
-                {typeof(FormatException), InvalidParameter},
-                {typeof(BrandUnderMaintenanceException), Maintenance},
-                {typeof(GameProviderUnderMaintenanceException), Maintenance},
-                {typeof(GameUnderMaintenanceException), Maintenance},
-                {typeof(InvalidStatusException), InvalidParameter},
-                {typeof(InvalidOperationException), SystemError}
+                { typeof(InvalidCredentialsException), InvalidCredential },
+                { typeof(MissingTokenException), InvalidParameter },
+                { typeof(PlayerLoginExpiredException), UserNotExist },
+                { typeof(PlayerNotFoundException), UserNotExist },
+                { typeof(PlayerDisabledException), SuspendPlayer },
+                { typeof(CountryRestrictedException), SystemError },
+                { typeof(PlayerHasInsufficientFundsException), InsufficientFunds },
+                { typeof(InvalidGameActionException), SystemError },
+                { typeof(InvalidAmountException), InvalidParameter },
+                { typeof(ArgumentException), InvalidParameter },
+                { typeof(ModelBindingException), InvalidParameter },
+                { typeof(FormatException), InvalidParameter },
+                { typeof(BrandUnderMaintenanceException), Maintenance },
+                { typeof(GameProviderUnderMaintenanceException), Maintenance },
+                { typeof(GameUnderMaintenanceException), Maintenance },
+                { typeof(InvalidStatusException), InvalidParameter },
+                { typeof(InvalidOperationException), SystemError }
             };
 
         private static readonly IReadOnlyDictionary<InvalidGameActionErrorCode, GameApiError>
             ApiErrorByInvalidGameActionErrorCode =
                 new Dictionary<InvalidGameActionErrorCode, GameApiError>
                 {
-                    {Settled, Success},
-                    {TransactionNotFound, TransactionIsNotFound},
-                    {TransactionBeingCancelledNotFound, TransactionIsNotFound},
-                    {TransactionBeingReferencedNotFound, TransactionIsNotFound},
-                    {RoundNotFound, RoundIsNotFound},
-                    {GameNotFound, GameIsNotFound}
+                    { Settled, Success },
+                    { TransactionNotFound, TransactionIsNotFound },
+                    { TransactionBeingCancelledNotFound, TransactionIsNotFound },
+                    { TransactionBeingReferencedNotFound, TransactionIsNotFound },
+                    { RoundNotFound, RoundIsNotFound },
+                    { GameNotFound, GameIsNotFound }
                 };
 
         int IErrorMapper.GetApiErrorByException(Exception exception)

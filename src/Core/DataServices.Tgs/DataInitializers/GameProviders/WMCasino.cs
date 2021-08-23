@@ -105,7 +105,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 {
                                     AgentId = "hpgtwapi",
                                     Signature = "97ffc7ab86c2f54be533e90da6f6ab9f",
-                                    CurrencyCode = "CNY"
+                                    CurrencyCode = "CNY",
+                                    Prefix = "pg",
+                                    Suffix = "cny"
                                 }
                             }
                         }
