@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Services.Caches;
 using TGS.GameProviders.Repositories;
@@ -41,7 +40,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
                 OrderId = orderId,
             };
             var response = await _client.AccessMoneyQueryAsync(configuration, source).ConfigureAwait(false);
-            if (response.ReturnCode is not 1)
+            if (response.ReturnCode != 1)
             {
                 return (false, null);
             }
@@ -63,7 +62,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
             };
             var response = await _client.AccessMoneyAsync(configuration, source).ConfigureAwait(false);
-            if (response.ReturnCode.ToString().IgnoreCaseNotEquals("1"))
+            if (response.ReturnCode != 1)
             {
                 return (false, orderId, 0);
             }
@@ -86,7 +85,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
             };
             var response = await _client.AccessMoneyAsync(configuration, source).ConfigureAwait(false);
-            if (response.ReturnCode.ToString().IgnoreCaseNotEquals("1"))
+            if (response.ReturnCode != 1)
             {
                 return (false, orderId, 0);
             }
@@ -111,7 +110,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
             var gameProviderId = await _service.GetGameProviderIdAsync();
             var currencyCode = await _service.GetGameProviderCurrencyCodeAsync(gameProviderId, player.DefaultWalletCurrencyCode);
-            if (response.ReturnCode.ToString().IgnoreCaseEquals("602"))
+            if (response.ReturnCode == 602)
             {
                 var prepareLoginRequest = new WGHorsePrepareLoginRequest()
                 {
@@ -121,13 +120,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
                     CurrencyCode = currencyCode,
                 };
                 var prepareLoginResponse = await _client.GetPrepareLoginAsync(configuration, prepareLoginRequest).ConfigureAwait(false);
-                if (prepareLoginResponse.ReturnCode.ToString().IgnoreCaseEquals("1"))
+                if (prepareLoginResponse.ReturnCode == 1)
                 {
                     response = await _client.GetBalanceAsync(configuration, source).ConfigureAwait(false);
                 }
             }
 
-            return response.ReturnCode is 1 ? (true, decimal.Parse(response.Balance)) : ((bool Success, decimal Balance))(false, 0);
+            return response.ReturnCode == 1 ? (true, decimal.Parse(response.Balance)) : ((bool Success, decimal Balance))(false, 0);
         }
     }
 }

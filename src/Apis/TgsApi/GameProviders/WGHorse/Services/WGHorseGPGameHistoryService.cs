@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
@@ -13,7 +12,6 @@ using TGS.Core.Models.Services.Caches;
 using TGS.Services.GameOperations.Data;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Shared.Game.ApiClients.WGHorse;
-using TGS.Shared.Game.Models.VR.Outgoing;
 using TGS.Shared.Game.Models.WGHorse.Incoming;
 using TGS.Shared.Game.Models.WGHorse.Outgoing;
 
@@ -79,9 +77,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
                 var response = await _client.GetGameRecordAsync(_configuration, data).ConfigureAwait(false);
 
-                if (response.ReturnCode.IgnoreCaseNotEquals("1"))
+                if (response.ReturnCode != 1)
                 {
-                    if (response.ReturnCode.IgnoreCaseNotEquals("503"))
+                    if (response.ReturnCode != 503)
                     {
                         break;
                     }
