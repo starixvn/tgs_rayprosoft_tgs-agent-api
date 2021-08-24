@@ -221,7 +221,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         formId,
                         request.Amount,
                         Rate: rate,
-                        request.TradeDescription)));
+                        formId.ToString())));
 
             await createDepositFormService
                 .ExecuteAsync(command)
