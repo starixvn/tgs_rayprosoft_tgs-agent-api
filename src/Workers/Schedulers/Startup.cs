@@ -23,6 +23,9 @@ using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.ApiClients.Extensions;
 using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
+using TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming;
+using TGS.Workers.Schedulers.Jobs.GameProviders.KY;
+using TGS.Workers.Schedulers.Jobs.GameProviders.VR;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGSports;
 using TGS.Workers.Schedulers.Jobs.Players;
@@ -122,6 +125,7 @@ namespace TGS.Workers.Schedulers
                 var url = _configuration.GetSection("Email:Url");
                 c.BaseAddress = new(url.Value);
             });
+            services.AddGameProviderScheduleLockRepository();
 
             services
                 .AddHealthChecks()
@@ -144,8 +148,12 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
 
             // GameProviders Services 
+            services.AddTransient<IBigGamingGameProviderFishingService, BigGamingGameProviderFishingService>();
+            services.AddTransient<IKYGameProviderService, KYGameProviderService>();
+            services.AddTransient<IVRGameProviderService, VRGameProviderService>();
             services.AddTransient<IWGSportsGameProviderService, WGSportsGameProviderService>();
             services.AddTransient<IWGHorseGameProviderService, WGHorseGameProviderService>();
+
         }
 
         private static Type[] GetModuleTypes() =>

@@ -20,6 +20,10 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string Localization { get; set; }
 
+        public int DisplayOrder { get; set; }
+
+        public string Remark { get; set; }
+
         public int Status { get; set; }
 
         public string Title { get; set; }

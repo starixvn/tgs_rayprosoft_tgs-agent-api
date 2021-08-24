@@ -35,6 +35,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<ApiLog> ApiLogs { get; set; }
 
+        DbSet<Banner> Banners { get; set; }
+
         DbSet<BetLimit> BetLimits { get; set; }
 
         DbSet<BrandBetLimit> BrandBetLimits { get; set; }
@@ -231,6 +233,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<Announcement> Announcements { get; set; }
 
         public DbSet<ApiLog> ApiLogs { get; set; }
+
+        public DbSet<Banner> Banners { get; set; }
 
         public DbSet<BetLimit> BetLimits { get; set; }
 

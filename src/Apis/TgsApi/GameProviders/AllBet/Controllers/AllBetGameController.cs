@@ -38,18 +38,21 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         private readonly IAllBetCacheServices _cacheServices;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IAllBetActionModelMapper _map;
+        private readonly IAllBetPlayerServices _playerServices;
         private readonly IAllBetServices _services;
 
         public AllBetGameController(
             IGamePlayActions actions,
             IAllBetActionModelMapper map,
             IAllBetServices services,
+            IAllBetPlayerServices playerServices,
             IAllBetCacheServices cacheServices,
             IGameProviderOperations gameProviderOperations)
         {
             _actions = actions;
             _map = map;
             _services = services;
+            _playerServices = playerServices;
             _cacheServices = cacheServices;
             _gameProviderOperations = gameProviderOperations;
 
@@ -69,7 +72,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet.Controllers
         {
             var agent = HttpContext.Items.Get(AllBetConsts.ContextItems.Agent, default(AllBetAgent));
 
-            var playerCode = _services.GetPlayerCode(playerId, agent.Suffix);
+            var playerCode = _playerServices.GetPlayerCode(playerId, agent.Suffix);
             var result = await _actions.GetBalanceAsync(Consts.GameProvider.AllBet, playerCode);
 
             return _map.Response(result);

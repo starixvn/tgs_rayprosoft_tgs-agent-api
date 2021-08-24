@@ -13,6 +13,7 @@ using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Messages;
 using TGS.GameProviders.Repositories;
 using TGS.GameProviders.Repositories.Models;
+using TGS.GameProviders.Repositories.Models.GameProviderScheduleLock;
 using TGS.GameProviders.Repositories.Models.ScheduleConfig.VR;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
@@ -26,33 +27,22 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
     [Queue(Consts.Queue.GameProvider)]
     public sealed class VRGameRecordJobWorker : BaseWork<TgsResponse>
     {
-        private readonly string _gameProviderCode = GameProviderConst.VR;
-        private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.VR;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IRoundQueries _roundQueries;
-        private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
-        private readonly IVRApiClient _client;
         private readonly ITgsLog _log;
-        private readonly IGameProviderScheduleRepository _gameProviderScheduleRepository;
+        private readonly IVRApiClient _client;
+        private readonly IVRGameProviderService _service;
+        private readonly IGameProviderScheduleLockRepository _gameProviderScheduleLockRepository;
 
         public VRGameRecordJobWorker(
-           IGameProviderOperations gameProviderOperations,
-           ISettingOperations settingOperations,
-           IRoundQueries roundQueries,
-           IGameProviderCurrencyCodeMapper currencyMapper,
-           IVRApiClient client,
-           ITgsLog log,
-           IGameProviderScheduleRepository gameProviderScheduleRepository
+            ITgsLog log,
+            IVRApiClient client,
+            IVRGameProviderService service,
+            IGameProviderScheduleLockRepository gameProviderScheduleLockRepository
            )
         {
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
-            _currencyMapper = currencyMapper ?? throw new ArgumentNullException(nameof(currencyMapper));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _gameProviderScheduleRepository = gameProviderScheduleRepository ?? throw new ArgumentNullException(nameof(gameProviderScheduleRepository));
             _log = log.SetLogger(nameof(VRGameRecordJobWorker));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
+            _gameProviderScheduleLockRepository = gameProviderScheduleLockRepository ?? throw new ArgumentNullException(nameof(gameProviderScheduleLockRepository));
         }
 
         /// <summary>
@@ -64,13 +54,9 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
         {
             try
             {
-                var configuration =
-                   await _settingOperations
-                   .GetValueFromJsonByKeyAsync<VRConfiguration>(_gameProviderConfigurations)
-                   .ConfigureAwait(false);
-                var gameProvider = await _gameProviderOperations
-                      .GetGameProviderIdByCodeAsync(_gameProviderCode)
-                      .ConfigureAwait(false);
+                var configuration = await _service.GetSettingConfigurationAsync().ConfigureAwait(false);
+
+                var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
 
                 var tasks = new List<Task>();
 
@@ -81,13 +67,26 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
 
                     Task t = Task.Run(async () =>
                     {
-                        var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, brand.BrandCode, brand.Merchantid, string.Empty).ConfigureAwait(false);
+                        var gameProviderSchedule = await _service.GetGameProviderScheduleAsync(gameProviderId, brand.BrandCode, brand.Merchantid).ConfigureAwait(false);
                         if (gameProviderSchedule == null)
                         {
-                            var result = await GameProviderScheduleInit(gameProvider, brand.BrandCode, brand.Merchantid).ConfigureAwait(false);
-                            gameProviderSchedule = result.gameProviderSchedule;
+                            gameProviderSchedule = await _service.GameProviderScheduleInitAsync(gameProviderId, brand.BrandCode, brand.Merchantid).ConfigureAwait(false);
                         }
-                        await GameRecordAsync(configuration, gameProviderSchedule);
+                        if (!await _gameProviderScheduleLockRepository.IsLockAsync(_service.GetGameProviderCode(), gameProviderSchedule.Id.ToString()).ConfigureAwait(false))
+                        {
+                            await _gameProviderScheduleLockRepository.SetAsync(
+                                _service.GetGameProviderCode(),
+                                gameProviderSchedule.Id.ToString(),
+                                new GameProviderScheduleLockData()
+                                {
+                                    GameProviderCode = _service.GetGameProviderCode(),
+                                    GameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false),
+                                    GameProviderScheduleId = gameProviderSchedule.Id,
+                                    LockDate = DateTimeOffset.UtcNow
+                                }).ConfigureAwait(false);
+                            await GameRecordAsync(configuration, gameProviderSchedule);
+                            await _gameProviderScheduleLockRepository.RemoveAsync(_service.GetGameProviderCode(), gameProviderSchedule.Id.ToString()).ConfigureAwait(false);
+                        }
                     });
                     tasks.Add(t);
 
@@ -97,6 +96,8 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
             }
             catch (Exception e)
             {
+                await _gameProviderScheduleLockRepository.RemoveGameProviderCodeAsync(_service.GetGameProviderCode()).ConfigureAwait(false);
+
                 _log.LogError("Execute job with error:", e);
 
                 return new()
@@ -134,86 +135,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.VR
                 }).ConfigureAwait(false);
                 if (responses.Success)
                 {
-                    gameProviderSchedule = await GameProviderScheduleUpdateAsync(gameProviderSchedule, config, responses, sysTime).ConfigureAwait(false);
+                    gameProviderSchedule = await _service.GameProviderScheduleUpdateAsync(gameProviderSchedule, responses, sysTime).ConfigureAwait(false);
                 }
                 else
                 {
                     break;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Games the provider schedule initialize.
-        /// </summary>
-        /// <param name="gameProviderId">The game provider identifier.</param>
-        /// <param name="brandCode">The brand code.</param>
-        /// <param name="AgentId">The agent identifier.</param>
-        /// <param name="currencyCode">The currency code.</param>
-        /// <returns></returns>
-        private async Task<(GameProviderSchedule gameProviderSchedule, VRGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProviderId, string brandCode, string merchantid)
-        {
-            var sysTime = DateTimeOffset.UtcNow;
-            var intervalMinuteMax = 24 * 60m;
-            var intervalMinute = 20m;
-            var config = new VRGameProviderScheduleConfig()
-            {
-                IntervalMinuteMax = intervalMinuteMax,
-                IntervalMinute = intervalMinute,
-                LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+0)),
-                StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1),
-                EndTime = sysTime
-            };
-
-            var gameProviderSchedule = new GameProviderSchedule()
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                GameProviderId = gameProviderId,
-                GameProviderCode = _gameProviderCode,
-                BrandCode = brandCode,
-                AgentId = merchantid,
-                CurrencyCode = string.Empty,
-                Config = JsonSerializer.Serialize(config),
-                CreatedOn = sysTime,
-                UpdatedOn = sysTime
-            };
-            await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
-
-            return (gameProviderSchedule, config);
-        }
-
-        /// <summary>
-        /// Games the provider schedule update asynchronous.
-        /// </summary>
-        /// <param name="gameProviderSchedule">The game provider schedule.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="responses">The responses.</param>
-        /// <returns></returns>
-        private async Task<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, VRGameProviderScheduleConfig config, VRGPGameRecordResponse responses, DateTimeOffset sysTime)
-        {
-            if (config.EndTime > sysTime || (sysTime - config.EndTime).TotalSeconds < (double)config.IntervalMinute * 60)
-            {
-                config.StartTime = sysTime.AddSeconds((double)config.IntervalMinute * 60 * -1);
-                config.EndTime = sysTime;
-            }
-            else
-            {
-                var endTime = config.EndTime.AddSeconds((double)config.IntervalMinute * 60);
-                config.StartTime = config.EndTime;
-                config.EndTime = (endTime > sysTime) ? sysTime : endTime;
-            }
-            config.LastGameRecordTime = (responses.LastGameRecorTime.HasValue) ? responses.LastGameRecorTime.Value : config.LastGameRecordTime;
-            gameProviderSchedule.Config = JsonSerializer.Serialize(config);
-            gameProviderSchedule.UpdatedOn = DateTimeOffset.UtcNow;
-
-            var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
-            if (updateResult.ModifiedCount > 0)
-            {
-                return gameProviderSchedule;
-            }
-            else
-            {
-                return null;
             }
         }
     }

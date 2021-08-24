@@ -6,12 +6,10 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddBackendOfficeRepositories(this IServiceCollection services)
-        {
-            services.AddTransient<ISettingRepository, SettingRepository>();
-            services.AddTransient<ISystemPaymentRepository, SystemPaymentRepository>();
-            services.AddTransient<IBackOfficeRepository, BackOfficeRepository>();
-
-            return services;
-        }
+            => services
+                .AddTransient<ISettingRepository, SettingRepository>()
+                .AddTransient<ISystemPaymentRepository, SystemPaymentRepository>()
+                .AddTransient<IBackOfficeRepository, BackOfficeRepository>()
+                .AddSingleton<ISystemClock, DefaultSystemClock>();
     }
 }

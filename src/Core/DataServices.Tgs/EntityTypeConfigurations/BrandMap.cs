@@ -39,6 +39,28 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.TimeZoneId)
                 .HasMaxLength(256);
 
+            builder.Property(c => c.SettlementIntervalType)
+                .HasColumnType(ColumnTypes.SmallInt)
+                .IsRequired();
+
+            builder.Property(c => c.PreviousSettlementFrom)
+                .IsRequired();
+
+            builder.Property(c => c.CurrentSettlementFrom)
+                .IsRequired();
+
+            builder.Property(c => c.NextSettlementFrom)
+                .IsRequired();
+
+            builder.Property(c => c.PreviousSettlementTo)
+                .IsRequired();
+
+            builder.Property(c => c.CurrentSettlementTo)
+                .IsRequired();
+
+            builder.Property(c => c.NextSettlementTo)
+                .IsRequired();
+
             builder.HasOne(c => c.Licensee)
                 .WithMany(c => c.Brands)
                 .HasForeignKey(c => c.LicenseeId)

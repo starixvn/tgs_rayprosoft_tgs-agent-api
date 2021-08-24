@@ -948,6 +948,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("created_on")
                         .HasDefaultValueSql("Now()");
 
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("display_order");
+
                     b.Property<DateTimeOffset?>("EndTime")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("end_time");
@@ -961,6 +967,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<string>("Localization")
                         .HasColumnType("jsonb")
                         .HasColumnName("localization");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
 
                     b.Property<int>("Status")
                         .ValueGeneratedOnAdd()
@@ -1091,11 +1101,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<DateTimeOffset?>("CurrentSettlementFrom")
+                    b.Property<DateTimeOffset>("CurrentSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_from");
 
-                    b.Property<DateTimeOffset?>("CurrentSettlementTo")
+                    b.Property<DateTimeOffset>("CurrentSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_to");
 
@@ -1114,11 +1124,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<DateTimeOffset?>("NextSettlementFrom")
+                    b.Property<DateTimeOffset>("NextSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_settlement_from");
 
-                    b.Property<DateTimeOffset?>("NextSettlementTo")
+                    b.Property<DateTimeOffset>("NextSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_settlement_to");
 
@@ -1127,11 +1137,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("operational_email");
 
-                    b.Property<DateTimeOffset?>("PreviousSettlementFrom")
+                    b.Property<DateTimeOffset>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_from");
 
-                    b.Property<DateTimeOffset?>("PreviousSettlementTo")
+                    b.Property<DateTimeOffset>("PreviousSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_to");
 
@@ -1141,8 +1151,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("secret_key");
 
-                    b.Property<int?>("SettlementIntervalType")
+                    b.Property<int?>("SettlementDay")
                         .HasColumnType("integer")
+                        .HasColumnName("settlement_day");
+
+                    b.Property<short>("SettlementIntervalType")
+                        .HasColumnType("smallint")
                         .HasColumnName("settlement_interval_type");
 
                     b.Property<short>("Status")
@@ -3199,18 +3213,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("channel_id");
 
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("created_by_username");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on")
-                        .HasDefaultValueSql("Now()");
-
                     b.Property<Guid>("MethodId")
                         .HasColumnType("uuid")
                         .HasColumnName("method_id");
@@ -3224,18 +3226,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("status")
                         .HasDefaultValueSql("0");
-
-                    b.Property<string>("UpdatedByUsername")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("updated_by_username");
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_on")
-                        .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
                         .HasName("pk_payment_method_channels");

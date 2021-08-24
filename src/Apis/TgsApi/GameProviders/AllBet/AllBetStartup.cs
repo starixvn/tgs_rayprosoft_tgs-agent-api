@@ -41,6 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet
             services.AddScoped<IAllBetServices, AllBetServices>();
             services.AddScoped<IAllBetCacheServices, AllBetCacheServices>();
             services.AddScoped<IAllBetAgentMapper, AllBetAgentMapper>();
+            services.AddScoped<IAllBetPlayerServices, AllBetPlayerServices>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[]
             {
