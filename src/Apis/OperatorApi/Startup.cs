@@ -212,6 +212,10 @@ namespace TGS.Apis.OperatorApi
                     }));
             services.AddProfileViewer();
 
+            services
+                .AddInterceptionService()
+                .AddServiceUtiltiyInterceptors();
+
             if (!_env.IsProduction())
             {
                 services.AddSwaggerGen(c =>
