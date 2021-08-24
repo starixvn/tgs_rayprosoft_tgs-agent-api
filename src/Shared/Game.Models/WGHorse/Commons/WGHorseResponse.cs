@@ -11,6 +11,6 @@ namespace TGS.Shared.Game.Models.WGHorse.Commons
     {
         [JsonPropertyName("ReturnCode")]
         [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
-        public int ReturnCode { get; init; }
+        public string ReturnCode { get; init; }
     }
 }
