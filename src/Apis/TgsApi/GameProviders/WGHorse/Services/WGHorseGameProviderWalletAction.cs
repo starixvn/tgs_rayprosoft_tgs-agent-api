@@ -41,7 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
                 OrderId = orderId,
             };
             var response = await _client.AccessMoneyQueryAsync(configuration, source).ConfigureAwait(false);
-            if (response.ReturnCode.IgnoreCaseNotEquals("1"))
+            if (response.ReturnCode is not 1)
             {
                 return (false, null);
             }
@@ -127,7 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
                 }
             }
 
-            return response.ReturnCode.IgnoreCaseNotEquals("1") ? (true, decimal.Parse(response.Balance)) : ((bool Success, decimal Balance))(false, 0);
+            return response.ReturnCode is 1 ? (true, decimal.Parse(response.Balance)) : ((bool Success, decimal Balance))(false, 0);
         }
     }
 }
