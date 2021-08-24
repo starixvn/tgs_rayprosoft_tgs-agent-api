@@ -13,8 +13,5 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("promotionid")]
         public Guid? PromotionId { get; init; }
-
-        [JsonPropertyName("tradedesc")]
-        public string TradeDescription { get; init; }
     }
 }
