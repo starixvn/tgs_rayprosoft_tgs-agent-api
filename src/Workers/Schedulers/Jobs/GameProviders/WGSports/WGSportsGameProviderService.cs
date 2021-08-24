@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
@@ -21,27 +19,27 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         /// Gets the setting configuration.
         /// </summary>
         /// <returns></returns>
-        ValueTask<WGSportsConfiguration> GetSettingConfiguration();
+        ValueTask<WGSportsConfiguration> GetSettingConfigurationAsync();
 
         /// <summary>
         /// Gets the game provider identifier.
         /// </summary>
         /// <returns></returns>
-        ValueTask<Guid> GetGameProviderId();
+        ValueTask<Guid> GetGameProviderIdAsync();
 
         /// <summary>
         /// Gets the game provider schedule.
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
-        ValueTask<GameProviderSchedule> GetGameProviderSchedule(Guid gameProviderId);
+        ValueTask<GameProviderSchedule> GetGameProviderScheduleAsync(Guid gameProviderId);
 
         /// <summary>
         /// Games the provider schedule initialize.
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
-        ValueTask<GameProviderSchedule> GameProviderScheduleInit(Guid gameProviderId);
+        ValueTask<GameProviderSchedule> GameProviderScheduleInitAsync(Guid gameProviderId);
 
         /// <summary>
         /// Games the provider schedule update asynchronous.
@@ -60,13 +58,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         WGSportsGameProviderScheduleConfig GetGameProviderScheduleConfig(GameProviderSchedule gameProviderSchedule);
 
     }
-    public class WGSportsGameProviderService : IWGSportsGameProviderService
+    public sealed class WGSportsGameProviderService : IWGSportsGameProviderService
     {
         private readonly IJsonSerializationProvider _json;
         private readonly ISettingOperations _settingOperations;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IGameProviderScheduleRepository _gameProviderScheduleRepository;
-
 
         public WGSportsGameProviderService(
             IJsonSerializationProvider json,
@@ -85,14 +82,14 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         /// Gets the setting configuration.
         /// </summary>
         /// <returns></returns>
-        async ValueTask<WGSportsConfiguration> IWGSportsGameProviderService.GetSettingConfiguration()
+        async ValueTask<WGSportsConfiguration> IWGSportsGameProviderService.GetSettingConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<WGSportsConfiguration>(SettingConsts.GameProviderConfigurations.WGSports).ConfigureAwait(false);
 
         /// <summary>
         /// Gets the game provider identifier.
         /// </summary>
         /// <returns></returns>
-        async ValueTask<Guid> IWGSportsGameProviderService.GetGameProviderId()
+        async ValueTask<Guid> IWGSportsGameProviderService.GetGameProviderIdAsync()
             => await _gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderConst.WGSports).ConfigureAwait(false);
 
         /// <summary>
@@ -100,7 +97,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
-        public async ValueTask<GameProviderSchedule> GetGameProviderSchedule(Guid gameProviderId)
+        public async ValueTask<GameProviderSchedule> GetGameProviderScheduleAsync(Guid gameProviderId)
         => await _gameProviderScheduleRepository.GetAsync(gameProviderId, string.Empty, string.Empty, string.Empty).ConfigureAwait(false);
 
         /// <summary>
@@ -108,7 +105,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
         /// </summary>
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
-        async ValueTask<GameProviderSchedule> IWGSportsGameProviderService.GameProviderScheduleInit(Guid gameProviderId)
+        async ValueTask<GameProviderSchedule> IWGSportsGameProviderService.GameProviderScheduleInitAsync(Guid gameProviderId)
         {
             var sysTime = DateTimeOffset.UtcNow;
             var intervalMinuteMax = 24 * 60m;
@@ -136,7 +133,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
             };
             await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
 
-            return await GetGameProviderSchedule(gameProviderId).ConfigureAwait(false); ;
+            return await GetGameProviderScheduleAsync(gameProviderId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -168,7 +165,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGSports
             var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
             if (updateResult.ModifiedCount > 0)
             {
-                return await GetGameProviderSchedule(gameProviderSchedule.GameProviderId).ConfigureAwait(false);
+                return await GetGameProviderScheduleAsync(gameProviderSchedule.GameProviderId).ConfigureAwait(false);
             }
             else
             {

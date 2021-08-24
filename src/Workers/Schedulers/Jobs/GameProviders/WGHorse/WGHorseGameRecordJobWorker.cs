@@ -47,17 +47,17 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse
         {
             try
             {
-                var configuration = await _service.GetSettingConfiguration().ConfigureAwait(false);
+                var configuration = await _service.GetSettingConfigurationAsync().ConfigureAwait(false);
 
-                var gameProviderId = await _service.GetGameProviderId().ConfigureAwait(false);
+                var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
 
                 var tasks = new List<Task>();
                 Task t = Task.Run(async () =>
                 {
-                    var gameProviderSchedule = await _service.GetGameProviderSchedule(gameProviderId).ConfigureAwait(false);
+                    var gameProviderSchedule = await _service.GetGameProviderScheduleAsync(gameProviderId).ConfigureAwait(false);
                     if (gameProviderSchedule == null)
                     {
-                        gameProviderSchedule = await _service.GameProviderScheduleInit(gameProviderId).ConfigureAwait(false);
+                        gameProviderSchedule = await _service.GameProviderScheduleInitAsync(gameProviderId).ConfigureAwait(false);
                     }
                     await GameRecordAsync(configuration, gameProviderSchedule);
                 });

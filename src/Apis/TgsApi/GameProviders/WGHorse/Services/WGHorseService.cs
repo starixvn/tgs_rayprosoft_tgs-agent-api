@@ -23,7 +23,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
         ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode);
         ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
         string GetGameProviderCode();
-        ClientRoundStatus GetClientRound(decimal settleAmount);
+        ClientRoundStatus GetClientRound(decimal playerWinLoss);
     }
     public class WGHorseService : IWGHorseService
     {
@@ -45,8 +45,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
             _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
             _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
         }
-        async ValueTask<Guid> IWGHorseService.GetGameProviderIdAsync(
-            ) => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.WGHorse).ConfigureAwait(false);
+
+        async ValueTask<Guid> IWGHorseService.GetGameProviderIdAsync()
+            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.WGHorse).ConfigureAwait(false);
 
         async ValueTask<WGHorseConfiguration> IWGHorseService.GetConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<WGHorseConfiguration>(SettingConsts.GameProviderConfigurations.WGHorse);
@@ -81,8 +82,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
             return Consts.GameProvider.WGHorse;
         }
 
-        ClientRoundStatus IWGHorseService.GetClientRound(decimal settleAmount)
-          => settleAmount switch
+        ClientRoundStatus IWGHorseService.GetClientRound(decimal playerWinLoss)
+          => playerWinLoss switch
           {
               > 0 => ClientRoundStatus.Win,
               <= 0 => ClientRoundStatus.Loss,

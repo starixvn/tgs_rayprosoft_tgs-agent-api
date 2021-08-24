@@ -54,8 +54,14 @@ namespace TGS.Apis.BackendOffice.Controllers.GameProvider
 
         [HttpPost("upload")]
         [Description("Upload games")]
-        public Task<UploadGamesResponse> UploadGamesAsync([FromForm] UploadGamesRequest request)
-            => _mediator.Send(request);
+        public async Task<IActionResult> UploadGamesAsync([FromForm] UploadGamesRequest request)
+        {
+            var response = await _mediator.Send(request).ConfigureAwait(false);
+
+            if (response.Valid)
+                return Ok(response);
+            return StatusCode(400, response);
+        }
 
         [AllowAnonymous]
         [HttpGet("export/{gameProviderId}")]

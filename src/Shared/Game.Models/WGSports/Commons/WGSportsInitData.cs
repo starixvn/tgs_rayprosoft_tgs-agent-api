@@ -29,5 +29,7 @@ namespace TGS.Shared.Game.Models.WGSports.Commons
         public string OddsType { get; set; }
         [JsonPropertyName("match_date")]
         public string MatchDate { get; set; }
+        [JsonPropertyName("amount")]
+        public string BetAmount { get; set; }
     }
 }

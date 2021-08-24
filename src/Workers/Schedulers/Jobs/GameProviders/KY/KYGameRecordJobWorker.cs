@@ -1,58 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Hangfire;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Log;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Messages;
-using TGS.GameProviders.Repositories;
 using TGS.GameProviders.Repositories.Models;
-using TGS.GameProviders.Repositories.Models.ScheduleConfig.KY;
-using TGS.Services.Operations;
-using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operations.Queries;
 using TGS.Shared.Game.ApiClients.KY;
 using TGS.Shared.Game.Models.KY.Incoming;
-using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
 {
     [Queue(Consts.Queue.GameProvider)]
     public sealed class KYGameRecordJobWorker : BaseWork<TgsResponse>
     {
-        private readonly string _gameProviderCode = GameProviderConst.KY;
-        private readonly string _gameProviderConfigurations = SettingConsts.GameProviderConfigurations.KY;
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IRoundQueries _roundQueries;
-        private readonly IGameProviderCurrencyCodeMapper _currencyMapper;
-        private readonly IKYApiClient _client;
         private readonly ITgsLog _log;
-        private readonly IGameProviderScheduleRepository _gameProviderScheduleRepository;
+        private readonly IKYApiClient _client;
+        private readonly IKYGameProviderService _service;
 
         public KYGameRecordJobWorker(
-           IGameProviderOperations gameProviderOperations,
-           ISettingOperations settingOperations,
-           IRoundQueries roundQueries,
-           IGameProviderCurrencyCodeMapper currencyMapper,
-           IKYApiClient client,
-           ITgsLog log,
-           IGameProviderScheduleRepository gameProviderScheduleRepository
-           )
+            ITgsLog log,
+            IKYApiClient client,
+            IKYGameProviderService service
+            )
         {
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
-            _currencyMapper = currencyMapper ?? throw new ArgumentNullException(nameof(currencyMapper));
-            _client = client ?? throw new ArgumentNullException(nameof(client));
-            _gameProviderScheduleRepository = gameProviderScheduleRepository ?? throw new ArgumentNullException(nameof(gameProviderScheduleRepository));
             _log = log.SetLogger(nameof(KYGameRecordJobWorker));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
         }
 
         /// <summary>
@@ -64,13 +41,9 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
         {
             try
             {
-                var configuration =
-                   await _settingOperations
-                   .GetValueFromJsonByKeyAsync<KYConfiguration>(_gameProviderConfigurations)
-                   .ConfigureAwait(false);
-                var gameProvider = await _gameProviderOperations
-                      .GetGameProviderIdByCodeAsync(_gameProviderCode)
-                      .ConfigureAwait(false);
+                var configuration = await _service.GetSettingConfigurationAsync().ConfigureAwait(false);
+
+                var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
 
                 var tasks = new List<Task>();
 
@@ -82,11 +55,11 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                     {
                         Task t = Task.Run(async () =>
                         {
-                            var gameProviderSchedule = await _gameProviderScheduleRepository.GetAsync(gameProvider, brand.BrandCode, agent.AgentId, agent.CurrencyCode).ConfigureAwait(false);
+                            var gameProviderSchedule = await _service.GetGameProviderScheduleAsync(gameProviderId, brand.BrandCode, agent.AgentId, agent.CurrencyCode).ConfigureAwait(false);
                             if (gameProviderSchedule == null)
                             {
-                                var result = await GameProviderScheduleInit(gameProvider, brand.BrandCode, agent.AgentId, agent.CurrencyCode).ConfigureAwait(false);
-                                gameProviderSchedule = result.gameProviderSchedule;
+                                gameProviderSchedule = await _service.GameProviderScheduleInitAsync(gameProviderId, brand.BrandCode, agent.AgentId, agent.CurrencyCode).ConfigureAwait(false);
+
                             }
                             await GameRecordAsync(configuration, gameProviderSchedule);
                         });
@@ -122,7 +95,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
 
             while (gameProviderSchedule != null)
             {
-                var config = JsonSerializer.Deserialize<KYGameProviderScheduleConfig>(gameProviderSchedule.Config);
+                var config = _service.GetGameProviderScheduleConfig(gameProviderSchedule);
                 if (config.EndTime >= sysTime)
                 {
                     break;
@@ -136,86 +109,12 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.KY
                 }).ConfigureAwait(false);
                 if (responses.Success)
                 {
-                    gameProviderSchedule = await GameProviderScheduleUpdateAsync(gameProviderSchedule, config, responses, sysTime).ConfigureAwait(false);
+                    gameProviderSchedule = await _service.GameProviderScheduleUpdateAsync(gameProviderSchedule, responses, sysTime).ConfigureAwait(false);
                 }
                 else
                 {
                     break;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Games the provider schedule initialize.
-        /// </summary>
-        /// <param name="gameProviderId">The game provider identifier.</param>
-        /// <param name="brandCode">The brand code.</param>
-        /// <param name="AgentId">The agent identifier.</param>
-        /// <param name="currencyCode">The currency code.</param>
-        /// <returns></returns>
-        private async Task<(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig gameProviderScheduleConfig)> GameProviderScheduleInit(Guid gameProviderId, string brandCode, string agentId, string currencyCode)
-        {
-            var sysTime = DateTimeOffset.UtcNow;
-            var intervalMinuteMax = 40m;
-            var intervalMinute = 10m;
-            var config = new KYGameProviderScheduleConfig()
-            {
-                IntervalMinuteMax = intervalMinuteMax,
-                IntervalMinute = intervalMinute,
-                LastGameRecordTime = new DateTimeOffset(Convert.ToDateTime("1970-01-01"), TimeSpan.FromHours(+8)),
-                StartTime = sysTime.AddSeconds((double)intervalMinute * 60 * -1),
-                EndTime = sysTime
-            };
-
-            var gameProviderSchedule = new GameProviderSchedule()
-            {
-                Id = GuidExtensions.NewSequentialGuid(),
-                GameProviderId = gameProviderId,
-                GameProviderCode = _gameProviderCode,
-                BrandCode = brandCode,
-                AgentId = agentId,
-                CurrencyCode = currencyCode,
-                Config = JsonSerializer.Serialize(config),
-                CreatedOn = sysTime,
-                UpdatedOn = sysTime
-            };
-            await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
-
-            return (gameProviderSchedule, config);
-        }
-
-        /// <summary>
-        /// Games the provider schedule update asynchronous.
-        /// </summary>
-        /// <param name="gameProviderSchedule">The game provider schedule.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="responses">The responses.</param>
-        /// <returns></returns>
-        private async Task<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, KYGameProviderScheduleConfig config, KYGPGameRecordResponse responses, DateTimeOffset sysTime)
-        {
-            if (config.EndTime > sysTime || (sysTime - config.EndTime).TotalSeconds < (double)config.IntervalMinute * 60)
-            {
-                config.StartTime = sysTime.AddSeconds((double)config.IntervalMinute * 60 * -1);
-                config.EndTime = sysTime;
-            }
-            else
-            {
-                var endTime = config.EndTime.AddSeconds((double)config.IntervalMinute * 60);
-                config.StartTime = config.EndTime;
-                config.EndTime = (endTime > sysTime) ? sysTime : endTime;
-            }
-            config.LastGameRecordTime = (responses.LastGameRecorTime.HasValue) ? responses.LastGameRecorTime.Value : config.LastGameRecordTime;
-            gameProviderSchedule.Config = JsonSerializer.Serialize(config);
-            gameProviderSchedule.UpdatedOn = DateTimeOffset.UtcNow;
-
-            var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
-            if (updateResult.ModifiedCount > 0)
-            {
-                return gameProviderSchedule;
-            }
-            else
-            {
-                return null;
             }
         }
     }

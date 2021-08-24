@@ -7,9 +7,6 @@ SET datetime=%mydate%%mytime%
 echo %datetime%
 SET tag=dev-%datetime%
 
-docker build -f src\Web\backoffice\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:%tag% .
-docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/backoffice-site:%tag%
-
 docker build -f src\Web\mocksite\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/mocksite:%tag% .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/mocksite:%tag%
 
@@ -24,9 +21,6 @@ docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/operator-api:%t
 
 docker build -f src\Apis\TgsApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/tgs-api:%tag% .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/tgs-api:%tag%
-
-docker build -f src\Apis\FileService\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/file-service:%tag% .
-docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/file-service:%tag%
 
 docker build -f src\Apis\GlobalApi\Dockerfile -t registry.gitlab.com/rayprosoft/turnkey-gaming-system/global-api:%tag% .
 docker push registry.gitlab.com/rayprosoft/turnkey-gaming-system/global-api:%tag%

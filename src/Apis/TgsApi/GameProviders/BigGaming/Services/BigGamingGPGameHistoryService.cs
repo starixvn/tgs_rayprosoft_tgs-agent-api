@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
@@ -25,17 +26,20 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
         private readonly IBigGamingService _service;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IGameRoundsProcessor _gameRoundsProcessor;
+        private readonly IGameProviderRecordService _gameProviderRecordService;
 
         public BigGamingGPGameHistoryService(
             IBigGamingApiClient client,
             IBigGamingService service,
             IJsonSerializationProvider jsonSerializationProvider,
-            IGameRoundsProcessor gameRoundsProcessor)
+            IGameRoundsProcessor gameRoundsProcessor,
+            IGameProviderRecordService gameProviderRecordService)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _gameRoundsProcessor = gameRoundsProcessor ?? throw new ArgumentNullException(nameof(gameRoundsProcessor));
+            _gameProviderRecordService = gameProviderRecordService ?? throw new ArgumentNullException(nameof(gameProviderRecordService));
         }
         async ValueTask<BigGamingGPGameRecordResponse> IBigGamingGPGameHistoryService.GameRecordFishingAsync(BigGamingGPGameRecordRequest source)
         {
@@ -89,18 +93,8 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
 
                     if (!players.TryGetValue(gameRecord.LoginId, out (Player Player, Guid? BrandGameProviderConfigurationIds) playerInfo))
                     {
-                        var player = await _service.GetPlayerByCodeAsync(gameRecord.LoginId).ConfigureAwait(false);
-                        if (player == null)
-                        {
-                            players.Add(gameRecord.LoginId, playerInfo);
-                        }
-                        else
-                        {
-                            var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(player.BrandId, gameProviderId).ConfigureAwait(false);
-                            playerInfo = (player, gameProviderConfigurationId);
-                            players.Add(gameRecord.LoginId, playerInfo);
-                        }
-
+                        playerInfo = await _gameProviderRecordService.GetPlayerInfoAsync(gameProviderId, gameRecord.LoginId).ConfigureAwait(false);
+                        players.Add(gameRecord.LoginId, playerInfo);
                     }
 
 
@@ -124,7 +118,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming.Services
                     var orderTime = new DateTimeOffset(DateTime.Parse(gameRecord.OrderTime), TimeSpan.FromHours(-4));
                     await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
                     {
-                        ExternalRoundId = gameRecord.ExternalRoundId,
+                        ExternalRoundId = gameRecord.ExternalBetId.ToString(),
                         GameProviderId = gameProviderId,
                         GameProviderCode = _service.GetGameProviderCode(),
                         PlayerCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.PlayerCode,

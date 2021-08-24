@@ -32,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Apis\BackendOffice\BackendOffice.csproj" />
+    <ProjectReference Include="..\..\Repositories\BackOffice.Repositories\BackOffice.Repositories.csproj" />
     <ProjectReference Include="..\TestsCommon\TestsCommon.csproj" />
   </ItemGroup>
 
