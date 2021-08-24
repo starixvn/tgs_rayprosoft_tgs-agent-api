@@ -42,6 +42,8 @@ namespace TGS.Apis.OperatorApi.Controllers
                         jsonOptions.JsonSerializerOptions)
                    let content = loc?.ContainsKey(cultureCode) == true
                     ? loc[cultureCode]
+                    : loc?.ContainsKey("en-US") == true
+                    ? loc["en-US"]
                     : null
                    select new BannerResponse
                    {
