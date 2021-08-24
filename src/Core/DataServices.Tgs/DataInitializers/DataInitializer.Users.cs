@@ -32,9 +32,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Name = userName,
                 Status = status,
                 TimeZone = DefaultTimeZone,
-                CreatedByUsername = AdminUsername,
+                CreatedByUsername = _AdminUsername,
                 CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = AdminUsername,
+                UpdatedByUsername = _AdminUsername,
                 UpdatedOn = DateTimeOffset.Now
             };
         }

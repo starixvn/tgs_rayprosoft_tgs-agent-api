@@ -12,6 +12,7 @@ using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Infrastructures.Extensions;
 using static TGS.Core.Models.Consts;
+
 namespace TGS.Apis.TgsApi.GameProviders.BigGaming
 {
     public sealed class BigGamingStartup : BaseStartup
@@ -26,12 +27,15 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-              new[] { typeof(BigGamingErrorMapper) },
-              (provider, key) => key switch
-              {
-                  GameProvider.BigGaming => provider.GetRequiredService<BigGamingErrorMapper>(),
-                  _ => provider.GetRequiredService<TgsErrorMapper>()
-              });
+                new[]
+                {
+                    typeof(BigGamingErrorMapper)
+                },
+                (provider, key) => key switch
+                {
+                    GameProvider.BigGaming => provider.GetRequiredService<BigGamingErrorMapper>(),
+                    _                      => provider.GetRequiredService<TgsErrorMapper>()
+                });
 
             services.AddScoped<AuthorizeBigGamingMiddleware>();
             services.AddScoped<HandleBigGamingExceptionMiddleware>();
@@ -42,13 +46,19 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
             services.AddScoped<IBigGamingModelActionMapper, BigGamingActionModelMapper>();
             services.AddScoped<IBigGamingGameHistoryService, BigGamingGameHistoryService>();
             services.AddTransient<IBigGamingGamePlayerCreate, BigGamingGamePlayerCreate>();
-            services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(BigGamingGameInitializer) }, (provider, _) =>
-            provider.GetRequiredService<BigGamingGameInitializer>());
-            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(BigGamingGameHistory) }, (provider, _) =>
-            provider.GetRequiredService<BigGamingGameHistory>());
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(BigGamingGameInitializer)
+            }, (provider, _) =>
+                provider.GetRequiredService<BigGamingGameInitializer>());
+            services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(BigGamingGameHistory)
+            }, (provider, _) =>
+                provider.GetRequiredService<BigGamingGameHistory>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/bg";
 
@@ -57,10 +67,7 @@ namespace TGS.Apis.TgsApi.GameProviders.BigGaming
                 {
                     builder.UseMiddleware<HandleBigGamingExceptionMiddleware>();
                     builder.UseMiddleware<AuthorizeBigGamingMiddleware>();
-
                 });
         }
-
     }
-
 }

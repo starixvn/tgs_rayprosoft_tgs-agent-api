@@ -47,7 +47,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 CardGameRebatePercentage = 10,
                 SportsRebatePercentage = 10,
                 VirtualSportsRebatePercentage = 10,
-                RegisteredOn = Now,
+                RegisteredOn = _Now,
                 DefaultWalletId = defaultWalletId,
                 Wallets = new[]
                 {
@@ -57,13 +57,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         AgentId = agentId.Value,
                         CurrencyCode = currencyCode,
                         Balance = 10,
-                        CreatedOn = Now,
-                        UpdatedOn = Now
+                        CreatedOn = _Now,
+                        UpdatedOn = _Now
                     }
                 },
-                CreatedByUsername = AdminUsername,
+                CreatedByUsername = _AdminUsername,
                 CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = AdminUsername,
+                UpdatedByUsername = _AdminUsername,
                 UpdatedOn = DateTimeOffset.Now
             };
         }
