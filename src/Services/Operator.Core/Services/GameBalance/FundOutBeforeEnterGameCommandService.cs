@@ -8,10 +8,10 @@ namespace TGS.Services.Operator.Services.GameBalance
 {
     internal class FundOutBeforeEnterGameCommandService : ICommandService<FundOutBeforeEnterGameCommand>
     {
-        private readonly ICommandService<FundOutGameBalanceCommand> _fundOutService;
-        private readonly IPlayerRepository _playerRepository;
         private readonly ICommandService<FundInAllGameBalanceCommand> _fundInAllService;
+        private readonly ICommandService<FundOutGameBalanceCommand> _fundOutService;
         private readonly IGetService<GetBalanceQuery, BalanceInfo> _getPlayerBalanceService;
+        private readonly IPlayerRepository _playerRepository;
 
         public FundOutBeforeEnterGameCommandService(
             IPlayerRepository playerRepository,
@@ -45,12 +45,15 @@ namespace TGS.Services.Operator.Services.GameBalance
                 .GetAsync(new GetBalanceQuery(command.PlayerCode))
                 .ConfigureAwait(false);
 
-            await _fundOutService
-                .ExecuteAsync(new FundOutGameBalanceCommand(
-                    command.GpCode,
-                    command.PlayerCode,
-                    (int)Math.Floor(playerBalance.Main)))
-                .ConfigureAwait(false);
+            var fundOutAmount = (int)Math.Floor(playerBalance.Main);
+
+            if (fundOutAmount > 0)
+                await _fundOutService
+                    .ExecuteAsync(new FundOutGameBalanceCommand(
+                        command.GpCode,
+                        command.PlayerCode,
+                        (int)Math.Floor(playerBalance.Main)))
+                    .ConfigureAwait(false);
         }
     }
 }
