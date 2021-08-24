@@ -20,9 +20,9 @@ namespace TGS.Shared.Game.ApiClients.WGSports
 
         ValueTask<WGSportsLoginResponse> GetLoginAsync(WGSportsConfiguration configuration, WGSportsLoginRequest source);
 
-        ValueTask<WGSportsAccessMoneyResponse> AccessMoneyAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyRequest source);
+        ValueTask<WGSportsResponse> AccessMoneyAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyRequest source);
 
-        ValueTask<WGSportsAccessMoneyQueryResponse> AccessMoneyQueryAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyQueryRequest source);
+        ValueTask<WGSportsResponse> AccessMoneyQueryAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyQueryRequest source);
 
         ValueTask<WGSportsGetBalanceResponse> GetBalanceAsync(WGSportsConfiguration configuration, WGSportsGetBalanceRequest source);
 
@@ -60,24 +60,24 @@ namespace TGS.Shared.Game.ApiClients.WGSports
             return ExecuteJsonRequestAsync<object, WGSportsLoginResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
 
-        ValueTask<WGSportsAccessMoneyResponse> IWGSportsApiClient.AccessMoneyAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyRequest source)
+        ValueTask<WGSportsResponse> IWGSportsApiClient.AccessMoneyAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyRequest source)
         {
             var data = $"{source.PlayerCode}|{(int)source.AmountType}|{source.OrderId}|{source.Amount}";
             var dataEncrypt = WGSportsUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoney&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.AccessMoney";
 
-            return ExecuteJsonRequestAsync<object, WGSportsAccessMoneyResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
+            return ExecuteJsonRequestAsync<object, WGSportsResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
 
-        ValueTask<WGSportsAccessMoneyQueryResponse> IWGSportsApiClient.AccessMoneyQueryAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyQueryRequest source)
+        ValueTask<WGSportsResponse> IWGSportsApiClient.AccessMoneyQueryAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyQueryRequest source)
         {
             var data = source.OrderId;
             var dataEncrypt = WGSportsUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoneyQuery&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.AccessMoneyQuery";
 
-            return ExecuteJsonRequestAsync<object, WGSportsAccessMoneyQueryResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
+            return ExecuteJsonRequestAsync<object, WGSportsResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
 
         ValueTask<WGSportsGetBalanceResponse> IWGSportsApiClient.GetBalanceAsync(WGSportsConfiguration configuration, WGSportsGetBalanceRequest source)
