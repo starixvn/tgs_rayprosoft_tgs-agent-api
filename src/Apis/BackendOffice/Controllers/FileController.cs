@@ -18,7 +18,7 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class FileController : BaseContextController
     {
         /// <summary>
-        ///     Gets the file.
+        /// Gets the file.
         /// </summary>
         /// <param name="fileServiceClient">The file service client.</param>
         /// <param name="objectId">The object identifier.</param>
@@ -38,7 +38,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost("upload/{prefix}")]
-        public async Task<UploadResponse> UploadFileAsync([FromServices] IFileServiceClient fileServiceClient,
+        public async Task<UploadResponse> UploadFileAsync(
+            [FromServices] IFileServiceClient fileServiceClient,
             string prefix,
             [FromForm(Name = "file")] IFormFile file)
         {
