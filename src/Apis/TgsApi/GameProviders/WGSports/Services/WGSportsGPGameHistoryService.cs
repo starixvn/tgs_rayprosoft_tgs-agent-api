@@ -153,6 +153,11 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                     successCount++;
                 }
 
+                if (gameRecord.Reference.IgnoreCaseEquals("不接受"))
+                {
+                    continue;
+                }
+
                 var createdOn = new DateTimeOffset(DateTime.Parse(gameRecord.RecordDate), TimeSpan.FromHours(-4));
                 DateTimeOffset? externalClosedOn = gameRecord.InitData.Win.IgnoreCaseEquals("0") ? null : new DateTimeOffset(DateTime.Parse(gameRecord.SettleDate), TimeSpan.FromHours(-4));
                 await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
