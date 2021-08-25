@@ -8,7 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Services.GameOperations.Calculators;
 
@@ -44,11 +46,11 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
             services.AddScoped<IWMCasinoUtility, WMCasinoUtility>();
             services.AddScoped<IWMCasinoPlayerServices, WMCasinoPlayerServices>();
 
-            //services.AddScopedWithResolver<IGameInitializer>(new[]
-            //    {
-            //        typeof(SabaGameInitializer)
-            //    },
-            //    (provider, _) => provider.GetRequiredService<SabaGameInitializer>());
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+                {
+                    typeof(WMCasinoGameInitializer)
+                },
+                (provider, _) => provider.GetRequiredService<WMCasinoGameInitializer>());
 
             //services.AddScopedWithResolver<IGameHistory>(new[]
             //    {
@@ -80,8 +82,16 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
 
             app.UseWhen(
                 context =>
-                    context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
-                    context.Request.ContentType == MediaTypeNames.Application.Json,
+                {
+                    if (context.Request.ContentType != MediaTypeNames.Application.Json)
+                    {
+                        return false;
+                    }
+
+                    return context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
+                        !context.Request.Path.StartsWithSegments("/gamerecord",
+                            StringComparison.OrdinalIgnoreCase);
+                },
                 builder =>
                 {
                     builder.UseMiddleware<AuthorizeWMCasinoMiddleware>();

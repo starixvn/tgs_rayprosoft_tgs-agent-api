@@ -12,7 +12,7 @@ using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.WMCasino.Enums;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
-using BetResult = TGS.Shared.Game.Models.WMCasino.Incoming.BetResult;
+using BetResult = TGS.Shared.Game.Models.WMCasino.Common.BetResult;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {

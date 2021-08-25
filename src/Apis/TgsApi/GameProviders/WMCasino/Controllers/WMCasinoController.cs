@@ -10,14 +10,16 @@ using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.WMCasino.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.WMCasino;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Services.GameOperations;
 using TGS.Services.Operations;
+using TGS.Shared.Game.ApiClients.WMCasino;
 using TGS.Shared.Game.Models.WMCasino.Enums;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
-using BetResult = TGS.Shared.Game.Models.WMCasino.Incoming.BetResult;
+using BetResult = TGS.Shared.Game.Models.WMCasino.Common.BetResult;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 {
@@ -154,6 +156,29 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             return message.IsNullOrEmpty()
                 ? _map.Response(GameApiError.Success, string.Empty)
                 : _map.Response(GameApiError.SystemError, message);
+        }
+
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HttpPost("gamerecord")]
+        public async ValueTask<GameProviderGameRecordResponse> GetGameRecordAsync(
+            [FromServices] IWMCasinoApiClient client,
+            [FromServices] ISettingOperations settingOperations,
+            [FromServices] IGameProviderOperations gameProviderOperations,
+            [FromServices] IWMCasinoAgentMapper agentMapper,
+            GameProviderGameRecordRequest request)
+        {
+            var configuration = await settingOperations
+                .GetValueFromJsonByKeyAsync<WMCasinoConfiguration>(SettingConsts.GameProviderConfigurations.WMCasino)
+                .ConfigureAwait(false);
+
+            var gameProviderId = await gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.WMCasino)
+                .ConfigureAwait(false);
+
+            var agent = agentMapper.GetAgentById(configuration.BrandMerchants, request.AgentId);
+
+            //var response = await client.GetDateTimeReportAsync()
+
+            return new GameProviderGameRecordResponse();
         }
 
         private async ValueTask<WalletTransferResponse> LockAmountAsync(WalletTransferRequest request)

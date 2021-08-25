@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TGS.Shared.Game.Models.WMCasino.Incoming
+namespace TGS.Shared.Game.Models.WMCasino.Common
 {
     public record BetResult
     {

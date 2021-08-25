@@ -28,6 +28,7 @@ using TGS.Workers.Schedulers.Jobs.GameProviders.KY;
 using TGS.Workers.Schedulers.Jobs.GameProviders.VR;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGSports;
+using TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino;
 using TGS.Workers.Schedulers.Jobs.Players;
 using TGS.Workers.Schedulers.Jobs.Promotion;
 using TGS.Workers.Schedulers.Jobs.Reports;
@@ -125,6 +126,7 @@ namespace TGS.Workers.Schedulers
                 var url = _configuration.GetSection("Email:Url");
                 c.BaseAddress = new(url.Value);
             });
+
             services.AddGameProviderScheduleLockRepository();
 
             services
@@ -153,7 +155,7 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IVRGameProviderService, VRGameProviderService>();
             services.AddTransient<IWGSportsGameProviderService, WGSportsGameProviderService>();
             services.AddTransient<IWGHorseGameProviderService, WGHorseGameProviderService>();
-
+            services.AddTransient<IWMCasinoGameProviderService, WMCasinoGameProviderService>();
         }
 
         private static Type[] GetModuleTypes() =>
