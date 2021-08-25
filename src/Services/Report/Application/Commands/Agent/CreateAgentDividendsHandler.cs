@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
@@ -48,70 +49,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
             var now = DateTimeOffset.Now.ToOffset(new(8, 0, 0));
             var queryDate = new DateTimeOffset(now.Year, now.Month, now.Day, 0, 0, 0, new(8, 0, 0));
 
-            var brands = await _brandService.GetBrandQueries(q =>
-                    q.Where(request.BrandCode is not null, x => x.Code == request.BrandCode)
-                        .Where(request.BrandCode is null, x => queryDate > x.CurrentSettlementTo))
-                .Where(x => x.SettlementIntervalType != null)
-                .ToArrayAsync(cancellationToken);
-            var createModels = new List<CreateAgentDividendModel>();
-            var createAutoSendModels = new List<CreateAgentDividendModel>();
-            var updateAgentDividends = new List<AgentDividend>();
-
-
-            var maxNumber = await _agentDividendService.GetAgentDividendQueries()
-                .MaxAsync(x => (int?)x.Id, cancellationToken) ?? 0;
-
-            foreach (var brand in brands)
-            {
-                if (!await _agentDividendService.GetAgentDividendQueries()
-                    .AnyAsync(
-                        x => x.BrandId == brand.Id && brand.CurrentSettlementFrom == x.From &&
-                            brand.CurrentSettlementTo == x.To, cancellationToken))
-                {
-                    var (autoSendDividends, manuelOrNegativeDividends, agentDividends) =
-                        await GetAgentDividends(brand, maxNumber);
-
-                    maxNumber += autoSendDividends.Count() + manuelOrNegativeDividends.Count();
-
-                    createAutoSendModels.AddRange(autoSendDividends);
-                    createModels.AddRange(manuelOrNegativeDividends);
-                    updateAgentDividends.AddRange(agentDividends);
-                }
-
-                var (nextFrom, nextTo) =
-                    GetInterval(brand.SettlementIntervalType,
-                        brand.NextSettlementTo.AddDays(1), brand.SettlementDay);
-
-                brand.PreviousSettlementFrom = brand.CurrentSettlementFrom;
-                brand.PreviousSettlementTo = brand.CurrentSettlementTo;
-                brand.CurrentSettlementFrom = brand.NextSettlementFrom;
-                brand.CurrentSettlementTo = brand.NextSettlementTo;
-                brand.NextSettlementFrom = nextFrom;
-                brand.NextSettlementTo = nextTo;
-            }
-
-            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray(), null);
-            await _agentDividendService.UpdateAgentDividendsAsync(updateAgentDividends.ToArray());
-            await _agentDividendService.CreateAgentDividendsAsync(
-                createAutoSendModels.ToArray(),
-                DateTimeOffset.Now);
-
-            await _brandService.UpdateBrandsAsync(brands);
-
-            var createdAgentIds = createAutoSendModels.Select(x => x.AgentId).ToArray();
-            var createdAgents = await _agentService.GetAgentQueries().Where(x => createdAgentIds.Contains(x.Id))
-                .ToArrayAsync(cancellationToken);
-
-            foreach (var models in createAutoSendModels)
-            {
-                var agent = createdAgents.Single(a => a.Id == models.AgentId);
-                await _walletRepository.ExchangeAsync(models.BrandId, agent.DefaultWalletId, agent.Id,
-                    TransactionTypes.Dividend, models.AgentDividendAmount);
-            }
-
-            scope.Complete();
+            await SendAgentDividend(request.BrandCode, queryDate, cancellationToken);
 
             return CreateValidResponse<MessageResponse>();
         }
@@ -405,6 +343,96 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
+        }
+
+        private async IAsyncEnumerable<Brand[]> GetBrands(string brandCode, DateTimeOffset queryDate,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            bool hasBrands;
+            do
+            {
+                var brands = await _brandService.GetBrandQueries(q
+                        =>
+                        q.Where(brandCode is not null, x => x.Code == brandCode)
+                            .Where(brandCode is null, x => queryDate > x.CurrentSettlementTo), true)
+                    .ToArrayAsync(cancellationToken);
+                hasBrands = brands.Any();
+                yield return brands;
+            } while (hasBrands);
+        }
+
+        private async Task SendAgentDividend(string brandCode, DateTimeOffset queryDate,
+            CancellationToken cancellationToken)
+        {
+            await foreach (var brands in GetBrands(brandCode, queryDate, cancellationToken))
+            {
+                var createModels = new List<CreateAgentDividendModel>();
+                var createAutoSendModels = new List<CreateAgentDividendModel>();
+                var updateAgentDividends = new List<AgentDividend>();
+
+                var maxNumber = await _agentDividendService.GetAgentDividendQueries()
+                    .MaxAsync(x => (int?)x.Id, cancellationToken) ?? 0;
+
+                foreach (var brand in brands)
+                {
+                    if (!await _agentDividendService.GetAgentDividendQueries()
+                        .AnyAsync(
+                            x => x.BrandId == brand.Id && brand.CurrentSettlementFrom == x.From &&
+                                brand.CurrentSettlementTo == x.To, cancellationToken))
+                    {
+                        var (autoSendDividends, manuelOrNegativeDividends, agentDividends) =
+                            await GetAgentDividends(brand, maxNumber);
+
+                        maxNumber += autoSendDividends.Count() + manuelOrNegativeDividends.Count();
+
+                        createAutoSendModels.AddRange(autoSendDividends);
+                        createModels.AddRange(manuelOrNegativeDividends);
+                        updateAgentDividends.AddRange(agentDividends);
+                    }
+
+                    var (nextFrom, nextTo) =
+                        GetInterval(brand.SettlementIntervalType,
+                            brand.NextSettlementTo.AddDays(1), brand.SettlementDay);
+
+                    brand.PreviousSettlementFrom = brand.CurrentSettlementFrom;
+                    brand.PreviousSettlementTo = brand.CurrentSettlementTo;
+                    brand.CurrentSettlementFrom = brand.NextSettlementFrom;
+                    brand.CurrentSettlementTo = brand.NextSettlementTo;
+                    brand.NextSettlementFrom = nextFrom;
+                    brand.NextSettlementTo = nextTo;
+                }
+
+                await SaveAgentDividendData(brands, createModels, createAutoSendModels, updateAgentDividends,
+                    cancellationToken);
+            }
+        }
+
+        private async Task SaveAgentDividendData(Brand[] brands, List<CreateAgentDividendModel> createModels,
+            List<CreateAgentDividendModel> createAutoSendModels, List<AgentDividend> updateAgentDividends,
+            CancellationToken cancellationToken)
+        {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+            await _agentDividendService.CreateAgentDividendsAsync(createModels.ToArray(), null);
+            await _agentDividendService.UpdateAgentDividendsAsync(updateAgentDividends.ToArray());
+            await _agentDividendService.CreateAgentDividendsAsync(
+                createAutoSendModels.ToArray(),
+                DateTimeOffset.Now);
+
+            await _brandService.UpdateBrandsAsync(brands);
+
+            var createdAgentIds = createAutoSendModels.Select(x => x.AgentId).ToArray();
+            var createdAgents = await _agentService.GetAgentQueries().Where(x => createdAgentIds.Contains(x.Id))
+                .ToArrayAsync(cancellationToken);
+
+            foreach (var models in createAutoSendModels)
+            {
+                var agent = createdAgents.Single(a => a.Id == models.AgentId);
+                await _walletRepository.ExchangeAsync(models.BrandId, agent.DefaultWalletId, agent.Id,
+                    TransactionTypes.Dividend, models.AgentDividendAmount);
+            }
+
+            scope.Complete();
         }
     }
 }
