@@ -129,6 +129,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         Id = form.Id,
                         Status = form.Status.ToFlowState(),
                         Amount = form.Amount,
+                        BrandPaymentId = form.BrandPaymentId,
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn
                     })
