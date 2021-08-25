@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
 using TGS.Apis.TgsApi.GameProviders.VR.Services;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
@@ -22,6 +23,9 @@ namespace TGS.Apis.TgsApi.GameProviders.VR
         {
             services.AddErrorMappers();
 
+            services.AddTransient<IGameProviderRecordService, GameProviderRecordService>();
+            services.AddTransient<IVRService, VRService>();
+            services.AddTransient<IVRGPGameHistoryService, VRGPGameHistoryService>();
             services.AddTransient<IVRGamePlayerCreate, VRGamePlayerCreate>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(VRGameInitializer) }, (provider, _) =>

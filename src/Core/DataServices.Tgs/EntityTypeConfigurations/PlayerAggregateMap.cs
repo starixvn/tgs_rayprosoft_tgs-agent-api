@@ -43,6 +43,18 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
+            builder.Property(b => b.RebateAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(b => b.DividendAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            builder.Property(b => b.PromotionAmount)
+                .HasPrecision(18, 6)
+                .IsRequired();
+
             builder.Property(b => b.BetAmount)
                 .HasPrecision(18, 6)
                 .IsRequired();
@@ -52,10 +64,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(b => b.WinLossAmount)
-                .HasPrecision(18, 6)
-                .IsRequired();
-
-            builder.Property(b => b.NetProfit)
                 .HasPrecision(18, 6)
                 .IsRequired();
 
@@ -69,13 +77,27 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(b => b.CreatedOn)
                 .IsRequired();
 
-            builder.HasIndex(b => new {b.BrandId, b.ReportDate})
+            builder.HasIndex(b => new
+                {
+                    b.BrandId,
+                    b.ReportDate
+                })
                 .HasDatabaseName("ix_player_aggregates_brand_id_report_date");
 
-            builder.HasIndex(b => new {b.BrandId, b.ReportDate, b.PlayerCode})
+            builder.HasIndex(b => new
+                {
+                    b.BrandId,
+                    b.ReportDate,
+                    b.PlayerCode
+                })
                 .HasDatabaseName("ix_player_aggregates_brand_id_report_date_player_code");
 
-            builder.HasIndex(b => new {b.BrandId, b.ReportDate, b.AgentId})
+            builder.HasIndex(b => new
+                {
+                    b.BrandId,
+                    b.ReportDate,
+                    b.AgentId
+                })
                 .HasDatabaseName("ix_player_aggregates_brand_id_report_date_agent_id");
         }
     }

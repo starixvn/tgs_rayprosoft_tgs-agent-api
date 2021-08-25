@@ -94,6 +94,9 @@ namespace TGS.Core.Models
             public const string Skywind = "SW";
             public const string AllBet = "AB";
             public const string Evolution = "EVO";
+            public const string WGSports = "WGFM";
+            public const string WGHorse = "WGVIA";
+            public const string WMCasino = "WM";
         }
 
         public static class EnvironmentVariable
@@ -145,12 +148,14 @@ namespace TGS.Core.Models
             public const string StationLetter = "stationLetter";
             public const string Promotion = "promotion";
             public const string MessengerQRCode = "messengerQRCode";
+            public const string Banner = "banner";
 
             public static readonly string[] Types =
             {
                 StationLetter,
                 Promotion,
-                MessengerQRCode
+                MessengerQRCode,
+                Banner
             };
         }
 

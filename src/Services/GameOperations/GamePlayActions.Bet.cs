@@ -48,19 +48,21 @@ namespace TGS.Services.GameOperations
         ValueTask<BetResult> IGamePlayActions.LockAmountAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.LockAmountAsync, async player =>
             {
+                var platformType = data.AllowPlaceBetWithDifferentPlatformToken ? null : data.PlatformType;
                 await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
-                    data.PlatformType);
+                    platformType).ConfigureAwait(false);
 
-                await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+                await ThrowIfGameIsNotTakenByBrandAsync(player, data).ConfigureAwait(false);
             });
 
         ValueTask<BetResult> IGamePlayActions.PlaceBetAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.PlaceBetAsync, async player =>
             {
+                var platformType = data.AllowPlaceBetWithDifferentPlatformToken ? null : data.PlatformType;
                 await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
-                    data.PlatformType);
+                    platformType).ConfigureAwait(false);
 
-                await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+                await ThrowIfGameIsNotTakenByBrandAsync(player, data).ConfigureAwait(false);
             });
 
         ValueTask<BetResult> IGamePlayActions.SettleBetAsync(BetData data) =>
@@ -72,16 +74,23 @@ namespace TGS.Services.GameOperations
         ValueTask<BetResult> IGamePlayActions.PlaceAndSettleBetAsync(BetData data) =>
             ExecuteGamePlayActionAsync(data, _operations.PlaceAndSettleBetAsync, async player =>
             {
+                var platformType = data.AllowPlaceBetWithDifferentPlatformToken ? null : data.PlatformType;
                 await ValidatePlayerAsync(player, data.GameProviderId, data.GameProviderConfigurationId,
-                    data.PlatformType);
+                    platformType).ConfigureAwait(false);
 
-                await ThrowIfGameIsNotTakenByBrandAsync(player, data);
+                await ThrowIfGameIsNotTakenByBrandAsync(player, data)
+                    .ConfigureAwait(false);
             });
 
         private async Task ThrowIfGameIsNotTakenByBrandAsync(CachedPlayer player, BetData data,
             GameActionType type = GameActionType.PlaceBet)
         {
             if (type != GameActionType.PlaceBet)
+            {
+                return;
+            }
+
+            if (data.Transactions.Length == 0)
             {
                 return;
             }
@@ -177,7 +186,7 @@ namespace TGS.Services.GameOperations
         private async ValueTask<BetResult> EnsureMappingsAsync(Guid gameProviderId, BetResult r)
         {
             var currencyCode = await _currencyMapper.InternalToExternalAsync(r.CurrencyCode, gameProviderId);
-            return r with {GameProviderCurrencyCode = currencyCode};
+            return r with { GameProviderCurrencyCode = currencyCode };
         }
 
         private async ValueTask<BetResult> ExecuteGamePlayActionAsync(BetData data,

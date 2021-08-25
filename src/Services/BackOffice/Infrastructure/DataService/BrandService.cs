@@ -11,7 +11,7 @@ using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Utility;
+using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Application.Models.Brand;
@@ -86,14 +86,22 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         {
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
+            var timeSpan = new TimeSpan(8, 0, 0);
+            var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
+                DateTimeOffset.Now.Day, 0,
+                0, 0, timeSpan);
+
             var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
-                BrandSettlementIntervalGenerator.GetInterval(request.SettlementIntervalType);
+                GetInterval(request.SettlementIntervalType, now, request.SettlementDay, now);
+
             var brand = new Brand
             {
                 Id = Guid.NewGuid(),
                 LicenseeId = request.LicenseeId,
                 Code = request.Code,
                 Name = request.Name,
+                PreviousSettlementFrom = currentFromDate,
+                PreviousSettlementTo = currentToDate,
                 CurrentSettlementFrom = currentFromDate,
                 CurrentSettlementTo = currentToDate,
                 NextSettlementFrom = nextFromDate,
@@ -103,6 +111,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 Status = Status.Active,
                 Description = request.Description,
                 OperationalEmail = request.OperationalEmail,
+                SettlementDay = request.SettlementDay,
                 SettlementIntervalType = request.SettlementIntervalType,
                 ApiKey = _credentialGenerator.GetApiKey(),
                 ClientId = request.Code,
@@ -159,8 +168,27 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
         async Task IBrandService.UpdateBrandAsync(Brand brand, UpdateBrandRequest request)
         {
+            if (request.SettlementIntervalType != brand.SettlementIntervalType)
+            {
+                var timeSpan = new TimeSpan(8, 0, 0);
+                var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
+                    DateTimeOffset.Now.Day, 0,
+                    0, 0, timeSpan);
+
+                var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
+                    GetInterval(request.SettlementIntervalType, now, request.SettlementDay,
+                        brand.CurrentSettlementFrom);
+
+                brand.CurrentSettlementFrom = currentFromDate;
+                brand.CurrentSettlementTo = currentToDate;
+                brand.NextSettlementFrom = nextFromDate;
+                brand.NextSettlementTo = nextToDate;
+            }
+
             brand.Code = request.Code;
             brand.Name = request.Name;
+            brand.SettlementDay = request.SettlementDay;
+            brand.SettlementIntervalType = request.SettlementIntervalType;
             brand.Description = request.Description;
             brand.OperationalEmail = request.OperationalEmail;
             brand.UpdatedByUsername = request.EditorUsername;
@@ -612,6 +640,45 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     });
 
             return new(brandGroupGameProviderBetLimits ?? Array.Empty<BrandGroupGameProviderBetLimit>());
+        }
+
+        private static (DateTimeOffset, DateTimeOffset, DateTimeOffset, DateTimeOffset) GetInterval(
+            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth, DateTimeOffset currentFromDate)
+        {
+            switch (type)
+            {
+                case SettlementIntervalType.Daily:
+                    return (startDate, startDate, startDate.AddDays(1), startDate.AddDays(1));
+                case SettlementIntervalType.Weekly:
+                    return (startDate,
+                        DateGenerator.GetLastDayOfWeek(startDate),
+                        DateGenerator.GetFirstDayOfWeek(startDate.AddDays(7)),
+                        DateGenerator.GetLastDayOfWeek(startDate.AddDays(7)));
+                case SettlementIntervalType.Monthly:
+                    if (dayOfMonth == null)
+                    {
+                        return (startDate,
+                            DateGenerator.GetLastDayOfMonth(startDate),
+                            DateGenerator.GetFirstDayOfMonth(startDate.AddMonths(1)),
+                            DateGenerator.GetLastDayOfMonth(startDate.AddMonths(1)));
+                    }
+
+                    if (startDate.Day <= dayOfMonth)
+                    {
+                        return (currentFromDate,
+                            startDate,
+                            startDate.AddDays(1),
+                            DateGenerator.GetSpecifyDayOfMonth(startDate, dayOfMonth.Value!));
+                    }
+
+                    return (currentFromDate,
+                        startDate,
+                        startDate.AddDays(1),
+                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
+                            dayOfMonth.Value!));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
         }
     }
 }

@@ -173,7 +173,7 @@ namespace TGS.Apis.OperatorApi.Models
                 && _ErrorCodeMessageIdMap.TryGetValue(errorType, out var messageKey))
                 return messageKey;
             else
-                return null;
+                return _ErrorCodeMessageIdMap[TgsApiError.SystemError];
         }
     }
 }

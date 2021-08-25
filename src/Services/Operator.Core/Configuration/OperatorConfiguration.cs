@@ -17,16 +17,57 @@ namespace TGS.Services.Operator.Configuration
             Services = services ?? throw new ArgumentNullException(nameof(services));
         }
 
+        public OperatorConfiguration AddGameProviderRepository<TGameProviderRepository>()
+            where TGameProviderRepository : class, IGameProviderRepository
+        {
+            Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration AddMaintenanceRedisRepository<TMaintenanceRedisRepository>() where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
+        {
+            Services
+                .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
+
+            return this;
+        }
+
         public OperatorConfiguration AddPaymentServiceClient(
-            Action<PaymentServiceClientOptions, IServiceProvider> configure)
+                            Action<PaymentServiceClientOptions, IServiceProvider> configure)
         {
             Services.AddPaymentServiceClient(configure);
 
             return this;
         }
 
+        public OperatorConfiguration AddStationLetterRepository<TStationLetterRepository>()
+                            where TStationLetterRepository : class, IStationLetterRepository
+        {
+            Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration AddSysRepository<TSysRepository>()
+                    where TSysRepository : class, ISysRepository
+        {
+            Services.AddTransient<ISysRepository, TSysRepository>();
+
+            return this;
+        }
+
+        public OperatorConfiguration AddWalletRepository<TWalletRepository>()
+            where TWalletRepository : class, IPlayerRepository
+        {
+            Services
+                .AddTransient<IPlayerRepository, TWalletRepository>();
+
+            return this;
+        }
+
         public OperatorConfiguration ConfigureEmailConfiguration<TDep>(Action<EmailConfiguration, TDep> configure)
-            where TDep : class
+                            where TDep : class
         {
             Services
                 .AddOptions<EmailConfiguration>()
@@ -48,39 +89,6 @@ namespace TGS.Services.Operator.Configuration
         public OperatorConfiguration ConfigureWallet(Action<WalletConfiguration> configure)
         {
             configure(Services.AddWallet());
-
-            return this;
-        }
-
-        public OperatorConfiguration UseGameProviderRepository<TGameProviderRepository>()
-            where TGameProviderRepository : class, IGameProviderRepository
-        {
-            Services.AddTransient<IGameProviderRepository, TGameProviderRepository>();
-
-            return this;
-        }
-
-        public OperatorConfiguration UseMaintenanceRedisRepository<TMaintenanceRedisRepository>() where TMaintenanceRedisRepository : class, IMaintenanceRedisRepository
-        {
-            Services
-                .AddTransient<IMaintenanceRedisRepository, TMaintenanceRedisRepository>();
-
-            return this;
-        }
-
-        public OperatorConfiguration UseStationLetterRepository<TStationLetterRepository>()
-                            where TStationLetterRepository : class, IStationLetterRepository
-        {
-            Services.AddTransient<IStationLetterRepository, TStationLetterRepository>();
-
-            return this;
-        }
-
-        public OperatorConfiguration UseWalletRepository<TWalletRepository>()
-            where TWalletRepository : class, IPlayerRepository
-        {
-            Services
-                .AddTransient<IPlayerRepository, TWalletRepository>();
 
             return this;
         }

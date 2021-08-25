@@ -90,11 +90,13 @@ namespace TGS.Apis.TgsApi.Commons
                 "/metrics"
             });
 
+            UseCustomMiddlewaresBeforeRouting(app);
+
             app.UseRouting();
 
             app.UseHttpMetrics();
 
-            UseCustomMiddlewares(app);
+            UseCustomMiddlewaresAfterRouting(app);
 
             app.UseEndpoints(endpoints =>
             {
@@ -122,13 +124,18 @@ namespace TGS.Apis.TgsApi.Commons
             });
         }
 
+
         #region Abstract and Virtual Methods
 
         protected virtual void AddCustomDependencyServices(IServiceCollection services)
         {
         }
 
-        protected virtual void UseCustomMiddlewares(IApplicationBuilder app)
+        protected virtual void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
+        {
+        }
+
+        protected virtual void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
         }
 

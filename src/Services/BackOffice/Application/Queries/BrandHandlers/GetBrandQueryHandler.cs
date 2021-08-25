@@ -47,6 +47,7 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                     ClientId = brand.ClientId,
                     SecretKey = brand.SecretKey,
                     ApiKey = brand.ApiKey,
+                    SettlementDay = brand.SettlementDay,
                     SettlementIntervalType = brand.SettlementIntervalType,
                     Domains = brand.Domains.Select(x => x.Url).ToArray(),
                     Currencies = brand.Currencies
@@ -106,7 +107,6 @@ namespace TGS.Services.BackOffice.Application.Queries.BrandHandlers
                                 GameProviderBetLimitId = b.GameProviderBetLimitId
                             }).ToArray()
                     }).ToArray(),
-
                     Description = brand.Description,
                     OperationalEmail = brand.OperationalEmail,
                     CreatedOn = brand.CreatedOn,

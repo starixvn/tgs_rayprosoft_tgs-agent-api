@@ -41,6 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet
             services.AddScoped<IAllBetServices, AllBetServices>();
             services.AddScoped<IAllBetCacheServices, AllBetCacheServices>();
             services.AddScoped<IAllBetAgentMapper, AllBetAgentMapper>();
+            services.AddScoped<IAllBetPlayerServices, AllBetPlayerServices>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[]
             {
@@ -55,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.AllBet
             services.AddSingleton<IBetValuesCalculator, AllBetBetValuesCalculator>();
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/ab";
 

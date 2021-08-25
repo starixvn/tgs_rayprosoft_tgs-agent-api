@@ -17,23 +17,41 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string SecretKey { get; }
             string ApiKey { get; }
             SettlementIntervalType Type { get; }
+            int? SettlementDay { get; }
 
             ICurrency[] Currencies => new ICurrency[]
             {
-                new CNYCurrency(), new IDRCurrency(), new IDR1000Currency(), new INRCurrency(), new VNDCurrency(),
-                new VND1000Currency(), new THBCurrency(), new EURCurrency(), new GBPCurrency(), new KRWCurrency(),
+                new CNYCurrency(),
+                new IDRCurrency(),
+                new IDR1000Currency(),
+                new INRCurrency(),
+                new VNDCurrency(),
+                new VND1000Currency(),
+                new THBCurrency(),
+                new EURCurrency(),
+                new GBPCurrency(),
+                new KRWCurrency(),
                 new JPYCurrency()
             };
 
             ILanguage[] Languages => new ILanguage[]
             {
-                new CNLanguage(), new USLanguage(), new IDLanguage(), new VNLanguage(), new THLanguage(),
-                new TWLanguage(), new JPLanguage(), new KRLanguage()
+                new CNLanguage(),
+                new USLanguage(),
+                new IDLanguage(),
+                new VNLanguage(),
+                new THLanguage(),
+                new TWLanguage(),
+                new JPLanguage(),
+                new KRLanguage()
             };
 
             string[] GameProviders => Array.Empty<string>();
 
-            string[] Groups => new[] {"Normal"};
+            string[] Groups => new[]
+            {
+                "Normal"
+            };
         }
 
         internal record TgsBrand : IBrand
@@ -54,7 +72,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string IBrand.ApiKey => "xdZYrxH3X8xXn2KlhWqB3VB4TjZrHfp4rM5xbHfa8cU3oz6CZDL3HqcuZ07pPQFV";
 
-            SettlementIntervalType IBrand.Type => SettlementIntervalType.Weekly;
+            SettlementIntervalType IBrand.Type => SettlementIntervalType.Monthly;
+
+            int? IBrand.SettlementDay => 13;
 
             string[] IBrand.GameProviders => new[]
             {
@@ -82,6 +102,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             string IBrand.ApiKey => "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ";
 
             SettlementIntervalType IBrand.Type => SettlementIntervalType.Daily;
+
+            int? IBrand.SettlementDay => null;
         }
     }
 }

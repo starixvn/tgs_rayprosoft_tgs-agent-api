@@ -46,20 +46,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('b360ae21-517a-e464-7de8-baf1d09533cd'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '9ba8107a-f638-42df-9550-97e6cf39635b'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --中国农业银行
 insert
     into
@@ -67,20 +59,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('5d84a5d7-8fc3-652e-8899-7a0dae399b57'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'afedfee0-869b-45c9-81c0-53b9ee893f87'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --中国工商银行
 insert
     into
@@ -88,20 +72,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('7520134b-bd47-b5ab-b919-2bdbc4b0f83a'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '993a41b8-a090-48e8-97f0-2dda0e5921f9'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --中国建设银行
 insert
     into
@@ -109,20 +85,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('c2840657-3836-e0a9-ddc5-4a08733f5b91'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'ae24a9ef-b18c-4ca1-b0b9-3540a70a0a55'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --中国民生银行
 insert
     into
@@ -130,20 +98,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('f139dfac-cc47-ce0a-27a9-a1eddb90a8f9'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'adb50cc2-f96f-4892-a555-93f2564af231'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --中国银行
 insert
     into
@@ -151,20 +111,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('26cdccc5-6e40-59a3-6a43-0aec07554592'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '76fd5896-b659-4d73-bfb8-d5eaf6ae71c3'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --交通银行
 insert
     into
@@ -172,20 +124,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('01d3ebd5-e715-a730-6341-4c0981c27bdb'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '8b7320c8-bc4f-46d6-a207-84490da9ab40'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --兴业银行
 insert
     into
@@ -193,20 +137,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('d01c44d7-053c-0820-42d4-a300dff62f39'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '9e7492bc-5d42-43e5-b202-8aa1f841ab85'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --农村商业银行
 insert
     into
@@ -214,20 +150,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('291abd62-5550-582d-b54d-0c896a6acd98'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '60b75917-13e7-481c-bee2-3f772e640afc'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --华夏银行
 insert
     into
@@ -235,20 +163,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('d7780c59-c3f4-5308-b546-a7d3966e624e'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '02f1c110-74b9-4ac8-82de-808cbb63aaa6'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --中信银行
 insert
     into
@@ -256,20 +176,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('84f9cb69-0892-1bda-22a0-dab46591796e'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'dc642a94-c2a3-4e89-a71d-891e69d2e3ca'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --城市商业银行
 insert
     into
@@ -277,20 +189,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('3efe6a1c-edf9-ae86-a95a-1d74458bd09d'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '133b2c82-15f4-4d49-9ce1-7b9016080579'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --广发银行
 insert
     into
@@ -298,20 +202,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('efb59916-ffc9-2125-ac1d-ee6d92d7761c'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'f69bdc10-2672-4bae-b56c-74312238e17a'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --恒丰银行
 insert
     into
@@ -319,20 +215,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('ffa5da22-373e-5ea1-8432-18c94338fc66'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '5da03236-2cbc-4943-996a-243f22c725e3'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --招商银行
 insert
     into
@@ -340,20 +228,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('6f70d98e-b8f0-3638-bc26-2402b6641ffe'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '32f5823c-556e-42e9-a1db-4b2f37f147ec'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --浙江农信
 insert
     into
@@ -361,20 +241,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('ecb3a350-6c0b-1d21-11e4-2ae15088e275'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'c71a8a66-c256-4387-8efc-22fbc3bbbc3e'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --渤海银行
 insert
     into
@@ -382,20 +254,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('d31dd2e2-c19f-4e1a-7ac0-e610c4497100'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '39f2eedd-8d53-4276-8840-58f48282369e'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --福建省农村信用社
 insert
     into
@@ -403,20 +267,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('0fb62a48-f081-9c0b-d90b-3c4188aff79b'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'afc7830d-2949-4a75-b63e-8206da684fa0'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --邮政储汇
 insert
     into
@@ -424,20 +280,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('6c21e2e1-dde7-dda1-c3f9-d3b75a4c9f49'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'aa1a7612-97c3-4ca5-985e-badc269c4e17'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --鄞州银行
 insert
     into
@@ -445,20 +293,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('c73164e8-14ac-8f1b-7454-ae69305836c1'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'ea89f52c-61a7-4727-b1e3-dc08f280c6c6'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --平安银行
 insert
     into
@@ -466,20 +306,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('894be4b2-66f5-af57-b52d-1557bfe18c1d'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '8f311f11-81b3-4e15-980b-2b215b15299e'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --上海浦东发展银行
 insert
     into
@@ -487,20 +319,12 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('7e960ad1-8699-37d6-c73d-bafea2bd8585'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 'e761a2d3-5705-417f-8d97-43cb7aea0142'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);
 --建设银行(與中国建设银行不同)
 insert
     into
@@ -508,17 +332,9 @@ insert
     payment_id,
     method_id,
     channel_id,
-    status,
-    created_on,
-    updated_on,
-    created_by_username,
-    updated_by_username)
+    status)
 values('cefa824b-0e01-228a-cbc0-e6a7fb972868'::uuid,
 '14d139ca-951f-62d8-53ee-a4512f22e04b'::uuid,
 '67252f3a-6826-45ce-8bbc-c53e2ca7cdcb'::uuid,
 '2c0e6a1d-e7ba-1443-7699-d341a14faf97'::uuid,
-0,
-now(),
-now(),
-'admin.enabled',
-'admin.enabled');
+0);

@@ -4,7 +4,6 @@
     {
         Daily = 1,
         Weekly = 2,
-        Monthly = 3,
-        Instantly = 4
+        Monthly = 3
     }
 }

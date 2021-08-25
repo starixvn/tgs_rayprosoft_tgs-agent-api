@@ -25,7 +25,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] {typeof(HabaneroErrorMapper)},
+                new[]
+                {
+                    typeof(HabaneroErrorMapper)
+                },
                 (provider, key) => key switch
                 {
                     GameProvider.Habanero => provider.GetRequiredService<HabaneroErrorMapper>(),
@@ -39,14 +42,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero
             services.AddScoped<IHabaneroServices, HabaneroServices>();
             services.AddSingleton<IHabaneroActionModelMapper, HabaneroActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(HabaneroGameInitializer)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(HabaneroGameInitializer)
+            }, (provider, _) =>
                 provider.GetRequiredService<HabaneroGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(HabaneroGameHistory)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(HabaneroGameHistory)
+            }, (provider, _) =>
                 provider.GetRequiredService<HabaneroGameHistory>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/haba";
 

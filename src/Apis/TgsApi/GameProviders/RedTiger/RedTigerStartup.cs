@@ -23,7 +23,10 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] {typeof(RedTigerErrorMapper)},
+                new[]
+                {
+                    typeof(RedTigerErrorMapper)
+                },
                 (provider, key) =>
                 {
                     return key switch
@@ -36,9 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.RedTiger
             services.AddScoped<HandleRedTigerErrorFilter>();
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
-        {
-            app.UseMiddleware<RedTigerDispatcherMiddleware>();
-        }
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+            => app.UseMiddleware<RedTigerDispatcherMiddleware>();
     }
 }

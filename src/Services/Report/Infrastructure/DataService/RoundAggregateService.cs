@@ -86,10 +86,26 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
             var playerAggregates = await _tgsRepository.Players.Include(x => x.Agent)
                 .GroupJoin(_tgsRepository.Transactions, p => p.PlayerCode, t => t.Wallet.PlayerCode,
-                    (p, t) => new { p.BrandId, Player = p, transaction = t })
+                    (p, t) => new
+                    {
+                        p.BrandId,
+                        Player = p,
+                        transaction = t
+                    })
                 .SelectMany(x => x.transaction.DefaultIfEmpty(),
-                    (x, transaction) => new { x.BrandId, x.Player, transaction })
-                .GroupBy(x => new { x.BrandId, x.Player.AgentId,x.Player.Agent.DividendPercentage, x.Player.PlayerCode },
+                    (x, transaction) => new
+                    {
+                        x.BrandId,
+                        x.Player,
+                        transaction
+                    })
+                .GroupBy(x => new
+                    {
+                        x.BrandId,
+                        x.Player.AgentId,
+                        x.Player.Agent.DividendPercentage,
+                        x.Player.PlayerCode
+                    },
                     (x, players) =>
                         new PlayerAggregateModel
                         {
@@ -147,16 +163,23 @@ namespace TGS.Services.Report.Infrastructure.DataService
                         .Sum(r => r.Turnover);
                 playerAggregate.WinLossAmount = playerRoundAggregates
                     .Sum(r => r.WinLoss);
-                playerAggregate.NetProfit = playerAggregate.WinLossAmount - playerAggregate.AdjustmentAmount -
-                    playerAggregate.BonusAmount - playerAggregate.RebateAmount - playerAggregate.DividendAmount -
-                    playerAggregate.PromotionAmount;
             }
 
             var playerAggregateByGameType = roundAggregates.GroupJoin(
                     _tgsRepository.Players.Include(x => x.Agent).Include(x => x.Vip),
-                    r => r.PlayerCode, p => p.PlayerCode, (r, p) => new {r, p = p.DefaultIfEmpty()})
+                    r => r.PlayerCode, p => p.PlayerCode, (r, p) => new
+                    {
+                        r,
+                        p = p.DefaultIfEmpty()
+                    })
                 .SelectMany(x => x.p.Select(player => player),
-                    (x, player) => new {x.r, x.p, player.Vip, player.Agent })
+                    (x, player) => new
+                    {
+                        x.r,
+                        x.p,
+                        player.Vip,
+                        player.Agent
+                    })
                 .GroupBy(x => new
                     {
                         x.r.BrandId,
@@ -203,8 +226,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
 
             playerAggregates = playerAggregates.Where(x =>
                 x.RegisteredCount != 0 || x.FirstFundInCount != 0 || x.DepositAmount != 0 || x.WithdrawalAmount != 0 ||
-                x.AdjustmentAmount != 0 || x.BonusAmount != 0 || x.BetAmount != 0 || x.Turnover != 0 ||
-                x.WinLossAmount != 0 || x.NetProfit != 0 || players.Contains(x.PlayerCode)).ToArray();
+                x.AdjustmentAmount != 0 || x.BonusAmount != 0 || x.RebateAmount != 0 || x.DividendAmount != 0 ||
+                x.PromotionAmount != 0 || x.BetAmount != 0 || x.Turnover != 0 ||
+                x.WinLossAmount != 0 || players.Contains(x.PlayerCode)).ToArray();
 
             return (playerAggregates, playerAggregateByGameType);
         }

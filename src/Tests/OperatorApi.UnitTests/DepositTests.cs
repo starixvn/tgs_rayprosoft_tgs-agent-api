@@ -6,13 +6,12 @@ using ExpectedObjects;
 using Moq;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Apis.FileService.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
+using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
 using TGS.Payment.ManualDeposit;
-using TGS.Services.Operations.Commands;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 
@@ -308,7 +307,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     It.IsAny<string>(),
                     It.Is<MediaTypeHeaderValue>(x => x.ToString() == contentType),
                     It.IsAny<Stream>()))
-                .Returns(ValueTask.FromResult(new FileView {Id = "testFileId", ContentType = contentType}));
+                .Returns(ValueTask.FromResult(new FileView
+                {
+                    Id = "testFileId",
+                    ContentType = contentType
+                }));
 
             await sut.ExecuteAsync(command);
 

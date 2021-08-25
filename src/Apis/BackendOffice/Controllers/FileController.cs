@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Resources;
-using TGS.Apis.FileService.Clients;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models;
+using Tgs.FileService.Clients;
 
 namespace TGS.Apis.BackendOffice.Controllers
 {
@@ -18,7 +18,7 @@ namespace TGS.Apis.BackendOffice.Controllers
     public class FileController : BaseContextController
     {
         /// <summary>
-        ///     Gets the file.
+        /// Gets the file.
         /// </summary>
         /// <param name="fileServiceClient">The file service client.</param>
         /// <param name="objectId">The object identifier.</param>
@@ -38,7 +38,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpPost("upload/{prefix}")]
-        public async Task<UploadResponse> UploadFileAsync([FromServices] IFileServiceClient fileServiceClient,
+        public async Task<UploadResponse> UploadFileAsync(
+            [FromServices] IFileServiceClient fileServiceClient,
             string prefix,
             [FromForm(Name = "file")] IFormFile file)
         {
@@ -58,7 +59,11 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var fileView = await fileServiceClient.UploadPublicFileAsync(path,
                 MediaTypeHeaderValue.Parse(contentType), fileStream);
-            return new() {Valid = true, Location = fileView.ExternalUrl};
+            return new()
+            {
+                Valid = true,
+                Location = fileView.ExternalUrl
+            };
         }
     }
 }
