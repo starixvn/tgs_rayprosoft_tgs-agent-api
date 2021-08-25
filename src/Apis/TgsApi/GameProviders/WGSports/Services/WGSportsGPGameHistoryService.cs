@@ -153,7 +153,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
                     successCount++;
                 }
 
-                if (gameRecord.Reference.IgnoreCaseEquals("不接受"))
+                if (gameRecord.Reference.IgnoreCaseContains("不接受"))
                 {
                     continue;
                 }
