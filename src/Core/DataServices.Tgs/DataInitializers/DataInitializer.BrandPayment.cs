@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -103,14 +104,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private async Task GenerateDepositBrandPaymentsAsync()
         {
             var allPaymentMethodChannels = await _repository.PaymentMethodChannels.ToArrayAsync();
-            var allBrands = Resellers
+            var allBrands = _Resellers
                 .SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
                 .Distinct();
 
             var manualDepositBrandPayments = from brand in allBrands
                                              from pmc in allPaymentMethodChannels
                                              where pmc.PaymentId == _Payments["Manual"].Id
-                                                && pmc.ChannelId != _CustomChannelId
+                                                 && pmc.ChannelId != _CustomChannelId
                                              let brandPaymentId = GuidExtensions.NewSequentialGuid()
                                              select new BrandPayment
                                              {
@@ -119,9 +120,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                                  BrandId = brand.Id,
                                                  PaymentMethodChannelId = pmc.Id,
                                                  TransferType = PaymentTransferType.Deposit,
-                                                 ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                                 ChannelName =
+                                                     $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
                                                      $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                                     $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).FirstOrDefault().Key ?? "Custom" }",
+                                                     $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).FirstOrDefault().Key ?? "Custom"}",
                                                  PaymentStatus = SwitchStatus.Enabled,
                                                  TransferLimitFrom = 10,
                                                  TransferLimitTo = 100000,
@@ -153,8 +155,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                                  },
                                                  VipLevels = new[]
                                                  {
-                                                     new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
-                                                     new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                                     new BrandPaymentVipLevel
+                                                     {
+                                                         BrandPaymentId = brandPaymentId,
+                                                         VipLevelId = _vipLevels[0].Id
+                                                     },
+                                                     new BrandPaymentVipLevel
+                                                     {
+                                                         BrandPaymentId = brandPaymentId,
+                                                         VipLevelId = _vipLevels[1].Id
+                                                     }
                                                  },
                                                  ExtendedData = JsonSerializer.Serialize(
                                                      new
@@ -167,9 +177,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                                          PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                                                          WriteIndented = false
                                                      }),
-                                                 CreatedByUsername = AdminUsername,
+                                                 CreatedByUsername = _AdminUsername,
                                                  CreatedOn = DateTimeOffset.Now,
-                                                 UpdatedByUsername = AdminUsername,
+                                                 UpdatedByUsername = _AdminUsername,
                                                  UpdatedOn = DateTimeOffset.Now
                                              };
 
@@ -184,7 +194,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           BrandId = brand.Id,
                                           PaymentMethodChannelId = pmc.Id,
                                           TransferType = PaymentTransferType.Deposit,
-                                          ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                          ChannelName =
+                                              $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
                                               $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
                                               $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
                                           PaymentStatus = SwitchStatus.Enabled,
@@ -218,8 +229,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           },
                                           VipLevels = new[]
                                           {
-                                              new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
-                                              new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                              new BrandPaymentVipLevel
+                                              {
+                                                  BrandPaymentId = brandPaymentId,
+                                                  VipLevelId = _vipLevels[0].Id
+                                              },
+                                              new BrandPaymentVipLevel
+                                              {
+                                                  BrandPaymentId = brandPaymentId,
+                                                  VipLevelId = _vipLevels[1].Id
+                                              }
                                           },
                                           ExtendedData = JsonSerializer.Serialize(
                                               new
@@ -234,9 +253,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                                   PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                                                   WriteIndented = false
                                               }),
-                                          CreatedByUsername = AdminUsername,
+                                          CreatedByUsername = _AdminUsername,
                                           CreatedOn = DateTimeOffset.Now,
-                                          UpdatedByUsername = AdminUsername,
+                                          UpdatedByUsername = _AdminUsername,
                                           UpdatedOn = DateTimeOffset.Now
                                       };
 
@@ -252,7 +271,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             BrandId = brand.Id,
                                             PaymentMethodChannelId = pmc.Id,
                                             TransferType = PaymentTransferType.Deposit,
-                                            ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                            ChannelName =
+                                                $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
                                                 $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
                                                 $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).FirstOrDefault().Key ?? "Custom"}",
                                             PaymentStatus = SwitchStatus.Enabled,
@@ -286,8 +306,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             },
                                             VipLevels = new[]
                                             {
-                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
-                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                                new BrandPaymentVipLevel
+                                                {
+                                                    BrandPaymentId = brandPaymentId,
+                                                    VipLevelId = _vipLevels[0].Id
+                                                },
+                                                new BrandPaymentVipLevel
+                                                {
+                                                    BrandPaymentId = brandPaymentId,
+                                                    VipLevelId = _vipLevels[1].Id
+                                                }
                                             },
                                             ExtendedData = JsonSerializer.Serialize(
                                                 new
@@ -302,9 +330,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                                                     WriteIndented = false
                                                 }),
-                                            CreatedByUsername = AdminUsername,
+                                            CreatedByUsername = _AdminUsername,
                                             CreatedOn = DateTimeOffset.Now,
-                                            UpdatedByUsername = AdminUsername,
+                                            UpdatedByUsername = _AdminUsername,
                                             UpdatedOn = DateTimeOffset.Now
                                         };
 
@@ -329,7 +357,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 Id = p.Value,
                 Code = p.Key,
-                Description = "online payment channel",
+                Description = "online payment channel"
             }).ToArray();
 
             await _repository.PaymentChannels.AddRangeAsync(paymentVendors);
@@ -346,7 +374,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private async Task GeneratePaymentMethodChannelsAsync()
         {
             var manualList = from channel in _PaymentChannels
-                             where !(new[] { "ETHEREUM", "TRON" }.Contains(channel.Key))
+                             where !new[]
+                             {
+                                 "ETHEREUM",
+                                 "TRON"
+                             }.Contains(channel.Key)
                              select new PaymentMethodChannel
                              {
                                  Id = GuidExtensions.NewSequentialGuid(),
@@ -355,7 +387,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                  ChannelId = channel.Value
                              };
 
-            var leepayList = new[] {
+            var leepayList = new[]
+            {
                 new PaymentMethodChannel
                 {
                     Id = GuidExtensions.NewSequentialGuid(),
@@ -373,7 +406,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             };
 
             var primepayList = from channel in _PaymentChannels
-                               where !(new[] { "ETHEREUM", "TRON" }.Contains(channel.Key))
+                               where !new[]
+                               {
+                                   "ETHEREUM",
+                                   "TRON"
+                               }.Contains(channel.Key)
                                select new PaymentMethodChannel
                                {
                                    Id = GuidExtensions.NewSequentialGuid(),
@@ -407,7 +444,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Id = p.Value.Id,
                 Code = p.Key,
                 BankType = p.Value.BankType,
-                Description = "online payment method",
+                Description = "online payment method"
             }).ToArray();
 
             await _repository.PaymentMethods.AddRangeAsync(paymentMethods);
@@ -422,9 +459,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Code = p.Key,
                 Name = p.Key,
                 Description = "online payment platform",
-                CreatedByUsername = AdminUsername,
+                CreatedByUsername = _AdminUsername,
                 CreatedOn = DateTimeOffset.Now,
-                UpdatedByUsername = AdminUsername,
+                UpdatedByUsername = _AdminUsername,
                 UpdatedOn = DateTimeOffset.Now
             }).ToArray();
 
@@ -435,14 +472,14 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private async Task GenerateWithdrawBrandPaymentsAsync()
         {
             var allPaymentMethodChannels = await _repository.PaymentMethodChannels.ToArrayAsync();
-            var allBrands = Resellers
+            var allBrands = _Resellers
                 .SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
                 .Distinct();
 
             var manualBrandPayments = from brand in allBrands
                                       from pmc in allPaymentMethodChannels
                                       where pmc.PaymentId == _Payments["Manual"].Id
-                                        && pmc.ChannelId == _CustomChannelId
+                                          && pmc.ChannelId == _CustomChannelId
                                       let brandPaymentId = GuidExtensions.NewSequentialGuid()
                                       select new BrandPayment
                                       {
@@ -451,9 +488,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           BrandId = brand.Id,
                                           PaymentMethodChannelId = pmc.Id,
                                           TransferType = PaymentTransferType.Withdrawal,
-                                          ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                          ChannelName =
+                                              $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
                                               $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                              $"Custom",
+                                              "Custom",
                                           PaymentStatus = SwitchStatus.Enabled,
                                           TransferLimitFrom = 10,
                                           TransferLimitTo = 100000,
@@ -485,13 +523,21 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           },
                                           VipLevels = new[]
                                           {
-                                              new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
-                                              new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                              new BrandPaymentVipLevel
+                                              {
+                                                  BrandPaymentId = brandPaymentId,
+                                                  VipLevelId = _vipLevels[0].Id
+                                              },
+                                              new BrandPaymentVipLevel
+                                              {
+                                                  BrandPaymentId = brandPaymentId,
+                                                  VipLevelId = _vipLevels[1].Id
+                                              }
                                           },
                                           ExtendedData = "{}",
-                                          CreatedByUsername = AdminUsername,
+                                          CreatedByUsername = _AdminUsername,
                                           CreatedOn = DateTimeOffset.Now,
-                                          UpdatedByUsername = AdminUsername,
+                                          UpdatedByUsername = _AdminUsername,
                                           UpdatedOn = DateTimeOffset.Now
                                       };
 
@@ -499,7 +545,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                       from pmc in allPaymentMethodChannels
                                       where pmc.PaymentId == _Payments["LeePay"].Id
                                       let brandPaymentId = GuidExtensions.NewSequentialGuid()
-                                      let channelType = pmc.ChannelId == _PaymentChannels["ETHEREUM"] ? "ETHEREUM" : "TRON"
+                                      let channelType = pmc.ChannelId == _PaymentChannels["ETHEREUM"]
+                                          ? "ETHEREUM"
+                                          : "TRON"
                                       select new BrandPayment
                                       {
                                           Id = brandPaymentId,
@@ -507,7 +555,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           BrandId = brand.Id,
                                           PaymentMethodChannelId = pmc.Id,
                                           TransferType = PaymentTransferType.Withdrawal,
-                                          ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                          ChannelName =
+                                              $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
                                               $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
                                               $"{_PaymentChannels.Where(p => p.Value == pmc.ChannelId).First().Key}",
                                           PaymentStatus = SwitchStatus.Enabled,
@@ -541,8 +590,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                           },
                                           VipLevels = new[]
                                           {
-                                              new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
-                                              new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                              new BrandPaymentVipLevel
+                                              {
+                                                  BrandPaymentId = brandPaymentId,
+                                                  VipLevelId = _vipLevels[0].Id
+                                              },
+                                              new BrandPaymentVipLevel
+                                              {
+                                                  BrandPaymentId = brandPaymentId,
+                                                  VipLevelId = _vipLevels[1].Id
+                                              }
                                           },
                                           ExtendedData = JsonSerializer.Serialize(
                                               new
@@ -557,9 +614,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                                   PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                                                   WriteIndented = false
                                               }),
-                                          CreatedByUsername = AdminUsername,
+                                          CreatedByUsername = _AdminUsername,
                                           CreatedOn = DateTimeOffset.Now,
-                                          UpdatedByUsername = AdminUsername,
+                                          UpdatedByUsername = _AdminUsername,
                                           UpdatedOn = DateTimeOffset.Now
                                       };
 
@@ -575,9 +632,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             BrandId = brand.Id,
                                             PaymentMethodChannelId = pmc.Id,
                                             TransferType = PaymentTransferType.Withdrawal,
-                                            ChannelName = $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
+                                            ChannelName =
+                                                $"{_Payments.Where(p => p.Value.Id == pmc.PaymentId).First().Key}_" +
                                                 $"{_PaymentMethods.Where(p => p.Value.Id == pmc.MethodId).First().Key}_" +
-                                                $"Custom",
+                                                "Custom",
                                             PaymentStatus = SwitchStatus.Enabled,
                                             TransferLimitFrom = 10,
                                             TransferLimitTo = 100000,
@@ -609,8 +667,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                             },
                                             VipLevels = new[]
                                             {
-                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[0].Id },
-                                                new BrandPaymentVipLevel { BrandPaymentId = brandPaymentId, VipLevelId = _vipLevels[1].Id }
+                                                new BrandPaymentVipLevel
+                                                {
+                                                    BrandPaymentId = brandPaymentId,
+                                                    VipLevelId = _vipLevels[0].Id
+                                                },
+                                                new BrandPaymentVipLevel
+                                                {
+                                                    BrandPaymentId = brandPaymentId,
+                                                    VipLevelId = _vipLevels[1].Id
+                                                }
                                             },
                                             ExtendedData = JsonSerializer.Serialize(
                                                 new
@@ -625,9 +691,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                                                     WriteIndented = false
                                                 }),
-                                            CreatedByUsername = AdminUsername,
+                                            CreatedByUsername = _AdminUsername,
                                             CreatedOn = DateTimeOffset.Now,
-                                            UpdatedByUsername = AdminUsername,
+                                            UpdatedByUsername = _AdminUsername,
                                             UpdatedOn = DateTimeOffset.Now
                                         };
 
@@ -639,7 +705,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private async Task GenerateApplePayInitialData()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            using var stream = assembly.GetManifestResourceStream(string.Format(Consts.PaymentInitialSqlFormat, "applePay"));
+            using var stream =
+                assembly.GetManifestResourceStream(string.Format(Consts.PaymentInitialSqlFormat, "applePay"));
             if (stream == null)
             {
                 return;
@@ -647,7 +714,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             using var reader = new StreamReader(stream);
             var cmdText = reader.ReadToEnd();
-            await _repository.ExecuteSqlCommandAsync(cmdText, System.Data.CommandType.Text);
+            await _repository.ExecuteSqlCommandAsync(cmdText, CommandType.Text);
         }
     }
 }

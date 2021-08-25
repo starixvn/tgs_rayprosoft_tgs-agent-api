@@ -1,0 +1,12 @@
+﻿Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+WM Casino Lobby,wmcasinolobby,,0,LiveDealerLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+Baccarat,Baccarat,,101,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+Dragon and Tiger,Dragon_and_Tiger,,102,LiveDealer,DesktopAndMobile,TRUE,,,FALSE,TRUE,TRUE,,WM
+Roulette,Roulette,,103,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+Sic bo,Sic_bo,,104,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+Niuniu,Niuniu,,105,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+Fantan,Fantan,,107,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+Sedie,Sedie,,108,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+Fishshrimpcrab,Fishshrimpcrab,,110,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+GoldenFlower,GoldenFlower,,111,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM
+AndarBahar,AndarBahar,,128,LiveDealer,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,WM

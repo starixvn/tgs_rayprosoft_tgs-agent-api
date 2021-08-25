@@ -28,7 +28,10 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] {typeof(IMESportsErrorMapper)},
+                new[]
+                {
+                    typeof(IMESportsErrorMapper)
+                },
                 (provider, key) => key switch
                 {
                     GameProvider.IMESports => provider.GetRequiredService<IMESportsErrorMapper>(),
@@ -41,14 +44,20 @@ namespace TGS.Apis.TgsApi.GameProviders.IMESports
             services.AddScoped<IIMESportsServices, IMESportsServices>();
             services.AddScoped<IIMESportsActionModelMapper, IMESportsActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(IMESportsGameInitializer)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(IMESportsGameInitializer)
+            }, (provider, _) =>
                 provider.GetRequiredService<IMESportsGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(IMESportsGameHistory)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(IMESportsGameHistory)
+            }, (provider, _) =>
                 provider.GetRequiredService<IMESportsGameHistory>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/imesports";
 

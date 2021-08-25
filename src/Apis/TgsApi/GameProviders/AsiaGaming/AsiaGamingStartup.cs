@@ -25,7 +25,10 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] {typeof(AsiaGamingErrorMapper)},
+                new[]
+                {
+                    typeof(AsiaGamingErrorMapper)
+                },
                 (provider, key) => key switch
                 {
                     GameProvider.AsiaGaming => provider.GetRequiredService<AsiaGamingErrorMapper>(),
@@ -39,14 +42,20 @@ namespace TGS.Apis.TgsApi.GameProviders.AsiaGaming
             services.AddScoped<IAsiaGamingServices, AsiaGamingServices>();
             services.AddSingleton<IAsiaGamingActionModelMapper, AsiaGamingActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(AsiaGamingGameHistory)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(AsiaGamingGameHistory)
+            }, (provider, _) =>
                 provider.GetRequiredService<AsiaGamingGameHistory>());
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(AsiaGamingGameInitializer)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(AsiaGamingGameInitializer)
+            }, (provider, _) =>
                 provider.GetRequiredService<AsiaGamingGameInitializer>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/ag";
 

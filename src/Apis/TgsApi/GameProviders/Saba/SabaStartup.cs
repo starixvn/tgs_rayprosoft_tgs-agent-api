@@ -25,7 +25,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] {typeof(SabaErrorMapper)},
+                new[]
+                {
+                    typeof(SabaErrorMapper)
+                },
                 (provider, key) => key switch
                 {
                     GameProvider.Saba => provider.GetRequiredService<SabaErrorMapper>(),
@@ -38,14 +41,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Saba
             services.AddScoped<ISabaServices, SabaServices>();
             services.AddScoped<ISabaActionModelMapper, SabaActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(SabaGameInitializer)},
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+                {
+                    typeof(SabaGameInitializer)
+                },
                 (provider, _) => provider.GetRequiredService<SabaGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(SabaGameHistory)},
+            services.AddScopedWithResolver<IGameHistory>(new[]
+                {
+                    typeof(SabaGameHistory)
+                },
                 (provider, _) => provider.GetRequiredService<SabaGameHistory>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/saba";
 

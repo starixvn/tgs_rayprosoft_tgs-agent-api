@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TGS.Core.Models.GameProviders.Settings
 {
     /// <summary>
-    /// WG Sports 設定檔案
+    ///     WG Sports 設定檔案
     /// </summary>
     public record WGSportsConfiguration : PluggableConfigurationBase
     {
         /// <summary>
-        /// The amount maximum
+        ///     The amount maximum
         /// </summary>
         public decimal AmountMaximum { get; init; }
 
         /// <summary>
-        /// The amount format
+        ///     The amount format
         /// </summary>
         public string AmountFormat { get; init; }
 

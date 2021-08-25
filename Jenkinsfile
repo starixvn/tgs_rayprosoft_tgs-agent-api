@@ -217,6 +217,7 @@ pipeline {
                             --set connectionStrings.tgs="$tgs_tgs" \
                             --set connectionStrings.redis="$tgs_redis" \
                             --set nats.urls="$tgs_nats" \
+                            --set mail.url="$tgs_mail_service" \
                             --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" 
 
                         helm template deployment/k8s/operator-api \
@@ -226,6 +227,7 @@ pipeline {
                             --set connectionStrings.tgs="$tgs_tgs" \
                             --set connectionStrings.redis="$tgs_redis" \
                             --set nats.urls="$tgs_nats" \
+                            --set mail.url="$tgs_mail_service" \
                             --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
                         | kubectl -n ${kube_ns} apply -f -
                     '''
@@ -251,6 +253,7 @@ pipeline {
                             --set connectionStrings.tgs="$tgs_tgs" \
                             --set connectionStrings.redis="$tgs_redis" \
                             --set nats.urls="$tgs_nats" \
+                            --set mail.url="$tgs_mail_service" \
                             --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
 
                         helm template deployment/k8s/agent-api \
@@ -259,6 +262,7 @@ pipeline {
                             --set connectionStrings.tgs="$tgs_tgs" \
                             --set connectionStrings.redis="$tgs_redis" \
                             --set nats.urls="$tgs_nats" \
+                            --set mail.url="$tgs_mail_service" \
                             --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"  \
                         | kubectl -n ${kube_ns} apply -f -
                     '''
@@ -452,6 +456,7 @@ pipeline {
                             --set connectionStrings.redis="$tgs_redis" \
                             --set connectionStrings.mongo="$tgs_mongo" \
                             --set nats.urls="$tgs_nats" \
+                            --set mail.url="$tgs_mail_service" \
                             --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment"
                             
                         helm template deployment/k8s/schedulers \
@@ -461,6 +466,7 @@ pipeline {
                             --set connectionStrings.redis="$tgs_redis" \
                             --set connectionStrings.mongo="$tgs_mongo" \
                             --set nats.urls="$tgs_nats" \
+                            --set mail.url="$tgs_mail_service" \
                             --set aspNetCoreEnvironment="$tgs_aspNetCoreEnvironment" \
                         | kubectl -n ${kube_ns} apply -f -
                     '''
