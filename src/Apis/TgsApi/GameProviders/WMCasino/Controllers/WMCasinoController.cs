@@ -19,7 +19,10 @@ using TGS.Services.Operations;
 using TGS.Shared.Game.ApiClients.WMCasino;
 using TGS.Shared.Game.Models.WMCasino.Enums;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
+using TGS.Shared.Game.Models.WMCasino.Outgoing;
+using BaseRequest = TGS.Shared.Game.Models.WMCasino.Incoming.BaseRequest;
 using BetResult = TGS.Shared.Game.Models.WMCasino.Common.BetResult;
+using ErrorResponse = TGS.Shared.Game.Models.WMCasino.Incoming.ErrorResponse;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 {
@@ -63,40 +66,64 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("balance")]
-        public async ValueTask<GetBalanceResponse> PlayersBalanceAsync(GetBalanceRequest request)
+        public async ValueTask<GetBalanceResponse> PlayersBalanceAsync(
+            [FromServices] IWMCasinoBetActionServices services,
+            [FromServices] IWMCasinoActionModelMapper map,
+            GetBalanceRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var r = await _services.GetBalanceAsync(playerCode).ConfigureAwait(false);
-            return _map.Response(request.User, r);
+            var r = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
+            return map.Response(request.User, r);
         }
 
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("transfer")]
-        public async ValueTask<WalletTransferResponse> WalletTransferAsync(WalletTransferRequest request)
+        public async ValueTask<WalletTransferResponse> WalletTransferAsync(
+            [FromServices] IWMCasinoBetActionServices services,
+            [FromServices] IWMCasinoActionModelMapper map,
+            WalletTransferRequest request)
         {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+
             if (request.ActionType == WalletActionType.Debit)
             {
-                return await LockAmountAsync(request).ConfigureAwait(false);
+                var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+                var gameProviderConfigurationId = HttpContext.Items.Get(
+                    Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+
+                var betResult = await services
+                    .LockAmountAsync(gameProviderId, gameProviderConfigurationId, playerCode, request)
+                    .ConfigureAwait(false);
+                return _map.Response(request, betResult.Balance);
             }
 
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var r = await _services.GetBalanceAsync(playerCode).ConfigureAwait(false);
-            return _map.Response(request, r.Balance);
+            var balanceResult = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
+            return map.Response(request, balanceResult.Balance);
         }
 
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("canceltransfer")]
         public async ValueTask<CancelWalletTransferResponse> CancelWalletTransferAsync(
+            [FromServices] IWMCasinoBetActionServices services,
+            [FromServices] IWMCasinoActionModelMapper map,
             CancelWalletTransferRequest request)
         {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+
             if (request.ActionType == WalletActionType.Debit)
             {
-                return await CancelLockAmountAsync(request).ConfigureAwait(false);
+                var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+                var gameProviderConfigurationId = HttpContext.Items.Get(
+                    Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+
+                var betResult = await services
+                    .CancelLockAmountAsync(gameProviderId, gameProviderConfigurationId, playerCode, request)
+                    .ConfigureAwait(false);
+                return _map.Response(request, betResult.Balance);
             }
 
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var r = await _services.GetBalanceAsync(playerCode).ConfigureAwait(false);
-            return _map.Response(request, r.Balance);
+            var balanceResult = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
+            return _map.Response(request, balanceResult.Balance);
         }
 
         [Consumes(MediaTypeNames.Application.Json)]
@@ -176,41 +203,15 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 
             var agent = agentMapper.GetAgentById(configuration.BrandMerchants, request.AgentId);
 
-            //var response = await client.GetDateTimeReportAsync()
+            var response = await client.GetDateTimeReportAsync(configuration.ApiUrl,
+                new GetDateTimeReportRequest
+                {
+                    VendorId = agent.AgentId,
+                    Signature = agent.Signature,
+                    StartTime = request.StartTime
+                }).ConfigureAwait(false);
 
             return new GameProviderGameRecordResponse();
-        }
-
-        private async ValueTask<WalletTransferResponse> LockAmountAsync(WalletTransferRequest request)
-        {
-            var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = HttpContext.Items.Get(
-                Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var data = await _services.GetGameProviderConfigurationDataAsync(
-                    gameProviderId, gameProviderConfigurationId, playerCode, request.ExternalGameId)
-                .ConfigureAwait(false);
-
-            var betData = _map.LockAmountRequest(playerCode, data, request);
-            var r = await _actions.LockAmountAsync(betData).ConfigureAwait(false);
-            return _map.Response(request, r.Balance);
-        }
-
-        private async ValueTask<CancelWalletTransferResponse> CancelLockAmountAsync(CancelWalletTransferRequest request)
-        {
-            var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
-            var gameProviderConfigurationId = HttpContext.Items.Get(
-                Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
-
-            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var data = await _services.GetGameProviderConfigurationDataAsync(gameProviderId,
-                    gameProviderConfigurationId, playerCode, request.ExternalGameId)
-                .ConfigureAwait(false);
-
-            var betData = _map.CancelLockAmountRequest(playerCode, data, request);
-            var r = await _actions.CancelTransactionAsync(betData).ConfigureAwait(false);
-            return _map.Response(request, r.Balance);
         }
 
         private async ValueTask<ErrorResponse> ExecuteBetResultsByRoundAsync(Guid gameProviderId,

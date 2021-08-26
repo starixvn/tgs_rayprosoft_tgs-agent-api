@@ -41,6 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
             services.AddScoped<HandleWMCasinoExceptionMiddleware>();
 
             services.AddScoped<IWMCasinoServices, WMCasinoServices>();
+            services.AddScoped<IWMCasinoBetActionServices, WMCasinoBetActionServices>();
             services.AddScoped<IWMCasinoAgentMapper, WMCasinoAgentMapper>();
             services.AddScoped<IWMCasinoActionModelMapper, WMCasinoActionModelMapper>();
             services.AddScoped<IWMCasinoUtility, WMCasinoUtility>();
