@@ -173,7 +173,7 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
-                        .AddHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
                 })
                 ;
 
