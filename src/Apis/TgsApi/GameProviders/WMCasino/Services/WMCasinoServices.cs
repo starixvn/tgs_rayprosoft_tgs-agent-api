@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
-using TGS.Services.GameOperations;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 
@@ -15,8 +13,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
     public interface IWMCasinoServices
     {
-        ValueTask<GetBalanceResult> GetBalanceAsync(string playerCode);
-
         ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
             Guid gameProviderConfigurationId, string playerCode, string externalGameId);
 
@@ -29,27 +25,19 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
     public class WMCasinoServices : IWMCasinoServices
     {
-        private static readonly string _GameProviderCode = Consts.GameProvider.WMCasino;
-        private readonly IGamePlayActions _actions;
         private readonly IGameActionQueries _gameActionQueries;
         private readonly IGameProviderOperations _gameProviderOperations;
         private readonly IPlayerOperations _playerOperations;
 
         public WMCasinoServices(
-            IGamePlayActions actions,
             IGameProviderOperations gameProviderOperations,
             IPlayerOperations playerOperations,
-            IGameActionQueries gameActionQueries
-        )
+            IGameActionQueries gameActionQueries)
         {
-            _actions = actions;
             _gameProviderOperations = gameProviderOperations;
             _playerOperations = playerOperations;
             _gameActionQueries = gameActionQueries;
         }
-
-        public ValueTask<GetBalanceResult> GetBalanceAsync(string playerCode)
-            => _actions.GetBalanceAsync(_GameProviderCode, playerCode);
 
         public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId,
             Guid gameProviderConfigurationId, string playerCode, string externalGameId)

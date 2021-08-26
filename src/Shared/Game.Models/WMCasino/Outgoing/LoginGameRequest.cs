@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace TGS.Shared.Game.Models.WMCasino.Outgoing
 {
@@ -12,11 +13,8 @@ namespace TGS.Shared.Game.Models.WMCasino.Outgoing
         [JsonPropertyName("password")]
         public string Password => "TgsP@ssword";
 
-        [JsonPropertyName("username")]
-        public string Username { get; init; }
-
         [JsonPropertyName("timestamp")]
-        public long Timestamp { get; init; }
+        public long Timestamp => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
         [JsonPropertyName("lang")]
         public string Language { get; init; }
