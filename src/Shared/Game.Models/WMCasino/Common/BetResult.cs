@@ -5,7 +5,7 @@ namespace TGS.Shared.Game.Models.WMCasino.Common
     public record BetResult
     {
         [JsonPropertyName("user")]
-        public string PlayerCode { get; init; }
+        public string User { get; init; }
 
         [JsonPropertyName("betId")]
         public string BetId { get; init; }
