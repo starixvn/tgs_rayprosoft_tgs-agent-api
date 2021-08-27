@@ -10,6 +10,8 @@ namespace TGS.Services.Report.Application.Models.Agent
         public Guid BrandId { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
+        public decimal PromotionAmount { get; set; }
+        public decimal RebateAmount { get; set; }
         public decimal DepositAmount { get; set; }
         public decimal WithdrawalAmount { get; set; }
         public decimal AdjustmentAmount { get; set; }
@@ -33,5 +35,6 @@ namespace TGS.Services.Report.Application.Models.Agent
         public decimal? BeforeDividendAmount { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public bool AutoSend { get; set; }
+        public AgentDividendMultipleLayerModel[] AgentDividendMultipleLayerModels { get; set; }
     }
 }
