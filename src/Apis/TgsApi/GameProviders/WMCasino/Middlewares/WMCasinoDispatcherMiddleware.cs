@@ -81,7 +81,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
 
             var json = _json.SerializeToString(items, _jsonSerializeOptions);
 
-            await using var stream = _RecyclableMemoryStreamManager.GetStream(Encoding.UTF8.GetBytes(json));
+            var stream = _RecyclableMemoryStreamManager.GetStream(Encoding.UTF8.GetBytes(json));
             context.Request.Body = stream;
             context.Request.ContentType = MediaTypeNames.Application.Json;
             context.Request.Path = route;
@@ -106,33 +106,23 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
             return items;
         }
 
-        private static Dictionary<string, object> ParseBetDetail(Dictionary<string, object> items)
+        private Dictionary<string, object> ParseBetDetail(Dictionary<string, object> items)
         {
             const string betDetailKey = "betdetail";
 
-            var matchedKeys = items.Keys.Where(s => s.StartsWith(betDetailKey)).ToArray();
-
-            if (matchedKeys.Length == 0)
+            if (!items.TryGetValue(betDetailKey, out var value))
             {
                 return items;
             }
 
-            var betDetail = new Dictionary<string, object>();
-
-            foreach (var key in matchedKeys)
+            var data = value?.ToString();
+            if (string.IsNullOrWhiteSpace(data))
             {
-                var value = items[key];
-                var betType = key
-                    .Replace(betDetailKey, string.Empty)
-                    .Replace("[", string.Empty)
-                    .Replace("]", string.Empty);
-
-                betDetail[betType] = value;
-
-                items.Remove(key);
+                return items;
             }
 
-            items[betDetailKey] = betDetail;
+            var details = _json.DeserializeFromString<Dictionary<string, decimal>>(data);
+            items[betDetailKey] = details;
 
             return items;
         }
