@@ -46,7 +46,7 @@ namespace TGS.Apis.BackendOffice.Services
                 .ExecuteAsync(command, cancellationToken)
                 .ConfigureAwait(false);
 
-            _logger.LogInformation("AutoApproveDeposit processing completed.")
+            _logger.LogInformation("AutoApproveDeposit processing completed.");
         }
     }
 }
