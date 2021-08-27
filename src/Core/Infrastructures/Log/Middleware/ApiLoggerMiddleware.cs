@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log.Attributes;
@@ -24,6 +25,8 @@ namespace TGS.Core.Infrastructures.Log.Middleware
             "/health"
         };
 
+        private readonly ILogger<ApiLoggerMiddleware> _logger;
+
         private readonly RequestDelegate _next;
 
         private readonly string _prefix;
@@ -31,10 +34,15 @@ namespace TGS.Core.Infrastructures.Log.Middleware
         //avoid LOH :https://stackoverflow.com/questions/43403941/how-to-read-asp-net-core-response-body/52328142#52328142
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
 
-        public ApiLoggerMiddleware(RequestDelegate next, string prefix)
+        public ApiLoggerMiddleware(
+            RequestDelegate next,
+            string prefix,
+            ILogger<ApiLoggerMiddleware> logger)
         {
             _prefix = prefix;
             _next = next;
+
+            _logger = logger;
 
             _recyclableMemoryStreamManager = new();
         }
@@ -127,10 +135,8 @@ namespace TGS.Core.Infrastructures.Log.Middleware
 
             log.LogApi(apiLogEvent);
 
-            log.LogInfo(
-                $@"Send api log event completely with path: {url}.{Environment.NewLine}
-Request Body: {reqMessage}
-Response Body: {resMessage}");
+            _logger.LogInformation(
+                $@"Send api log event completely with path: {url}.{Environment.NewLine}Request Body: {reqMessage}{Environment.NewLine}Response Body: {resMessage}");
         }
 
         private string GetPrefix(string path)
