@@ -135,25 +135,6 @@ namespace TGS.Core.Infrastructures.Log.Middleware
 
             log.LogApi(apiLogEvent);
 
-            log.LogAdmin(new AdminLogEvent
-            {
-                ipaddress = requestAnalyzer.GetIp(context).NoLongerThan(256),
-                host = "api-log-debugger",
-                trackingid = log.TrackingId,
-                path = url.NoLongerThan(256),
-                method = context.Request.Method.NoLongerThan(8),
-                servername = Environment.MachineName.NoLongerThan(128),
-                requestheaders = context.Request.Headers.ToDetailString(),
-                requestcontent = reqMessage,
-                responseheaders = context.Response.Headers.ToDetailString(),
-                responsecontent = resMessage?.Length > _ResMessageSizeLimit
-                    ? CutOffResponseContent(resMessage)
-                    : resMessage,
-                responsecode = context.Response.StatusCode,
-                executiontimems = ms,
-                recordedon = requestTime
-            });
-
             _logger.LogInformation(
                 $@"Send api log event completely with path: {url}.{Environment.NewLine}Request Body: {reqMessage}{Environment.NewLine}Response Body: {resMessage}");
         }
