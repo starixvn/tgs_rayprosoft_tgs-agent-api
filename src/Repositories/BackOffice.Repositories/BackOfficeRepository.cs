@@ -124,6 +124,22 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId)
+        {
+            var query = from bg in _tgsRepository.BrandGames.AsQueryable()
+                        from game in _tgsRepository.Games
+                        where bg.BrandId == brandId
+                            && bg.GameId == game.Id
+                        select new GameData
+                        {
+                            GameId = game.Id,
+                            GameName = game.Name,
+                            Localization = game.Localization
+                        };
+
+            return query.ToAsyncEnumerable();
+        }
+
         public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
         {
             var currentTime = _systemClock.UtcNow;

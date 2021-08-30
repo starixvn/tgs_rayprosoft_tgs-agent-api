@@ -6,6 +6,8 @@ using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Round;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Queries.Game;
+using TGS.Services.BackOffice.Application.Services;
+using TGS.Services.BackOffice.Domain;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
@@ -31,8 +33,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet]
         [Description("Get rounds")]
-        public ValueTask<PagedResponse<RoundModel>> GetRoundsAsync(
+        public async ValueTask<PagedResponse<RoundModel>> GetRoundsAsync(
             [FromServices] IGetService<GetGameRoundListQuery, PagedResponse<RoundModel>> queryService,
+            [FromServices] IGetService<GetAllGamesByBrandIdQuery, GameData> gameQueryService,
             [FromQuery] GetRoundsRequest request)
         {
             var query = new GetGameRoundListQuery(
@@ -48,7 +51,13 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                 request.To,
                 request);
 
-            return queryService.GetAsync(query);
+            var records = await queryService
+                .GetAsync(query)
+                .ConfigureAwait(false);
+
+            var allGames = gameQueryService.GetAsync(new GetAllGamesByBrandIdQuery(request.BrandId));
+
+            return null;
         }
     }
 }

@@ -8,6 +8,7 @@ using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Application.Queries.Game;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
