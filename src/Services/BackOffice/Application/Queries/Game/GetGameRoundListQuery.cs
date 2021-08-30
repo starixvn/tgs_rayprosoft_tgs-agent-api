@@ -1,5 +1,6 @@
 ﻿using System;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Messages;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {
@@ -13,5 +14,6 @@ namespace TGS.Services.BackOffice.Application.Queries.Game
         ClientRoundStatus? Status,
         GameType? GameType,
         DateTimeOffset From,
-        DateTimeOffset To);
+        DateTimeOffset To,
+        PageableRequest Paging);
 }

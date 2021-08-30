@@ -50,7 +50,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             await repository.SaveChangesAsync();
 
-            var sut = new GetLocalizationQueryService(repository);
+            var sut = new GetGameLocalizationQueryService(repository);
 
             var query = new GetGameLocalizationQuery(gameProviderCode);
             var info = await sut.GetAsync(query, default);

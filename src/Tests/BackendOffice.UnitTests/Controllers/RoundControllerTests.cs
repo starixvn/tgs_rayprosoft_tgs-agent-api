@@ -1,14 +1,13 @@
-﻿using System.Data.SqlClient;
-using System.Linq;
+﻿using System;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
-using AutoFixture;
-using FluentAssertions;
 using Moq;
 using NUnit.Framework;
 using TGS.Apis.BackendOffice.Controllers.Report;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Round;
 using TGS.Core.Models.Messages;
+using TGS.Services.BackOffice.Application.Queries.Game;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -16,52 +15,50 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
     [Parallelizable]
     public class RoundControllerTests : BaseTests
     {
+        private readonly Mock<IReportClient> _clientMock = new();
+
+        private RoundReportController _controller;
+
+        [Test]
+        public async Task Can_Get_Rounds()
+        {
+            var moqReportClient = new Mock<IReportClient>();
+
+            var sut = new GetGameRoundListQueryService(moqReportClient.Object);
+
+            var query = new GetGameRoundListQuery(
+                Guid.NewGuid(),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                DateTimeOffset.UtcNow.AddDays(-1),
+                DateTimeOffset.UtcNow,
+                new PageableRequest
+                {
+                    Page = 1,
+                    Rows = 10,
+                    SortBy = "updatedOn",
+                    OrderBy = SortOrder.Descending,
+                    ShowAll = false
+                });
+
+            await sut.GetAsync(query);
+
+            moqReportClient.Verify(
+                fake => fake.GetRoundsAsync(It.IsAny<GetRoundsRequest>()),
+                Times.Exactly(1));
+        }
+
         [SetUp]
         public override void Setup()
         {
             base.Setup();
             _controller = new(
                 _clientMock.Object);
-        }
-
-        private RoundReportController _controller;
-        private readonly Mock<IReportClient> _clientMock = new();
-
-        [TestCase(true)]
-        [TestCase(false)]
-        public async Task Can_Get_Rounds(bool showAll)
-        {
-            var list = new Fixture()
-                .CreateMany<RoundModel>(99)
-                .ToArray();
-
-            var request = new GetRoundsRequest
-            {
-                Page = 1,
-                Rows = 10,
-                SortBy = "updatedOn",
-                OrderBy = SortOrder.Descending,
-                ShowAll = showAll
-            };
-            var (skip, take) = GetPage(request);
-            var orderedRoles = list.OrderByDescending(p => p.CreatedOn);
-
-            var expectedRoles = showAll ? orderedRoles.ToArray() : orderedRoles.Skip(skip).Take(take).ToArray();
-
-            _clientMock
-                .Setup(m => m.GetRoundsAsync(It.IsAny<GetRoundsRequest>()))
-                .ReturnsAsync(new PagedResponse<RoundModel> {Valid = true, Items = expectedRoles});
-
-            var response = await _controller.GetRoundsAsync(request);
-            response.Valid.Should().BeTrue();
-
-            for (var i = 0; i < response.Items.Length; i++)
-            {
-                response.Items[i].Id.Should().Be(expectedRoles[i].Id);
-                response.Items[i].ExternalRoundId.Should().Be(expectedRoles[i].ExternalRoundId);
-            }
-
-            _clientMock.Verify(x => x.GetRoundsAsync(It.IsAny<GetRoundsRequest>()));
         }
     }
 }
