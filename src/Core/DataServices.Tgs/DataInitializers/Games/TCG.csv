@@ -1,0 +1,4 @@
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+TCG SEA,TCG_SEA,,1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,TCG_SEA
+TCG LOTTO,TCG_LOTTO,,1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,TCG_LOTTO
+TCG LOTTO VN,TCG_LOTTO_VN,,1,Sportsbook,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,TCG_LOTTO_VN

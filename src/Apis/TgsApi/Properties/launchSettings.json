@@ -181,6 +181,16 @@
       },
       "applicationUrl": "http://localhost:62330"
     },
+    "TgsApi-TCG": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "health",
+      "environmentVariables": {
+        "GameProviderCode": "TCG",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:62330"
+    },
     "Docker-SBO": {
       "commandName": "Docker",
       "launchBrowser": true,
@@ -338,6 +348,17 @@
         "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
         "environmentVariables": {
           "GameProviderCode": "WM",
+          "ASPNETCORE_ENVIRONMENT": "Development"
+        },
+        "publishAllPorts": true,
+        "useSSL": true
+      },
+      "Docker-TCG": {
+        "commandName": "Docker",
+        "launchBrowser": true,
+        "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/health",
+        "environmentVariables": {
+          "GameProviderCode": "TCG",
           "ASPNETCORE_ENVIRONMENT": "Development"
         },
         "publishAllPorts": true,
