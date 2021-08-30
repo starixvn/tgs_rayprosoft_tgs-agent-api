@@ -7,11 +7,11 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {
-    internal class GetLocalizationQueryService : IGetService<GetGameLocalizationQuery, GameLocalizationInfo>
+    internal class GetGameLocalizationQueryService : IGetService<GetGameLocalizationQuery, GameLocalizationInfo>
     {
         private readonly ITgsRepository _tgsRepository;
 
-        public GetLocalizationQueryService(
+        public GetGameLocalizationQueryService(
             ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));

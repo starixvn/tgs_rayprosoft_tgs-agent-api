@@ -86,9 +86,11 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Get the player deposit info list.
         /// </summary>
-        /// <param name="getDepositFormsQueryService"></param>
-        /// <param name="request"></param>
-        /// <param name="paging"></param>
+        /// <param name="getDepositFormsQueryService">The get deposit forms query service.</param>
+        /// <param name="brandPaymentsQueryService">The brand payments query service.</param>
+        /// <param name="getPaymentService">The get payment service.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="paging">The paging.</param>
         /// <returns></returns>
         [HttpGet("player/list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
