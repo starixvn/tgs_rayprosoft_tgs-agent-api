@@ -70,6 +70,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dividend percentage must less than or equal to upper layer..
+        /// </summary>
+        public static string DividendPercentageMustLessThanOrEqualToUpperLayer {
+            get {
+                return ResourceManager.GetString("DividendPercentageMustLessThanOrEqualToUpperLayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Email is existed..
         /// </summary>
         public static string EmailExisted {

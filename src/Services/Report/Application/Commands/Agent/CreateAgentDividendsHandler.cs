@@ -26,10 +26,12 @@ namespace TGS.Services.Report.Application.Commands.Agent
         private readonly ITgsAgentService _agentService;
         private readonly ITgsBrandService _brandService;
         private readonly IPlayerAggregateService _playerAggregateService;
+        private readonly IPlayerGameAggregateService _playerGameAggregateService;
         private readonly IAgentWalletRepository _walletRepository;
 
         public CreateAgentDividendsHandler(
             IPlayerAggregateService playerAggregateService,
+            IPlayerGameAggregateService playerGameAggregateService,
             ITgsAgentService agentService,
             ITgsBrandService brandService,
             IAgentDividendService agentDividendService,
@@ -39,6 +41,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
             _agentService = agentService;
             _brandService = brandService;
             _playerAggregateService = playerAggregateService;
+            _playerGameAggregateService = playerGameAggregateService;
             _agentDividendService = agentDividendService;
             _walletRepository = walletRepository;
         }
@@ -196,7 +199,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                 data?.NetProfit
             });
 
-            var agentGameData = _playerAggregateService.Repository.PlayerGameAggregates.AsQueryable()
+            var agentGameData = _playerGameAggregateService.GetPlayerGameAggregateQueries()
                 .Where(x => x.AgentId != null)
                 .Where(x => x.BrandId == brand.Id)
                 .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&

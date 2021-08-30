@@ -56,7 +56,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         VirtualSportsWinLoss = list.Sum(l => l.VirtualSportsWinLoss),
                         WinLossAmount = list.Sum(l => l.WinLossAmount),
                         AgentDividendAmount = list.Sum(l => l.AgentDividendAmount),
-                        Payout = list.Sum(l => l.PromotionAmount + l.RebateAmount + l.AdjustmentAmount)
+                        ExpenditureAmount = list.Sum(l => l.PromotionAmount + l.RebateAmount + l.AdjustmentAmount)
                     }).ToArrayAsync(cancellationToken);
 
             var agentIds = agentDividends.Select(x => x.AgentId).ToArray();
@@ -80,7 +80,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     WinLossAmount = ad.WinLossAmount,
                     AgentDividendAmount = ad.AgentDividendAmount,
                     AgentDividendPercentage = ad.AgentDividendPercentage,
-                    Payout = ad.Payout
+                    ExpenditureAmount = ad.ExpenditureAmount
                 }).ToArray();
 
             return await models.CreatePagedResponseAsync(models.Length);

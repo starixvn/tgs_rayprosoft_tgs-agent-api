@@ -28,13 +28,23 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.NameExisted);
             }
 
-            if (request.ParentUsername.IsNotNullOrEmpty() &&
-                !await _service.ExistsAsync(x =>
-                    x.BrandId == request.BrandId &&
-                    x.Username == request.ParentUsername))
+            if (request.ParentUsername.IsNotNullOrEmpty())
             {
-                return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
+                var parentAgent = await _service.GetAgentAsync(x => x.BrandId == request.BrandId &&
+                    x.Username == request.ParentUsername);
+
+                if (parentAgent == null)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
+                }
+
+                if (parentAgent.DividendPercentage < request.DividendPercentage)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent
+                        .DividendPercentageMustLessThanOrEqualToUpperLayer);
+                }
             }
+
 
             await _service.CreateAgentAsync(request);
 
