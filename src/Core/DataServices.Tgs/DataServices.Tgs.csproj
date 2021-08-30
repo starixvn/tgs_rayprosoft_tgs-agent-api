@@ -19,6 +19,7 @@
     <None Remove="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
     <None Remove="SqlScripts\Indexes\game_actions_external_group_id.sql" />
     <None Remove="SqlScripts\Indexes\game_actions_external_transaction_id.sql" />
+    <None Remove="SqlScripts\Indexes\players_brand_id_email.sql" />
     <None Remove="SqlScripts\Indexes\rounds_createdon.sql" />
     <None Remove="SqlScripts\PaymentInitial\applepay.sql" />
   </ItemGroup>
@@ -72,6 +73,7 @@
     <EmbeddedResource Include="SqlScripts\Indexes\api_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\game_actions_external_group_id.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\game_actions_external_transaction_id.sql" />
+    <EmbeddedResource Include="SqlScripts\Indexes\players_brand_id_email.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\rounds_createdon.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
     <EmbeddedResource Include="SqlScripts\Indexes\gameProviders.sql" />
