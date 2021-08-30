@@ -86,14 +86,18 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Get the player deposit info list.
         /// </summary>
-        /// <param name="getDepositFormsQueryService"></param>
-        /// <param name="request"></param>
-        /// <param name="paging"></param>
+        /// <param name="getDepositFormsQueryService">The get deposit forms query service.</param>
+        /// <param name="brandPaymentsQueryService">The brand payments query service.</param>
+        /// <param name="getPaymentService">The get payment service.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="paging">The paging.</param>
         /// <returns></returns>
         [HttpGet("player/list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagedResponse<DepositFormViewModel>> GetDepositFormsAsync(
             [FromServices] IGetService<GetDepositFormsQuery, Tgs.Payment.Clients.PagingResponse<DepositFormInfo>> getDepositFormsQueryService,
+            [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
+            [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService,
             [FromQuery] GetDepositFormsRequest request,
             [FromQuery] PageableRequest paging)
         {
@@ -119,20 +123,32 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var result = await getDepositFormsQueryService.GetAsync(query).ConfigureAwait(false);
 
+            var brandPayments = await brandPaymentsQueryService.QueryAsync(
+                new BrandPaymentsQuery(brandId, playerTokenData.PlayerCode))
+                .ToDictionaryAsync(bp => bp.Id)
+                .ConfigureAwait(false);
+
             var response = new PagedResponse<DepositFormViewModel>
             {
                 Valid = true,
                 TotalCount = result.TotalCount,
-                Items = result.Items
-                    .Select(form => new DepositFormViewModel
+                Items = await result.Items.ToAsyncEnumerable()
+                    .SelectAwait(async form => new DepositFormViewModel
                     {
                         Id = form.Id,
                         Status = form.Status.ToFlowState(),
                         Amount = form.Amount,
+                        BrandPaymentId = form.BrandPaymentId,
+                        CanUploadCerts = form.Status == PaymentFlowState.WaitPayment
+                            && brandPayments.TryGetValue(form.BrandPaymentId, out var info)
+                            && (await getPaymentService
+                                .GetAsync(new GetPaymentQuery(info.PaymentId))
+                                .ConfigureAwait(false)).Code == "Manual",
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn
                     })
-                    .ToArray()
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
             };
             return response;
         }

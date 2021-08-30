@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log.Attributes;
@@ -15,9 +16,17 @@ namespace TGS.Core.Infrastructures.Log.Middleware
 {
     public sealed class ApiLoggerMiddleware
     {
-        private const int ResMessageSizeLimit = 1000012;
+        private const int _ResMessageSizeLimit = 1000012;
 
-        private static readonly string[] BypassRouting = {"/", "/favicon.ico", "/health"};
+        private static readonly string[] _BypassRouting =
+        {
+            "/",
+            "/favicon.ico",
+            "/health"
+        };
+
+        private readonly ILogger<ApiLoggerMiddleware> _logger;
+
         private readonly RequestDelegate _next;
 
         private readonly string _prefix;
@@ -25,10 +34,15 @@ namespace TGS.Core.Infrastructures.Log.Middleware
         //avoid LOH :https://stackoverflow.com/questions/43403941/how-to-read-asp-net-core-response-body/52328142#52328142
         private readonly RecyclableMemoryStreamManager _recyclableMemoryStreamManager;
 
-        public ApiLoggerMiddleware(RequestDelegate next, string prefix)
+        public ApiLoggerMiddleware(
+            RequestDelegate next,
+            string prefix,
+            ILogger<ApiLoggerMiddleware> logger)
         {
             _prefix = prefix;
             _next = next;
+
+            _logger = logger;
 
             _recyclableMemoryStreamManager = new();
         }
@@ -44,7 +58,7 @@ namespace TGS.Core.Infrastructures.Log.Middleware
                 var sw = Stopwatch.StartNew();
                 await _next(context);
                 sw.Stop();
-                var ms = (int) sw.ElapsedMilliseconds;
+                var ms = (int)sw.ElapsedMilliseconds;
                 context.Response.Body.Seek(0, SeekOrigin.Begin);
                 using var sr = new StreamReader(context.Response.Body);
                 var message = await sr.ReadToEndAsync();
@@ -72,12 +86,12 @@ namespace TGS.Core.Infrastructures.Log.Middleware
         }
 
         private static string CutOffResponseContent(string responseContent) =>
-            $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
+            $"{responseContent.NoLongerThan(_ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
 
         public async Task InvokeAsync(HttpContext context, IRequestAnalyzer requestAnalyzer, ITgsLog log)
         {
             var path = context.Request.Path.Value;
-            if (BypassRouting.Any(r => path.IgnoreCaseEquals(r)))
+            if (_BypassRouting.Any(r => path.IgnoreCaseEquals(r)))
             {
                 await _next(context);
                 return;
@@ -111,7 +125,7 @@ namespace TGS.Core.Infrastructures.Log.Middleware
                     requestheaders = context.Request.Headers.ToDetailString(),
                     requestcontent = reqMessage,
                     responseheaders = context.Response.Headers.ToDetailString(),
-                    responsecontent = resMessage?.Length > ResMessageSizeLimit
+                    responsecontent = resMessage?.Length > _ResMessageSizeLimit
                         ? CutOffResponseContent(resMessage)
                         : resMessage,
                     responsecode = context.Response.StatusCode,
@@ -120,6 +134,28 @@ namespace TGS.Core.Infrastructures.Log.Middleware
                 };
 
             log.LogApi(apiLogEvent);
+
+            log.LogAdmin(new AdminLogEvent
+            {
+                ipaddress = requestAnalyzer.GetIp(context).NoLongerThan(256),
+                host = "api-log-debugger",
+                trackingid = log.TrackingId,
+                path = url.NoLongerThan(256),
+                method = context.Request.Method.NoLongerThan(8),
+                servername = Environment.MachineName.NoLongerThan(128),
+                requestheaders = context.Request.Headers.ToDetailString(),
+                requestcontent = reqMessage,
+                responseheaders = context.Response.Headers.ToDetailString(),
+                responsecontent = resMessage?.Length > _ResMessageSizeLimit
+                    ? CutOffResponseContent(resMessage)
+                    : resMessage,
+                responsecode = context.Response.StatusCode,
+                executiontimems = ms,
+                recordedon = requestTime
+            });
+
+            _logger.LogInformation(
+                $@"Send api log event completely with path: {url}.{Environment.NewLine}Request Body: {reqMessage}{Environment.NewLine}Response Body: {resMessage}");
         }
 
         private string GetPrefix(string path)

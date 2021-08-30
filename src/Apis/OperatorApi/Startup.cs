@@ -203,6 +203,10 @@ namespace TGS.Apis.OperatorApi
                     .AddSource("TGS.*")
                     .AddAspNetCoreInstrumentation()
                     .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation(options =>
+                    {
+                        options.SetDbStatementForText = true;
+                    })
                     .AddProfileViewExporter(builder =>
                     {
                         builder
