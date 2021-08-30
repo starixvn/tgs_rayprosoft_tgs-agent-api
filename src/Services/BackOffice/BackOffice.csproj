@@ -40,6 +40,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Clients\Promotion.Client\Promotion.Client.csproj" />
+    <ProjectReference Include="..\..\Clients\Report.Client\Report.Client.csproj" />
     <ProjectReference Include="..\..\Core\DataServices.Tgs\DataServices.Tgs.csproj" />
     <ProjectReference Include="..\..\Core\Models\Models.csproj" />
     <ProjectReference Include="..\..\Repositories\TgsTransaction.Repositories\TgsTransaction.Repositories.csproj" />
