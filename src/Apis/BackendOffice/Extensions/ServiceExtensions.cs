@@ -174,9 +174,8 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve-group");
-                })
-                ;
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
+                });
 
             return services;
         }
