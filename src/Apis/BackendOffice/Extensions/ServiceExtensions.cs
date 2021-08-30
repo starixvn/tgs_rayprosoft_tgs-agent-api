@@ -41,7 +41,8 @@ namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services,
+        public static IServiceCollection AddBackendOfficeServices(
+            this IServiceCollection services,
             IConfiguration configuration)
         {
             services.AddTgsRepository(configuration, "Tgs");
@@ -173,7 +174,7 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
-                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve-group");
                 })
                 ;
 
