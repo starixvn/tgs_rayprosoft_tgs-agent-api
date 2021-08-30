@@ -57,11 +57,11 @@ namespace TGS.Services.Report.Application.Commands.Agent
             return CreateValidResponse<MessageResponse>();
         }
 
-        private IEnumerable<AgentDividendMultipleLayerModel> GetAgentDividends(
+        private static IEnumerable<AgentDividendMultipleLayerModel> GetAgentDividends(
             Core.DataServices.Tgs.Models.Agent[] agents, Guid brandId, Guid agentId,
             decimal netProfit)
         {
-            bool hasAgentAndParentAgentId;
+            bool hasParentAgentId;
 
             var agent = agents.First(x => x.Id == agentId);
             var currentAgentId = agentId;
@@ -79,19 +79,22 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     Dividend = netProfit * (agent.DividendPercentage - childDividendPercentage) / 100M
                 };
 
-                hasAgentAndParentAgentId = agent.ParentAgentId != null;
-                if (hasAgentAndParentAgentId)
+                hasParentAgentId = agent.ParentAgentId != null;
+
+                if (!hasParentAgentId)
                 {
-                    childDividendPercentage = agent.DividendPercentage;
-
-                    var parentAgent = agents.First(x => x.Id == agent.ParentAgentId);
-                    currentAgentId = parentAgent.Id;
-
-                    layer = $"{currentAgentId},{layer}";
-
-                    agent = parentAgent;
+                    continue;
                 }
-            } while (hasAgentAndParentAgentId);
+
+                childDividendPercentage = agent.DividendPercentage;
+
+                var parentAgent = agents.First(x => x.Id == agent.ParentAgentId);
+                currentAgentId = parentAgent.Id;
+
+                layer = $"{currentAgentId},{layer}";
+
+                agent = parentAgent;
+            } while (hasParentAgentId);
         }
 
         private async Task<(List<CreateAgentDividendModel>, List<CreateAgentDividendModel>, List<AgentDividend>)>
@@ -350,22 +353,15 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
         private static (DateTimeOffset, DateTimeOffset) GetInterval(
             SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth)
-        {
-            switch (type)
+            => type switch
             {
-                case SettlementIntervalType.Daily:
-                    return (startDate, startDate);
-                case SettlementIntervalType.Weekly:
-                    return (DateGenerator.GetFirstDayOfWeek(startDate),
-                        DateGenerator.GetLastDayOfWeek(startDate));
-                case SettlementIntervalType.Monthly:
-                    return (startDate,
-                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
-                            dayOfMonth.Value!));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-        }
+                SettlementIntervalType.Daily => (startDate, startDate),
+                SettlementIntervalType.Weekly => (DateGenerator.GetFirstDayOfWeek(startDate),
+                    DateGenerator.GetLastDayOfWeek(startDate)),
+                SettlementIntervalType.Monthly => (startDate,
+                    DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1), dayOfMonth.Value!)),
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+            };
 
         private async IAsyncEnumerable<Brand[]> GetBrands(string brandCode, DateTimeOffset queryDate,
             [EnumeratorCancellation] CancellationToken cancellationToken)

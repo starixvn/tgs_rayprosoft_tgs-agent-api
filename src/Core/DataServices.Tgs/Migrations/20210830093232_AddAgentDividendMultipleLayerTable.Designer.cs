@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210827093232_AddAgentDividendMultipleLayerTable")]
+    [Migration("20210830093232_AddAgentDividendMultipleLayerTable")]
     partial class AddAgentDividendMultipleLayerTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
