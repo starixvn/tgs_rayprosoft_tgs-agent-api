@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
-using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
-using TGS.Apis.TgsApi.GameProviders.VR.Services;
-using TGS.Apis.TgsApi.Models.Interfaces;
+using TGS.Apis.TgsApi.GameProviders.TCG.Middlewares;
+using TGS.Apis.TgsApi.GameProviders.TCG.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
-using TGS.Core.Infrastructures.Extensions;
+using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.TCG
 {
@@ -21,7 +22,31 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
 
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
-            services.AddErrorMappers();
+            services.AddErrorMappers(
+               new[]
+               {
+                    typeof(TCGErrorMapper)
+               },
+               (provider, key) => key switch
+               {
+                   GameProvider.TCG => provider.GetRequiredService<TCGErrorMapper>(),
+                   _ => provider.GetRequiredService<TgsErrorMapper>()
+               }
+               );
+            services.AddScoped<AuthorizeTCGMiddleware>();
+            services.AddScoped<HandleTCGExceptionMiddleware>();
+        }
+
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        {
+            const string Route = "/api/tcg"; 
+
+            app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
+                builder =>
+                {
+                    builder.UseMiddleware<HandleTCGExceptionMiddleware>();
+                    builder.UseMiddleware<AuthorizeTCGMiddleware>();
+                });
         }
     }
 }
