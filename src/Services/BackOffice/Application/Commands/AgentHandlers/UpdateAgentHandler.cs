@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,32 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     x.LevelType == AgentLevelType.Chief))
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
+            }
+
+            if (request.ParentUsername.IsNotNullOrEmpty())
+            {
+                var parentAgent = await _service.GetAgentAsync(x => x.BrandId == request.BrandId &&
+                    x.Username == request.ParentUsername);
+
+                if (parentAgent == null)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
+                }
+
+                if (parentAgent.DividendPercentage < request.DividendPercentage)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent
+                        .DividendPercentageMustLessThanOrEqualToUpperLayer);
+                }
+            }
+
+            var childAgentMaxDividendPercentage = await _service.GetAgentQueries()
+                .Where(x => x.ParentAgentId == agent.Id).MaxAsync(x => x.DividendPercentage, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (request.DividendPercentage < childAgentMaxDividendPercentage)
+            {
+                return CreateInvalidResponse<MessageResponse>(Agent.DividendPercentageMustLessThanOrEqualToUpperLayer);
             }
 
             if (request.UpdateType == MemberUpdateType.Contact &&

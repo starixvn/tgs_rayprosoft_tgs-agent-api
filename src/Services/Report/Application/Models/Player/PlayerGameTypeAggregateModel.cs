@@ -22,7 +22,6 @@ namespace TGS.Services.Report.Application.Models.Player
         public decimal VipVirtualSportsRebatePercentage { get; set; }
         public decimal VipLotteryRebatePercentage { get; set; }
         public decimal VipRebateAmount { get; set; }
-        public decimal AgentDividendPercentage { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
         public DateTimeOffset ReportDate { get; set; }
     }
