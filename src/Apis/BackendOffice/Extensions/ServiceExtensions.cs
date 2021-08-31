@@ -41,7 +41,8 @@ namespace TGS.Apis.BackendOffice.Extensions
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddBackendOfficeServices(this IServiceCollection services,
+        public static IServiceCollection AddBackendOfficeServices(
+            this IServiceCollection services,
             IConfiguration configuration)
         {
             services.AddTgsRepository(configuration, "Tgs");
@@ -141,7 +142,11 @@ namespace TGS.Apis.BackendOffice.Extensions
                 var enUSCulture = "en-US";
                 var zhCNCulture = "zh-CN";
 
-                var supportedCultures = new[] { new CultureInfo(enUSCulture), new CultureInfo(zhCNCulture) };
+                var supportedCultures = new[]
+                {
+                    new CultureInfo(enUSCulture),
+                    new CultureInfo(zhCNCulture)
+                };
 
                 options.DefaultRequestCulture = new(zhCNCulture, zhCNCulture);
                 options.SupportedCultures = supportedCultures;
@@ -169,9 +174,8 @@ namespace TGS.Apis.BackendOffice.Extensions
 
                             options.Url = configuration.GetValue<string>("NatsSetting:Urls");
                         })
-                        .AddHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
-                })
-                ;
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve");
+                });
 
             return services;
         }

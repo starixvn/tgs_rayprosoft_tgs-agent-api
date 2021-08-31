@@ -49,10 +49,22 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         .Where(x => x.AgentId == agent.Id)
                         .Where(x => x.ReportDate >= request.From && x.ReportDate < request.To), p => p.PlayerCode,
                     playerAggregate => playerAggregate.PlayerCode,
-                    (player, players) => new {player, players})
+                    (player, players) => new
+                    {
+                        player,
+                        players
+                    })
                 .SelectMany(x => x.players.DefaultIfEmpty(),
-                    (x, playerAggregate) => new {x.player, playerAggregate})
-                .GroupBy(x => new {x.player.Username, x.player.PlayerCode}, (player, playerAggregate) =>
+                    (x, playerAggregate) => new
+                    {
+                        x.player,
+                        playerAggregate
+                    })
+                .GroupBy(x => new
+                {
+                    x.player.Username,
+                    x.player.PlayerCode
+                }, (player, playerAggregate) =>
                     new AgentContributionModel
                     {
                         Username = player.Username,
@@ -60,11 +72,19 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         DepositAmount = playerAggregate.Sum(p => p.playerAggregate?.DepositAmount ?? 0),
                         WithdrawalAmount = playerAggregate.Sum(p => p.playerAggregate?.WithdrawalAmount ?? 0),
                         AdjustmentAmount = playerAggregate.Sum(p => p.playerAggregate?.AdjustmentAmount ?? 0),
-                        BonusAmount = playerAggregate.Sum(p => p.playerAggregate?.BonusAmount ?? 0),
+                        BonusAmount =
+                            playerAggregate.Sum(p
+                                => p.playerAggregate == null
+                                    ? 0
+                                    : p.playerAggregate.RebateAmount + p.playerAggregate.PromotionAmount),
                         BetAmount = playerAggregate.Sum(p => p.playerAggregate?.BetAmount ?? 0),
                         ValidBetAmount = playerAggregate.Sum(p => p.playerAggregate?.Turnover ?? 0),
                         WinLossAmount = playerAggregate.Sum(p => p.playerAggregate?.WinLossAmount ?? 0),
-                        NetProfit = playerAggregate.Sum(p => p.playerAggregate?.NetProfit ?? 0)
+                        NetProfit = playerAggregate.Sum(p => p.playerAggregate == null
+                            ? 0
+                            : p.playerAggregate.WinLossAmount - p.playerAggregate.AdjustmentAmount -
+                            p.playerAggregate.RebateAmount -
+                            p.playerAggregate.PromotionAmount)
                     }).ToArray();
 
             if (!request.IncludeAgents)
@@ -80,10 +100,22 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         .Where(x => x.AgentId != null)
                         .Where(x => x.ReportDate >= request.From && x.ReportDate <= request.To), a => a.Id,
                     playerAggregate => playerAggregate.AgentId,
-                    (agent, players) => new {agent, players})
+                    (agent, players) => new
+                    {
+                        agent,
+                        players
+                    })
                 .SelectMany(x => x.players.DefaultIfEmpty(),
-                    (x, playerAggregate) => new {x.agent, playerAggregate})
-                .GroupBy(x => new {x.agent.Username, x.agent.Id}, (agent, playerAggregate) =>
+                    (x, playerAggregate) => new
+                    {
+                        x.agent,
+                        playerAggregate
+                    })
+                .GroupBy(x => new
+                {
+                    x.agent.Username,
+                    x.agent.Id
+                }, (agent, playerAggregate) =>
                     new AgentContributionModel
                     {
                         Username = agent.Username,
@@ -91,11 +123,19 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         DepositAmount = playerAggregate.Sum(p => p.playerAggregate?.DepositAmount ?? 0),
                         WithdrawalAmount = playerAggregate.Sum(p => p.playerAggregate?.WithdrawalAmount ?? 0),
                         AdjustmentAmount = playerAggregate.Sum(p => p.playerAggregate?.AdjustmentAmount ?? 0),
-                        BonusAmount = playerAggregate.Sum(p => p.playerAggregate?.BonusAmount ?? 0),
+                        BonusAmount =
+                            playerAggregate.Sum(p
+                                => p.playerAggregate == null
+                                    ? 0
+                                    : p.playerAggregate.RebateAmount + p.playerAggregate.PromotionAmount),
                         BetAmount = playerAggregate.Sum(p => p.playerAggregate?.BetAmount ?? 0),
                         ValidBetAmount = playerAggregate.Sum(p => p.playerAggregate?.Turnover ?? 0),
                         WinLossAmount = playerAggregate.Sum(p => p.playerAggregate?.WinLossAmount ?? 0),
-                        NetProfit = playerAggregate.Sum(p => p.playerAggregate?.NetProfit ?? 0)
+                        NetProfit = playerAggregate.Sum(p => p.playerAggregate == null
+                            ? 0
+                            : p.playerAggregate.WinLossAmount - p.playerAggregate.AdjustmentAmount -
+                            p.playerAggregate.RebateAmount -
+                            p.playerAggregate.PromotionAmount)
                     }).ToArray();
 
 

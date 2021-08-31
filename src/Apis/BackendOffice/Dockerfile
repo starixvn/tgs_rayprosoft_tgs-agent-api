@@ -19,15 +19,14 @@ COPY ["src/Core/Infrastructures/Infrastructures.csproj", "src/Core/Infrastructur
 COPY ["src/Core/DataServices.Base/DataServices.Base.csproj", "src/Core/DataServices.Base/"]
 COPY ["src/Services/Bucket/PlayerBucket.Core.csproj", "src/Services/Bucket/"]
 COPY ["src/Services/Wallet.Core/Wallet.Core.csproj", "src/Services/Wallet.Core/"]
+COPY ["src/Clients/Promotion.Client/Promotion.Client.csproj", "src/Clients/Promotion.Client/"]
 COPY ["src/Services/TgsTransaction.Core/TgsTransaction.Core.csproj", "src/Services/TgsTransaction.Core/"]
 COPY ["src/Repositories/TgsTransaction.Repositories/TgsTransaction.Repositories.csproj", "src/Repositories/TgsTransaction.Repositories/"]
 COPY ["src/Services/Operations/Operations.csproj", "src/Services/Operations/"]
 COPY ["src/Repositories/BackOffice.Repositories/BackOffice.Repositories.csproj", "src/Repositories/BackOffice.Repositories/"]
 COPY ["src/Clients/Report.Client/Report.Client.csproj", "src/Clients/Report.Client/"]
 COPY ["src/Repositories/Wallet.Repositories/Wallet.Repositories.csproj", "src/Repositories/Wallet.Repositories/"]
-COPY ["src/Clients/Promotion.Client/Promotion.Client.csproj", "src/Clients/Promotion.Client/"]
 COPY ["src/Services/PluggableServices/PluggableServices.csproj", "src/Services/PluggableServices/"]
-COPY ["src/Clients/FileService.Client/FileService.Client.csproj", "src/Clients/FileService.Client/"]
 COPY ["src/Repositories/PlayerBucket.Repositories/PlayerBucket.Repositories.csproj", "src/Repositories/PlayerBucket.Repositories/"]
 RUN dotnet restore "src/Apis/BackendOffice/BackendOffice.csproj"
 COPY . .

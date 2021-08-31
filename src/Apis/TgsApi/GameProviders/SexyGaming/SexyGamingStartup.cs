@@ -25,12 +25,15 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-            new[] { typeof(SexyGamingErrorMapper) },
-            (provider, key) => key switch
-            {
-                GameProvider.SexyGaming => provider.GetRequiredService<SexyGamingErrorMapper>(),
-                _ => provider.GetRequiredService<TgsErrorMapper>()
-            });
+                new[]
+                {
+                    typeof(SexyGamingErrorMapper)
+                },
+                (provider, key) => key switch
+                {
+                    GameProvider.SexyGaming => provider.GetRequiredService<SexyGamingErrorMapper>(),
+                    _                       => provider.GetRequiredService<TgsErrorMapper>()
+                });
 
             services.AddScoped<AuthorizeSexyGamingMiddleware>();
             services.AddScoped<HandleSexyGamingExceptionMiddleware>();
@@ -39,15 +42,20 @@ namespace TGS.Apis.TgsApi.GameProviders.SexyGaming
             services.AddScoped<ISexyGamingRedisCacheService, SexyGamingRedisCacheService>();
             services.AddScoped<ISexyGamingGameHistoryService, SexyGamingGameHistoryService>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(SexyGamingGameInitializer) }, (provider, _) =>
-                  provider.GetRequiredService<SexyGamingGameInitializer>());
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(SexyGamingGameInitializer)
+            }, (provider, _) =>
+                provider.GetRequiredService<SexyGamingGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(SexyGamingGameHistory) }, (provider, _) =>
-                  provider.GetRequiredService<SexyGamingGameHistory>());
-
+            services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(SexyGamingGameHistory)
+            }, (provider, _) =>
+                provider.GetRequiredService<SexyGamingGameHistory>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/sg";
 

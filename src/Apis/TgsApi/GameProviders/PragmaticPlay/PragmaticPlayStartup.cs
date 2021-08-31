@@ -25,7 +25,10 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] {typeof(PragmaticPlayErrorMapper)},
+                new[]
+                {
+                    typeof(PragmaticPlayErrorMapper)
+                },
                 (provider, key) => key switch
                 {
                     GameProvider.PragmaticPlay => provider.GetRequiredService<PragmaticPlayErrorMapper>(),
@@ -41,14 +44,20 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay
             services.AddSingleton<IPragmaticPlayActionModelMapper, PragmaticPlayActionModelMapper>();
             services.AddSingleton<IPragmaticPlayHashProvider, PragmaticPlayHashProvider>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(PragmaticPlayGameInitializer)},
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+                {
+                    typeof(PragmaticPlayGameInitializer)
+                },
                 (provider, _) => provider.GetRequiredService<PragmaticPlayGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(PragmaticPlayGameHistory)},
+            services.AddScopedWithResolver<IGameHistory>(new[]
+                {
+                    typeof(PragmaticPlayGameHistory)
+                },
                 (provider, _) => provider.GetRequiredService<PragmaticPlayGameHistory>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/pp";
 

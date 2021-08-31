@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Apis\FileService\FileService.csproj" />
     <ProjectReference Include="..\..\Services\FileService.Core\FileService.Core.csproj" />
   </ItemGroup>
 

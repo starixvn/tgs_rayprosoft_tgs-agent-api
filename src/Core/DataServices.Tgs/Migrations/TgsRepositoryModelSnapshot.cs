@@ -922,6 +922,87 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("api_logs", "log");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Banner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("BeginTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("begin_time");
+
+                    b.Property<Guid>("BrandId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("brand_id");
+
+                    b.Property<string>("CreatedByUserName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("created_by_user_name");
+
+                    b.Property<DateTimeOffset>("CreatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.Property<int>("DisplayOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1)
+                        .HasColumnName("display_order");
+
+                    b.Property<DateTimeOffset?>("EndTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_time");
+
+                    b.Property<bool>("IsEnabled")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_enabled");
+
+                    b.Property<string>("Localization")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("localization");
+
+                    b.Property<string>("Remark")
+                        .HasColumnType("text")
+                        .HasColumnName("remark");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0)
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<string>("UpdatedByUserName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("updated_by_user_name");
+
+                    b.Property<DateTimeOffset>("UpdatedOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.HasKey("Id")
+                        .HasName("pk_banners");
+
+                    b.HasIndex("BrandId")
+                        .HasDatabaseName("ix_banners_brand_id");
+
+                    b.ToTable("banners");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BetLimit", b =>
                 {
                     b.Property<int>("Id")
@@ -1020,11 +1101,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_on");
 
-                    b.Property<DateTimeOffset?>("CurrentSettlementFrom")
+                    b.Property<DateTimeOffset>("CurrentSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_from");
 
-                    b.Property<DateTimeOffset?>("CurrentSettlementTo")
+                    b.Property<DateTimeOffset>("CurrentSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("current_settlement_to");
 
@@ -1043,11 +1124,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("name");
 
-                    b.Property<DateTimeOffset?>("NextSettlementFrom")
+                    b.Property<DateTimeOffset>("NextSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_settlement_from");
 
-                    b.Property<DateTimeOffset?>("NextSettlementTo")
+                    b.Property<DateTimeOffset>("NextSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("next_settlement_to");
 
@@ -1056,11 +1137,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("operational_email");
 
-                    b.Property<DateTimeOffset?>("PreviousSettlementFrom")
+                    b.Property<DateTimeOffset>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_from");
 
-                    b.Property<DateTimeOffset?>("PreviousSettlementTo")
+                    b.Property<DateTimeOffset>("PreviousSettlementTo")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_to");
 
@@ -1070,8 +1151,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("secret_key");
 
-                    b.Property<int?>("SettlementIntervalType")
+                    b.Property<int?>("SettlementDay")
                         .HasColumnType("integer")
+                        .HasColumnName("settlement_day");
+
+                    b.Property<short>("SettlementIntervalType")
+                        .HasColumnType("smallint")
                         .HasColumnName("settlement_interval_type");
 
                     b.Property<short>("Status")
@@ -3128,18 +3213,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("channel_id");
 
-                    b.Property<string>("CreatedByUsername")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("created_by_username");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_on")
-                        .HasDefaultValueSql("Now()");
-
                     b.Property<Guid>("MethodId")
                         .HasColumnType("uuid")
                         .HasColumnName("method_id");
@@ -3153,18 +3226,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("status")
                         .HasDefaultValueSql("0");
-
-                    b.Property<string>("UpdatedByUsername")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("updated_by_username");
-
-                    b.Property<DateTimeOffset>("UpdatedOn")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_on")
-                        .HasDefaultValueSql("Now()");
 
                     b.HasKey("Id")
                         .HasName("pk_payment_method_channels");
@@ -3471,6 +3532,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("deposit_amount");
 
+                    b.Property<decimal>("DividendAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("dividend_amount");
+
                     b.Property<int>("FirstFundInCount")
                         .HasColumnType("integer")
                         .HasColumnName("first_fund_in_count");
@@ -3483,16 +3549,21 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("minute");
 
-                    b.Property<decimal>("NetProfit")
-                        .HasPrecision(18, 6)
-                        .HasColumnType("numeric(18,6)")
-                        .HasColumnName("net_profit");
-
                     b.Property<string>("PlayerCode")
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)")
                         .HasColumnName("player_code");
+
+                    b.Property<decimal>("PromotionAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("promotion_amount");
+
+                    b.Property<decimal>("RebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rebate_amount");
 
                     b.Property<int>("RegisteredCount")
                         .HasColumnType("integer")
@@ -5851,6 +5922,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Brand");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Banner", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Brand", null)
+                        .WithMany()
+                        .HasForeignKey("BrandId")
+                        .HasConstraintName("fk_banners_brands_brand_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BetLimit", b =>

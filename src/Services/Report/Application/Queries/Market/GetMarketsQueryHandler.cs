@@ -60,11 +60,16 @@ namespace TGS.Services.Report.Application.Queries.Market
                         DepositAmount = markets.Sum(m => m.market?.DepositAmount ?? 0),
                         WithdrawalAmount = -markets.Sum(m => m.market?.WithdrawalAmount ?? 0),
                         AdjustmentAmount = markets.Sum(m => m.market?.AdjustmentAmount ?? 0),
-                        BonusAmount = markets.Sum(m => m.market?.BonusAmount ?? 0),
+                        BonusAmount =
+                            markets.Sum(m => m.market == null ? 0 : m.market.RebateAmount + m.market.PromotionAmount),
                         BetAmount = markets.Sum(m => m.market?.BetAmount ?? 0),
                         Turnover = markets.Sum(m => m.market?.Turnover ?? 0),
                         WinLossAmount = markets.Sum(m => m.market?.WinLossAmount ?? 0),
-                        NetProfit = markets.Sum(m => m.market?.NetProfit ?? 0)
+                        NetProfit = markets.Sum(m
+                            => m.market == null
+                                ? 0
+                                : m.market.WinLossAmount - m.market.AdjustmentAmount - m.market.RebateAmount -
+                                m.market.PromotionAmount)
                     })
                 .CreatePagedResponseAsync(dates.Length);
         }

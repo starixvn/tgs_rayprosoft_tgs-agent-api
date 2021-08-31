@@ -29,7 +29,10 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] {typeof(SBOBETErrorMapper)},
+                new[]
+                {
+                    typeof(SBOBETErrorMapper)
+                },
                 (provider, key) => key switch
                 {
                     GameProvider.SBOBET => provider.GetRequiredService<SBOBETErrorMapper>(),
@@ -42,19 +45,28 @@ namespace TGS.Apis.TgsApi.GameProviders.SBOBET
             services.AddScoped<ISBOBETServices, SBOBETServices>();
             services.AddSingleton<ISBOBETActionModelMapper, SBOBetActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] {typeof(SBOBETGameInitializer)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(SBOBETGameInitializer)
+            }, (provider, _) =>
                 provider.GetRequiredService<SBOBETGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] {typeof(SBOBETGameHistory)}, (provider, _) =>
+            services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(SBOBETGameHistory)
+            }, (provider, _) =>
                 provider.GetRequiredService<SBOBETGameHistory>());
 
-            services.AddScopedWithResolver<IPlayerAction>(new[] {typeof(SBOBETPlayerAction)}, (provider, _) =>
+            services.AddScopedWithResolver<IPlayerAction>(new[]
+            {
+                typeof(SBOBETPlayerAction)
+            }, (provider, _) =>
                 provider.GetRequiredService<SBOBETPlayerAction>());
 
             services.AddTransient<IBetServiceFactory, BetServiceFactory>();
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/sbo";
 

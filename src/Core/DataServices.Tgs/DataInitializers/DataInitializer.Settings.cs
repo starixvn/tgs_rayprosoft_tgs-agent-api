@@ -54,10 +54,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Key = key,
                 Value = value,
                 Description = description,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                CreatedOn = Now,
-                UpdatedOn = Now
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
+                CreatedOn = _Now,
+                UpdatedOn = _Now
             };
 
         private static ArrearsEmail GetArrearsEmail() =>
@@ -231,6 +231,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     SubMenus = new[]
                     {
+                        new MenuSetting("Banner")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Create"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("Verify")
+                            }
+                        },
                         new MenuSetting("Announcement")
                         {
                             SubMenus = new[]
@@ -257,6 +267,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("View"),
                                 new MenuSetting("Create"),
                                 new MenuSetting("Update")
+                            }
+                        },
+                        new MenuSetting("IMSettings")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View"),
+                                new MenuSetting("Update"),
+                                new MenuSetting("ViewLiveChat"),
+                                new MenuSetting("UpdateLiveChat")
                             }
                         }
                     }

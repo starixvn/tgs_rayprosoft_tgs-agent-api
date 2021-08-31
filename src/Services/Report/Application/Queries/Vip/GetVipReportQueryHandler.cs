@@ -55,7 +55,11 @@ namespace TGS.Services.Report.Application.Queries.Vip
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.ReportDate >= from && x.ReportDate < to)
                 .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
-                .GroupBy(x => new {x.PlayerCode, x.BrandId},
+                .GroupBy(x => new
+                    {
+                        x.PlayerCode,
+                        x.BrandId
+                    },
                     (x, players) => new
                     {
                         x.BrandId,
@@ -63,19 +67,32 @@ namespace TGS.Services.Report.Application.Queries.Vip
                         DepositAmount = players.Sum(m => m.DepositAmount),
                         WithdrawalAmount = players.Sum(m => m.WithdrawalAmount),
                         AdjustmentAmount = players.Sum(m => m.AdjustmentAmount),
-                        BonusAmount = players.Sum(m => m.BonusAmount),
+                        BonusAmount = players.Sum(m => m.RebateAmount + m.PromotionAmount),
                         BetAmount = players.Sum(m => m.BetAmount),
                         Turnover = players.Sum(m => m.Turnover),
                         WinLossAmount = players.Sum(m => m.WinLossAmount),
-                        NetProfit = players.Sum(m => m.NetProfit)
+                        NetProfit = players.Sum(m
+                            => m.WinLossAmount - m.AdjustmentAmount - m.RebateAmount - m.PromotionAmount)
                     })
                 .GroupJoin(_service.Repository.PlayerGameAggregates.AsQueryable()
                         .Where(x => x.BrandId == request.BrandId)
                         .Where(x => x.ReportDate >= from && x.ReportDate < to)
                         .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode),
-                    p => new {p.BrandId, p.PlayerCode},
-                    pg => new {pg.BrandId, pg.PlayerCode},
-                    (p, pg) => new {p, pg})
+                    p => new
+                    {
+                        p.BrandId,
+                        p.PlayerCode
+                    },
+                    pg => new
+                    {
+                        pg.BrandId,
+                        pg.PlayerCode
+                    },
+                    (p, pg) => new
+                    {
+                        p,
+                        pg
+                    })
                 .SelectMany(x => x.pg.DefaultIfEmpty(),
                     (x, pg) => new
                     {

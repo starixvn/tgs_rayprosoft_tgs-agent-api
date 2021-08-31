@@ -14,6 +14,9 @@ using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming;
 using TGS.Apis.TgsApi.GameProviders.Skywind;
 using TGS.Apis.TgsApi.GameProviders.VR;
+using TGS.Apis.TgsApi.GameProviders.WGHorse;
+using TGS.Apis.TgsApi.GameProviders.WGSports;
+using TGS.Apis.TgsApi.GameProviders.WMCasino;
 using static TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Apis.TgsApi
@@ -37,7 +40,10 @@ namespace TGS.Apis.TgsApi
             {SexyGaming, typeof(SexyGamingStartup)},
             {Skywind, typeof(SkywindStartup)},
             {AllBet, typeof(AllBetStartup)},
-            {Evolution, typeof(EvolutionStartup)}
+            {Evolution, typeof(EvolutionStartup)},
+            {WGSports, typeof(WGSportsStartup)},
+            {WGHorse, typeof(WGHorseStartup)},
+            {WMCasino, typeof(WMCasinoStartup)}
         };
 
         private static readonly IReadOnlyDictionary<string, string> _ConfigFileMap = new Dictionary<string, string>
@@ -55,7 +61,10 @@ namespace TGS.Apis.TgsApi
             {SexyGaming, "SexyGaming/sexygaming.json"},
             {Skywind, "Skywind/skywind.json"},
             {AllBet, "AllBet/allbet.json"},
-            {Evolution, "Evolution/evolution.json"}
+            {Evolution, "Evolution/evolution.json"},
+            {WGSports, "WGSports/wgsports.json"},
+            {WGHorse, "WGHorse/wghorse.json"},
+            {WMCasino, "WMCasino/wmcasino.json"}
         };
     }
 }

@@ -25,11 +25,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
         protected override void AddCustomDependencyServices(IServiceCollection services)
         {
             services.AddErrorMappers(
-                new[] { typeof(SkywindErrorMapper) },
+                new[]
+                {
+                    typeof(SkywindErrorMapper)
+                },
                 (provider, key) => key switch
                 {
                     GameProvider.Skywind => provider.GetRequiredService<SkywindErrorMapper>(),
-                    _ => provider.GetRequiredService<TgsErrorMapper>()
+                    _                    => provider.GetRequiredService<TgsErrorMapper>()
                 }
             );
 
@@ -38,14 +41,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
             services.AddScoped<ISkywindServices, SkywindServices>();
             services.AddScoped<ISkywindActionModelMapper, SkywindActionModelMapper>();
 
-            services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(SkywindGameInitializer) }, (provider, _) =>
-            provider.GetRequiredService<SkywindGameInitializer>());
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(SkywindGameInitializer)
+            }, (provider, _) =>
+                provider.GetRequiredService<SkywindGameInitializer>());
 
-            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(SkywindGameHistory) }, (provider, _) =>
-            provider.GetRequiredService<SkywindGameHistory>());
+            services.AddScopedWithResolver<IGameHistory>(new[]
+            {
+                typeof(SkywindGameHistory)
+            }, (provider, _) =>
+                provider.GetRequiredService<SkywindGameHistory>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/sw/api";
 

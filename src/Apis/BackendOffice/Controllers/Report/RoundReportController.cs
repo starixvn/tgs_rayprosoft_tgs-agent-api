@@ -21,8 +21,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet]
         [Description("Get rounds")]
-        public Task<PagedResponse<RoundModel>> GetRoundsAsync([FromQuery] GetRoundsRequest request) =>
-            _client.GetRoundsAsync(request);
+        public Task<PagedResponse<RoundModel>> GetRoundsAsync([FromQuery] GetRoundsRequest request) 
+            => _client.GetRoundsAsync(request);
 
         [HttpGet("{roundId}")]
         [Description("Get a round")]

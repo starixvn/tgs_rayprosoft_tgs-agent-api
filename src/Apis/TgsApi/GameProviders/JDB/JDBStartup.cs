@@ -55,7 +55,7 @@ namespace TGS.Apis.TgsApi.GameProviders.JDB
                 provider.GetRequiredService<JDBGameHistory>());
         }
 
-        protected override void UseCustomMiddlewares(IApplicationBuilder app)
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/jdb";
 

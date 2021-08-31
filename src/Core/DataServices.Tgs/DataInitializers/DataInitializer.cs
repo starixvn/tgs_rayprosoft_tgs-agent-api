@@ -11,7 +11,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Utility;
+using Tgs.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using static TGS.Core.Models.Enums.GameType;
 using static TGS.Core.Models.Enums.GameActionType;
@@ -21,15 +21,15 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     [ExcludeFromCodeCoverage]
     public sealed partial class DataInitializer : BaseDataInitializer
     {
-        private const string AdminUsername = "admin.enabled";
-        private static readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
+        private const string _AdminUsername = "admin.enabled";
+        private static readonly DateTimeOffset _Now = DateTimeOffset.UtcNow;
 
-        private static readonly IList<IReseller> Resellers = new IReseller[]
+        private static readonly IList<IReseller> _Resellers = new IReseller[]
         {
             new TgsReseller()
         };
 
-        private static readonly IRole _gpiBrandRole = new GpiBrandRole();
+        private static readonly IRole _GpiBrandRole = new GpiBrandRole();
 
         private readonly List<Agent> _agents = new();
 
@@ -70,7 +70,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             new ResellerAdminRole(),
             new LicenseeAdminRole(),
             new TgsBrandRole(),
-            _gpiBrandRole
+            _GpiBrandRole
         };
 
         private BetLimit[] _betLimits;
@@ -100,7 +100,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new SexyGamingGameProvider(env),
                 new SkywindGameProvider(env),
                 new AllBetGameProvider(env),
-                new EvolutionGameProvider(env)
+                new EvolutionGameProvider(env),
+                new WGSportsGameProvider(env),
+                new WGHorseGameProvider(env),
+                new WMCasinoGameProvider(env)
             };
         }
 
@@ -205,10 +208,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     Name = c.Name,
                     NativeName = c.NativeName,
                     Symbol = c.Symbol,
-                    CreatedByUsername = AdminUsername,
-                    UpdatedByUsername = AdminUsername,
-                    CreatedOn = Now,
-                    UpdatedOn = Now
+                    CreatedByUsername = _AdminUsername,
+                    UpdatedByUsername = _AdminUsername,
+                    CreatedOn = _Now,
+                    UpdatedOn = _Now
                 }).ToArray();
 
             await _repository.Currencies.AddRangeAsync(currencies);
@@ -217,7 +220,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private async Task GenerateAgentsAsync()
         {
-            var brands = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+            var brands = _Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
                 .Distinct()
                 .Select(brand => brand)
                 .ToArray();
@@ -247,7 +250,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         private async Task GenerateVipLevelsAsync()
         {
-            _vipLevels = Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
+            _vipLevels = _Resellers.SelectMany(x => x.Licensees.SelectMany(l => l.Brands))
                 .Distinct()
                 .Select(brand => new VipLevel
                 {
@@ -260,10 +263,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     SlotRebatePercentage = 4,
                     SportsRebatePercentage = 5,
                     VirtualSportsRebatePercentage = 6,
-                    CreatedByUsername = AdminUsername,
-                    UpdatedByUsername = AdminUsername,
-                    CreatedOn = Now,
-                    UpdatedOn = Now
+                    CreatedByUsername = _AdminUsername,
+                    UpdatedByUsername = _AdminUsername,
+                    CreatedOn = _Now,
+                    UpdatedOn = _Now
                 })
                 .ToArray();
 
@@ -338,10 +341,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     LanguageCode = p.LanguageCode,
                     Name = p.Name,
                     LocalizedName = p.LocalizedName,
-                    CreatedByUsername = AdminUsername,
-                    UpdatedByUsername = AdminUsername,
-                    CreatedOn = Now,
-                    UpdatedOn = Now
+                    CreatedByUsername = _AdminUsername,
+                    UpdatedByUsername = _AdminUsername,
+                    CreatedOn = _Now,
+                    UpdatedOn = _Now
                 }).ToArray();
 
             await _repository.Languages.AddRangeAsync(languages);
@@ -375,10 +378,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 MinBet = b.MinBet,
                 MaxBet = b.MaxBet,
                 MaxBetPerMatch = b.MaxBetPerMatch,
-                CreatedOn = Now,
-                UpdatedOn = Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername
+                CreatedOn = _Now,
+                UpdatedOn = _Now,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername
             }).ToArray();
 
             await _repository.BetLimits.AddRangeAsync(_betLimits);
@@ -457,9 +460,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Wechat = Generator.RandomString(20),
                 VipId = vipId,
                 AgentId = agentId,
-                RegisteredOn = Now,
-                LastActiveOn = Now,
-                UpdatedOn = Now,
+                RegisteredOn = _Now,
+                LastActiveOn = _Now,
+                UpdatedOn = _Now,
                 UpdatedByUsername = username,
                 BrandId = brand.Id,
                 Wallets =
@@ -472,8 +475,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             CurrencyCode = currencyCode,
                             ExternalCurrencyCode = currencyCode,
                             Balance = 1000,
-                            CreatedOn = Now,
-                            UpdatedOn = Now
+                            CreatedOn = _Now,
+                            UpdatedOn = _Now
                         }
                     }
                 //Banks = new[]
@@ -511,7 +514,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
         private async Task GenerateResellersWithDescendantsAsync()
         {
             // resellers
-            var resellers = Resellers.Select(CreateResellerWithLicensees).ToArray();
+            var resellers = _Resellers.Select(CreateResellerWithLicensees).ToArray();
 
             await _repository.Resellers.AddRangeAsync(resellers);
 
@@ -627,10 +630,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 SupportTestPlayer = gameProvider.SupportTestPlayer,
                 AllowKickPlayer = gameProvider.AllowKickPlayer,
                 TransferWallet = gameProvider.TransferWallet,
-                CreatedOn = Now,
-                UpdatedOn = Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
+                CreatedOn = _Now,
+                UpdatedOn = _Now,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
                 Currencies =
                     gameProvider.Currencies.Select(curr =>
                         new GameProviderCurrency
@@ -659,10 +662,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                     MobileEndpoint = gpc.MobileEndpoint,
                     Description = gp.Name,
                     GameProviderId = gp.Id,
-                    CreatedOn = Now,
-                    UpdatedOn = Now,
-                    CreatedByUsername = AdminUsername,
-                    UpdatedByUsername = AdminUsername,
+                    CreatedOn = _Now,
+                    UpdatedOn = _Now,
+                    CreatedByUsername = _AdminUsername,
+                    UpdatedByUsername = _AdminUsername,
                     ConfigurationData = gpc.ConfigurationData,
                     IsDefault = idx == 0
                 }).ToHashSet();
@@ -671,10 +674,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             {
                 Code = sgp.Code,
                 Name = sgp.Name,
-                CreatedOn = Now,
-                UpdatedOn = Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername
+                CreatedOn = _Now,
+                UpdatedOn = _Now,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername
             }).ToHashSet();
 
             gp.Games = gameProvider.Games.Select((g, idx) => new Models.Game
@@ -695,10 +698,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 SubGame = g.SubGame,
                 AvailableToBrand = g.AvailableToBrand,
                 Html5 = g.Html5,
-                CreatedOn = Now,
-                UpdatedOn = Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
+                CreatedOn = _Now,
+                UpdatedOn = _Now,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
                 AvailableCurrencies = g.AvailableCurrencies,
                 SubGameProviderCode = g.SubGameProviderCode
             }).ToHashSet();
@@ -729,10 +732,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 OperationalEmail = reseller.OperationalEmail,
                 Description = string.Empty,
                 BusinessType = reseller.BusinessType,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                CreatedOn = Now,
-                UpdatedOn = Now,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
+                CreatedOn = _Now,
+                UpdatedOn = _Now,
                 Currencies =
                     reseller.Currencies.Select(curr =>
                         new ResellerCurrency
@@ -779,10 +782,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Name = licensee.Name,
                 OperationalEmail = licensee.OperationalEmail,
                 Status = Status.Active,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                CreatedOn = Now,
-                UpdatedOn = Now,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
+                CreatedOn = _Now,
+                UpdatedOn = _Now,
                 ResellerId = reseller.Id,
                 Description = string.Empty,
                 Currencies =
@@ -873,8 +876,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 IsDefault = _betLimits.Where(l => l.CurrencyCode == bl.CurrencyCode).Min(l => l.MinBet) == bl.MinBet
             }).ToHashSet();
 
+            var timeSpan = new TimeSpan(8, 0, 0);
+            var now = new DateTimeOffset(DateTimeOffset.Now.Year, DateTimeOffset.Now.Month,
+                DateTimeOffset.Now.Day, 0,
+                0, 0, timeSpan);
+
             var (currentFromDate, currentToDate, nextFromDate, nextToDate) =
-                BrandSettlementIntervalGenerator.GetInterval(brand.Type);
+                GetInterval(brand.Type, now, brand.SettlementDay, now);
 
             return new()
             {
@@ -883,10 +891,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Name = brand.Name,
                 OperationalEmail = brand.OperationalEmail,
                 Status = Status.Active,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
-                CreatedOn = Now,
-                UpdatedOn = Now,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
+                CreatedOn = _Now,
+                UpdatedOn = _Now,
                 LicenseeId = licensee.Id,
                 TimeZoneId = brand.TimeZoneId,
                 Description = string.Empty,
@@ -924,10 +932,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         Id = brandGroupId,
                         BrandId = brand.Id,
                         Name = name,
-                        CreatedByUsername = AdminUsername,
-                        UpdatedByUsername = AdminUsername,
-                        CreatedOn = Now,
-                        UpdatedOn = Now,
+                        CreatedByUsername = _AdminUsername,
+                        UpdatedByUsername = _AdminUsername,
+                        CreatedOn = _Now,
+                        UpdatedOn = _Now,
                         Description = string.Empty,
                         BrandGames =
                             games.Select(g => new BrandGroupGame
@@ -1037,8 +1045,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 Status = RoleStatus.Enabled,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername,
                 MenuSetting = _jsonSerializationProvider.SerializeToString(GetMenuSettings()),
                 RoleType = role.RoleType
             }).ToArray();
@@ -1094,9 +1102,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             users.AddRange(adminAccounts.Select(username =>
                 CreateUser(username, UserStatus.Enabled, Roles.AdminRoleId, AdminDepartments[ProductDepartment])));
 
-            var brandDepartment = Departments.First(x => x.BrandId == _gpiBrandRole.BrandId);
+            var brandDepartment = Departments.First(x => x.BrandId == _GpiBrandRole.BrandId);
             users.AddRange(brandAccounts.Select(username =>
-                CreateUser(username, UserStatus.Enabled, _gpiBrandRole.Id, brandDepartment.Id)));
+                CreateUser(username, UserStatus.Enabled, _GpiBrandRole.Id, brandDepartment.Id)));
 
             await _repository.Users.AddRangeAsync(users);
             await _repository.SaveChangesAsync();
@@ -1176,10 +1184,10 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 BrandId = x.Value.Id,
                 Credit = 1000,
                 Balance = 1000,
-                CreatedOn = Now,
-                UpdatedOn = Now,
-                CreatedByUsername = AdminUsername,
-                UpdatedByUsername = AdminUsername
+                CreatedOn = _Now,
+                UpdatedOn = _Now,
+                CreatedByUsername = _AdminUsername,
+                UpdatedByUsername = _AdminUsername
             });
 
             await _repository.PlatformCredits.AddRangeAsync(platformCredits);
@@ -1246,6 +1254,45 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 : gameProviderCodes
                     .Select(code => _gameProvidersCreated[code])
                     .ToArray();
+
+        private static (DateTimeOffset, DateTimeOffset, DateTimeOffset, DateTimeOffset) GetInterval(
+            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth, DateTimeOffset currentFromDate)
+        {
+            switch (type)
+            {
+                case SettlementIntervalType.Daily:
+                    return (startDate, startDate, startDate.AddDays(1), startDate.AddDays(1));
+                case SettlementIntervalType.Weekly:
+                    return (startDate,
+                        DateGenerator.GetLastDayOfWeek(startDate),
+                        DateGenerator.GetFirstDayOfWeek(startDate.AddDays(7)),
+                        DateGenerator.GetLastDayOfWeek(startDate.AddDays(7)));
+                case SettlementIntervalType.Monthly:
+                    if (dayOfMonth == null)
+                    {
+                        return (startDate,
+                            DateGenerator.GetLastDayOfMonth(startDate),
+                            DateGenerator.GetFirstDayOfMonth(startDate.AddMonths(1)),
+                            DateGenerator.GetLastDayOfMonth(startDate.AddMonths(1)));
+                    }
+
+                    if (startDate.Day <= dayOfMonth)
+                    {
+                        return (currentFromDate,
+                            startDate,
+                            startDate.AddDays(1),
+                            DateGenerator.GetSpecifyDayOfMonth(startDate, dayOfMonth.Value!));
+                    }
+
+                    return (currentFromDate,
+                        startDate,
+                        startDate.AddDays(1),
+                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
+                            dayOfMonth.Value!));
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+            }
+        }
     }
 
     internal class Generator

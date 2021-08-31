@@ -1,0 +1,34 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using TGS.ServiceUtility;
+
+namespace TGS.Services.Operator.Services.Localization
+{
+    internal class GetAllLocalizationStringsQueryService
+        : IGetService<GetAllLocalizationStringsQuery, IDictionary<string, string>>
+    {
+        private readonly ISysRepository _sysRepository;
+
+        public GetAllLocalizationStringsQueryService(ISysRepository sysRepository)
+        {
+            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
+        }
+
+        public async ValueTask<IDictionary<string, string>> GetAsync(
+            GetAllLocalizationStringsQuery query,
+            CancellationToken cancellationToken = default)
+        {
+            var allI18N = _sysRepository.QueryAllLocalizationStringsAsync(query.CultureCode);
+
+            return await allI18N
+                .ToDictionaryAsync(
+                    p => p.Key,
+                    p => p.Value,
+                    cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        }
+    }
+}

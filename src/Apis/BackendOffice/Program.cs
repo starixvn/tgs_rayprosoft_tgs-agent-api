@@ -23,11 +23,6 @@ namespace TGS.Apis.BackendOffice
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                })
-                .ConfigureLogging(builder =>
-                {
-                    builder.AddDebug();
-                    builder.AddConsole();
                 });
         }
     }

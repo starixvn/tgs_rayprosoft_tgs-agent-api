@@ -18,6 +18,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public string ClientId { get; set; }
         public string SecretKey { get; set; }
         public string ApiKey { get; set; }
+        public int? SettlementDay { get; set; }
         public SettlementIntervalType? SettlementIntervalType { get; set; }
         public BrandGameProviderModel[] GameProviders { get; set; }
         public BrandCurrencyModel[] Currencies { get; set; }
