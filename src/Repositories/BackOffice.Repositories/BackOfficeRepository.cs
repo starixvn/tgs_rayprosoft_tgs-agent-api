@@ -87,7 +87,9 @@ namespace TGS.BackOffice.Repositories
                 banner.UpdatedOn);
         }
 
-        public async ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings)
+        public async ValueTask ImportLocalizationStringsAsync(
+            string systemCode,
+            IEnumerable<LocalizationStringInfo> localizationStrings)
         {
             var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
                 .Where(loc => loc.SystemCode == systemCode)
@@ -117,7 +119,8 @@ namespace TGS.BackOffice.Repositories
                             CultureCode = info.CultureCode,
                             MessageId = info.MessageId,
                             Text = info.Text
-                        }).ConfigureAwait(false);
+                        })
+                        .ConfigureAwait(false);
                 }
             }
 

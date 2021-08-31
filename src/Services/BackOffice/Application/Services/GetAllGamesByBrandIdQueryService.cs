@@ -18,8 +18,6 @@ namespace TGS.Services.BackOffice.Application.Services
         public IAsyncEnumerable<GameData> QueryAsync(
             GetAllGamesByBrandIdQuery query,
             CancellationToken cancellationToken = default)
-        {
-            return _backOfficeRepository.QueryAllGamesAsync(query.BrandId);
-        }
+            => _backOfficeRepository.QueryAllGamesAsync(query.BrandId);
     }
 }
