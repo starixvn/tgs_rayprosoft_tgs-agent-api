@@ -352,16 +352,17 @@ namespace TGS.Services.Report.Application.Commands.Agent
         }
 
         private static (DateTimeOffset, DateTimeOffset) GetInterval(
-            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth)
-            => type switch
-            {
-                SettlementIntervalType.Daily => (startDate, startDate),
-                SettlementIntervalType.Weekly => (DateGenerator.GetFirstDayOfWeek(startDate),
-                    DateGenerator.GetLastDayOfWeek(startDate)),
-                SettlementIntervalType.Monthly => (startDate,
-                    DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1), dayOfMonth.Value!)),
-                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-            };
+            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth) => type switch
+        {
+            SettlementIntervalType.Daily => (startDate, startDate),
+            SettlementIntervalType.Weekly => (DateGenerator.GetFirstDayOfWeek(startDate),
+                DateGenerator.GetLastDayOfWeek(startDate)),
+            SettlementIntervalType.Monthly => (startDate,
+                dayOfMonth == null
+                    ? DateGenerator.GetLastDayOfMonth(startDate.AddMonths(1))
+                    : DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1), dayOfMonth.Value!)),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
 
         private async IAsyncEnumerable<Brand[]> GetBrands(string brandCode, DateTimeOffset queryDate,
             [EnumeratorCancellation] CancellationToken cancellationToken)
