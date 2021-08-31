@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+using TGS.Shared.Game.Models.TCG.Common;
 
 namespace TGS.Shared.Game.Models.TCG.Outgoing
 {
-    public record TCGLaunchGameRequest
+    public record TCGLaunchGameRequest : TCGBaseRequest
     {
-        [Required]
-        [JsonPropertyName("method")]
-        public int Method { get; init; }
         [Required]
         [JsonPropertyName("username")]
         public string UserName { get; init; }
