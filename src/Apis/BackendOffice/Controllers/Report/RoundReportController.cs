@@ -74,7 +74,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                     GameId = game.GameId,
                     Localization = jsonSerializationProvider
                         .DeserializeFromString<IDictionary<string, GameLocalizationData>>(
-                            game.Localization,
+                            game.Localization ?? "{}",
                             serializerOptions)
                 })
                 .ToDictionaryAsync(game => game.GameId)
