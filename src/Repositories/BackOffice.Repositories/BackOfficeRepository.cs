@@ -87,7 +87,9 @@ namespace TGS.BackOffice.Repositories
                 banner.UpdatedOn);
         }
 
-        public async ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings)
+        public async ValueTask ImportLocalizationStringsAsync(
+            string systemCode,
+            IEnumerable<LocalizationStringInfo> localizationStrings)
         {
             var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
                 .Where(loc => loc.SystemCode == systemCode)
@@ -117,11 +119,28 @@ namespace TGS.BackOffice.Repositories
                             CultureCode = info.CultureCode,
                             MessageId = info.MessageId,
                             Text = info.Text
-                        }).ConfigureAwait(false);
+                        })
+                        .ConfigureAwait(false);
                 }
             }
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId)
+        {
+            var query = from bg in _tgsRepository.BrandGames.AsQueryable()
+                        from game in _tgsRepository.Games
+                        where bg.BrandId == brandId
+                            && bg.GameId == game.Id
+                        select new GameData
+                        {
+                            GameId = game.Id,
+                            GameName = game.Name,
+                            Localization = game.Localization
+                        };
+
+            return query.ToAsyncEnumerable();
         }
 
         public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
