@@ -9,59 +9,140 @@ namespace TGS.Shared.Game.Models.TCG.Enums
 {
     public enum GameApiError
     {
-        [Description("Success(成功)")]
+        /// <summary>
+        /// 成功
+        /// </summary>
+        [Description("Success")]
         Success = 0,
-        [Description("Unknown system error, please contact TCG customer support(未知的系统错误，请联系TCG客服)")]
+        /// <summary>
+        /// 未知的系统错误，请联系TCG客服
+        /// </summary>
+        [Description("Unknown system error, please contact TCG customer support")]
         UnknownSystemErrorPleaseContactTCGCustomerSupport = 1,
-        [Description("Missing required parameter(缺少必需的参数)")]
+        /// <summary>
+        /// 缺少必需的参数
+        /// </summary>
+        [Description("Missing required parameter")]
         MissingRequiredParameter = 2,
-        [Description("Method not supported for the this product type (此产品类型不支持此方法)")]
+        /// <summary>
+        /// 此产品类型不支持此方法
+        /// </summary>
+        [Description("Method not supported for the this product type")]
         MethodNotSupportedForTheThisProductType = 3,
-        [Description("Merchant is not allowed for this product type (商家不允许使用此产品类型)")]
+        /// <summary>
+        /// 商家不允许使用此产品类型
+        /// </summary>
+        [Description("Merchant is not allowed for this product type")]
         MerchantIsNotAllowedForThisProductType = 4,
-        [Description("Merchant not found (找不到商家)")]
+        /// <summary>
+        /// 找不到商家
+        /// </summary>
+        [Description("Merchant not found")]
         MerchantNotFound = 5,
-        [Description("Invalid parameters, Failed to decrypt the parameters (参数无效，无法解密参数)")]
+        /// <summary>
+        /// 参数无效，无法解密参数
+        /// </summary>
+        [Description("Invalid parameters, Failed to decrypt the parameters")]
         InvalidParametersFailedToDecryptTheParameters = 6,
-        [Description("Invalid signature (签名无效)")]
+        /// <summary>
+        /// 签名无效
+        /// </summary>
+        [Description("Invalid signature")]
         InvalidSignature = 7,
-        [Description("Unsupported currency (不支持的货币)")]
+        /// <summary>
+        /// 不支持的货币
+        /// </summary>
+        [Description("Unsupported currency")]
         UnsupportedCurrency = 8,
-        [Description("Invalid Account type (帐户类型无效)")]
+        /// <summary>
+        /// 帐户类型无效
+        /// </summary>
+        [Description("Invalid Account type")]
         InvalidAccountType = 9,
-        [Description("Invalid product type (产品类型无效)")]
+        /// <summary>
+        /// 产品类型无效
+        /// </summary>
+        [Description("Invalid product type")]
         InvalidProductType = 10,
-        [Description("Insufficient balance to fund out / withdraw (提现余额不足)")]
+        /// <summary>
+        /// 提现余额不足
+        /// </summary>
+        [Description("Insufficient balance to fund out / withdraw")]
         InsufficientBalanceToFundOutWithdraw = 11,
-        [Description("Transaction already exists (交易序号已經存在)")]
+        /// <summary>
+        /// 交易序号已經存在
+        /// </summary>
+        [Description("Transaction already exists")]
         TransactionAlreadyExists = 12,
-        [Description("Invalid game code (游戏代码无效)")]
+        /// <summary>
+        /// 游戏代码无效
+        /// </summary>
+        [Description("Invalid game code")]
         InvalidGameCode = 13,
-        [Description("User Does Not Exists (用户不存在)")]
+        /// <summary>
+        /// 用户不存在
+        /// </summary>
+        [Description("User Does Not Exists")]
         UserDoesNotExists = 15,
-        [Description("Insufficient merchant credit to fund in (信用额度不足)")]
+        /// <summary>
+        /// 信用额度不足
+        /// </summary>
+        [Description("Insufficient merchant credit to fund in")]
         InsufficientMerchantCreditToFundIn = 16,
-        [Description("Trial mode is not supported for this game code (此游戏代码不支持试用模式)")]
+        /// <summary>
+        /// 此游戏代码不支持试用模式
+        /// </summary>
+        [Description("Trial mode is not supported for this game code")]
         TrialModeIsNotSupportedForThisGameCode = 18,
-        [Description("Batch not ready (批次理未准备好)")]
+        /// <summary>
+        /// 批次理未准备好
+        /// </summary>
+        [Description("Batch not ready")]
         BatchNotReady = 19,
-        [Description("Method not found (找不到方法)")]
+        /// <summary>
+        /// 找不到方法
+        /// </summary>
+        [Description("Method not found")]
         MethodNotFound = 21,
-        [Description("Parameter Validation Failed (参数验证失败)")]
+        /// <summary>
+        /// 参数验证失败
+        /// </summary>
+        [Description("Parameter Validation Failed")]
         ParameterValidationFailed = 22,
-        [Description("API is busy (API 繁忙)")]
+        /// <summary>
+        /// API 繁忙
+        /// </summary>
+        [Description("API is busy")]
         APIIsBusy = 23,
-        [Description("Transaction not found (未找到此交易)")]
+        /// <summary>
+        /// 未找到此交易
+        /// </summary>
+        [Description("Transaction not found")]
         TransactionNotFound = 24,
-        [Description("Reservation already process (預約已經完成)")]
+        /// <summary>
+        /// 預約已經完成
+        /// </summary>
+        [Description("Reservation already process")]
         ReservationAlreadyProcess = 25,
-        [Description("Decimal not supported (Decimal 格式位支持)")]
+        /// <summary>
+        /// Decimal 格式位支持
+        /// </summary>
+        [Description("Decimal not supported")]
         DecimalNotSupported = 26,
-        [Description("API is under maintenance (接口正在维护中)")]
+        /// <summary>
+        /// 接口正在维护中
+        /// </summary>
+        [Description("API is under maintenance")]
         APIIsUnderMaintenance = 27,
-        [Description("API is prohibited for this merchant (此商户禁止使用此接口)")]
+        /// <summary>
+        /// 此商户禁止使用此接口
+        /// </summary>
+        [Description("API is prohibited for this merchant")]
         APIIsProhibitedForThisMerchant = 28,
-        [Description("Product is under maintenance (产品正在维护中)")]
+        /// <summary>
+        /// 产品正在维护中
+        /// </summary>
+        [Description("Product is under maintenance")]
         ProductIsUnderMaintenance = 30
     }
 }
