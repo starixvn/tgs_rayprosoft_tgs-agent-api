@@ -24,7 +24,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         BetData PlaceAndSettleBetRequest(
             GameProviderConfigurationData data, string playerCode, BetResult[] results,
-            GameActionExternalIds[] externalIds, bool isManual);
+            GameActionExternalIds[] externalIds, bool fromSchedule);
 
         (BetData CancelBetData, BetData SettleBetData) ResettleRequest(
             GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
@@ -115,7 +115,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         public BetData PlaceAndSettleBetRequest(
             GameProviderConfigurationData data, string playerCode, BetResult[] results,
-            GameActionExternalIds[] externalIds, bool isManual)
+            GameActionExternalIds[] externalIds, bool fromSchedule)
         {
             var bets = new List<TransactionData>();
             var settles = new List<TransactionData>();
@@ -134,21 +134,22 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     continue;
                 }
 
-                var betTypeCode = GetBetTypeCode(isManual, r);
+                var betTypeCode = GetBetTypeCode(fromSchedule, r);
                 var betAmount = r.BetAmount;
                 var winAmount = betAmount + r.WinLoss;
+                var lockAmount = _utility.GetDepositAmount(betTypeCode, betAmount);
 
                 var betTime = _utility.ParseDateTimeOffset(r.BetTime);
                 var externalGameId = r.ExternalGameId;
                 var externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId);
 
-                lockedAmount += betAmount;
+                lockedAmount += lockAmount;
 
                 bets.AddRange(new[]
                 {
                     new TransactionData
                     {
-                        Amount = betAmount,
+                        Amount = lockAmount,
                         ExternalTransactionId = $"{betId}_unlock",
                         ExternalRoundId = externalRoundId,
                         ExternalGameActionGroupId = externalRoundId,
