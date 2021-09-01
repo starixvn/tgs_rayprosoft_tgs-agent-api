@@ -37,10 +37,12 @@ namespace OperatorApi.UnitTests
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
 
             fakeAgentOperations
-                .GetAgentByInvitationCodeAsync(Arg.Is(invitationCode))
+                .GetAgentByInvitationCodeAsync(
+                    Arg.Is(brandId),
+                    Arg.Is(invitationCode))
                 .Returns(new Agent());
 
-            var sut = new GetCreatePlayerQueryService(
+            var sut = new CreatePlayerQueryService(
                 fakeStatusValidator,
                 fakePlayerOperations,
                 fakePasswordHandler,
@@ -48,13 +50,59 @@ namespace OperatorApi.UnitTests
                 fakeBrandOperations,
                 fakeAgentOperations);
 
-            var query = new GetCreatePlayerQuery(brandId, "username", "password", "CNY", invitationCode, false);
+            var query = new CreatePlayerQuery(
+                brandId,
+                "username",
+                "password",
+                "CNY",
+                invitationCode,
+                false);
 
             // act
             var actual = await sut.GetAsync(query, default);
 
             // assert
             Assert.IsTrue(actual.IsNew);
+        }
+
+        [Test]
+        public async Task Register_Player_With_Other_Brand_InvitationCode_Should_Throw_Error()
+        {
+            var brandId = Guid.NewGuid();
+            var invitationCode = "6rd4mq";
+
+            var fakeStatusValidator = Substitute.For<IStatusValidator>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
+
+            fakeAgentOperations
+                .GetAgentByInvitationCodeAsync(
+                    Arg.Is(brandId),
+                    Arg.Is(invitationCode))
+                .Returns(default(Agent));
+
+            var sut = new CreatePlayerQueryService(
+                fakeStatusValidator,
+                fakePlayerOperations,
+                fakePasswordHandler,
+                fakeBrandCurrencyCodeMapper,
+                fakeBrandOperations,
+                fakeAgentOperations);
+
+            var query = new CreatePlayerQuery(
+                brandId,
+                "username",
+                "password",
+                "CNY",
+                invitationCode,
+                false);
+
+            // act
+            Assert.ThrowsAsync<InvalidInvitationCodeException>(
+                async () => await sut.GetAsync(query, default));
         }
 
         [Test]
@@ -84,7 +132,7 @@ namespace OperatorApi.UnitTests
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
 
-            var sut = new GetCreatePlayerQueryService(
+            var sut = new CreatePlayerQueryService(
                 fakeStatusValidator,
                 fakePlayerOperations,
                 fakePasswordHandler,
@@ -94,7 +142,7 @@ namespace OperatorApi.UnitTests
 
             var password = "password";
 
-            var query = new GetCreatePlayerQuery(brandId, "username", password, "CNY", null, false);
+            var query = new CreatePlayerQuery(brandId, "username", password, "CNY", null, false);
 
             // act
             var actual = await sut.GetAsync(query, default);
@@ -115,7 +163,7 @@ namespace OperatorApi.UnitTests
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
 
-            var sut = new GetCreatePlayerQueryService(
+            var sut = new CreatePlayerQueryService(
                 fakeStatusValidator,
                 fakePlayerOperations,
                 fakePasswordHandler,
@@ -125,7 +173,7 @@ namespace OperatorApi.UnitTests
             var password = "password";
             var invitationCode = "NonExistentCode";
 
-            var query = new GetCreatePlayerQuery(brandId, "username", password, "CNY", invitationCode, false);
+            var query = new CreatePlayerQuery(brandId, "username", password, "CNY", invitationCode, false);
 
             Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query, default));
         }
