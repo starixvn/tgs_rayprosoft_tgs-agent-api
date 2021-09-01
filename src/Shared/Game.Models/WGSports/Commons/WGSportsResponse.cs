@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 namespace TGS.Shared.Game.Models.WGSports.Commons
 {
     public record WGSportsResponse
-    { 
+    {
         [JsonPropertyName("ReturnCode")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int ReturnCode { get; init; }
     }
 }

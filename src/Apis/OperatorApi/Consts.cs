@@ -9,7 +9,7 @@
 
         public const string Site = "operator-api";
 
-        public static readonly string[] DefaultBypassRouting = {"/health", "/metrics", "/favicon.ico", "/swagger"};
+        public static readonly string[] DefaultBypassRouting = {"/health", "/metrics", "/favicon.ico", "/swagger", "/profiler"};
 
         public static class ClaimName
         {

@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using OpenTelemetry.Exporter.ProfileViewer.Filters;
+using OpenTelemetry.Trace;
 using Prometheus;
 using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
@@ -86,6 +88,7 @@ namespace TGS.Apis.OperatorApi
                         HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
                 });
                 endpoints.MapMetrics();
+                endpoints.MapProfileViewer();
             });
 
             if (!_env.IsProduction())
@@ -189,12 +192,33 @@ namespace TGS.Apis.OperatorApi
 
             services.AddHttpContextAccessor();
 
-            //services.AddMediatR(typeof(Startup).Assembly);
-
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db")
                 .AddRedis(_configuration)
                 .ForwardToPrometheus();
+
+            services.AddOpenTelemetryTracing(
+                (builder) => builder
+                    .AddSource("Tgs.*")
+                    .AddSource("TGS.*")
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    .AddEntityFrameworkCoreInstrumentation(options =>
+                    {
+                        options.SetDbStatementForText = true;
+                    })
+                    .AddProfileViewExporter(builder =>
+                    {
+                        builder
+                            .AddFilter(new FileExtensionFilter("html", "ico", "png", "jpg"))
+                            .AddFilter(new UrlPathFilter("/swagger"))
+                            .AddFilter(new UrlPathFilter("/health"));
+                    }));
+            services.AddProfileViewer();
+
+            services
+                .AddInterceptionService()
+                .AddServiceUtiltiyInterceptors();
 
             if (!_env.IsProduction())
             {

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
@@ -52,7 +53,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 moqPaymentServiceClient.Object,
                 moqPlayerService.Object,
                 moqPlayerBucketRepository.Object,
-                moqPromotionClient.Object);
+                moqPromotionClient.Object,
+                NullLogger<ReviewDepositFormCommandService>.Instance);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();

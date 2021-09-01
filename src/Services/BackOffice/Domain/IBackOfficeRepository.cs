@@ -6,6 +6,8 @@ namespace TGS.Services.BackOffice.Domain
 {
     public interface IBackOfficeRepository
     {
+        ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier);
+
         ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier);
 
         IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode);
@@ -13,6 +15,8 @@ namespace TGS.Services.BackOffice.Domain
         ValueTask<BannerInfo> GetBannerByIdAsync(Guid id);
 
         ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings);
+
+        IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
 
         IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId);
 
@@ -27,7 +31,5 @@ namespace TGS.Services.BackOffice.Domain
         ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier);
 
         ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
-
-        ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier);
     }
 }

@@ -174,7 +174,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var query = new GetBannersQuery(
                 brandId,
-                BannerStatus.Expired,
+                BannerStatus.Rejected,
                 paging);
 
             return new PagedResponse<BannerListItem>

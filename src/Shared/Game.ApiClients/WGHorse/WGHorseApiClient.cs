@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
@@ -18,7 +19,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
 
         ValueTask<WGHorseLoginResponse> GetLoginAsync(WGHorseConfiguration configuration, WGHorseLoginRequest source);
 
-        ValueTask<WGHorseAccessMoneyResponse> AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source);
+        ValueTask<WGHorseResponse> AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source);
 
         ValueTask<WGHorseResponse> AccessMoneyQueryAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyQueryRequest source);
 
@@ -56,14 +57,14 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
             return ExecuteJsonRequestAsync<object, WGHorseLoginResponse>(HttpMethod.Get, path, null, logPrefix: prefix);
         }
 
-        ValueTask<WGHorseAccessMoneyResponse> IWGHorseApiClient.AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source)
+        ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source)
         {
             var data = $"{source.PlayerCode}|{ (int)source.AmountType}|{source.OrderId}|{source.Amount}";
             var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoney&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.AccessMoney";
 
-            return ExecuteJsonRequestAsync<WGHorseAccessMoneyRequest, WGHorseAccessMoneyResponse>(HttpMethod.Get, path, source, logPrefix: prefix);
+            return ExecuteJsonRequestAsync<WGHorseAccessMoneyRequest, WGHorseResponse>(HttpMethod.Get, path, source, logPrefix: prefix);
         }
 
         ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyQueryAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyQueryRequest source)

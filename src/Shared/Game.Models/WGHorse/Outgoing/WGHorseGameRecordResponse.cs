@@ -8,10 +8,8 @@ using TGS.Shared.Game.Models.WGHorse.Commons;
 
 namespace TGS.Shared.Game.Models.WGHorse.Outgoing
 {
-    public record WGHorseGameRecordResponse
+    public record WGHorseGameRecordResponse: WGHorseResponse
     {
-        [JsonPropertyName("ReturnCode")]
-        public string ReturnCode { get; set; }
         [JsonPropertyName("Page")]
         public string Page { get; set; }
         [JsonPropertyName("PageTotal")]

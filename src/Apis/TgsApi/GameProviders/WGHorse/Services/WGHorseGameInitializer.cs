@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.PluggableServices.Models;
 using TGS.Shared.Game.ApiClients.WGHorse;
@@ -40,7 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
             var prepareLoginResponse = await _client.GetPrepareLoginAsync(configuration, prepareLoginRequest).ConfigureAwait(false);
 
-            if (prepareLoginResponse.ReturnCode != 1)
+            if (prepareLoginResponse.ReturnCode is not 1)
             {
                 throw new GameProviderApiErrorException(prepareLoginResponse.ReturnCode.ToString());
             }
@@ -54,7 +55,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
             var loginResponse = await _client.GetLoginAsync(configuration, sportsLoginRequest).ConfigureAwait(false);
 
-            if (loginResponse.ReturnCode != 1)
+            if (prepareLoginResponse.ReturnCode is not 1)
             {
                 throw new GameProviderApiErrorException(prepareLoginResponse.ReturnCode.ToString());
             }

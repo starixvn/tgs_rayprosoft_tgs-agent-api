@@ -41,6 +41,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 From = model.From,
                 To = model.To,
                 AgentDividendPercentage = model.AgentDividendPercentage,
+                PromotionAmount = model.PromotionAmount,
+                RebateAmount = model.RebateAmount,
                 DepositAmount = model.DepositAmount,
                 WithdrawalAmount = model.WithdrawalAmount,
                 AdjustmentAmount = model.AdjustmentAmount,
@@ -63,7 +65,16 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 CreatedOn = model.CreatedOn,
                 SentOn = sentOn,
                 BeforeDividendAmount = model.BeforeDividendAmount,
-                ReferencedAgentDividendId = model.ReferencedAgentDividendId
+                ReferencedAgentDividendId = model.ReferencedAgentDividendId,
+                AgentDividendMultipleLayers = model.AgentDividendMultipleLayerModels.Select(x
+                    => new AgentDividendMultipleLayer
+                    {
+                        AgentId = x.AgentId,
+                        AgentDividendId = model.Id.Value,
+                        DividendProviderAgentId = x.DividendProviderAgentId,
+                        Layer = x.Layer,
+                        Dividend = x.Dividend
+                    }).ToArray()
             }).ToArray());
 
         IQueryable<AgentDividend> IAgentDividendService.GetAgentDividendQueries(

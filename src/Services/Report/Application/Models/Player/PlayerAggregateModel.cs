@@ -22,6 +22,5 @@ namespace TGS.Services.Report.Application.Models.Player
         public decimal BetAmount { get; set; }
         public decimal Turnover { get; set; }
         public decimal WinLossAmount { get; set; }
-        public decimal? AgentDividendPercentage { get; set; }
     }
 }

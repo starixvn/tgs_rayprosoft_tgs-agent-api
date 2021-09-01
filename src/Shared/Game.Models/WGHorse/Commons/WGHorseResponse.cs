@@ -10,6 +10,7 @@ namespace TGS.Shared.Game.Models.WGHorse.Commons
     public record WGHorseResponse
     {
         [JsonPropertyName("ReturnCode")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public int ReturnCode { get; init; }
     }
 }
