@@ -120,23 +120,29 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasForeignKey(p => p.AgentDividendId)
                 .HasConstraintName("fk_agents_dividends_agent_dividend_multiple_layers_agent_dividend_id");
 
-            builder.HasIndex(b => b.BrandId)
-                .HasDatabaseName("ix_agent_dividends_brand_id");
+            builder.HasIndex(b => new
+                {
+                    b.AgentId,
+                    b.SentOn
+                })
+                .HasDatabaseName("ix_agent_dividends_agent_id_sent_on");
 
             builder.HasIndex(b => new
                 {
+                    b.BrandId,
+                    b.From,
+                    b.To
+                })
+                .HasDatabaseName("ix_agent_dividends_brand_id_from_to");
+
+
+            builder.HasIndex(b => new
+                {
+                    b.AgentId,
                     b.BrandId,
                     b.CreatedOn
                 })
-                .HasDatabaseName("ix_agent_dividends_brand_id_created_on");
-
-            builder.HasIndex(b => new
-                {
-                    b.BrandId,
-                    b.CreatedOn,
-                    b.AgentId
-                })
-                .HasDatabaseName("ix_agent_dividends_brand_id_created_on_agent_id");
+                .HasDatabaseName("ix_agent_dividends_agent_id_brand_id_created_on");
         }
     }
 }
