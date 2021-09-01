@@ -338,8 +338,9 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         DateGenerator.GetLastDayOfWeek(startDate));
                 case SettlementIntervalType.Monthly:
                     return (startDate,
-                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
-                            dayOfMonth.Value!));
+                        dayOfMonth == null
+                            ? DateGenerator.GetLastDayOfMonth(startDate.AddMonths(1))
+                            : DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1), dayOfMonth.Value!));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
