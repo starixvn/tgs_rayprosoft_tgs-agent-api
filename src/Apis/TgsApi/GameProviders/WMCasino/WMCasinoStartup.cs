@@ -54,11 +54,11 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                 },
                 (provider, _) => provider.GetRequiredService<WMCasinoGameInitializer>());
 
-            //services.AddScopedWithResolver<IGameHistory>(new[]
-            //    {
-            //        typeof(SabaGameHistory)
-            //    },
-            //    (provider, _) => provider.GetRequiredService<SabaGameHistory>());
+            services.AddScopedWithResolver<IGameHistory>(new[]
+                {
+                    typeof(WMCasinoGameHistory)
+                },
+                (provider, _) => provider.GetRequiredService<WMCasinoGameHistory>());
 
             services.AddSingleton<IBetValuesCalculator, WMCasinoBetValuesCalculator>();
         }
