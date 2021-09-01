@@ -107,6 +107,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
                              GameId = model.GameId,
                              GameName = loc?.Name ?? model.GameName,
                              GameProviderCode = model.GameProviderCode,
+                             GameProviderName = model.GameProviderName,
                              GameProviderId = model.GameProviderId,
                              PlayerCode = model.PlayerCode,
                              PlatformType = model.PlatformType,
