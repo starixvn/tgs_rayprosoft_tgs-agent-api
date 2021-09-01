@@ -91,7 +91,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino
                     }
 
                     return context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
-                        !context.Request.Path.StartsWithSegments("/gamerecord",
+                        !context.Request.Path.StartsWithSegments($"{route}/gamerecord",
                             StringComparison.OrdinalIgnoreCase);
                 },
                 builder =>

@@ -65,7 +65,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 {
                     VendorId = agent.AgentId,
                     Signature = agent.Signature,
-                    StartTime = request.StartTime
+                    StartTime = request.StartTime,
+                    EndTime = request.EndTime
                 }).ConfigureAwait(false);
 
             if (response.ErrorCode != (int)ServiceApiError.Success)

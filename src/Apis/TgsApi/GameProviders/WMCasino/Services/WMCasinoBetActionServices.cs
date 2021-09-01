@@ -88,7 +88,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             }
         }
 
-
         private async ValueTask PlaceAndSettleBetAsync(GameProviderConfigurationData data,
             string playerCode, GameBetResult[] betResults, bool fromSchedule)
         {
