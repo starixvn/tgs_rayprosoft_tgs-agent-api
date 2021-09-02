@@ -94,6 +94,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new("http://game-wm") : new("http://localhost:62330"),
                     ApiUrl = new("https://api.a45.me/api/wallet/Gateway.php"),
                     MaxResultCount = 25,
+                    EnableReportJob = false,
                     BrandMerchants = new WMCasinoBrandMerchant[]
                     {
                         new()
@@ -107,7 +108,8 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                     Signature = "97ffc7ab86c2f54be533e90da6f6ab9f",
                                     CurrencyCode = "CNY",
                                     Prefix = "pg",
-                                    Suffix = "cny"
+                                    Suffix = "cny",
+                                    Status = true
                                 }
                             }
                         }

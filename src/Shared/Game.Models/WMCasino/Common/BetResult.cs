@@ -17,12 +17,15 @@ namespace TGS.Shared.Game.Models.WMCasino.Common
         public string SettleTime { get; init; }
 
         [JsonPropertyName("bet")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public decimal BetAmount { get; init; }
 
         [JsonPropertyName("validbet")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public decimal ValidBet { get; init; }
 
         [JsonPropertyName("winLoss")]
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public decimal WinLoss { get; init; }
 
         [JsonPropertyName("gid")]

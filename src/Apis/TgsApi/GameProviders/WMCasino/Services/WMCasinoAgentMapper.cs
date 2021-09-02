@@ -32,17 +32,17 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 throw new ArgumentException($"No Merchant of '{brandCode}' is found.");
             }
 
-            return merchant.Agents.FirstOrDefault(a => a.CurrencyCode == currencyCode);
+            return merchant.Agents.FirstOrDefault(ag => ag.CurrencyCode == currencyCode && ag.Status);
         }
 
         public WMCasinoAgent GetAgentById(WMCasinoBrandMerchant[] merchants, string agentId)
             => merchants
                 .SelectMany(m => m.Agents)
-                .FirstOrDefault(ag => ag.AgentId.Equals(agentId));
+                .FirstOrDefault(ag => ag.AgentId.Equals(agentId) && ag.Status);
 
         public WMCasinoAgent GetAgentBySignature(WMCasinoBrandMerchant[] merchants, string signature)
             => merchants
                 .SelectMany(m => m.Agents)
-                .FirstOrDefault(ag => ag.Signature.Equals(signature));
+                .FirstOrDefault(ag => ag.Signature.Equals(signature) && ag.Status);
     }
 }

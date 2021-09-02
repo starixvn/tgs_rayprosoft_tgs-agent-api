@@ -10,5 +10,7 @@ namespace TGS.Core.Models.GameProviders.Settings
         public WMCasinoBrandMerchant[] BrandMerchants { get; init; }
 
         public int MaxResultCount { get; init; }
+
+        public bool EnableReportJob { get; init; }
     }
 }

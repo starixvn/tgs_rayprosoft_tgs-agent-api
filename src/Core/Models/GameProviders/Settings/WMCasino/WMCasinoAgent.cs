@@ -11,5 +11,7 @@
         public string Prefix { get; init; }
 
         public string Suffix { get; init; }
+
+        public bool Status { get; init; }
     }
 }

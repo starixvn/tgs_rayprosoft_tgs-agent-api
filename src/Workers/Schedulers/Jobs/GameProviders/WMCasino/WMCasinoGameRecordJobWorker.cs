@@ -62,6 +62,15 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino
                     .GetValueFromJsonByKeyAsync<WMCasinoConfiguration>(
                         SettingConsts.GameProviderConfigurations.WMCasino).ConfigureAwait(false);
 
+                if (!configuration.EnableReportJob)
+                {
+                    return new TgsResponse
+                    {
+                        Error = (int)TgsApiError.None,
+                        ErrorMessage = "Job has been switched off"
+                    };
+                }
+
                 var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_GameProviderCode)
                     .ConfigureAwait(false);
 
@@ -69,9 +78,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino
                 {
                     var brandCode = b.BrandCode;
 
-                    return b.Agents.Select(a => Task.Run(async () =>
-                        await ExecuteScheduleAsync(gameProviderId, brandCode, a, configuration)
-                            .ConfigureAwait(false)));
+                    return b.Agents.Where(ag => ag.Status)
+                        .Select(ag => Task.Run(async () =>
+                            await ExecuteScheduleAsync(gameProviderId, brandCode, ag, configuration)
+                                .ConfigureAwait(false)));
                 });
 
                 await Task.WhenAll(tasks).ConfigureAwait(false);
