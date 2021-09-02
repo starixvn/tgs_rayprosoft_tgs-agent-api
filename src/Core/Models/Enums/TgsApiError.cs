@@ -18,6 +18,7 @@
         InsufficientBucket = 207,
         GameBalanceFundInFailed = 208,
         GameBalanceFundOutFailed = 209,
+        UserBanned = 210,
 
         InvalidGameAction = 301,
         TransactionIdNotFound = 302,

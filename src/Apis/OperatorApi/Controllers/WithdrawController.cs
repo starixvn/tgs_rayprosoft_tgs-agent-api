@@ -23,6 +23,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [CheckEnabled]
         public async Task<Guid> CreateWithdrawRequestAsync(
             [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
             [FromServices] ICommandService<CheckWithdrawPayPasswordCommand> checkPasswordService,

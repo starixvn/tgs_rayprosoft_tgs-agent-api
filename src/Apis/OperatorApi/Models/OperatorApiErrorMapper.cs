@@ -50,7 +50,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest,
                 [TgsApiError.GameBalanceFundInFailed] = StatusCodes.Status400BadRequest,
                 [TgsApiError.GameBalanceFundOutFailed] = StatusCodes.Status400BadRequest,
-                [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest
+                [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
+                [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, string> _ErrorCodeMessageIdMap =
@@ -89,7 +90,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.PromotionCannotJoin] = "PromotionCannotJoin",
                 [TgsApiError.GameBalanceFundInFailed] = "GameBalanceFundInFailed",
                 [TgsApiError.GameBalanceFundOutFailed] = "GameBalanceFundOutFailed",
-                [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull"
+                [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
+                [TgsApiError.UserBanned] = "UserBanned"
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -130,7 +132,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(GameBalanceFundInFailedException)] = TgsApiError.GameBalanceFundInFailed,
                 [typeof(GameBalanceFundOutFailedException)] = TgsApiError.GameBalanceFundOutFailed,
                 [typeof(LoginFailException)] = TgsApiError.LoginFail,
-                [typeof(FavoriteCountFullException)] = TgsApiError.FavoriteFull
+                [typeof(FavoriteCountFullException)] = TgsApiError.FavoriteFull,
+                [typeof(UserBannedException)] = TgsApiError.UserBanned
             };
 
         public bool CanProcess(Exception exception)

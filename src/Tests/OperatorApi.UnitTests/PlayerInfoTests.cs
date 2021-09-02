@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using NUnit.Framework;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operator.Services.Player;
@@ -75,6 +78,33 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         It.Is<string>(x => x == command.WeChatId),
                         It.IsAny<DateTimeOffset>()),
                     Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Get_Player_Status_Should_Success()
+        {
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+            var brandId = Guid.NewGuid();
+            var playerCode = "playerCode";
+
+            repository.Players.Add(new Player()
+            {
+                PlayerCode = playerCode,
+                Status = Core.Models.Enums.PlayerStatus.Disabled
+            });
+
+            await repository.SaveChangesAsync();
+            var sut = new GetPlayerStatusQueryService(repository);
+
+            var query = new GetPlayerStatusQuery(playerCode);
+            var actual = await sut.GetAsync(query);
+            var expected = Core.Models.Enums.PlayerStatus.Disabled;
+
+            Assert.AreEqual(expected, actual);
         }
     }
 }
