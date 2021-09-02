@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using TGS.Shared.Game.Models.TCG.Common;
 
 namespace TGS.Shared.Game.Models.TCG.Incoming
 {
-    public record TCGCreditRequest : TCGBaseRequest
+    public record TCGCreditRequest : TCGSingleWalletRequest
     {
         [Required]
         [JsonPropertyName("product_type")]
@@ -17,7 +12,5 @@ namespace TGS.Shared.Game.Models.TCG.Incoming
         [Required]
         [JsonPropertyName("transactions")]
         public TransactionData[] Transactions { get; init; }
-        [JsonPropertyName("request_time")]
-        public long RequestTime { get; init; }
     }
 }
