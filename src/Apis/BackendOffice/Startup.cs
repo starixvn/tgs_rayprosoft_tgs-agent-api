@@ -1,15 +1,25 @@
 using System;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
+using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
@@ -28,6 +38,16 @@ namespace TGS.Apis.BackendOffice
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseRequestLocalization(options =>
+            {
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+                options.SupportedCultures.Clear();
+                options.SupportedUICultures.Clear();
+
+                config.GetSection("RequestLocalization").Bind(options);
+            });
+
             if (env.IsDevelopmentOrDocker())
             {
                 app.UseDeveloperExceptionPage();
@@ -84,6 +104,66 @@ namespace TGS.Apis.BackendOffice
                         new JsonStringEnumConverter()
                     }
                 };
+            });
+
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+            services
+                .AddHttpContextAccessor()
+                .AddRouting(options => options.LowercaseUrls = true);
+            services
+                .AddControllers(options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                    options.Filters.Add(new ValidationFilter());
+                })
+                .AddDataAnnotationsLocalization()
+                .AddFluentValidation(c =>
+                {
+                    c.RegisterValidatorsFromAssembly(
+                        Assembly.GetExecutingAssembly(),
+                        lifetime: ServiceLifetime.Singleton);
+                })
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    options.JsonSerializerOptions.IgnoreNullValues = true;
+                });
+
+            services.AddHealthChecks()
+                .AddPostgres(_configuration, "Tgs", "tgs-db")
+                .AddNats()
+                .ForwardToPrometheus();
+
+            services.AddAntiforgery(options =>
+            {
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.HeaderName = Consts.BackendOffice.CsrfTokenName;
+            });
+
+            services
+                .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = new("/api/auth");
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        context.Response.Headers["Location"] = context.RedirectUri;
+                        context.Response.StatusCode = 401;
+                        return Task.CompletedTask;
+                    };
+                });
+
+            services.AddFileServiceClient((sp, httpClient) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                httpClient.BaseAddress = new(config.GetValue<string>("File:FileServiceBaseUrl"));
             });
 
             services.AddSwaggerGen(c =>

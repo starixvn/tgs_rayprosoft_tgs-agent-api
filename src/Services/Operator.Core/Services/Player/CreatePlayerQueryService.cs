@@ -14,16 +14,16 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
-    internal class GetCreatePlayerQueryService : IGetService<GetCreatePlayerQuery, CreatePlayerInfo>
+    internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, CreatePlayerInfo>
     {
-        private readonly IStatusValidator _statusValidator;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IPasswordHandler _passwordHandler;
-        private readonly IBrandCurrencyCodeMapper _currencyCodeMapper;
-        private readonly IBrandOperations _brandOperations;
         private readonly IAgentOperations _agentOperations;
+        private readonly IBrandOperations _brandOperations;
+        private readonly IBrandCurrencyCodeMapper _currencyCodeMapper;
+        private readonly IPasswordHandler _passwordHandler;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IStatusValidator _statusValidator;
 
-        public GetCreatePlayerQueryService(
+        public CreatePlayerQueryService(
             IStatusValidator statusValidator,
             IPlayerOperations playerOperations,
             IPasswordHandler passwordHandler,
@@ -39,15 +39,15 @@ namespace TGS.Services.Operator.Services.Player
             _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
         }
 
-        public async ValueTask<CreatePlayerInfo> GetAsync(GetCreatePlayerQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<CreatePlayerInfo> GetAsync(CreatePlayerQuery query, CancellationToken cancellationToken = default)
         {
-            await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default);
+            await _statusValidator
+                .ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default)
+                .ConfigureAwait(false);
 
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(query.BrandId, query.UserName);
             if (playerCode.IsNotNullOrEmpty())
-            {
                 return new CreatePlayerInfo(playerCode, IsNew: false);
-            }
 
             var (salt, password) = _passwordHandler.GenerateCredential(query.Password);
 
@@ -56,32 +56,67 @@ namespace TGS.Services.Operator.Services.Player
 
             if (string.IsNullOrWhiteSpace(query.AgentInvitationCode))
             {
-                var result = await _playerOperations.CreatePlayerAsync(
-                    new CreatePlayerData()
-                    {
-                        BrandId = query.BrandId,
-                        Username = query.UserName,
-                        Salt = salt,
-                        Password = password,
-                        CurrencyCode = currency,
-                        ExternalCurrencyCode = query.CurrencyCode,
-                        BetLimitId = betLimitId,
-                        AgentId = null,
-                        AgentInvitationCode = null,
-                        Type = query.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
-                    });
+                var result = await CreatePlayerAsync(
+                    query,
+                    salt,
+                    password,
+                    currency,
+                    betLimitId).ConfigureAwait(false);
 
                 return new CreatePlayerInfo(result, IsNew: true);
             }
             else
             {
-                var agent = await _agentOperations.GetAgentByInvitationCodeAsync(query.AgentInvitationCode);
-                if (agent == null)
-                {
-                    throw new InvalidInvitationCodeException(query.AgentInvitationCode, "Can't find the agent info");
-                }
+                var result = await CreatePlayerByAgentAsync(
+                    query,
+                    salt,
+                    password,
+                    currency,
+                    betLimitId).ConfigureAwait(false);
 
-                var result = await _playerOperations.CreatePlayerAsync(
+                return new CreatePlayerInfo(result, IsNew: true);
+            }
+        }
+
+        private Task<string> CreatePlayerAsync(
+            CreatePlayerQuery query,
+            byte[]? salt,
+            byte[]? password,
+            string currency,
+            int betLimitId)
+        {
+            return _playerOperations.CreatePlayerAsync(
+                new CreatePlayerData()
+                {
+                    BrandId = query.BrandId,
+                    Username = query.UserName,
+                    Salt = salt,
+                    Password = password,
+                    CurrencyCode = currency,
+                    ExternalCurrencyCode = query.CurrencyCode,
+                    BetLimitId = betLimitId,
+                    AgentId = null,
+                    AgentInvitationCode = null,
+                    Type = query.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
+                });
+        }
+
+        private async Task<string> CreatePlayerByAgentAsync(
+                    CreatePlayerQuery query,
+            byte[]? salt,
+            byte[]? password,
+            string currency,
+            int betLimitId)
+        {
+            var agent = await _agentOperations
+                .GetAgentByInvitationCodeAsync(query.BrandId, query.AgentInvitationCode)
+                .ConfigureAwait(false)
+                ?? throw new InvalidInvitationCodeException(
+                    query.AgentInvitationCode,
+                    "Can't find the agent info");
+
+            var result = await _playerOperations
+                .CreatePlayerAsync(
                     new CreatePlayerData()
                     {
                         BrandId = query.BrandId,
@@ -94,10 +129,9 @@ namespace TGS.Services.Operator.Services.Player
                         AgentId = agent.Id,
                         AgentInvitationCode = query.AgentInvitationCode,
                         Type = query.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
-                    });
-
-                return new CreatePlayerInfo(result, IsNew: true);
-            }
+                    })
+                .ConfigureAwait(false);
+            return result;
         }
     }
 }
