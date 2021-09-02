@@ -150,4 +150,7 @@
   <data name="EmailExisted" xml:space="preserve">
     <value>邮件信箱已存在</value>
   </data>
+  <data name="DividendPercentageMustLessThanOrEqualToUpperLayer" xml:space="preserve">
+    <value>分红百分比必须小于或等于上层</value>
+  </data>
 </root>

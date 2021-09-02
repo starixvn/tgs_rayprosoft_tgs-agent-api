@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TGS.Core.DataServices.Tgs.Models
 {
@@ -10,6 +11,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public int? ReferencedAgentDividendId { get; set; }
         public DateTimeOffset From { get; set; }
         public DateTimeOffset To { get; set; }
+        public decimal PromotionAmount { get; set; }
+        public decimal RebateAmount { get; set; }
         public decimal DepositAmount { get; set; }
         public decimal WithdrawalAmount { get; set; }
         public decimal AdjustmentAmount { get; set; }
@@ -33,5 +36,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public decimal? BeforeDividendAmount { get; set; }
         public DateTimeOffset? SentOn { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
+        public virtual ICollection<AgentDividendMultipleLayer> AgentDividendMultipleLayers { get; set; }
     }
 }

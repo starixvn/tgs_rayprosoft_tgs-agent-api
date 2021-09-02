@@ -26,10 +26,12 @@ namespace TGS.Services.Report.Application.Commands.Agent
         private readonly ITgsAgentService _agentService;
         private readonly ITgsBrandService _brandService;
         private readonly IPlayerAggregateService _playerAggregateService;
+        private readonly IPlayerGameAggregateService _playerGameAggregateService;
         private readonly IAgentWalletRepository _walletRepository;
 
         public CreateAgentDividendsHandler(
             IPlayerAggregateService playerAggregateService,
+            IPlayerGameAggregateService playerGameAggregateService,
             ITgsAgentService agentService,
             ITgsBrandService brandService,
             IAgentDividendService agentDividendService,
@@ -39,6 +41,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
             _agentService = agentService;
             _brandService = brandService;
             _playerAggregateService = playerAggregateService;
+            _playerGameAggregateService = playerGameAggregateService;
             _agentDividendService = agentDividendService;
             _walletRepository = walletRepository;
         }
@@ -54,24 +57,54 @@ namespace TGS.Services.Report.Application.Commands.Agent
             return CreateValidResponse<MessageResponse>();
         }
 
+        private static IEnumerable<AgentDividendMultipleLayerModel> GetAgentDividends(
+            Core.DataServices.Tgs.Models.Agent[] agents, Guid brandId, Guid agentId,
+            decimal netProfit)
+        {
+            bool hasParentAgentId;
+
+            var agent = agents.First(x => x.Id == agentId);
+            var currentAgentId = agentId;
+            var providerAgentId = agent.Id;
+            var childDividendPercentage = 0M;
+            var layer = agent.Id.ToString();
+
+            do
+            {
+                yield return new AgentDividendMultipleLayerModel
+                {
+                    AgentId = currentAgentId,
+                    DividendProviderAgentId = providerAgentId,
+                    Layer = layer,
+                    Dividend = netProfit * (agent.DividendPercentage - childDividendPercentage) / 100M
+                };
+
+                hasParentAgentId = agent.ParentAgentId != null;
+
+                if (!hasParentAgentId)
+                {
+                    continue;
+                }
+
+                childDividendPercentage = agent.DividendPercentage;
+
+                var parentAgent = agents.First(x => x.Id == agent.ParentAgentId);
+                currentAgentId = parentAgent.Id;
+
+                layer = $"{currentAgentId},{layer}";
+
+                agent = parentAgent;
+            } while (hasParentAgentId);
+        }
+
         private async Task<(List<CreateAgentDividendModel>, List<CreateAgentDividendModel>, List<AgentDividend>)>
-            GetAgentDividends(Brand brand, int idNumber)
+            GetAgentDividends(Brand brand, int idNumber, CancellationToken cancellationToken)
         {
             var agents = await _agentService
-                .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id && x.ParentAgentId != null))
-                .GroupBy(x => new
-                    {
-                        x.Id,
-                        x.ParentAgentId
-                    },
-                    (a, list) => new
-                    {
-                        a.Id,
-                        a.ParentAgentId
-                    })
-                .ToArrayAsync();
+                .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id))
+                .ToArrayAsync(cancellationToken);
 
-            var agentDividendGroup = await _playerAggregateService.GetPlayerAggregateQueries()
+            var playerData = await _playerAggregateService.GetPlayerAggregateQueries()
                 .Where(x => x.AgentId != null)
                 .Where(x => x.BrandId == brand.Id)
                 .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
@@ -80,13 +113,15 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     {
                         x.BrandId,
                         x.AgentId,
-                        x.AgentDividendPercentage
+                        x.PlayerCode
                     },
                     (groupItem, playerAggregates) => new
                     {
                         groupItem.AgentId,
+                        groupItem.PlayerCode,
                         groupItem.BrandId,
-                        groupItem.AgentDividendPercentage,
+                        PromotionAmount = playerAggregates.Sum(p => p.PromotionAmount),
+                        RebateAmount = playerAggregates.Sum(p => p.RebateAmount),
                         DepositAmount = playerAggregates.Sum(p => p.DepositAmount),
                         WithdrawalAmount = playerAggregates.Sum(p => p.WithdrawalAmount),
                         AdjustmentAmount = playerAggregates.Sum(p => p.AdjustmentAmount),
@@ -96,200 +131,190 @@ namespace TGS.Services.Report.Application.Commands.Agent
                         WinLossAmount = playerAggregates.Sum(p => p.WinLossAmount),
                         NetProfit = playerAggregates.Sum(p
                             => p.WinLossAmount - p.AdjustmentAmount - p.RebateAmount - p.PromotionAmount)
-                    }).GroupJoin(_playerAggregateService.Repository.PlayerGameAggregates.AsQueryable()
-                        .Where(x => x.AgentId != null)
-                        .Where(x => x.BrandId == brand.Id)
-                        .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
-                            x.ReportDate <= brand.CurrentSettlementTo),
-                    p => new
+                    })
+                .Select(x => new
+                {
+                    AgentId = x.AgentId.Value,
+                    x.PlayerCode,
+                    x.BrandId,
+                    x.PromotionAmount,
+                    x.RebateAmount,
+                    x.DepositAmount,
+                    x.WithdrawalAmount,
+                    x.AdjustmentAmount,
+                    x.BonusAmount,
+                    x.BetAmount,
+                    x.Turnover,
+                    x.WinLossAmount,
+                    x.NetProfit
+                }).ToArrayAsync(cancellationToken);
+
+            var parentAgentDividends = playerData.SelectMany(x => GetAgentDividends(agents, brand.Id, x.AgentId,
+                x.NetProfit)).ToArray();
+
+            var agentData = playerData.GroupBy(x => new
+            {
+                x.BrandId,
+                x.AgentId
+            }, (groupItem, playerAggregates) => new
+            {
+                groupItem.AgentId,
+                groupItem.BrandId,
+                PromotionAmount = playerAggregates.Sum(p => p.PromotionAmount),
+                RebateAmount = playerAggregates.Sum(p => p.RebateAmount),
+                DepositAmount = playerAggregates.Sum(p => p.DepositAmount),
+                WithdrawalAmount = playerAggregates.Sum(p => p.WithdrawalAmount),
+                AdjustmentAmount = playerAggregates.Sum(p => p.AdjustmentAmount),
+                BonusAmount = playerAggregates.Sum(p => p.BonusAmount),
+                BetAmount = playerAggregates.Sum(p => p.BetAmount),
+                Turnover = playerAggregates.Sum(p => p.Turnover),
+                WinLossAmount = playerAggregates.Sum(p => p.WinLossAmount),
+                NetProfit = playerAggregates.Sum(p => p.NetProfit)
+            });
+
+            var allAgents = agents.GroupJoin(agentData, agent => new
+                {
+                    agent.Id,
+                    agent.BrandId
+                }, data => new
+                {
+                    Id = data.AgentId,
+                    data.BrandId
+                },
+                (agent, data) => new
+                {
+                    agent,
+                    data
+                }).SelectMany(x => x.data.DefaultIfEmpty(), (x, data) => new
+            {
+                AgentId = x.agent.Id,
+                x.agent.BrandId,
+                x.agent.DividendPercentage,
+                data?.PromotionAmount,
+                data?.RebateAmount,
+                data?.DepositAmount,
+                data?.WithdrawalAmount,
+                data?.AdjustmentAmount,
+                data?.BonusAmount,
+                data?.BetAmount,
+                data?.Turnover,
+                data?.WinLossAmount,
+                data?.NetProfit
+            });
+
+            var agentGameData = _playerGameAggregateService.GetPlayerGameAggregateQueries()
+                .Where(x => x.AgentId != null)
+                .Where(x => x.BrandId == brand.Id)
+                .Where(x => x.ReportDate >= brand.CurrentSettlementFrom &&
+                    x.ReportDate <= brand.CurrentSettlementTo).GroupBy(x => new
+                {
+                    x.BrandId,
+                    x.AgentId
+                }, (agent, playerGames) => new
+                {
+                    AgentId = agent.AgentId.Value,
+                    agent.BrandId,
+                    LiveDealerWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.LiveDealer)
+                            .Sum(l => l.WinLoss),
+                    SlotWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.Slot)
+                            .Sum(l => l.WinLoss),
+                    FishingWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.Fishing)
+                            .Sum(l => l.WinLoss),
+                    ArcadeWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.Arcade)
+                            .Sum(l => l.WinLoss),
+                    TableGameWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.TableGame)
+                            .Sum(l => l.WinLoss),
+                    LotteryWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.Lottery)
+                            .Sum(l => l.WinLoss),
+                    CardGameWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.CardGame)
+                            .Sum(l => l.WinLoss),
+                    SportsWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.Sportsbook)
+                            .Sum(l => l.WinLoss),
+                    ESportsWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.ESports)
+                            .Sum(l => l.WinLoss),
+                    VirtualSportsWinLoss =
+                        playerGames
+                            .Where(l => l.GameType == GameType.VirtualSports)
+                            .Sum(l => l.WinLoss),
+                    WinLoss = playerGames
+                        .Sum(l => l.WinLoss)
+                });
+
+            var agentDividends = allAgents.GroupJoin(agentGameData,
+                    agent => new
                     {
-                        p.BrandId,
-                        p.AgentId,
-                        p.AgentDividendPercentage
+                        agent.BrandId,
+                        agent.AgentId
                     },
-                    pg => new
+                    agentGame => new
                     {
-                        pg.BrandId,
-                        pg.AgentId,
-                        pg.AgentDividendPercentage
+                        agentGame.BrandId,
+                        agentGame.AgentId
                     },
-                    (agent, playerGameAggregates) => new
+                    (agent, games) => new
                     {
                         agent,
-                        playerGameAggregates
+                        games
                     })
-                .SelectMany(x => x.playerGameAggregates.DefaultIfEmpty(),
-                    (x, playerGameAggregate) => new
+                .SelectMany(x => x.games.DefaultIfEmpty(),
+                    (x, games) => new CreateAgentDividendModel
                     {
-                        x.agent.AgentId,
-                        x.agent.BrandId,
-                        x.agent.AgentDividendPercentage,
-                        x.agent.DepositAmount,
-                        x.agent.WithdrawalAmount,
-                        x.agent.AdjustmentAmount,
-                        x.agent.BonusAmount,
-                        x.agent.BetAmount,
-                        x.agent.Turnover,
-                        x.agent.WinLossAmount,
-                        x.agent.NetProfit,
-                        playerGameAggregate
-                    }).ToArrayAsync();
-
-            var agentDividends = agentDividendGroup
-                .GroupBy(
-                    x => new
-                    {
-                        x.AgentId,
-                        x.BrandId,
-                        x.AgentDividendPercentage,
-                        x.DepositAmount,
-                        x.WithdrawalAmount,
-                        x.AdjustmentAmount,
-                        x.BonusAmount,
-                        x.BetAmount,
-                        x.Turnover,
-                        x.WinLossAmount,
-                        x.NetProfit
-                    },
-                    (x, agents) =>
-                    {
-                        return new
-                        {
-                            x.AgentId,
-                            x.BrandId,
-                            x.AgentDividendPercentage,
-                            x.DepositAmount,
-                            x.WithdrawalAmount,
-                            x.AdjustmentAmount,
-                            x.BonusAmount,
-                            x.BetAmount,
-                            x.Turnover,
-                            x.WinLossAmount,
-                            x.NetProfit,
-                            LiveDealerWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.LiveDealer)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            SlotWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.Slot)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            FishingWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.Fishing)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            ArcadeWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.Arcade)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            TableGameWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.TableGame)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            LotteryWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.Lottery)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            CardGameWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.CardGame)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            SportsWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.Sportsbook)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            ESportsWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.ESports)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            VirtualSportsWinLoss =
-                                agents
-                                    .Where(l => l.playerGameAggregate != null)
-                                    .Where(l => l.playerGameAggregate.GameType == GameType.VirtualSports)
-                                    .Sum(l => l.playerGameAggregate.WinLoss),
-                            WinLoss = agents
-                                .Where(l => l.playerGameAggregate != null)
-                                .Sum(l => l.playerGameAggregate.WinLoss),
-                            AgentDividendAmount = x.AgentDividendPercentage * x.NetProfit / 100M
-                        };
-                    })
-                .GroupBy(x => new
-                    {
-                        x.AgentId,
-                        x.BrandId,
-                        x.AgentDividendPercentage
-                    },
-                    (x, models) => new CreateAgentDividendModel
-                    {
-                        AgentId = x.AgentId.Value,
-                        BrandId = x.BrandId,
+                        AgentId = x.agent.AgentId,
+                        BrandId = x.agent.BrandId,
+                        AutoSend = brand.AutoSentAgentBonus,
                         From = brand.CurrentSettlementFrom,
                         To = brand.CurrentSettlementTo,
-                        AgentDividendPercentage = x.AgentDividendPercentage,
-                        DepositAmount = models.Sum(m => m.DepositAmount),
-                        WithdrawalAmount = models.Sum(m => m.WithdrawalAmount),
-                        AdjustmentAmount = models.Sum(m => m.AdjustmentAmount),
-                        BonusAmount = models.Sum(m => m.BonusAmount),
-                        BetAmount = models.Sum(m => m.BetAmount),
-                        Turnover = models.Sum(m => m.Turnover),
-                        WinLossAmount = models.Sum(m => m.WinLossAmount),
-                        NetProfit = models.Sum(m => m.NetProfit),
-                        LiveDealerWinLoss = models.Sum(m => m.LiveDealerWinLoss),
-                        SlotWinLoss = models.Sum(m => m.SlotWinLoss),
-                        FishingWinLoss = models.Sum(m => m.FishingWinLoss),
-                        ArcadeWinLoss = models.Sum(m => m.ArcadeWinLoss),
-                        TableGameWinLoss = models.Sum(m => m.TableGameWinLoss),
-                        LotteryWinLoss = models.Sum(m => m.LotteryWinLoss),
-                        CardGameWinLoss = models.Sum(m => m.CardGameWinLoss),
-                        SportsWinLoss = models.Sum(m => m.SportsWinLoss),
-                        ESportsWinLoss = models.Sum(m => m.ESportsWinLoss),
-                        VirtualSportsWinLoss = models.Sum(m => m.VirtualSportsWinLoss),
-                        AgentDividendAmount = models.Sum(m => m.AgentDividendAmount) +
-                            agents.Where(a => a.ParentAgentId == x.AgentId).Sum(child =>
-                            {
-                                var childAgentPlayers = agentDividendGroup
-                                    .Where(a =>
-                                        a.AgentId == child.Id).GroupBy(
-                                        g => new
-                                        {
-                                            g.AgentId,
-                                            g.BrandId,
-                                            g.AgentDividendPercentage,
-                                            g.NetProfit
-                                        },
-                                        (agent, childAgents) => new
-                                        {
-                                            agent.AgentId,
-                                            agent.NetProfit,
-                                            agent.AgentDividendPercentage,
-                                            RebateAmount = childAgents
-                                                .Where(c => c.playerGameAggregate != null)
-                                                .Sum(c =>
-                                                    c.playerGameAggregate.VipRebateAmount)
-                                        }).ToArray();
-
-                                var amount = childAgentPlayers.Sum(c =>
-                                    Math.Abs(x.AgentDividendPercentage - c.AgentDividendPercentage) * c.NetProfit /
-                                    100M);
-                                return amount;
-                            }),
-                        CreatedOn = DateTimeOffset.Now,
-                        AutoSend = brand.AutoSentAgentBonus
-                    }).ToArray();
+                        PromotionAmount = x.agent?.PromotionAmount ?? 0M,
+                        RebateAmount = x.agent?.RebateAmount ?? 0M,
+                        DepositAmount = x.agent?.DepositAmount ?? 0M,
+                        WithdrawalAmount = x.agent?.WithdrawalAmount ?? 0M,
+                        AdjustmentAmount = x.agent?.AdjustmentAmount ?? 0M,
+                        BonusAmount = x.agent?.BonusAmount ?? 0M,
+                        BetAmount = x.agent?.BetAmount ?? 0M,
+                        Turnover = x.agent?.Turnover ?? 0M,
+                        WinLossAmount = x.agent?.WinLossAmount ?? 0M,
+                        NetProfit = x.agent?.NetProfit ?? 0M,
+                        LiveDealerWinLoss = games?.LiveDealerWinLoss ?? 0M,
+                        SlotWinLoss = games?.SlotWinLoss ?? 0M,
+                        FishingWinLoss = games?.FishingWinLoss ?? 0M,
+                        ArcadeWinLoss = games?.ArcadeWinLoss ?? 0M,
+                        TableGameWinLoss = games?.TableGameWinLoss ?? 0M,
+                        LotteryWinLoss = games?.LotteryWinLoss ?? 0M,
+                        CardGameWinLoss = games?.CardGameWinLoss ?? 0M,
+                        SportsWinLoss = games?.SportsWinLoss ?? 0M,
+                        ESportsWinLoss = games?.ESportsWinLoss ?? 0M,
+                        VirtualSportsWinLoss = games?.VirtualSportsWinLoss ?? 0M,
+                        AgentDividendPercentage = x.agent?.DividendPercentage ?? 0M,
+                        AgentDividendAmount =
+                            parentAgentDividends.Where(p => p.AgentId == x.agent.AgentId).Sum(s => s.Dividend),
+                        AgentDividendMultipleLayerModels =
+                            parentAgentDividends.Where(p => p.AgentId == x.agent.AgentId).ToArray(),
+                        CreatedOn = DateTimeOffset.Now
+                    }).Where(x => x.AgentDividendAmount != 0M).ToArray();
 
             var agentIds = agentDividends.Where(x => x.AgentDividendAmount > 0M).Select(x => x.AgentId).ToArray();
 
             var noSendDividends = await _agentDividendService.GetAgentDividendQueries()
-                .Where(x => agentIds.Contains(x.AgentId) && x.SentOn == null).ToArrayAsync().ConfigureAwait(false);
+                .Where(x => agentIds.Contains(x.AgentId) && x.SentOn == null).ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             foreach (var dividend in agentDividends)
             {
@@ -327,23 +352,17 @@ namespace TGS.Services.Report.Application.Commands.Agent
         }
 
         private static (DateTimeOffset, DateTimeOffset) GetInterval(
-            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth)
+            SettlementIntervalType type, DateTimeOffset startDate, int? dayOfMonth) => type switch
         {
-            switch (type)
-            {
-                case SettlementIntervalType.Daily:
-                    return (startDate, startDate);
-                case SettlementIntervalType.Weekly:
-                    return (DateGenerator.GetFirstDayOfWeek(startDate),
-                        DateGenerator.GetLastDayOfWeek(startDate));
-                case SettlementIntervalType.Monthly:
-                    return (startDate,
-                        DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1),
-                            dayOfMonth.Value!));
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
-        }
+            SettlementIntervalType.Daily => (startDate, startDate),
+            SettlementIntervalType.Weekly => (DateGenerator.GetFirstDayOfWeek(startDate),
+                DateGenerator.GetLastDayOfWeek(startDate)),
+            SettlementIntervalType.Monthly => (startDate,
+                dayOfMonth == null
+                    ? DateGenerator.GetLastDayOfMonth(startDate.AddMonths(1))
+                    : DateGenerator.GetSpecifyDayOfMonth(startDate.AddMonths(1), dayOfMonth.Value!)),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
 
         private async IAsyncEnumerable<Brand[]> GetBrands(string brandCode, DateTimeOffset queryDate,
             [EnumeratorCancellation] CancellationToken cancellationToken)
@@ -381,7 +400,7 @@ namespace TGS.Services.Report.Application.Commands.Agent
                                 brand.CurrentSettlementTo == x.To, cancellationToken))
                     {
                         var (autoSendDividends, manuelOrNegativeDividends, agentDividends) =
-                            await GetAgentDividends(brand, maxNumber);
+                            await GetAgentDividends(brand, maxNumber, cancellationToken);
 
                         maxNumber += autoSendDividends.Count() + manuelOrNegativeDividends.Count();
 

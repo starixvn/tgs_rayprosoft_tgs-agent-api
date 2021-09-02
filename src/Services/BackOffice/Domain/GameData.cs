@@ -1,4 +1,6 @@
-﻿namespace TGS.Services.BackOffice.Domain
+﻿using System.Collections.Generic;
+
+namespace TGS.Services.BackOffice.Domain
 {
     public class GameData
     {

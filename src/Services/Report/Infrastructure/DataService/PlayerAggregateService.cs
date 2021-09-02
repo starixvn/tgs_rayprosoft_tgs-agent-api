@@ -54,8 +54,7 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 DividendAmount = model.DividendAmount.Truncate(2),
                 BetAmount = model.BetAmount.Truncate(2),
                 Turnover = model.Turnover.Truncate(2),
-                WinLossAmount = model.WinLossAmount.Truncate(2),
-                AgentDividendPercentage = model.AgentDividendPercentage ?? 0M
+                WinLossAmount = model.WinLossAmount.Truncate(2)
             }).ToArray());
 
         Task IPlayerAggregateService.DeletePlayerAggregatesAsync(PlayerAggregate[] markets) =>
