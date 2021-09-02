@@ -17,6 +17,7 @@ using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Shared.Game.Models.KY.Commons;
 using TGS.Shared.Game.Models.TCG.Common;
+using TGS.Shared.Game.Models.TCG.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.TCG
 {
@@ -26,40 +27,47 @@ namespace TGS.Shared.Game.ApiClients.TCG
     }
     public class TCGApiClient : BaseApiClient, ITCGApiClient
     {
-        private static readonly string GameProviderCode = Consts.GameProvider.TCG;
-
         private readonly HttpClient _client;
 
         private readonly IApiClientLogger _logger;
 
-        private readonly IHashProvider _hashProvider;
-
         private readonly IJsonSerializationProvider _json;
+
+        private readonly ITCGUtility _utility;
 
         public TCGApiClient(
             HttpClient client,
             IApiClientLogger logger,
             IJsonSerializationProvider json,
-            IHashProvider hashProvider)
+            ITCGUtility utility)
             : base(client, logger, json)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _json = json ?? throw new ArgumentNullException(nameof(json));
-            _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
+            _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
-        public async ValueTask<TResponse> GetAPIAsync<TRequest, TResponse>(Uri apiUrl, TRequest request) where TRequest : TCGBaseRequest where TResponse : TCGBaseResponse
+        public ValueTask<TCGRegisterPlayerResponse> RegisterPlayerAsync(TCGRegisterPlayerRequest request)
+        => GetAPIAsync<TCGRegisterPlayerRequest, TCGRegisterPlayerResponse>(new("http://www.connect6play.com/doBusiness.do"), request, "RegisterPlayer");
+
+
+        private async ValueTask<TResponse> GetAPIAsync<TRequest, TResponse>(Uri apiUrl, TRequest request, string prefix) where TRequest : TCGBaseRequest where TResponse : TCGBaseResponse
         {
 
             var sw = Stopwatch.StartNew();
             var responseMessage = default(string);
             var response = default(TResponse);
-            var dataJson = DESCrypt(_json.SerializeToString(request));
-            var data = "merchant_code=" + HttpUtility.UrlEncode("test")
-                  + "&params=" + HttpUtility.UrlEncode(dataJson)
-                + "&sign=" + HttpUtility.UrlEncode(She256("aa123456", dataJson));
-            HttpContent content = new StringContent(data, Encoding.UTF8);
+            var jsonString = _json.SerializeToString(request);
+            var encryptedParams = _utility.DESCEncrypt(jsonString, "EuWEfLac");
+            var sign = _utility.GetHash256(encryptedParams, "h2f69FzdSmMZzrdE");
+            var data =
+                "merchant_code=" + HttpUtility.UrlEncode("pegacnys")
+                + "&params=" + HttpUtility.UrlEncode(encryptedParams)
+                + "&sign=" + HttpUtility.UrlEncode(sign);
+
+            HttpContent content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded");
+
             var httpResponseMessage = await _client.PostAsync(apiUrl, content);
             sw.Stop();
             using (var sr = new StreamReader(httpResponseMessage.Content.ReadAsStreamAsync().Result))
@@ -72,7 +80,7 @@ namespace TGS.Shared.Game.ApiClients.TCG
                 ip = string.Empty,
                 path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
                 method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
-                prefix = GameProviderCode.ToLower(),
+                prefix = _utility.GetPrefix(prefix),
                 servername = Environment.MachineName.NoLongerThan(128),
                 requestheaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
                 requestcontent = _json.SerializeToString(request),
@@ -89,20 +97,6 @@ namespace TGS.Shared.Game.ApiClients.TCG
             }
 
             return response;
-        }
-
-        private string DESCrypt(string json)
-        {
-            return HttpUtility.HtmlEncode(json);
-        }
-
-        private string She256(string key, string encryptedParams)
-        {
-            var datas = Encoding.UTF8.GetBytes(encryptedParams);
-            var encodingKey = Encoding.UTF8.GetBytes(key);
-            var base64Str = _hashProvider.Hash(datas, encodingKey, HashAlgorithmKind.Sha256);
-
-            return HttpUtility.UrlEncode(base64Str);
         }
     }
 }
