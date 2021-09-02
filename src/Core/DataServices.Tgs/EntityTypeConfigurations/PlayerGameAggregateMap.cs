@@ -74,26 +74,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(b => new
                 {
-                    b.BrandId,
-                    b.ReportDate
-                })
-                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date");
-
-            builder.HasIndex(b => new
-                {
-                    b.BrandId,
                     b.ReportDate,
+                    b.BrandId,
+                    b.AgentId,
                     b.PlayerCode
                 })
-                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_player_code");
-
-            builder.HasIndex(b => new
-                {
-                    b.BrandId,
-                    b.ReportDate,
-                    b.AgentId
-                })
-                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_agent_id");
+                .HasDatabaseName("ix_player_game_rebate_aggregates_multiple_keys");
         }
     }
 }
