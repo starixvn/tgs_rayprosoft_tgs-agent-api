@@ -1,0 +1,101 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models;
+using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.TCG;
+using TGS.Core.Models.Services.Caches;
+using TGS.Services.Operations;
+using TGS.Services.Operations.CodeMappers;
+
+namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
+{
+    public interface ITCGService
+    {
+        ValueTask<Guid> GetGameProviderIdAsync();
+        ValueTask<TCGConfiguration> GetConfigurationAsync();
+        ValueTask<CachedPlayer> GetCachedPlayerAsync(string playerCode);
+        ValueTask<Player> GetPlayerByCodeAsync(string playerCode);
+        ValueTask<string> GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language);
+        ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode);
+        ValueTask<Guid> GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId);
+        ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
+        ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId);
+        ValueTask<TCGMerchant> GetMerchantAsync(string currencyCode);
+        string GetGameProviderCode();
+    }
+    public class TCGService : ITCGService
+    {
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly ISettingOperations _settingOperations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly IBrandGameProviderOperations _brandGameProviderOperations;
+        private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
+        private readonly IBrandOperations _brandOperations;
+        public TCGService(
+            IGameProviderOperations gameProviderOperations,
+            ISettingOperations settingOperations,
+            IPlayerOperations playerOperations,
+            IBrandGameProviderOperations brandGameProviderOperations,
+            IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
+            IBrandOperations brandOperations)
+        {
+            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
+            _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
+            _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+        }
+        async ValueTask<Guid> ITCGService.GetGameProviderIdAsync(
+            ) => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
+
+        async ValueTask<TCGConfiguration> ITCGService.GetConfigurationAsync()
+            => await _settingOperations.GetValueFromJsonByKeyAsync<TCGConfiguration>(SettingConsts.GameProviderConfigurations.TCG).ConfigureAwait(false);
+
+        async ValueTask<CachedPlayer> ITCGService.GetCachedPlayerAsync(string playerCode)
+        {
+            var player = await _playerOperations.GetCachedPlayerAsync(playerCode).ConfigureAwait(false);
+            if (player == null)
+            {
+                throw new PlayerLoginExpiredException();
+            }
+            return player;
+        }
+
+        async ValueTask<Player> ITCGService.GetPlayerByCodeAsync(string playerCode)
+            => await _playerOperations.GetPlayerByCodeAsync(playerCode).ConfigureAwait(false);
+
+        async ValueTask<string> ITCGService.GetGameProviderCultureCodeAsync(Guid gameProviderId, Guid brandId, string language)
+            => await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, language).ConfigureAwait(false);
+
+        async ValueTask<string> ITCGService.GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode)
+            => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId).ConfigureAwait(false);
+
+        async ValueTask<Guid> ITCGService.GetBrandGameProviderConfigurationIdAsync(Guid brandId, Guid gameProviderId)
+            => await _brandOperations.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId);
+
+        async ValueTask<CachedGame> ITCGService.GetCachedGameAsync(Guid gameProviderId, string externalGameId)
+        {
+            var games = await _gameProviderOperations.GetCachedGamesAsync(gameProviderId, externalGameId).ConfigureAwait(false);
+            return games.FirstOrDefault();
+        }
+
+        string ITCGService.GetGameProviderCode()
+        {
+            return Consts.GameProvider.TCG;
+        }
+
+        async ValueTask<TCGMerchant> ITCGService.GetMerchantAsync(string currencyCode)
+        {
+            var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<TCGConfiguration>(SettingConsts.GameProviderConfigurations.TCG).ConfigureAwait(false);
+            return configuration.Merchants.Where(x => x.CurrencyCodev == currencyCode).FirstOrDefault();
+        }
+
+        async ValueTask<CachedGame> ITCGService.GetCachedGameAsync(Guid gameProviderId, int gameId)
+        => await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameId).ConfigureAwait(false);
+    }
+}

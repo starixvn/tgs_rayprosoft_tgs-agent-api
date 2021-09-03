@@ -6,7 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.TCG.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.TCG.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
+using TGS.Shared.Game.ApiClients.TCG;
 using static TGS.Core.Models.Consts;
 
 namespace TGS.Apis.TgsApi.GameProviders.TCG
@@ -35,11 +38,19 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                );
             services.AddScoped<AuthorizeTCGMiddleware>();
             services.AddScoped<HandleTCGExceptionMiddleware>();
+            services.AddScoped<ITCGService, TCGService>();
+            services.AddScoped<ITCGUtility, TCGUtility>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+            {
+                typeof(TCGGameInitializer)
+            }, (provider, _) =>
+                provider.GetRequiredService<TCGGameInitializer>());
         }
 
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
-            const string Route = "/api/tcg"; 
+            const string Route = "/api/tcg";
 
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>

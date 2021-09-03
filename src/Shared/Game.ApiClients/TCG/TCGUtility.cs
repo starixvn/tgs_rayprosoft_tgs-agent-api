@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 using TGS.Core.Models;
 
 namespace TGS.Shared.Game.ApiClients.TCG

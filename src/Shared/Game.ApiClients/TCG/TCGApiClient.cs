@@ -15,6 +15,7 @@ using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
+using TGS.Core.Models.GameProviders.Settings.TCG;
 using TGS.Shared.Game.Models.KY.Commons;
 using TGS.Shared.Game.Models.TCG.Common;
 using TGS.Shared.Game.Models.TCG.Outgoing;
@@ -23,6 +24,17 @@ namespace TGS.Shared.Game.ApiClients.TCG
 {
     public interface ITCGApiClient
     {
+        ValueTask<TCGRegisterPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGRegisterPlayerRequest request);
+
+        ValueTask<TCGKickOutLottoPlayerResponse> KickOutLottoPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGKickOutLottoPlayerRequest request);
+
+        ValueTask<TCGLaunchGameResponse> LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByELOTTORequest request);
+
+        ValueTask<TCGLaunchGameResponse> LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameBySEARequest request);
+
+        ValueTask<TCGLaunchGameResponse> LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByLOTTOVNRequest request);
+
+        ValueTask<TCGUpdatePasswordPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request);
 
     }
     public class TCGApiClient : BaseApiClient, ITCGApiClient
@@ -48,21 +60,35 @@ namespace TGS.Shared.Game.ApiClients.TCG
             _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
-        public ValueTask<TCGRegisterPlayerResponse> RegisterPlayerAsync(TCGRegisterPlayerRequest request)
-        => GetAPIAsync<TCGRegisterPlayerRequest, TCGRegisterPlayerResponse>(new("http://www.connect6play.com/doBusiness.do"), request, "RegisterPlayer");
+        ValueTask<TCGRegisterPlayerResponse> ITCGApiClient.RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGRegisterPlayerRequest request)
+            => GetAPIAsync<TCGRegisterPlayerRequest, TCGRegisterPlayerResponse>(ApiUrl, merchant, request, "RegisterPlayer");
 
+        ValueTask<TCGKickOutLottoPlayerResponse> ITCGApiClient.KickOutLottoPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGKickOutLottoPlayerRequest request)
+       => GetAPIAsync<TCGKickOutLottoPlayerRequest, TCGKickOutLottoPlayerResponse>(ApiUrl, merchant, request, "KickOutLottoPlayer");
 
-        private async ValueTask<TResponse> GetAPIAsync<TRequest, TResponse>(Uri apiUrl, TRequest request, string prefix) where TRequest : TCGBaseRequest where TResponse : TCGBaseResponse
+        ValueTask<TCGLaunchGameResponse> ITCGApiClient.LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByELOTTORequest request)
+         => GetAPIAsync<TCGLaunchGameByELOTTORequest, TCGLaunchGameResponse>(ApiUrl, merchant, request, "LaunchGameByELOTTO");
+
+        ValueTask<TCGLaunchGameResponse> ITCGApiClient.LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameBySEARequest request)
+         => GetAPIAsync<TCGLaunchGameBySEARequest, TCGLaunchGameResponse>(ApiUrl, merchant, request, "LaunchGameBySEA");
+
+        ValueTask<TCGLaunchGameResponse> ITCGApiClient.LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByLOTTOVNRequest request)
+         => GetAPIAsync<TCGLaunchGameByLOTTOVNRequest, TCGLaunchGameResponse>(ApiUrl, merchant, request, "LaunchGameByLOTTOVN");
+
+        ValueTask<TCGUpdatePasswordPlayerResponse> ITCGApiClient.RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request)
+            => GetAPIAsync<TCGUpdatePasswordPlayerRequest, TCGUpdatePasswordPlayerResponse>(ApiUrl, merchant, request, "RegisterPlayer");
+
+        private async ValueTask<TResponse> GetAPIAsync<TRequest, TResponse>(Uri apiUrl, TCGMerchant merchant, TRequest request, string prefix) where TResponse : TCGBaseResponse
         {
 
             var sw = Stopwatch.StartNew();
             var responseMessage = default(string);
             var response = default(TResponse);
             var jsonString = _json.SerializeToString(request);
-            var encryptedParams = _utility.DESCEncrypt(jsonString, "EuWEfLac");
-            var sign = _utility.GetHash256(encryptedParams, "h2f69FzdSmMZzrdE");
+            var encryptedParams = _utility.DESCEncrypt(jsonString, merchant.DESKey);
+            var sign = _utility.GetHash256(encryptedParams, merchant.SHA256Key);
             var data =
-                "merchant_code=" + HttpUtility.UrlEncode("pegacnys")
+                "merchant_code=" + HttpUtility.UrlEncode(merchant.MerchantCode)
                 + "&params=" + HttpUtility.UrlEncode(encryptedParams)
                 + "&sign=" + HttpUtility.UrlEncode(sign);
 
@@ -98,5 +124,6 @@ namespace TGS.Shared.Game.ApiClients.TCG
 
             return response;
         }
+
     }
 }

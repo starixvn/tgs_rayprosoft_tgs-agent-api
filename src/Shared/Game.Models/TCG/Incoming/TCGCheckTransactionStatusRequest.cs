@@ -4,7 +4,7 @@ using TGS.Shared.Game.Models.TCG.Common;
 
 namespace TGS.Shared.Game.Models.TCG.Incoming
 {
-    public record TCGCheckTransactionStatusRequest : TCGBaseRequest
+    public record TCGCheckTransactionStatusRequest : TCGSingleWalletRequest
     {
         [Required]
         [JsonPropertyName("product_type")]
@@ -15,8 +15,5 @@ namespace TGS.Shared.Game.Models.TCG.Incoming
         [Required]
         [JsonPropertyName("transaction_details")]
         public TransactionInfo[] TransactionDetails { get; init; }
-        [Required]
-        [JsonPropertyName("request_time")]
-        public long RequestTime { get; init; }
     }
 }

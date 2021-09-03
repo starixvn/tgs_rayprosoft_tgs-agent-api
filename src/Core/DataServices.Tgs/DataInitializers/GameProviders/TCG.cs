@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.TCG;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -89,7 +90,91 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new TCGConfiguration
                 {
                     ServiceEndpointUrl =
-                        _env.IsDocker() ? new("http://game-tcg") : new("http://localhost:62330")
+                        _env.IsDocker() ? new("http://game-tcg") : new("http://localhost:62330"),
+                    ApiUrl = new("http://www.connect6play.com/doBusiness.do"),
+                    Merchants = new TCGMerchant[] {
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="CNY",
+                            MerchantCode="pegacnys",
+                            DESKey="EuWEfLac",
+                            SHA256Key="h2f69FzdSmMZzrdE",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="HKD",
+                            MerchantCode="pegahkds",
+                            DESKey="1dNvhUV4",
+                            SHA256Key="uC7wC9j2GhQBUQu0",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="IDR_1000",
+                            MerchantCode="pegaidrks",
+                            DESKey="2xifdSt0",
+                            SHA256Key="I2PkSJCT5sI4ZHYX",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="IDR",
+                            MerchantCode="pegaidrs",
+                            DESKey="XKNDjygF",
+                            SHA256Key="9MLfRXnHWeuwVDo4",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="INR",
+                            MerchantCode="pegainrs",
+                            DESKey="dA60szJG",
+                            SHA256Key="x3F9G1CxP0YRXIE",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="MYR",
+                            MerchantCode="pegamyrs",
+                            DESKey="8pi5m8zH",
+                            SHA256Key="NNffZsPcfZDNut9r",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="THB",
+                            MerchantCode="pegathbs",
+                            DESKey="XE3U5zVJ",
+                            SHA256Key="4vzJ3p1sRQTcLswn",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="USD",
+                            MerchantCode="pegausds",
+                            DESKey="kRxkTF9r",
+                            SHA256Key="Vz2tGy1Q7TK0AdAQ",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="VND_1000",
+                            MerchantCode="pegavndks",
+                            DESKey="PjmKWpPX",
+                            SHA256Key="g3kstTENOj5yJWCS",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                        new TCGMerchant
+                        {
+                            CurrencyCodev="VND",
+                            MerchantCode="pegavnds",
+                            DESKey="AiynBxjI",
+                            SHA256Key="NH5v1N9XlCnbQjj1",
+                            PlayerPassword="TgsPassw0rd"
+                        },
+                    }
+
                 };
 
             SubGameProvider[] IGameProvider.SubGameProviders => new SubGameProvider[]
