@@ -37,30 +37,32 @@ namespace TGS.Apis.OperatorApi.Filters
 
             var status = await _getService.GetAsync(new GetPlayerStatusQuery(playerCode));
 
-            var error = TgsApiError.UserBlocked;
-            var errorMsg = string.Empty;
-            var errorMsgKey = string.Empty;
-
             if (status == PlayerStatus.Disabled && ignoreAttr != null)
             {
-                errorMsgKey = "UserBlocked";
+                context.Result = new ObjectResult(
+                    new FailResponse()
+                    {
+                        Error = (int)TgsApiError.UserBlocked,
+                        ErrorMessage = string.Empty,
+                        ErrorMessageKey = "UserBlocked"
+                    })
+                {
+                    StatusCode = 403
+                };
             }
             else if (status == PlayerStatus.InBlacklist)
             {
-                error = TgsApiError.UserBanned;
-                errorMsgKey = "AccessDenied";
-            }
-
-            context.Result = new ObjectResult(
-                new FailResponse()
+                context.Result = new ObjectResult(
+                    new FailResponse()
+                    {
+                        Error = (int)TgsApiError.UserBanned,
+                        ErrorMessage = string.Empty,
+                        ErrorMessageKey = "AccessDenied"
+                    })
                 {
-                    Error = (int)error,
-                    ErrorMessage = errorMsg,
-                    ErrorMessageKey = errorMsgKey
-                })
-            { 
-                StatusCode = 403 
-            };
+                    StatusCode = 403
+                };
+            }
         }
     }
 }
