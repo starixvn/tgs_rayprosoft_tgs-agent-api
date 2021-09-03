@@ -3,11 +3,14 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operations;
+using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
+using CoreEnums = TGS.Core.Models.Enums;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -105,6 +108,26 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var expected = Core.Models.Enums.PlayerStatus.Disabled;
 
             Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void Check_Player_Status_InBlacklist_Should_Throw_Exception()
+        {
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var player = new Player()
+            {
+                Status = CoreEnums.PlayerStatus.InBlacklist
+            };
+
+            fakePlayerOperations
+                .GetPlayerByCodeAsync(Arg.Any<string>())
+                .Returns(player);
+            var sut = new CheckPlayerBannedCommandService(fakePlayerOperations);
+
+            var command = new CheckPlayerBannedCommand(
+                Guid.NewGuid(),
+                "UserName");
+            Assert.ThrowsAsync<UserBannedException>(async () => await sut.ExecuteAsync(command));
         }
     }
 }
