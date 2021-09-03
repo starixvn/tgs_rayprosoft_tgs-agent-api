@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using TGS.Apis.OperatorApi.Attributes;
@@ -47,7 +48,7 @@ namespace TGS.Apis.OperatorApi.Filters
                         ErrorMessageKey = "UserBlocked"
                     })
                 {
-                    StatusCode = 403
+                    StatusCode = StatusCodes.Status403Forbidden
                 };
             }
             else if (status == PlayerStatus.InBlacklist)
@@ -60,7 +61,7 @@ namespace TGS.Apis.OperatorApi.Filters
                         ErrorMessageKey = "AccessDenied"
                     })
                 {
-                    StatusCode = 403
+                    StatusCode = StatusCodes.Status403Forbidden
                 };
             }
         }
