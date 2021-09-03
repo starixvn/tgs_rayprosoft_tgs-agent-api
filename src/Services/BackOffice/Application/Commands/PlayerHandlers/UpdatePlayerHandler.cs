@@ -25,7 +25,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         public override async Task<MessageResponse> Handle(UpdatePlayerRequest request,
             CancellationToken cancellationToken)
         {
-            var updatePlayerType = new[] {"info", "contact", "password"};
+            var updatePlayerType = new[] { "info", "contact", "password" };
 
             if (!updatePlayerType.Contains(request.Type))
             {
@@ -41,7 +41,11 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             if (!request.AgentUsername.IsNullOrEmpty())
             {
-                var agent = await _agentService.GetAgentAsync(p => p.Username == request.AgentUsername);
+                var agent = await _agentService
+                    .GetAgentAsync(p => p.BrandId == player.BrandId
+                        && p.Username == request.AgentUsername)
+                    .ConfigureAwait(false);
+
                 if (agent == null)
                 {
                     return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
