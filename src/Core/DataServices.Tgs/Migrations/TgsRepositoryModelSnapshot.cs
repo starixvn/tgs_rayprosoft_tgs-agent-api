@@ -601,14 +601,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_agent_dividends_id");
 
-                    b.HasIndex("BrandId")
-                        .HasDatabaseName("ix_agent_dividends_brand_id");
+                    b.HasIndex("AgentId", "SentOn")
+                        .HasDatabaseName("ix_agent_dividends_agent_id_sent_on");
 
-                    b.HasIndex("BrandId", "CreatedOn")
-                        .HasDatabaseName("ix_agent_dividends_brand_id_created_on");
+                    b.HasIndex("AgentId", "BrandId", "CreatedOn")
+                        .HasDatabaseName("ix_agent_dividends_agent_id_brand_id_created_on");
 
-                    b.HasIndex("BrandId", "CreatedOn", "AgentId")
-                        .HasDatabaseName("ix_agent_dividends_brand_id_created_on_agent_id");
+                    b.HasIndex("BrandId", "From", "To")
+                        .HasDatabaseName("ix_agent_dividends_brand_id_from_to");
 
                     b.ToTable("agent_dividends");
                 });
@@ -3638,14 +3638,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_player_aggregates_id");
 
-                    b.HasIndex("BrandId", "ReportDate")
-                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date");
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_player_aggregates_agent_id");
 
-                    b.HasIndex("BrandId", "ReportDate", "AgentId")
-                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date_agent_id");
-
-                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
-                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date_player_code");
+                    b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode")
+                        .HasDatabaseName("ix_player_aggregates_multiple_keys");
 
                     b.ToTable("player_aggregates", "report");
                 });
@@ -3981,14 +3978,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_player_game_rebate_aggregates_id");
 
-                    b.HasIndex("BrandId", "ReportDate")
-                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date");
-
-                    b.HasIndex("BrandId", "ReportDate", "AgentId")
-                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_agent_id");
-
-                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
-                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_player_code");
+                    b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode")
+                        .HasDatabaseName("ix_player_game_rebate_aggregates_multiple_keys");
 
                     b.ToTable("player_game_rebate_aggregates", "report");
                 });
