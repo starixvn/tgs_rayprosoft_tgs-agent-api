@@ -121,12 +121,12 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("create")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<CreatePlayerResponse> CreateAsync(
-            [FromServices] IGetService<CreatePlayerQuery, CreatePlayerInfo> createPlayerQueryService,
+            [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerQueryService,
             [FromBody] CreatePlayerRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
-            var query = new CreatePlayerQuery(
+            var query = new CreatePlayerCommand(
                 brandId,
                 request.Username,
                 request.Password,
