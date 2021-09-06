@@ -21,6 +21,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost("applepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [PlayerCheckEnabled]
         public async Task<ApplePayDepositFormCreatedResponse> SubmitApplePayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
@@ -87,6 +88,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
         [HttpPost("primepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [PlayerCheckEnabled]
         public async Task<PrimePayDepositFormCreatedResponse> SubmitPrimePayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
@@ -154,6 +156,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         [HttpPost("umpay")]
+        [PlayerCheckEnabled]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<UmPayDepositFormCreatedResponse> SubmitUmPayDepositRequestAsync(
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
