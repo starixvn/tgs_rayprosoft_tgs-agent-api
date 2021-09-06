@@ -41,12 +41,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_NeedAuthorize_Is_True_And_AllowNullOrEmpty_Is_False_Should_Excute()
+        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_True_And_NeedAuthorize_Is_True_Should_Excute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
-            fakeService
-                .GetAsync(new GetPlayerStatusQuery("playerCode"))
-                .Returns(PlayerStatus.Disabled);
             var sut = new CheckPlayerEnabledFilter(fakeService);
             var fakeHttpContext = new DefaultHttpContext();
 
@@ -60,10 +57,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
             context.ActionDescriptor.EndpointMetadata = new List<object> {
                 new AuthorizePlayerTokenAttribute()
-                { 
-                    NeedAuthorize = true,
-                    AllowNullOrEmpty = false
-                },                
+                {
+                    AllowNullOrEmpty = true,
+                    NeedAuthorize = true
+                },
             };
             await sut.OnAuthorizationAsync(context);
 
@@ -71,7 +68,34 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_NeedAuthorize_Is_True_And_AllowNullOrEmpty_Is_True_Should_Excute()
+        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_True_And_NeedAuthorize_Is_False__Should_Excute()
+        {
+            var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
+            var sut = new CheckPlayerEnabledFilter(fakeService);
+            var fakeHttpContext = new DefaultHttpContext();
+
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData()
+            {
+                PlayerCode = "playerCode"
+            });
+            var routeData = new RouteData();
+            var actionDescriptor = new ActionDescriptor();
+            var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
+            var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
+            context.ActionDescriptor.EndpointMetadata = new List<object> {
+                new AuthorizePlayerTokenAttribute()
+                {
+                    AllowNullOrEmpty = true,
+                    NeedAuthorize = false
+                },
+            };
+            await sut.OnAuthorizationAsync(context);
+
+            Assert.IsNull(context.Result);
+        }
+
+        [Test]
+        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_False_And_NeedAuthorize_Is_True_Should_Excute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
             fakeService
@@ -91,8 +115,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             context.ActionDescriptor.EndpointMetadata = new List<object> {
                 new AuthorizePlayerTokenAttribute()
                 {
-                    NeedAuthorize = true,
-                    AllowNullOrEmpty = true
+                    AllowNullOrEmpty = false,
+                    NeedAuthorize = true
                 },
             };
             await sut.OnAuthorizationAsync(context);
@@ -101,42 +125,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_NeedAuthorize_Is_False_And_AllowNullOrEmpty_Is_True_Should_Excute()
+        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_False_And_NeedAuthorize_Is_False_Should_Excute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
-            fakeService
-                .GetAsync(new GetPlayerStatusQuery("playerCode"))
-                .Returns(PlayerStatus.Enabled);
-            var sut = new CheckPlayerEnabledFilter(fakeService);
-            var fakeHttpContext = new DefaultHttpContext();
-
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData()
-            {
-                PlayerCode = "playerCode"
-            });
-            var routeData = new RouteData();
-            var actionDescriptor = new ActionDescriptor();
-            var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
-            var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
-            context.ActionDescriptor.EndpointMetadata = new List<object> {
-                new AuthorizePlayerTokenAttribute()
-                {
-                    NeedAuthorize = false,
-                    AllowNullOrEmpty = true
-                },
-            };
-            await sut.OnAuthorizationAsync(context);
-
-            Assert.IsNull(context.Result);
-        }
-
-        [Test]
-        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_NeedAuthorize_Is_False_And_AllowNullOrEmpty_Is_False_Should_Excute()
-        {
-            var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
-            fakeService
-                .GetAsync(new GetPlayerStatusQuery("playerCode"))
-                .Returns(PlayerStatus.Enabled);
             var sut = new CheckPlayerEnabledFilter(fakeService);
             var fakeHttpContext = new DefaultHttpContext();
 
@@ -181,13 +172,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
             context.ActionDescriptor.EndpointMetadata = new List<object> {
                 new AuthorizePlayerTokenAttribute()
                 {
-                    NeedAuthorize = true,
-                    AllowNullOrEmpty = false
+                    AllowNullOrEmpty = false,
+                    NeedAuthorize = true
                 },
             };
             await sut.OnAuthorizationAsync(context);
 
-            Assert.IsNotNull(context.Result);            
+            Assert.IsNotNull(context.Result);
 
             var result = (ObjectResult)context.Result;
 
@@ -216,11 +207,18 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actionDescriptor = new ActionDescriptor();
             var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
             var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
+            context.ActionDescriptor.EndpointMetadata = new List<object> {
+                new AuthorizePlayerTokenAttribute()
+                {
+                    AllowNullOrEmpty = false,
+                    NeedAuthorize = true
+                },
+            };
 
             await sut.OnAuthorizationAsync(context);
             Assert.IsNull(context.Result);
         }
-        
+
         [Test]
         public async Task When_Player_Status_Disabled_And_Api_Has_CheckEnabledAttribute_Should_Get_StatusCodes_403()
         {
@@ -242,7 +240,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
             var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
             context.ActionDescriptor.EndpointMetadata = new List<object> {
-                new AuthorizePlayerTokenAttribute(),
+                new AuthorizePlayerTokenAttribute()
+                {
+                    AllowNullOrEmpty = false,
+                    NeedAuthorize = true
+                },
                 new PlayerCheckEnabledAttribute()
             };
             await sut.OnAuthorizationAsync(context);
@@ -277,7 +279,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actionContext = new ActionContext(fakeHttpContext, routeData, actionDescriptor);
             var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
             context.ActionDescriptor.EndpointMetadata = new List<object> {
-                new AuthorizePlayerTokenAttribute()                
+                new AuthorizePlayerTokenAttribute()
+                {
+                    AllowNullOrEmpty = false,
+                    NeedAuthorize = true
+                }
             };
             await sut.OnAuthorizationAsync(context);
 
@@ -293,7 +299,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .GetAsync(new GetPlayerStatusQuery("playerCode"))
                 .Returns(PlayerStatus.InBlacklist);
             var sut = new CheckPlayerEnabledFilter(fakeService);
-            
+
             var fakeHttpContext = new DefaultHttpContext();
 
             fakeHttpContext.Items.Add("playerToken", new PlayerTokenData()
@@ -306,6 +312,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
             context.ActionDescriptor.EndpointMetadata = new List<object> {
                 new AuthorizePlayerTokenAttribute()
+                {
+                    AllowNullOrEmpty = false,
+                    NeedAuthorize = true
+                }
             };
 
             await sut.OnAuthorizationAsync(context);
