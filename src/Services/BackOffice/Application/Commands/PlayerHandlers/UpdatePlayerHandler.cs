@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
@@ -43,6 +44,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             {
                 var agent = await _agentService
                     .GetAgentAsync(p => p.BrandId == player.BrandId
+                        && p.Status == AgentStatus.Enabled
                         && p.Username == request.AgentUsername)
                     .ConfigureAwait(false);
 

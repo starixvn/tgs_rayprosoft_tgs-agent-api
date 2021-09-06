@@ -121,12 +121,12 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("create")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<CreatePlayerResponse> CreateAsync(
-            [FromServices] IGetService<CreatePlayerQuery, CreatePlayerInfo> createPlayerQueryService,
+            [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerQueryService,
             [FromBody] CreatePlayerRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
-            var query = new CreatePlayerQuery(
+            var query = new CreatePlayerCommand(
                 brandId,
                 request.Username,
                 request.Password,
@@ -209,11 +209,16 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<LoginResponse> LoginAsync(
             [FromServices] IRequestAnalyzer requestAnalyzer,
+            [FromServices] ICommandService<CheckPlayerBannedCommand> commandService,
             [FromServices] IGetService<GetLoginQuery, LoginInfo> getLoginQueryService,
             [FromBody] LoginRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var ipAddress = requestAnalyzer.GetIp(HttpContext);
+
+            await commandService
+                .ExecuteAsync(new CheckPlayerBannedCommand(brandId, request.Username))
+                .ConfigureAwait(false);
 
             var query = new GetLoginQuery(
                 brandId,

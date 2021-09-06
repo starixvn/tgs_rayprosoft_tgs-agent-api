@@ -14,7 +14,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
-    internal class CreatePlayerQueryService : IGetService<CreatePlayerQuery, CreatePlayerInfo>
+    internal class CreatePlayerCommandService : IGetService<CreatePlayerCommand, CreatePlayerInfo>
     {
         private readonly IAgentOperations _agentOperations;
         private readonly IBrandOperations _brandOperations;
@@ -23,7 +23,7 @@ namespace TGS.Services.Operator.Services.Player
         private readonly IPlayerOperations _playerOperations;
         private readonly IStatusValidator _statusValidator;
 
-        public CreatePlayerQueryService(
+        public CreatePlayerCommandService(
             IStatusValidator statusValidator,
             IPlayerOperations playerOperations,
             IPasswordHandler passwordHandler,
@@ -39,7 +39,7 @@ namespace TGS.Services.Operator.Services.Player
             _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
         }
 
-        public async ValueTask<CreatePlayerInfo> GetAsync(CreatePlayerQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<CreatePlayerInfo> GetAsync(CreatePlayerCommand query, CancellationToken cancellationToken = default)
         {
             await _statusValidator
                 .ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default)
@@ -79,7 +79,7 @@ namespace TGS.Services.Operator.Services.Player
         }
 
         private Task<string> CreatePlayerAsync(
-            CreatePlayerQuery query,
+            CreatePlayerCommand query,
             byte[]? salt,
             byte[]? password,
             string currency,
@@ -102,7 +102,7 @@ namespace TGS.Services.Operator.Services.Player
         }
 
         private async Task<string> CreatePlayerByAgentAsync(
-                    CreatePlayerQuery query,
+                    CreatePlayerCommand query,
             byte[]? salt,
             byte[]? password,
             string currency,
@@ -110,8 +110,10 @@ namespace TGS.Services.Operator.Services.Player
         {
             var agent = await _agentOperations
                 .GetAgentByInvitationCodeAsync(query.BrandId, query.AgentInvitationCode)
-                .ConfigureAwait(false)
-                ?? throw new InvalidInvitationCodeException(
+                .ConfigureAwait(false);
+
+            if (agent == null || agent.Status != AgentStatus.Enabled)
+                throw new InvalidInvitationCodeException(
                     query.AgentInvitationCode,
                     "Can't find the agent info");
 
