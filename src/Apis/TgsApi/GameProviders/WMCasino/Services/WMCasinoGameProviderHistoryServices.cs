@@ -108,11 +108,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             {
                 var playerCode = r.Key.PlayerCode;
 
-                if (playerCode == "4udw8okzh5hd")
-                {
-                    playerCode = "4ucmqplxb029";
-                }
-
                 try
                 {
                     var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
