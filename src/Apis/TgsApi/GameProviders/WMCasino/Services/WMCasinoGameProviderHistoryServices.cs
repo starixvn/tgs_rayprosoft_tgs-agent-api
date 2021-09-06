@@ -76,7 +76,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     EndTime = request.EndTime
                 }).ConfigureAwait(false);
 
-            if (response.ErrorCode != (int)ServiceApiError.Success ||
+            if (response.ErrorCode != (int)ServiceApiError.Success &&
                 response.ErrorCode != (int)ServiceApiError.NoResult)
             {
                 throw new GameProviderApiErrorException(response.ErrorMessage);

@@ -50,12 +50,22 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 return string.Empty;
             }
 
-            var results = roundDetail.Split(" ", StringSplitOptions.RemoveEmptyEntries)
-                .Select(r => r.Split(":", StringSplitOptions.RemoveEmptyEntries))
-                .Where(r => r.Length > 1)
+            var results = roundDetail.Split(" ", StringSplitOptions.RemoveEmptyEntries).ToArray();
+
+            if (results.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            if (results.Length == 1)
+            {
+                return results[0];
+            }
+
+            var items = results.Select(r => r.Split(":", StringSplitOptions.RemoveEmptyEntries))
                 .ToDictionary(r => r[0], r => r[1]);
 
-            return results.Count == 0 ? string.Empty : _json.SerializeToString(results);
+            return items.Count == 0 ? string.Empty : _json.SerializeToString(items);
         }
     }
 }
