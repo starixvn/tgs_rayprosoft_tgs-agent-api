@@ -108,6 +108,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var transactions = default(TransactionData);
 
             var cachedGames = await _gameProviderOperations.GetCachedGamesAsync(data.GameProviderId, source.GameCode).ConfigureAwait(false);
+            if (cachedGames.Length == 0)
+            {
+                return null;
+            }
             var cachedGame = cachedGames.First();
             string externalTransactionId = source.TrxId;
 
@@ -130,9 +134,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
                     RoundClosed = true
                 };
             }
-
-
-            return GetBetData(data, playCode, transactions, data.AutoCloseRound);
+            if (transactions == null)
+            {
+                return null;
+            }
+            else
+            {
+                return GetBetData(data, playCode, transactions, data.AutoCloseRound);
+            }
         }
 
         private BetData GetBetData(GameProviderConfigurationData data, string playerCode,
