@@ -21,7 +21,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class PlayerStatusCheckTests
     {
         [Test]
-        public async Task When_Api_Has_No_AuthorizePlayerTokenAttribute_Should_Excute()
+        public async Task When_Api_Has_No_AuthorizePlayerTokenAttribute_Should_Execute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
             var sut = new CheckPlayerEnabledFilter(fakeService);
@@ -41,7 +41,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_True_And_NeedAuthorize_Is_True_Should_Excute()
+        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_True_And_NeedAuthorize_Is_True_Should_Execute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
             var sut = new CheckPlayerEnabledFilter(fakeService);
@@ -68,7 +68,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_True_And_NeedAuthorize_Is_False__Should_Excute()
+        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_True_And_NeedAuthorize_Is_False__Should_Execute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
             var sut = new CheckPlayerEnabledFilter(fakeService);
@@ -95,7 +95,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_False_And_NeedAuthorize_Is_True_Should_Excute()
+        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_False_And_NeedAuthorize_Is_True_Should_Execute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
             fakeService
@@ -125,7 +125,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_False_And_NeedAuthorize_Is_False_Should_Excute()
+        public async Task When_Api_Has_AuthorizePlayerTokenAttribute_And_AllowNullOrEmpty_Is_False_And_NeedAuthorize_Is_False_Should_Execute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
             var sut = new CheckPlayerEnabledFilter(fakeService);
@@ -188,7 +188,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Player_Status_Enabled_Api_Should_Excute()
+        public async Task When_Player_Status_Enabled_Api_Should_Execute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
             fakeService
@@ -259,7 +259,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task When_Player_Status_Disabled_And_Api_Has_No_CheckEnabledAttribute_Should_Excute()
+        public async Task When_Player_Status_Disabled_And_Api_Has_No_CheckEnabledAttribute_Should_Execute()
         {
             var fakeService = Substitute.For<IGetService<GetPlayerStatusQuery, PlayerStatus>>();
             fakeService
