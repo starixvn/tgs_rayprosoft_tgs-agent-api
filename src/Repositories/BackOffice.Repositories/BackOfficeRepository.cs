@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -87,8 +88,20 @@ namespace TGS.BackOffice.Repositories
                 banner.UpdatedOn);
         }
 
+        public async ValueTask<BrandLogoInfo> GetBrandLogoInfoAsync(Guid brandId)
+        {
+            var brand = await _tgsRepository.Brands
+                .FindAsync(brandId)
+                .ConfigureAwait(false);
+
+            if (brand == null || string.IsNullOrWhiteSpace(brand.LogoInfo))
+                return null;
+
+            return JsonSerializer.Deserialize<BrandLogoInfo>(brand.LogoInfo);
+        }
+
         public async ValueTask ImportLocalizationStringsAsync(
-            string systemCode,
+                    string systemCode,
             IEnumerable<LocalizationStringInfo> localizationStrings)
         {
             var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
