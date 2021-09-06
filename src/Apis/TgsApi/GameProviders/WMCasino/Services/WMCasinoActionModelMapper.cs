@@ -406,18 +406,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         private static GameActionType GetSettleGameActionType(string externalGameId,
             decimal betAmount, decimal winAmount)
         {
-            if (winAmount > betAmount)
-            {
-                return GameActionType.WinBet;
-            }
-
             if (winAmount == betAmount)
             {
                 // for game NiuNiu, return WinBet
                 return externalGameId.Equals("105") ? GameActionType.WinBet : GameActionType.TieBet;
             }
 
-            return GameActionType.LoseBet;
+            return winAmount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
         }
     }
 }
