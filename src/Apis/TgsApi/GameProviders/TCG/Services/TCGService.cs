@@ -25,6 +25,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, string externalGameId);
         ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId);
         ValueTask<TCGMerchant> GetMerchantAsync(string currencyCode);
+        ValueTask<TCGMerchant> GetMerchantByMerchantCodeAsync(string merchantCode);
         string GetGameProviderCode();
     }
     public class TCGService : ITCGService
@@ -97,5 +98,11 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 
         async ValueTask<CachedGame> ITCGService.GetCachedGameAsync(Guid gameProviderId, int gameId)
         => await _gameProviderOperations.GetCachedGameAsync(gameProviderId, gameId).ConfigureAwait(false);
+
+        async ValueTask<TCGMerchant> ITCGService.GetMerchantByMerchantCodeAsync(string merchantCode)
+        {
+            var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<TCGConfiguration>(SettingConsts.GameProviderConfigurations.TCG).ConfigureAwait(false);
+            return configuration.Merchants.Where(x => x.MerchantCode == merchantCode).FirstOrDefault();
+        }
     }
 }

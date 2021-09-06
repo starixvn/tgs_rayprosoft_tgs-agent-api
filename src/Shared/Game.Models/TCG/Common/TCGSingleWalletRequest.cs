@@ -12,7 +12,7 @@ namespace TGS.Shared.Game.Models.TCG.Common
     {
         [Required]
         [JsonPropertyName("method")]
-        public int Method { get; init; }
+        public string Method { get; init; }
         [Required]
         [JsonPropertyName("request_time")]
         public long RequestTime { get; init; }

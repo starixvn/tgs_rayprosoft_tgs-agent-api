@@ -88,9 +88,9 @@ namespace TGS.Shared.Game.ApiClients.TCG
             var encryptedParams = _utility.DESCEncrypt(jsonString, merchant.DESKey);
             var sign = _utility.GetHash256(encryptedParams, merchant.SHA256Key);
             var data =
-                "merchant_code=" + HttpUtility.UrlEncode(merchant.MerchantCode)
-                + "&params=" + HttpUtility.UrlEncode(encryptedParams)
-                + "&sign=" + HttpUtility.UrlEncode(sign);
+                "merchant_code=" + WebUtility.UrlEncode(merchant.MerchantCode)
+                + "&params=" + WebUtility.UrlEncode(encryptedParams)
+                + "&sign=" + WebUtility.UrlEncode(sign);
 
             HttpContent content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded");
 

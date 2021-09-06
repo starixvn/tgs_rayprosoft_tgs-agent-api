@@ -53,8 +53,7 @@ namespace TGS.Shared.Game.ApiClients.TCG
             {
                 Key = Encoding.UTF8.GetBytes(key),
                 Mode = CipherMode.ECB,
-                Padding = PaddingMode.PKCS7,
-
+                Padding = PaddingMode.PKCS7
             })
             {
 

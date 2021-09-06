@@ -14,15 +14,12 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
 {
     public sealed class HandleTCGExceptionMiddleware : BaseHandleGameProviderExceptionMiddleware
     {
-        private readonly IGamePlayActions _action;
-
+        
         public HandleTCGExceptionMiddleware(
             Func<string, IErrorMapper> mapper,
-            ITgsLog log,
-            IGamePlayActions action)
-            : base(mapper, Consts.GameProvider.Skywind, log, "tcg")
+            ITgsLog log)
+            : base(mapper, Consts.GameProvider.TCG, log, "tcg")
         {
-            _action = action;
 
         }
 

@@ -18,8 +18,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
     public sealed class AuthorizeTCGMiddleware : IMiddleware
     {
 
-        public AuthorizeTCGMiddleware(
-            )
+        public AuthorizeTCGMiddleware()
         {
 
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
@@ -38,6 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                );
             services.AddScoped<AuthorizeTCGMiddleware>();
             services.AddScoped<HandleTCGExceptionMiddleware>();
+            services.AddScoped<DispatcherTCGMiddleware>();
             services.AddScoped<ITCGService, TCGService>();
             services.AddScoped<ITCGUtility, TCGUtility>();
 
@@ -48,6 +50,22 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                 provider.GetRequiredService<TCGGameInitializer>());
         }
 
+        protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
+        {
+            const string route = "/api/tcg/entrance";
+
+            app.UseWhen(
+                context =>
+                    context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
+                    HttpMethods.IsPost(context.Request.Method),
+                builder =>
+                {
+                    builder.UseMiddleware<HandleTCGExceptionMiddleware>();
+                    builder.UseMiddleware<DispatcherTCGMiddleware>();
+                });
+        }
+
+
         protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
         {
             const string Route = "/api/tcg";
@@ -55,7 +73,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
             app.UseWhen(context => context.Request.Path.StartsWithSegments(Route, StringComparison.OrdinalIgnoreCase),
                 builder =>
                 {
-                    builder.UseMiddleware<HandleTCGExceptionMiddleware>();
                     builder.UseMiddleware<AuthorizeTCGMiddleware>();
                 });
         }
