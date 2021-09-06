@@ -123,7 +123,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
 
             var betData = await _map.RollbackBetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
             decimal balance;
-            if (betData.Transactions.Length > 0)
+            if (betData != null)
             {
                 var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
                 balance = betResult.Balance;
