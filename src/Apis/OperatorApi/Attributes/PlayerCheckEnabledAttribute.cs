@@ -6,7 +6,7 @@ namespace TGS.Apis.OperatorApi.Attributes
     /// When player status is disabled, player can't use this api
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class CheckEnabledAttribute : Attribute
+    public class PlayerCheckEnabledAttribute : Attribute
     {
     }
 }

@@ -243,7 +243,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var context = new AuthorizationFilterContext(actionContext, new List<IFilterMetadata> { });
             context.ActionDescriptor.EndpointMetadata = new List<object> {
                 new AuthorizePlayerTokenAttribute(),
-                new CheckEnabledAttribute()
+                new PlayerCheckEnabledAttribute()
             };
             await sut.OnAuthorizationAsync(context);
 

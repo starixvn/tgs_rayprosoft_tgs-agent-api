@@ -30,7 +30,7 @@ namespace TGS.Apis.OperatorApi.Filters
             {
                 return;
             }
-            var ignoreAttr = context.ActionDescriptor.EndpointMetadata.OfType<CheckEnabledAttribute>().LastOrDefault();
+            var playerCheckEnabledAttr = context.ActionDescriptor.EndpointMetadata.OfType<PlayerCheckEnabledAttribute>().LastOrDefault();
 
             var playerTokenData = context.HttpContext.Items.GetPlayerTokenData();
 
@@ -38,7 +38,7 @@ namespace TGS.Apis.OperatorApi.Filters
 
             var status = await _getService.GetAsync(new GetPlayerStatusQuery(playerCode));
 
-            if (status == PlayerStatus.Disabled && ignoreAttr != null)
+            if (status == PlayerStatus.Disabled && playerCheckEnabledAttr != null)
             {
                 context.Result = new ObjectResult(
                     new FailResponse()
