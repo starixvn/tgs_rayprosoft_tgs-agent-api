@@ -4,12 +4,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.TCG;
 using TGS.Core.Models.Services.Caches;
+using TGS.Core.Models.Services.Data;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
+using TGS.Services.Operations.Queries;
 
 namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 {
@@ -26,6 +29,8 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         ValueTask<CachedGame> GetCachedGameAsync(Guid gameProviderId, int gameId);
         ValueTask<TCGMerchant> GetMerchantAsync(string currencyCode);
         ValueTask<TCGMerchant> GetMerchantByMerchantCodeAsync(string merchantCode);
+        ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
+        ValueTask<GameActionExternalIds> GetGameActionExternalIdByPlaceBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
         string GetGameProviderCode();
     }
     public class TCGService : ITCGService
@@ -36,13 +41,15 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         private readonly IBrandGameProviderOperations _brandGameProviderOperations;
         private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
         private readonly IBrandOperations _brandOperations;
+        private readonly IGameActionQueries _gameActionQueries;
         public TCGService(
             IGameProviderOperations gameProviderOperations,
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
             IBrandGameProviderOperations brandGameProviderOperations,
             IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
-            IBrandOperations brandOperations)
+            IBrandOperations brandOperations,
+            IGameActionQueries gameActionQueries)
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
@@ -50,9 +57,11 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             _brandGameProviderOperations = brandGameProviderOperations ?? throw new ArgumentNullException(nameof(brandGameProviderOperations));
             _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
         }
         async ValueTask<Guid> ITCGService.GetGameProviderIdAsync(
             ) => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
+
 
         async ValueTask<TCGConfiguration> ITCGService.GetConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<TCGConfiguration>(SettingConsts.GameProviderConfigurations.TCG).ConfigureAwait(false);
@@ -103,6 +112,15 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         {
             var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<TCGConfiguration>(SettingConsts.GameProviderConfigurations.TCG).ConfigureAwait(false);
             return configuration.Merchants.Where(x => x.MerchantCode == merchantCode).FirstOrDefault();
+        }
+
+        async ValueTask<Guid> ITCGService.GetBrandIdByPlayerCodeAsync(string playerCode)
+            => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode).ConfigureAwait(false);
+
+        async ValueTask<GameActionExternalIds> ITCGService.GetGameActionExternalIdByPlaceBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
+        {
+            var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, new[] { GameActionType.PlaceBet }).ConfigureAwait(false);
+            return gameActionExternalIds.FirstOrDefault();
         }
     }
 }
