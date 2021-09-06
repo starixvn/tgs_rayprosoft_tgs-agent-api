@@ -4,7 +4,7 @@ namespace TGS.Services.Agent
 {
     public record AgentInfo(
         Guid Id,
-        string UserName,
+        string Username,
         string? RealName,
         string? Phone,
         Guid DefaultWalletId,
@@ -16,5 +16,6 @@ namespace TGS.Services.Agent
         int AgentLevel,
         byte[] PayPassword,
         byte[] PaySalt,
-        decimal AccumulatedProfitSharing);
+        decimal AccumulatedProfitSharing,
+        decimal DividendPercentage);
 }

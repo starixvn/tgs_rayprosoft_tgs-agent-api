@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Security;
+using TGS.Services.Agent.Exceptions;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.PayPassowrd
@@ -17,7 +18,8 @@ namespace TGS.Services.Agent.Services.PayPassowrd
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         }
 
-        public async ValueTask ExecuteAsync(SetFirstPayPasswordCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(SetFirstPayPasswordCommand command,
+            CancellationToken cancellationToken = default)
         {
             var agent = await _agentRepository
                 .GetAgentByIdAsync(command.AgentId)

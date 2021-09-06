@@ -2,11 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Security;
+using TGS.Services.Agent.Exceptions;
+using TGS.Services.Agent.ValidateCode;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Models.Services;
 using TGS.ServiceUtility;
-using TGS.Services.Agent.ValidateCode;
-using TGS.Services.Agent.Services.Agent;
 
 namespace TGS.Services.Agent.Services.Agent
 {
@@ -23,7 +23,8 @@ namespace TGS.Services.Agent.Services.Agent
         {
             _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+            _validateCodeOperator =
+                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
         public async ValueTask ExecuteAsync(ResetPasswordCommand command, CancellationToken cancellationToken = default)
@@ -44,7 +45,7 @@ namespace TGS.Services.Agent.Services.Agent
 
             var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);
             await _agentOperations
-                .ChangeAgentPasswordAsync(new ChangeAgentPasswordData()
+                .ChangeAgentPasswordAsync(new ChangeAgentPasswordData
                 {
                     Username = username.Username,
                     Id = agentId,

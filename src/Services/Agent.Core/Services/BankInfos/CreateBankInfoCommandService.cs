@@ -16,11 +16,13 @@ namespace TGS.Services.Agent.Services.BankInfos
             IPaymentServiceClient paymentServiceClient,
             IAgentRepository agentRepository)
         {
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _paymentServiceClient =
+                paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
         }
 
-        public async ValueTask ExecuteAsync(CreateBankInfoCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(CreateBankInfoCommand command,
+            CancellationToken cancellationToken = default)
         {
             var agent = await _agentRepository.GetAgentByIdAsync(command.AgentId).ConfigureAwait(false);
 
@@ -35,7 +37,7 @@ namespace TGS.Services.Agent.Services.BankInfos
                 .CreateAgentBankInfoAsync(
                     command.BrandId,
                     command.AgentId,
-                    agent.UserName,
+                    agent.Username,
                     createInfo)
                 .ConfigureAwait(false);
         }

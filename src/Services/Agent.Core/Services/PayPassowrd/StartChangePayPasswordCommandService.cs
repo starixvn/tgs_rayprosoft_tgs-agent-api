@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
-using TGS.Core.Infrastructures.Mail;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 using TGS.ServiceUtility;
 
@@ -22,10 +22,12 @@ namespace TGS.Services.Agent.Services.PayPassowrd
         {
             _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+            _validateCodeOperator =
+                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(StartChangePayPasswordCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask<string> GetAsync(StartChangePayPasswordCommand command,
+            CancellationToken cancellationToken = default)
         {
             var agent = await _agentRepository
                 .GetAgentByIdAsync(command.AgentId)
@@ -45,7 +47,7 @@ namespace TGS.Services.Agent.Services.PayPassowrd
                     var data = new ValidateCodeData(command.AgentId.ToString(), token);
 
                     var result = await _validateCodeOperator
-                        .SaveValidateDataAsync<ValidateCodeData>(validateCode, token, data)
+                        .SaveValidateDataAsync(validateCode, token, data)
                         .ConfigureAwait(false);
 
                     return (result, validateCode, token);

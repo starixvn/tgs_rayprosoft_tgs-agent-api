@@ -40,7 +40,8 @@ namespace TGS.Agent.Repositories
                 (int)agent.LevelType,
                 agent.WithdrawPassword,
                 agent.WithdrawSalt,
-                dividend);
+                dividend,
+                agent.DividendPercentage);
         }
 
         public async ValueTask SetPayPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt,

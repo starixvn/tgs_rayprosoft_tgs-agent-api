@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment;
-using Tgs.Payment.Clients;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Core.Models.Exceptions;
-using TGS.Services.Agent;
+using Tgs.Payment.Clients;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Services.BrandPayments;
 using TGS.Services.Agent.Services.Withdraw;
 using TGS.ServiceUtility;
@@ -64,7 +62,8 @@ namespace TGS.Apis.AgentApi.Controllers
         [TgsResponseWrapper]
         public async IAsyncEnumerable<BrandPaymentResponse> GetBrandPaymentsAsync(
             [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
-            [FromServices] IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
+            [FromServices]
+            IGetService<AllPaymentMethodsQuery, IDictionary<Guid, PaymentMethodInfo>> getAllPaymentMethodService,
             [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService)
         {
             var brandId = HttpContext.Items.GetBrandId();
