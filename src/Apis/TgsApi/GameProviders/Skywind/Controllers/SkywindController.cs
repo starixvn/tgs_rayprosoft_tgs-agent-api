@@ -122,23 +122,24 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .ConfigureAwait(false);
 
             var betData = await _map.RollbackBetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
-            decimal balance;
-            if (betData != null)
+
+            if (betData == null)
             {
-                var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
-                balance = betResult.Balance;
+                return new SkywindSingleWalletResponse()
+                {
+                    ErrorCode = (int)GameApiError.TransactionNotFound,
+                    ErrorMsg = GameApiError.TransactionNotFound.Description(),
+                    TrxId = request.TrxId
+                };
             }
-            else
-            {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
-                balance = getBalance.Balance;
-            }
+
+            var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                Balance = balance,
+                Balance = betResult.Balance,
                 TrxId = request.TrxId
             };
         }
