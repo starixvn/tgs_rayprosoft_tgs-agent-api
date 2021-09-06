@@ -31,11 +31,6 @@ namespace TGS.Apis.OperatorApi.Filters
                 return;
             }
 
-            if(authAttr.NeedAuthorize == false)
-            {
-                return;
-            }
-
             var playerCheckEnabledAttr = context.ActionDescriptor.EndpointMetadata.OfType<PlayerCheckEnabledAttribute>().LastOrDefault();
 
             var playerTokenData = context.HttpContext.Items.GetPlayerTokenData();
