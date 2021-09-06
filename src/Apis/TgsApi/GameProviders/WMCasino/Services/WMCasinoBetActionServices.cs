@@ -108,7 +108,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         }
 
         private async ValueTask ResettleOrVoidRoundAsync(GameProviderConfigurationData data,
-            string playerCode, GameBetResult[] betResults, bool isManual)
+            string playerCode, GameBetResult[] betResults, bool fromSchedule)
         {
             var betResult = betResults.First();
             var externalGameActionGroupId =

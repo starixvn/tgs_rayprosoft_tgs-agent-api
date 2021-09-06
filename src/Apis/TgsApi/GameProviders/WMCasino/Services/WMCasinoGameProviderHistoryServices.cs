@@ -76,7 +76,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     EndTime = request.EndTime
                 }).ConfigureAwait(false);
 
-            if (response.ErrorCode != (int)ServiceApiError.Success ||
+            if (response.ErrorCode != (int)ServiceApiError.Success &&
                 response.ErrorCode != (int)ServiceApiError.NoResult)
             {
                 throw new GameProviderApiErrorException(response.ErrorMessage);
@@ -107,6 +107,11 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             var tasks = results.Select(async r =>
             {
                 var playerCode = r.Key.PlayerCode;
+
+                if (playerCode == "4udw8okzh5hd")
+                {
+                    playerCode = "4ucmqplxb029";
+                }
 
                 try
                 {
