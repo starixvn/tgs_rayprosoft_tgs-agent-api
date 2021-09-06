@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Services.Agent.Services.Agent;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 using TGS.Services.Operations;
 using TGS.ServiceUtility;
 
-namespace TGS.Services.Operator.Services.Player
+namespace TGS.Services.Agent.Services.Agent
 {
     internal class CommitSetAgentEmailCommandService : ICommandService<CommitSetAgentEmailCommand>
     {
@@ -17,11 +17,13 @@ namespace TGS.Services.Operator.Services.Player
             IValidateCodeOperator validateCodeOperator,
             IAgentOperations agentOperations)
         {
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+            _validateCodeOperator =
+                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
             _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
         }
 
-        public async ValueTask ExecuteAsync(CommitSetAgentEmailCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(CommitSetAgentEmailCommand command,
+            CancellationToken cancellationToken = default)
         {
             var result = await _validateCodeOperator
                 .GetValidateCodeDataAsync<EmailValidateData>(command.ValidateCode, command.SecurityKey)

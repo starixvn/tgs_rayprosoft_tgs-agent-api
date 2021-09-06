@@ -58,8 +58,9 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             }
 
             var childAgentMaxDividendPercentage = await _service.GetAgentQueries()
-                .Where(x => x.ParentAgentId == agent.Id).MaxAsync(x => x.DividendPercentage, cancellationToken)
-                .ConfigureAwait(false);
+                .Where(x => x.ParentAgentId == agent.Id)
+                .MaxAsync(x => (decimal?)x.DividendPercentage, cancellationToken)
+                .ConfigureAwait(false) ?? 0M;
 
             if (request.DividendPercentage < childAgentMaxDividendPercentage)
             {
