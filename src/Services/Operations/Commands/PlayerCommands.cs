@@ -11,6 +11,7 @@ using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations.Models.Services;
 
 namespace TGS.Services.Operations.Commands
@@ -169,20 +170,22 @@ namespace TGS.Services.Operations.Commands
             return loginRecord;
         }
 
-        public Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
+        public async Task<int> SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn)
         {
-            var updateInfo = new Player
+            var updateInfo = await _repository.Players.FirstOrDefaultAsync(x => x.PlayerCode == playerCode);
+            if (updateInfo == null)
             {
-                PlayerCode = playerCode,
-                Email = email,
-                UpdatedOn = updatedOn
-            };
+                throw new PlayerNotFoundException(playerCode);
+            }
+
+            updateInfo.Email = email;
+            updateInfo.UpdatedOn = updatedOn;
 
             _repository.Players.Attach(updateInfo);
             _repository.Entry(updateInfo).Property(nameof(Player.Email)).IsModified = true;
             _repository.Entry(updateInfo).Property(nameof(Player.UpdatedOn)).IsModified = true;
 
-            return _repository.SaveChangesAsync();
+            return await _repository.SaveChangesAsync();
         }
 
         public Task SetIdentityAsync(string playerCode, string realName, string identity, bool isAuthenticate,

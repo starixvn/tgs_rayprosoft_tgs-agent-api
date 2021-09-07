@@ -159,6 +159,18 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Email));
         }
 
+        [HttpGet("game/auto-transfer")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public ValueTask<bool> GetAutoTransferToGameFlagAsync(
+                    [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var query = new GetPlayerIsAutoTransferToGameQuery(playerTokenData.PlayerCode);
+
+            return getService.GetAsync(query);
+        }
+
         /// <summary>
         /// Get player information
         /// </summary>
@@ -422,11 +434,13 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromBody] SubmitChangeEmailRequest request)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
 
             var command = new CommitSetPlayerEmailCommand(
                 playerTokenData.PlayerCode,
                 request.SecurityKey,
-                request.ValidateCode);
+                request.ValidateCode,
+                brandId);
 
             return commitPlayerEmailService.ExecuteAsync(command);
         }
@@ -463,18 +477,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             var command = new TogglePlayerIsAutoTransferToGameCommand(playerTokenData.PlayerCode);
 
             return toggleService.ExecuteAsync(command);
-        }
-
-        [HttpGet("game/auto-transfer")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public ValueTask<bool> GetAutoTransferToGameFlagAsync(
-            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-
-            var query = new GetPlayerIsAutoTransferToGameQuery(playerTokenData.PlayerCode);
-
-            return getService.GetAsync(query);
         }
     }
 }
