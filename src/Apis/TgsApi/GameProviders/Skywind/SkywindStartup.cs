@@ -32,13 +32,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind
                 (provider, key) => key switch
                 {
                     GameProvider.Skywind => provider.GetRequiredService<SkywindErrorMapper>(),
-                    _                    => provider.GetRequiredService<TgsErrorMapper>()
+                    _ => provider.GetRequiredService<TgsErrorMapper>()
                 }
             );
 
             services.AddScoped<AuthorizeSkywindMiddleware>();
             services.AddScoped<HandleSkywindExceptionMiddleware>();
-            services.AddScoped<ISkywindServices, SkywindServices>();
+            services.AddScoped<ISkywindService, SkywindService>();
             services.AddScoped<ISkywindActionModelMapper, SkywindActionModelMapper>();
 
             services.AddScopedWithResolver<IGameInitializer>(new[]
