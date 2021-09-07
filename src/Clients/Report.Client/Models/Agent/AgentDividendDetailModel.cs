@@ -18,5 +18,6 @@ namespace TGS.Clients.Report.Client.Models.Agent
         public decimal WinLossAmount { get; set; }
         public decimal AgentDividendAmount { get; set; }
         public decimal AgentDividendPercentage { get; set; }
+        public decimal ExpenditureAmount { get; set; }
     }
 }
