@@ -7,20 +7,28 @@ using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
+using TGS.Services.BackOffice.Application.Services;
 using TGS.Services.BackOffice.Infrastructure.DataService;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
     public class UpdatePlayerHandler : Handler<UpdatePlayerRequest, MessageResponse>
     {
         private readonly IAgentService _agentService;
+        private readonly IGetService<CheckBrandEmailQuery, bool> _getService;
         private readonly IPlayerService _service;
 
-        public UpdatePlayerHandler(IPlayerService service, IAgentService agentService, IHttpContextAccessor accessor) :
+        public UpdatePlayerHandler(
+            IPlayerService service,
+            IAgentService agentService,
+            IHttpContextAccessor accessor,
+            IGetService<CheckBrandEmailQuery, bool> getService) :
             base(accessor)
         {
             _service = service;
             _agentService = agentService;
+            _getService = getService;
         }
 
         public override async Task<MessageResponse> Handle(UpdatePlayerRequest request,
@@ -56,6 +64,14 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 player.AgentId = agent.Id;
             }
 
+            if (request.Type == updatePlayerType[1])
+            {
+                var isBrandHasSameEmail = await _getService
+                    .GetAsync(new CheckBrandEmailQuery(player.BrandId, request.Email))
+                    .ConfigureAwait(false);
+                if (isBrandHasSameEmail)
+                    return CreateInvalidResponse<MessageResponse>(Player.BrandEmailDuplicate);
+            }
 
             await _service.UpdatePlayerAsync(player, request);
 

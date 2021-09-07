@@ -14,9 +14,11 @@ using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
+using AgentNotFoundException = TGS.Core.Models.Exceptions.AgentNotFoundException;
 
 namespace TGS.Apis.AgentApi.Handlers.Agent
 {
@@ -70,6 +72,11 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
                 throw new AgentNotFoundException(username, Resources.Agent.NotFound);
             }
 
+            if (agent.Status == AgentStatus.InBlacklist)
+            {
+                throw new UserBannedException();
+            }
+
             if (!_passwordHandler.Verify(agent.Password, agent.Salt, request.Password))
             {
                 throw new InvalidCredentialsException(Resources.Agent.PasswordMismatched);
@@ -91,9 +98,18 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
             });
 
             var token = await GenerateAgentJwtTokenAsync(brandId,
-                new() {AgentId = agent.Id, LoginRecordId = record.Id, ExpiredOn = record.ExpiredOn});
+                new()
+                {
+                    AgentId = agent.Id,
+                    LoginRecordId = record.Id,
+                    ExpiredOn = record.ExpiredOn
+                });
 
-            return new() {AgentToken = token, LoginTime = createdOn.ToUnixTimeMilliseconds()};
+            return new()
+            {
+                AgentToken = token,
+                LoginTime = createdOn.ToUnixTimeMilliseconds()
+            };
         }
 
         private async Task<string> GenerateAgentJwtTokenAsync(Guid brandId, AgentTokenData agentTokenData)
@@ -103,7 +119,8 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
             var jti = Guid.NewGuid().ToString();
             var identity = new ClaimsIdentity(new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, data), new Claim(JwtRegisteredClaimNames.Jti, jti)
+                new Claim(JwtRegisteredClaimNames.Sub, data),
+                new Claim(JwtRegisteredClaimNames.Jti, jti)
             });
 
             var payload = _hashProvider.Hash($"{data}:{jti}");

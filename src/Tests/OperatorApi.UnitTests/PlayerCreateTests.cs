@@ -66,46 +66,6 @@ namespace OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Register_Player_With_Other_Brand_InvitationCode_Should_Throw_Error()
-        {
-            var brandId = Guid.NewGuid();
-            var invitationCode = "6rd4mq";
-
-            var fakeStatusValidator = Substitute.For<IStatusValidator>();
-            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
-            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
-            var fakeAgentOperations = Substitute.For<IAgentOperations>();
-            var fakeBrandOperations = Substitute.For<IBrandOperations>();
-
-            fakeAgentOperations
-                .GetAgentByInvitationCodeAsync(
-                    Arg.Is(brandId),
-                    Arg.Is(invitationCode))
-                .Returns(default(Agent));
-
-            var sut = new CreatePlayerCommandService(
-                fakeStatusValidator,
-                fakePlayerOperations,
-                fakePasswordHandler,
-                fakeBrandCurrencyCodeMapper,
-                fakeBrandOperations,
-                fakeAgentOperations);
-
-            var query = new CreatePlayerCommand(
-                brandId,
-                "username",
-                "password",
-                "CNY",
-                invitationCode,
-                false);
-
-            // act
-            Assert.ThrowsAsync<InvalidInvitationCodeException>(
-                async () => await sut.GetAsync(query, default));
-        }
-
-        [Test]
         public async Task Register_Player_With_No_InvitationCode()
         {
             // arrange
@@ -176,6 +136,46 @@ namespace OperatorApi.UnitTests
             var query = new CreatePlayerCommand(brandId, "username", password, "CNY", invitationCode, false);
 
             Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query, default));
+        }
+
+        [Test]
+        public async Task Register_Player_With_Other_Brand_InvitationCode_Should_Throw_Error()
+        {
+            var brandId = Guid.NewGuid();
+            var invitationCode = "6rd4mq";
+
+            var fakeStatusValidator = Substitute.For<IStatusValidator>();
+            var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+            var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
+            var fakeAgentOperations = Substitute.For<IAgentOperations>();
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
+
+            fakeAgentOperations
+                .GetAgentByInvitationCodeAsync(
+                    Arg.Is(brandId),
+                    Arg.Is(invitationCode))
+                .Returns(default(Agent));
+
+            var sut = new CreatePlayerCommandService(
+                fakeStatusValidator,
+                fakePlayerOperations,
+                fakePasswordHandler,
+                fakeBrandCurrencyCodeMapper,
+                fakeBrandOperations,
+                fakeAgentOperations);
+
+            var query = new CreatePlayerCommand(
+                brandId,
+                "username",
+                "password",
+                "CNY",
+                invitationCode,
+                false);
+
+            // act
+            Assert.ThrowsAsync<InvalidInvitationCodeException>(
+                async () => await sut.GetAsync(query, default));
         }
 
         [Test]

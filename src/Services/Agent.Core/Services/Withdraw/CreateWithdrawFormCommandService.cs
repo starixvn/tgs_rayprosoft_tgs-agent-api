@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Tgs.Payment.Clients;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.WalletService;
 using TGS.ServiceUtility;
 
@@ -20,10 +21,12 @@ namespace TGS.Services.Agent.Services.Withdraw
         {
             _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
             _walletRepository = walletRepository ?? throw new ArgumentNullException(nameof(walletRepository));
-            _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
+            _paymentServiceClient =
+                paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
-        public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(CreateWithdrawFormCommand command,
+            CancellationToken cancellationToken = default)
         {
             var agentData = await _agentRepository
                 .GetAgentByIdAsync(command.AgentId)
@@ -44,8 +47,8 @@ namespace TGS.Services.Agent.Services.Withdraw
                         Amount = command.Amount,
                         BankInfoId = command.BankInfoId,
                         BrandId = command.BrandId,
-                        UserName = agentData.UserName,
-                        UserType = UserType.Agent,
+                        UserName = agentData.Username,
+                        UserType = UserType.Agent
                     })
                 .ConfigureAwait(false);
 

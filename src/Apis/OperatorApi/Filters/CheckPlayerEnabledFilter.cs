@@ -26,10 +26,11 @@ namespace TGS.Apis.OperatorApi.Filters
         {
             var authAttr = context.ActionDescriptor.EndpointMetadata.OfType<AuthorizePlayerTokenAttribute>().LastOrDefault();
 
-            if (authAttr == null || !authAttr.NeedAuthorize && authAttr.AllowNullOrEmpty)
+            if (authAttr == null || authAttr.AllowNullOrEmpty)
             {
                 return;
             }
+
             var playerCheckEnabledAttr = context.ActionDescriptor.EndpointMetadata.OfType<PlayerCheckEnabledAttribute>().LastOrDefault();
 
             var playerTokenData = context.HttpContext.Items.GetPlayerTokenData();

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 
 namespace TGS.Agent.Repositories
@@ -40,7 +41,14 @@ namespace TGS.Agent.Repositories
                 (int)agent.LevelType,
                 agent.WithdrawPassword,
                 agent.WithdrawSalt,
-                dividend);
+                dividend,
+                agent.DividendPercentage);
+        }
+
+        public async ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id)
+        {
+            var agent = await _tgsRepository.Agents.FindAsync(id).ConfigureAwait(false);
+            return agent.Status;
         }
 
         public async ValueTask SetPayPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt,

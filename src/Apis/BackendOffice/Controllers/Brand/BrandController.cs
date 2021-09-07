@@ -3,8 +3,12 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Brand;
+using TGS.Services.BackOffice.Application.Services;
+using TGS.Services.BackOffice.Domain;
+using TGS.ServiceUtility;
 
 namespace TGS.Apis.BackendOffice.Controllers.Brand
 {
@@ -19,18 +23,74 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
             _mediator = mediator;
         }
 
-        [HttpGet]
-        [Description("Get brands: 品牌商列表")]
-        public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request) =>
-            _mediator.Send(request);
+        [HttpPost]
+        [Description("Create a Brand")]
+        public Task<MessageResponse> CreateBrandAsync(CreateBrandRequest request)
+            => _mediator.Send(request);
 
         [HttpGet("{id}")]
         [Description("Get a Brand")]
-        public Task<GetBrandResponse> GetBrandAsync(Guid id) => _mediator.Send(new GetBrandRequest(id));
+        public Task<GetBrandResponse> GetBrandAsync(Guid id)
+            => _mediator.Send(new GetBrandRequest(id));
 
-        [HttpPost]
-        [Description("Create a Brand")]
-        public Task<MessageResponse> CreateBrandAsync(CreateBrandRequest request) => _mediator.Send(request);
+        [HttpGet("logo/{brandId}")]
+        public async ValueTask<ResponseViewModel<BrandLogoInfoViewModel>> GetBrandLogoInfoAsync(
+            [FromServices] IGetService<GetBrandLogoQuery, BrandLogoInfo> getService,
+            Guid brandId)
+        {
+            var query = new GetBrandLogoQuery(brandId);
+
+            var info = await getService
+                .GetAsync(query, HttpContext.RequestAborted)
+                .ConfigureAwait(false);
+
+            if (info == null)
+                return new ResponseViewModel<BrandLogoInfoViewModel>
+                {
+                    Valid = true,
+                    Data = new BrandLogoInfoViewModel
+                    {
+                        BrandId = brandId
+                    }
+                };
+
+            return new ResponseViewModel<BrandLogoInfoViewModel>
+            {
+                Valid = true,
+                Data = new BrandLogoInfoViewModel
+                {
+                    BrandId = info.BrandId,
+                    DesktopLogoUrl = info.DesktopLogoUrl,
+                    LoadingIconUrl = info.LoadingUrl,
+                    MobileLogoUrl = info.MobileLogoUrl
+                }
+            };
+        }
+
+        [HttpGet]
+        [Description("Get brands: 品牌商列表")]
+        public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request)
+            => _mediator.Send(request);
+
+        [HttpPut("logo")]
+        public ValueTask ModifyBrandLogoInfoAsync(
+            [FromServices] ICommandService<ModifyBrandLogoInfoCommand> modifyService,
+            BrandLogoInfoViewModel request)
+        {
+            var command = new ModifyBrandLogoInfoCommand(
+                request.BrandId,
+                request.DesktopLogoUrl,
+                request.MobileLogoUrl,
+                request.LoadingIconUrl,
+                Username);
+
+            return modifyService.ExecuteAsync(command, HttpContext.RequestAborted);
+        }
+
+        [HttpGet("{id}/syncGames")]
+        [Description("sync brand games")]
+        public Task<MessageResponse> SyncBrandGamesAsync(Guid id)
+            => _mediator.Send(new SyncGamesRequest(id));
 
         [HttpPut("{id}")]
         [Description("Update a Brand")]
@@ -39,9 +99,5 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
             request.Id = id;
             return _mediator.Send(request);
         }
-
-        [HttpGet("{id}/syncGames")]
-        [Description("sync brand games")]
-        public Task<MessageResponse> SyncBrandGamesAsync(Guid id) => _mediator.Send(new SyncGamesRequest(id));
     }
 }

@@ -31,6 +31,7 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
+using TGS.Apis.AgentApi.Filters;
 
 namespace TGS.Apis.AgentApi
 {
@@ -138,7 +139,11 @@ namespace TGS.Apis.AgentApi
             });
 
             services.AddRouting(options => options.LowercaseUrls = true);
-            services.AddControllers(options => options.Filters.Add<ValidateModelFilter>())
+            services.AddControllers(options =>
+                {
+                    options.Filters.Add<CheckAgentEnabledFilter>();
+                    options.Filters.Add<ValidateModelFilter>();
+                })
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
                 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -31,6 +32,13 @@ namespace TGS.BackOffice.Repositories
             banner.UpdatedOn = _systemClock.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask<bool> CheckBrandEmailAsync(Guid brandId, string email)
+        {
+            return await _tgsRepository.Players
+                .AnyAsync(p => p.BrandId == brandId && p.Email.ToLower() == email.ToLower())
+                .ConfigureAwait(false);
         }
 
         public async ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier)
@@ -87,8 +95,20 @@ namespace TGS.BackOffice.Repositories
                 banner.UpdatedOn);
         }
 
+        public async ValueTask<BrandLogoInfo> GetBrandLogoInfoAsync(Guid brandId)
+        {
+            var brand = await _tgsRepository.Brands
+                .FindAsync(brandId)
+                .ConfigureAwait(false);
+
+            if (brand == null || string.IsNullOrWhiteSpace(brand.LogoInfo))
+                return null;
+
+            return JsonSerializer.Deserialize<BrandLogoInfo>(brand.LogoInfo);
+        }
+
         public async ValueTask ImportLocalizationStringsAsync(
-            string systemCode,
+                    string systemCode,
             IEnumerable<LocalizationStringInfo> localizationStrings)
         {
             var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
@@ -281,6 +301,24 @@ namespace TGS.BackOffice.Repositories
             banner.UpdatedOn = _systemClock.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier)
+        {
+            var brand = await _tgsRepository.Brands
+                .FindAsync(info.BrandId)
+                .ConfigureAwait(false);
+
+            if (brand == null || brand.Id != info.BrandId)
+                return;
+
+            brand.LogoInfo = JsonSerializer.Serialize(info);
+            brand.UpdatedByUsername = modifier;
+            brand.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
         }
 
         private static BannerFlowStatus ConvertBannerStatus(int status)

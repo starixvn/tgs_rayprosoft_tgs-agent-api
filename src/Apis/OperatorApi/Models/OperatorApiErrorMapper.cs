@@ -7,6 +7,7 @@ using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Interfaces;
 using TGS.Services.Operator;
 using TGS.Services.Operator.BrandPayment;
+using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Apis.OperatorApi.Models
@@ -51,7 +52,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.GameBalanceFundInFailed] = StatusCodes.Status400BadRequest,
                 [TgsApiError.GameBalanceFundOutFailed] = StatusCodes.Status400BadRequest,
                 [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
-                [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden
+                [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
+                [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, string> _ErrorCodeMessageIdMap =
@@ -91,7 +93,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.GameBalanceFundInFailed] = "GameBalanceFundInFailed",
                 [TgsApiError.GameBalanceFundOutFailed] = "GameBalanceFundOutFailed",
                 [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
-                [TgsApiError.UserBanned] = "UserBanned"
+                [TgsApiError.UserBanned] = "UserBanned",
+                [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate"
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -133,7 +136,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(GameBalanceFundOutFailedException)] = TgsApiError.GameBalanceFundOutFailed,
                 [typeof(LoginFailException)] = TgsApiError.LoginFail,
                 [typeof(FavoriteCountFullException)] = TgsApiError.FavoriteFull,
-                [typeof(UserBannedException)] = TgsApiError.UserBanned
+                [typeof(UserBannedException)] = TgsApiError.UserBanned,
+                [typeof(BrandEmailDuplicateException)] = TgsApiError.BrandEmailDuplicate
             };
 
         public bool CanProcess(Exception exception)

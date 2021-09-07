@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TGS.Services.Agent
+namespace TGS.Services.Agent.Exceptions
 {
     public class AgentNotFoundException : Exception
     {

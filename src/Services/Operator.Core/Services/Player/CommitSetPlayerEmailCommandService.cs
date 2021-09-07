@@ -2,23 +2,25 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
     internal class CommitSetPlayerEmailCommandService : ICommandService<CommitSetPlayerEmailCommand>
     {
-        private readonly IValidateCodeOperator _validateCodeOperator;
+        private readonly IGetService<CheckBrandEmailQuery, bool> _getService;
         private readonly IPlayerOperations _playerOperations;
+        private readonly IValidateCodeOperator _validateCodeOperator;
 
         public CommitSetPlayerEmailCommandService(
             IValidateCodeOperator validateCodeOperator,
-            IPlayerOperations playerOperations)
+            IPlayerOperations playerOperations,
+            IGetService<CheckBrandEmailQuery, bool> getService)
         {
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+            _getService = getService ?? throw new ArgumentNullException(nameof(getService));
         }
 
         public async ValueTask ExecuteAsync(CommitSetPlayerEmailCommand command, CancellationToken cancellationToken = default)
@@ -31,6 +33,12 @@ namespace TGS.Services.Operator.Services.Player
                 throw new ValidateCodeNotVerifyException();
 
             var updatedOn = DateTimeOffset.UtcNow;
+
+            var isBrandHasSameEmail = await _getService.GetAsync(
+                new CheckBrandEmailQuery(command.BrandId, result.Email));
+
+            if (isBrandHasSameEmail)
+                throw new BrandEmailDuplicateException();
 
             await _playerOperations
                 .SetEmailAsync(command.PlayerCode, result.Email, updatedOn)
