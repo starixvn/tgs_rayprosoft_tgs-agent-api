@@ -14,6 +14,8 @@ namespace TGS.Services.BackOffice.Domain
 
         ValueTask<BannerInfo> GetBannerByIdAsync(Guid id);
 
+        ValueTask<BrandLogoInfo> GetBrandLogoInfoAsync(Guid brandId);
+
         ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings);
 
         IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
@@ -31,5 +33,7 @@ namespace TGS.Services.BackOffice.Domain
         ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier);
 
         ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
+
+        ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier);
     }
 }

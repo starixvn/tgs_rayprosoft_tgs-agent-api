@@ -12,7 +12,7 @@ namespace TGS.Core.Infrastructures.Redis
 {
     public sealed class RedisCacheManager : IRedisCacheManager
     {
-        internal static readonly TimeSpan MaxTimeSpan = TimeSpan.FromDays(1);
+        private static readonly TimeSpan _MaxTimeSpan = TimeSpan.FromDays(1);
         private readonly IRedisCacheManager _interface;
         private readonly IRedisRepository _repository;
         private readonly IJsonSerializationProvider _serializationProvider;
@@ -41,9 +41,8 @@ namespace TGS.Core.Infrastructures.Redis
         }
 
         Task IRedisCacheManager.CacheListAsync<T>(object cacheType, object key, TimeSpan? expiresIn, T data)
-        {
-            return _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> { data });
-        }
+            => _interface.CacheListAsync(cacheType, key, expiresIn, new List<T> { data });
+
 
         async Task<List<T>> IRedisCacheManager.GetListAsync<T>(object cacheType, object key,
             Func<Task<List<T>>> createFunc)
@@ -98,6 +97,7 @@ namespace TGS.Core.Infrastructures.Redis
             var totalPage = Math.DivRem(keys.Length, 10000, out var rem);
             if (rem > 0)
                 totalPage += 1;
+
             var index = 0;
 
             var deleteTasks = new List<Task>();
@@ -126,7 +126,8 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
                 return await getData();
             }
         }
@@ -142,7 +143,8 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
                 return await getData();
             }
         }
@@ -159,7 +161,8 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
             }
         }
 
@@ -186,7 +189,8 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
                 return await getData();
             }
         }
@@ -199,7 +203,8 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
             }
         }
 
@@ -218,7 +223,8 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
             }
         }
 
@@ -236,7 +242,8 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
             }
 
             return Array.Empty<RedisValue>();
@@ -255,7 +262,8 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
             }
 
             return Array.Empty<HashEntry>();
@@ -274,16 +282,15 @@ namespace TGS.Core.Infrastructures.Redis
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"redis error :{ex}");
+                Console.WriteLine(
+                    $"redis error on type '{cacheType}' with key '{key}': {ex.ToString().Replace(Environment.NewLine, "$$")}");
             }
 
             return RedisValue.Null;
         }
 
         private static CommandFlags GetCommandFlags(bool fireAndForget)
-        {
-            return fireAndForget ? CommandFlags.FireAndForget : CommandFlags.None;
-        }
+            => fireAndForget ? CommandFlags.FireAndForget : CommandFlags.None;
 
         #region Internal Methods
 
@@ -294,7 +301,7 @@ namespace TGS.Core.Infrastructures.Redis
             $"{cacheType}:{key}";
 
         internal static TimeSpan CapExpiry(TimeSpan? expiresIn) =>
-            expiresIn == null || expiresIn.Value > MaxTimeSpan ? MaxTimeSpan : expiresIn.Value;
+            expiresIn == null || expiresIn.Value > _MaxTimeSpan ? _MaxTimeSpan : expiresIn.Value;
 
         internal async Task<T> GetAsync<T>(object cacheType, object key, Func<Task<T>> createFunc = null)
         {
@@ -338,8 +345,6 @@ namespace TGS.Core.Infrastructures.Redis
             var flags = GetCommandFlags(cacheWithFireAndForget);
             return db.StringSetAsync(cacheKey, serializedValue, expiresIn, When.Always, flags);
         }
-
-
 
         #endregion Internal Methods
     }
