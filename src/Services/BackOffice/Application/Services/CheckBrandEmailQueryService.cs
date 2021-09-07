@@ -15,9 +15,9 @@ namespace TGS.Services.BackOffice.Application.Services
             _backOfficeRepository = backOfficeRepository ?? throw new ArgumentNullException(nameof(backOfficeRepository));
         }
 
-        public async ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
+        public ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
         {
-            return await _backOfficeRepository.CheckBrandEmailAsync(query.BrandId, query.Email);
+            return _backOfficeRepository.CheckBrandEmailAsync(query.BrandId, query.Email);
         }
     }
 }
