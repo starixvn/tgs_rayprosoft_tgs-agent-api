@@ -30,7 +30,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
                 { "/sw/api/validate_terminal_ticket",ValidateTicketAsync},
                 { "/sw/api/get_balance",ValidateBalanceAsync},
                 { "/sw/api/debit",ValidateBetAsync},
-                { "/sw/api/settle",ValidateSettleAsync}
+                { "/sw/api/credit",ValidateSettleAsync}
             };
         }
 
