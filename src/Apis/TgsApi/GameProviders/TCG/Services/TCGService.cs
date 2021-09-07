@@ -34,6 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         ValueTask<bool> ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode, string externalRoundId, string externalTransactionId);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode);
+        ValueTask<RoundStatus?> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
         string GetGameProviderCode();
     }
     public class TCGService : ITCGService
@@ -45,6 +46,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
         private readonly IBrandOperations _brandOperations;
         private readonly IGameActionQueries _gameActionQueries;
+        private readonly IRoundQueries _roundQueries;
         public TCGService(
             IGameProviderOperations gameProviderOperations,
             ISettingOperations settingOperations,
@@ -52,7 +54,8 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             IBrandGameProviderOperations brandGameProviderOperations,
             IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
             IBrandOperations brandOperations,
-            IGameActionQueries gameActionQueries)
+            IGameActionQueries gameActionQueries,
+            IRoundQueries roundQueries)
         {
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
@@ -61,6 +64,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
+            _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
         }
         async ValueTask<Guid> ITCGService.GetGameProviderIdAsync(
             ) => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
@@ -134,5 +138,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 
         ValueTask<GameActionExternalIds> ITCGService.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId);
+        ValueTask<RoundStatus?> ITCGService.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
+          => _roundQueries.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
+
+
     }
 }

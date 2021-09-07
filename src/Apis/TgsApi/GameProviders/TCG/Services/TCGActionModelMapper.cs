@@ -241,6 +241,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             var gameProviderCode = _service.GetGameProviderCode();
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId).ConfigureAwait(false);
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, source.ProductType);
             foreach (var order in source.ReservationDetails)
             {
                 var brandId = await _service.GetBrandIdByPlayerCodeAsync(order.UserName).ConfigureAwait(false);
@@ -249,25 +250,28 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 if (await _service.ReferencedGameActionExistsAsync(gameProviderId, order.UserName, additionalInformation.OrderNo, order.RefNo).ConfigureAwait(false))
                 {
                     var actionExternalIds = await _service.GetGameActionExternalIdAsync(gameProviderId, order.UserName, order.RefNo).ConfigureAwait(false);
-                    var externalTransactionId = $"{ order.RefNo}_cancel";
-                    batchTransactionData.Add(new BatchTransactionData()
+                    var roundStatus = await _service.GetGameActionExternalIdAsync(gameProviderId, order.UserName, actionExternalIds.ExternalRoundId, cachedGame.Id).ConfigureAwait(false);
+                    if (roundStatus.Value == RoundStatus.Open)
                     {
-                        PlayerCode = order.UserName,
-                        GameProviderConfigurationId = gameProviderConfigurationId,
-                        Amount = order.Amount,
-                        Commission = 0,
-                        ExternalGameId = actionExternalIds.ExternalGameId,
-                        ExternalBetId = actionExternalIds.ExternalBetId.ToString(),
-                        ExternalRoundId = actionExternalIds.ExternalRoundId,
-                        ExternalTransactionId = externalTransactionId,
-                        ExternalTransactionReferenceId = actionExternalIds.ExternalReferencedTransactionId.ToString(),
-                        GameActionType = GameActionType.CancelTransaction,
-                        BetType = string.Empty,
-                        Timestamp = DateTime.UtcNow,
-                        RoundDetail = _jsonSerializationProvider.SerializeToString(order)
-                    });
+                        var externalTransactionId = $"{ order.RefNo}_close";
+                        batchTransactionData.Add(new BatchTransactionData()
+                        {
+                            PlayerCode = order.UserName,
+                            GameProviderConfigurationId = gameProviderConfigurationId,
+                            Amount = order.Amount,
+                            Commission = 0,
+                            ExternalGameId = actionExternalIds.ExternalGameId,
+                            ExternalBetId = actionExternalIds.ExternalBetId.ToString(),
+                            ExternalRoundId = actionExternalIds.ExternalRoundId,
+                            ExternalTransactionId = externalTransactionId,
+                            ExternalTransactionReferenceId = actionExternalIds.ExternalReferencedTransactionId.ToString(),
+                            GameActionType = GameActionType.LoseBet,
+                            BetType = string.Empty,
+                            Timestamp = DateTime.UtcNow,
+                            RoundDetail = _jsonSerializationProvider.SerializeToString(order)
+                        });
+                    }
                 }
-
             }
             return GetBetData(gameProviderId, gameProviderCode, autoCloseRound, batchTransactionData.ToArray());
         }

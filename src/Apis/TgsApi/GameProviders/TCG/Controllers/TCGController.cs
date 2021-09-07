@@ -163,6 +163,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             {
                 Status = (int)GameApiError.Success,
                 ErrorDesc = GameApiError.Success.Description(),
+                BalanceInfos = balanceInfos.ToArray()
             };
         }
 
@@ -170,10 +171,22 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("confirmreserve")]
         public async ValueTask<TCGSingleWalletTradeResponse> ConfirmReserveAsync(TCGConfirmReserveRequest request)
         {
+            var betData = await _mapper.ConfirmReserveAsync(request).ConfigureAwait(false);
+            var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
+
+            var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
+                                select new BalanceInfo
+                                {
+                                    Usernam = PlayerBalance.Key,
+                                    Balance = PlayerBalance.Value
+                                }).ToArray();
+
+
             return new TCGSingleWalletTradeResponse()
             {
                 Status = (int)GameApiError.Success,
                 ErrorDesc = GameApiError.Success.Description(),
+                BalanceInfos = balanceInfos.ToArray()
             };
         }
 
