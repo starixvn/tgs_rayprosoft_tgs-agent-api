@@ -6,11 +6,9 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
-
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace Agent.UnitTests
@@ -28,25 +26,22 @@ namespace Agent.UnitTests
             ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
             var brandId = Guid.NewGuid();
-            var brand = new Brand()
+            var brand = new CoreModels.Brand
             {
                 Id = brandId,
-                Currencies = new List<BrandCurrency>()
+                Currencies = new List<CoreModels.BrandCurrency>
+                {
+                    new CoreModels.BrandCurrency
                     {
-                        new BrandCurrency()
-                        {
-                            BrandId=brandId,
-                            CurrencyCode="CNY"
-                        }
+                        BrandId = brandId,
+                        CurrencyCode = "CNY"
                     }
+                }
             };
 
             await repository.Brands.AddAsync(brand);
             var parentAgentId = Guid.NewGuid();
-            var parentAgent = new CoreModels.Agent()
-            {
-                Id = parentAgentId
-            };
+            var parentAgent = new CoreModels.Agent {Id = parentAgentId};
             await repository.Agents.AddAsync(parentAgent);
             await repository.SaveChangesAsync();
 
@@ -54,11 +49,11 @@ namespace Agent.UnitTests
 
             var sut = new GetCreateAgentQueryService(repository, fakePasswordHandler);
 
-            var query = new GetCreateAgentQuery()
+            var query = new GetCreateAgentQuery
             {
                 ParentAgentId = parentAgentId,
                 BrandId = brandId,
-                UserName = "UserName",
+                Username = "UserName",
                 Password = "Password",
                 Remarks = "Remarks"
             };

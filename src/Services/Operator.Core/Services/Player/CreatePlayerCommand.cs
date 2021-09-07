@@ -2,7 +2,7 @@
 
 namespace TGS.Services.Operator.Services.Player
 {
-    public record CreatePlayerQuery(
+    public record CreatePlayerCommand(
         Guid BrandId,
         string UserName,
         string Password,

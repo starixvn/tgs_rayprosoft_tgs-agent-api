@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Core.Infrastructures.Mail;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Properties;
 using TGS.Services.Agent.ValidateCode;
 using TGS.ServiceUtility;
@@ -22,12 +23,15 @@ namespace TGS.Services.Agent.Services.Agent
         {
             _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+            _validateCodeOperator =
+                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(StartSetAgentEmailCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask<string> GetAsync(StartSetAgentEmailCommand command,
+            CancellationToken cancellationToken = default)
         {
-            var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
+            var saveResult = await Policy
+                .HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
                 .RetryAsync(5)
                 .ExecuteAsync(async () =>
                 {
@@ -47,13 +51,17 @@ namespace TGS.Services.Agent.Services.Agent
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            var mailSubject = Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailSubject), command.CultureInfo)!;
+            var mailSubject =
+                Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailSubject), command.CultureInfo)!;
             var mailBody = string.Format(
                 Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
                 saveResult.ValidateCode);
 
             var mailMessage = new SendEmailRequest(
-                new[] { command.Email },
+                new[]
+                {
+                    command.Email
+                },
                 mailSubject,
                 mailBody);
 

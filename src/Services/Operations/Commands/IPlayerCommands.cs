@@ -22,7 +22,7 @@ namespace TGS.Services.Operations.Commands
 
         Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn);
 
-        Task SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
+        Task<int> SetEmailAsync(string playerCode, string email, DateTimeOffset updatedOn);
         Task SetPhoneAsync(string playerCode, string phone, DateTimeOffset updatedOn);
 
         Task SetIdentityAsync(

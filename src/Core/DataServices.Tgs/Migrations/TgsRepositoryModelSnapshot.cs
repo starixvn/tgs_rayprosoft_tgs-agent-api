@@ -1170,6 +1170,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("licensee_id");
 
+                    b.Property<string>("LogoInfo")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("logo_info");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(255)

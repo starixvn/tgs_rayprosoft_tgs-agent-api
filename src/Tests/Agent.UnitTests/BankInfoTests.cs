@@ -49,7 +49,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
-                    0M));
+                    0M,
+                    10M));
 
             await sut.ExecuteAsync(command);
 

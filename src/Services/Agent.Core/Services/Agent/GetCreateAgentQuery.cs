@@ -29,7 +29,7 @@ namespace TGS.Services.Agent.Services.Agent
 
         public decimal SportsRebatePercentage { get; init; }
 
-        public string UserName { get; set; } = default!;
+        public string Username { get; set; } = default!;
 
         public decimal VirtualSportsRebatePercentage { get; init; }
     }
