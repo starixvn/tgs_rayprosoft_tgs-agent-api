@@ -34,7 +34,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
             => _mediator.Send(new GetBrandRequest(id));
 
         [HttpGet("logo/{brandId}")]
-        public async ValueTask<BrandLogoInfoViewModel> GetBrandLogoInfoAsync(
+        public async ValueTask<ResponseViewModel<BrandLogoInfoViewModel>> GetBrandLogoInfoAsync(
             [FromServices] IGetService<GetBrandLogoQuery, BrandLogoInfo> getService,
             Guid brandId)
         {
@@ -45,17 +45,25 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
                 .ConfigureAwait(false);
 
             if (info == null)
-                return new BrandLogoInfoViewModel
+                return new ResponseViewModel<BrandLogoInfoViewModel>
                 {
-                    BrandId = brandId
+                    Valid = true,
+                    Data = new BrandLogoInfoViewModel
+                    {
+                        BrandId = brandId
+                    }
                 };
 
-            return new BrandLogoInfoViewModel
+            return new ResponseViewModel<BrandLogoInfoViewModel>
             {
-                BrandId = info.BrandId,
-                DesktopLogoUrl = info.DesktopLogoUrl,
-                LoadingIconUrl = info.LoadingUrl,
-                MobileLogoUrl = info.MobileLogoUrl
+                Valid = true,
+                Data = new BrandLogoInfoViewModel
+                {
+                    BrandId = info.BrandId,
+                    DesktopLogoUrl = info.DesktopLogoUrl,
+                    LoadingIconUrl = info.LoadingUrl,
+                    MobileLogoUrl = info.MobileLogoUrl
+                }
             };
         }
 
