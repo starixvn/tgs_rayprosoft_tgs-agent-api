@@ -88,7 +88,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             return await _services.DecryptTokenAsync(parameters["cust_session_id"].ToString()).ConfigureAwait(false);
         }
 
-        private async ValueTask<CachedPlayerLoginRecord> ValidateSettleAsync(Dictionary<string, object> parameters)
+        private ValueTask<CachedPlayerLoginRecord> ValidateSettleAsync(Dictionary<string, object> parameters)
         {
             if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
             {
@@ -98,12 +98,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             {
                 throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
             }
-            return await ValueTask.FromResult(new CachedPlayerLoginRecord()
+            return ValueTask.FromResult(new CachedPlayerLoginRecord()
             {
                 PlayerCode = parameters["cust_id"].ToString(),
                 PlatformType = PlatformType.Desktop,
                 Status = LoginStatus.Enabled
-            }).ConfigureAwait(false);
+            });
         }
 
     }
