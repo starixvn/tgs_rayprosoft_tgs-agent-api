@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.TCG.Enums
 {
-    public enum ProductType
+    public enum TCGProductType
     {
         /// <summary>
         /// TCG LOTTO

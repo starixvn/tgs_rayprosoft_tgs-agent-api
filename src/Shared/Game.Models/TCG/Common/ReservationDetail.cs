@@ -10,7 +10,7 @@ namespace TGS.Shared.Game.Models.TCG.Common
         [JsonPropertyName("ref_no")]
         public string RefNo { get; init; }
         [JsonPropertyName("username")]
-        public string Username { get; init; }
+        public string UserName { get; init; }
         [JsonPropertyName("additionalInformation")]
         public JsonDocument AdditionalInformation { get; init; }
     }

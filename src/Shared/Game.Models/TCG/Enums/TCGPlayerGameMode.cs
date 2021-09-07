@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.TCG.Enums
 {
-    public enum PlayerGameMode
+    public enum TCGPlayerGameMode
     {
         /// <summary>
         /// The trial player

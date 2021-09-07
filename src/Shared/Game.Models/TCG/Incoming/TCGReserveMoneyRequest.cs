@@ -11,6 +11,6 @@ namespace TGS.Shared.Game.Models.TCG.Incoming
         public int ProductType { get; init; }
         [Required]
         [JsonPropertyName("transactions")]
-        public TransactionData[] Transactions { get; init; }
+        public TCGTransactionData[] Transactions { get; init; }
     }
 }

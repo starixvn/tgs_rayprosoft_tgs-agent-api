@@ -92,7 +92,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             {
                 UserName = source.UserName,
                 Platform = "html5",
-                GameMode = ((int)PlayerGameMode.RealPlayer).ToString(),
+                GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
                 GameCode = "Lobby",
                 Language = source.Language,
                 LotteryBetMode = "Elott_Traditional",
@@ -112,7 +112,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             {
                 UserName = source.UserName,
                 Platform = "html5",
-                GameMode = ((int)PlayerGameMode.RealPlayer).ToString(),
+                GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
                 GameCode = "lobby",
                 Language = source.Language,
                 LotteryBetMode = "SEA_Tradition",
@@ -126,7 +126,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             {
                 UserName = source.UserName,
                 Platform = "WEB",
-                GameMode = ((int)PlayerGameMode.RealPlayer).ToString(),
+                GameMode = ((int)TCGPlayerGameMode.RealPlayer).ToString(),
                 GameCode = "lobby",
                 Language = source.Language,
                 LotteryBetMode = "Elott",

@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using TGS.Shared.Game.Models.TCG.Enums;
 
 namespace TGS.Shared.Game.Models.TCG.Common
 {
-    public class TransactionData
+    public class TCGTransactionData
     {
         [Required]
         [JsonPropertyName("ref_no")]
@@ -17,7 +18,7 @@ namespace TGS.Shared.Game.Models.TCG.Common
         public decimal Amount { get; init; }
         [Required]
         [JsonPropertyName("tx_type")]
-        public string TxType { get; init; }
+        public TransactionType TxType { get; init; }
         [JsonPropertyName("remarks")]
         public string Remarks { get; init; }
         [JsonPropertyName("additionalInformation")]

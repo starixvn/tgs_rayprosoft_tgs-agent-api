@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
 using TGS.Apis.TgsApi.Extensions;
+using TGS.Apis.TgsApi.GameProviders.TCG.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Services.GameOperations;
@@ -24,10 +25,17 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
     public class TCGController : ControllerBase
     {
         private readonly IGamePlayActions _actions;
+        private readonly ITCGService _service;
+        private readonly ITCGActionModelMapper _mapper;
 
-        public TCGController(IGamePlayActions actions)
+        public TCGController(
+            IGamePlayActions actions,
+            ITCGService service,
+            ITCGActionModelMapper mapper)
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [Consumes("application/x-www-form-urlencoded")]
@@ -57,11 +65,31 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("bet")]
         public async ValueTask<TCGSingleWalletTradeResponse> BetAsync(TCGDebitRequest request)
         {
+            var betDatas = await _mapper.BetAsync(request).ConfigureAwait(false);
+            if (betDatas == null)
+            {
+                return new TCGSingleWalletTradeResponse()
+                {
+                    Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
+                    ErrorDesc = GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport.Description(),
+                };
+            }
+            var balanceInfos = new List<BalanceInfo>();
+            foreach (var betData in betDatas)
+            {
+                var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+                balanceInfos.Add(new BalanceInfo()
+                {
+                    Usernam = betData.PlayerCode,
+                    Balance = betResult.Balance
+                });
+            }
 
             return new TCGSingleWalletTradeResponse()
             {
                 Status = (int)GameApiError.Success,
                 ErrorDesc = GameApiError.Success.Description(),
+                BalanceInfos = balanceInfos.ToArray()
             };
         }
 
@@ -69,11 +97,20 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("settle")]
         public async ValueTask<TCGSingleWalletTradeResponse> SettleAsync(TCGCreditRequest request)
         {
+            var betData = await _mapper.SettleAsync(request).ConfigureAwait(false);
+            var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
 
+            var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
+                                select new BalanceInfo
+                                {
+                                    Usernam = PlayerBalance.Key,
+                                    Balance = PlayerBalance.Value
+                                }).ToArray();
             return new TCGSingleWalletTradeResponse()
             {
                 Status = (int)GameApiError.Success,
                 ErrorDesc = GameApiError.Success.Description(),
+                BalanceInfos = balanceInfos
             };
         }
 
@@ -81,11 +118,31 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("reservemoney")]
         public async ValueTask<TCGSingleWalletTradeResponse> ReserveMoneyAsync(TCGReserveMoneyRequest request)
         {
+            var betDatas = await _mapper.ReserveMoneyAsync(request).ConfigureAwait(false);
+            if (betDatas == null)
+            {
+                return new TCGSingleWalletTradeResponse()
+                {
+                    Status = (int)GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport,
+                    ErrorDesc = GameApiError.UnknownSystemErrorPleaseContactTCGCustomerSupport.Description(),
+                };
+            }
+            var balanceInfos = new List<BalanceInfo>();
+            foreach (var betData in betDatas)
+            {
+                var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
+                balanceInfos.Add(new BalanceInfo()
+                {
+                    Usernam = betData.PlayerCode,
+                    Balance = betResult.Balance
+                });
+            }
 
             return new TCGSingleWalletTradeResponse()
             {
                 Status = (int)GameApiError.Success,
                 ErrorDesc = GameApiError.Success.Description(),
+                BalanceInfos = balanceInfos.ToArray()
             };
         }
 
@@ -93,7 +150,15 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("cancelreserve")]
         public async ValueTask<TCGSingleWalletTradeResponse> CancelReserveAsync(TCGCancelReserveRequest request)
         {
+            var betData = await _mapper.CancelReserveAsync(request).ConfigureAwait(false);
+            var betResult = await _actions.CancelBatchAsync(betData).ConfigureAwait(false);
 
+            var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
+                                select new BalanceInfo
+                                {
+                                    Usernam = PlayerBalance.Key,
+                                    Balance = PlayerBalance.Value
+                                }).ToArray();
             return new TCGSingleWalletTradeResponse()
             {
                 Status = (int)GameApiError.Success,
@@ -105,7 +170,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         [HttpPost("confirmreserve")]
         public async ValueTask<TCGSingleWalletTradeResponse> ConfirmReserveAsync(TCGConfirmReserveRequest request)
         {
-
             return new TCGSingleWalletTradeResponse()
             {
                 Status = (int)GameApiError.Success,
