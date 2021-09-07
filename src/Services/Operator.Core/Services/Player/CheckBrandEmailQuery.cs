@@ -2,5 +2,5 @@
 
 namespace TGS.Services.Operator.Services.Player
 {
-    public record CheckBrandEmailCommand(Guid BrandId, string Email);
+    public record CheckBrandEmailQuery(Guid BrandId, string Email);
 }

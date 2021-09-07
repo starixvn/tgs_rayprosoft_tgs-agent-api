@@ -9,14 +9,14 @@ namespace TGS.Services.Operator.Services.Player
 {
     internal class CommitSetPlayerEmailCommandService : ICommandService<CommitSetPlayerEmailCommand>
     {
-        private readonly IGetService<CheckBrandEmailCommand, bool> _getService;
+        private readonly IGetService<CheckBrandEmailQuery, bool> _getService;
         private readonly IPlayerOperations _playerOperations;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public CommitSetPlayerEmailCommandService(
             IValidateCodeOperator validateCodeOperator,
             IPlayerOperations playerOperations,
-            IGetService<CheckBrandEmailCommand, bool> getService)
+            IGetService<CheckBrandEmailQuery, bool> getService)
         {
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -35,7 +35,7 @@ namespace TGS.Services.Operator.Services.Player
             var updatedOn = DateTimeOffset.UtcNow;
 
             var isBrandHasSameEmail = await _getService.GetAsync(
-                new CheckBrandEmailCommand(command.BrandId, result.Email));
+                new CheckBrandEmailQuery(command.BrandId, result.Email));
 
             if (isBrandHasSameEmail)
                 throw new BrandEmailDuplicateException();
