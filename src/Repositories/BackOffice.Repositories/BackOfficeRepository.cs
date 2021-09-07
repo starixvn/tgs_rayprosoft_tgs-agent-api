@@ -296,6 +296,24 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public async ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier)
+        {
+            var brand = await _tgsRepository.Brands
+                .FindAsync(info.BrandId)
+                .ConfigureAwait(false);
+
+            if (brand == null || brand.Id != info.BrandId)
+                return;
+
+            brand.LogoInfo = JsonSerializer.Serialize(info);
+            brand.UpdatedByUsername = modifier;
+            brand.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
+        }
+
         private static BannerFlowStatus ConvertBannerStatus(int status)
             => status switch
             {

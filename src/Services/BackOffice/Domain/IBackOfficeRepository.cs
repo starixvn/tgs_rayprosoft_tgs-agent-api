@@ -33,5 +33,7 @@ namespace TGS.Services.BackOffice.Domain
         ValueTask SetIsEnableBannerAsync(Guid id, bool isEnable, string modifier);
 
         ValueTask UpdateBannerAsync(Guid id, BannerModifyInfo updateInfo, string modifier);
+
+        ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier);
     }
 }

@@ -64,6 +64,21 @@ namespace TGS.Apis.BackendOffice.Controllers.Brand
         public Task<PagedResponse<BrandModel>> GetBrandsAsync([FromQuery] GetBrandsRequest request)
             => _mediator.Send(request);
 
+        [HttpPut("logo")]
+        public ValueTask ModifyBrandLogoInfoAsync(
+            [FromServices] ICommandService<ModifyBrandLogoInfoCommand> modifyService,
+            BrandLogoInfoViewModel request)
+        {
+            var command = new ModifyBrandLogoInfoCommand(
+                request.BrandId,
+                request.DesktopLogoUrl,
+                request.MobileLogoUrl,
+                request.LoadingIconUrl,
+                Username);
+
+            return modifyService.ExecuteAsync(command, HttpContext.RequestAborted);
+        }
+
         [HttpGet("{id}/syncGames")]
         [Description("sync brand games")]
         public Task<MessageResponse> SyncBrandGamesAsync(Guid id)
