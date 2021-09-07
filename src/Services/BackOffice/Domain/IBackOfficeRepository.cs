@@ -8,6 +8,8 @@ namespace TGS.Services.BackOffice.Domain
     {
         ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier);
 
+        ValueTask<bool> CheckBrandEmailAsync(Guid brandId, string email);
+
         ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier);
 
         IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode);
