@@ -27,7 +27,7 @@ namespace TGS.Apis.AgentApi.Filters
             var authAttr = context.ActionDescriptor.EndpointMetadata.OfType<AuthorizeAgentTokenAttribute>()
                 .LastOrDefault();
 
-            if (authAttr == null || !authAttr.AllowNullOrEmpty)
+            if (authAttr == null || authAttr.AllowNullOrEmpty)
             {
                 return;
             }
