@@ -239,7 +239,7 @@ namespace Agent.UnitTests
                     AllowNullOrEmpty = false,
                     NeedAuthorize = true
                 },
-                new CheckEnabledAttribute()
+                new CheckAgentEnabledAttribute()
             };
             await sut.OnAuthorizationAsync(context);
 

@@ -27,12 +27,13 @@ namespace TGS.Apis.AgentApi.Filters
             var authAttr = context.ActionDescriptor.EndpointMetadata.OfType<AuthorizeAgentTokenAttribute>()
                 .LastOrDefault();
 
-            if (authAttr == null || !authAttr.NeedAuthorize)
+            if (authAttr == null || !authAttr.AllowNullOrEmpty)
             {
                 return;
             }
 
-            var ignoreAttr = context.ActionDescriptor.EndpointMetadata.OfType<CheckEnabledAttribute>().LastOrDefault();
+            var agentCheckEnabledAttr = context.ActionDescriptor.EndpointMetadata.OfType<CheckAgentEnabledAttribute>()
+                .LastOrDefault();
 
             var agentTokenData = context.HttpContext.Items.GetAgentTokenData();
 
@@ -40,7 +41,7 @@ namespace TGS.Apis.AgentApi.Filters
 
             var status = await _getService.GetAsync(new GetAgentStatusQuery(agentId));
 
-            if (status == AgentStatus.Disabled && ignoreAttr != null)
+            if (status == AgentStatus.Disabled && agentCheckEnabledAttr != null)
             {
                 context.Result = new ObjectResult(
                     new TgsResponse
