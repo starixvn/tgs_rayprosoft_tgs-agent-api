@@ -8,6 +8,7 @@ using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operations;
 using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
+using TGS.ServiceUtility;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -19,16 +20,19 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeCheckService = Substitute.For<IGetService<CheckBrandEmailCommand, bool>>();
 
             var sut = new CommitSetPlayerEmailCommandService(
                 fakeValidateCodeOperator,
-                fakePlayerOperations);
+                fakePlayerOperations,
+                fakeCheckService);
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
             var token = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
+            var brandId = Guid.NewGuid();
 
-            var command = new CommitSetPlayerEmailCommand(playerCode, token, validateCode);
+            var command = new CommitSetPlayerEmailCommand(playerCode, token, validateCode, brandId);
 
             fakeValidateCodeOperator
                 .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
@@ -42,17 +46,20 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
+            var fakeCheckService = Substitute.For<IGetService<CheckBrandEmailCommand, bool>>();
 
             var sut = new CommitSetPlayerEmailCommandService(
                 fakeValidateCodeOperator,
-                fakePlayerOperations);
+                fakePlayerOperations,
+                fakeCheckService);
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
             var email = "test@raypro.com";
+            var brandId = Guid.NewGuid();
 
-            var command = new CommitSetPlayerEmailCommand(playerCode, securityKey, validateCode);
+            var command = new CommitSetPlayerEmailCommand(playerCode, securityKey, validateCode, brandId);
 
             fakeValidateCodeOperator
                 .GetValidateCodeDataAsync<EmailValidateData>(Arg.Is(validateCode), Arg.Is(securityKey))
