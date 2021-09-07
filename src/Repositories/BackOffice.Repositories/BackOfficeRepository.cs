@@ -36,6 +36,8 @@ namespace TGS.BackOffice.Repositories
         public async ValueTask<bool> CheckBrandEmailAsync(Guid brandId, string email)
         {
             return await _tgsRepository.Players
+                .AsAsyncEnumerable()
+                .Where(p=>p.BrandId == brandId && !string.IsNullOrEmpty(email))
                 .AnyAsync(p => p.BrandId == brandId && p.Email.ToLower() == email.ToLower())
                 .ConfigureAwait(false);
         }
