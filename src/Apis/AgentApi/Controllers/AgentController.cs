@@ -30,6 +30,7 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         [HttpPost("create")]
+        [CheckAgentEnabled]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<CreateAgentResponse> CreateAgentAsync(
             [FromServices] IGetService<GetCreateAgentQuery, CreateAgentInfo> getCreateAgentQueryService,

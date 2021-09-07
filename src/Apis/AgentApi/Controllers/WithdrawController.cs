@@ -23,6 +23,7 @@ namespace TGS.Apis.AgentApi.Controllers
         [HttpPost]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [TgsResponseWrapper]
+        [CheckAgentEnabled]
         public async Task<Guid> CreateWithdrawRequestAsync(
             [FromServices] ICommandService<CreateWithdrawFormCommand> createFormService,
             [FromServices] ICommandService<CheckWithdrawPayPasswordCommand> checkPasswordService,
