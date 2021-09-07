@@ -108,15 +108,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeCheckEmailService = Substitute.For<IGetService<CheckBrandEmailQuery, bool>>();
+
             var sut = new CommitSetPlayerEmailCommandService(
                 fakeValidateCodeOperator,
                 fakePlayerOperations,
                 fakeCheckEmailService);
             var brandId = Guid.NewGuid();
 
-            fakeValidateCodeOperator.GetValidateCodeDataAsync<EmailValidateData>(
-                Arg.Any<string>(),
-                Arg.Any<string>())
+            fakeValidateCodeOperator
+                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(),Arg.Any<string>())
                 .Returns(new EmailValidateData("test@email.com", "playerCode"));
 
             fakeCheckEmailService
