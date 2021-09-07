@@ -19,6 +19,8 @@ namespace TGS.Services.Operator.Services.Player
         public async ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
         {
             return await _tgsRepository.Players
+                .AsAsyncEnumerable()
+                .Where(p => p.BrandId == query.BrandId && !string.IsNullOrEmpty(p.Email))
                 .AnyAsync(p => p.BrandId == query.BrandId && p.Email.ToLower() == query.Email.ToLower())
                 .ConfigureAwait(false);
         }
