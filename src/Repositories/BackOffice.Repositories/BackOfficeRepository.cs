@@ -34,11 +34,13 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask<bool> CheckBrandEmailAsync(Guid brandId, string email)
+        public ValueTask<bool> CheckBrandEmailAsync(Guid brandId, string email)
         {
-            return await _tgsRepository.Players
-                .AnyAsync(p => p.BrandId == brandId && p.Email.ToLower() == email.ToLower())
-                .ConfigureAwait(false);
+            var result = _tgsRepository.Players
+                .AsQueryable()
+                .Any(p => p.BrandId == brandId && p.Email.ToLower() == email.ToLower());
+
+            return ValueTask.FromResult(result);
         }
 
         public async ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier)

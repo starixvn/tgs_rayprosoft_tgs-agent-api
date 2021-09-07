@@ -16,11 +16,13 @@ namespace TGS.Services.Operator.Services.Player
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
+        public ValueTask<bool> GetAsync(CheckBrandEmailQuery query, CancellationToken cancellationToken = default)
         {
-            return await _tgsRepository.Players
-                .AnyAsync(p => p.BrandId == query.BrandId && p.Email.ToLower() == query.Email.ToLower())
-                .ConfigureAwait(false);
+            var result = _tgsRepository.Players
+                .AsQueryable()
+                .Any(p => p.BrandId == query.BrandId && p.Email.ToLower() == query.Email.ToLower());
+
+            return ValueTask.FromResult(result);
         }
     }
 }
