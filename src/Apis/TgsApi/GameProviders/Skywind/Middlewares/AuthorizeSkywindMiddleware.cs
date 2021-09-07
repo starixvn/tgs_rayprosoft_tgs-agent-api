@@ -98,7 +98,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
             {
                 throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
             }
-            return await Task.FromResult(new CachedPlayerLoginRecord()
+            return await ValueTask.FromResult(new CachedPlayerLoginRecord()
             {
                 PlayerCode = parameters["cust_id"].ToString(),
                 PlatformType = PlatformType.Desktop,
