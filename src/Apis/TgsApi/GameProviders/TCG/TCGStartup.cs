@@ -42,7 +42,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
             services.AddScoped<DispatcherTCGMiddleware>();
             services.AddScoped<ITCGService, TCGService>();
             services.AddScoped<ITCGUtility, TCGUtility>();
-
+            services.AddScoped<ITCGActionModelMapper, TCGActionModelMapper>();
             services.AddScopedWithResolver<IGameInitializer>(new[]
             {
                 typeof(TCGGameInitializer)

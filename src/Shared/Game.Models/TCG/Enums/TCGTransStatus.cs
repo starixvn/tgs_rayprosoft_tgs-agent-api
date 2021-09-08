@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TGS.Shared.Game.Models.TCG.Enums
 {
-    public enum TransStatus
+    public enum TCGTransStatus
     {
         /// <summary>
         /// 未找到

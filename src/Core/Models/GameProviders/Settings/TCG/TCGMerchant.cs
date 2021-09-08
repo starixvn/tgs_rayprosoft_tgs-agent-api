@@ -9,6 +9,10 @@ namespace TGS.Core.Models.GameProviders.Settings.TCG
     public record TCGMerchant
     {
         /// <summary>
+        /// The game URL
+        /// </summary>
+        public Uri GameUrl { get; init; }
+        /// <summary>
         /// The currency code
         /// </summary>
         public string CurrencyCodev { get; init; }

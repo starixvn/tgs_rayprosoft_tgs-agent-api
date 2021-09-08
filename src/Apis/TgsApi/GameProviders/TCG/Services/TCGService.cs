@@ -30,11 +30,11 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         ValueTask<TCGMerchant> GetMerchantAsync(string currencyCode);
         ValueTask<TCGMerchant> GetMerchantByMerchantCodeAsync(string merchantCode);
         ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
-        ValueTask<GameActionExternalIds> GetGameActionExternalIdByPlaceBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
         ValueTask<bool> ReferencedGameActionExistsAsync(Guid gameProviderId, string playerCode, string externalRoundId, string externalTransactionId);
         ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
         ValueTask<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode);
         ValueTask<RoundStatus?> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
+        ValueTask<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
         string GetGameProviderCode();
     }
     public class TCGService : ITCGService
@@ -66,9 +66,8 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
             _roundQueries = roundQueries ?? throw new ArgumentNullException(nameof(roundQueries));
         }
-        async ValueTask<Guid> ITCGService.GetGameProviderIdAsync(
-            ) => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
-
+        async ValueTask<Guid> ITCGService.GetGameProviderIdAsync()
+            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.TCG).ConfigureAwait(false);
 
         async ValueTask<TCGConfiguration> ITCGService.GetConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<TCGConfiguration>(SettingConsts.GameProviderConfigurations.TCG).ConfigureAwait(false);
@@ -124,12 +123,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         async ValueTask<Guid> ITCGService.GetBrandIdByPlayerCodeAsync(string playerCode)
             => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode).ConfigureAwait(false);
 
-        async ValueTask<GameActionExternalIds> ITCGService.GetGameActionExternalIdByPlaceBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
-        {
-            var gameActionExternalIds = await _gameActionQueries.GetGameActionExternalIdsAsync(gameProviderId, playerCode, externalRoundId, gameId, new[] { GameActionType.PlaceBet }).ConfigureAwait(false);
-            return gameActionExternalIds.FirstOrDefault();
-        }
-
         async ValueTask<CachedPlayerLoginRecord> ITCGService.GetPlayerLatestEnabledLoginRecordAsync(string playerCode)
         => await _playerOperations.GetPlayerLatestEnabledLoginRecordAsync(playerCode).ConfigureAwait(false);
 
@@ -138,9 +131,11 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 
         ValueTask<GameActionExternalIds> ITCGService.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId);
+
         ValueTask<RoundStatus?> ITCGService.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
           => _roundQueries.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
 
-
+        ValueTask<GameActionData> ITCGService.GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
+            => _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId);
     }
 }

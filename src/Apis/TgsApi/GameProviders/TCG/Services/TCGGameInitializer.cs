@@ -33,9 +33,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             _json = json ?? throw new ArgumentNullException(nameof(json));
             _methodMapper = new Dictionary<string, Func<Uri, TCGMerchant, TCGLaunchGameRequest, bool, ValueTask<TCGLaunchGameResponse>>>
             {
-                { "TCG_SEA",SEAAsync },
-                { "TCG LOTTO",ELOTTOAsync },
-                { "TCG_LOTTO_VN",LOTTOVNAsync }
+                { "384",SEAAsync },
+                { "2",ELOTTOAsync },
+                { "420",LOTTOVNAsync }
             };
         }
 
@@ -83,7 +83,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                     throw new GameProviderApiErrorException(response.ErrorDesc);
                 }
             }
-            return new() { Url = response.GameUrl };
+            return new() { Url = $"{ merchant.GameUrl}{response.GameUrl}" };
         }
         private ValueTask<TCGLaunchGameResponse> ELOTTOAsync(Uri apiUrl, TCGMerchant merchant, TCGLaunchGameRequest source, bool IsMobile = false)
         {
