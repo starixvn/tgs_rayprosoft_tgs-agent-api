@@ -32,8 +32,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
             { "scs", "/api/tcg/checktransactionstatus" }
         };
 
-        private static readonly RecyclableMemoryStreamManager _RecyclableMemoryStreamManager =
-            new RecyclableMemoryStreamManager();
+        private static readonly RecyclableMemoryStreamManager _RecyclableMemoryStreamManager = new();
 
         private readonly IJsonSerializationProvider _json;
         private readonly JsonSerializerOptions _jsonSerializeOptions;
@@ -90,7 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
                 throw new InvalidCredentialsException(GameApiError.InvalidSignature.Description());
             }
 
-            var decrypt = string.Empty;
+            string decrypt;
             try
             {
                 decrypt = _utility.DESCDecrypt(paramsRequest, merchant.DESKey);

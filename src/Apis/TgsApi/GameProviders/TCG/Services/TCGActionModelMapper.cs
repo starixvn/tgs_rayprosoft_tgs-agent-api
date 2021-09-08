@@ -260,7 +260,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                     && additionalInformation.OrderNo == betExternalId.ExternalRoundId
                     && betExternalId.GameActionType == GameActionType.PlaceBet)
                 {
-                    var roundStatus = await _service.GetGameActionExternalIdAsync(gameProviderId, order.UserName, betExternalId.ExternalRoundId, cachedGame.Id).ConfigureAwait(false);
+                    var roundStatus = await _service.GetRoundStatusAsync(gameProviderId, order.UserName, betExternalId.ExternalRoundId, cachedGame.Id).ConfigureAwait(false);
                     if (roundStatus.Value == RoundStatus.Open)
                     {
                         var externalTransactionId = $"{ order.RefNo}_close";
