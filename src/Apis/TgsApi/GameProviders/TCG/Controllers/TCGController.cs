@@ -84,7 +84,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
                 var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
                 balanceInfos.Add(new BalanceInfo()
                 {
-                    Usernam = betData.PlayerCode,
+                    UserName = betData.PlayerCode,
                     Balance = betResult.Balance
                 });
             }
@@ -111,7 +111,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
                                 select new BalanceInfo
                                 {
-                                    Usernam = PlayerBalance.Key,
+                                    UserName = PlayerBalance.Key,
                                     Balance = PlayerBalance.Value
                                 }).ToArray();
             return new TCGSingleWalletTradeResponse()
@@ -145,7 +145,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
                 var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
                 balanceInfos.Add(new BalanceInfo()
                 {
-                    Usernam = betData.PlayerCode,
+                    UserName = betData.PlayerCode,
                     Balance = betResult.Balance
                 });
             }
@@ -171,7 +171,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
                                 select new BalanceInfo
                                 {
-                                    Usernam = PlayerBalance.Key,
+                                    UserName = PlayerBalance.Key,
                                     Balance = PlayerBalance.Value
                                 }).ToArray();
             return new TCGSingleWalletTradeResponse()
@@ -196,7 +196,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var balanceInfos = (from PlayerBalance in betResult.PlayerBalances
                                 select new BalanceInfo
                                 {
-                                    Usernam = PlayerBalance.Key,
+                                    UserName = PlayerBalance.Key,
                                     Balance = PlayerBalance.Value
                                 }).ToArray();
 

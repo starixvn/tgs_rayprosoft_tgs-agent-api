@@ -9,8 +9,8 @@ namespace TGS.Shared.Game.Models.TCG.Common
 {
     public record BalanceInfo
     {
-        [JsonPropertyName("usernam")]
-        public string Usernam { get; init; }
+        [JsonPropertyName("username")]
+        public string UserName { get; init; }
         [JsonPropertyName("balance")]
         public decimal Balance { get; init; }
     }
