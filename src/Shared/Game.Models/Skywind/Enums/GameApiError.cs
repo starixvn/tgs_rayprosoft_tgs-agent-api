@@ -30,7 +30,10 @@ namespace TGS.Shared.Game.Models.Skywind.Enums
         InsufficientFreeBetsBalance = -5,
         [Description(@"Returned when the request contains the invalid value of the freebet parameter, for example, when the Operator expects the free bet promotion is stored on their side but the promotion was created on Provider’s side and the values of free bet parameters don’t match.")]
         InvalidFreeBet = -6,
-        [Description(@"Can be returned in the case of a rollback operation when the transaction id in the request is invalid")]
+        /// <summary>
+        /// Can be returned in the case of a rollback operation when the transaction id in the request is invalid
+        /// </summary>
+        [Description(@"Transaction not found.")]
         TransactionNotFound = -7,
         [Description("Player is on timeout.")]
         PlayerIsOnTimeout = -1500,
