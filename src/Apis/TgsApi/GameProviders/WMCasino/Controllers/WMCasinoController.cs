@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -112,7 +113,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
 
             var configurationIds = new ConcurrentDictionary<Guid, Guid>();
 
-            var tasks = results.Select(async r =>
+            List<ExecuteResult> executeResults = new();
+
+            foreach (var r in results)
             {
                 var playerCode = playerServices.GetPlayerCode(r.Key, agent!.Prefix, agent!.Suffix);
                 var brandId = await playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
@@ -126,31 +129,25 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
                     configurationIds[brandId] = gameProviderConfigurationId;
                 }
 
+                ErrorResponse errorResponse;
+
                 try
                 {
                     await services.ExecuteBetResultsByRoundAsync(
                             gameProviderId, gameProviderConfigurationId, playerCode, r.Value, false)
                         .ConfigureAwait(false);
 
-                    return new
-                    {
-                        PlayerCode = playerCode,
-                        Response = map.Response(GameApiError.Success, string.Empty)
-                    };
+                    errorResponse = map.Response(GameApiError.Success, string.Empty);
                 }
                 catch (Exception ex)
                 {
-                    return new
-                    {
-                        PlayerCode = playerCode,
-                        Response = map.Response(GameApiError.SystemError, ex.Message)
-                    };
+                    errorResponse = map.Response(GameApiError.SystemError, ex.Message);
                 }
-            });
 
-            var responses = await Task.WhenAll(tasks);
+                executeResults.Add(new ExecuteResult(playerCode, errorResponse));
+            }
 
-            var message = responses
+            var message = executeResults
                 .Where(r => r.Response.ErrorCode != (int)GameApiError.Success)
                 .Select(r => $"user {r.PlayerCode} with error: {r.Response.ErrorMessage}")
                 .ToArray().JoinAsStringByComma();
@@ -166,5 +163,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             [FromServices] IWMCasinoGameProviderHistoryServices services,
             GameProviderGameRecordRequest request)
             => services.GetGameRecordAsync(request);
+
+        private record ExecuteResult(string PlayerCode, ErrorResponse Response);
     }
 }
