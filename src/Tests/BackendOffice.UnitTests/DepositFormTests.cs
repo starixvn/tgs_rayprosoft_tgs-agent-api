@@ -8,6 +8,7 @@ using NUnit.Framework;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Infrastructure.DataService;
