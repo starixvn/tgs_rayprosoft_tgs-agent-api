@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings.TCG;
@@ -18,19 +16,15 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
     {
         private readonly ITCGApiClient _client;
         private readonly ITCGService _service;
-        private readonly IJsonSerializationProvider _json;
-
         private readonly IReadOnlyDictionary<string, Func<Uri, TCGMerchant, TCGLaunchGameRequest, bool, ValueTask<TCGLaunchGameResponse>>> _methodMapper;
 
         public TCGGameInitializer(
             ITCGApiClient client,
-            ITCGService service,
-            IJsonSerializationProvider json
+            ITCGService service
             )
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _service = service ?? throw new ArgumentNullException(nameof(service));
-            _json = json ?? throw new ArgumentNullException(nameof(json));
             _methodMapper = new Dictionary<string, Func<Uri, TCGMerchant, TCGLaunchGameRequest, bool, ValueTask<TCGLaunchGameResponse>>>
             {
                 { "384",SEAAsync },
@@ -45,7 +39,6 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             var gameProviderId = await _service.GetGameProviderIdAsync();
             var configuration = await _service.GetConfigurationAsync();
             var cultureCode = await _service.GetGameProviderCultureCodeAsync(gameProviderId, player.BrandId, request.Language);
-            var currencyCode = await _service.GetGameProviderCurrencyCodeAsync(gameProviderId, player.DefaultWalletCurrencyCode);
             var merchant = await _service.GetMerchantAsync(player.DefaultWalletCurrencyCode);
             var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.GameId);
 

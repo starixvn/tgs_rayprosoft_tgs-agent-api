@@ -7,7 +7,6 @@ using TGS.Core.Models.Interfaces;
 using TGS.Shared.Game.Models.TCG.Enums;
 using static TGS.Core.Models.Enums.InvalidGameActionErrorCode;
 using static TGS.Shared.Game.Models.TCG.Enums.GameApiError;
-using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
 {
