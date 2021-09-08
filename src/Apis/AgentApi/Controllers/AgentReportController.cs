@@ -102,6 +102,8 @@ namespace TGS.Apis.AgentApi.Controllers
 
         [HttpGet("dividendDetails")]
         [Description("Get agent dividend details")]
+        [TgsResponseWrapper]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<AgentDividendDetailModel>>
             GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
         {
