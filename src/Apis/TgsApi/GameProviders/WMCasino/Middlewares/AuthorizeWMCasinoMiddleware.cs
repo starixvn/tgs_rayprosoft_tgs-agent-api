@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Middlewares
             var setting =
                 await _settingOperations.GetValueFromJsonByKeyAsync<WMCasinoConfiguration>(SettingConsts
                     .GameProviderConfigurations.WMCasino);
-            var agent = _agentMapper.GetAgent(setting.BrandMerchants, signature);
+            var agent = _agentMapper.GetAgentBySignature(setting.BrandMerchants, signature);
 
             if (agent == null)
             {

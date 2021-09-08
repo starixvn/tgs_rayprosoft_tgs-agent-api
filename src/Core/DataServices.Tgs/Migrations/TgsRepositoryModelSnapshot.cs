@@ -541,6 +541,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("net_profit");
 
+                    b.Property<decimal>("PromotionAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("promotion_amount");
+
+                    b.Property<decimal>("RebateAmount")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("rebate_amount");
+
                     b.Property<int?>("ReferencedAgentDividendId")
                         .HasColumnType("integer")
                         .HasColumnName("referenced_agent_dividend_id");
@@ -591,16 +601,58 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_agent_dividends_id");
 
-                    b.HasIndex("BrandId")
-                        .HasDatabaseName("ix_agent_dividends_brand_id");
+                    b.HasIndex("AgentId", "SentOn")
+                        .HasDatabaseName("ix_agent_dividends_agent_id_sent_on");
 
-                    b.HasIndex("BrandId", "CreatedOn")
-                        .HasDatabaseName("ix_agent_dividends_brand_id_created_on");
+                    b.HasIndex("AgentId", "BrandId", "CreatedOn")
+                        .HasDatabaseName("ix_agent_dividends_agent_id_brand_id_created_on");
 
-                    b.HasIndex("BrandId", "CreatedOn", "AgentId")
-                        .HasDatabaseName("ix_agent_dividends_brand_id_created_on_agent_id");
+                    b.HasIndex("BrandId", "From", "To")
+                        .HasDatabaseName("ix_agent_dividends_brand_id_from_to");
 
                     b.ToTable("agent_dividends");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividendMultipleLayer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("AgentDividendId")
+                        .HasColumnType("integer")
+                        .HasColumnName("agent_dividend_id");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<decimal>("Dividend")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("dividend");
+
+                    b.Property<Guid>("DividendProviderAgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("dividend_provider_agent_id");
+
+                    b.Property<string>("Layer")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("layer");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_dividend_multiple_layers_id");
+
+                    b.HasIndex("AgentDividendId")
+                        .HasDatabaseName("ix_agent_dividend_multiple_layers_agent_dividend_id");
+
+                    b.HasIndex("AgentId", "DividendProviderAgentId")
+                        .HasDatabaseName("ix_agent_dividend_multiple_layers_agent_id_dividend_provider_agent_id");
+
+                    b.ToTable("agent_dividend_multiple_layers");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentLoginRecord", b =>
@@ -1117,6 +1169,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uuid")
                         .HasColumnName("licensee_id");
+
+                    b.Property<string>("LogoInfo")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("logo_info");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -3500,11 +3556,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("numeric(18,6)")
                         .HasColumnName("adjustment_amount");
 
-                    b.Property<decimal>("AgentDividendPercentage")
-                        .HasPrecision(9, 6)
-                        .HasColumnType("numeric(9,6)")
-                        .HasColumnName("agent_dividend_percentage");
-
                     b.Property<Guid?>("AgentId")
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
@@ -3591,14 +3642,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_player_aggregates_id");
 
-                    b.HasIndex("BrandId", "ReportDate")
-                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date");
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_player_aggregates_agent_id");
 
-                    b.HasIndex("BrandId", "ReportDate", "AgentId")
-                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date_agent_id");
-
-                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
-                        .HasDatabaseName("ix_player_aggregates_brand_id_report_date_player_code");
+                    b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode")
+                        .HasDatabaseName("ix_player_aggregates_multiple_keys");
 
                     b.ToTable("player_aggregates", "report");
                 });
@@ -3840,11 +3888,6 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<decimal>("AgentDividendPercentage")
-                        .HasPrecision(9, 6)
-                        .HasColumnType("numeric(9,6)")
-                        .HasColumnName("agent_dividend_percentage");
-
                     b.Property<Guid?>("AgentId")
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
@@ -3939,14 +3982,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasKey("Id")
                         .HasName("pk_player_game_rebate_aggregates_id");
 
-                    b.HasIndex("BrandId", "ReportDate")
-                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date");
-
-                    b.HasIndex("BrandId", "ReportDate", "AgentId")
-                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_agent_id");
-
-                    b.HasIndex("BrandId", "ReportDate", "PlayerCode")
-                        .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_player_code");
+                    b.HasIndex("ReportDate", "BrandId", "AgentId", "PlayerCode")
+                        .HasDatabaseName("ix_player_game_rebate_aggregates_multiple_keys");
 
                     b.ToTable("player_game_rebate_aggregates", "report");
                 });
@@ -5849,6 +5886,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Player");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividendMultipleLayer", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.AgentDividend", "AgentDividend")
+                        .WithMany("AgentDividendMultipleLayers")
+                        .HasForeignKey("AgentDividendId")
+                        .HasConstraintName("fk_agents_dividends_agent_dividend_multiple_layers_agent_dividend_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AgentDividend");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentLoginRecord", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", "Agent")
@@ -7209,6 +7258,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("SubAgents");
 
                     b.Navigation("Wallets");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividend", b =>
+                {
+                    b.Navigation("AgentDividendMultipleLayers");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.BetLimit", b =>

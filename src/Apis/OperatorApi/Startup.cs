@@ -21,6 +21,7 @@ using Tgs.Payment.PrimePay;
 using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Filters.Swaggers;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Clients.Report.Client.Extensions;
@@ -172,6 +173,7 @@ namespace TGS.Apis.OperatorApi
             services
                 .AddControllers(options =>
                 {
+                    options.Filters.Add<CheckPlayerEnabledFilter>();
                     options.Filters.Add<ValidateModelFilter>();
                     options.Filters.Add<TgsResponseWrapperAttribute>();
                 })

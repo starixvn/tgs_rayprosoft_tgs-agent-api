@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
+using TGS.Apis.OperatorApi.Filters;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Core.Models.Messages;
 using TGS.Services.Operator.Services.StationLetters;
@@ -28,7 +29,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="language">language</param>
         /// <returns></returns>
         [HttpGet("{language}")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]        
         public async Task<PagingResponse<StationLetterResponse>> GetLettersAsync(
             [FromServices] IQueryService<GetStationLettersQuery, StationLetter> getStationLetterService,
             [FromServices] IGetService<GetStationLettersQuery, int> countStationLetterService,

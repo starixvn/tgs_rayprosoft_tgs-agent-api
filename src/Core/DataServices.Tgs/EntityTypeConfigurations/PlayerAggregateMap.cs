@@ -67,10 +67,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(18, 6)
                 .IsRequired();
 
-            builder.Property(b => b.AgentDividendPercentage)
-                .HasPrecision(9, 6)
-                .IsRequired();
-
             builder.Property(b => b.ReportDate)
                 .IsRequired();
 
@@ -79,26 +75,15 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.HasIndex(b => new
                 {
-                    b.BrandId,
-                    b.ReportDate
-                })
-                .HasDatabaseName("ix_player_aggregates_brand_id_report_date");
-
-            builder.HasIndex(b => new
-                {
-                    b.BrandId,
                     b.ReportDate,
+                    b.BrandId,
+                    b.AgentId,
                     b.PlayerCode
                 })
-                .HasDatabaseName("ix_player_aggregates_brand_id_report_date_player_code");
+                .HasDatabaseName("ix_player_aggregates_multiple_keys");
 
-            builder.HasIndex(b => new
-                {
-                    b.BrandId,
-                    b.ReportDate,
-                    b.AgentId
-                })
-                .HasDatabaseName("ix_player_aggregates_brand_id_report_date_agent_id");
+            builder.HasIndex(b => new {b.AgentId})
+                .HasDatabaseName("ix_player_aggregates_agent_id");
         }
     }
 }

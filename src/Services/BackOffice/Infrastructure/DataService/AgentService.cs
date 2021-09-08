@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -23,14 +24,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<Agent, bool>> predicate);
 
         Task<Agent> GetAgentAsync(Expression<Func<Agent, bool>> predicate,
-                            Func<IQueryable<Agent>, IQueryable<Agent>> preQuery = null);
+            Func<IQueryable<Agent>, IQueryable<Agent>> preQuery = null);
 
         IQueryable<AgentAuditLog> GetAgentAuditLogQueries(
             Func<IQueryable<AgentAuditLog>, IQueryable<AgentAuditLog>> preQuery = null,
             bool tracking = false);
 
         IQueryable<Agent> GetAgentQueries(Func<IQueryable<Agent>, IQueryable<Agent>> preQuery = null,
-                    bool tracking = false);
+            bool tracking = false);
 
         Task UpdateAgentAsync(Agent agent, UpdateAgentRequest request);
     }
@@ -136,13 +137,22 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             var parentAgent =
                 await _repository.Agents.AsQueryable().FirstOrDefaultAsync(x =>
-                    x.BrandId == request.BrandId && x.Username == request.ParentUsername);
+                    x.BrandId == request.BrandId && x.Username == request.ParentUsername).ConfigureAwait(false);
+
             var operation = (AgentOperation)Enum.Parse(typeof(AgentOperation), request.UpdateType.ToString());
+
             if (request.ParentUsername.IsNotNullOrEmpty() && agent.ParentAgentId != parentAgent.Id)
             {
                 operation = AgentOperation.Agent;
+
+                var agents = await _repository.Agents.AsQueryable().Where(x => x.BrandId == agent.BrandId)
+                    .ToArrayAsync().ConfigureAwait(false);
+
+                var updateAgents = GetChildAgents(request.Id, agents);
+
+                await UpdateEntitiesAsync(updateAgents).ConfigureAwait(false);
             }
-                    
+
             switch (request.UpdateType)
             {
                 case MemberUpdateType.Info:
@@ -173,8 +183,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                         ? -1
                         : request.VirtualSportsRebatePercentage;
                     agent.AgentStatus = operation == AgentOperation.Agent
-                            ? AgentConfigStatus.WaitForConfigurePercentage
-                            : AgentConfigStatus.DoneForConfigurePercentage;
+                        ? AgentConfigStatus.WaitForConfigurePercentage
+                        : AgentConfigStatus.DoneForConfigurePercentage;
                     break;
 
                 case MemberUpdateType.Contact:
@@ -208,6 +218,24 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await CreateEntityAsync(auditLog).ConfigureAwait(false);
 
             scope.Complete();
+        }
+
+        private static IEnumerable<Agent> GetChildAgents(Guid parentAgentId, Agent[] agents)
+        {
+            var childAgents = agents.Where(x => x.ParentAgentId == parentAgentId).ToArray();
+            foreach (var agent in childAgents)
+            {
+                agent.DividendPercentage = 0M;
+                yield return agent;
+
+                if (agents.Any(x => x.ParentAgentId == agent.Id))
+                {
+                    foreach (var childAgent in GetChildAgents(agent.Id, agents))
+                    {
+                        yield return childAgent;
+                    }
+                }
+            }
         }
     }
 }

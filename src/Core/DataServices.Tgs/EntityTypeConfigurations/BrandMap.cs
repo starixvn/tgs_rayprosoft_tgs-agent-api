@@ -61,6 +61,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.NextSettlementTo)
                 .IsRequired();
 
+            builder.Property(c => c.LogoInfo)
+                .HasColumnType(ColumnTypes.Jsonb);
+
             builder.HasOne(c => c.Licensee)
                 .WithMany(c => c.Brands)
                 .HasForeignKey(c => c.LicenseeId)
