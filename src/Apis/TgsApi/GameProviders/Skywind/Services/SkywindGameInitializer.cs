@@ -19,7 +19,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
     {
         private readonly ISkywindApiClient _client;
         private readonly IPlayerOperations _playerOperations;
-        private readonly ISkywindServices _services;
+        private readonly ISkywindService _service;
         private readonly ISettingOperations _settingOperations;
         private readonly ITokenProvider _tokenProvider;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
@@ -29,7 +29,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         public SkywindGameInitializer(
             ISkywindApiClient client,
             IPlayerOperations playerOperations,
-            ISkywindServices services,
+            ISkywindService service,
             IJsonSerializationProvider jsonSerializationProvider,
             ISettingOperations settingOperations,
             ITokenProvider tokenProvider,
@@ -39,7 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
@@ -53,7 +53,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             var loginTokenId = token.LoginRecordId;
             var encryptedToken = await _tokenProvider.EncryptAsync(loginTokenId);
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode);
-            var gameProviderId = await _services.GetGameProviderIdAsync().ConfigureAwait(false);
+            var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             var brandId = player.BrandId;
             var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId, request.Language);
             var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind);

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
-using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;

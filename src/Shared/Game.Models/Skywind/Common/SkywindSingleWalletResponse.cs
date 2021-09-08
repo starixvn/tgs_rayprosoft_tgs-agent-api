@@ -10,6 +10,8 @@ namespace TGS.Shared.Game.Models.Skywind.Common
         public string ErrorMsg { get; set; }
         [JsonPropertyName("balance")]
         public decimal Balance { get; set; }
+        [JsonPropertyName("currency_code")]
+        public string CurrencyCode { get; set; }
         [JsonPropertyName("trx_id")]
         public string TrxId { get; set; }
         [JsonPropertyName("free_bet_count")]

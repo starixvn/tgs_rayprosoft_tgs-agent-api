@@ -27,18 +27,18 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
     {
         private readonly IGamePlayActions _actions;
         private readonly ISkywindActionModelMapper _map;
-        private readonly ISkywindServices _services;
+        private readonly ISkywindService _service;
         private readonly IGamePlayActions _gamePlayActions;
         public SkywindController(
             IGamePlayActions actions,
             ISkywindActionModelMapper map,
-            ISkywindServices services,
+            ISkywindService service,
             IGamePlayActions gamePlayActions)
         {
 
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _map = map ?? throw new ArgumentNullException(nameof(map));
-            _services = services ?? throw new ArgumentNullException(nameof(services));
+            _service = service ?? throw new ArgumentNullException(nameof(service));
             _gamePlayActions = gamePlayActions ?? throw new ArgumentNullException(nameof(gamePlayActions));
         }
 
@@ -53,7 +53,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                Balance = getBalance.Balance
+                Balance = getBalance.Balance,
+                CurrencyCode = getBalance.GameProviderCurrencyCode
             };
         }
 
@@ -66,11 +67,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
+            var gameProviderConfigurationData = await _service
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
             var betData = await _map.BetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
+            if (betData == null)
+            {
+                return new SkywindSingleWalletResponse()
+                {
+                    ErrorCode = (int)GameApiError.DuplicateTransaction,
+                    ErrorMsg = GameApiError.DuplicateTransaction.Description(),
+                    TrxId = request.TrxId
+                };
+            }
+
             var betResult = await _actions.PlaceBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
@@ -78,6 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
                 Balance = betResult.Balance,
+                CurrencyCode = betResult.GameProviderCurrencyCode,
                 TrxId = request.TrxId
             };
         }
@@ -91,11 +103,23 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
+            var gameProviderConfigurationData = await _service
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
             var betData = await _map.SettleAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
+
+            if (betData == null)
+            {
+                return new SkywindSingleWalletResponse()
+                {
+                    ErrorCode = (int)GameApiError.DuplicateTransaction,
+                    ErrorMsg = GameApiError.DuplicateTransaction.Description(),
+                    TrxId = request.TrxId
+                };
+            }
+
+
             var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
@@ -103,6 +127,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
                 Balance = betResult.Balance,
+                CurrencyCode = betResult.GameProviderCurrencyCode,
                 TrxId = request.TrxId
             };
         }
@@ -117,28 +142,30 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             var gameProviderConfigurationId = items.Get(Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
             var platformType = items.Get(Consts.ContextItems.PlatformType, PlatformType.Desktop);
 
-            var gameProviderConfigurationData = await _services
+            var gameProviderConfigurationData = await _service
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
             var betData = await _map.RollbackBetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
-            decimal balance;
-            if (betData.Transactions.Length > 0)
+
+            if (betData == null)
             {
-                var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
-                balance = betResult.Balance;
+                return new SkywindSingleWalletResponse()
+                {
+                    ErrorCode = (int)GameApiError.TransactionNotFound,
+                    ErrorMsg = GameApiError.TransactionNotFound.Description(),
+                    TrxId = request.TrxId
+                };
             }
-            else
-            {
-                var getBalance = await _actions.GetBalanceAsync(Consts.GameProvider.BigGaming, playerCode).ConfigureAwait(false);
-                balance = getBalance.Balance;
-            }
+
+            var betResult = await _actions.SettleBetAsync(betData).ConfigureAwait(false);
 
             return new SkywindSingleWalletResponse()
             {
                 ErrorCode = (int)GameApiError.Success,
                 ErrorMsg = GameApiError.Success.Description(),
-                Balance = balance,
+                Balance = betResult.Balance,
+                CurrencyCode = betResult.GameProviderCurrencyCode,
                 TrxId = request.TrxId
             };
         }
