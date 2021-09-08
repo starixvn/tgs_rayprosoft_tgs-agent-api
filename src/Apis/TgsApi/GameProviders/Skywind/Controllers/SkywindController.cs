@@ -71,6 +71,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 .GetGameProviderConfigurationDataAsync(gameProviderId, gameProviderConfigurationId, platformType)
                 .ConfigureAwait(false);
 
+            if (request.EventType.ToLower().IgnoreCaseEquals("free-bet") && request.Amount > 0)
+            {
+                return new SkywindSingleWalletResponse()
+                {
+                    ErrorCode = (int)GameApiError.InsufficientFreeBetsBalance,
+                    ErrorMsg = GameApiError.InsufficientFreeBetsBalance.Description(),
+                    TrxId = request.TrxId
+                };
+            }
+
             var betData = await _map.BetAsync(gameProviderConfigurationData, playerCode, request).ConfigureAwait(false);
             if (betData == null)
             {

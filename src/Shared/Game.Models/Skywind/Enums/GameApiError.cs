@@ -26,7 +26,7 @@ namespace TGS.Shared.Game.Models.Skywind.Enums
         BetLimitWasExceeded = -302,
         [Description(@"Player does not have sufficient balance to perform an operation.")]
         InsufficientBalance = -4,
-        [Description(@"Returned when the number of free bets for the player is 0.")]
+        [Description(@"Insufficient free bets Balance.")]
         InsufficientFreeBetsBalance = -5,
         [Description(@"Returned when the request contains the invalid value of the freebet parameter, for example, when the Operator expects the free bet promotion is stored on their side but the promotion was created on Provider’s side and the values of free bet parameters don’t match.")]
         InvalidFreeBet = -6,
