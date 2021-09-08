@@ -6,9 +6,15 @@ namespace TGS.Shared.Game.Models.Skywind.Enums
     {
         [Description("No errors")]
         Success = 0,
-        [Description(@"As we expect idempotency for all our transactions, we require that in the case of receiving a duplicate transaction from us (a duplicate debit/credit request with the same trx_id), you will respond with error_code=1 and the balance value as in the response to the original request.")]
+        /// <summary>
+        /// As we expect idempotency for all our transactions, we require that in the case of receiving a duplicate transaction from us (a duplicate debit/credit request with the same trx_id), you will respond with error_code=1 and the balance value as in the response to the original request.
+        /// </summary>
+        [Description(@"Duplicate transaction")]
         DuplicateTransaction = 1,
-        [Description(@"An unexpected error was encountered while processing the request. It can be caused by a validation error, for example, if the merchant doesn’t exist. Operator can use this error when they don’t expect such behavior from the provider’s side.")]
+        /// <summary>
+        /// An unexpected error was encountered while processing the request. It can be caused by a validation error, for example, if the merchant doesn’t exist. Operator can use this error when they don’t expect such behavior from the provider’s side.
+        /// </summary>
+        [Description(@"Merchant internal error")]
         MerchantInternalError = -1,
         [Description(@"Returned when the game is launched with the playerCode which doesn’t exist on the merchant’s side or if the playerCode has an invalid value, for example, is empty or has a number value type.")]
         PlayerNotFound = -2,
