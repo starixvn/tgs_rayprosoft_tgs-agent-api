@@ -105,11 +105,9 @@ namespace TGS.Apis.AgentApi.Controllers
         public async Task<PagingResponse<AgentDividendDetailModel>>
             GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
         {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
-
             var dividendRequest = new GetAgentDividendDetailsRequest
             {
-                AgentId = agentTokenData.AgentId,
+                AgentId = request.AgentId,
                 From = request.From,
                 To = request.To,
                 Page = request.Page,
