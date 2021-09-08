@@ -30,7 +30,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
                 { "/sw/api/validate_terminal_ticket",ValidateTicketAsync},
                 { "/sw/api/get_balance",ValidateBalanceAsync},
                 { "/sw/api/debit",ValidateBetAsync},
-                { "/sw/api/credit",ValidateSettleAsync}
+                { "/sw/api/credit",ValidateSettleAsync},
+                { "/sw/api/rollback",ValidateRollbackAsync},
             };
         }
 
@@ -105,6 +106,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Middlewares
                 Status = LoginStatus.Enabled
             });
         }
+        private ValueTask<CachedPlayerLoginRecord> ValidateRollbackAsync(Dictionary<string, object> parameters)
+        {
+            if (!parameters.TryGetValue("trx_id", out object trxId) || string.IsNullOrEmpty(trxId.ToString()))
+            {
+                throw new InvalidOperationException(GameApiError.MerchantInternalError.Description());
+            }
 
+            return ValueTask.FromResult(new CachedPlayerLoginRecord()
+            {
+                PlayerCode = parameters["cust_id"].ToString(),
+                PlatformType = PlatformType.Desktop,
+                Status = LoginStatus.Enabled
+            });
+        }
     }
 }
