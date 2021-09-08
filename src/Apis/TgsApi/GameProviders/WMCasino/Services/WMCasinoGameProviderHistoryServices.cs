@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
@@ -104,9 +105,13 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
             var configurationIds = new ConcurrentDictionary<Guid, Guid>();
 
-            var tasks = results.Select(async r =>
+            List<ExecuteResult> executeResults = new();
+
+            foreach (var r in results)
             {
                 var playerCode = r.Key.PlayerCode;
+
+                ExecuteResult executeResult;
 
                 try
                 {
@@ -126,25 +131,15 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                             gameProviderId, gameProviderConfigurationId, playerCode, r.Value, true)
                         .ConfigureAwait(false);
 
-                    return new
-                    {
-                        Success = true,
-                        PlayerCode = playerCode,
-                        ErrorMessage = string.Empty
-                    };
+                    executeResult = new(true, playerCode, string.Empty);
                 }
                 catch (Exception ex)
                 {
-                    return new
-                    {
-                        Success = false,
-                        PlayerCode = playerCode,
-                        ErrorMessage = ex.GetMessageChain()
-                    };
+                    executeResult = new(false, playerCode, ex.GetMessageChain());
                 }
-            });
 
-            var executeResults = await Task.WhenAll(tasks).ConfigureAwait(false);
+                executeResults.Add(executeResult);
+            }
 
             if (executeResults.Any(r => !r.Success))
             {
@@ -166,5 +161,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 LastGameRecordTime = lastGameRecord
             };
         }
+
+        private record ExecuteResult(bool Success, string PlayerCode, string ErrorMessage);
     }
 }
