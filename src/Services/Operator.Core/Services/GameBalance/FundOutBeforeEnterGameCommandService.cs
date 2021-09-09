@@ -8,24 +8,23 @@ namespace TGS.Services.Operator.Services.GameBalance
 {
     internal class FundOutBeforeEnterGameCommandService : ICommandService<FundOutBeforeEnterGameCommand>
     {
-        private readonly ICommandService<FundInAllGameBalanceCommand> _fundInAllService;
         private readonly ICommandService<FundOutGameBalanceCommand> _fundOutService;
         private readonly IGetService<GetBalanceQuery, BalanceInfo> _getPlayerBalanceService;
         private readonly IPlayerRepository _playerRepository;
 
         public FundOutBeforeEnterGameCommandService(
             IPlayerRepository playerRepository,
-            ICommandService<FundInAllGameBalanceCommand> fundInAllService,
             IGetService<GetBalanceQuery, BalanceInfo> getPlayerBalanceService,
             ICommandService<FundOutGameBalanceCommand> fundInService)
         {
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-            _fundInAllService = fundInAllService ?? throw new ArgumentNullException(nameof(fundInAllService));
-            _getPlayerBalanceService = getPlayerBalanceService ?? throw new ArgumentNullException(nameof(getPlayerBalanceService));
+            _getPlayerBalanceService = getPlayerBalanceService ??
+                throw new ArgumentNullException(nameof(getPlayerBalanceService));
             _fundOutService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         }
 
-        public async ValueTask ExecuteAsync(FundOutBeforeEnterGameCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(FundOutBeforeEnterGameCommand command,
+            CancellationToken cancellationToken = default)
         {
             var isAutoTransfer = await _playerRepository
                 .GetPlayerAutoTransferFlagAsync(command.PlayerCode)
@@ -34,26 +33,21 @@ namespace TGS.Services.Operator.Services.GameBalance
             if (!isAutoTransfer)
                 return;
 
-            await _fundInAllService
-                .ExecuteAsync(new FundInAllGameBalanceCommand(
-                    command.BrandId,
-                    command.PlayerCode,
-                    command.GpCode))
-                .ConfigureAwait(false);
-
             var playerBalance = await _getPlayerBalanceService
-                .GetAsync(new GetBalanceQuery(command.PlayerCode))
+                .GetAsync(new GetBalanceQuery(command.PlayerCode), cancellationToken)
                 .ConfigureAwait(false);
 
             var fundOutAmount = (int)Math.Floor(playerBalance.Main);
 
             if (fundOutAmount > 0)
+            {
                 await _fundOutService
                     .ExecuteAsync(new FundOutGameBalanceCommand(
                         command.GpCode,
                         command.PlayerCode,
-                        (int)Math.Floor(playerBalance.Main)))
+                        (int)Math.Floor(playerBalance.Main)), cancellationToken)
                     .ConfigureAwait(false);
+            }
         }
     }
 }
