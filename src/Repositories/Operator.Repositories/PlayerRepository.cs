@@ -33,7 +33,7 @@ namespace TGS.Operator.Repositories
                 .FindAsync(playerCode)
                 .ConfigureAwait(false);
 
-            return settingData?.IsAutoTransferToGame == true;
+            return settingData?.IsAutoTransferToGame ?? true;
         }
 
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
