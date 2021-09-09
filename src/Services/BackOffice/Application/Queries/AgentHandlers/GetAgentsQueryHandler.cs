@@ -1,8 +1,6 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
@@ -19,37 +17,12 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
             _service = service;
         }
 
-        public override Task<PagedResponse<AgentModel>> Handle(GetAgentsRequest request,
-            CancellationToken cancellationToken) =>
-            _service.GetAgentQueries(q => q.Where(ResellerId, r => r.Brand.Licensee.ResellerId == ResellerId)
-                    .Where(LicenseeId, l => l.Brand.LicenseeId == LicenseeId)
-                    .Where(BrandId, l => l.Brand.Id == BrandId)
-                    .Where(x => x.BrandId == request.BrandId)
-                    .Where(request.Status, x => x.Status == request.Status)
-                    .Where(request.Type, x => x.Type == request.Type)
-                    .Where(request.LevelType, x => x.LevelType == request.LevelType)
-                    .Where(request.Username, x => EF.Functions.ILike(x.Username, $"%{request.Username}%"))
-                )
-                .Select(x => new AgentModel
-                {
-                    Id = x.Id,
-                    BrandId = x.BrandId,
-                    Username = x.Username,
-                    Status = x.Status,
-                    AgentStatus = x.AgentStatus,
-                    Type = x.Type,
-                    LevelType = x.LevelType,
-                    Balance = x.Wallets.FirstOrDefault().Balance,
-                    CommissionPercentage = x.CommissionPercentage,
-                    DividendPercentage = x.DividendPercentage,
-                    LiveDealerRebatePercentage = x.LiveDealerRebatePercentage,
-                    SlotRebatePercentage = x.SlotRebatePercentage,
-                    LotteryRebatePercentage = x.LotteryRebatePercentage,
-                    CardGameRebatePercentage = x.CardGameRebatePercentage,
-                    SportsRebatePercentage = x.SportsRebatePercentage,
-                    VirtualSportsRebatePercentage = x.VirtualSportsRebatePercentage,
-                    TeamNumber = 1 + x.Players.Count + x.SubAgents.Count +
-                        x.SubAgents.SelectMany(s => s.Players).Count()
-                }).CreatePagedResponseAsync(request);
+        public override async Task<PagedResponse<AgentModel>> Handle(GetAgentsRequest request,
+            CancellationToken cancellationToken)
+        {
+            var (logs, totalCount) = await _service.GetAgentsAsync(request);
+
+            return await logs.CreatePagedResponseAsync(totalCount);
+        }
     }
 }
