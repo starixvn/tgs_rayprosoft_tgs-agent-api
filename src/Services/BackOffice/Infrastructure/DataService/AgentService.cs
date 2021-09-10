@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Base;
+using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
@@ -34,6 +35,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             bool tracking = false);
 
         Task UpdateAgentAsync(Agent agent, UpdateAgentRequest request);
+
+        Task<(IEnumerable<AgentModel>, int)> GetAgentsAsync(GetAgentsRequest request);
     }
 
     public class AgentService : BaseRepositoryOperations<ITgsRepository>, IAgentService
@@ -218,6 +221,25 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             await CreateEntityAsync(auditLog).ConfigureAwait(false);
 
             scope.Complete();
+        }
+
+        public async Task<(IEnumerable<AgentModel>, int)> GetAgentsAsync(GetAgentsRequest request)
+        {
+            const string spName = "dbo.agent_get_agents_with_team_counts";
+            var results = await _repository.SqlQueryMultipleAsync<AgentModel>(spName,
+                parameters: new Dictionary<string, object>
+                {
+                    {"_brand_id", request.BrandId},
+                    {"_username", request.Username},
+                    {"_page_size", request.ShowAll ? int.MaxValue : request.Rows},
+                    {"_page_number", request.ShowAll ? 1 : request.Page},
+                    {"_sort_by", request.SortBy},
+                    {"_is_desc", request.IsDesc},
+                    {"_status", request.Status},
+                    {"_type", request.Type},
+                    {"_level_type", request.LevelType}
+                });
+            return (results, results.Any() ? results.First().TotalCount : 0);
         }
 
         private static IEnumerable<Agent> GetChildAgents(Guid parentAgentId, Agent[] agents)
