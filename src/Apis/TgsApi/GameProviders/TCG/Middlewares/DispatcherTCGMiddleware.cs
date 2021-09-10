@@ -35,26 +35,17 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Middlewares
         private static readonly RecyclableMemoryStreamManager _RecyclableMemoryStreamManager = new();
 
         private readonly IJsonSerializationProvider _json;
-        private readonly JsonSerializerOptions _jsonSerializeOptions;
-        private readonly ISettingOperations _settingOperations;
         private readonly ITCGUtility _utility;
         private readonly ITCGService _service;
 
         public DispatcherTCGMiddleware(
             IJsonSerializationProvider json,
-            ISettingOperations settingOperations,
             ITCGUtility utility,
             ITCGService service)
         {
             _json = json ?? throw new ArgumentNullException(nameof(json));
-            _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _utility = utility ?? throw new ArgumentNullException(nameof(utility));
             _service = service ?? throw new ArgumentNullException(nameof(service));
-            _jsonSerializeOptions = new JsonSerializerOptions
-            {
-                WriteIndented = false,
-                NumberHandling = JsonNumberHandling.Strict
-            };
         }
 
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)

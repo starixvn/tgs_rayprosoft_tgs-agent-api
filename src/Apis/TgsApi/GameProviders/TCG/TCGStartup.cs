@@ -37,6 +37,16 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                    _ => provider.GetRequiredService<TgsErrorMapper>()
                }
                );
+
+            services.AddGameProviderTCGFtpClientRepository((options, sp) =>
+            {
+                var config = sp.GetRequiredService<IConfiguration>();
+
+                config.GetSection("TCGFtpApi").Bind(options);
+            });
+
+            services.AddTransient<ITCGGPGameHistoryService, TCGGPGameHistoryService>();
+
             services.AddScoped<AuthorizeTCGMiddleware>();
             services.AddScoped<HandleTCGExceptionMiddleware>();
             services.AddScoped<DispatcherTCGMiddleware>();
@@ -48,6 +58,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
                 typeof(TCGGameInitializer)
             }, (provider, _) =>
                 provider.GetRequiredService<TCGGameInitializer>());
+
         }
 
         protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
