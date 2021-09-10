@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
 
@@ -39,6 +40,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             _ = fakePlayerRepository.Received(1)
                 .TogglePlayerAutoTransferFlagAsync(Arg.Is(command.PlayerCode));
+        }
+
+        [Test]
+        public void Not_Found_PlayerGameSetting_Expression_Should_Be_True()
+        {
+            var sut = default(PlayerGameSetting);
+
+            var actual = sut?.IsAutoTransferToGame ?? true;
+
+            Assert.IsTrue(actual);
         }
     }
 }

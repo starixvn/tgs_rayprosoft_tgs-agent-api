@@ -14,6 +14,7 @@
     <None Remove="DataInitializers\Games\WGFM.csv" />
     <None Remove="DataInitializers\Games\WGVIA.csv" />
     <None Remove="DataInitializers\Games\WM.csv" />
+    <None Remove="SqlScripts\Functions\agent_get_agents_with_team_counts.sql" />
     <None Remove="SqlScripts\Functions\game_action_get_game_actions_by_external_group_id.sql" />
     <None Remove="SqlScripts\Functions\promotion_revert_amount_used.sql" />
     <None Remove="SqlScripts\Indexes\brand_fuzzy_query_trgm.sql" />
@@ -59,6 +60,7 @@
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_game_action_external_ids.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\game_action_get_valid_game_action_external_ids.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_admin_log.sql" />
+    <EmbeddedResource Include="SqlScripts\Functions\agent_get_agents_with_team_counts.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_admin_logs.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_api_log.sql" />
     <EmbeddedResource Include="SqlScripts\Functions\log_get_api_logs.sql" />
