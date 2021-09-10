@@ -20,9 +20,9 @@ namespace TGS.Services.BackOffice.Application.Queries.AgentHandlers
         public override async Task<PagedResponse<AgentModel>> Handle(GetAgentsRequest request,
             CancellationToken cancellationToken)
         {
-            var (logs, totalCount) = await _service.GetAgentsAsync(request);
+            var (agents, totalCount) = await _service.GetAgentsAsync(request);
 
-            return await logs.CreatePagedResponseAsync(totalCount);
+            return await agents.CreatePagedResponseAsync(totalCount);
         }
     }
 }
