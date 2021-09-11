@@ -73,7 +73,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
         /// <param name="responses">The responses.</param>
         /// <param name="sysTime">The system time.</param>
         /// <returns></returns>
-        ValueTask<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, TCGGPGameRecordResponse responses, DateTimeOffset sysTime);
+        ValueTask GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, TCGGPGameRecordResponse responses, DateTimeOffset sysTime);
 
         /// <summary>
         /// Gets the game provider schedule configuration.
@@ -88,6 +88,13 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
         /// <param name="gameProviderId">The game provider identifier.</param>
         /// <returns></returns>
         Task<CachedGame[]> GetGameLotteryLobbyAsync(Guid gameProviderId);
+
+        /// <summary>
+        /// Gets the sub gp and merchant code.
+        /// </summary>
+        /// <param name="agentId">The agent identifier.</param>
+        /// <returns></returns>
+        (string SubGP, string MerchantCode) GetSubGPAndMerchantCode(string agentId);
     }
     public class TCGGameProviderService : ITCGGameProviderService
     {
@@ -134,7 +141,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
             return gameProviderSchedule;
         }
 
-        public async ValueTask<GameProviderSchedule> GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, TCGGPGameRecordResponse responses, DateTimeOffset sysTime)
+        public async ValueTask GameProviderScheduleUpdateAsync(GameProviderSchedule gameProviderSchedule, TCGGPGameRecordResponse responses, DateTimeOffset sysTime)
         {
             var config = GetGameProviderScheduleConfig(gameProviderSchedule);
             if (!string.IsNullOrEmpty(responses.LastGameRecorDirectory) && !string.IsNullOrEmpty(responses.LastGameRecorFile))
@@ -145,15 +152,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
             gameProviderSchedule.Config = _json.SerializeToString(config);
             gameProviderSchedule.UpdatedOn = DateTimeOffset.UtcNow;
 
-            var updateResult = await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
-            if (updateResult.ModifiedCount > 0)
-            {
-                return await GetGameProviderScheduleAsync(gameProviderSchedule.GameProviderId, gameProviderSchedule.CurrencyCode, gameProviderSchedule.AgentId).ConfigureAwait(false);
-            }
-            else
-            {
-                return null;
-            }
+            await _gameProviderScheduleRepository.MergeAsync(gameProviderSchedule).ConfigureAwait(false);
         }
 
         public string GetGameProviderCode()
@@ -180,8 +179,13 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
             return games.Where(x => x.Type == GameType.LotteryLobby).ToArray();
         }
 
+        public (string SubGP, string MerchantCode) GetSubGPAndMerchantCode(string agentId)
+        {
+            var splits = agentId.Split("-");
+            return (splits[0], splits[1]);
+        }
+
         private string GetAgentId(string subGP, string merchantCode)
             => string.Format("{0}-{1}", subGP, merchantCode);
-
     }
 }

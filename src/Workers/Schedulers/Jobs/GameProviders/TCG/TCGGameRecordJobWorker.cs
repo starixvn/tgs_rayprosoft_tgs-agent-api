@@ -6,9 +6,13 @@ using Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Messages;
 using TGS.GameProviders.Repositories;
+using TGS.GameProviders.Repositories.Models;
 using TGS.GameProviders.Repositories.Models.GameProviderScheduleLock;
+using TGS.Shared.Game.ApiClients.TCG;
+using TGS.Shared.Game.Models.TCG.Incoming;
 
 namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
 {
@@ -18,16 +22,19 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
         private readonly ITgsLog _log;
         private readonly IGameProviderScheduleLockRepository _gameProviderScheduleLockRepository;
         private readonly ITCGGameProviderService _service;
+        private readonly ITCGApiClient _client;
 
         public TCGGameRecordJobWorker(
             ITgsLog log,
             IGameProviderScheduleLockRepository gameProviderScheduleLockRepository,
-            ITCGGameProviderService service
+            ITCGGameProviderService service,
+            ITCGApiClient client
             )
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _gameProviderScheduleLockRepository = gameProviderScheduleLockRepository ?? throw new ArgumentNullException(nameof(gameProviderScheduleLockRepository));
             _service = service ?? throw new ArgumentNullException(nameof(service));
+            _client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         /// <summary>
@@ -39,8 +46,9 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
         {
             try
             {
-                var config = await _service.GetSettingConfigurationAsync().ConfigureAwait(false);
+                var configuration = await _service.GetSettingConfigurationAsync().ConfigureAwait(false);
                 var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
+                var gameProviderCode = _service.GetGameProviderCode();
                 var gameLotteryLobby = await _service.GetGameLotteryLobbyAsync(gameProviderId).ConfigureAwait(false);
 
                 if (gameLotteryLobby == null)
@@ -54,7 +62,7 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
                 var tasks = new List<Task>();
                 foreach (var game in gameLotteryLobby)
                 {
-                    var merchants = config.Merchants;
+                    var merchants = configuration.Merchants;
                     if (game.AvailableCurrencies.Length > 0)
                     {
                         merchants = (from merchant in merchants
@@ -66,39 +74,43 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
                     {
                         continue;
                     }
+
                     foreach (var merchant in merchants)
                     {
-                        Task t = Task.Run(async () =>
+                        Task task = Task.Run(async () =>
                         {
                             var gameProviderSchedule = await _service.GetGameProviderScheduleAsync(gameProviderId, game.Code, merchant.CurrencyCode, merchant.MerchantCode).ConfigureAwait(false);
                             if (gameProviderSchedule == null)
                             {
                                 gameProviderSchedule = await _service.GameProviderScheduleInitAsync(gameProviderId, game.Code, merchant.CurrencyCode, merchant.MerchantCode).ConfigureAwait(false);
                             }
-                            if (!await _gameProviderScheduleLockRepository.IsLockAsync(_service.GetGameProviderCode(), gameProviderSchedule.Id.ToString()).ConfigureAwait(false))
+                            var gameProviderScheduleId = gameProviderSchedule.Id.ToString("N");
+                            if (!await _gameProviderScheduleLockRepository.IsLockAsync(gameProviderCode, gameProviderScheduleId).ConfigureAwait(false))
                             {
                                 await _gameProviderScheduleLockRepository.SetAsync(
-                                    _service.GetGameProviderCode(),
-                                    gameProviderSchedule.Id.ToString(),
+                                    gameProviderCode,
+                                    gameProviderScheduleId,
                                     new GameProviderScheduleLockData()
                                     {
-                                        GameProviderCode = _service.GetGameProviderCode(),
-                                        GameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false),
+                                        GameProviderCode = gameProviderCode,
+                                        GameProviderId = gameProviderId,
                                         GameProviderScheduleId = gameProviderSchedule.Id,
                                         LockDate = DateTimeOffset.UtcNow
                                     }).ConfigureAwait(false);
-                                //await GameRecordAsync(configuration, gameProviderSchedule);
-                                await _gameProviderScheduleLockRepository.RemoveAsync(_service.GetGameProviderCode(), gameProviderSchedule.Id.ToString()).ConfigureAwait(false);
+
+                                await GameRecordAsync(configuration, gameProviderSchedule).ConfigureAwait(false);
+                                await _gameProviderScheduleLockRepository.RemoveAsync(gameProviderCode, gameProviderScheduleId).ConfigureAwait(false);
                             }
                         });
-                        tasks.Add(t);
+                        tasks.Add(task);
                     }
-
                 }
-                await Task.WhenAll(tasks);
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             catch (Exception e)
             {
+                await _gameProviderScheduleLockRepository.RemoveGameProviderCodeAsync(_service.GetGameProviderCode()).ConfigureAwait(false);
 
                 _log.LogError("Execute job with error:", e);
 
@@ -108,7 +120,34 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
                     ErrorMessage = e.Message
                 };
             }
+
             return new();
+
+        }
+
+        /// <summary>
+        /// Games the record asynchronous.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        /// <param name="gameProviderSchedule">The game provider schedule.</param>
+        private async Task GameRecordAsync(TCGConfiguration configuration, GameProviderSchedule gameProviderSchedule)
+        {
+            var sysTime = DateTimeOffset.UtcNow;
+            var config = _service.GetGameProviderScheduleConfig(gameProviderSchedule);
+            (string subGP, string merchantCode) = _service.GetSubGPAndMerchantCode(gameProviderSchedule.AgentId);
+            var responses = await _client.GameRecordAsync(configuration.ServiceEndpointUrl, new TCGGPGameRecordRequest()
+            {
+                SubGP = subGP,
+                MerchantCode = merchantCode,
+                IsDesignation = false,
+                LastGameRecorDirectory = config.LastGameRecorDirectory,
+                LastGameRecorFile = config.LastGameRecorFile
+            }).ConfigureAwait(false);
+
+            if (responses.Success)
+            {
+                await _service.GameProviderScheduleUpdateAsync(gameProviderSchedule, responses, sysTime).ConfigureAwait(false);
+            }
         }
     }
 }

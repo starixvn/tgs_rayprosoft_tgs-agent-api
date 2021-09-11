@@ -44,7 +44,7 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<IWGHorseApiClient, WGHorseApiClient>();
             services.AddHttpClient<IWMCasinoApiClient, WMCasinoApiClient>();
             services.AddHttpClient<ITCGApiClient, TCGApiClient>();
-
+            services.AddScoped<ITCGUtility, TCGUtility>();
 
             return services;
         }

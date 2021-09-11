@@ -18,6 +18,7 @@ using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings.TCG;
 using TGS.Shared.Game.Models.KY.Commons;
 using TGS.Shared.Game.Models.TCG.Common;
+using TGS.Shared.Game.Models.TCG.Incoming;
 using TGS.Shared.Game.Models.TCG.Outgoing;
 
 namespace TGS.Shared.Game.ApiClients.TCG
@@ -36,6 +37,7 @@ namespace TGS.Shared.Game.ApiClients.TCG
 
         ValueTask<TCGUpdatePasswordPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request);
 
+        ValueTask<TCGGPGameRecordResponse> GameRecordAsync(Uri apiUrl, TCGGPGameRecordRequest request);
     }
     public class TCGApiClient : BaseApiClient, ITCGApiClient
     {
@@ -77,6 +79,9 @@ namespace TGS.Shared.Game.ApiClients.TCG
 
         ValueTask<TCGUpdatePasswordPlayerResponse> ITCGApiClient.RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request)
             => GetAPIAsync<TCGUpdatePasswordPlayerRequest, TCGUpdatePasswordPlayerResponse>(ApiUrl, merchant, request, "RegisterPlayer");
+
+        ValueTask<TCGGPGameRecordResponse> ITCGApiClient.GameRecordAsync(Uri apiUrl, TCGGPGameRecordRequest request) =>
+         ExecuteJsonRequestAsync<TCGGPGameRecordRequest, TCGGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/tcg/GameRecord", request, logPrefix: _utility.GetPrefix("GameRecord"));
 
         private async ValueTask<TResponse> GetAPIAsync<TRequest, TResponse>(Uri apiUrl, TCGMerchant merchant, TRequest request, string prefix) where TResponse : TCGBaseResponse
         {
