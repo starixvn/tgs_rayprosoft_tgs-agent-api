@@ -27,15 +27,17 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         private readonly IGamePlayActions _actions;
         private readonly ITCGService _service;
         private readonly ITCGActionModelMapper _mapper;
-
+        private readonly ITCGGPGameHistoryService _gameHistoryService;
         public TCGController(
             IGamePlayActions actions,
             ITCGService service,
-            ITCGActionModelMapper mapper)
+            ITCGActionModelMapper mapper,
+            ITCGGPGameHistoryService gameHistoryService)
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _gameHistoryService = gameHistoryService ?? throw new ArgumentNullException(nameof(gameHistoryService));
         }
 
         [Consumes("application/x-www-form-urlencoded")]
@@ -236,6 +238,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
                 ErrorDesc = GameApiError.Success.Description()
             }));
         }
+
+        [HttpPost("GameRecord")]
+        public ValueTask<TCGGPGameRecordResponse> GameRecordAsync(TCGGPGameRecordRequest request)
+            => _gameHistoryService.GameRecordAsync(request);
     }
 }
 
