@@ -13,6 +13,7 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log.Events;
+using TGS.GameProviders.Repositories.Models.GameProviderTCGFtpClient;
 using TGS.GameProviders.Repositories.Options;
 
 namespace TGS.GameProviders.Repositories
@@ -32,7 +33,7 @@ namespace TGS.GameProviders.Repositories
             _json = json ?? throw new ArgumentNullException(nameof(json));
         }
 
-        public async Task<string> GetSettledFileContentAsync(string path, string merchant, string directory, string file)
+        public async Task<GetSettledFileContentResponse> GetSettledFileContentAsync(string path, string merchant, string directory, string file)
         {
             var sw = Stopwatch.StartNew();
             var responseMessage = default(string);
@@ -68,7 +69,7 @@ namespace TGS.GameProviders.Repositories
 
             if (!string.IsNullOrEmpty(responseMessage) && httpResponseMessage.StatusCode == HttpStatusCode.OK)
             {
-                return responseMessage;
+                return _json.DeserializeFromString<GetSettledFileContentResponse>(responseMessage);
             }
             return null;
         }

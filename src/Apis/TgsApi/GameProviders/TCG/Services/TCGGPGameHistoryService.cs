@@ -40,8 +40,24 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
             var lastGameRecorFile = source.LastGameRecorFile;
             if (source.IsDesignation)
             {
+                string[] getFileList;
+                if (string.IsNullOrEmpty(lastGameRecorFile))
+                {
+                    getFileList = await _gameProviderTCGFtpClientRepository.GetSettledFileListAsync(api, source.MerchantCode, lastGameRecorDirectory);
+                    if (getFileList == null)
+                    {
+                        return new()
+                        {
+                            Success = false,
+                        };
+                    }
+                }
+                else
+                {
+                    getFileList = new[] { lastGameRecorFile };
+                }
 
-                var content = await _gameProviderTCGFtpClientRepository.GetSettledFileContentAsync(api, source.MerchantCode, lastGameRecorDirectory, lastGameRecorFile).ConfigureAwait(false);
+                lastGameRecorFile = await ProcessFileListAsync(api, source.MerchantCode, lastGameRecorDirectory, getFileList).ConfigureAwait(false);
             }
             else
             {
@@ -63,11 +79,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                             getFileList = getFileList.Where((val, idx) => idx > index).ToArray();
                         }
                     }
-                    foreach (var file in getFileList)
-                    {
-                        var content = await _gameProviderTCGFtpClientRepository.GetSettledFileContentAsync(api, source.MerchantCode, lastGameRecorDirectory, file).ConfigureAwait(false);
-                        lastGameRecorFile = file;
-                    }
+                    lastGameRecorFile = await ProcessFileListAsync(api, source.MerchantCode, lastGameRecorDirectory, getFileList).ConfigureAwait(false);
                     var day = DateTime.Parse($"{lastGameRecorDirectory.Substring(0, 4)}-{lastGameRecorDirectory.Substring(4, 2)}-{lastGameRecorDirectory.Substring(6, 2)}");
                     if (day.AddDays(1) <= nowDay)
                     {
@@ -85,6 +97,17 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 LastGameRecorDirectory = lastGameRecorDirectory,
                 LastGameRecorFile = lastGameRecorFile
             };
+        }
+
+        private async Task<string> ProcessFileListAsync(string api, string merchantCode, string lastGameRecorDirectory, string[] fileList)
+        {
+            string lastGameRecorFile = string.Empty;
+            foreach (var file in fileList)
+            {
+                var response = await _gameProviderTCGFtpClientRepository.GetSettledFileContentAsync(api, merchantCode, lastGameRecorDirectory, file).ConfigureAwait(false);
+                lastGameRecorFile = file;
+            }
+            return lastGameRecorFile;
         }
     }
 }
