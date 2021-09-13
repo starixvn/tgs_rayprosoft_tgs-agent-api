@@ -1,0 +1,35 @@
+Name,Code,RuleUrl,ExternalId,Type,PlatformType,HasTurnoverOnTieBet,EndpointPath,Description,SubGame,AvailableToBrand,Html5,AvailableCurrencies,SubGpCode
+CardGameLobby,CardGameLobby,,384,CardGameLobby,DesktopAndMobile,FALSE,,,FALSE,TRUE,TRUE,,365
+Ox Banker,Ox_Banker,,555,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+2-plyr Mahjong,2plyr_Mahjong,,449,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Star Ox,Star_Ox,,556,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Battle Blackjack,Battle_Blackjack,,557,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+3 Cards,3_Cards,,561,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Run Fast,Run_Fast,,559,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Three Pictures,Three_Pictures,,563,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Red Mahjong,Red_Mahjong,,445,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Guangdong Mahjong,Guangdong_Mahjong,,452,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Fight Landlord,Fight_Landlord,,560,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+13 Cards,13_Cards,,562,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Happy Ox,Happy_Ox,,666,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Texas Poker,Texas_Poker,,565,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Bursting Baccarat,Bursting_Baccarat,,549,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+2-plyr Fight Landlord,2plyr_Fight_Landlord,,570,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Casino 3 Pictures,Casino_3_Pictures,,566,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Mahjong Titan,Mahjong_Titan,,564,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Brust Ox,Brust_Ox,,567,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Rapid 3 Pic,Rapid_3_Pic,,569,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+365 Poker,365_Poker,,701,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Bursting 3 Pictures,Bursting_3_Pictures,,703,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+3 Pictures Special,3_Pictures_Special,,706,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Casino Ox,Casino_Ox,,705,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+8 Cards,8_Cards,,702,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+3 Patti Classic,3_Patti_Classic,,707,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Rummy,Rummy,,710,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Vietnam Fish Prawn Crab,Vietnam_Fish_Prawn_Crab,,912,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Thai Fish Prawn Crab,Thai_Fish_Prawn_Crab,,913,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Vietnam Tai-Xiu,Vietnam_TaiXiu,,916,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Thai Hi-Lo,Thai_HiLo,,917,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Jhandi Munda,Jhandi_Munda,,918,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Andar Bahar,Andar_Bahar,,921,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365
+Pok Deng,Pok_Deng,,789,CardGame,DesktopAndMobile,FALSE,,,TRUE,TRUE,TRUE,,365

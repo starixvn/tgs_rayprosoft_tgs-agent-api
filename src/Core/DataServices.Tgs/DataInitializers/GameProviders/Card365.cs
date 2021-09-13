@@ -15,7 +15,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
     {
         internal record Card365GameProvider : IGameProvider
         {
-            private const int UniqueId = 19;
+            private const int _UniqueId = 19;
 
             private readonly IWebHostEnvironment _env;
             private readonly IGame[] _games;
@@ -39,7 +39,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             Guid IGameProvider.Id => new("579D6DA3-B0ED-4E3F-BD4A-434A98EFBD68");
 
-            string IGameProvider.Code => GameProviderConst.AllBet;
+            string IGameProvider.Code => GameProviderConst.Card365;
 
             string IGameProvider.Name => "365 Cards";
 
@@ -75,7 +75,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             bool IGameProvider.AllowKickPlayer => false;
 
-            ushort IGameProvider.UniqueId => UniqueId;
+            ushort IGameProvider.UniqueId => _UniqueId;
 
             GameProviderBetLimit[] IGameProvider.BetLimits => Array.Empty<GameProviderBetLimit>();
 
@@ -99,19 +99,19 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
         internal record Card365GameProviderConfiguration : IGameProviderConfiguration
         {
-            private static readonly string _endpoint = string.Empty;
+            private static readonly string _Endpoint = string.Empty;
 
-            Guid IGameProviderConfiguration.Id => new("7D600741-FABD-48AA-99CD-916A3CB19DA4");
+            Guid IGameProviderConfiguration.Id => new("5DD6C034-297A-4718-8D89-D6811A46ABED");
 
             string IGameProviderConfiguration.Name => "Configuration 365";
 
             string IGameProviderConfiguration.ClientId => "365-PG";
 
-            string IGameProviderConfiguration.SecretKey => "kMbkCVTkkCWXbEImBrTusQFcWudPqzcXoXMgCpVB";
+            string IGameProviderConfiguration.SecretKey => "pLDGFVWLJaioBBlPwZUwybkQQyFiwzaCApTRKNiN";
 
-            string IGameProviderConfiguration.DesktopEndpoint => _endpoint;
+            string IGameProviderConfiguration.DesktopEndpoint => _Endpoint;
 
-            string IGameProviderConfiguration.MobileEndpoint => _endpoint;
+            string IGameProviderConfiguration.MobileEndpoint => _Endpoint;
         }
     }
 }
