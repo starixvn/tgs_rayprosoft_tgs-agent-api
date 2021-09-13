@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Hosting;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models.GameProviders;
 using TGS.Core.Models.GameProviders.Settings;
+using TGS.Core.Models.GameProviders.Settings.Card365;
 using GameProviderConst = TGS.Core.Models.Consts.GameProvider;
 
 namespace TGS.Core.DataServices.Tgs.DataInitializers
@@ -84,7 +84,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 {
                     ServiceEndpointUrl =
                         _env.IsDocker() ? new("http://game-365") : new("http://localhost:62330"),
-                    ApiUrl = new("https://sw2.apidemo.net:8443/")
+                    ApiUrl = new("https://g5ky3i.365gaming.cc/api/website/"),
+                    Cert = "755C24B710D9F2B4B15DAB2B489CF471",
+                    BrandAgents = new[]
+                    {
+                        new Card365BrandAgent
+                        {
+                            BrandCode = "Default",
+                            AgentId = "card0201"
+                        }
+                    }
                 };
 
             Dictionary<string, string> IGameProvider.SportTypes => new();
