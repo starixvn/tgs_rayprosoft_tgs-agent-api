@@ -6,9 +6,9 @@ CREATE OR REPLACE FUNCTION dbo.agent_get_agents_with_team_counts(
 	_page_number integer, 
 	_sort_by text, 
 	_is_desc bool,
-    _status smallint default null,
-	_type smallint default null,
-	_level_type smallint default null)
+    _status integer default null,
+	_type integer default null,
+	_level_type integer default null)
 RETURNS TABLE (
 	 "Id" UUID, 
 	 "BrandId" UUID, 
