@@ -1,0 +1,57 @@
+﻿using System;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using TGS.Apis.TgsApi.Commons;
+using TGS.Apis.TgsApi.GameProviders.Card365.Middlewares;
+using TGS.Apis.TgsApi.GameProviders.Card365.Services;
+using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Models;
+
+namespace TGS.Apis.TgsApi.GameProviders.Card365
+{
+    public class Card365Startup : BaseStartup
+    {
+        public Card365Startup(IConfiguration configuration, IWebHostEnvironment env)
+            : base(configuration, env)
+        {
+        }
+
+        protected override string LogPrefix => "365";
+
+        protected override void AddCustomDependencyServices(IServiceCollection services)
+        {
+            services.AddErrorMappers(new[]
+                {
+                    typeof(Card365ErrorMapper)
+                },
+                (provider, key) => key switch
+                {
+                    Consts.GameProvider.Card365 => provider.GetRequiredService<Card365ErrorMapper>(),
+                    _                           => provider.GetRequiredService<TgsErrorMapper>()
+                });
+
+            services.AddScoped<Card365DispatcherMiddleware>();
+
+
+            services.AddScoped<ICard365ActionMapper, Card365ActionMapper>();
+        }
+
+        protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
+        {
+            const string route = "/api/365/entrance";
+
+            app.UseWhen(
+                context =>
+                    context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase) &&
+                    HttpMethods.IsPost(context.Request.Method),
+                builder =>
+                {
+                    //builder.UseMiddleware<HandleWMCasinoExceptionMiddleware>();
+                    builder.UseMiddleware<Card365DispatcherMiddleware>();
+                });
+        }
+    }
+}
