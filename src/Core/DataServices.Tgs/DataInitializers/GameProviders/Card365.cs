@@ -37,7 +37,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 _env = env;
             }
 
-            Guid IGameProvider.Id => new("579D6DA3-B0ED-4E3F-BD4A-434A98EFBD68");
+            Guid IGameProvider.Id => new("630E822B-2635-4314-A7E4-5C7057C1A920");
 
             string IGameProvider.Code => GameProviderConst.Card365;
 
