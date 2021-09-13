@@ -61,8 +61,8 @@
     <PackageReference Include="Tgs.Interceptors" Version="0.0.1" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.10" />
-    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.0.10-alpha" />
-    <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.5" />
+    <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.0.11" />
+    <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
   </ItemGroup>
 
