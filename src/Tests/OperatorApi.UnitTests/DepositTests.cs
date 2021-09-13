@@ -59,7 +59,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqPaymentClient = new Mock<IPaymentClient>();
-            var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
+            var serializer = new ManualDepositSerializer();
             var moqPromotionClient = new Mock<IPromotionClient>();
 
             var sut = new CreateDepositFormCommandService(
@@ -284,12 +284,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqFileServiceClient = new Mock<IFileServiceClient>();
-            var serializer = new ManualDepositSerializer(new JsonSerializationProvider());
 
             var sut = new SubmitBankDepositFormCommandService(
                 moqPaymentServiceClient.Object,
-                moqFileServiceClient.Object,
-                serializer);
+                moqFileServiceClient.Object);
 
             var playerCode = "ThisIsPlayerCode";
             var formId = Guid.NewGuid();
@@ -300,7 +298,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 playerCode,
                 formId,
                 contentType,
-                fileStream);
+                fileStream,
+                id => "{}");
 
             moqFileServiceClient
                 .Setup(fake => fake.UploadFileAsync(

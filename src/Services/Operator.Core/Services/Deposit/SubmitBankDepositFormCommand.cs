@@ -7,5 +7,6 @@ namespace TGS.Services.Operator.Services.Deposit
         string PlayerCode,
         Guid FormId,
         string ContentType,
-        Stream FileStream);
+        Stream FileStream,
+        Func<string, string> CreatePaymentReturn);
 }
