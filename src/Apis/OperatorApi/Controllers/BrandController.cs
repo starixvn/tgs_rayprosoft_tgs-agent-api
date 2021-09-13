@@ -14,9 +14,9 @@ namespace TGS.Apis.OperatorApi.Controllers
     public class BrandController : ControllerBase
     {
         [HttpGet]
-        [Description("Get a brand's logo")]
+        [Description("Get a brand")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
-        public ValueTask<BrandInfo> GetBrandLogoAsync(
+        public ValueTask<BrandInfo> GetBrandAsync(
             [FromServices] IGetService<BrandQuery, BrandInfo> queryService)
         {
             var brandId = HttpContext.Items.GetBrandId();
