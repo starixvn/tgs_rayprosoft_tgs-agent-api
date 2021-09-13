@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Extensions;
@@ -25,16 +24,12 @@ namespace TGS.Services.Operator.Services.GameProvider
         private readonly IBrandOperations _brandOperations;
         private readonly IGameProviderRepository _gameProviderRepository;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IValidStatus<GameStatus> _validGameStatus;
-        private readonly IValidStatus<Status> _validStatus;
 
         public GetGameProvidersQueryService(
             IBrandCurrencyCodeMapper brandCurrencyCodeMapper,
             IPlayerOperations playerOperations,
             IBrandLanguageCodeMapper brandLanguageCodeMapper,
             IBrandOperations brandOperations,
-            IValidStatus<Status> validStatus,
-            IValidStatus<GameStatus> validGameStatus,
             IGameProviderRepository gameProviderRepository)
         {
             _brandCurrencyCodeMapper = brandCurrencyCodeMapper ??
@@ -43,9 +38,6 @@ namespace TGS.Services.Operator.Services.GameProvider
             _brandLanguageCodeMapper = brandLanguageCodeMapper ??
                 throw new ArgumentNullException(nameof(brandLanguageCodeMapper));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
-            _validStatus = validStatus ?? throw new ArgumentNullException(nameof(validStatus));
-            _validGameStatus = validGameStatus ?? throw new ArgumentNullException(nameof(validGameStatus));
-
             _gameProviderRepository =
                 gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
         }
@@ -84,8 +76,37 @@ namespace TGS.Services.Operator.Services.GameProvider
             var brandGameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId)
                 .ConfigureAwait(false);
 
-            var statuses = _validStatus.GetStatus(playerType);
-            var gameStatuses = _validGameStatus.GetStatus(playerType);
+            var statuses = Array.Empty<Status>();
+            switch (playerType)
+            {
+                case PlayerType.RealPlayer:
+                case PlayerType.TestPlayer:
+                case PlayerType.All:
+                    {
+                        statuses = new Status[] { Status.Active, Status.Maintenance };
+                        break;
+                    }
+                default:
+                    break;
+            }
+
+            var gameStatuses = Array.Empty<GameStatus>();
+            switch (playerType)
+            {
+                case PlayerType.RealPlayer:
+                    {
+                        gameStatuses = new GameStatus[] { GameStatus.Active, GameStatus.Maintenance };
+                        break;
+                    }
+                case PlayerType.TestPlayer:
+                case PlayerType.All:
+                    {
+                        gameStatuses = new GameStatus[] { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
+                        break;
+                    }
+                default:
+                    break;
+            }
 
             var gamePlatformTypes = platformType.ToGamePlatformTypes();
             var gameProviderIds = brandGameProviders.Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus))
