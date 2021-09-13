@@ -46,7 +46,7 @@ BEGIN
 			       A.PARENT_AGENT_ID,
 				   A.USERNAME,
 			       CAST(S.FULLNAME || '->' || A.USERNAME AS text) AS FULLNAME,
-			       (SELECT COUNT(1) FROM DBO.PLAYERS WHERE AGENT_ID = A.ID) PLAYER_COUNT
+			       S.PLAYER_COUNT + (SELECT COUNT(1) FROM DBO.PLAYERS WHERE AGENT_ID = A.ID) PLAYER_COUNT
 		    FROM DBO.AGENTS A
 			INNER JOIN SUBAGENTS S ON S.PARENT_AGENT_ID = A.ID
 			WHERE A.BRAND_ID = _brand_id )
@@ -69,17 +69,23 @@ SELECT A.ID as "Id",
 	T.AGENT_COUNT + T.PLAYER_COUNT as "TeamNumber",
 	count(*) over() as "TotalCount"
 FROM DBO.AGENTS A
-INNER JOIN (SELECT ID,
-				   COUNT(1) AGENT_COUNT,
-				   SUM(PLAYER_COUNT) PLAYER_COUNT
-			FROM SUBAGENTS
-			GROUP BY ID) T ON A.ID = T.ID
+INNER JOIN (SELECT G.ID,
+				SUM(G.AGENT_COUNT) AGENT_COUNT,
+				SUM(G.PLAYER_COUNT) PLAYER_COUNT
+			FROM
+				(SELECT ID,
+						COUNT(1) AGENT_COUNT,
+						PLAYER_COUNT
+					FROM SUBAGENTS
+					GROUP BY ID,
+						PLAYER_COUNT) G
+			GROUP BY G.ID) T ON A.ID = T.ID
 WHERE A.BRAND_ID = _BRAND_ID
 		AND (_STATUS IS NULL OR A.STATUS = _STATUS)
 		AND (_TYPE IS NULL OR A.TYPE = _TYPE)
 		AND (_LEVEL_TYPE IS NULL OR A.LEVEL_TYPE = _LEVEL_TYPE)
 		AND ((_USERNAME IS NULL OR _USERNAME = '') OR A.USERNAME ilike '%' || _USERNAME || '%')
-order by
+		order by
 	  case when _is_desc = false AND lower(_sort_by) = 'username'	then a.username	end asc,
 	  case when _is_desc = false AND lower(_sort_by) = 'status'	then a.status	end asc,
 	  case when _is_desc = true AND lower(_sort_by) = 'username'	then a.username	end desc,
