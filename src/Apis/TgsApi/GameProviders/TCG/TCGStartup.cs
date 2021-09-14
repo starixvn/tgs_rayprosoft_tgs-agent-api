@@ -51,13 +51,13 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG
             services.AddScoped<HandleTCGExceptionMiddleware>();
             services.AddScoped<DispatcherTCGMiddleware>();
             services.AddScoped<ITCGService, TCGService>();
-            
+
             services.AddScoped<ITCGActionModelMapper, TCGActionModelMapper>();
-            services.AddScopedWithResolver<IGameInitializer>(new[]
-            {
-                typeof(TCGGameInitializer)
-            }, (provider, _) =>
-                provider.GetRequiredService<TCGGameInitializer>());
+
+            services.AddScopedWithResolver<IGameInitializer>(new[] { typeof(TCGGameInitializer) }, (provider, _)
+                => provider.GetRequiredService<TCGGameInitializer>());
+            services.AddScopedWithResolver<IGameHistory>(new[] { typeof(TCGGameHistory) }, (provider, _)
+                => provider.GetRequiredService<TCGGameHistory>());
 
         }
 

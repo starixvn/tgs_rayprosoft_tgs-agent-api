@@ -35,7 +35,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
                 {
-                    new JsonData {Value = _jsonSerializationProvider.SerializeToString(round.RoundDetail)}
+                    new JsonData {Value = round.RoundDetail.AdditionalData }
                 }
             });
         }
