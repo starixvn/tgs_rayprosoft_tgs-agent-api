@@ -23,13 +23,10 @@ COPY ["src/Repositories/Wallet.Repositories/Wallet.Repositories.csproj", "src/Re
 COPY ["src/Services/Wallet.Core/Wallet.Core.csproj", "src/Services/Wallet.Core/"]
 COPY ["src/Repositories/PlayerBucket.Repositories/PlayerBucket.Repositories.csproj", "src/Repositories/PlayerBucket.Repositories/"]
 COPY ["src/Services/Bucket/PlayerBucket.Core.csproj", "src/Services/Bucket/"]
-COPY ["src/Repositories/BackOffice.Repositories/BackOffice.Repositories.csproj", "src/Repositories/BackOffice.Repositories/"]
-COPY ["src/Services/BackOffice/BackOffice.csproj", "src/Services/BackOffice/"]
-COPY ["src/Clients/Promotion.Client/Promotion.Client.csproj", "src/Clients/Promotion.Client/"]
-COPY ["src/Services/TgsTransaction.Core/TgsTransaction.Core.csproj", "src/Services/TgsTransaction.Core/"]
-COPY ["src/Repositories/TgsTransaction.Repositories/TgsTransaction.Repositories.csproj", "src/Repositories/TgsTransaction.Repositories/"]
 COPY ["src/Repositories/Promotion.Repositories/Promotion.Repositories.csproj", "src/Repositories/Promotion.Repositories/"]
 COPY ["src/Services/Promotion.Core/Promotion.Core.csproj", "src/Services/Promotion.Core/"]
+COPY ["src/Repositories/TgsTransaction.Repositories/TgsTransaction.Repositories.csproj", "src/Repositories/TgsTransaction.Repositories/"]
+COPY ["src/Services/TgsTransaction.Core/TgsTransaction.Core.csproj", "src/Services/TgsTransaction.Core/"]
 RUN dotnet restore "src/Apis/ReportApi/ReportApi.csproj"
 COPY . .
 WORKDIR "/src/src/Apis/ReportApi"
