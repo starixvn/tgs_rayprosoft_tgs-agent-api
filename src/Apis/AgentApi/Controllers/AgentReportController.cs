@@ -59,7 +59,8 @@ namespace TGS.Apis.AgentApi.Controllers
 
             return new()
             {
-                TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<AgentContributionModel>()
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentContributionModel>()
             };
         }
 
@@ -94,7 +95,35 @@ namespace TGS.Apis.AgentApi.Controllers
 
             return new()
             {
-                TotalCount = response.TotalCount, Items = response.Items ?? Array.Empty<AgentDividendModel>()
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentDividendModel>()
+            };
+        }
+
+        [HttpGet("dividendDetails")]
+        [Description("Get agent dividend details")]
+        [TgsResponseWrapper]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<AgentDividendDetailModel>>
+            GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
+        {
+            var dividendRequest = new GetAgentDividendDetailsRequest
+            {
+                AgentId = request.AgentId,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+            var response = await _client.GetAgentDividendDetailsAsync(dividendRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentDividendDetailModel>()
             };
         }
     }

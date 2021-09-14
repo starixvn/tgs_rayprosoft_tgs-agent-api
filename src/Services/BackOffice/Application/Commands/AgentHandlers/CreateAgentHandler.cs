@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
@@ -29,13 +28,23 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 return CreateInvalidResponse<MessageResponse>(Agent.NameExisted);
             }
 
-            if (request.ParentUsername.IsNotNullOrEmpty() &&
-                !await _service.ExistsAsync(x =>
-                    x.BrandId == request.BrandId &&
-                    x.Username == request.ParentUsername && x.LevelType == AgentLevelType.Chief))
+            if (request.ParentUsername.IsNotNullOrEmpty())
             {
-                return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
+                var parentAgent = await _service.GetAgentAsync(x => x.BrandId == request.BrandId &&
+                    x.Username == request.ParentUsername);
+
+                if (parentAgent == null)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
+                }
+
+                if (parentAgent.DividendPercentage < request.DividendPercentage)
+                {
+                    return CreateInvalidResponse<MessageResponse>(Agent
+                        .DividendPercentageMustLessThanOrEqualToUpperLayer);
+                }
             }
+
 
             await _service.CreateAgentAsync(request);
 

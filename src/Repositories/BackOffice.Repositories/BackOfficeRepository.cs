@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
@@ -58,7 +59,7 @@ namespace TGS.BackOffice.Repositories
         }
 
         public IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode)
-                    => _tgsRepository.SystemLocalizations.AsQueryable()
+            => _tgsRepository.SystemLocalizations.AsQueryable()
                 .Where(loc => loc.SystemCode == systemCode)
                 .Select(loc => new LocalizationStringInfo(
                     loc.SystemCode,
@@ -87,14 +88,29 @@ namespace TGS.BackOffice.Repositories
                 banner.UpdatedOn);
         }
 
-        public async ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings)
+        public async ValueTask<BrandLogoInfo> GetBrandLogoInfoAsync(Guid brandId)
+        {
+            var brand = await _tgsRepository.Brands
+                .FindAsync(brandId)
+                .ConfigureAwait(false);
+
+            if (brand == null || string.IsNullOrWhiteSpace(brand.LogoInfo))
+                return null;
+
+            return JsonSerializer.Deserialize<BrandLogoInfo>(brand.LogoInfo);
+        }
+
+        public async ValueTask ImportLocalizationStringsAsync(
+            string systemCode,
+            IEnumerable<LocalizationStringInfo> localizationStrings)
         {
             var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
                 .Where(loc => loc.SystemCode == systemCode)
                 .ToArray();
 
             var grouping = (from loc in allLocalizationStrings
-                            group loc by loc.CultureCode into g
+                            group loc by loc.CultureCode
+                            into g
                             select new
                             {
                                 CaltureCode = g.Key,
@@ -117,11 +133,28 @@ namespace TGS.BackOffice.Repositories
                             CultureCode = info.CultureCode,
                             MessageId = info.MessageId,
                             Text = info.Text
-                        }).ConfigureAwait(false);
+                        })
+                        .ConfigureAwait(false);
                 }
             }
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId)
+        {
+            var query = from bg in _tgsRepository.BrandGames.AsQueryable()
+                        from game in _tgsRepository.Games
+                        where bg.BrandId == brandId
+                            && bg.GameId == game.Id
+                        select new GameData
+                        {
+                            GameId = game.Id,
+                            GameName = game.Name,
+                            Localization = game.Localization
+                        };
+
+            return query.ToAsyncEnumerable();
         }
 
         public IAsyncEnumerable<BannerInfo> QueryExpiredBannersAsync(Guid brandId)
@@ -223,8 +256,8 @@ namespace TGS.BackOffice.Repositories
             banner.Status = reviewState switch
             {
                 BannerReviewState.Approve => 1000,
-                BannerReviewState.Reject => 2000,
-                _ => 9000
+                BannerReviewState.Reject  => 2000,
+                _                         => 9000
             };
 
             banner.UpdatedByUserName = reviewer;
@@ -264,13 +297,31 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public async ValueTask UpdateBrandLogoInfoAsync(BrandLogoInfo info, string modifier)
+        {
+            var brand = await _tgsRepository.Brands
+                .FindAsync(info.BrandId)
+                .ConfigureAwait(false);
+
+            if (brand == null || brand.Id != info.BrandId)
+                return;
+
+            brand.LogoInfo = JsonSerializer.Serialize(info);
+            brand.UpdatedByUsername = modifier;
+            brand.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
+        }
+
         private static BannerFlowStatus ConvertBannerStatus(int status)
             => status switch
             {
-                0 => BannerFlowStatus.WaitApprving,
+                0    => BannerFlowStatus.WaitApprving,
                 1000 => BannerFlowStatus.Approved,
                 2000 => BannerFlowStatus.Rejected,
-                _ => BannerFlowStatus.Unknown
+                _    => BannerFlowStatus.Unknown
             };
     }
 }

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Polly;
 using TGS.Core.DataServices.Tgs;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 using TGS.ServiceUtility;
 
@@ -22,10 +23,12 @@ namespace TGS.Services.Agent.Services.Agent
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+            _validateCodeOperator =
+                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(ForgotPasswordCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask<string> GetAsync(ForgotPasswordCommand command,
+            CancellationToken cancellationToken = default)
         {
             var agent = _tgsRepository.Agents.AsQueryable()
                 .Where(agent => agent.Email == command.Email)

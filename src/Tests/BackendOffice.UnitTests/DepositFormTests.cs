@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
 using TGS.Clients.Promotion.Client;
@@ -48,14 +48,13 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var moqPlayerService = new Mock<IPlayerService>();
             var moqPlayerBucketRepository = new Mock<IPlayerBucketRepository>();
             var moqPromotionClient = new Mock<IPromotionClient>();
-            var logger = new Mock<ILogger<ReviewDepositFormCommandService>>();
 
             var sut = new ReviewDepositFormCommandService(
                 moqPaymentServiceClient.Object,
                 moqPlayerService.Object,
                 moqPlayerBucketRepository.Object,
                 moqPromotionClient.Object,
-                logger.Object);
+                NullLogger<ReviewDepositFormCommandService>.Instance);
 
             var brandId = Guid.NewGuid();
             var formId = Guid.NewGuid();

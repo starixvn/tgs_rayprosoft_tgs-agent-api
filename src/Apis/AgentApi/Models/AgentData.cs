@@ -36,5 +36,8 @@ namespace TGS.Apis.AgentApi.Models
 
         [JsonPropertyName("accumulatedprofitsharing")]
         public decimal AccumulatedProfitSharing { get; init; }
+
+        [JsonPropertyName("dividendpercentage")]
+        public decimal DividendPercentage { get; init; }
     }
 }

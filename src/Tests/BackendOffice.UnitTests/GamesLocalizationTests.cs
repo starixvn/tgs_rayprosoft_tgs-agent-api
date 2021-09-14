@@ -8,6 +8,7 @@ using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.BackOffice.Application.Queries.Game;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Tests.BackendOffice.UnitTests
 {
@@ -50,7 +51,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             await repository.SaveChangesAsync();
 
-            var sut = new GetLocalizationQueryService(repository);
+            var sut = new GetGameLocalizationQueryService(repository);
 
             var query = new GetGameLocalizationQuery(gameProviderCode);
             var info = await sut.GetAsync(query, default);

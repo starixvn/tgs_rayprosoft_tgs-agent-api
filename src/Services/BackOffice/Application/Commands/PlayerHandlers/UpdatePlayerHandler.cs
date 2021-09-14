@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
@@ -15,7 +16,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         private readonly IAgentService _agentService;
         private readonly IPlayerService _service;
 
-        public UpdatePlayerHandler(IPlayerService service, IAgentService agentService, IHttpContextAccessor accessor) :
+        public UpdatePlayerHandler(
+            IPlayerService service,
+            IAgentService agentService,
+            IHttpContextAccessor accessor) :
             base(accessor)
         {
             _service = service;
@@ -25,7 +29,12 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
         public override async Task<MessageResponse> Handle(UpdatePlayerRequest request,
             CancellationToken cancellationToken)
         {
-            var updatePlayerType = new[] {"info", "contact", "password"};
+            var updatePlayerType = new[]
+            {
+                "info",
+                "contact",
+                "password"
+            };
 
             if (!updatePlayerType.Contains(request.Type))
             {
@@ -41,7 +50,12 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             if (!request.AgentUsername.IsNullOrEmpty())
             {
-                var agent = await _agentService.GetAgentAsync(p => p.Username == request.AgentUsername);
+                var agent = await _agentService
+                    .GetAgentAsync(p => p.BrandId == player.BrandId
+                        && p.Status == AgentStatus.Enabled
+                        && p.Username == request.AgentUsername)
+                    .ConfigureAwait(false);
+
                 if (agent == null)
                 {
                     return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
@@ -50,6 +64,13 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 player.AgentId = agent.Id;
             }
 
+            if (request.Type == updatePlayerType[1] &&
+                await _service.ExistsAsync(x
+                    => x.BrandId == player.BrandId && x.PlayerCode != player.PlayerCode &&
+                    x.Email.ToLower() == request.Email.ToLower()))
+            {
+                return CreateInvalidResponse<MessageResponse>(Player.BrandEmailDuplicate);
+            }
 
             await _service.UpdatePlayerAsync(player, request);
 

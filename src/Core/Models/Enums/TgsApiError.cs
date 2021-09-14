@@ -18,6 +18,7 @@
         InsufficientBucket = 207,
         GameBalanceFundInFailed = 208,
         GameBalanceFundOutFailed = 209,
+        UserBanned = 210,
 
         InvalidGameAction = 301,
         TransactionIdNotFound = 302,
@@ -34,6 +35,7 @@
         EmailNotVerify = 406,
         PromotionCannotJoin = 407,
         FavoriteFull = 408,
+        BrandEmailDuplicate = 409,
 
         SystemError = 900,
         OperationNotAllowed = 901,

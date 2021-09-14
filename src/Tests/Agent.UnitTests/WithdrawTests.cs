@@ -5,6 +5,7 @@ using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
 using TGS.Services.Agent;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Services.Withdraw;
 using TGS.Services.WalletService;
 
@@ -47,7 +48,8 @@ namespace Agent.UnitTests
                     1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
-                    0M));
+                    0M,
+                    10M));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
@@ -126,7 +128,8 @@ namespace Agent.UnitTests
                     1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
-                    0M));
+                    0M,
+                    10M));
 
             fakeWalletRepository
                 .GetBalanceAsync(Arg.Any<Guid>(), Arg.Is(command.AgentId))
