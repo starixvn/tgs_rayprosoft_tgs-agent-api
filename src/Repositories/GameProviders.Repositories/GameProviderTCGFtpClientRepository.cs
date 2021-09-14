@@ -35,8 +35,6 @@ namespace TGS.GameProviders.Repositories
 
         public async Task<GetSettledFileContentResponse> GetSettledFileContentAsync(string path, string merchant, string directory, string file)
         {
-            var sw = Stopwatch.StartNew();
-            var responseMessage = default(string);
             var parameters = new Dictionary<string, string>()
             {
                 { "merchant",merchant},
@@ -44,74 +42,85 @@ namespace TGS.GameProviders.Repositories
                 { "file",file}
             };
             var paths = $"{path}/GetSettledFileContent?{string.Join("&", parameters.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)))}";
-            var httpResponseMessage = await _client.GetAsync(paths).ConfigureAwait(false);
-            sw.Stop();
-            using (var sr = new StreamReader(httpResponseMessage.Content.ReadAsStreamAsync().Result))
+
+            string result = await FtpClientGetAsync(paths, "GetSettledFileContent").ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(result))
             {
-                responseMessage = await sr.ReadToEndAsync() ?? string.Empty;
+                return _json.DeserializeFromString<GetSettledFileContentResponse>(result);
             }
 
-            _logger.LogHttpResponse(new ApiLogEvent
-            {
-                ip = string.Empty,
-                path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
-                method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
-                prefix = "TCGFtpClient",
-                servername = Environment.MachineName.NoLongerThan(128),
-                requestheaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
-                requestcontent = null,
-                responseheaders = httpResponseMessage.RequestMessage.Headers.ToString(),
-                responsecontent = responseMessage,
-                responsecode = (int)httpResponseMessage.StatusCode,
-                executiontimems = (int)sw.ElapsedMilliseconds,
-                recordedon = DateTimeOffset.UtcNow
-            });
-
-            if (!string.IsNullOrEmpty(responseMessage) && httpResponseMessage.StatusCode == HttpStatusCode.OK)
-            {
-                return _json.DeserializeFromString<GetSettledFileContentResponse>(responseMessage);
-            }
             return null;
         }
 
         public async Task<string[]> GetSettledFileListAsync(string path, string merchant, string directory)
         {
-            var sw = Stopwatch.StartNew();
-            var responseMessage = default(string);
             var parameters = new Dictionary<string, string>()
             {
                 { "merchant",merchant},
                 { "directory",directory},
             };
             var paths = $"{path}/GetSettledFileList?{string.Join("&", parameters.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)))}";
-            var httpResponseMessage = await _client.GetAsync(paths).ConfigureAwait(false);
-            sw.Stop();
-            using (var sr = new StreamReader(httpResponseMessage.Content.ReadAsStreamAsync().Result))
+
+            string result = await FtpClientGetAsync(paths, "GetSettledFileList").ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(result))
             {
-                responseMessage = await sr.ReadToEndAsync() ?? string.Empty;
+                return _json.DeserializeFromString<string[]>(result);
             }
 
-            _logger.LogHttpResponse(new ApiLogEvent
-            {
-                ip = string.Empty,
-                path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
-                method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
-                prefix = "TCGFtpClient",
-                servername = Environment.MachineName.NoLongerThan(128),
-                requestheaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
-                requestcontent = null,
-                responseheaders = httpResponseMessage.RequestMessage.Headers.ToString(),
-                responsecontent = responseMessage,
-                responsecode = (int)httpResponseMessage.StatusCode,
-                executiontimems = (int)sw.ElapsedMilliseconds,
-                recordedon = DateTimeOffset.UtcNow
-            });
-
-            if (!string.IsNullOrEmpty(responseMessage) && httpResponseMessage.StatusCode == HttpStatusCode.OK)
-            {
-                return _json.DeserializeFromString<string[]>(responseMessage);
-            }
             return null;
+        }
+
+        private async Task<string> FtpClientGetAsync(string paths, string prefix)
+        {
+            var sw = Stopwatch.StartNew();
+            var responseMessage = default(string);
+            var httpResponseMessage = default(HttpResponseMessage);
+            var logPrefix = $"tcg.ftp.client.{prefix}";
+            try
+            {
+                httpResponseMessage = await _client.GetAsync(paths).ConfigureAwait(false);
+                sw.Stop();
+
+                if (httpResponseMessage.StatusCode == HttpStatusCode.OK)
+                {
+                    using (var sr = new StreamReader(httpResponseMessage.Content.ReadAsStreamAsync().Result))
+                    {
+                        responseMessage = await sr.ReadToEndAsync() ?? string.Empty;
+                    }
+                }
+                _logger.LogHttpResponse(new ApiLogEvent
+                {
+                    ip = string.Empty,
+                    path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
+                    method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
+                    prefix = logPrefix,
+                    servername = Environment.MachineName.NoLongerThan(128),
+                    requestheaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
+                    requestcontent = null,
+                    responseheaders = httpResponseMessage.RequestMessage.Headers.ToString(),
+                    responsecontent = responseMessage,
+                    responsecode = (int)httpResponseMessage.StatusCode,
+                    executiontimems = (int)sw.ElapsedMilliseconds,
+                    recordedon = DateTimeOffset.UtcNow
+                });
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                var response = new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Content = new StringContent(
+                      $"Connect to remote host timeout {Environment.NewLine}{Environment.NewLine}{ex}"),
+                    RequestMessage = null
+                };
+
+                await _logger.LogHttpResponseAsync(response, (int)sw.ElapsedMilliseconds, null, logPrefix);
+            }
+
+            return responseMessage;
         }
     }
 }
