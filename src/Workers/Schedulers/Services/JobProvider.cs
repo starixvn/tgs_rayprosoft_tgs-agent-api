@@ -68,9 +68,9 @@ namespace TGS.Workers.Schedulers.Services
                 new JobDescription(new("321E2BEE-0028-4D82-8CA7-BB1F1B83C4E0"), Cron.Monthly(1, 0, 0), null,
                     typeof(PlatformCreditBalanceWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("8FB79844-E7FA-48FF-91EA-1C3899A0901B"), Cron.Minutely(), null,
-                    typeof(WMCasinoGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
-                //new JobDescription(new("F522E7F6-92B2-F2C9-73A9-36429EB9DC86"), Cron.Minutely(), null,
-                //    typeof(TCGGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
+                    typeof(WMCasinoGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
+                new JobDescription(new("F522E7F6-92B2-F2C9-73A9-36429EB9DC86"), Cron.Minutely(), null,
+                    typeof(TCGGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
             )
 
         {
