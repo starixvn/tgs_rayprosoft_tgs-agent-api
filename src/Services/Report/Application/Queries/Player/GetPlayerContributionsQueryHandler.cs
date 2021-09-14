@@ -50,7 +50,7 @@ namespace TGS.Services.Report.Application.Queries.Player
 
             var tgsPlayers = request.Level == null
                 ? null
-                : players.Where(x => x.Vip.Level == request.Level)
+                : players.Where(x => x.Vip?.Level == request.Level)
                     .Select(x => x.PlayerCode).ToArray();
 
             var reportPlayers = await _playerAggregateService
