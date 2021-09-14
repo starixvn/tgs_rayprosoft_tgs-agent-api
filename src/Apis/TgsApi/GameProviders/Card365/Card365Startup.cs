@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Mime;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -34,9 +35,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365
                 });
 
             services.AddScoped<Card365DispatcherMiddleware>();
+            services.AddScoped<AuthorizeCard365Middleware>();
 
-
-            services.AddScoped<ICard365ActionMapper, Card365ActionMapper>();
+            services.AddScoped<ICard365ActionModelMapper, Card365ActionModelMapper>();
+            services.AddScoped<ICard365BetActionServices, Card365BetActionServices>();
+            services.AddScoped<ICard365Services, Card365Services>();
         }
 
         protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
@@ -51,6 +54,20 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365
                 {
                     //builder.UseMiddleware<HandleWMCasinoExceptionMiddleware>();
                     builder.UseMiddleware<Card365DispatcherMiddleware>();
+                });
+        }
+
+        protected override void UseCustomMiddlewaresAfterRouting(IApplicationBuilder app)
+        {
+            const string route = "/api/365";
+
+            app.UseWhen(
+                context =>
+                    context.Request.ContentType == MediaTypeNames.Application.Json &&
+                    context.Request.Path.StartsWithSegments(route, StringComparison.OrdinalIgnoreCase),
+                builder =>
+                {
+                    builder.UseMiddleware<AuthorizeCard365Middleware>();
                 });
         }
     }

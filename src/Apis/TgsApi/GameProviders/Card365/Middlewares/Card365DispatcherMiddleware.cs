@@ -57,7 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
                 return;
             }
 
-            items["key"] = key;
+            items["key"] = key.ToString();
             items["path"] = context.Request.Path;
 
             var json = JsonSerializer.Serialize(items, _jsonSerializeOptions);

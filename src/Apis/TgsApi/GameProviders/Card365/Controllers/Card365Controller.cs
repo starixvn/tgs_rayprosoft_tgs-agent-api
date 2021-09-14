@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.FeatureManagement.Mvc;
+using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Card365.Services;
 using TGS.Core.Models;
-using TGS.Services.GameOperations;
 using TGS.Shared.Game.Models.Card365.Incoming;
 
 namespace TGS.Apis.TgsApi.GameProviders.Card365.Controllers
@@ -24,13 +24,26 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Controllers
 
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("balance")]
-        public async ValueTask<BalanceResponse> PlayersBalanceAsync(
-            [FromServices] IGamePlayActions actions,
-            [FromServices] ICard365ActionMapper map,
+        public async ValueTask<BalanceResponse> GetBalanceAsync(
+            [FromServices] ICard365BetActionServices services,
+            [FromServices] ICard365ActionModelMapper map,
             GetBalanceRequest request)
         {
-            var playerCode = request.PlayerCode;
-            var r = await actions.GetBalanceAsync(Consts.GameProvider.Card365, playerCode).ConfigureAwait(false);
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            var r = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
+            return map.Response(r);
+        }
+
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HttpPost("bet")]
+        public async ValueTask<BalanceResponse> LockAmountAsync(
+            [FromServices] ICard365BetActionServices services,
+            [FromServices] ICard365ActionModelMapper map,
+            BetRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+
+            var r = await services.LockAmountAsync(playerCode, request).ConfigureAwait(false);
             return map.Response(r);
         }
     }
