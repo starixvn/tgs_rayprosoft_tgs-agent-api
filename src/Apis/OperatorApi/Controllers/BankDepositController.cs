@@ -125,7 +125,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
                         formId,
                         request.Amount,
-                        player.Username)));
+                        player.RealName)));
 
             await createDepositFormService
                 .ExecuteAsync(command)
