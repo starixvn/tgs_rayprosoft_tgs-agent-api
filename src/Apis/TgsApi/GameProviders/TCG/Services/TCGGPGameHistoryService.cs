@@ -137,13 +137,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 var tasks = new List<Task>();
                 foreach (var data in response.Datas)
                 {
-                    var task = Task.Run(async () =>
-                    {
-                        var (roundsData, roundsDetail) = await _gameRoundsProcessor.GetExternalRoundIdByExternalGameIdAsync(data.OrderNum, data.PlayCode, gameProviderId, externalGameId).ConfigureAwait(false);
-                        roundsDetail.AdditionalData = _json.SerializeToString(data);
-                        await _gameRoundsProcessor.UpdateRoundDetailAsync(roundsDetail).ConfigureAwait(false);
-                    });
-                    tasks.Add(task);
+                    var (roundsData, roundsDetail) = await _gameRoundsProcessor.GetExternalRoundIdByExternalGameIdAsync(data.OrderNum, data.Username, gameProviderId, externalGameId).ConfigureAwait(false);
+                    roundsDetail.AdditionalData = _json.SerializeToString(data);
+                    await _gameRoundsProcessor.UpdateRoundDetailAsync(roundsDetail).ConfigureAwait(false);
                 }
                 await Task.WhenAll(tasks);
                 lastGameRecorFile = file;
