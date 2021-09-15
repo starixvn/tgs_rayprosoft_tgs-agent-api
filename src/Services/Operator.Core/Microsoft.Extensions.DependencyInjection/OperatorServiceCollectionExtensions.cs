@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Configuration;
 using TGS.Services.Operator.ValidateCode;
@@ -44,7 +43,6 @@ namespace Microsoft.Extensions.DependencyInjection
                     httpClient.BaseAddress = options.FileServiceBaseUrl;
                 })
                 .AddPaymentClient()
-                .AddSingleton<ManualDepositSerializer>()
                 .AddNatsMessageQueue(config =>
                 {
                     config.ConfigQueueOptions((options, sp) =>

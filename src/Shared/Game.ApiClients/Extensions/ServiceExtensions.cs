@@ -11,6 +11,7 @@ using TGS.Shared.Game.ApiClients.Saba;
 using TGS.Shared.Game.ApiClients.SBOBET;
 using TGS.Shared.Game.ApiClients.SexyGaming;
 using TGS.Shared.Game.ApiClients.Skywind;
+using TGS.Shared.Game.ApiClients.TCG;
 using TGS.Shared.Game.ApiClients.VR;
 using TGS.Shared.Game.ApiClients.WGHorse;
 using TGS.Shared.Game.ApiClients.WGSports;
@@ -42,6 +43,8 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<IWGSportsApiClient, WGSportsApiClient>();
             services.AddHttpClient<IWGHorseApiClient, WGHorseApiClient>();
             services.AddHttpClient<IWMCasinoApiClient, WMCasinoApiClient>();
+            services.AddHttpClient<ITCGApiClient, TCGApiClient>();
+            services.AddScoped<ITCGUtility, TCGUtility>();
 
             return services;
         }

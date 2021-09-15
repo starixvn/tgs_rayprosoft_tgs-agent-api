@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Services.Operator;
@@ -17,23 +15,13 @@ namespace TGS.Operator.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<BalanceInfo> GetBalanceInfoAsync(string playerCode)
-        {
-            var playerWallet = await _tgsRepository.Wallets.AsAsyncEnumerable()
-                .Where(wallet => wallet.PlayerCode == playerCode)
-                .SingleAsync()
-                .ConfigureAwait(false);
-
-            return new BalanceInfo(playerWallet.Balance);
-        }
-
         public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
         {
             var settingData = await _tgsRepository.PlayerGameSettings
                 .FindAsync(playerCode)
                 .ConfigureAwait(false);
 
-            return settingData?.IsAutoTransferToGame == true;
+            return settingData?.IsAutoTransferToGame ?? true;
         }
 
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)

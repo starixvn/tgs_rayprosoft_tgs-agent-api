@@ -13,6 +13,7 @@ using TGS.Apis.TgsApi.GameProviders.Saba;
 using TGS.Apis.TgsApi.GameProviders.SBOBET;
 using TGS.Apis.TgsApi.GameProviders.SexyGaming;
 using TGS.Apis.TgsApi.GameProviders.Skywind;
+using TGS.Apis.TgsApi.GameProviders.TCG;
 using TGS.Apis.TgsApi.GameProviders.VR;
 using TGS.Apis.TgsApi.GameProviders.WGHorse;
 using TGS.Apis.TgsApi.GameProviders.WGSports;
@@ -43,7 +44,8 @@ namespace TGS.Apis.TgsApi
             {Evolution, typeof(EvolutionStartup)},
             {WGSports, typeof(WGSportsStartup)},
             {WGHorse, typeof(WGHorseStartup)},
-            {WMCasino, typeof(WMCasinoStartup)}
+            {WMCasino, typeof(WMCasinoStartup)},
+            {TCG, typeof(TCGStartup)},
         };
 
         private static readonly IReadOnlyDictionary<string, string> _ConfigFileMap = new Dictionary<string, string>
@@ -64,7 +66,8 @@ namespace TGS.Apis.TgsApi
             {Evolution, "Evolution/evolution.json"},
             {WGSports, "WGSports/wgsports.json"},
             {WGHorse, "WGHorse/wghorse.json"},
-            {WMCasino, "WMCasino/wmcasino.json"}
+            {WMCasino, "WMCasino/wmcasino.json"},
+            {TCG, "TCG/tcg.json"}
         };
     }
 }
