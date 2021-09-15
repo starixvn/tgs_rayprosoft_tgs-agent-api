@@ -8,8 +8,6 @@ namespace TGS.Services.BackOffice.Domain
     {
         ValueTask ChangeBannerOrderAsync(Guid id, int order, string modifier);
 
-        ValueTask<bool> CheckBrandEmailAsync(Guid brandId, string email);
-
         ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier);
 
         IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode);
@@ -18,7 +16,8 @@ namespace TGS.Services.BackOffice.Domain
 
         ValueTask<BrandLogoInfo> GetBrandLogoInfoAsync(Guid brandId);
 
-        ValueTask ImportLocalizationStringsAsync(string systemCode, IEnumerable<LocalizationStringInfo> localizationStrings);
+        ValueTask ImportLocalizationStringsAsync(string systemCode,
+            IEnumerable<LocalizationStringInfo> localizationStrings);
 
         IAsyncEnumerable<GameData> QueryAllGamesAsync(Guid brandId);
 

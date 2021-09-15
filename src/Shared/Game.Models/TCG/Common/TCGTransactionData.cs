@@ -18,7 +18,7 @@ namespace TGS.Shared.Game.Models.TCG.Common
         public decimal Amount { get; init; }
         [Required]
         [JsonPropertyName("tx_type")]
-        public TCGTransactionType TxType { get; init; }
+        public string TxType { get; init; }
         [JsonPropertyName("remarks")]
         public string Remarks { get; init; }
         [JsonPropertyName("additionalInformation")]

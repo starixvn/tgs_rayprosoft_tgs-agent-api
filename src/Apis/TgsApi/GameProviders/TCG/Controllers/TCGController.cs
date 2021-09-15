@@ -27,15 +27,17 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
         private readonly IGamePlayActions _actions;
         private readonly ITCGService _service;
         private readonly ITCGActionModelMapper _mapper;
-
+        private readonly ITCGGPGameHistoryService _gameHistoryService;
         public TCGController(
             IGamePlayActions actions,
             ITCGService service,
-            ITCGActionModelMapper mapper)
+            ITCGActionModelMapper mapper,
+            ITCGGPGameHistoryService gameHistoryService)
         {
             _actions = actions ?? throw new ArgumentNullException(nameof(actions));
             _service = service ?? throw new ArgumentNullException(nameof(service));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _gameHistoryService = gameHistoryService ?? throw new ArgumentNullException(nameof(gameHistoryService));
         }
 
         [Consumes("application/x-www-form-urlencoded")]
@@ -68,7 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderCode = _service.GetGameProviderCode();
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType);
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
             var betDatas = await _mapper.BetAsync(gameProviderId, gameProviderCode, cachedGame, request).ConfigureAwait(false);
             if (betDatas == null)
             {
@@ -104,7 +106,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderCode = _service.GetGameProviderCode();
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType);
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
             var betData = await _mapper.SettleAsync(gameProviderId, gameProviderCode, cachedGame, request).ConfigureAwait(false);
             var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
 
@@ -129,7 +131,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderCode = _service.GetGameProviderCode();
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType);
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
             var betDatas = await _mapper.ReserveMoneyAsync(gameProviderId, gameProviderCode, cachedGame, request).ConfigureAwait(false);
             if (betDatas == null)
             {
@@ -189,7 +191,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderCode = _service.GetGameProviderCode();
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType);
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
             var betData = await _mapper.ConfirmReserveAsync(gameProviderId, gameProviderCode, cachedGame, request).ConfigureAwait(false);
             var betResult = await _actions.SettleBatchAsync(betData).ConfigureAwait(false);
 
@@ -216,7 +218,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
             var items = HttpContext.Items;
             var gameProviderId = items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
             var gameProviderCode = _service.GetGameProviderCode();
-            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType);
+            var cachedGame = await _service.GetCachedGameAsync(gameProviderId, request.ProductType.ToString());
             var queryResults = await _mapper.CheckTransactionStatusAsync(gameProviderId, gameProviderCode, cachedGame, request).ConfigureAwait(false);
 
             return new TCGCheckTransactionStatusResponse()
@@ -236,6 +238,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Controllers
                 ErrorDesc = GameApiError.Success.Description()
             }));
         }
+
+        [HttpPost("GameRecord")]
+        public ValueTask<TCGGPGameRecordResponse> GameRecordAsync(TCGGPGameRecordRequest request)
+            => _gameHistoryService.GameRecordAsync(request);
     }
 }
 

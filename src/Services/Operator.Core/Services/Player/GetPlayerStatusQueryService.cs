@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.Models.Enums;
 using TGS.ServiceUtility;
@@ -22,6 +23,7 @@ namespace TGS.Services.Operator.Services.Player
             CancellationToken cancellationToken = default)
         {
             var player = await _tgsRepository.Players
+                .AsNoTracking()
                 .SingleAsync(x => x.PlayerCode == query.PlayerCode)
                 .ConfigureAwait(false);
 

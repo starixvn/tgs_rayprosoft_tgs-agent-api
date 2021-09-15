@@ -25,6 +25,7 @@ using TGS.Workers.Schedulers.Jobs;
 using TGS.Workers.Schedulers.Jobs.Agents;
 using TGS.Workers.Schedulers.Jobs.GameProviders.BigGaming;
 using TGS.Workers.Schedulers.Jobs.GameProviders.KY;
+using TGS.Workers.Schedulers.Jobs.GameProviders.TCG;
 using TGS.Workers.Schedulers.Jobs.GameProviders.VR;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGSports;
@@ -156,6 +157,7 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IWGSportsGameProviderService, WGSportsGameProviderService>();
             services.AddTransient<IWGHorseGameProviderService, WGHorseGameProviderService>();
             services.AddTransient<IWMCasinoGameProviderService, WMCasinoGameProviderService>();
+            services.AddTransient<ITCGGameProviderService, TCGGameProviderService>();
         }
 
         private static Type[] GetModuleTypes() =>

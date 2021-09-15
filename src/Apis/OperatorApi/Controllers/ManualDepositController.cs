@@ -71,6 +71,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = true)]
         public async ValueTask SubmitDepositFormAsync(
             [FromServices] ICommandService<SubmitBankDepositFormCommand> submitBankDepositFormCommandService,
+            [FromServices] ManualDepositSerializer serializer,
             Guid id,
             [FromForm(Name = "file")] IFormFile manualReceipt)
         {
@@ -83,7 +84,9 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerTokenData.PlayerCode,
                 id,
                 contentType,
-                fileStream);
+                fileStream,
+                id => serializer.Serialize(
+                    new ManualDepositPaymentReturn(id)));
 
             await submitBankDepositFormCommandService.ExecuteAsync(command);
         }

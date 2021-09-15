@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.Options;
 using TGS.Core.Infrastructures.Redis;
 using TGS.GameProviders.Repositories;
 using TGS.GameProviders.Repositories.Options;
@@ -17,6 +18,24 @@ namespace Microsoft.Extensions.DependencyInjection
 
             return services
                 .AddTransient<IGameProviderScheduleRepository, GameProviderScheduleRepository>();
+        }
+
+        public static IServiceCollection AddGameProviderTCGFtpClientRepository(
+            this IServiceCollection services,
+            Action<TCGFtpApiOption, IServiceProvider> configure)
+        {
+            services
+                .AddOptions<TCGFtpApiOption>()
+                .Configure(configure);
+            services
+                  .AddHttpClient<GameProviderTCGFtpClientRepository>((sp, c) =>
+                  {
+                      var options = sp.GetRequiredService<IOptions<TCGFtpApiOption>>().Value;
+
+                      c.BaseAddress = options.Url;
+                  });
+            return services
+                .AddTransient<IGameProviderTCGFtpClientRepository>(sp => sp.GetRequiredService<GameProviderTCGFtpClientRepository>());
         }
 
         public static IServiceCollection AddGameProvidersoRepository(this IServiceCollection services)

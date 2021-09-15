@@ -15,7 +15,7 @@ namespace TGS.Core.Models.GameProviders.Settings.TCG
         /// <summary>
         /// The currency code
         /// </summary>
-        public string CurrencyCodev { get; init; }
+        public string CurrencyCode { get; init; }
         /// <summary>
         /// The merchant code
         /// </summary>

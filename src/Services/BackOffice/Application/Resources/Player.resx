@@ -154,6 +154,6 @@
     <value>Password need character.</value>
   </data>
   <data name="BrandEmailDuplicate" xml:space="preserve">
-    <value>Email is exist.</value>
+    <value>Email is existed.</value>
   </data>
 </root>

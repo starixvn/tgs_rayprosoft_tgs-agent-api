@@ -96,7 +96,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-cny.srvttt.com"),
-                            CurrencyCodev="CNY",
+                            CurrencyCode="CNY",
                             MerchantCode="pegacnys",
                             DESKey="EuWEfLac",
                             SHA256Key="h2f69FzdSmMZzrdE",
@@ -105,7 +105,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-hkd.srvttt.com"),
-                            CurrencyCodev="HKD",
+                            CurrencyCode="HKD",
                             MerchantCode="pegahkds",
                             DESKey="1dNvhUV4",
                             SHA256Key="uC7wC9j2GhQBUQu0",
@@ -114,7 +114,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-idrk.srvttt.com"),
-                            CurrencyCodev="IDR_1000",
+                            CurrencyCode="IDR_1000",
                             MerchantCode="pegaidrks",
                             DESKey="2xifdSt0",
                             SHA256Key="I2PkSJCT5sI4ZHYX",
@@ -123,7 +123,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-idr.srvttt.com"),
-                            CurrencyCodev="IDR",
+                            CurrencyCode="IDR",
                             MerchantCode="pegaidrs",
                             DESKey="XKNDjygF",
                             SHA256Key="9MLfRXnHWeuwVDo4",
@@ -132,7 +132,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-inr.srvttt.com"),
-                            CurrencyCodev="INR",
+                            CurrencyCode="INR",
                             MerchantCode="pegainrs",
                             DESKey="dA60szJG",
                             SHA256Key="x3F9G1CxP0YRXIE",
@@ -141,7 +141,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-myr.srvttt.com"),
-                            CurrencyCodev="MYR",
+                            CurrencyCode="MYR",
                             MerchantCode="pegamyrs",
                             DESKey="8pi5m8zH",
                             SHA256Key="NNffZsPcfZDNut9r",
@@ -150,7 +150,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-thb.srvttt.com"),
-                            CurrencyCodev="THB",
+                            CurrencyCode="THB",
                             MerchantCode="pegathbs",
                             DESKey="XE3U5zVJ",
                             SHA256Key="4vzJ3p1sRQTcLswn",
@@ -159,7 +159,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-usd.srvttt.com"),
-                            CurrencyCodev="USD",
+                            CurrencyCode="USD",
                             MerchantCode="pegausds",
                             DESKey="kRxkTF9r",
                             SHA256Key="Vz2tGy1Q7TK0AdAQ",
@@ -168,7 +168,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-vndk.srvttt.com"),
-                            CurrencyCodev="VND_1000",
+                            CurrencyCode="VND_1000",
                             MerchantCode="pegavndks",
                             DESKey="PjmKWpPX",
                             SHA256Key="g3kstTENOj5yJWCS",
@@ -177,7 +177,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         new TCGMerchant
                         {
                             GameUrl=new("https://tcg-vnd.srvttt.com"),
-                            CurrencyCodev="VND",
+                            CurrencyCode="VND",
                             MerchantCode="pegavnds",
                             DESKey="AiynBxjI",
                             SHA256Key="NH5v1N9XlCnbQjj1",

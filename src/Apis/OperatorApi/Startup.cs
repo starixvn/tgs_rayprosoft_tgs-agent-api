@@ -151,6 +151,7 @@ namespace TGS.Apis.OperatorApi
                 })
                 .Services
                 .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>()
+                .AddSingleton<ManualDepositSerializer>()
                 .AddSingleton<PrimePaySerializer>()
                 .AddSingleton<ApplePaySerializer>()
                 .AddSingleton<LeePaySerializer>()
