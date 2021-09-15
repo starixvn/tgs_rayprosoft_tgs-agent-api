@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -15,7 +15,7 @@
     </PackageReference>
     <PackageReference Include="PagingUtility.AsyncEnumerable" Version="0.0.3" />
     <PackageReference Include="Tgs.FileService.Client" Version="0.0.4" />
-    <PackageReference Include="Tgs.MessageQueue" Version="1.1.0" />
+    <PackageReference Include="Tgs.MessageQueue" Version="1.1.1" />
     <PackageReference Include="Tgs.Payment.Client" Version="0.1.5" />
     <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.17" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
