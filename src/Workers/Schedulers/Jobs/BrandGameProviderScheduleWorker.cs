@@ -66,7 +66,7 @@ namespace TGS.Workers.Schedulers.Jobs
                     {
                         CacheType = RedisCacheType.BrandGameProviders,
                         Key = x.BrandId
-                    }).ToArray();
+                    }).Distinct().ToArray();
 
                 await _service.UpdateBrandGameProvidersAsync(brandGameProviders);
 
