@@ -105,24 +105,26 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             var orderId = default(string);
             if (fundTransferStatus == FundTransferTransactionStatus.Success)
             {
-                var response = await FundOutAsync(player, amount);
+                var (Success, OrderId, Balance) = await FundOutAsync(player, amount);
                 fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
-                if (!response.Success)
+                if (!Success)
                 {
-                    var checking = await CheckingOrderIdAsync(player, response.OrderId);
+                    fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
+                    /*
+                    var checking = await CheckingOrderIdAsync(player, OrderId);
                     if (checking.Checking && !string.IsNullOrEmpty(checking.OrderId))
                     {
                         fundTransferStatus = FundTransferTransactionStatus.Success;
-                        orderId = response.OrderId;
+                        orderId = OrderId;
                     }
+                    */
                 }
                 else
                 {
                     fundTransferStatus = FundTransferTransactionStatus.Success;
-                    orderId = response.OrderId;
+                    orderId = OrderId;
                 }
             }
-
 
             await _gameProviderFundTransferTransactionRepository.UpdateAsync(new UpdateGameProviderFundTransferTransactionRequest
             {
