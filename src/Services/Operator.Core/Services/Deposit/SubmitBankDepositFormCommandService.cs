@@ -2,10 +2,9 @@
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Utility;
 using Tgs.FileService.Clients;
 using Tgs.Payment.Clients;
-using TGS.Payment.ManualDeposit;
+using TGS.Core.Infrastructures.Utility;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Deposit
@@ -14,17 +13,14 @@ namespace TGS.Services.Operator.Services.Deposit
     {
         private readonly IFileServiceClient _fileServiceClient;
         private readonly IPaymentServiceClient _paymentServiceClient;
-        private readonly ManualDepositSerializer _serializer;
 
         public SubmitBankDepositFormCommandService(
             IPaymentServiceClient paymentServiceClient,
-            IFileServiceClient fileServiceClient,
-            ManualDepositSerializer serializer)
+            IFileServiceClient fileServiceClient)
         {
             _paymentServiceClient =
                 paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
             _fileServiceClient = fileServiceClient ?? throw new ArgumentNullException(nameof(fileServiceClient));
-            _serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
         public async ValueTask ExecuteAsync(SubmitBankDepositFormCommand command,
@@ -43,8 +39,7 @@ namespace TGS.Services.Operator.Services.Deposit
                 .SubmitDepositFormStatusAsync(
                     command.FormId,
                     PaymentFlowState.WaitApprove,
-                    _serializer.Serialize(
-                        new ManualDepositPaymentReturn(uploadResult.Id)))
+                    command.CreatePaymentReturn(uploadResult.Id))
                 .ConfigureAwait(false);
         }
     }
