@@ -21,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Repositories\BackOffice.Repositories\BackOffice.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\PlayerBucket.Repositories\PlayerBucket.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Promotion.Repositories\Promotion.Repositories.csproj" />
     <ProjectReference Include="..\..\Repositories\Wallet.Repositories\Wallet.Repositories.csproj" />

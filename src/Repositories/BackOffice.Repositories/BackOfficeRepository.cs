@@ -34,15 +34,6 @@ namespace TGS.BackOffice.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public ValueTask<bool> CheckBrandEmailAsync(Guid brandId, string email)
-        {
-            var result = _tgsRepository.Players
-                .AsQueryable()
-                .Any(p => p.BrandId == brandId && p.Email.ToLower() == email.ToLower());
-
-            return ValueTask.FromResult(result);
-        }
-
         public async ValueTask<Guid> CreateBannerAsync(BannerModifyInfo createInfo, string modifier)
         {
             var createBanner = new Banner
@@ -68,7 +59,7 @@ namespace TGS.BackOffice.Repositories
         }
 
         public IAsyncEnumerable<LocalizationStringInfo> ExportLocalizationStringsAsync(string systemCode)
-                    => _tgsRepository.SystemLocalizations.AsQueryable()
+            => _tgsRepository.SystemLocalizations.AsQueryable()
                 .Where(loc => loc.SystemCode == systemCode)
                 .Select(loc => new LocalizationStringInfo(
                     loc.SystemCode,
@@ -110,7 +101,7 @@ namespace TGS.BackOffice.Repositories
         }
 
         public async ValueTask ImportLocalizationStringsAsync(
-                    string systemCode,
+            string systemCode,
             IEnumerable<LocalizationStringInfo> localizationStrings)
         {
             var allLocalizationStrings = _tgsRepository.SystemLocalizations.AsQueryable()
@@ -118,7 +109,8 @@ namespace TGS.BackOffice.Repositories
                 .ToArray();
 
             var grouping = (from loc in allLocalizationStrings
-                            group loc by loc.CultureCode into g
+                            group loc by loc.CultureCode
+                            into g
                             select new
                             {
                                 CaltureCode = g.Key,
@@ -264,8 +256,8 @@ namespace TGS.BackOffice.Repositories
             banner.Status = reviewState switch
             {
                 BannerReviewState.Approve => 1000,
-                BannerReviewState.Reject => 2000,
-                _ => 9000
+                BannerReviewState.Reject  => 2000,
+                _                         => 9000
             };
 
             banner.UpdatedByUserName = reviewer;
@@ -326,10 +318,10 @@ namespace TGS.BackOffice.Repositories
         private static BannerFlowStatus ConvertBannerStatus(int status)
             => status switch
             {
-                0 => BannerFlowStatus.WaitApprving,
+                0    => BannerFlowStatus.WaitApprving,
                 1000 => BannerFlowStatus.Approved,
                 2000 => BannerFlowStatus.Rejected,
-                _ => BannerFlowStatus.Unknown
+                _    => BannerFlowStatus.Unknown
             };
     }
 }

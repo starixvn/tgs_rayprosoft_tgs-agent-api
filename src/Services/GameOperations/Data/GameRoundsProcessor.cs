@@ -18,6 +18,10 @@ namespace TGS.Services.GameOperations.Data
 
         ValueTask<(Round roundsData, RoundDetail roundsDetail)> GetExternalRoundIdAsync(string externalRoundId,
             string playerCode, Guid gameProviderId, int gameId);
+
+        ValueTask<(Round roundsData, RoundDetail roundsDetail)> GetExternalRoundIdByExternalGameIdAsync(string externalRoundId, string playerCode, Guid gameProviderId, string externalGameId);
+
+        ValueTask UpdateRoundDetailAsync(RoundDetail detail);
     }
 
     internal sealed class GameRoundsProcessor : IGameRoundsProcessor
@@ -85,6 +89,42 @@ namespace TGS.Services.GameOperations.Data
             ;
 
             return (round, roundsDetail);
+        }
+
+        public async ValueTask<(Round roundsData, RoundDetail roundsDetail)> GetExternalRoundIdByExternalGameIdAsync(
+            string externalRoundId,
+            string playerCode,
+            Guid gameProviderId,
+            string externalGameId)
+        {
+            var round = await (from Round in _tgsRepository.Rounds.AsQueryable()
+                               join Game in _tgsRepository.Games.AsQueryable()
+                               on Round.GameId equals Game.Id
+                               where
+                                Round.ExternalRoundId == externalRoundId
+                                && Round.PlayerCode == playerCode
+                                && Round.GameProviderId == gameProviderId
+                                && Game.ExternalId == externalGameId
+                               select Round)
+                               .FirstOrDefaultAsync()
+                               .ConfigureAwait(false);
+            if (round == null)
+            {
+                return (default(Round), default(RoundDetail));
+            }
+
+            var roundsDetail = await _tgsRepository.RoundDetails.AsQueryable()
+                .FirstOrDefaultAsync(x => x.RoundId == round.Id)
+                .ConfigureAwait(false);
+            ;
+
+            return (round, roundsDetail);
+        }
+
+        public async ValueTask UpdateRoundDetailAsync(RoundDetail detail)
+        {
+            _tgsRepository.RoundDetails.Update(detail);
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         #region private

@@ -107,7 +107,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         async ValueTask<TCGMerchant> ITCGService.GetMerchantAsync(string currencyCode)
         {
             var configuration = await _settingOperations.GetValueFromJsonByKeyAsync<TCGConfiguration>(SettingConsts.GameProviderConfigurations.TCG).ConfigureAwait(false);
-            return configuration.Merchants.Where(x => x.CurrencyCodev == currencyCode).FirstOrDefault();
+            return configuration.Merchants.Where(x => x.CurrencyCode == currencyCode).FirstOrDefault();
         }
 
         async ValueTask<CachedGame> ITCGService.GetCachedGameAsync(Guid gameProviderId, int gameId)

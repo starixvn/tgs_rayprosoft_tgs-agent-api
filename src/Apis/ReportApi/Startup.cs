@@ -50,7 +50,6 @@ namespace TGS.Apis.ReportApi
                 .AddPluggableServices()
                 .AddReportServices()
                 .AddTransactions()
-                .AddBackendOfficeRepositories()
                 .AddPlayerBucketRepositoriesServices();
 
             services
