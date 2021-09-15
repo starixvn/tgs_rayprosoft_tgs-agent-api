@@ -24,27 +24,32 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Controllers
 
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("balance")]
-        public async ValueTask<BalanceResponse> GetBalanceAsync(
+        public ValueTask<BalanceResponse> GetBalanceAsync(
             [FromServices] ICard365BetActionServices services,
-            [FromServices] ICard365ActionModelMapper map,
             GetBalanceRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
-            var r = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
-            return map.Response(r);
+            return services.GetBalanceAsync(playerCode);
         }
 
         [Consumes(MediaTypeNames.Application.Json)]
         [HttpPost("bet")]
-        public async ValueTask<BalanceResponse> LockAmountAsync(
+        public ValueTask<BalanceResponse> LockAmountAsync(
             [FromServices] ICard365BetActionServices services,
-            [FromServices] ICard365ActionModelMapper map,
             BetRequest request)
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            return services.LockAmountAsync(playerCode, request);
+        }
 
-            var r = await services.LockAmountAsync(playerCode, request).ConfigureAwait(false);
-            return map.Response(r);
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HttpPost("cancelbet")]
+        public ValueTask<BalanceResponse> CancelLockAmountAsync(
+            [FromServices] ICard365BetActionServices services,
+            CancelBetRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            return services.CancelLockAmountAsync(playerCode, request);
         }
     }
 }

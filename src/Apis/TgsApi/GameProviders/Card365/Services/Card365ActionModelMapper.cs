@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
+using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.Card365.Enums;
 using TGS.Shared.Game.Models.Card365.Incoming;
@@ -15,6 +17,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         BalanceResponse Response(GetBalanceResult r);
 
         BalanceResponse Response(BetResult r);
+
+        BetData CancelLockAmountRequest(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, CancelBetRequest request);
     }
 
     public class Card365ActionModelMapper : ICard365ActionModelMapper
@@ -43,6 +48,25 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
             {
                 transaction
             });
+        }
+
+        public BetData CancelLockAmountRequest(string playerCode, GameProviderConfigurationData data,
+            GameActionExternalIds[] externalIds, CancelBetRequest request)
+        {
+            var transactions = externalIds.Select(ga => new TransactionData
+            {
+                Amount = ga.Amount,
+                ExternalGameId = ga.ExternalGameId,
+                ExternalRoundId = ga.ExternalRoundId,
+                ExternalTransactionId = $"{ga.ExternalTransactionId}_cancel",
+                ExternalTransactionReferenceId = ga.ExternalTransactionId,
+                ExternalGameActionGroupId = ga.ExternalGameActionGroupId,
+                ExternalBetId = ga.ExternalRoundId,
+                GameActionType = GameActionType.CancelTransaction,
+                TimeStamp = ParseDateTimeOffset(request.Timestamp)
+            }).ToArray();
+
+            return GetBetData(playerCode, data, transactions);
         }
 
         public BalanceResponse Response(GetBalanceResult r)
