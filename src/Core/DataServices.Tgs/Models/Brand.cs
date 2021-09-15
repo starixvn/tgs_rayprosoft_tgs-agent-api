@@ -32,6 +32,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<BrandDomain> Domains { get; set; }
 
+        public bool EnableSms { get; set; }
+
         public virtual ICollection<BrandGameProvider> GameProviders { get; set; }
 
         public virtual ICollection<BrandGame> Games { get; set; }
@@ -63,6 +65,8 @@ namespace TGS.Core.DataServices.Tgs.Models
         public int? SettlementDay { get; set; }
 
         public SettlementIntervalType SettlementIntervalType { get; set; }
+
+        public string SmsVendorCode { get; set; }
 
         public virtual ICollection<StationLetter> StationLetters { get; set; }
 

@@ -139,7 +139,7 @@ namespace OperatorApi.UnitTests
         }
 
         [Test]
-        public async Task Register_Player_With_Other_Brand_InvitationCode_Should_Throw_Error()
+        public void Register_Player_With_Other_Brand_InvitationCode_Should_Throw_Error()
         {
             var brandId = Guid.NewGuid();
             var invitationCode = "6rd4mq";

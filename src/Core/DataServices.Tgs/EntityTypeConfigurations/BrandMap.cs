@@ -39,6 +39,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.TimeZoneId)
                 .HasMaxLength(256);
 
+            builder.Property(c => c.EnableSms)
+                .HasDefaultValue(false)
+                .IsRequired();
+
+            builder.Property(c => c.SmsVendorCode);
+
             builder.Property(c => c.SettlementIntervalType)
                 .HasColumnType(ColumnTypes.SmallInt)
                 .IsRequired();
