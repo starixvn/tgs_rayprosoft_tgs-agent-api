@@ -1166,6 +1166,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("description");
 
+                    b.Property<bool>("EnableSms")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_sms");
+
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uuid")
                         .HasColumnName("licensee_id");
@@ -1214,6 +1220,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<short>("SettlementIntervalType")
                         .HasColumnType("smallint")
                         .HasColumnName("settlement_interval_type");
+
+                    b.Property<string>("SmsVendorCode")
+                        .HasColumnType("text")
+                        .HasColumnName("sms_vendor_code");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
@@ -3410,6 +3420,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<Guid?>("AgentId")
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
+
+                    b.Property<string>("AreaCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("area_code");
 
                     b.Property<int>("BetLimitId")
                         .HasColumnType("integer")
