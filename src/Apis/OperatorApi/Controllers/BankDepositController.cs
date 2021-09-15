@@ -6,13 +6,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
+using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
+using TGS.Services.Operator.Services.Player;
 using TGS.ServiceUtility;
 
 namespace TGS.Apis.OperatorApi.Controllers
@@ -81,6 +84,82 @@ namespace TGS.Apis.OperatorApi.Controllers
                 {
                     FormId = createdFormId,
                     PaymentUrl = applyInfo.Response.ReceiveUrl.ToString(),
+                    ErrorMessage = string.Empty
+                };
+            }
+            else
+            {
+                throw new PaymentFailException(applyInfo.Response.Msg);
+            }
+        }
+
+        [HttpPost("maticpay")]
+        [PlayerCheckEnabled]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<MaticPayDepositFormCreatedResponse> SubmitMaticPayDepositRequestAsync(
+           [FromServices] IGetService<GetPlayerQuery, PlayerDataInfo> getPlayerInfoService,
+           [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
+           [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
+           [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+           [FromServices] MaticPaySerializer serializer,
+           [FromBody] SubmitMaticPayDepositRequest request
+           )
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var brandPayment = await getBrandPaymentService
+                .GetAsync(new GetBrandPaymentQuery(request.BrandPaymentId))
+                .ConfigureAwait(false);
+
+            var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
+
+            var player = await getPlayerInfoService.GetAsync(new GetPlayerQuery(brandId, playerTokenData.PlayerCode));
+
+            var command = new CreateDepositFormCommand(
+                playerTokenData.PlayerCode,
+                brandId,
+                request.BrandPaymentId,
+                request.Amount,
+                "tgs.payment.maticpay.deposit",
+                request.PromotionId,
+                formId => serializer.Serialize(
+                    new MaticPayDepositSettings(
+                        brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
+                        brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
+                        formId,
+                        request.Amount,
+                        player.RealName)));
+
+            await createDepositFormService
+                .ExecuteAsync(command)
+                .ConfigureAwait(false);
+
+            var createdFormId = await command.ReturnFormIdSource.Task.ConfigureAwait(false);
+
+            var getDepositFormQuery = new GetDepositFormQuery(
+                playerTokenData.PlayerCode,
+                createdFormId,
+                brandId);
+
+            var formData = await getDepositFormService
+                .GetAsync(getDepositFormQuery)
+                .ConfigureAwait(false);
+
+            var applyInfo = serializer.Deserialize<MaticPayDepositApplyInfo>(formData.ApplyInfo!);
+
+            if (applyInfo.Response.Code == "0")
+            {
+                var paymentUrl = applyInfo.Response.Detail.PayURL.ToString();
+                if (applyInfo.Response.Detail.PayURL.ToString() == string.Empty)
+                {
+                    paymentUrl = applyInfo.Response.Detail.PayHtml.ToString();
+                }
+
+                return new MaticPayDepositFormCreatedResponse
+                {
+                    FormId = createdFormId,
+                    PaymentUrl = paymentUrl,
                     ErrorMessage = string.Empty
                 };
             }
