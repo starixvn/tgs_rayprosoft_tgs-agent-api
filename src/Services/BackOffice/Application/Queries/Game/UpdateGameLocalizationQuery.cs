@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TGS.Services.BackOffice.Domain;
 
 namespace TGS.Services.BackOffice.Application.Queries.Game
 {

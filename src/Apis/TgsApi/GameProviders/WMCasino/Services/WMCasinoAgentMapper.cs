@@ -8,7 +8,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
     {
         WMCasinoAgent GetAgent(WMCasinoBrandMerchant[] merchants, string brandCode, string currencyCode);
 
-        WMCasinoAgent GetAgent(WMCasinoBrandMerchant[] merchants, string signature);
+        WMCasinoAgent GetAgentBySignature(WMCasinoBrandMerchant[] merchants, string signature);
+
+        WMCasinoAgent GetAgentById(WMCasinoBrandMerchant[] merchants, string agentId);
     }
 
     public class WMCasinoAgentMapper : IWMCasinoAgentMapper
@@ -30,12 +32,17 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 throw new ArgumentException($"No Merchant of '{brandCode}' is found.");
             }
 
-            return merchant.Agents.FirstOrDefault(a => a.CurrencyCode == currencyCode);
+            return merchant.Agents.FirstOrDefault(ag => ag.CurrencyCode == currencyCode && ag.Status);
         }
 
-        public WMCasinoAgent GetAgent(WMCasinoBrandMerchant[] merchants, string signature)
+        public WMCasinoAgent GetAgentById(WMCasinoBrandMerchant[] merchants, string agentId)
             => merchants
                 .SelectMany(m => m.Agents)
-                .FirstOrDefault(ag => ag.Signature.Equals(signature));
+                .FirstOrDefault(ag => ag.AgentId.Equals(agentId) && ag.Status);
+
+        public WMCasinoAgent GetAgentBySignature(WMCasinoBrandMerchant[] merchants, string signature)
+            => merchants
+                .SelectMany(m => m.Agents)
+                .FirstOrDefault(ag => ag.Signature.Equals(signature) && ag.Status);
     }
 }

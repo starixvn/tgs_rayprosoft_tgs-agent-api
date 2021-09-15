@@ -14,8 +14,5 @@ namespace TGS.Shared.Game.Models.WMCasino.Outgoing
 
         [JsonPropertyName("username")]
         public string Username { get; init; }
-
-        [JsonPropertyName("timestamp")]
-        public long Timestamp { get; init; }
     }
 }

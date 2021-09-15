@@ -97,6 +97,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Email is existed..
+        /// </summary>
+        public static string BrandEmailDuplicate {
+            get {
+                return ResourceManager.GetString("BrandEmailDuplicate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Player not found..
         /// </summary>
         public static string NotFound {

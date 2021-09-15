@@ -30,6 +30,7 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         [HttpPost("create")]
+        [CheckAgentEnabled]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<CreateAgentResponse> CreateAgentAsync(
             [FromServices] IGetService<GetCreateAgentQuery, CreateAgentInfo> getCreateAgentQueryService,
@@ -53,7 +54,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 Remarks = request.Remarks,
                 SlotRebatePercentage = request.SlotRebatePercentage,
                 SportsRebatePercentage = request.SportsRebatePercentage,
-                UserName = request.UserName,
+                Username = request.UserName,
                 VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage
             };
 
@@ -95,7 +96,7 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 Data = new AgentData
                 {
-                    Username = agentInfo.UserName,
+                    Username = agentInfo.Username,
                     RealName = agentInfo.RealName,
                     Email = agentInfo.Email,
                     Phone = agentInfo.Phone,
@@ -105,7 +106,8 @@ namespace TGS.Apis.AgentApi.Controllers
                     BrandUrl = agentInfo.BrandUrl,
                     IsSetPayPassword = agentInfo.PayPassword.Length > 0,
                     AgentLevel = agentInfo.AgentLevel,
-                    AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing
+                    AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing,
+                    DividendPercentage = agentInfo.DividendPercentage
                 }
             };
         }

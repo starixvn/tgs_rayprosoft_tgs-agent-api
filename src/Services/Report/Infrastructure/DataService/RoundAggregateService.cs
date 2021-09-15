@@ -146,7 +146,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             PromotionAmount = players.Where(p =>
                                 p.transaction.Type == TransactionType.Promotion && p.transaction.RecordedOn >= start &&
                                 p.transaction.RecordedOn < end).Sum(t => t.transaction.Amount),
-                            AgentDividendPercentage = x.DividendPercentage,
                             CreatedOn = DateTimeOffset.Now
                         }).ToArrayAsync();
 
@@ -216,7 +215,6 @@ namespace TGS.Services.Report.Infrastructure.DataService
                                     ? 0M
                                     : GetPlayerRebateAmountByGameType(x.Vip, x.GameType,
                                         aggregate.Select(a => a.r)),
-                            AgentDividendPercentage = x.Agent?.DividendPercentage ?? 0M,
                             CreatedOn = DateTimeOffset.Now,
                             ReportDate = reportDate
                         };

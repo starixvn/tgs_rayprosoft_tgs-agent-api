@@ -130,4 +130,7 @@
   <data name="EmailExisted" xml:space="preserve">
     <value>Email is existed.</value>
   </data>
+  <data name="DividendPercentageMustLessThanOrEqualToUpperLayer" xml:space="preserve">
+    <value>Dividend percentage must less than or equal to upper layer.</value>
+  </data>
 </root>

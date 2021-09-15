@@ -10,6 +10,7 @@ using TGS.Workers.Schedulers.Jobs.GameProviders.SBOBET;
 using TGS.Workers.Schedulers.Jobs.GameProviders.VR;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGHorse;
 using TGS.Workers.Schedulers.Jobs.GameProviders.WGSports;
+using TGS.Workers.Schedulers.Jobs.GameProviders.WMCasino;
 using TGS.Workers.Schedulers.Jobs.Players;
 using TGS.Workers.Schedulers.Jobs.Promotion;
 using TGS.Workers.Schedulers.Jobs.Reports;
@@ -64,7 +65,9 @@ namespace TGS.Workers.Schedulers.Services
                 new JobDescription(new("F1F7F055-77F6-C46E-2530-AFA692E538FF"), Cron.Minutely(), null,
                     typeof(WGHorseGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
                 new JobDescription(new("321E2BEE-0028-4D82-8CA7-BB1F1B83C4E0"), Cron.Monthly(1, 0, 0), null,
-                    typeof(PlatformCreditBalanceWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
+                    typeof(PlatformCreditBalanceWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId)),
+                new JobDescription(new("8FB79844-E7FA-48FF-91EA-1C3899A0901B"), Cron.Minutely(), null,
+                    typeof(WMCasinoGameRecordJobWorker), TimeZoneInfo.FindSystemTimeZoneById(_TimeZoneId))
             )
 
         {

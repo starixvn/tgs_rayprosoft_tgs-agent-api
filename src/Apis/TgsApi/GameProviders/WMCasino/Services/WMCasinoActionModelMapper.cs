@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using TGS.Core.Infrastructures.Extensions;
@@ -12,7 +11,7 @@ using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.WMCasino.Enums;
 using TGS.Shared.Game.Models.WMCasino.Incoming;
-using BetResult = TGS.Shared.Game.Models.WMCasino.Incoming.BetResult;
+using BetResult = TGS.Shared.Game.Models.WMCasino.Common.BetResult;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
@@ -25,7 +24,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         BetData PlaceAndSettleBetRequest(
             GameProviderConfigurationData data, string playerCode, BetResult[] results,
-            GameActionExternalIds[] externalIds, bool isManual);
+            GameActionExternalIds[] externalIds, bool fromSchedule);
 
         (BetData CancelBetData, BetData SettleBetData) ResettleRequest(
             GameProviderConfigurationData data, string playerCode, BetResult[] betResults,
@@ -46,9 +45,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
     public class WMCasinoActionModelMapper : IWMCasinoActionModelMapper
     {
-        private const string _TimestampFormat = "yyyy-MM-dd HH:mm:ss";
         private const string _GameProviderCode = Consts.GameProvider.WMCasino;
-        private static readonly TimeSpan _Offset = TimeSpan.FromHours(8);
 
         private static readonly JsonSerializerOptions _SerializerOptions = new JsonSerializerOptions
         {
@@ -56,7 +53,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
         };
 
         private readonly IJsonSerializationProvider _json;
-
         private readonly IWMCasinoUtility _utility;
 
         public WMCasinoActionModelMapper(
@@ -82,7 +78,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalBetId = externalRoundId,
                 GameActionType = GameActionType.LockAmount,
-                TimeStamp = ParseDateTimeOffset(request.Timestamp)
+                TimeStamp = _utility.ParseDateTimeOffset(request.Timestamp)
             };
 
             return GetBetData(playerCode, data, new[]
@@ -107,7 +103,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 ExternalGameActionGroupId = externalRoundId,
                 ExternalBetId = externalRoundId,
                 GameActionType = GameActionType.CancelTransaction,
-                TimeStamp = ParseDateTimeOffset(request.Timestamp),
+                TimeStamp = _utility.ParseDateTimeOffset(request.Timestamp),
                 RoundClosed = false
             };
 
@@ -119,7 +115,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         public BetData PlaceAndSettleBetRequest(
             GameProviderConfigurationData data, string playerCode, BetResult[] results,
-            GameActionExternalIds[] externalIds, bool isManual)
+            GameActionExternalIds[] externalIds, bool fromSchedule)
         {
             var bets = new List<TransactionData>();
             var settles = new List<TransactionData>();
@@ -138,21 +134,23 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     continue;
                 }
 
-                var betTypeCode = GetBetTypeCode(isManual, r);
+                var betTypeCode = GetBetTypeCode(fromSchedule, r);
                 var betAmount = r.BetAmount;
                 var winAmount = betAmount + r.WinLoss;
 
-                var betTime = ParseDateTimeOffset(r.BetTime);
+                var lockAmount = _utility.GetDepositAmount(betTypeCode, betAmount);
+
+                var betTime = _utility.ParseDateTimeOffset(r.BetTime);
                 var externalGameId = r.ExternalGameId;
                 var externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId);
 
-                lockedAmount += betAmount;
+                lockedAmount += lockAmount;
 
                 bets.AddRange(new[]
                 {
                     new TransactionData
                     {
-                        Amount = betAmount,
+                        Amount = lockAmount,
                         ExternalTransactionId = $"{betId}_unlock",
                         ExternalRoundId = externalRoundId,
                         ExternalGameActionGroupId = externalRoundId,
@@ -187,22 +185,21 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     ExternalBetId = betId,
                     ExternalTransactionReferenceId = betId,
                     ExternalGameId = externalGameId,
-                    GameActionType = winAmount == 0 ? GameActionType.LoseBet :
-                        winAmount > betAmount       ? GameActionType.WinBet : GameActionType.TieBet,
-                    TimeStamp = ParseDateTimeOffset(r.SettleTime),
+                    GameActionType = GetSettleGameActionType(externalGameId, betAmount, winAmount),
+                    TimeStamp = _utility.ParseDateTimeOffset(r.SettleTime),
                     RoundDetail = r.GameResult,
                     RoundClosed = lockedAmount == 0,
                     ExtraData = _json.SerializeToString(
                         new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
                         _SerializerOptions),
-                    CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate())
+                    CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate()),
+                    AllowLoseBetNegativeAmount = true
                 });
             }
 
             var transactions = bets.Concat(settles).ToArray();
             return transactions.Length == 0 ? null : GetBetData(playerCode, data, transactions, true);
         }
-
 
         public (BetData CancelBetData, BetData SettleBetData) ResettleRequest(GameProviderConfigurationData data,
             string playerCode, BetResult[] betResults, GameActionExternalIds[] externalIds)
@@ -224,7 +221,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
                 var betAmount = r.BetAmount;
                 var winAmount = betAmount + r.WinLoss;
-                var settleTime = ParseDateTimeOffset(r.SettleTime);
+                var settleTime = _utility.ParseDateTimeOffset(r.SettleTime);
                 var externalGameId = r.ExternalGameId;
                 var externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId);
 
@@ -250,15 +247,15 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     ExternalBetId = betId,
                     ExternalTransactionReferenceId = betId,
                     ExternalGameId = externalGameId,
-                    GameActionType = winAmount == 0 ? GameActionType.LoseBet :
-                        winAmount > betAmount       ? GameActionType.WinBet : GameActionType.TieBet,
-                    TimeStamp = ParseDateTimeOffset(r.SettleTime),
+                    GameActionType = GetSettleGameActionType(externalGameId, betAmount, winAmount),
+                    TimeStamp = _utility.ParseDateTimeOffset(r.SettleTime),
                     RoundDetail = r.GameResult,
                     RoundClosed = remainingLockAmount == 0,
                     ExtraData = _json.SerializeToString(
                         new { BetDeailIds = r.BetWalletIds.SplitByComma(StringSplitOptions.RemoveEmptyEntries) },
                         _SerializerOptions),
-                    CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate())
+                    CustomBetValues = new CustomBetValues(r.ValidBet, r.WinLoss.Negate()),
+                    AllowLoseBetNegativeAmount = true
                 });
             }
 
@@ -289,7 +286,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             {
                 var betId = r.BetId;
                 var settleId = $"{betId}_settle";
-                var settleTime = ParseDateTimeOffset(r.SettleTime);
+                var settleTime = _utility.ParseDateTimeOffset(r.SettleTime);
                 var externalGameId = r.ExternalGameId;
                 var externalRoundId = _utility.GetExternalRoundIdByBetResult(r.RoundId, r.SubRoundId);
 
@@ -335,7 +332,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 {
                     PlayerCode = playerCode,
                     Balance = r.Balance,
-                    Timestamp = GetTimestamp()
+                    Timestamp = _utility.GetTimestamp()
                 }
             };
 
@@ -348,7 +345,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     Amount = request.Amount,
                     Balance = balance,
                     DealId = request.DealId,
-                    Timestamp = GetTimestamp()
+                    Timestamp = _utility.GetTimestamp()
                 }
             };
 
@@ -361,7 +358,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     Amount = request.Amount,
                     Balance = balance,
                     DealId = request.DealId,
-                    Timestamp = GetTimestamp()
+                    Timestamp = _utility.GetTimestamp()
                 }
             };
 
@@ -372,16 +369,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 ErrorMessage = message
             };
 
-        private static string GetTimestamp()
-            => DateTimeOffset.UtcNow.ToOffset(_Offset).ToString(_TimestampFormat);
-
-        private static DateTimeOffset ParseDateTimeOffset(string timestamp)
-        {
-            var dateTime = DateTime.ParseExact(timestamp, _TimestampFormat, null,
-                DateTimeStyles.AllowWhiteSpaces);
-
-            return new DateTimeOffset(dateTime, _Offset);
-        }
 
         private static BetData GetBetData(string playerCode, GameProviderConfigurationData data,
             TransactionData[] transactions, bool allowPlaceBetWithDifferentPlatformToken = false)
@@ -399,8 +386,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                 WithCustomBetValues = true
             };
 
-        private static string GetBetTypeCode(bool isManual, BetResult r)
-            => isManual ? r.BetTypeCode : r.BetType;
+        private static string GetBetTypeCode(bool fromSchedule, BetResult r)
+            => fromSchedule ? r.BetTypeCode : r.BetType;
 
         private static decimal CalculateRemainingLockAmount(GameActionExternalIds[] externalIds)
         {
@@ -414,6 +401,18 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
                     t.GameActionType.IsOneOf(GameActionType.LockAmount, GameActionType.UnlockAmount) &&
                     !cancellationReferenceIds.Contains(t.ExternalTransactionId))
                 .Sum(t => t.Amount);
+        }
+
+        private static GameActionType GetSettleGameActionType(string externalGameId,
+            decimal betAmount, decimal winAmount)
+        {
+            if (winAmount == betAmount)
+            {
+                // for game NiuNiu, return WinBet
+                return externalGameId.Equals("105") ? GameActionType.WinBet : GameActionType.TieBet;
+            }
+
+            return winAmount > 0 ? GameActionType.WinBet : GameActionType.LoseBet;
         }
     }
 }

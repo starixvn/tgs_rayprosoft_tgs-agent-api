@@ -8,6 +8,7 @@ using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Apis.AgentApi.Validators;
 using TGS.Core.Infrastructures.Security;
 using TGS.Services.Agent;
+using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Services.PayPassowrd;
 using TGS.Services.Agent.ValidateCode;
 
@@ -42,7 +43,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 1,
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
-                0M);
+                0M,
+                10M);
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -88,7 +90,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 1,
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
-                0M);
+                0M,
+                10M);
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -148,7 +151,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         3
                     },
                     Array.Empty<byte>(),
-                    0M));
+                    0M,
+                    10M));
 
             Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
         }
@@ -183,7 +187,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     1,
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
-                    0M));
+                    0M,
+                    10M));
 
             await sut.ExecuteAsync(command);
 
@@ -220,7 +225,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 1,
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
-                0M);
+                0M,
+                10M);
 
             var command = new StartChangePayPasswordCommand(agent.Id, CultureInfo.GetCultureInfo("en-US"));
 
@@ -269,7 +275,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 1,
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
-                0M);
+                0M,
+                10M);
             fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();

@@ -62,10 +62,6 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasPrecision(9, 6)
                 .IsRequired();
 
-            builder.Property(b => b.AgentDividendPercentage)
-                .HasPrecision(9, 6)
-                .IsRequired();
-
             builder.Property(c => c.VipRebateAmount)
                 .HasPrecision(18, 6)
                 .IsRequired();
@@ -76,14 +72,14 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(b => b.CreatedOn)
                 .IsRequired();
 
-            builder.HasIndex(b => new {b.BrandId, b.ReportDate})
-                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date");
-
-            builder.HasIndex(b => new {b.BrandId, b.ReportDate, b.PlayerCode})
-                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_player_code");
-
-            builder.HasIndex(b => new {b.BrandId, b.ReportDate, b.AgentId})
-                .HasDatabaseName("ix_player_game_rebate_aggregates_brand_id_report_date_agent_id");
+            builder.HasIndex(b => new
+                {
+                    b.ReportDate,
+                    b.BrandId,
+                    b.AgentId,
+                    b.PlayerCode
+                })
+                .HasDatabaseName("ix_player_game_rebate_aggregates_multiple_keys");
         }
     }
 }
