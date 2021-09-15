@@ -205,13 +205,16 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
             var response = await FundInAsync(player, Math.Abs(request.Amount));
 
             FundTransferTransactionStatus fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
-            if (!response.Success)
+            if (response.Success)
             {
+                fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
+                /*
                 var checking = await CheckingOrderIdAsync(player, response.OrderId);
                 if (checking.Checking && !string.IsNullOrEmpty(checking.OrderId))
                 {
                     fundTransferStatus = FundTransferTransactionStatus.Success;
                 }
+                */
             }
             else
             {
