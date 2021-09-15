@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Text.Json;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Data;
@@ -20,6 +22,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
 
         BetData CancelLockAmountRequest(string playerCode, GameProviderConfigurationData data,
             GameActionExternalIds[] externalIds, CancelBetRequest request);
+
+        BetData PlaceAndSettleBetRequest(string playerCode, GameProviderConfigurationData data,
+            SettleBetRequest request);
     }
 
     public class Card365ActionModelMapper : ICard365ActionModelMapper
@@ -27,6 +32,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         private static readonly string _GameProviderCode = Consts.GameProvider.Card365;
         private static readonly string _TimestampFormat = "MM/dd/yyyy HH:mm:ss.fff";
         private static readonly TimeSpan _Offset = TimeSpan.FromHours(8);
+
+        private readonly JsonSerializerOptions _jsonSerializerOptions =
+            new() { WriteIndented = false };
+
 
         public BetData LockAmountRequest(string playerCode, GameProviderConfigurationData data, BetRequest request)
         {
@@ -63,8 +72,75 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                 ExternalGameActionGroupId = ga.ExternalGameActionGroupId,
                 ExternalBetId = ga.ExternalRoundId,
                 GameActionType = GameActionType.CancelTransaction,
-                TimeStamp = ParseDateTimeOffset(request.Timestamp)
+                TimeStamp = ParseDateTimeOffset(request.Timestamp),
+                RoundClosed = true
             }).ToArray();
+
+            return GetBetData(playerCode, data, transactions);
+        }
+
+
+        public BetData PlaceAndSettleBetRequest(string playerCode, GameProviderConfigurationData data,
+            SettleBetRequest request)
+        {
+            var externalRoundId = request.ExternalRoundId;
+            var externalGameId = request.ExternalGameId.ToString();
+            var externalTransactionId = request.ExternalTransactionId;
+
+            var validBet = request.ValidBet;
+            var playerWinLoss = request.WinLoss;
+
+            var settleAmount = request.RealBetMoney + playerWinLoss;
+
+            var transactions = new[]
+            {
+                new TransactionData
+                {
+                    Amount = request.BetAmount,
+                    ExternalGameId = externalGameId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = $"{externalTransactionId}_unlock",
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    GameActionType = GameActionType.UnlockAmount,
+                    TimeStamp = ParseDateTimeOffset(request.BetTimestamp)
+                },
+                new TransactionData
+                {
+                    Amount = request.RealBetMoney,
+                    ExternalGameId = externalGameId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    GameActionType = GameActionType.PlaceBet,
+                    TimeStamp = ParseDateTimeOffset(request.BetTimestamp)
+                },
+                new TransactionData
+                {
+                    Amount = settleAmount,
+                    ExternalGameId = externalGameId,
+                    ExternalRoundId = externalRoundId,
+                    ExternalTransactionId = $"{externalTransactionId}_settle",
+                    ExternalTransactionReferenceId = externalTransactionId,
+                    ExternalGameActionGroupId = externalRoundId,
+                    ExternalBetId = externalRoundId,
+                    GameActionType = settleAmount > 0 ? GameActionType.WinBet : GameActionType.LoseBet,
+                    TimeStamp = ParseDateTimeOffset(request.SettleTimestamp),
+                    Commission = request.Commission,
+                    RoundClosed = true,
+                    AllowLoseBetNegativeAmount = true,
+                    CustomBetValues = new CustomBetValues(validBet, playerWinLoss.Negate()),
+                    RoundDetail = JsonSerializer.Serialize(new
+                    {
+                        request.OutMoney,
+                        request.Chair,
+                        request.Banker,
+                        request.PlayId,
+                        request.Tiles
+                    }, _jsonSerializerOptions)
+                }
+            };
 
             return GetBetData(playerCode, data, transactions);
         }

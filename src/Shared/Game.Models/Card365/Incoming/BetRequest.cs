@@ -31,5 +31,8 @@ namespace TGS.Shared.Game.Models.Card365.Incoming
 
         [JsonPropertyName("betTransTime")]
         public string Timestamp { get; init; }
+
+        [JsonPropertyName("chair")]
+        public int Chair { get; init; }
     }
 }

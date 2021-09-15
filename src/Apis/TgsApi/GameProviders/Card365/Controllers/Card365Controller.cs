@@ -51,5 +51,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Controllers
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             return services.CancelLockAmountAsync(playerCode, request);
         }
+
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HttpPost("settle")]
+        public ValueTask<BalanceResponse> PlaceBetAndSettleAsync(
+            [FromServices] ICard365BetActionServices services,
+            SettleBetRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            return services.PlaceBetAndSettleAsync(playerCode, request);
+        }
     }
 }
