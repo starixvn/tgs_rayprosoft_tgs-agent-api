@@ -8,5 +8,6 @@ namespace TGS.Services.Operator.Services.Player
         string Password,
         string CurrencyCode,
         string AgentInvitationCode,
-        bool IsTestPlayer);
+        bool IsTestPlayer,
+        string IpAddress);
 }
