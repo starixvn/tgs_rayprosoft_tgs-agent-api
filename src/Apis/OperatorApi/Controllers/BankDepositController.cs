@@ -193,7 +193,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerTokenData.PlayerCode,
                 brandId,
                 request.BrandPaymentId,
-                request.Amount,
+                amount,
                 "tgs.payment.umpay.deposit",
                 request.PromotionId,
                 formId => serializer.Serialize(
