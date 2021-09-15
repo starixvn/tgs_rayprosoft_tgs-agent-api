@@ -9,5 +9,9 @@ namespace TGS.Services.Operator
         ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
         ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
+
+        ValueTask PlayerRegisterIpAsync(string playerCode, string ip);
+
+        ValueTask PlayerLoginIpAsync(string playerCode, string ip);
     }
 }

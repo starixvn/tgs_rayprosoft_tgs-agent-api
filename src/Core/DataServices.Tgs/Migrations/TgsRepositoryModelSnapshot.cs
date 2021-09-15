@@ -4006,6 +4006,35 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("player_game_settings");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIpRecord", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<short>("IpType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("ip_type");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("ip");
+
+                    b.Property<DateTimeOffset>("RecordOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("record_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.HasKey("PlayerCode", "IpType")
+                        .HasName("pk_player_ip_records");
+
+                    b.ToTable("player_ip_records");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6781,6 +6810,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIpRecord", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_player_ip_records_players_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
