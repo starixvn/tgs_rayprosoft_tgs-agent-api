@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Hangfire.Services;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -15,15 +16,18 @@ namespace TGS.Workers.Schedulers.Jobs
     [Queue(Consts.Queue.Schedule)]
     public sealed class BrandGameProviderScheduleWorker : BaseWork<TgsResponse>
     {
+        private readonly IRedisCacheManager _cacheManager;
         private readonly ITgsLog _log;
         private readonly IBrandGameProviderService _service;
 
         public BrandGameProviderScheduleWorker(
+            IRedisCacheManager cacheManager,
             IBrandGameProviderService service,
             ITgsLog log)
         {
             _service = service;
             _log = log.SetLogger(nameof(BrandGameProviderScheduleWorker));
+            _cacheManager = cacheManager;
         }
 
         public override async Task<TgsResponse> ExecuteAsync(object context)
@@ -54,8 +58,19 @@ namespace TGS.Workers.Schedulers.Jobs
                 var brandGameProvidersToBeActivated =
                     await GetBrandGameProviders(Status.Maintenance, Status.Active, Predicate);
 
-                await _service.UpdateBrandGameProvidersAsync(brandGameProvidersToBeMaintenance
-                    .Union(brandGameProvidersToBeActivated).ToArray());
+                var brandGameProviders = brandGameProvidersToBeMaintenance
+                    .Union(brandGameProvidersToBeActivated).ToArray();
+
+                var cacheKeys = brandGameProviders
+                    .Select(x => new CacheKey
+                    {
+                        CacheType = RedisCacheType.BrandGameProviders,
+                        Key = x.BrandId
+                    }).ToArray();
+
+                await _service.UpdateBrandGameProvidersAsync(brandGameProviders);
+
+                await _cacheManager.ClearCacheByBatchAsync(cacheKeys);
 
                 return new();
             }
@@ -63,7 +78,11 @@ namespace TGS.Workers.Schedulers.Jobs
             {
                 _log.LogError("Fail to update brand game provider status", ex);
 
-                return new() {Error = (int)TgsApiError.SystemError, ErrorMessage = ex.Message};
+                return new()
+                {
+                    Error = (int)TgsApiError.SystemError,
+                    ErrorMessage = ex.Message
+                };
             }
         }
 
