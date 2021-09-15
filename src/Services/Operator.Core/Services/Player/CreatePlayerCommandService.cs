@@ -22,6 +22,7 @@ namespace TGS.Services.Operator.Services.Player
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
         private readonly IStatusValidator _statusValidator;
+        private readonly IPlayerRepository _playerRepository;
 
         public CreatePlayerCommandService(
             IStatusValidator statusValidator,
@@ -29,7 +30,8 @@ namespace TGS.Services.Operator.Services.Player
             IPasswordHandler passwordHandler,
             IBrandCurrencyCodeMapper currencyCodeMapper,
             IBrandOperations brandOperations,
-            IAgentOperations agentOperations)
+            IAgentOperations agentOperations,
+            IPlayerRepository playerRepository)
         {
             _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -37,6 +39,7 @@ namespace TGS.Services.Operator.Services.Player
             _currencyCodeMapper = currencyCodeMapper ?? throw new ArgumentNullException(nameof(currencyCodeMapper));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
+            _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         }
 
         public async ValueTask<CreatePlayerInfo> GetAsync(CreatePlayerCommand query, CancellationToken cancellationToken = default)
@@ -54,28 +57,32 @@ namespace TGS.Services.Operator.Services.Player
             var currency = await _currencyCodeMapper.ExternalToInternalAsync(query.CurrencyCode, query.BrandId);
             var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(query.BrandId, currency);
 
+            var resultPlayerCode = default(string);
             if (string.IsNullOrWhiteSpace(query.AgentInvitationCode))
             {
-                var result = await CreatePlayerAsync(
-                    query,
-                    salt,
-                    password,
-                    currency,
-                    betLimitId).ConfigureAwait(false);
+                resultPlayerCode = await CreatePlayerAsync(
+                   query,
+                   salt,
+                   password,
+                   currency,
+                   betLimitId).ConfigureAwait(false);
 
-                return new CreatePlayerInfo(result, IsNew: true);
+
             }
             else
             {
-                var result = await CreatePlayerByAgentAsync(
-                    query,
-                    salt,
-                    password,
-                    currency,
-                    betLimitId).ConfigureAwait(false);
-
-                return new CreatePlayerInfo(result, IsNew: true);
+                resultPlayerCode = await CreatePlayerByAgentAsync(
+                  query,
+                  salt,
+                  password,
+                  currency,
+                  betLimitId).ConfigureAwait(false);
             }
+            if (!string.IsNullOrEmpty(resultPlayerCode))
+            {
+                await _playerRepository.PlayerRegisterIpAsync(resultPlayerCode, query.IpAddress).ConfigureAwait(false);
+            }
+            return new CreatePlayerInfo(resultPlayerCode, IsNew: true);
         }
 
         private Task<string> CreatePlayerAsync(
