@@ -34,6 +34,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public int Status { get; set; }
 
+        public string ThirdPartyOrderNo { get; set; }
+
         public DateTimeOffset UpdatedOn { get; set; }
     }
 }
