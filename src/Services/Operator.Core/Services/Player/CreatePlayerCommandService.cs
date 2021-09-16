@@ -78,9 +78,12 @@ namespace TGS.Services.Operator.Services.Player
                   currency,
                   betLimitId).ConfigureAwait(false);
             }
+
+
             if (!string.IsNullOrEmpty(resultPlayerCode))
             {
-                await _playerRepository.PlayerRegisterIpAsync(resultPlayerCode, query.IpAddress).ConfigureAwait(false);
+                var player = await _playerOperations.GetPlayerByCodeAsync(resultPlayerCode);
+                await _playerRepository.PlayerRegisterIpAsync(resultPlayerCode, query.IpAddress, player.RegisteredOn).ConfigureAwait(false);
             }
             return new CreatePlayerInfo(resultPlayerCode, IsNew: true);
         }

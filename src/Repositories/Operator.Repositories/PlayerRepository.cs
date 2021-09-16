@@ -62,21 +62,21 @@ namespace TGS.Operator.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip)
+        public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
         {
             var datas = new PlayerIpRecord[] {
                 new() {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.RegisterIp,
                     Ip = ip,
-                    RecordOn = DateTimeOffset.UtcNow
+                    RecordOn = registeredOn
                 } ,
                 new()
                 {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.LoginIp,
                     Ip = ip,
-                    RecordOn = DateTimeOffset.UtcNow
+                    RecordOn = registeredOn
                 } };
             await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
