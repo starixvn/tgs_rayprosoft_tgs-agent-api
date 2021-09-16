@@ -24,6 +24,10 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public decimal WageringRequirement { get; set; }
         public BankModel[] Banks { get; init; }
 
+        public string RegisterIp { get; init; }
+        public string LastLoginIp { get; init; }
+        public DateTimeOffset? LastLoginOn { get; init; }
+
         public class BankModel
         {
             public Guid Id { get; init; }

@@ -1,9 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.DataServices.Base.Extensions;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.PlayerIp;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -21,23 +23,22 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerIpHandlers
         }
 
         public override Task<PagedResponse<PlayerIpByIpModel>> Handle(GetPlayerIpsByIpRequest request, CancellationToken cancellationToken)
-            => _service
-            .GetPlayerIpOperationByIpQueries(request.BrandId, request.IpAddress)
-            .GroupBy(x => new
+        {
+            var endDateTimeOffset = DateTimeOffset.UtcNow;
+            var startDateTimeOffset = endDateTimeOffset.AddDays(-14);
+
+            if (request.IpType == IpType.RegisterIp)
             {
-                PlayerCode = x.Player.PlayerCode,
-                Username = x.Player.Username
-
-            })
-            .Select(group => new PlayerIpByIpModel
+                return _service
+                    .GetPlayerIpRecordsByRegisterQueries(request.BrandId, request.IpAddress, startDateTimeOffset, endDateTimeOffset)
+                    .CreatePagedResponseAsync(request);
+            }
+            else
             {
-                PlayerCode = group.Key.PlayerCode,
-                Username = group.Key.Username,
-                CreatedOn = group.Max(y => y.CreatedOn)
-            })
-            .OrderBy(x => x.CreatedOn)
-            .CreatePagedResponseAsync(request);
-
-
+                return _service
+                    .GetPlayerIpOperationByIpQueries(request.BrandId, request.IpAddress, startDateTimeOffset, endDateTimeOffset)
+                    .CreatePagedResponseAsync(request);
+            }
+        }
     }
 }
