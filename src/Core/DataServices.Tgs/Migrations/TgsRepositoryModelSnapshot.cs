@@ -1225,6 +1225,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("text")
                         .HasColumnName("sms_vendor_code");
 
+                    b.Property<string>("SmsVendorSettings")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("sms_vendor_settings");
+
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
                         .HasColumnName("status");
