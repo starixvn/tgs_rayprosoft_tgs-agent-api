@@ -5,7 +5,8 @@ namespace TGS.Shared.Game.Models.Card365.Incoming
     public record ErrorResponse
     {
         [JsonPropertyName("status")]
-        public string ErrorCode { get; init; }
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
+        public int ErrorCode { get; init; }
 
         [JsonPropertyName("msg")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

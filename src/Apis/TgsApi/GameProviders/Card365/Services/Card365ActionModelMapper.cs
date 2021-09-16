@@ -193,14 +193,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         public BalanceResponse Response(GetBalanceResult r)
             => new BalanceResponse
             {
-                ErrorCode = ((int)GameApiError.Success).ToString(),
+                ErrorCode = (int)GameApiError.Success,
                 Balance = r.Balance
             };
 
         public BalanceResponse Response(BetResult r)
             => new BalanceResponse
             {
-                ErrorCode = ((int)GameApiError.Success).ToString(),
+                ErrorCode = (int)GameApiError.Success,
                 Balance = r.Balance
             };
 

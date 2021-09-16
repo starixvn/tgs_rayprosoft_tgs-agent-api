@@ -37,6 +37,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365
 
             services.AddScoped<Card365DispatcherMiddleware>();
             services.AddScoped<AuthorizeCard365Middleware>();
+            services.AddScoped<HandleCard365ExceptionMiddleware>();
 
             services.AddScoped<ICard365ActionModelMapper, Card365ActionModelMapper>();
             services.AddScoped<ICard365BetActionServices, Card365BetActionServices>();
@@ -55,7 +56,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365
                     HttpMethods.IsPost(context.Request.Method),
                 builder =>
                 {
-                    //builder.UseMiddleware<HandleWMCasinoExceptionMiddleware>();
+                    builder.UseMiddleware<HandleCard365ExceptionMiddleware>();
                     builder.UseMiddleware<Card365DispatcherMiddleware>();
                 });
         }

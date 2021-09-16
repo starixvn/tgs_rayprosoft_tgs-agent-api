@@ -8,7 +8,7 @@
         NoData = 1003,
         InvalidUsername = 1004,
         InvalidParameters = 1008,
-        InsufficientFund = 1009,
+        InsufficientFunds = 1009,
         GameIdNotExist = 1011,
         InvalidAgent = 1016,
         AccountBlocked = 1018,
