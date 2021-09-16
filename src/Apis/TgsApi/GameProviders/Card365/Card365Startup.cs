@@ -10,6 +10,7 @@ using TGS.Apis.TgsApi.GameProviders.Card365.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Card365.Services;
 using TGS.Core.Infrastructures.ErrorMappers;
 using TGS.Core.Models;
+using TGS.Services.GameOperations.Calculators;
 
 namespace TGS.Apis.TgsApi.GameProviders.Card365
 {
@@ -40,6 +41,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365
             services.AddScoped<ICard365ActionModelMapper, Card365ActionModelMapper>();
             services.AddScoped<ICard365BetActionServices, Card365BetActionServices>();
             services.AddScoped<ICard365Services, Card365Services>();
+
+            services.AddSingleton<IBetValuesCalculator, Card365BetValuesCalculator>();
         }
 
         protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
