@@ -61,6 +61,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
 
+            builder.Property(w => w.ThirdPartyOrderNo);
+
             builder.HasOne(w => w.Brand)
                 .WithMany()
                 .HasForeignKey(w => w.BrandId)
