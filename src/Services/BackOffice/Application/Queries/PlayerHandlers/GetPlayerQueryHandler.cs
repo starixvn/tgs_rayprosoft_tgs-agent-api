@@ -78,7 +78,7 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                         playerBuckets.Sum(p => p.CurrentBucketAmount),
                     RegisterIp = registerIp == null ? string.Empty : registerIp.Ip,
                     LastLoginIp = loginIp == null ? string.Empty : registerIp.Ip,
-                    LastLoginOn = loginIp == null ? (DateTimeOffset?)null : registerIp.RecordOn,
+                    LastLoginOn = loginIp == null ? null : registerIp.RecordOn,
                 }
             };
         }
