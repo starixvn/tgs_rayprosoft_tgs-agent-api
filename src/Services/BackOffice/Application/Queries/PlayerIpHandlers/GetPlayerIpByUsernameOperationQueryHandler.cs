@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,20 +23,32 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerIpHandlers
         }
 
         public override Task<PagedResponse<PlayerIpByUserNameModel>> Handle(GetPlayerIpsByUserNameRequest request, CancellationToken cancellationToken)
-            => _service
-            .GetPlayerIpOperationByUsernameQueries(request.BrandId, request.UserName)
-            .GroupBy(x => new
+        {
+            var endDateTimeOffset = DateTimeOffset.UtcNow;
+            var startDateTimeOffset = endDateTimeOffset.AddDays(-14);
+
+            var loginRecords = _service.GetPlayerIpOperationByUsernameQueries(request.BrandId, request.UserName, startDateTimeOffset, endDateTimeOffset);
+
+            var registerRecords = _service
+              .GetPlayerIpRecordsByRegister(request.BrandId, request.UserName)
+              .Where(x => x.RecordOn > endDateTimeOffset && x.RecordOn < endDateTimeOffset)
+              .Select(x => new PlayerIpByUserNameModel
+              {
+                  IpAddress = x.Ip,
+                  CreatedOn = x.RecordOn
+              })
+              .OrderByDescending(x => x.CreatedOn);
+            loginRecords.Concat(registerRecords);
+
+            return loginRecords.GroupBy(x => new
             {
                 IpAddress = x.IpAddress
-            })
-            .Select(group => new PlayerIpByUserNameModel
+            }).Select(group => new PlayerIpByUserNameModel
             {
                 IpAddress = group.Key.IpAddress,
                 CreatedOn = group.Max(y => y.CreatedOn)
-            })
-            .OrderByDescending(x => x.CreatedOn)
-            .CreatePagedResponseAsync(request);
-
-
+            }).OrderByDescending(x => x.CreatedOn)
+              .CreatePagedResponseAsync(request);
+        }
     }
 }
