@@ -2098,6 +2098,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("status");
 
+                    b.Property<string>("ThirdPartyOrderNo")
+                        .HasColumnType("text")
+                        .HasColumnName("third_party_order_no");
+
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -5830,6 +5834,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("status");
+
+                    b.Property<string>("ThirdPartyOrderNo")
+                        .HasColumnType("text")
+                        .HasColumnName("third_party_order_no");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .ValueGeneratedOnAdd()
