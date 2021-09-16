@@ -20,7 +20,23 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet]
         [Description("Get markets")]
-        public Task<PagedResponse<MarketModel>> GetVipsAsync([FromQuery] GetMarketsRequest request) =>
+        public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
             _mediator.Send(request);
+
+        //[HttpGet("export")]
+        //[Description("export markets")]
+        //public async Task<PagedResponse<MarketModel>> ExportMarketsAsync([FromQuery] GetMarketsRequest request)
+        //{
+        //    var getMarketsRequest = new GetMarketsRequest
+        //    {
+        //        BrandId = request.BrandId,
+        //        From = request.From,
+        //        To = request.To,
+        //        ShowAll = true
+        //    };
+        //    var markets = await _mediator.Send(getMarketsRequest).ConfigureAwait(false);
+
+        //    markets.Items.(x => x.)
+        //}
     }
 }
