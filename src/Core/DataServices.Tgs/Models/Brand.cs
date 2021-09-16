@@ -68,6 +68,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string SmsVendorCode { get; set; }
 
+        public string SmsVendorSettings { get; set; }
+
         public virtual ICollection<StationLetter> StationLetters { get; set; }
 
         public Status Status { get; set; }
