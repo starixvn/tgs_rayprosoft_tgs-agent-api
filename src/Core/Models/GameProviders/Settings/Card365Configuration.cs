@@ -9,6 +9,8 @@ namespace TGS.Core.Models.GameProviders.Settings
 
         public string Cert { get; init; }
 
+        public string Website { get; init; }
+
         public Card365BrandAgent[] BrandAgents { get; init; }
     }
 }

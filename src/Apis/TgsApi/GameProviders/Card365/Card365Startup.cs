@@ -8,7 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TGS.Apis.TgsApi.Commons;
 using TGS.Apis.TgsApi.GameProviders.Card365.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.Card365.Services;
+using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.ErrorMappers;
+using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
 using TGS.Services.GameOperations.Calculators;
 
@@ -42,8 +44,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365
             services.AddScoped<ICard365ActionModelMapper, Card365ActionModelMapper>();
             services.AddScoped<ICard365BetActionServices, Card365BetActionServices>();
             services.AddScoped<ICard365Services, Card365Services>();
+            services.AddScoped<ICard365AgentMapper, Card365AgentMapper>();
 
             services.AddSingleton<IBetValuesCalculator, Card365BetValuesCalculator>();
+
+            services.AddScopedWithResolver<IGameInitializer>(new[]
+                {
+                    typeof(Card365GameInitializer)
+                },
+                (provider, _) => provider.GetRequiredService<Card365GameInitializer>());
+
+            //services.AddScopedWithResolver<IGameHistory>(new[]
+            //    {
+            //        typeof(WMCasinoGameHistory)
+            //    },
+            //    (provider, _) => provider.GetRequiredService<WMCasinoGameHistory>());
         }
 
         protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)

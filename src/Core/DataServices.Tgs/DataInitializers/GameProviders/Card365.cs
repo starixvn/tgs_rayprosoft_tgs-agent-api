@@ -86,6 +86,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                         _env.IsDocker() ? new("http://game-365") : new("http://localhost:62330"),
                     ApiUrl = new("https://g5ky3i.365gaming.cc/api/website/"),
                     Cert = "755C24B710D9F2B4B15DAB2B489CF471",
+                    Website = "card365pega",
                     BrandAgents = new[]
                     {
                         new Card365BrandAgent
