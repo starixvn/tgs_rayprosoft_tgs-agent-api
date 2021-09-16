@@ -16,7 +16,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             { "getBalance", "/api/365/balance" },
             { "bet", "/api/365/bet" },
             { "settle", "/api/365/settle" },
-            { "voidGame", "/api/365/void" },
+            { "voidGame", "/api/365/voidgame" },
             { "cancelBet", "/api/365/cancelbet" }
         };
 

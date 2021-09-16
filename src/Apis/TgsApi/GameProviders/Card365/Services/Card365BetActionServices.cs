@@ -17,6 +17,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         ValueTask<BalanceResponse> CancelLockAmountAsync(string playerCode, CancelBetRequest request);
 
         ValueTask<BalanceResponse> PlaceBetAndSettleAsync(string playerCode, SettleBetRequest request);
+
+        ValueTask<BalanceResponse> VoidRoundAsync(string playerCode, VoidGameRequest request);
     }
 
     public class Card365BetActionServices : ICard365BetActionServices
@@ -84,6 +86,21 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
 
             var betData = _map.PlaceAndSettleBetRequest(playerCode, data, request);
             var result = await _actions.PlaceAndSettleBetAsync(betData);
+            return _map.Response(result);
+        }
+
+        public async ValueTask<BalanceResponse> VoidRoundAsync(string playerCode, VoidGameRequest request)
+        {
+            var externalRoundId = request.ExternalRoundId;
+
+            var data = await _services.GetGameProviderConfigurationDataAsync()
+                .ConfigureAwait(false);
+
+            var externalIds = await _services
+                .GetGameActionExternalIdsAsync(data.GameProviderId, playerCode, externalRoundId).ConfigureAwait(false);
+
+            var betData = _map.VoidRoundRequest(playerCode, data, externalIds, request);
+            var result = await _actions.CancelTransactionAsync(betData);
             return _map.Response(result);
         }
     }

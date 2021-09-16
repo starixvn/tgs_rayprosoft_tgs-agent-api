@@ -61,5 +61,15 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Controllers
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             return services.PlaceBetAndSettleAsync(playerCode, request);
         }
+
+        [Consumes(MediaTypeNames.Application.Json)]
+        [HttpPost("voidgame")]
+        public ValueTask<BalanceResponse> VoidRoundAsync(
+            [FromServices] ICard365BetActionServices services,
+            VoidGameRequest request)
+        {
+            var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
+            return services.VoidRoundAsync(playerCode, request);
+        }
     }
 }
