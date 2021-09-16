@@ -26,8 +26,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         IQueryable<PlayerIpModel> GetPlayerIpRecordsByRegisterQueries(Guid brandId, DateTimeOffset startOn, DateTimeOffset endOn);
 
         IQueryable<PlayerIpByIpModel> GetPlayerIpRecordsByRegisterQueries(Guid brandId, string ipAddress, DateTimeOffset startOn, DateTimeOffset endOn);
-
-        IQueryable<PlayerIpByIpModel> GetPlayerIpRecordsByLoginQueries(Guid brandId, string ipAddress, DateTimeOffset startOn, DateTimeOffset endOn);
     }
     public class PlayerIpService : IPlayerIpService
     {
@@ -61,7 +59,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             {
                 IpAddress = group.Key,
                 MemberCount = group.Count()
-            });
+            }).OrderByDescending(x => x.MemberCount);
 
         public IQueryable<PlayerIpByIpModel> GetPlayerIpOperationByIpQueries(Guid brandId, string ipAddress, DateTimeOffset startOn, DateTimeOffset endOn)
             => _tgsRepository.PlayerLoginRecords.AsQueryable()
@@ -150,42 +148,6 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             })
             .OrderBy(x => x.CreatedOn);
 
-        public IQueryable<PlayerIpByIpModel> GetPlayerIpRecordsByLoginQueries(Guid brandId, string ipAddress, DateTimeOffset startOn, DateTimeOffset endOn)
-            => _tgsRepository.Players.AsQueryable()
-            .Where(x => x.BrandId == brandId)
-            .Join(_tgsRepository.PlayerIpRecords,
-                player => player.PlayerCode,
-                playerIpRecord => playerIpRecord.PlayerCode,
-                (player, playerIpRecord) => new
-                {
-                    player.BrandId,
-                    player.PlayerCode,
-                    player.Username,
-                    playerIpRecord.Ip,
-                    playerIpRecord.IpType,
-                    playerIpRecord.RecordOn
-                })
-            .Where(x =>
-           x.IpType == (int)IpType.LoginIp
-           && x.Ip == ipAddress
-           && x.RecordOn > startOn
-           && x.RecordOn < endOn)
-            .GroupBy(x => new
-            {
-                x.BrandId,
-                x.PlayerCode,
-                x.Username,
-                x.Ip,
-                x.IpType,
-            })
-            .Select((group) => new PlayerIpByIpModel
-            {
-                PlayerCode = group.Key.PlayerCode,
-                Username = group.Key.Username,
-                CreatedOn = group.Max(playerIpRecord => playerIpRecord.RecordOn)
-            })
-            .OrderBy(x => x.CreatedOn);
-
         public IQueryable<PlayerIpModel> GetPlayerIpRecordsByRegisterQueries(Guid brandId, DateTimeOffset startOn, DateTimeOffset endOn)
             => _tgsRepository.Players.AsQueryable()
             .Where(x => x.BrandId == brandId)
@@ -202,19 +164,26 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                     playerIpRecord.RecordOn
                 })
             .Where(x =>
-           x.IpType == (int)IpType.LoginIp
+           x.IpType == (int)IpType.RegisterIp
            && x.RecordOn > startOn
            && x.RecordOn < endOn)
             .GroupBy(x => new
             {
                 x.Ip,
-                x.IpType
+                x.IpType,
+                x.PlayerCode
             })
-            .Select((group) => new PlayerIpModel
+            .Select((group) => new
             {
-                IpAddress = group.Key.Ip,
-                MemberCount = group.Where(x => x.Ip == group.Key.Ip).Count()
+                Ip = group.Key.Ip,
+                IpType = group.Key.IpType,
+                PlayerCode = group.Key.PlayerCode,
             })
-            .OrderByDescending(x => x.MemberCount);
+            .GroupBy(x => x.Ip)
+            .Select(group => new PlayerIpModel
+            {
+                IpAddress = group.Key,
+                MemberCount = group.Count()
+            }).OrderByDescending(x => x.MemberCount);
     }
 }
