@@ -20,7 +20,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             _mediator = mediator;
         }
 
-        [HttpGet()]
+        [HttpGet]
         [Description("Get player ipaddress ")]
         public Task<PagedResponse<PlayerIpModel>> GetPlayerIpsListAsync([FromQuery] GetPlayerIpsRequest request) =>
             _mediator.Send(request);
