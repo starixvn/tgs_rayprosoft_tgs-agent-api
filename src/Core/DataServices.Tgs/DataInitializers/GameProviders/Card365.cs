@@ -59,7 +59,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new KRWCurrency("8"),
                 new THBCurrency("9"),
                 new VND1000Currency("11"),
-                new INRCurrency("17"),
+                new INRCurrency("15"),
                 new VNDCurrency("55"),
                 new IDRCurrency("56")
             };
