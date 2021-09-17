@@ -28,6 +28,7 @@ namespace TGS.Shared.Game.ApiClients.VR
         ValueTask<VRFundCheckingResponse> FundCheckingAsync(VRBrandMerchant brandMerchant, VRFundCheckingRequest request);
         ValueTask<VRGetBalanceResponse> GetBalanceAsync(VRBrandMerchant brandMerchant, VRGetBalanceRequest request);
         ValueTask<VRGameRecordResponse> GetGameRecordAsync(VRBrandMerchant brandMerchant, VRGameRecordRequest request);
+        ValueTask<VRKickResponse> KickAsync(VRBrandMerchant brandMerchant, VRKickRequest request);
         Uri GetGameURLAsync(VRBrandMerchant brandMerchant, VRGameUrlRequest request);
         ValueTask<VRGPGameRecordResponse> GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request);
     }
@@ -81,6 +82,9 @@ namespace TGS.Shared.Game.ApiClients.VR
 
         public ValueTask<VRGameRecordResponse> GetGameRecordAsync(VRBrandMerchant brandMerchant, VRGameRecordRequest request)
             => GetAPIAsync<VRGameRecordRequest, VRGameRecordResponse>(brandMerchant, GPAction.GameRecord, request);
+
+        public ValueTask<VRKickResponse> KickAsync(VRBrandMerchant brandMerchant, VRKickRequest request)
+            => GetAPIAsync<VRKickRequest, VRKickResponse>(brandMerchant, GPAction.Kick, request);
 
         public ValueTask<VRGPGameRecordResponse> GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request) =>
           ExecuteJsonRequestAsync<VRGPGameRecordRequest, VRGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/vr/GameRecord", request);

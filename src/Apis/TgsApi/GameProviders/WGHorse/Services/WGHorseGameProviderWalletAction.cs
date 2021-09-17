@@ -33,9 +33,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
         public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundInAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
             var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
-            var orderId = $"{ Consts.GameProvider.WGHorse}{transactionGameProviderId.ToString("N")}{player.PlayerCode}";
+            var orderId = $"{transactionGameProviderId.ToString("N")}{player.PlayerCode}";
             var source = new WGHorseAccessMoneyRequest()
             {
                 PlayerCode = player.PlayerCode,
@@ -47,18 +46,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
             var response = await _client.AccessMoneyAsync(configuration, source).ConfigureAwait(false);
             if (response.ReturnCode != 1)
             {
-                if (response.ReturnCode != 305)
-                {
-                    (bool Checking, string OrderId) = await CheckingOrderIdAsync(player, orderId).ConfigureAwait(false);
-                    if (!Checking)
-                    {
-                        return (false, orderId, null);
-                    }
-                }
-                else
-                {
-                    return (false, orderId, null);
-                }
+                return (false, orderId, null);
             }
             var (Success, Balance) = await GetGameProviderBalanceAsync(player).ConfigureAwait(false);
 
@@ -67,9 +55,8 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
 
         public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundOutAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
             var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
-            var orderId = $"{ Consts.GameProvider.WGHorse}{transactionGameProviderId.ToString("N")}{player.PlayerCode}";
+            var orderId = $"{transactionGameProviderId.ToString("N")}{player.PlayerCode}";
             var source = new WGHorseAccessMoneyRequest()
             {
                 PlayerCode = player.PlayerCode,
@@ -81,18 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
             var response = await _client.AccessMoneyAsync(configuration, source).ConfigureAwait(false);
             if (response.ReturnCode != 1)
             {
-                if (response.ReturnCode != 305)
-                {
-                    (bool Checking, string OrderId) = await CheckingOrderIdAsync(player, orderId).ConfigureAwait(false);
-                    if (!Checking)
-                    {
-                        return (false, orderId, null);
-                    }
-                }
-                else
-                {
-                    return (false, orderId, null);
-                }
+                return (false, orderId, null);
             }
             var (Success, Balance) = await GetGameProviderBalanceAsync(player).ConfigureAwait(false);
 
@@ -132,23 +108,6 @@ namespace TGS.Apis.TgsApi.GameProviders.WGHorse.Services
             }
 
             return response.ReturnCode == 1 ? (true, decimal.Parse(response.Balance)) : (false, 0);
-        }
-
-        private async ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId)
-        {
-            var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
-
-            var source = new WGHorseAccessMoneyQueryRequest()
-            {
-                OrderId = orderId,
-            };
-            var response = await _client.AccessMoneyQueryAsync(configuration, source).ConfigureAwait(false);
-            if (response.ReturnCode != 1)
-            {
-                return (false, null);
-            }
-
-            return (true, orderId);
         }
     }
 }

@@ -1,15 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace TGS.Shared.Game.Models.VR.Outgoing
 {
     public record VRGetBalanceResponse
     {
-        public string playerName { get; set; }
-        public decimal balance { get; set; }
-        public IEnumerable<VRGetBalanceGamesResponse> games { get; set; }
+        [JsonPropertyName("playerName")]
+        public string PlayerName { get; set; }
+        [JsonPropertyName("balance")]
+        public decimal Balance { get; set; }
+        [JsonPropertyName("games")]
+        public IEnumerable<VRGetBalanceGamesResponse> Games { get; set; }
     }
 }

@@ -20,15 +20,12 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 {
     public class KYGameProviderWalletAction : BaseGameProviderWalletAction
     {
-        private readonly string _gameProviderCode = Consts.GameProvider.KY;
         private readonly IKYApiClient _client;
         private readonly ISettingOperations _settingOperations;
-        private readonly IHashProvider _hashProvider;
         private readonly IGameProviderOperations _gameProviderOperations;
 
         public KYGameProviderWalletAction(
             IKYApiClient client,
-            IHashProvider hashProvider,
             IGameProviderOperations gameProviderOperations,
             ISettingOperations settingOperations,
             IPlayerOperations playerOperations,
@@ -37,7 +34,6 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             ) : base(playerOperations, gameProviderOperations, gameProviderFundTransferTransactionRepository, walletRepository)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
-            _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
             _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
         }
@@ -67,55 +63,6 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             return true;
         }
 
-        private async ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId)
-        {
-            var configuration =
-                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
-                     .GameProviderConfigurations.KY);
-
-            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(player.BrandCode) && x.Status).FirstOrDefault();
-            if (brandMerchant == null)
-            {
-                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
-            }
-
-            var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault().AgentId;
-
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
-            var timestamp = date.ToUnixTimeMilliseconds();
-
-
-            var data = new KYFundCheckingRequest()
-            {
-                Action = KYUtility.GetAction(GPAction.CreatePlayer) ?? -1,
-                OrderId = orderId
-            };
-
-            var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
-            var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
-
-            var apiKYRequest = new KYApiRequest()
-            {
-                Agent = agentId,
-                Timestamp = timestamp,
-                Param = param,
-                Key = key
-            };
-
-            var response = await _client.GetAPIAsync<KYFundCheckingResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
-
-            var checking = false;
-            if (response.Data.Code == 0 && response.Data.Status == 0)
-            {
-                checking = true;
-            }
-
-            return new() { Checking = checking, OrderId = (checking) ? orderId : null };
-
-        }
-
         public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundInAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
             var configuration =
@@ -130,43 +77,26 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault().AgentId;
 
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
-            var timestamp = date.ToUnixTimeMilliseconds();
-            var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
-
+            var dateTimeOffset = DateTimeOffset.UtcNow.AddHours(+8);
+            var orderId = $"{agentId}{dateTimeOffset.ToString("yyyyMMddHHmmssfff")}{player.PlayerCode}";
 
             var data = new KYFnudRequest()
             {
-                Action = KYUtility.GetAction(GPAction.FundIn) ?? -1,
                 PlayerCode = player.PlayerCode,
                 Amount = amount,
                 OrderId = orderId
             };
-            var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
-            var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
 
-            var apiKYRequest = new KYApiRequest()
+            var response = await _client.FundAsync(brandMerchant, agentId, dateTimeOffset, GPAction.FundIn, data).ConfigureAwait(false);
+
+            if (response.Data.Code != 0)
             {
-                Agent = agentId,
-                Timestamp = timestamp,
-                Param = param,
-                Key = key
-            };
-
-            var response = await _client.GetAPIAsync<KYFnudResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
-
-            var balance = default(decimal);
-            var success = false;
-            if (response.Data.Code == 0)
-            {
-                Decimal.TryParse(response.Data.Balance, out balance);
-                success = true;
+                return (false, orderId, null);
             }
 
+            Decimal.TryParse(response.Data.Balance, out decimal balance);
 
-            return new() { Success = success, Balance = balance, OrderId = orderId };
+            return new(true, orderId, balance);
         }
 
         public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundOutAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
@@ -182,49 +112,32 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             }
             var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault().AgentId;
 
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
-            var timestamp = date.ToUnixTimeMilliseconds();
-            var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
-
+            var dateTimeOffset = DateTimeOffset.UtcNow.AddHours(+8);
+            var orderId = $"{agentId}{dateTimeOffset.ToString("yyyyMMddHHmmssfff")}{player.PlayerCode}";
 
             var data = new KYFnudRequest()
             {
-                Action = KYUtility.GetAction(GPAction.FundOut) ?? -1,
                 PlayerCode = player.PlayerCode,
                 Amount = amount,
                 OrderId = orderId
             };
-            var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
-            var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
 
-            var apiKYRequest = new KYApiRequest()
+            var response = await _client.FundAsync(brandMerchant, agentId, dateTimeOffset, GPAction.FundOut, data).ConfigureAwait(false);
+
+            if (response.Data.Code != 0)
             {
-                Agent = agentId,
-                Timestamp = timestamp,
-                Param = param,
-                Key = key
-            };
-
-            var response = await _client.GetAPIAsync<KYFnudResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
-
-            var balance = default(decimal);
-            var success = false;
-            if (response.Data.Code == 0)
-            {
-                Decimal.TryParse(response.Data.Balance, out balance);
-                success = true;
+                return (false, orderId, null);
             }
 
+            Decimal.TryParse(response.Data.Balance, out decimal balance);
 
-            return new() { Success = success, Balance = balance, OrderId = orderId };
+            return new(true, orderId, balance);
         }
 
         public override async ValueTask<(Guid GameProviderId, string GameProviderCode)> GetGameProviderAsync()
         {
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProviderCode).ConfigureAwait(false);
-            return new(gameProviderId, _gameProviderCode);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.KY).ConfigureAwait(false);
+            return new(gameProviderId, Consts.GameProvider.KY);
         }
 
         public override async ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player)
@@ -240,29 +153,14 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             }
 
             var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(player.DefaultWalletCurrencyCode) && x.Status).FirstOrDefault().AgentId;
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
-            var timestamp = date.ToUnixTimeMilliseconds();
-            var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
+            var dateTimeOffset = DateTimeOffset.UtcNow.AddHours(+8);
 
             var data = new KYGetBalanceRequest()
             {
-                Action = KYUtility.GetAction(GPAction.GetBalance) ?? -1,
                 PlayerCode = player.PlayerCode
             };
-            var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
-            var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
 
-            var apiKYRequest = new KYApiRequest()
-            {
-                Agent = agentId,
-                Timestamp = timestamp,
-                Param = param,
-                Key = key
-            };
-
-            var response = await _client.GetAPIAsync<KYGetBalanceResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetBalanceAsync(brandMerchant, agentId, data).ConfigureAwait(false);
 
             if (response.Data.Code != 0)
             {
