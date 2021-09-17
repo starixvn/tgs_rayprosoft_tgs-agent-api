@@ -28,6 +28,7 @@ namespace TGS.Services.Operator.Services.Player
         private readonly IHashProvider _hashProvider;
         private readonly IJwtTokenHandler _jwtTokenHandler;
         private readonly IBrandOperations _brandOperations;
+        private readonly IPlayerRepository _playerRepository;
 
         public GetLoginQueryService(
             IStatusValidator statusValidator,
@@ -37,7 +38,8 @@ namespace TGS.Services.Operator.Services.Player
             ITokenProvider tokenProvider,
             IHashProvider hashProvider,
             IJwtTokenHandler jwtTokenHandler,
-            IBrandOperations brandOperations)
+            IBrandOperations brandOperations,
+            IPlayerRepository playerRepository)
         {
             _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -47,6 +49,7 @@ namespace TGS.Services.Operator.Services.Player
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
             _jwtTokenHandler = jwtTokenHandler ?? throw new ArgumentNullException(nameof(jwtTokenHandler));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
+            _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
         }
 
         public async ValueTask<LoginInfo> GetAsync(GetLoginQuery query, CancellationToken cancellationToken = default)
@@ -91,6 +94,8 @@ namespace TGS.Services.Operator.Services.Player
                     ExpiredOn = record.ExpiredOn
                 },
                 query.Site);
+
+            await _playerRepository.PlayerLoginIpAsync(playerCode, query.IpAddress);
 
             return new LoginInfo()
             {

@@ -1166,6 +1166,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("description");
 
+                    b.Property<bool>("EnableSms")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("enable_sms");
+
                     b.Property<Guid>("LicenseeId")
                         .HasColumnType("uuid")
                         .HasColumnName("licensee_id");
@@ -1214,6 +1220,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Property<short>("SettlementIntervalType")
                         .HasColumnType("smallint")
                         .HasColumnName("settlement_interval_type");
+
+                    b.Property<string>("SmsVendorCode")
+                        .HasColumnType("text")
+                        .HasColumnName("sms_vendor_code");
+
+                    b.Property<string>("SmsVendorSettings")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("sms_vendor_settings");
 
                     b.Property<short>("Status")
                         .HasColumnType("smallint")
@@ -2083,6 +2097,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("status");
+
+                    b.Property<string>("ThirdPartyOrderNo")
+                        .HasColumnType("text")
+                        .HasColumnName("third_party_order_no");
 
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .ValueGeneratedOnAdd()
@@ -3411,6 +3429,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("agent_id");
 
+                    b.Property<string>("AreaCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("area_code");
+
                     b.Property<int>("BetLimitId")
                         .HasColumnType("integer")
                         .HasColumnName("bet_limit_id");
@@ -4004,6 +4027,35 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasName("pk_player_game_settings");
 
                     b.ToTable("player_game_settings");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIpRecord", b =>
+                {
+                    b.Property<string>("PlayerCode")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)")
+                        .HasColumnName("player_code");
+
+                    b.Property<short>("IpType")
+                        .HasColumnType("smallint")
+                        .HasColumnName("ip_type");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("ip");
+
+                    b.Property<DateTimeOffset>("RecordOn")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("record_on")
+                        .HasDefaultValueSql("Now()");
+
+                    b.HasKey("PlayerCode", "IpType")
+                        .HasName("pk_player_ip_records");
+
+                    b.ToTable("player_ip_records");
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>
@@ -5783,6 +5835,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("status");
 
+                    b.Property<string>("ThirdPartyOrderNo")
+                        .HasColumnType("text")
+                        .HasColumnName("third_party_order_no");
+
                     b.Property<DateTimeOffset>("UpdatedOn")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
@@ -6781,6 +6837,16 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .IsRequired();
 
                     b.Navigation("Player");
+                });
+
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerIpRecord", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerCode")
+                        .HasConstraintName("fk_player_ip_records_players_player_code")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.PlayerLoginRecord", b =>

@@ -278,6 +278,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("ViewLiveChat"),
                                 new MenuSetting("UpdateLiveChat")
                             }
+                        },
+                        new MenuSetting("IPAddress")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
                         }
                     }
                 },
@@ -437,7 +444,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                                 new MenuSetting("Update")
                             }
                         },
-                        new MenuSetting("Platforms")
+                        new MenuSetting("Brands")
                         {
                             SubMenus = new[]
                             {

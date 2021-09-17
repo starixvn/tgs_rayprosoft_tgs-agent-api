@@ -7,6 +7,7 @@ using Moq;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Log;
+using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Workers.Schedulers.Jobs;
@@ -20,12 +21,14 @@ namespace TGS.Tests.Schedulers.UnitTests
         [SetUp]
         public void Setup() =>
             _service = new(
+                _redisCacheManager.Object,
                 _serviceMock.Object,
                 _logMock.Object);
 
         private BrandGameProviderScheduleWorker _service;
         private readonly Mock<IBrandGameProviderService> _serviceMock = new();
         private readonly Mock<ITgsLog> _logMock = new();
+        private readonly Mock<IRedisCacheManager> _redisCacheManager = new();
 
         [TestCase(Status.Active, Status.Maintenance, -1, 10)]
         [TestCase(Status.Maintenance, Status.Active, 1, 10)]
@@ -73,7 +76,9 @@ namespace TGS.Tests.Schedulers.UnitTests
                 .With(s => s.GameProvider, new GameProvider())
                 .With(s => s.GameProviderConfiguration, new GameProviderConfiguration())
                 .With(s => s.DefaultLanguage, new Language())
-                .With(s => s.Schedules, new BrandGameProviderSchedule[] { }));
+                .With(s => s.Schedules, new BrandGameProviderSchedule[]
+                {
+                }));
             return fixture;
         }
     }

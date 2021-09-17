@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace TGS.Services.Operator
 {
@@ -9,5 +10,9 @@ namespace TGS.Services.Operator
         ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
         ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
+
+        ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn);
+
+        ValueTask PlayerLoginIpAsync(string playerCode, string ip);
     }
 }

@@ -145,6 +145,8 @@ namespace TGS.Core.DataServices.Tgs
 
         DbSet<PlayerGameSetting> PlayerGameSettings { get; set; }
 
+        DbSet<PlayerIpRecord> PlayerIpRecords { get; set; }
+
         DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 
         DbSet<PlayerRebate> PlayerRebates { get; set; }
@@ -346,6 +348,8 @@ namespace TGS.Core.DataServices.Tgs
         public DbSet<PlayerGameAggregate> PlayerGameAggregates { get; set; }
 
         public DbSet<PlayerGameSetting> PlayerGameSettings { get; set; }
+
+        public DbSet<PlayerIpRecord> PlayerIpRecords { get; set; }
 
         public DbSet<PlayerLoginRecord> PlayerLoginRecords { get; set; }
 

@@ -30,10 +30,14 @@ namespace TGS.Services.Operator.Services.Brand
 
             if (result.LogoInfo.IsNullOrEmpty())
             {
-                return new BrandInfo(query.BrandId, default, default, default);
+                return new BrandInfo(
+                    query.BrandId,
+                    default!,
+                    default!,
+                    default!);
             }
 
-            var logo = JsonSerializer.Deserialize<BrandInfo>(result.LogoInfo);
+            var logo = JsonSerializer.Deserialize<BrandInfo>(result.LogoInfo)!;
 
             return new BrandInfo(logo.BrandId, logo.DesktopLogoUrl, logo.MobileLogoUrl, logo.LoadingUrl);
         }

@@ -121,18 +121,20 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("create")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<CreatePlayerResponse> CreateAsync(
+            [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerQueryService,
             [FromBody] CreatePlayerRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
-
+            var ipAddress = requestAnalyzer.GetIp(HttpContext);
             var query = new CreatePlayerCommand(
                 brandId,
                 request.Username,
                 request.Password,
                 request.CurrencyCode,
                 request.AgentInvitationCode,
-                request.IsTestPlayer);
+                request.IsTestPlayer,
+                ipAddress);
             var info = await createPlayerQueryService.GetAsync(query).ConfigureAwait(false);
 
             return new CreatePlayerResponse()

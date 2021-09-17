@@ -19,13 +19,15 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _repository;
         private readonly IPlayerService _service;
+        private readonly IPlayerIpService _playerIpService;
 
-        public GetPlayerQueryHandler(IPlayerService service, ITgsRepository repository, IHttpContextAccessor accessor,
+        public GetPlayerQueryHandler(IPlayerService service, ITgsRepository repository, IHttpContextAccessor accessor, IPlayerIpService playerIpService,
             IJsonSerializationProvider jsonSerializationProvider) :
             base(accessor)
         {
             _service = service;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _playerIpService = playerIpService ?? throw new ArgumentNullException(nameof(playerIpService));
             _jsonSerializationProvider = jsonSerializationProvider ??
                 throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
@@ -43,6 +45,8 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
             var playerBuckets = await _repository.PlayerBuckets.AsQueryable()
                 .Where(x => x.PlayerCode == player.PlayerCode).ToArrayAsync(cancellationToken);
 
+            var registerIp = _playerIpService.GetPlayerIpRecordsByRegister(player.BrandId, player.Username).FirstOrDefault();
+            var loginIp = _playerIpService.GetPlayerIpRecordsByLogin(player.BrandId, player.Username).FirstOrDefault();
             return new()
             {
                 Valid = true,
@@ -71,7 +75,10 @@ namespace TGS.Services.BackOffice.Application.Queries.PlayerHandlers
                         Detail = _jsonSerializationProvider.DeserializeFromString<JsonDocument>(p.Detail)
                     }).ToArray(),
                     WageringRequirement = playerBuckets.Sum(p => p.BucketAmount) -
-                        playerBuckets.Sum(p => p.CurrentBucketAmount)
+                        playerBuckets.Sum(p => p.CurrentBucketAmount),
+                    RegisterIp = registerIp == null ? string.Empty : registerIp.Ip,
+                    LastLoginIp = loginIp == null ? string.Empty : loginIp.Ip,
+                    LastLoginOn = loginIp == null ? null : loginIp.RecordOn,
                 }
             };
         }

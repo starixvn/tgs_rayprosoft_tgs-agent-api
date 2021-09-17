@@ -28,13 +28,15 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string PaymentReturn { get; set; }
 
-        public string UserId { get; set; }
-
         public string Remark { get; set; }
 
         public int Status { get; set; }
 
+        public string ThirdPartyOrderNo { get; set; }
+
         public DateTimeOffset UpdatedOn { get; set; }
+
+        public string UserId { get; set; }
 
         public string UserName { get; set; }
 
