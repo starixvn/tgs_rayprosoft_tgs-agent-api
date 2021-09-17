@@ -60,7 +60,7 @@ namespace TGS.Services.Operator.ValidateCode
 
         public ValueTask SendMessageAsync(string phone, string shortMessage, string currency, Guid brandId)
         {
-            return _smsServiceClient.SendShortMessageAsync(phone, shortMessage, currency, brandId);
+            return _smsServiceClient.SendShortMessageAsync(phone, shortMessage, brandId);
         }
 
         private TData? DeserializeValidateCodeData<TData>(string json) => JsonSerializer.Deserialize<TData>(json);
