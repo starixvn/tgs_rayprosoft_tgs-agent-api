@@ -31,10 +31,12 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<ISBOApiClient, SBOApiClient>();
             services.AddHttpClient<IPragmaticPlayApiClient, PragmaticPlayApiClient>();
             services.AddHttpClient<IKYApiClient, KYApiClient>();
+            services.AddScoped<IKYUtility, KYUtility>();
             services.AddHttpClient<IJDBApiClient, JDBApiClient>();
             services.AddHttpClient<IAsiaGamingApiClient, AsiaGamingApiClient>();
             services.AddHttpClient<ISabaApiClient, SabaApiClient>();
             services.AddHttpClient<IVRApiClient, VRApiClient>();
+            services.AddScoped<IVRUtility, VRUtility>();
             services.AddHttpClient<IIMESportsApiClient, IMESportsApiClient>();
             services.AddHttpClient<IBigGamingApiClient, BigGamingApiClient>();
             services.AddHttpClient<ISexyGamingApiClient, SexyGamingApiClient>();
@@ -42,7 +44,9 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<IAllBetApiClient, AllBetApiClient>();
             services.AddHttpClient<IEvolutionApiClient, EvolutionApiClient>();
             services.AddHttpClient<IWGSportsApiClient, WGSportsApiClient>();
+            services.AddScoped<IWGSportsUtility, WGSportsUtility>();
             services.AddHttpClient<IWGHorseApiClient, WGHorseApiClient>();
+            services.AddScoped<IWGHorseUtility, WGHorseUtility>();
             services.AddHttpClient<IWMCasinoApiClient, WMCasinoApiClient>();
 
             services.AddHttpClient<ITCGApiClient, TCGApiClient>();

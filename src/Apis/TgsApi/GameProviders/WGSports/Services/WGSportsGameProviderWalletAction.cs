@@ -31,28 +31,10 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
         public override ValueTask<bool> CheckingAmountAsync(CachedPlayer player, decimal amount)
             => ValueTask.FromResult(true);
 
-        public override async ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId)
+        public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundInAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
             var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
-
-            var source = new WGSportsAccessMoneyQueryRequest()
-            {
-                OrderId = orderId,
-            };
-            var response = await _client.AccessMoneyQueryAsync(configuration, source).ConfigureAwait(false);
-            if (response.ReturnCode != 1)
-            {
-                return (false, null);
-            }
-
-            return (true, orderId);
-        }
-
-        public override async ValueTask<(bool Success, string OrderId, decimal Balance)> FundInAsync(CachedPlayer player, decimal amount)
-        {
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
-            var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
-            var orderId = $"{ Consts.GameProvider.WGSports}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
+            var orderId = $"{transactionGameProviderId.ToString("N")}{player.PlayerCode}";
             var source = new WGSportsAccessMoneyRequest()
             {
                 PlayerCode = player.PlayerCode,
@@ -64,18 +46,17 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             var response = await _client.AccessMoneyAsync(configuration, source).ConfigureAwait(false);
             if (response.ReturnCode != 1)
             {
-                return (false, orderId, 0);
+                return (false, orderId, null);
             }
             var (Success, Balance) = await GetGameProviderBalanceAsync(player).ConfigureAwait(false);
 
             return (true, orderId, Balance);
         }
 
-        public override async ValueTask<(bool Success, string OrderId, decimal Balance)> FundOutAsync(CachedPlayer player, decimal amount)
+        public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundOutAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
             var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
-            var orderId = $"{ Consts.GameProvider.WGSports}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
+            var orderId = $"{transactionGameProviderId.ToString("N")}{player.PlayerCode}";
             var source = new WGSportsAccessMoneyRequest()
             {
                 PlayerCode = player.PlayerCode,
@@ -87,7 +68,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WGSports.Services
             var response = await _client.AccessMoneyAsync(configuration, source).ConfigureAwait(false);
             if (response.ReturnCode != 1)
             {
-                return (false, orderId, 0);
+                return (false, orderId, null);
             }
             var (Success, Balance) = await GetGameProviderBalanceAsync(player).ConfigureAwait(false);
 

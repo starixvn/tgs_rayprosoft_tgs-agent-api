@@ -17,7 +17,6 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
 {
     public class VRGameProviderWalletAction : BaseGameProviderWalletAction
     {
-        private readonly string _gameProviderCode = Consts.GameProvider.VR;
         private readonly IVRApiClient _client;
         private readonly ISettingOperations _settingOperations;
         private readonly IVRGamePlayerCreate _gamePlayerCreate;
@@ -64,35 +63,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             return true;
         }
 
-        public override async ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId)
-        {
-            var configuration =
-                await _settingOperations.GetValueFromJsonByKeyAsync<VRConfiguration>(SettingConsts
-                    .GameProviderConfigurations.VR);
-
-            var brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals(player.BrandCode) && x.Status).FirstOrDefault();
-            if (brandMerchant == null)
-            {
-                brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
-            }
-
-            var data = new VRFundCheckingRequest()
-            {
-                StartTime = DateTimeOffset.UtcNow.AddDays(-1).ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                endTime = DateTimeOffset.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-                SerialNumber = orderId,
-                PlayerCode = player.PlayerCode
-            };
-
-            var response = await _client.GetAPIAsync<VRFundCheckingRequest, VRFundCheckingResponse>(brandMerchant, GPAction.FundChecking, data);
-            if (response.TotalRecords == 0)
-            {
-                return new(false, string.Empty);
-            }
-            return new(true, response.Records.First().SerialNumber);
-        }
-
-        public async override ValueTask<(bool Success, string OrderId, decimal Balance)> FundInAsync(CachedPlayer player, decimal amount)
+        public async override ValueTask<(bool Success, string OrderId, decimal? Balance)> FundInAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
             var configuration =
               await _settingOperations.GetValueFromJsonByKeyAsync<VRConfiguration>(SettingConsts
@@ -104,26 +75,26 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
             }
 
-
+            var orderId = $"{transactionGameProviderId.ToString("N")}";
             var date = DateTimeOffset.UtcNow;
             var data = new VRFnudRequest()
             {
-                SerialNumber = date.AddHours(+8).ToUnixTimeSeconds().ToString(),
+                SerialNumber = orderId,
                 PlayerCode = player.PlayerCode,
                 Type = 1,
                 Amount = amount,
                 CreateTime = date.ToString("yyyy-MM-ddTHH:mm:ssZ")
             };
 
-            var response = await _client.GetAPIAsync<VRFnudRequest, VRFnudResponse>(brandMerchant, GPAction.FundIn, data).ConfigureAwait(false);
+            var response = await _client.FundAsync(brandMerchant, GPAction.FundIn, data).ConfigureAwait(false);
             if (response.State != 0)
             {
-                return new() { Success = false, Balance = 0, OrderId = string.Empty };
+                return (false, orderId, null);
             }
-            return new() { Success = true, Balance = response.Balance, OrderId = response.SerialNumber };
+            return (true, response.SerialNumber, response.Balance);
         }
 
-        public async override ValueTask<(bool Success, string OrderId, decimal Balance)> FundOutAsync(CachedPlayer player, decimal amount)
+        public async override ValueTask<(bool Success, string OrderId, decimal? Balance)> FundOutAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
             var configuration =
               await _settingOperations.GetValueFromJsonByKeyAsync<VRConfiguration>(SettingConsts
@@ -135,29 +106,29 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                 brandMerchant = configuration.BrandMerchants.Where(x => x.BrandCode.IgnoreCaseEquals("Default") && x.Status).FirstOrDefault();
             }
 
-
+            var orderId = $"{transactionGameProviderId.ToString("N")}";
             var date = DateTimeOffset.UtcNow;
             var data = new VRFnudRequest()
             {
-                SerialNumber = date.AddHours(+8).ToUnixTimeSeconds().ToString(),
+                SerialNumber = orderId,
                 PlayerCode = player.PlayerCode,
                 Type = 0,
                 Amount = amount,
                 CreateTime = date.ToString("yyyy-MM-ddTHH:mm:ssZ")
             };
 
-            var response = await _client.GetAPIAsync<VRFnudRequest, VRFnudResponse>(brandMerchant, GPAction.FundOut, data).ConfigureAwait(false);
+            var response = await _client.FundAsync(brandMerchant, GPAction.FundOut, data).ConfigureAwait(false);
             if (response.State != 0)
             {
-                return new() { Success = false, Balance = 0, OrderId = string.Empty };
+                return (false, orderId, null);
             }
-            return new() { Success = true, Balance = response.Balance, OrderId = response.SerialNumber };
+            return (true, response.SerialNumber, response.Balance);
         }
 
         public override async ValueTask<(Guid GameProviderId, string GameProviderCode)> GetGameProviderAsync()
         {
-            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(_gameProviderCode).ConfigureAwait(false);
-            return new(gameProviderId, _gameProviderCode);
+            var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.VR).ConfigureAwait(false);
+            return new(gameProviderId, Consts.GameProvider.VR);
         }
 
         public override async ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player)
@@ -176,23 +147,23 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             {
                 PlayerCode = player.PlayerCode
             };
-            var response = await _client.GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, data).ConfigureAwait(false);
+            var response = await _client.GetBalanceAsync(brandMerchant, data).ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(response.playerName) || response.balance == -1)
+            if (string.IsNullOrEmpty(response.PlayerName) || response.Balance == -1)
             {
                 if (await _gamePlayerCreate.CreatePlayerAsync(player).ConfigureAwait(false))
                 {
-                    response = await _client.GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, data).ConfigureAwait(false);
+                    response = await _client.GetBalanceAsync(brandMerchant, data).ConfigureAwait(false);
                 }
             }
 
-            if (string.IsNullOrEmpty(response.playerName) || response.balance == -1)
+            if (string.IsNullOrEmpty(response.PlayerName) || response.Balance == -1)
             {
                 return new(false, 0);
 
             }
 
-            return new(true, response.balance);
+            return new(true, response.Balance);
         }
     }
 }
