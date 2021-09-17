@@ -54,11 +54,11 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365
                 },
                 (provider, _) => provider.GetRequiredService<Card365GameInitializer>());
 
-            //services.AddScopedWithResolver<IGameHistory>(new[]
-            //    {
-            //        typeof(WMCasinoGameHistory)
-            //    },
-            //    (provider, _) => provider.GetRequiredService<WMCasinoGameHistory>());
+            services.AddScopedWithResolver<IGameHistory>(new[]
+                {
+                    typeof(Card365GameHistory)
+                },
+                (provider, _) => provider.GetRequiredService<Card365GameHistory>());
         }
 
         protected override void UseCustomMiddlewaresBeforeRouting(IApplicationBuilder app)
