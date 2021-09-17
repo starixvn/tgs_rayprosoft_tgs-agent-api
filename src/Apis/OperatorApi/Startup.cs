@@ -17,6 +17,7 @@ using Prometheus;
 using Tgs.Payment.ApplePay;
 using Tgs.Payment.Clients;
 using Tgs.Payment.LeePay;
+using Tgs.Payment.MaticPay;
 using Tgs.Payment.PrimePay;
 using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
@@ -150,10 +151,12 @@ namespace TGS.Apis.OperatorApi
                 })
                 .Services
                 .Decorate<IPaymentClient, ManualDepositPaymentClientDecorator>()
+                .AddSingleton<ManualDepositSerializer>()
                 .AddSingleton<PrimePaySerializer>()
                 .AddSingleton<ApplePaySerializer>()
                 .AddSingleton<LeePaySerializer>()
-                .AddSingleton<UmPaySerializer>();
+                .AddSingleton<UmPaySerializer>()
+                .AddSingleton<MaticPaySerializer>();
 
             services
                 .AddOptions<ConstValidateCodeOptions>()
