@@ -23,20 +23,10 @@ namespace TGS.Apis.ReportApi.Controllers
         public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
             _mediator.Send(request);
 
-        //[HttpGet("export")]
-        //[Description("export markets")]
-        //public async Task<PagedResponse<MarketModel>> ExportMarketsAsync([FromQuery] GetMarketsRequest request)
-        //{
-        //    var getMarketsRequest = new GetMarketsRequest
-        //    {
-        //        BrandId = request.BrandId,
-        //        From = request.From,
-        //        To = request.To,
-        //        ShowAll = true
-        //    };
-        //    var markets = await _mediator.Send(getMarketsRequest).ConfigureAwait(false);
-
-        //    markets.Items.(x => x.)
-        //}
+        [HttpGet("export")]
+        [Description("export markets")]
+        public async Task<IActionResult> ExportMarketsAsync([FromQuery] ExportMarketsRequest request) => File(
+            await _mediator.Send(request).ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 }

@@ -1,10 +1,11 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Resources;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Tgs.Core.Infrastructures.Utility;
+using TGS.Core.Infrastructures.Utility;
 using TGS.Services.Report.Application.Models.Market;
 
 namespace TGS.Services.Report.Application.Queries.Market
@@ -30,12 +31,32 @@ namespace TGS.Services.Report.Application.Queries.Market
                 To = request.To,
                 ShowAll = true
             };
-            var rr1 = new ResourceReader("Resources1.resources");
-            var dict = rr1.GetEnumerator();
+
             var markets = await _mediator.Send(getMarketsRequest, cancellationToken).ConfigureAwait(false);
-            var xlsx = markets.Items.Export("games");
+
+            var exportData = markets.Items.Select(x => new ExportMarketModel
+            {
+                ReportDate = x.ReportDate,
+                RegisteredCount = x.RegisteredCount,
+                FirstFundInCount = x.FirstFundInCount,
+                DepositAmount = x.DepositAmount,
+                WithdrawalAmount = x.WithdrawalAmount,
+                AdjustmentAmount = x.AdjustmentAmount,
+                BonusAmount = x.BonusAmount,
+                BetAmount = x.BetAmount,
+                Turnover = x.Turnover,
+                WinLossAmount = x.WinLossAmount,
+                NetProfit = x.NetProfit
+            });
+
+            var resource = new ResourceManager(typeof(Resources.Market));
+
+            var xlsx = exportData.ExportWithLocalization("markets", resource);
+
             await using var stream = new MemoryStream();
+
             xlsx.SaveAs(stream);
+
             return new MemoryStream(stream.ToArray());
         }
     }

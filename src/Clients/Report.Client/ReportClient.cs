@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Clients.Report.Client.Models.Market;
@@ -34,6 +35,9 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
             GetAgentAccountChangesRequest request);
+
+        Task<Stream> ExportMarketsAsync(ExportMarketsRequest request);
+        Task<Stream> ExportPlayerContributionsAsync(ExportPlayerContributionsRequest request);
     }
 
     public class ReportClient : BaseApiClient, IReportClient
@@ -187,6 +191,20 @@ namespace TGS.Clients.Report.Client
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
+        }
+
+        public async Task<Stream> ExportMarketsAsync(ExportMarketsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/marketReport/export?", request);
+
+            return await GetFileAsync(path);
+        }
+
+        public async Task<Stream> ExportPlayerContributionsAsync(ExportPlayerContributionsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/playerReport/export?", request);
+
+            return await GetFileAsync(path);
         }
     }
 }

@@ -24,5 +24,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             [FromQuery] GetPlayerContributionsRequest request) =>
             _client.GetPlayerContributionsAsync(request);
 
+        [HttpGet("export")]
+        public async Task<IActionResult> GetFileAsync([FromQuery] ExportPlayerContributionsRequest request) => File(
+            await _client.ExportPlayerContributionsAsync(request).ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PlayerContributions.xlsx");
     }
 }

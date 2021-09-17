@@ -22,5 +22,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         [Description("Get market report")]
         public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
             _client.GetMarketsAsync(request);
+
+        [HttpGet("export")]
+        public async Task<IActionResult> GetFileAsync([FromQuery] ExportMarketsRequest request) => File(
+            await _client.ExportMarketsAsync(request).ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Markets.xlsx");
     }
 }
