@@ -222,29 +222,36 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async Task<LoginResponse> LoginAsync(
             [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromServices] ICommandService<CheckPlayerBannedCommand> commandService,
-            [FromServices] IGetService<GetLoginQuery, LoginInfo> getLoginQueryService,
+            [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
             [FromBody] LoginRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
-            var ipAddress = requestAnalyzer.GetIp(HttpContext);
-
-            await commandService
-                .ExecuteAsync(new CheckPlayerBannedCommand(brandId, request.Username))
-                .ConfigureAwait(false);
-
-            var query = new GetLoginQuery(
-                brandId,
-                request.Username,
-                request.Password,
-                ipAddress,
-                request.PlatformType, Consts.Site);
-
-            LoginInfo info;
             try
             {
-                info = await getLoginQueryService.GetAsync(query).ConfigureAwait(false);
+                var ipAddress = requestAnalyzer.GetIp(HttpContext);
+
+                await commandService
+                    .ExecuteAsync(new CheckPlayerBannedCommand(brandId, request.Username))
+                    .ConfigureAwait(false);
+
+                var query = new LoginCommand(
+                    brandId,
+                    request.Username,
+                    request.Password,
+                    ipAddress,
+                    request.PlatformType, Consts.Site);
+
+                var info = await loginService
+                    .GetAsync(query)
+                    .ConfigureAwait(false);
+
+                return new LoginResponse()
+                {
+                    LoginTime = info.LoginTime,
+                    PlayerToken = info.PlayerToken
+                };
             }
-            catch (CoreExceptions.PlayerNotFoundException)
+            catch (PlayerNotFoundException)
             {
                 throw new CoreExceptions.PlayerNotFoundException(request.Username, Resources.Player.NotFound);
             }
@@ -271,12 +278,6 @@ namespace TGS.Apis.OperatorApi.Controllers
 
                 throw new LoginFailException();
             }
-
-            return new LoginResponse()
-            {
-                LoginTime = info.LoginTime,
-                PlayerToken = info.PlayerToken
-            };
         }
 
         /// <summary>
