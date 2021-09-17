@@ -34,18 +34,18 @@ namespace TGS.Shared.Game.ApiClients.WGSports
     public class WGSportsApiClient : BaseApiClient, IWGSportsApiClient
     {
         private readonly string _gameProviderCode = Consts.GameProvider.WGSports;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IWGSportsUtility _utility;
 
-        public WGSportsApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json, IHashProvider hashProvider)
+        public WGSportsApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json, IWGSportsUtility utility)
             : base(client, logger, json)
         {
-            _jsonSerializationProvider = json ?? throw new System.ArgumentNullException(nameof(json));
+            _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
         ValueTask<WGSportsPrepareLoginResponse> IWGSportsApiClient.GetPrepareLoginAsync(WGSportsConfiguration configuration, WGSportsPrepareLoginRequest source)
         {
             var data = $"{source.Timestamp}|{source.PlayerCode}|{source.PlayerNickname}|{source.CurrencyCode}|{source.Handicap}";
-            var dataEncrypt = WGSportsUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=PrepareLogin&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.PrepareLogin";
 
@@ -63,7 +63,7 @@ namespace TGS.Shared.Game.ApiClients.WGSports
         ValueTask<WGSportsResponse> IWGSportsApiClient.AccessMoneyAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyRequest source)
         {
             var data = $"{source.PlayerCode}|{(int)source.AmountType}|{source.OrderId}|{source.Amount}";
-            var dataEncrypt = WGSportsUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoney&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.AccessMoney";
 
@@ -73,7 +73,7 @@ namespace TGS.Shared.Game.ApiClients.WGSports
         ValueTask<WGSportsResponse> IWGSportsApiClient.AccessMoneyQueryAsync(WGSportsConfiguration configuration, WGSportsAccessMoneyQueryRequest source)
         {
             var data = source.OrderId;
-            var dataEncrypt = WGSportsUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoneyQuery&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.AccessMoneyQuery";
 
@@ -83,7 +83,7 @@ namespace TGS.Shared.Game.ApiClients.WGSports
         ValueTask<WGSportsGetBalanceResponse> IWGSportsApiClient.GetBalanceAsync(WGSportsConfiguration configuration, WGSportsGetBalanceRequest source)
         {
             var data = source.PlayerCode;
-            var dataEncrypt = WGSportsUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=GetBalance&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.GetBalance";
 
@@ -93,7 +93,7 @@ namespace TGS.Shared.Game.ApiClients.WGSports
         ValueTask<WGSportsGameRecordResponse> IWGSportsApiClient.GetGameRecordAsync(WGSportsConfiguration configuration, WGSportsGameRecordRequest request)
         {
             var data = $"|{request.GameRecordTime.Description()}|{request.StartTime:yyyy-MM-dd HH:mm:ss}|{request.EndTime:yyyy-MM-dd HH:mm:ss}";
-            var dataEncrypt = WGSportsUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=ShowBetList&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.ShowBetList";
 

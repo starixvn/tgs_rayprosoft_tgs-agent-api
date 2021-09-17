@@ -67,7 +67,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             return true;
         }
 
-        public override async ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId)
+        private async ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId)
         {
             var configuration =
                  await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
@@ -116,7 +116,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
         }
 
-        public override async ValueTask<(bool Success, string OrderId, decimal Balance)> FundInAsync(CachedPlayer player, decimal amount)
+        public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundInAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts
@@ -169,7 +169,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             return new() { Success = success, Balance = balance, OrderId = orderId };
         }
 
-        public override async ValueTask<(bool Success, string OrderId, decimal Balance)> FundOutAsync(CachedPlayer player, decimal amount)
+        public override async ValueTask<(bool Success, string OrderId, decimal? Balance)> FundOutAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount)
         {
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<KYConfiguration>(SettingConsts

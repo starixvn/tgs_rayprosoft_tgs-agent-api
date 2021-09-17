@@ -23,32 +23,36 @@ namespace TGS.Shared.Game.ApiClients.VR
 {
     public interface IVRApiClient
     {
-        ValueTask<ResultData> GetAPIAsync<SourceData, ResultData>(VRBrandMerchant brandMerchant, GPAction action, SourceData request);
+        ValueTask<VRErrorCodeResponse> CreatePlayerAsync(VRBrandMerchant brandMerchant, VRCreatePlayerRequest request);
+        ValueTask<VRFnudResponse> FundAsync(VRBrandMerchant brandMerchant, GPAction action, VRFnudRequest request);
+        ValueTask<VRFundCheckingResponse> FundCheckingAsync(VRBrandMerchant brandMerchant, VRFundCheckingRequest request);
+        ValueTask<VRGetBalanceResponse> GetBalanceAsync(VRBrandMerchant brandMerchant, VRGetBalanceRequest request);
+        ValueTask<VRGameRecordResponse> GetGameRecordAsync(VRBrandMerchant brandMerchant, VRGameRecordRequest request);
         Uri GetGameURLAsync(VRBrandMerchant brandMerchant, VRGameUrlRequest request);
         ValueTask<VRGPGameRecordResponse> GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request);
-
     }
 
     public sealed class VRApiClient : BaseApiClient, IVRApiClient
     {
-        private static readonly string GameProviderCode = Consts.GameProvider.VR;
-
         private readonly HttpClient _client;
 
         private readonly IApiClientLogger _logger;
 
-        public VRApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json)
+        private readonly IVRUtility _utility;
+
+        public VRApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json, IVRUtility utility)
             : base(client, logger, json)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
-        Uri IVRApiClient.GetGameURLAsync(VRBrandMerchant brandMerchant, VRGameUrlRequest request)
+        public Uri GetGameURLAsync(VRBrandMerchant brandMerchant, VRGameUrlRequest request)
         {
-            var path = VRUtility.GetPath(request);
+            var path = _utility.GetPath(request);
 
-            var dataEncrypt = VRUtility.AesEncrypt(path, brandMerchant.Deskey, true);
+            var dataEncrypt = _utility.AesEncrypt(path, brandMerchant.Deskey, true);
 
             var apiUrl = brandMerchant.ApiUrl;
 
@@ -59,17 +63,35 @@ namespace TGS.Shared.Game.ApiClients.VR
                 data = dataEncrypt,
             };
 
-            return new Uri($"{apiUrl.Scheme}://{apiUrl.Host}{VRUtility.GetAction(GPAction.GetGameUrl)}?{VRUtility.GetPath(data)}");
+            return new Uri($"{apiUrl.Scheme}://{apiUrl.Host}{_utility.GetAction(GPAction.GetGameUrl)}?{_utility.GetPath(data)}");
 
         }
 
-        async ValueTask<ResultData> IVRApiClient.GetAPIAsync<SourceData, ResultData>(VRBrandMerchant brandMerchant, GPAction action, SourceData request)
+        public ValueTask<VRErrorCodeResponse> CreatePlayerAsync(VRBrandMerchant brandMerchant, VRCreatePlayerRequest request)
+            => GetAPIAsync<VRCreatePlayerRequest, VRErrorCodeResponse>(brandMerchant, GPAction.CreatePlayer, request);
+
+        public ValueTask<VRGetBalanceResponse> GetBalanceAsync(VRBrandMerchant brandMerchant, VRGetBalanceRequest request)
+            => GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, request);
+
+        public ValueTask<VRFnudResponse> FundAsync(VRBrandMerchant brandMerchant, GPAction action, VRFnudRequest request)
+            => GetAPIAsync<VRFnudRequest, VRFnudResponse>(brandMerchant, action, request);
+
+        public ValueTask<VRFundCheckingResponse> FundCheckingAsync(VRBrandMerchant brandMerchant, VRFundCheckingRequest request)
+            => GetAPIAsync<VRFundCheckingRequest, VRFundCheckingResponse>(brandMerchant, GPAction.FundChecking, request);
+
+        public ValueTask<VRGameRecordResponse> GetGameRecordAsync(VRBrandMerchant brandMerchant, VRGameRecordRequest request)
+            => GetAPIAsync<VRGameRecordRequest, VRGameRecordResponse>(brandMerchant, GPAction.GameRecord, request);
+
+        public ValueTask<VRGPGameRecordResponse> GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request) =>
+          ExecuteJsonRequestAsync<VRGPGameRecordRequest, VRGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/vr/GameRecord", request);
+
+        private async ValueTask<ResultData> GetAPIAsync<SourceData, ResultData>(VRBrandMerchant brandMerchant, GPAction action, SourceData request)
         {
             var sw = Stopwatch.StartNew();
             var responseMessage = default(string);
             var response = default(ResultData);
 
-            var dataEncrypt = VRUtility.AesEncrypt(JsonSerializer.Serialize(request), brandMerchant.Deskey, false);
+            var dataEncrypt = _utility.AesEncrypt(JsonSerializer.Serialize(request), brandMerchant.Deskey, false);
 
             var apiUrl = brandMerchant.ApiUrl;
 
@@ -82,7 +104,7 @@ namespace TGS.Shared.Game.ApiClients.VR
 
             HttpContent content = new StringContent(JsonSerializer.Serialize(data), Encoding.UTF8, "application/json");
 
-            var url = new Uri($"{apiUrl.Scheme}://{apiUrl.Host}{VRUtility.GetAction(action)}");
+            var url = new Uri($"{apiUrl.Scheme}://{apiUrl.Host}{_utility.GetAction(action)}");
 
             var httpResponseMessage = await _client.PostAsync(url, content);
             sw.Stop();
@@ -94,8 +116,7 @@ namespace TGS.Shared.Game.ApiClients.VR
 
             if (!string.IsNullOrEmpty(responseMessage) && httpResponseMessage.StatusCode == HttpStatusCode.OK)
             {
-
-                var contentDecrypt = VRUtility.AesDecrypt(responseMessage, brandMerchant.Deskey, false);
+                var contentDecrypt = _utility.AesDecrypt(responseMessage, brandMerchant.Deskey, false);
                 if (!string.IsNullOrEmpty(contentDecrypt))
                 {
                     responseMessage = contentDecrypt;
@@ -109,7 +130,7 @@ namespace TGS.Shared.Game.ApiClients.VR
                 ip = string.Empty,
                 path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
                 method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
-                prefix = GameProviderCode.ToLower(),
+                prefix = $"{Consts.GameProvider.VR.ToLower()}.{action.ToString()}",
                 servername = Environment.MachineName.NoLongerThan(128),
                 requestheaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
                 requestcontent = JsonSerializer.Serialize(data),
@@ -120,12 +141,7 @@ namespace TGS.Shared.Game.ApiClients.VR
                 recordedon = DateTimeOffset.UtcNow
             });
 
-
-
             return response;
         }
-
-        ValueTask<VRGPGameRecordResponse> IVRApiClient.GameRecordAsync(Uri apiUrl, VRGPGameRecordRequest request) =>
-          ExecuteJsonRequestAsync<VRGPGameRecordRequest, VRGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/vr/GameRecord", request);
     }
 }
