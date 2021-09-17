@@ -63,6 +63,7 @@
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.10" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />    
     <PackageReference Include="Tgs.Payment.ManualDeposit" Version="0.0.11" />
+    <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.PrimePay.Client" Version="0.0.6" />
     <PackageReference Include="Tgs.Payment.UmPay.Client" Version="0.0.1" />
   </ItemGroup>
