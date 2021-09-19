@@ -6,5 +6,6 @@ namespace TGS.Services.Operator
         Guid BrandId,
         Uri DesktopLogoUrl,
         Uri MobileLogoUrl,
-        Uri LoadingUrl);
+        Uri LoadingUrl,
+        bool SmsEnabled);
 }

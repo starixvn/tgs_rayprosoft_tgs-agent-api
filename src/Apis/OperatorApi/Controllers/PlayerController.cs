@@ -156,10 +156,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         public ValueTask<string> ForgotPasswordAsync(
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
-        {
-            return forgotPasswordService
-                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Email));
-        }
+            => forgotPasswordService.GetAsync(new ForgotPasswordCommand(
+                CultureInfo.CurrentUICulture,
+                request.Email));
 
         [HttpGet("game/auto-transfer")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
