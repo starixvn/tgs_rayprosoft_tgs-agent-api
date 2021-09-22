@@ -34,8 +34,12 @@ namespace TGS.Services.Operator.Services.Player
 
             var updatedOn = DateTimeOffset.UtcNow;
 
-            var isBrandHasSameEmail = await _getService.GetAsync(
-                new CheckBrandEmailQuery(command.BrandId, result.Email));
+            var isBrandHasSameEmail = await _getService
+                .GetAsync(new CheckBrandEmailQuery(
+                    command.BrandId,
+                    result.Email,
+                    command.PlayerCode))
+                .ConfigureAwait(false);
 
             if (isBrandHasSameEmail)
                 throw new BrandEmailDuplicateException();
