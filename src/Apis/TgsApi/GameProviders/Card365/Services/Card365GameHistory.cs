@@ -13,11 +13,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
 {
     public class Card365GameHistory : BaseBetHistory
     {
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
+
         public Card365GameHistory(
             IRoundQueries roundQueries,
             IGameProviderOperations gameProviderOperations)
             : base(roundQueries, gameProviderOperations)
         {
+            _jsonSerializerOptions = new JsonSerializerOptions { WriteIndented = false };
         }
 
         protected override ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode,
@@ -38,7 +41,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
             });
         }
 
-        private static string GetGameHistory(string roundDetail)
+        private string GetGameHistory(string roundDetail)
         {
             if (string.IsNullOrWhiteSpace(roundDetail))
             {
@@ -51,7 +54,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                 return string.Empty;
             }
 
-            return items.TryGetValue("Tiles", out var tiles) ? tiles.ToString() : string.Empty;
+            var tiles = items.TryGetValue("Tiles", out var value) ? value.ToString() : string.Empty;
+            var isBanker = items.TryGetValue("Banker", out value) && "0".Equals(value!.ToString());
+
+            return JsonSerializer.Serialize(new
+            {
+                IsBanker = isBanker,
+                Tiles = tiles
+            }, _jsonSerializerOptions);
         }
     }
 }
