@@ -18,7 +18,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
-    internal class GetLoginQueryService : IGetService<GetLoginQuery, LoginInfo>
+    internal class LoginCommandService : IGetService<LoginCommand, LoginInfo>
     {
         private readonly IStatusValidator _statusValidator;
         private readonly IPlayerOperations _playerOperations;
@@ -29,7 +29,7 @@ namespace TGS.Services.Operator.Services.Player
         private readonly IJwtTokenHandler _jwtTokenHandler;
         private readonly IBrandOperations _brandOperations;
 
-        public GetLoginQueryService(
+        public LoginCommandService(
             IStatusValidator statusValidator,
             IPlayerOperations playerOperations,
             IPlayerQueries playerQueries,
@@ -49,7 +49,7 @@ namespace TGS.Services.Operator.Services.Player
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
         }
 
-        public async ValueTask<LoginInfo> GetAsync(GetLoginQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<LoginInfo> GetAsync(LoginCommand query, CancellationToken cancellationToken = default)
         {
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default);
 
