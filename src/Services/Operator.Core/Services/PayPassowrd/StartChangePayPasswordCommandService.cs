@@ -5,32 +5,40 @@ using Polly;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Services.Operations;
 using TGS.Services.Operator.Properties;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.PayPassowrd;
 using TGS.Services.Operator.ValidateCode;
+using TGS.ServiceUtility;
+using TGS.SmsService.Client;
 
 namespace TGS.Services.Operator.Services.PayPassowrd
 {
     internal class StartChangePayPasswordCommandService : IGetService<StartChangePayPasswordCommand, string>
     {
-        private readonly IPlayerOperations _playerOperations;
         private readonly IValidateCodeGenerator _codeGenerator;
-        private readonly IValidateCodeOperator _validateCodeOperator;
         private readonly IEmailClient _emailClient;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly ISmsServiceClient _smsServiceClient;
+        private readonly ISysRepository _sysRepository;
+        private readonly IValidateCodeOperator _validateCodeOperator;
 
         public StartChangePayPasswordCommandService(
             IPlayerOperations playerOperations,
             IValidateCodeGenerator codeGenerator,
             IValidateCodeOperator validateCodeOperator,
-            IEmailClient emailClient)
+            IEmailClient emailClient,
+            ISmsServiceClient smsServiceClient,
+            ISysRepository sysRepository)
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
             _emailClient = emailClient ?? throw new ArgumentNullException(nameof(emailClient));
+            _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
+            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
         }
 
-        public async ValueTask<string> GetAsync(StartChangePayPasswordCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask<string> GetAsync(
+            StartChangePayPasswordCommand command,
+            CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)
@@ -39,7 +47,8 @@ namespace TGS.Services.Operator.Services.PayPassowrd
             if (string.IsNullOrEmpty(player.Email))
                 throw new EmailNotVerifyException();
 
-            var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(data => !data.Result)
+            var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string Token)>(
+                data => !data.Result)
                 .RetryAsync(5)
                 .ExecuteAsync(async () =>
                 {
@@ -59,17 +68,36 @@ namespace TGS.Services.Operator.Services.PayPassowrd
             if (!saveResult.Result)
                 throw new GenerateValidateCodeFailException();
 
-            var mailSubject = Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailSubject), command.CultureInfo)!;
-            var mailBody = string.Format(
-                Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
-                saveResult.ValidateCode);
+            var brandInfo = await _sysRepository
+                .GetBrandInfoAsync(player.BrandId)
+                .ConfigureAwait(false);
 
-            var mailMessage = new SendEmailRequest(
-                new[] { player.Email },
-                mailSubject,
-                mailBody);
+            if (brandInfo!.SmsEnabled)
+            {
+                if (!player.PhoneAuthentication)
+                    throw new PlayerPhoneNotSetException();
 
-            await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
+                await _smsServiceClient.SendShortMessageAsync(
+                    $"{player.AreaCode}{player.Phone}",
+                    string.Format(
+                        Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
+                        saveResult.ValidateCode),
+                    player.BrandId).ConfigureAwait(false);
+            }
+            else
+            {
+                var mailSubject = Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailSubject), command.CultureInfo)!;
+                var mailBody = string.Format(
+                    Resources.ResourceManager.GetString(nameof(Resources.ValidateCodeMailBody), command.CultureInfo)!,
+                    saveResult.ValidateCode);
+
+                var mailMessage = new SendEmailRequest(
+                    new[] { player.Email },
+                    mailSubject,
+                    mailBody);
+
+                await _emailClient.SendAsync(mailMessage).ConfigureAwait(false);
+            }
 
             return saveResult.Token;
         }

@@ -1,45 +1,34 @@
 ﻿using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Brand
 {
     internal class GetBrandQueryService : IGetService<BrandQuery, BrandInfo>
     {
-        private readonly ITgsRepository _tgsRepository;
+        private readonly ISysRepository _sysRepository;
 
-        public GetBrandQueryService(ITgsRepository tgsRepository)
+        public GetBrandQueryService(ISysRepository sysRepository)
         {
-            _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
         }
 
         public async ValueTask<BrandInfo> GetAsync(
             BrandQuery query,
             CancellationToken cancellationToken = default)
         {
-            var result = await _tgsRepository.Brands.FindAsync(query.BrandId);
+            var brandInfo = await _sysRepository
+                .GetBrandInfoAsync(query.BrandId)
+                .ConfigureAwait(false);
 
-            if (result == null)
+            if (brandInfo == null)
             {
                 throw new BrandNotFoundException();
             }
 
-            if (result.LogoInfo.IsNullOrEmpty())
-            {
-                return new BrandInfo(
-                    query.BrandId,
-                    default!,
-                    default!,
-                    default!);
-            }
-
-            var logo = JsonSerializer.Deserialize<BrandInfo>(result.LogoInfo)!;
-
-            return new BrandInfo(logo.BrandId, logo.DesktopLogoUrl, logo.MobileLogoUrl, logo.LoadingUrl);
+            return brandInfo;
         }
     }
 }

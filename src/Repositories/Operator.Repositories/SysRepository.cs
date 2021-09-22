@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 using TGS.Core.DataServices.Tgs;
 using TGS.Services.Operator;
 
@@ -48,6 +50,35 @@ namespace TGS.Operator.Repositories
                            banner.Localization);
 
             return rows.ToAsyncEnumerable();
+        }
+
+        public async ValueTask<BrandInfo?> GetBrandInfoAsync(Guid brandId)
+        {
+            var brand = await _tgsRepository.Brands
+                .FindAsync(brandId)
+                .ConfigureAwait(false);
+
+            if (brand == null)
+                return null;
+
+            if (string.IsNullOrWhiteSpace(brand.LogoInfo))
+            {
+                return new BrandInfo(
+                    brandId,
+                    default!,
+                    default!,
+                    default!,
+                    brand.EnableSms);
+            }
+
+            var logo = JsonSerializer.Deserialize<BrandSmsVendorSettings>(brand.LogoInfo)!;
+
+            return new BrandInfo(
+                brand.Id,
+                logo.DesktopLogoUrl,
+                logo.MobileLogoUrl,
+                logo.LoadingUrl,
+                brand.EnableSms);
         }
     }
 }

@@ -128,7 +128,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     smsClient => smsClient.SendShortMessageAsync(
                         It.Is<string>(x => x == phone),
                         It.Is<string>(x => x == expectedShortMessage),
-                        It.IsAny<string>(),
                         It.IsAny<Guid>()),
                     Times.Exactly(1));
             Assert.AreEqual(expectedSecurityKey, actualSecurityKey);

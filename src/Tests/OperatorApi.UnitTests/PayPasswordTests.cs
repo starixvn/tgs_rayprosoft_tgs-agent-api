@@ -14,6 +14,7 @@ using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.PayPassowrd;
 using TGS.Services.Operator.ValidateCode;
+using TGS.SmsService.Client;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -169,12 +170,16 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakeEmailClient = Substitute.For<IEmailClient>();
+            var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
 
             var sut = new StartChangePayPasswordCommandService(
                 fakePlayerOperations,
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator,
-                fakeEmailClient);
+                fakeEmailClient,
+                fakeSmsServiceClient,
+                fakeSysRepository);
 
             var email = "email@test.com";
             var player = new Player
@@ -186,15 +191,19 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 DefaultWalletCurrencyCode = "CNY"
             };
 
-            var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
+            var command = new StartChangePayPasswordCommand(
+                player.PlayerCode,
+                CultureInfo.GetCultureInfo("en-US"));
 
             var validateCode = "123456";
             var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 
-            fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode)).Returns(player);
-
-            fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
-            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(expectedSecurityKey);
+            fakePlayerOperations.GetPlayerByCodeAsync(Arg.Is(player.PlayerCode))
+                .Returns(player);
+            fakeValidateCodeGenerator.GenerateCode()
+                .Returns(validateCode);
+            fakeValidateCodeGenerator.GenerateSecurityKey()
+                .Returns(expectedSecurityKey);
 
             fakeValidateCodeOperator
                 .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(expectedSecurityKey), Arg.Any<ValidateCodeData>())
@@ -214,6 +223,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     actual = msg;
                 }))
                 .Returns(ValueTask.FromResult(new SendEmailResponse()));
+
+            fakeSysRepository.GetBrandInfoAsync(Arg.Any<Guid>())
+                .Returns(new BrandInfo(
+                    player.BrandId,
+                    new Uri("http://img.org/1.png"),
+                    new Uri("http://img.org/2.png"),
+                    new Uri("http://img.org/3.png"),
+                    false));
+
             var actualSecurityKey = await sut.GetAsync(command);
 
             _ = fakeEmailClient
@@ -240,14 +258,20 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakeEmailClient = Substitute.For<IEmailClient>();
+            var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
 
-            var command = new StartChangePayPasswordCommand(player.PlayerCode, CultureInfo.GetCultureInfo("en-US"));
+            var command = new StartChangePayPasswordCommand(
+                player.PlayerCode,
+                CultureInfo.GetCultureInfo("en-US"));
 
             var sut = new StartChangePayPasswordCommandService(
                 fakePlayerOperations,
                 fakeValidateCodeGenerator,
                 fakeValidateCodeOperator,
-                fakeEmailClient);
+                fakeEmailClient,
+                fakeSmsServiceClient,
+                fakeSysRepository);
 
             Assert.ThrowsAsync<EmailNotVerifyException>(async () => await sut.GetAsync(command));
         }

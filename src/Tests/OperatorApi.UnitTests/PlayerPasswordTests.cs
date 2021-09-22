@@ -17,6 +17,7 @@ using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
+using TGS.SmsService.Client;
 
 namespace OperatorApi.UnitTests
 {
@@ -43,10 +44,10 @@ namespace OperatorApi.UnitTests
 
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
-            var sut = new GetChangePasswordQueryService(fakeStatusValidator, fakePlayerQueries, fakePasswordHandler, fakePlayerOperations);
+            var sut = new ChangePasswordQueryService(fakeStatusValidator, fakePlayerQueries, fakePasswordHandler, fakePlayerOperations);
 
             var brandId = Guid.NewGuid();
-            var query = new GetChangePasswordQuery(brandId, playerCode, "oldPassword", "newPassword");
+            var query = new ChangePasswordQuery(brandId, playerCode, "oldPassword", "newPassword");
 
             fakePasswordHandler
                 .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(query.OldPassword))
@@ -76,11 +77,15 @@ namespace OperatorApi.UnitTests
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 
             var fakeTgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
+            var fakeSysRepository = Substitute.For<ISysRepository>();
+            var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
             var sut = new ForgotPasswordCommandService(
                 fakeTgsRepository,
                 Substitute.For<IValidateCodeGenerator>(),
-                Substitute.For<IValidateCodeOperator>());
+                Substitute.For<IValidateCodeOperator>(),
+                fakeSysRepository,
+                fakeSmsServiceClient);
 
             var command = new ForgotPasswordCommand(CultureInfo.GetCultureInfo("en-US"), "0911123456");
 
@@ -114,11 +119,15 @@ namespace OperatorApi.UnitTests
 
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
+            var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
             var sut = new ForgotPasswordCommandService(
                 fakeTgsRepository,
                 fakeValidateCodeGenerator,
-                fakeValidateCodeOperator);
+                fakeValidateCodeOperator,
+                fakeSysRepository,
+                fakeSmsServiceClient);
 
             var command = new ForgotPasswordCommand(CultureInfo.GetCultureInfo("en-US"), email);
 
@@ -131,6 +140,14 @@ namespace OperatorApi.UnitTests
             fakeValidateCodeOperator
                 .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
                 .Returns(true);
+
+            fakeSysRepository.GetBrandInfoAsync(Arg.Any<Guid>())
+                .Returns(new BrandInfo(
+                    player.BrandId,
+                    new Uri("http://img.org/1.png"),
+                    new Uri("http://img.org/2.png"),
+                    new Uri("http://img.org/3.png"),
+                    false));
 
             var expected = $"Your ID verification code is : {validateCode}";
 
