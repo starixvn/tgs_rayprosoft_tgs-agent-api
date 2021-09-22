@@ -28,6 +28,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
         ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId);
         string GetExternalRoundId(string roundId, long eventId);
         string GetExternalTransactionId(string trxId, long eventId, string action);
+        bool IsTest(string playerCode);
     }
 
     public class SkywindService : ISkywindService
@@ -58,10 +59,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
         }
 
-        async ValueTask<GameActionExternalIds> ISkywindService.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
+        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
 
-        async ValueTask<GameProviderConfigurationData> ISkywindService.GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
                  .ConfigureAwait(false);
@@ -75,7 +76,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             };
         }
 
-        async ValueTask<CachedPlayerLoginRecord> ISkywindService.DecryptTokenAsync(string token)
+        public async ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token)
         {
             if (token.IsNullOrEmpty())
             {
@@ -86,29 +87,29 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
         }
 
-        async ValueTask<Guid> ISkywindService.GetGameProviderIdAsync()
+        public async ValueTask<Guid> GetGameProviderIdAsync()
         {
             return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind).ConfigureAwait(false);
         }
 
-        async ValueTask<SkywindConfiguration> ISkywindService.GetConfigurationAsync()
+        public async ValueTask<SkywindConfiguration> GetConfigurationAsync()
             => await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind);
 
-        async ValueTask<Guid> ISkywindService.GetGameProviderIdByCodeAsync()
+        public async ValueTask<Guid> GetGameProviderIdByCodeAsync()
                     => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind);
 
-        async ValueTask<string> ISkywindService.GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode)
+        public async ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode)
             => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId).ConfigureAwait(false);
 
-        async ValueTask<Guid> ISkywindService.GetBrandIdByPlayerCodeAsync(string playerCode)
+        public async ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode)
             => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
 
-        async ValueTask<CachedBrandGameProviderConfiguration> ISkywindService.GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
+        public async ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
             => await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
-        string ISkywindService.GetExternalRoundId(string roundId, long eventId) => $"{roundId}_{eventId}";
+        public string GetExternalRoundId(string roundId, long eventId) => $"{roundId}_{eventId}";
 
-        string ISkywindService.GetExternalTransactionId(string trxId, long eventId, string action)
+        public string GetExternalTransactionId(string trxId, long eventId, string action)
         {
 
             var externalTransaction = $"{trxId}_{eventId}";
@@ -122,5 +123,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             }
 
         }
+
+        public bool IsTest(string playerCode)
+            => playerCode.IgnoreCaseEquals("4uedhjjznnw4") || playerCode.IgnoreCaseEquals("4ueua6d0au9x");
     }
 }
