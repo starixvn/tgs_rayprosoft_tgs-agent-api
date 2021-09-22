@@ -2,7 +2,7 @@
 
 namespace TGS.Services.Operator.Services.Player
 {
-    public record GetChangePasswordQuery(
+    public record ChangePasswordQuery(
         Guid BrandId,
         string PlayerCode,
         string OldPassword,

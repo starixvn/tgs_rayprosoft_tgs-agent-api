@@ -44,10 +44,10 @@ namespace OperatorApi.UnitTests
 
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
 
-            var sut = new GetChangePasswordQueryService(fakeStatusValidator, fakePlayerQueries, fakePasswordHandler, fakePlayerOperations);
+            var sut = new ChangePasswordQueryService(fakeStatusValidator, fakePlayerQueries, fakePasswordHandler, fakePlayerOperations);
 
             var brandId = Guid.NewGuid();
-            var query = new GetChangePasswordQuery(brandId, playerCode, "oldPassword", "newPassword");
+            var query = new ChangePasswordQuery(brandId, playerCode, "oldPassword", "newPassword");
 
             fakePasswordHandler
                 .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Is(query.OldPassword))

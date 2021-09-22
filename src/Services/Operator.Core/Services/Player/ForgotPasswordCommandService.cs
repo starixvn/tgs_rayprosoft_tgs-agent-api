@@ -67,7 +67,7 @@ namespace TGS.Services.Operator.Services.Player
 
             if (brandInfo!.SmsEnabled)
             {
-                if (player.PhoneAuthentication)
+                if (!player.PhoneAuthentication)
                     throw new PlayerPhoneNotSetException();
 
                 await _smsServiceClient.SendShortMessageAsync(

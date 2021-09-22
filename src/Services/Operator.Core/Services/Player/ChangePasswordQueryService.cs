@@ -12,14 +12,14 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
-    internal class GetChangePasswordQueryService : IGetService<GetChangePasswordQuery, ChangePasswordInfo>
+    internal class ChangePasswordQueryService : IGetService<ChangePasswordQuery, ChangePasswordInfo>
     {
         private readonly IStatusValidator _statusValidator;
         private readonly IPlayerQueries _playerQueries;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
 
-        public GetChangePasswordQueryService(
+        public ChangePasswordQueryService(
             IStatusValidator statusValidator,
             IPlayerQueries playerQueries,
             IPasswordHandler passwordHandler,
@@ -31,7 +31,7 @@ namespace TGS.Services.Operator.Services.Player
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
         }
 
-        public async ValueTask<ChangePasswordInfo> GetAsync(GetChangePasswordQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<ChangePasswordInfo> GetAsync(ChangePasswordQuery query, CancellationToken cancellationToken = default)
         {
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default);
 

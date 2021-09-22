@@ -40,13 +40,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<ChangePasswordResponse> ChangePasswordAsync(
-            [FromServices] IGetService<GetChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
+            [FromServices] IGetService<ChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
             [FromBody] ChangePasswordRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var query = new GetChangePasswordQuery(
+            var query = new ChangePasswordQuery(
                 brandId,
                 playerTokenData.PlayerCode,
                 request.OldPassword,
