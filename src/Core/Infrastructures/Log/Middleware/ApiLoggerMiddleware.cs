@@ -116,14 +116,16 @@ namespace TGS.Core.Infrastructures.Log.Middleware
 
             var url = context.Request.GetEncodedUrl();
 
-            var RecordedContentTypes = new[] {
+            var recordedContentTypes = new[]
+            {
                 MediaTypeNames.Application.Json,
                 MediaTypeNames.Application.Soap,
                 MediaTypeNames.Application.Xml,
                 MediaTypeNames.Text.Html,
                 MediaTypeNames.Text.Plain,
                 MediaTypeNames.Text.Xml,
-                MediaTypeNames.Text.RichText
+                MediaTypeNames.Text.RichText,
+                "application/x-www-form-urlencoded"
             };
 
             var apiLogEvent =
@@ -135,13 +137,13 @@ namespace TGS.Core.Infrastructures.Log.Middleware
                     prefix = GetPrefix(path),
                     servername = Environment.MachineName.NoLongerThan(128),
                     requestheaders = context.Request.Headers.ToDetailString(),
-                    requestcontent = RecordedContentTypes.Contains(context.Request.ContentType)
+                    requestcontent = recordedContentTypes.Contains(context.Request.ContentType)
                         ? reqMessage
                         : context.Request.ContentType,
                     responseheaders = context.Response.Headers.ToDetailString(),
                     responsecontent = resMessage?.Length > _ResMessageSizeLimit
                         ? CutOffResponseContent(resMessage)
-                        : RecordedContentTypes.Contains(context.Response.ContentType)
+                        : recordedContentTypes.Contains(context.Response.ContentType)
                             ? resMessage
                             : context.Response.ContentType,
                     responsecode = context.Response.StatusCode,
