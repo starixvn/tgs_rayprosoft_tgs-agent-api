@@ -53,7 +53,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                     ApplyInfo = string.IsNullOrWhiteSpace(formDetail.ApplyInfo) ? null : JsonDocument.Parse(formDetail.ApplyInfo),
                     PaymentReturn = string.IsNullOrWhiteSpace(formDetail.PaymentReturn) ? null : JsonDocument.Parse(formDetail.PaymentReturn),
                     CreatedOn = formDetail.CreatedOn,
-                    UpdatedOn = formDetail.UpdatedOn
+                    UpdatedOn = formDetail.UpdatedOn,
+                    ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo != null ? formDetail.ThirdPartyOrderNo : string.Empty
                 }
             };
         }
@@ -86,6 +87,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 brandId,
                 request.UserName,
                 request.ChannelName,
+                request.ThirdPartyOrderNo,
                 request.PaymentMethodId,
                 request.Status.ToPaymentFlowState(),
                 createOnRange,
@@ -112,7 +114,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                         Amount = form.Amount,
                         Remark = form.Remark,
                         CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn
+                        UpdatedOn = form.UpdatedOn,
+                        ThirdPartyOrderNo = form.ThirdPartyOrderNo != null ? form.ThirdPartyOrderNo : string.Empty
                     })
                     .ToArray()
             };

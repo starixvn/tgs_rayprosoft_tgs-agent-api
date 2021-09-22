@@ -24,6 +24,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
                     CreateOnRange = query.CreateOnRange,
                     PaymentMethodId = query.PaymentMethodId,
                     Status = query.Status,
+                    ThirdPartyOrderNo = query.ThirdPartyOrderNo,
                     UpdateOnRange = query.UpdateOnRange,
                     UserName = query.UserName
                 },
