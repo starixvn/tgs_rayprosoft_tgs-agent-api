@@ -99,6 +99,14 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
             var externalIds = await _services
                 .GetGameActionExternalIdsAsync(data.GameProviderId, playerCode, externalRoundId).ConfigureAwait(false);
 
+            var lockTransaction = externalIds.FirstOrDefault(a => a.GameActionType == GameActionType.LockAmount);
+
+            if (externalIds.Any(a => a.GameActionType == GameActionType.CancelTransaction &&
+                a.ExternalReferencedTransactionId == lockTransaction?.ExternalTransactionId))
+            {
+                return await GetBalanceAsync(playerCode).ConfigureAwait(false);
+            }
+
             var betData = _map.VoidRoundRequest(playerCode, data, externalIds, request);
             var result = await _actions.CancelTransactionAsync(betData);
             return _map.Response(result);
