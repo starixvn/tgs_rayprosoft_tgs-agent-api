@@ -309,6 +309,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
                     createdFormId,
                     applyInfo.Response.TradeNo);
+
                 await updateDepositFormService
                     .ExecuteAsync(updateThirdPartyOrderNoCommand)
                     .ConfigureAwait(false);
