@@ -50,7 +50,7 @@ namespace TGS.GameProviders.Repositories.Models.GameProviderTCGFtpClient.Commons
         [JsonPropertyName("winAmount")]
         public decimal WinAmount { get; set; }
         [JsonPropertyName("netPNL")]
-        public int NetPNL { get; set; }
+        public decimal NetPNL { get; set; }
         [JsonPropertyName("betStatus")]
         public string BetStatus { get; set; }
         [JsonPropertyName("settlementTime")]
