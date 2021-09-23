@@ -55,7 +55,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                         : JsonDocument.Parse(formDetail.PaymentReturn),
                     CreatedOn = formDetail.CreatedOn,
                     UpdatedOn = formDetail.UpdatedOn,
-                    ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo ?? string.Empty
+                    ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo
                 }
             };
         }
@@ -109,7 +109,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                         Remark = form.Remark,
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn,
-                        ThirdPartyOrderNo = form.ThirdPartyOrderNo ?? string.Empty
+                        ThirdPartyOrderNo = form.ThirdPartyOrderNo
                     })
                     .ToArray()
             };
