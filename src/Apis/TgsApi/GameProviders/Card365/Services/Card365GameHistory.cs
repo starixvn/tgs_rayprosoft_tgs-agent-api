@@ -54,7 +54,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                 return string.Empty;
             }
 
-            var tiles = items.TryGetValue("Tiles", out var value) ? value.ToString() : string.Empty;
+            var tiles = items.TryGetValue("Tiles", out var value) && value != null ? value.ToString() : string.Empty;
             var isBanker = items.TryGetValue("Banker", out value) && "0".Equals(value!.ToString());
 
             return JsonSerializer.Serialize(new
