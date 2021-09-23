@@ -28,6 +28,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
         public DateTimeOffset UpdatedOn { get; init; }
 
         public string UserName { get; init; }
+
         public string UserType { get; init; }
+
+        public string ThirdPartyOrderNo { get; init; }
     }
 }
