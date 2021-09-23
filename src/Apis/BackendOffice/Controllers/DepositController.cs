@@ -54,7 +54,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                     PaymentReturn = string.IsNullOrWhiteSpace(formDetail.PaymentReturn) ? null : JsonDocument.Parse(formDetail.PaymentReturn),
                     CreatedOn = formDetail.CreatedOn,
                     UpdatedOn = formDetail.UpdatedOn,
-                    ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo != null ? formDetail.ThirdPartyOrderNo : string.Empty
+                    ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo
                 }
             };
         }
@@ -115,7 +115,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                         Remark = form.Remark,
                         CreatedOn = form.CreatedOn,
                         UpdatedOn = form.UpdatedOn,
-                        ThirdPartyOrderNo = form.ThirdPartyOrderNo != null ? form.ThirdPartyOrderNo : string.Empty
+                        ThirdPartyOrderNo = form.ThirdPartyOrderNo
                     })
                     .ToArray()
             };

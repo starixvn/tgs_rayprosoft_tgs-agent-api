@@ -26,13 +26,15 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 
         public JsonDocument PaymentReturn { get; init; }
 
-        public string UserId { get; init; }
-
         public string Remark { get; init; }
 
         public FlowState Status { get; init; }
 
+        public string ThirdPartyOrderNo { get; init; }
+
         public DateTimeOffset UpdatedOn { get; init; }
+
+        public string UserId { get; init; }
 
         public string UserName { get; init; }
 
