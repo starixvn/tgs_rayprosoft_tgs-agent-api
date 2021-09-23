@@ -53,6 +53,8 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired()
                 .HasDefaultValueSql("Now()");
 
+            builder.Property(c=> c.ThirdPartyOrderNo);
+
             builder
                 .HasOne(c => c.Player)
                 .WithMany()

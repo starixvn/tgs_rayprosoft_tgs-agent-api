@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +24,8 @@ namespace TGS.Apis.OperatorApi.Controllers
     [ApiController]
     public class BankDepositController : ControllerBase
     {
+        private static Random _Random = new Random();
+
         [HttpPost("applepay")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [PlayerCheckEnabled]
@@ -241,6 +245,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
             [FromServices] UmPaySerializer serializer,
             [FromBody] SubmitUmPayDepositRequest request
             )
@@ -254,21 +259,31 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
+            //需要隨機兩位小數的通道類型:PAY01支轉支 PAY03轉數快 PAY04網銀
+            var randomPointTradeTypes = new string[] { "PAY01", "PAY03", "PAY04" };
+
+            var tradeType = brandPaymentInfo.RootElement.GetProperty("tradeType").GetString();
+            var amount = request.Amount;
+            if (randomPointTradeTypes.Contains(tradeType))
+            {
+                amount += _Random.Next(1, 100) / 100M;
+            }
+
             var command = new CreateDepositFormCommand(
                 playerTokenData.PlayerCode,
                 brandId,
                 request.BrandPaymentId,
-                request.Amount,
+                amount,
                 "tgs.payment.umpay.deposit",
                 request.PromotionId,
                 formId => serializer.Serialize(
                     new UmPayDepositSettings(
                         brandPaymentInfo.RootElement.GetProperty("apiKey").GetString(),
                         brandPaymentInfo.RootElement.GetProperty("merchantNo").GetString(),
-                        brandPaymentInfo.RootElement.GetProperty("tradeType").GetString(),
+                        tradeType,
                         "1",
                         formId,
-                        request.Amount,
+                        amount,
                         Rate: 1m,
                         formId.ToString())));
 
@@ -291,6 +306,14 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             if (applyInfo.Response.Code == "1")
             {
+                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                    createdFormId,
+                    applyInfo.Response.TradeNo);
+
+                await updateDepositFormService
+                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                    .ConfigureAwait(false);
+
                 return new UmPayDepositFormCreatedResponse
                 {
                     FormId = createdFormId,

@@ -7,9 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DataInitializers\Games\365.csv" />
     <None Remove="DataInitializers\Games\AB.csv" />
     <None Remove="DataInitializers\Games\EVO.csv" />
     <None Remove="DataInitializers\Games\SW.csv" />
+    <None Remove="DataInitializers\Games\TCG.csv" />
     <None Remove="DataInitializers\Games\WGFM.csv" />
     <None Remove="DataInitializers\Games\WGVIA.csv" />
     <None Remove="DataInitializers\Games\WM.csv" />
@@ -33,6 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="DataInitializers\Games\365.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AB.csv" />
     <EmbeddedResource Include="DataInitializers\Games\IMES.csv" />
     <EmbeddedResource Include="DataInitializers\Games\AG.csv" />
@@ -45,6 +48,7 @@
     <EmbeddedResource Include="DataInitializers\Games\SG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\EVO.csv" />
     <EmbeddedResource Include="DataInitializers\Games\SW.csv" />
+    <EmbeddedResource Include="DataInitializers\Games\TCG.csv" />
     <EmbeddedResource Include="DataInitializers\Games\WGVIA.csv" />
     <EmbeddedResource Include="DataInitializers\Games\WGFM.csv" />
     <EmbeddedResource Include="DataInitializers\Games\VR.csv" />

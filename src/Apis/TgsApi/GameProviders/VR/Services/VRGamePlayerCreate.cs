@@ -47,7 +47,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             {
                 PlayerCode = player.PlayerCode
             };
-            var response = await _client.GetAPIAsync<VRCreatePlayerRequest, VRErrorCodeResponse>(brandMerchant, GPAction.CreatePlayer, data).ConfigureAwait(false);
+            var response = await _client.CreatePlayerAsync(brandMerchant, data).ConfigureAwait(false);
 
             if (response.errorCode != 0)
             {

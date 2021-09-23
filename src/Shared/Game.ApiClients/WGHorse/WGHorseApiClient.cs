@@ -33,16 +33,18 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
     public class WGHorseApiClient : BaseApiClient, IWGHorseApiClient
     {
         private readonly string _gameProviderCode = Consts.GameProvider.WGHorse;
+        private readonly IWGHorseUtility _utility;
 
-        public WGHorseApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json, IHashProvider hashProvider)
+        public WGHorseApiClient(HttpClient client, IApiClientLogger logger, IJsonSerializationProvider json, IWGHorseUtility utility)
             : base(client, logger, json)
         {
+            _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
         ValueTask<WGHorsePrepareLoginResponse> IWGHorseApiClient.GetPrepareLoginAsync(WGHorseConfiguration configuration, WGHorsePrepareLoginRequest source)
         {
             var data = $"{source.Timestamp}|{source.PlayerCode}|{source.PlayerNickname}|{source.CurrencyCode}";
-            var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=PrepareLogin&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.PrepareLogin";
 
@@ -60,7 +62,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
         ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyRequest source)
         {
             var data = $"{source.PlayerCode}|{ (int)source.AmountType}|{source.OrderId}|{source.Amount}";
-            var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoney&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.AccessMoney";
 
@@ -70,7 +72,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
         ValueTask<WGHorseResponse> IWGHorseApiClient.AccessMoneyQueryAsync(WGHorseConfiguration configuration, WGHorseAccessMoneyQueryRequest source)
         {
             var data = source.OrderId;
-            var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=AccessMoneyQuery&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.AccessMoneyQuery";
 
@@ -80,7 +82,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
         ValueTask<WGHorseGetBalanceResponse> IWGHorseApiClient.GetBalanceAsync(WGHorseConfiguration configuration, WGHorseGetBalanceRequest source)
         {
             var data = source.PlayerCode;
-            var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=GetBalance&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.GetBalance";
 
@@ -90,7 +92,7 @@ namespace TGS.Shared.Game.ApiClients.WGHorse
         ValueTask<WGHorseGameRecordResponse> IWGHorseApiClient.GetGameRecordAsync(WGHorseConfiguration configuration, WGHorseGameRecordRequest request)
         {
             var data = $"|{request.StartTime:yyyy-MM-dd}|{request.EndTime:yyyy-MM-dd}|{request.PageIndex}|{request.PageSize}";
-            var dataEncrypt = WGHorseUtility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
+            var dataEncrypt = _utility.AesEncrypt(data, configuration.PartnerKey, configuration.IV);
             var path = $"{configuration.ApiUrl}?m=api&c=index&a=ShowBetList&Hash={dataEncrypt}&PartnerCode={configuration.PartnerCode}";
             var prefix = $"{_gameProviderCode }.ShowBetList";
 

@@ -35,7 +35,7 @@ insert_final_newline = false
 # 組合管理 Using
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = true
-file_header_template = unset
+file_header_template = 
 
 # this. 和 Me. 喜好設定
 dotnet_style_qualification_for_event = false:silent
@@ -272,3 +272,8 @@ resharper_redundant_base_qualifier_highlighting = warning
 resharper_suggest_var_or_type_built_in_types_highlighting = hint
 resharper_suggest_var_or_type_elsewhere_highlighting = hint
 resharper_suggest_var_or_type_simple_types_highlighting = hint
+
+[*]
+
+# ReSharper properties
+resharper_xmldoc_indent_text = RemoveIndent

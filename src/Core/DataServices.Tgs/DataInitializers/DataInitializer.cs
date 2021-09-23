@@ -103,7 +103,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new EvolutionGameProvider(env),
                 new WGSportsGameProvider(env),
                 new WGHorseGameProvider(env),
-                new WMCasinoGameProvider(env)
+                new WMCasinoGameProvider(env),
+                new TCGGameProvider(env),
+                new Card365GameProvider(env)
             };
         }
 

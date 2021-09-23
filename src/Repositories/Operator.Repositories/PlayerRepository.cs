@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.Operator;
 
 namespace TGS.Operator.Repositories
@@ -17,23 +17,13 @@ namespace TGS.Operator.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
-        public async ValueTask<BalanceInfo> GetBalanceInfoAsync(string playerCode)
-        {
-            var playerWallet = await _tgsRepository.Wallets.AsAsyncEnumerable()
-                .Where(wallet => wallet.PlayerCode == playerCode)
-                .SingleAsync()
-                .ConfigureAwait(false);
-
-            return new BalanceInfo(playerWallet.Balance);
-        }
-
         public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
         {
             var settingData = await _tgsRepository.PlayerGameSettings
                 .FindAsync(playerCode)
                 .ConfigureAwait(false);
 
-            return settingData?.IsAutoTransferToGame == true;
+            return settingData?.IsAutoTransferToGame ?? true;
         }
 
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
@@ -68,6 +58,55 @@ namespace TGS.Operator.Repositories
             }
 
             settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
+        {
+            var datas = new PlayerIpRecord[] {
+                new() {
+                    PlayerCode = playerCode,
+                    IpType = (int)IpType.RegisterIp,
+                    Ip = ip,
+                    RecordOn = registeredOn
+                } ,
+                new()
+                {
+                    PlayerCode = playerCode,
+                    IpType = (int)IpType.LoginIp,
+                    Ip = ip,
+                    RecordOn = registeredOn
+                } };
+            await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask PlayerLoginIpAsync(string playerCode, string ip)
+        {
+            var ipType = (int)IpType.LoginIp;
+            var data = _tgsRepository.PlayerIpRecords
+                .AsQueryable()
+                .Where(x => x.PlayerCode == playerCode && x.IpType == ipType)
+                .FirstOrDefault();
+
+            if (data == null)
+            {
+                data = new PlayerIpRecord
+                {
+                    PlayerCode = playerCode,
+                    IpType = ipType,
+                    Ip = ip,
+                    RecordOn = DateTimeOffset.UtcNow
+                };
+                _tgsRepository.PlayerIpRecords.Add(data);
+            }
+            else
+            {
+                data.Ip = ip;
+                data.RecordOn = DateTimeOffset.UtcNow;
+                _tgsRepository.PlayerIpRecords.Update(data);
+            }
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

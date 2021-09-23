@@ -71,7 +71,7 @@ namespace TGS.Services.Promotion.MessageQueue
                         .CommitTagAsync(depositForm.PlayerCode)
                         .ConfigureAwait(false);
 
-                    if (depositForm.CreatedOn.Date == currentDate)
+                    if (depositForm.CreatedOn.ToLocalTime().Date == currentDate)
                         await _dailyFirstDepositChecker
                             .CommitTagAsync(depositForm.PlayerCode)
                             .ConfigureAwait(false);
@@ -90,7 +90,7 @@ namespace TGS.Services.Promotion.MessageQueue
                         .RollbackTagAsync(depositForm.PlayerCode)
                         .ConfigureAwait(false);
 
-                    if (depositForm.CreatedOn.Date == currentDate)
+                    if (depositForm.CreatedOn.ToLocalTime().Date == currentDate)
                         await _dailyFirstDepositChecker
                             .RollbackTagAsync(depositForm.PlayerCode)
                             .ConfigureAwait(false);

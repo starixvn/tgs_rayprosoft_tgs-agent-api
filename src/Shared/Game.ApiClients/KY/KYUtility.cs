@@ -1,23 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
 
 namespace TGS.Shared.Game.ApiClients.KY
 {
-    /// <summary>
-    /// KY Utility
-    /// </summary>
-    public static class KYUtility
+    public interface IKYUtility
     {
-        private static readonly Dictionary<GPAction, int> _MapAction;
+        /// <summary>
+        /// Gets the action.
+        /// </summary>
+        /// <param name="action">The action.</param>
+        /// <returns></returns>
+        int? GetAction(GPAction action);
 
         /// <summary>
-        /// Initializes the <see cref="KYUtility"/> class.
+        /// Gets the path.
         /// </summary>
-        static KYUtility()
+        /// <typeparam name="TRequest">The type of the request.</typeparam>
+        /// <param name="request">The request.</param>
+        /// <param name="options">The options.</param>
+        /// <returns></returns>
+        string GetPath<TRequest>(TRequest request, JsonSerializerOptions options = null);
+
+        /// <summary>
+        /// Hashes the m d5.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns></returns>
+        public string HashMD5(string data);
+
+        /// <summary>
+        /// Aeses the encrypt.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="isEncodeUrl">if set to <c>true</c> [is encode URL].</param>
+        /// <returns></returns>
+        string AesEncrypt(string data, string key, bool isEncodeUrl = true);
+
+        /// <summary>
+        /// Aeses the decrypt.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <param name="key">The key.</param>
+        /// <param name="isDecodeUrl">if set to <c>true</c> [is decode URL].</param>
+        /// <returns></returns>
+        string AesDecrypt(string data, string key, bool isDecodeUrl = true);
+    }
+
+    internal class KYUtility : IKYUtility
+    {
+        private readonly Dictionary<GPAction, int> _MapAction;
+
+        public KYUtility()
         {
             _MapAction = new Dictionary<GPAction, int>();
             _MapAction.Add(GPAction.GetGameUrl, 0);
@@ -29,40 +68,33 @@ namespace TGS.Shared.Game.ApiClients.KY
             _MapAction.Add(GPAction.GameRecord, 6);
         }
 
-        /// <summary>
-        /// Gets the action.
-        /// </summary>
-        /// <param name="action">The action.</param>
-        /// <returns></returns>
-        public static int? GetAction(GPAction action)
+        public int? GetAction(GPAction action)
         {
             return _MapAction.Where(x => x.Key == action).FirstOrDefault().Value;
         }
 
-        /// <summary>
-        /// Gets the path.
-        /// </summary>
-        /// <typeparam name="TRequest">The type of the request.</typeparam>
-        /// <param name="request">The request.</param>
-        /// <returns></returns>
-        public static string GetPath<TRequest>(TRequest request, JsonSerializerOptions options = null)
+        public string GetPath<TRequest>(TRequest request, JsonSerializerOptions options = null)
         {
             var value = JsonSerializer.Serialize(request, options);
             var items = JsonSerializer.Deserialize<Dictionary<string, object>>(value, options);
             return string.Join("&", items.Select(kvp => string.Format("{0}={1}", kvp.Key, kvp.Value)));
         }
 
-        /// <summary>
-        /// Aeses the encrypt.
-        /// </summary>
-        /// <param name="str">The string.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="isEncodeUrl">if set to <c>true</c> [is encode URL].</param>
-        /// <returns></returns>
-        public static string AesEncrypt(string str, string key, bool isEncodeUrl = true)
+        public string HashMD5(string data)
         {
-            if (string.IsNullOrEmpty(str)) return null;
-            Byte[] toEncryptArray = Encoding.UTF8.GetBytes(str);
+            MD5 md5 = new MD5CryptoServiceProvider();
+            byte[] dataByte = System.Text.Encoding.UTF8.GetBytes(data);
+            byte[] result = md5.ComputeHash(dataByte);
+            string ret = "";
+            for (int i = 0; i < result.Length; i++)
+                ret += result[i].ToString("x").PadLeft(2, '0');
+            return ret;
+        }
+
+        public string AesEncrypt(string data, string key, bool isEncodeUrl = true)
+        {
+            if (string.IsNullOrEmpty(data)) return null;
+            Byte[] toEncryptArray = Encoding.UTF8.GetBytes(data);
 
             System.Security.Cryptography.RijndaelManaged rm = new System.Security.Cryptography.RijndaelManaged
             {
@@ -79,20 +111,13 @@ namespace TGS.Shared.Game.ApiClients.KY
             return isEncodeUrl ? System.Web.HttpUtility.UrlEncode(base64Str) : base64Str;
         }
 
-        /// <summary>
-        /// Aeses the decrypt.
-        /// </summary>
-        /// <param name="str">The string.</param>
-        /// <param name="key">The key.</param>
-        /// <param name="isDecodeUrl">if set to <c>true</c> [is decode URL].</param>
-        /// <returns></returns>
-        public static string AesDecrypt(string str, string key, bool isDecodeUrl = true)
+        public string AesDecrypt(string data, string key, bool isDecodeUrl = true)
         {
-            if (string.IsNullOrEmpty(str)) return null;
+            if (string.IsNullOrEmpty(data)) return null;
             if (isDecodeUrl)
-                str = System.Web.HttpUtility.UrlDecode(str);
+                data = System.Web.HttpUtility.UrlDecode(data);
 
-            Byte[] toEncryptArray = Convert.FromBase64String(str);
+            Byte[] toEncryptArray = Convert.FromBase64String(data);
 
             System.Security.Cryptography.RijndaelManaged rm = new System.Security.Cryptography.RijndaelManaged
             {

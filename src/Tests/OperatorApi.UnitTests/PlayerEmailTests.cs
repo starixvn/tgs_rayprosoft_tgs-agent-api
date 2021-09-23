@@ -98,7 +98,36 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var actual = await sut.GetAsync(
                 new CheckBrandEmailQuery(
                     new Guid("4e86719f-243f-46f6-b010-5c758b7285af"),
-                    "TEST@mail.com"));
+                    "TEST@mail.com",
+                    "playerCode1"));
+            Assert.IsTrue(actual);
+        }
+
+        [Test]
+        public async Task Same_Brand_And_Same_Email_But_Same_Player_Should_Get_False()
+        {
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+            repository.Players.Add(new Core.DataServices.Tgs.Models.Player()
+            {
+                PlayerCode = "playerCode",
+                BrandId = new Guid("4e86719f-243f-46f6-b010-5c758b7285af"),
+                Email = "test@mail.com"
+            });
+
+            await repository.SaveChangesAsync();
+
+            var sut = new CheckBrandEmailQueryService(repository);
+
+            var actual = await sut.GetAsync(
+                new CheckBrandEmailQuery(
+                    new Guid("4e86719f-243f-46f6-b010-5c758b7285af"),
+                    "TEST@mail.com",
+                    "playerCode1"));
             Assert.IsTrue(actual);
         }
 
@@ -116,7 +145,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var brandId = Guid.NewGuid();
 
             fakeValidateCodeOperator
-                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(),Arg.Any<string>())
+                .GetValidateCodeDataAsync<EmailValidateData>(Arg.Any<string>(), Arg.Any<string>())
                 .Returns(new EmailValidateData("test@email.com", "playerCode"));
 
             fakeCheckEmailService

@@ -40,13 +40,13 @@ namespace TGS.Apis.OperatorApi.Controllers
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<ChangePasswordResponse> ChangePasswordAsync(
-            [FromServices] IGetService<GetChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
+            [FromServices] IGetService<ChangePasswordQuery, ChangePasswordInfo> getChangePasswordQueryService,
             [FromBody] ChangePasswordRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var query = new GetChangePasswordQuery(
+            var query = new ChangePasswordQuery(
                 brandId,
                 playerTokenData.PlayerCode,
                 request.OldPassword,
@@ -121,18 +121,20 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("create")]
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<CreatePlayerResponse> CreateAsync(
+            [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromServices] IGetService<CreatePlayerCommand, CreatePlayerInfo> createPlayerQueryService,
             [FromBody] CreatePlayerRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
-
+            var ipAddress = requestAnalyzer.GetIp(HttpContext);
             var query = new CreatePlayerCommand(
                 brandId,
                 request.Username,
                 request.Password,
                 request.CurrencyCode,
                 request.AgentInvitationCode,
-                request.IsTestPlayer);
+                request.IsTestPlayer,
+                ipAddress);
             var info = await createPlayerQueryService.GetAsync(query).ConfigureAwait(false);
 
             return new CreatePlayerResponse()
@@ -154,10 +156,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         public ValueTask<string> ForgotPasswordAsync(
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
-        {
-            return forgotPasswordService
-                .GetAsync(new ForgotPasswordCommand(CultureInfo.CurrentUICulture, request.Email));
-        }
+            => forgotPasswordService.GetAsync(new ForgotPasswordCommand(
+                CultureInfo.CurrentUICulture,
+                request.Email));
 
         [HttpGet("game/auto-transfer")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
