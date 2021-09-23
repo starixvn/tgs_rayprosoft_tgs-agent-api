@@ -245,6 +245,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
             [FromServices] UmPaySerializer serializer,
             [FromBody] SubmitUmPayDepositRequest request
             )
@@ -305,6 +306,14 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             if (applyInfo.Response.Code == "1")
             {
+                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                    createdFormId,
+                    applyInfo.Response.TradeNo);
+
+                await updateDepositFormService
+                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                    .ConfigureAwait(false);
+
                 return new UmPayDepositFormCreatedResponse
                 {
                     FormId = createdFormId,

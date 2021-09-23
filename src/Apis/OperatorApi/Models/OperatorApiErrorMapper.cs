@@ -14,6 +14,47 @@ namespace TGS.Apis.OperatorApi.Models
 {
     public class OperatorApiErrorMapper : IErrorMapper
     {
+        private static readonly IReadOnlyDictionary<TgsApiError, string> _ErrorCodeMessageIdMap =
+            new Dictionary<TgsApiError, string>
+            {
+                [TgsApiError.InvalidCredentials] = "InvalidCredentials",
+                [TgsApiError.InvalidOrExpiredPlayerToken] = "InvalidOrExpiredPlayerToken",
+                [TgsApiError.InvalidCaptcha] = "InvalidCaptcha",
+                [TgsApiError.ClientIdNotFound] = "ClientIdNotFound",
+
+                [TgsApiError.PlayerNotFound] = "PlayerNotFound",
+                [TgsApiError.UserBlocked] = "UserBlocked",
+                [TgsApiError.CountryRestricted] = "CountryRestricted",
+                [TgsApiError.CurrencyMismatch] = "CurrencyMismatch",
+                [TgsApiError.InsufficientFunds] = "InsufficientFunds",
+                [TgsApiError.InvalidInvitationCode] = "InvalidInvitationCode",
+
+                [TgsApiError.InvalidGameAction] = "InvalidGameAction",
+                [TgsApiError.TransactionIdNotFound] = "TransactionIdNotFound",
+                [TgsApiError.DuplicateTransaction] = "DuplicateTransaction",
+                [TgsApiError.InvalidAmount] = "InvalidAmount",
+
+                [TgsApiError.LoginFail] = "LoginFail",
+                [TgsApiError.InvalidArguments] = "InvalidArguments",
+                [TgsApiError.IncorrectFormat] = "IncorrectFormat",
+                [TgsApiError.UnderMaintenance] = "UnderMaintenance",
+                [TgsApiError.InvalidStatus] = "InvalidStatus",
+
+                [TgsApiError.SystemError] = "SystemError",
+                [TgsApiError.OperationNotAllowed] = "OperationNotAllowed",
+                [TgsApiError.ProviderApiError] = "ProviderApiError",
+
+                [TgsApiError.ValidateCodeNotVerify] = "ValidateCodeNotVerify",
+                [TgsApiError.EmailNotVerify] = "EmailNotVerify",
+                [TgsApiError.InsufficientBucket] = "InsufficientBucket",
+                [TgsApiError.PromotionCannotJoin] = "PromotionCannotJoin",
+                [TgsApiError.GameBalanceFundInFailed] = "GameBalanceFundInFailed",
+                [TgsApiError.GameBalanceFundOutFailed] = "GameBalanceFundOutFailed",
+                [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
+                [TgsApiError.UserBanned] = "UserBanned",
+                [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate"
+            };
+
         private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
             new Dictionary<TgsApiError, int>
             {
@@ -54,47 +95,6 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
                 [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
                 [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError
-            };
-
-        private static readonly IReadOnlyDictionary<TgsApiError, string> _ErrorCodeMessageIdMap =
-            new Dictionary<TgsApiError, string>
-            {
-                [TgsApiError.InvalidCredentials] = "InvalidCredentials",
-                [TgsApiError.InvalidOrExpiredPlayerToken] = "InvalidOrExpiredPlayerToken",
-                [TgsApiError.InvalidCaptcha] = "InvalidCaptcha",
-                [TgsApiError.ClientIdNotFound] = "ClientIdNotFound",
-
-                [TgsApiError.PlayerNotFound] = "PlayerNotFound",
-                [TgsApiError.UserBlocked] = "UserBlocked",
-                [TgsApiError.CountryRestricted] = "CountryRestricted",
-                [TgsApiError.CurrencyMismatch] = "CurrencyMismatch",
-                [TgsApiError.InsufficientFunds] = "InsufficientFunds",
-                [TgsApiError.InvalidInvitationCode] = "InvalidInvitationCode",
-
-                [TgsApiError.InvalidGameAction] = "InvalidGameAction",
-                [TgsApiError.TransactionIdNotFound] = "TransactionIdNotFound",
-                [TgsApiError.DuplicateTransaction] = "DuplicateTransaction",
-                [TgsApiError.InvalidAmount] = "InvalidAmount",
-
-                [TgsApiError.LoginFail] = "LoginFail",
-                [TgsApiError.InvalidArguments] = "InvalidArguments",
-                [TgsApiError.IncorrectFormat] = "IncorrectFormat",
-                [TgsApiError.UnderMaintenance] = "UnderMaintenance",
-                [TgsApiError.InvalidStatus] = "InvalidStatus",
-
-                [TgsApiError.SystemError] = "SystemError",
-                [TgsApiError.OperationNotAllowed] = "OperationNotAllowed",
-                [TgsApiError.ProviderApiError] = "ProviderApiError",
-
-                [TgsApiError.ValidateCodeNotVerify] = "ValidateCodeNotVerify",
-                [TgsApiError.EmailNotVerify] = "EmailNotVerify",
-                [TgsApiError.InsufficientBucket] = "InsufficientBucket",
-                [TgsApiError.PromotionCannotJoin] = "PromotionCannotJoin",
-                [TgsApiError.GameBalanceFundInFailed] = "GameBalanceFundInFailed",
-                [TgsApiError.GameBalanceFundOutFailed] = "GameBalanceFundOutFailed",
-                [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
-                [TgsApiError.UserBanned] = "UserBanned",
-                [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate"
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -141,7 +141,7 @@ namespace TGS.Apis.OperatorApi.Models
             };
 
         public bool CanProcess(Exception exception)
-            => _TgsApiErrorByException.ContainsKey(exception.GetType());
+            => true;
 
         public int GetApiErrorByException(Exception exception)
         {

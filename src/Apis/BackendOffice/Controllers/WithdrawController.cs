@@ -79,6 +79,7 @@ namespace TGS.Apis.BackendOffice.Controllers
                 brandId,
                 request.UserName,
                 request.ChannelName,
+                request.ThirdPartyOrderNo,
                 request.PaymentMethodId,
                 request.Status.ToPaymentFlowState(),
                 createOnRange,
