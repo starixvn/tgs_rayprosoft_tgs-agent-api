@@ -114,6 +114,18 @@ namespace TGS.Workers.Schedulers
                     typesToUseManagementPage: GetModuleTypes())
                 .AddMail(_configuration);
 
+            services.AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var config = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .ProcessAllSubjects();
+            });
+
             services.AddControllers();
 
             services.AddGameProvidersMognoRepository((options, sp) =>

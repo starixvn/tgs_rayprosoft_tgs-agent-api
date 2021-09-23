@@ -6,20 +6,20 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models.Interfaces;
 
 namespace TGS.Core.Infrastructures.Filters
 {
     public abstract class BaseHandleErrorFilter : IAsyncActionFilter
     {
-        protected abstract string LoggerName { get; }
-
+        private IDictionary<string, object> _actionArguments;
         protected IErrorMapper ErrorMapper { get; }
+
         protected ITgsLog Log { get; }
 
-        private IDictionary<string, object> _actionArguments;
+        protected abstract string LoggerName { get; }
 
         public BaseHandleErrorFilter(Func<string, IErrorMapper> mapper, string mapperKey, ITgsLog log)
         {
@@ -54,6 +54,13 @@ namespace TGS.Core.Infrastructures.Filters
 
         #region Private Methods
 
+        private static string GetRequestHeadersAsString(HttpRequest request)
+        {
+            return request.Headers
+                .Aggregate(new StringBuilder(), (b, p) => b.AppendLine($"{p.Key}={p.Value.JoinAsStringBySemicolon()}"))
+                .ToString();
+        }
+
         private string GetErrorMessage(ActionExecutedContext context, string type, string errorMessage, int statusCode)
         {
             var reqParams = new List<object>();
@@ -81,13 +88,6 @@ namespace TGS.Core.Infrastructures.Filters
                 requestParams = reqParams
             }
             .ToJson();
-        }
-
-        private static string GetRequestHeadersAsString(HttpRequest request)
-        {
-            return request.Headers
-                .Aggregate(new StringBuilder(), (b, p) => b.AppendLine($"{p.Key}={p.Value.JoinAsStringBySemicolon()}"))
-                .ToString();
         }
 
         #endregion Private Methods

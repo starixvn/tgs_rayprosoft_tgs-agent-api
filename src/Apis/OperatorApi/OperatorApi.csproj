@@ -59,6 +59,7 @@
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
     <PackageReference Include="Tgs.Interceptors" Version="0.0.1" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.1.1" />
     <PackageReference Include="Tgs.Payment.ApplePay.Client" Version="0.0.5" />
     <PackageReference Include="Tgs.Payment.LeePay.Client" Version="0.0.10" />
     <PackageReference Include="Tgs.Payment.MaticPay.Client" Version="0.0.6" />    

@@ -4,10 +4,9 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Interfaces;
 using TGS.Core.Models.Messages;
 

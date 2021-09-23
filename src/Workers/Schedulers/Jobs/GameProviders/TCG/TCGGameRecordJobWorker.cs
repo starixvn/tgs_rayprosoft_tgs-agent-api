@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Hangfire.Services;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Messages;
@@ -19,10 +19,10 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
     [Queue(Consts.Queue.GameProvider)]
     public sealed class TCGGameRecordJobWorker : BaseWork<TgsResponse>
     {
-        private readonly ITgsLog _log;
-        private readonly IGameProviderScheduleLockRepository _gameProviderScheduleLockRepository;
-        private readonly ITCGGameProviderService _service;
         private readonly ITCGApiClient _client;
+        private readonly IGameProviderScheduleLockRepository _gameProviderScheduleLockRepository;
+        private readonly ITgsLog _log;
+        private readonly ITCGGameProviderService _service;
 
         public TCGGameRecordJobWorker(
             ITgsLog log,
@@ -122,7 +122,6 @@ namespace TGS.Workers.Schedulers.Jobs.GameProviders.TCG
             }
 
             return new();
-
         }
 
         /// <summary>

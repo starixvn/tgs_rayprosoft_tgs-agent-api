@@ -6,6 +6,7 @@ using MessagePack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
@@ -68,7 +69,6 @@ namespace TGS.Tests.Nats.IntegrationTests
                 .AddEnvironmentVariables()
                 .Build();
 
-            serviceCollection.AddScoped<ITgsLog, TgsLog>();
             serviceCollection.AddScoped<IJsonSerializationProvider, JsonSerializationProvider>();
             serviceCollection.AddSingleton<IConfiguration>(configuration);
 #else

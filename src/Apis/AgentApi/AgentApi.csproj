@@ -28,6 +28,7 @@
     <PackageReference Include="Scrutor" Version="3.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.1.4" />
     <PackageReference Include="System.Linq.Async" Version="5.0.0" />
+    <PackageReference Include="Tgs.MessageQueue.Nats" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Log.Attributes;
-using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.WebApiServices;
 
 namespace TGS.Core.Infrastructures.Log.Middleware
@@ -129,24 +129,24 @@ namespace TGS.Core.Infrastructures.Log.Middleware
             var apiLogEvent =
                 new ApiLogEvent
                 {
-                    ip = requestAnalyzer.GetIp(context).NoLongerThan(256),
-                    path = url.NoLongerThan(256),
-                    method = context.Request.Method.NoLongerThan(8),
-                    prefix = GetPrefix(path),
-                    servername = Environment.MachineName.NoLongerThan(128),
-                    requestheaders = context.Request.Headers.ToDetailString(),
-                    requestcontent = RecordedContentTypes.Contains(context.Request.ContentType)
+                    Ip = requestAnalyzer.GetIp(context).NoLongerThan(256),
+                    Path = url.NoLongerThan(256),
+                    Method = context.Request.Method.NoLongerThan(8),
+                    Prefix = GetPrefix(path),
+                    ServerName = Environment.MachineName.NoLongerThan(128),
+                    RequestHeaders = context.Request.Headers.ToDetailString(),
+                    RequestContent = RecordedContentTypes.Contains(context.Request.ContentType)
                         ? reqMessage
                         : context.Request.ContentType,
-                    responseheaders = context.Response.Headers.ToDetailString(),
-                    responsecontent = resMessage?.Length > _ResMessageSizeLimit
+                    ResponseHeaders = context.Response.Headers.ToDetailString(),
+                    ResponseContent = resMessage?.Length > _ResMessageSizeLimit
                         ? CutOffResponseContent(resMessage)
                         : RecordedContentTypes.Contains(context.Response.ContentType)
                             ? resMessage
                             : context.Response.ContentType,
-                    responsecode = context.Response.StatusCode,
-                    executiontimems = ms,
-                    recordedon = requestTime
+                    ResponseCode = (short)context.Response.StatusCode,
+                    ExecutionTimeMs = ms,
+                    RecordedOn = requestTime
                 };
 
             log.LogApi(apiLogEvent);

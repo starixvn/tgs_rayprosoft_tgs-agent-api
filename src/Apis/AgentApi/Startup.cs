@@ -1,8 +1,8 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
 using TGS.Apis.AgentApi.Extensions;
+using TGS.Apis.AgentApi.Filters;
 using TGS.Apis.AgentApi.Filters.Swaggers;
 using TGS.Apis.AgentApi.Models;
 using TGS.Clients.Report.Client.Extensions;
@@ -31,7 +32,6 @@ using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
-using TGS.Apis.AgentApi.Filters;
 
 namespace TGS.Apis.AgentApi
 {
@@ -102,6 +102,18 @@ namespace TGS.Apis.AgentApi
                 .AddPluggableServices()
                 .AddReportClientServices(_configuration)
                 .AddTransactions();
+
+            services.AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var config = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .ProcessAllSubjects();
+            });
 
             services
                 .AddAgentApiCore()

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;

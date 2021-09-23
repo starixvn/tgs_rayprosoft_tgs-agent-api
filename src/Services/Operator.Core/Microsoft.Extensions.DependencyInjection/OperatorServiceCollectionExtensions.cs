@@ -42,16 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
                     httpClient.BaseAddress = options.FileServiceBaseUrl;
                 })
-                .AddPaymentClient()
-                .AddNatsMessageQueue(config =>
-                {
-                    config.ConfigQueueOptions((options, sp) =>
-                    {
-                        var configuration = sp.GetRequiredService<IConfiguration>();
-
-                        options.Url = configuration.GetValue<string>("NatsSetting:Urls");
-                    });
-                });
+                .AddPaymentClient();
 
             var opConfiguration = new OperatorConfiguration(services);
 
