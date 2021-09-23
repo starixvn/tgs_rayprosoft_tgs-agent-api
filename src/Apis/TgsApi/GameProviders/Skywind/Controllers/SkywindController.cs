@@ -142,7 +142,6 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
             };
         }
 
-
         [HttpPost("rollback")]
         public async Task<SkywindSingleWalletResponse> RollbackBetAsync(SkywindRollbackBetRequest request)
         {
@@ -203,7 +202,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 CustSessionId = request.Ticket,
                 CurrencyCode = validationResult.GameProviderCurrencyCode,
                 Country = "CN",
-                TestCust = false
+                TestCust = _service.IsTest(playerCode)
             };
         }
 
@@ -229,7 +228,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Controllers
                 CustSessionId = request.Ticket,
                 CurrencyCode = validationResult.GameProviderCurrencyCode,
                 Country = "CN",
-                TestCust = false
+                TestCust = _service.IsTest(playerCode)
             };
         }
 
