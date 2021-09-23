@@ -27,5 +27,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
         public DateTimeOffset CreatedOn { get; init; }
 
         public DateTimeOffset UpdatedOn { get; init; }
+
+        public string ThirdPartyOrderNo { get; init; }
     }
 }

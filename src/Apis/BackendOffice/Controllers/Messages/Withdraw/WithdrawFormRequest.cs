@@ -12,6 +12,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
         [FromQuery(Name = "channel")]
         public string ChannelName { get; init; }
 
+        [FromQuery(Name = "thirdOrderNo")]
+        public string ThirdPartyOrderNo { get; init; }
+
         [FromQuery(Name = "method")]
         public Guid? PaymentMethodId { get; init; }
 
