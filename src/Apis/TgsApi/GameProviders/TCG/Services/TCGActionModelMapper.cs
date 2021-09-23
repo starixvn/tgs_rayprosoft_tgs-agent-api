@@ -118,10 +118,9 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 var brandId = await _service.GetBrandIdByPlayerCodeAsync(order.UserName).ConfigureAwait(false);
                 var gameProviderConfigurationId = await _service.GetBrandGameProviderConfigurationIdAsync(brandId, gameProviderId).ConfigureAwait(false);
                 var additionalInformation = _jsonSerializationProvider.DeserializeFromString<AdditionalInformationLotto>(_jsonSerializationProvider.SerializeToString(order.AdditionalInformation));
-                var betExternalId = await _service.GetGameActionExternalIdAsync(gameProviderId, order.UserName, order.RefNo).ConfigureAwait(false);
-                if (betExternalId != null
-                    && additionalInformation.OrderNo == betExternalId.ExternalRoundId
-                    && betExternalId.GameActionType == GameActionType.PlaceBet
+                var (roundRecord, gameActionRecord) = await _service.GetGameActionsByBetAsync(gameProviderId, order.UserName, additionalInformation.OrderNo, cachedGame.Id).ConfigureAwait(false);
+                if (gameActionRecord != null
+                    && additionalInformation.OrderNo == roundRecord.ExternalRoundId
                     )
                 {
                     batchTransactionData.Add(new BatchTransactionData()
@@ -130,11 +129,11 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                         GameProviderConfigurationId = gameProviderConfigurationId,
                         Amount = order.Amount,
                         Commission = 0,
-                        ExternalGameId = betExternalId.ExternalGameId,
-                        ExternalBetId = betExternalId.ExternalBetId.ToString(),
-                        ExternalRoundId = betExternalId.ExternalRoundId,
+                        ExternalGameId = cachedGame.ExternalId,
+                        ExternalBetId = gameActionRecord.ExternalBetId.ToString(),
+                        ExternalRoundId = roundRecord.ExternalRoundId,
                         ExternalTransactionId = order.RefNo.ToString(),
-                        ExternalTransactionReferenceId = betExternalId.ExternalTransactionId.ToString(),
+                        ExternalTransactionReferenceId = gameActionRecord.ExternalTransactionId.ToString(),
                         GameActionType = (order.Amount > 0) ? GameActionType.WinBet : GameActionType.LoseBet,
                         BetType = string.Empty,
                         Timestamp = DateTime.UtcNow,
