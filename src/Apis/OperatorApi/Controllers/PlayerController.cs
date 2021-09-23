@@ -417,7 +417,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var command = new StartSetPlayerPhoneCommand(playerTokenData.PlayerCode, request.Phone,
+            var command = new StartSetPlayerPhoneCommand(
+                playerTokenData.PlayerCode,
+                request.Phone,
                 CultureInfo.CurrentUICulture);
 
             return startSetPlayerPhoneService.GetAsync(command);
