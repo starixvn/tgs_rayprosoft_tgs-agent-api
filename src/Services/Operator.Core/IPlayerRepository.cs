@@ -6,17 +6,19 @@ namespace TGS.Services.Operator
 {
     public interface IPlayerRepository
     {
-        ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode);
-
-        ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
-
         ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
 
-        ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn);
+        ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode);
+
+        ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName);
+
+        ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
 
         ValueTask PlayerLoginIpAsync(string playerCode, string ip);
 
-        ValueTask<PlayerPasswordInfo?> GetPlayerPasswordInfoByUsernameAsync(Guid brandId, string username);
+        ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn);
+
+        ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
         ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
     }

@@ -201,7 +201,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
                     .ConfigureAwait(false);
             }
-            catch (PlayerNotFoundException)
+            catch (CoreExceptions.PlayerNotFoundException)
             {
                 throw new CoreExceptions.PlayerNotFoundException(query.PlayerCode, Player.NotFound);
             }
@@ -247,7 +247,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     PlayerToken = info.PlayerToken
                 };
             }
-            catch (PlayerNotFoundException)
+            catch (CoreExceptions.PlayerNotFoundException)
             {
                 throw new CoreExceptions.PlayerNotFoundException(request.Username, Player.NotFound);
             }
@@ -420,33 +420,49 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <summary>
         /// Starts to set phone with username and password
         /// </summary>
-        /// <param name="validateInitPhoneService">The validate init phone service</param>
+        /// <param name="getPlayerInfoService">The get player information service.</param>
+        /// <param name="validatePlayerService">The validate init phone service</param>
         /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
         /// <param name="request">The request.</param>
-        /// <returns>security code</returns>
+        /// <returns>
+        /// security code
+        /// </returns>
         [HttpPost("init-phone")]
-        public async ValueTask<string> StartInitPhoneAsync(
-            [FromServices] IGetService<ValidateInitPhoneCommand, string> validateInitPhoneService,
+        public async ValueTask<string> StartChangePhoneAsync(
+            [FromServices] IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo> getPlayerInfoService,
+            [FromServices] IGetService<PlayerPasswordValidateCommand, bool> validatePlayerService,
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartInitPhoneRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
-            var validateInitPhoneCommand = new ValidateInitPhoneCommand(
-                brandId,
-                request.Username,
-                request.Password);
-
-            var playerCode = await validateInitPhoneService.GetAsync(validateInitPhoneCommand)
+            var playerInfo = await getPlayerInfoService
+                .GetAsync(new GetPlayerInfoByUserNameQuery(brandId, request.UserName))
                 .ConfigureAwait(false);
 
+            if (playerInfo == null)
+                throw new CoreExceptions.PlayerNotFoundException("Player not found.");
+
+            var playerPasswordValidateCommand = new PlayerPasswordValidateCommand(
+                playerInfo.PlayerCode,
+                request.Password);
+
+            var isValid = await validatePlayerService
+                .GetAsync(playerPasswordValidateCommand)
+                .ConfigureAwait(false);
+
+            if (!isValid)
+                throw new CoreExceptions.InvalidCredentialsException("Login fail.");
+
             var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
-                playerCode,
+                playerInfo.PlayerCode,
                 request.AreaCode,
                 request.Phone,
                 CultureInfo.CurrentUICulture);
 
-            return await startSetPlayerPhoneService.GetAsync(startSetPlayerPhoneCommand).ConfigureAwait(false);
+            return await startSetPlayerPhoneService
+                .GetAsync(startSetPlayerPhoneCommand)
+                .ConfigureAwait(false);
         }
 
         /// <summary>

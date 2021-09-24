@@ -7,7 +7,7 @@ namespace TGS.Apis.OperatorApi.Models.Messages
     {
         [Required]
         [JsonPropertyName("username")]
-        public string Username { get; init; }
+        public string UserName { get; init; }
 
         [Required]
         [JsonPropertyName("pwd")]
