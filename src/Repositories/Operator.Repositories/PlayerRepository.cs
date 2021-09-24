@@ -64,20 +64,23 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
         {
-            var datas = new PlayerIpRecord[] {
-                new() {
+            var datas = new PlayerIpRecord[]
+            {
+                new()
+                {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.RegisterIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                } ,
+                },
                 new()
                 {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.LoginIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                } };
+                }
+            };
             await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -109,6 +112,25 @@ namespace TGS.Operator.Repositories
             }
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask<PlayerPasswordInfo?> GetPlayerPasswordInfoByUsernameAsync(Guid brandId, string username)
+        {
+            var playerData = await _tgsRepository.Players
+                .FirstOrDefaultAsync(p => p.BrandId == brandId &&
+                    p.Username.ToLower() == username.ToLower())
+                .ConfigureAwait(false);
+
+            if (playerData == null)
+            {
+                return null;
+            }
+
+            return new PlayerPasswordInfo(
+                playerData.PlayerCode,
+                playerData.Username,
+                playerData.Salt,
+                playerData.Password);
         }
     }
 }
