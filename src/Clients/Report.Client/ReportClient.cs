@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Clients.Report.Client.Models.Market;
@@ -34,14 +35,23 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
             GetAgentAccountChangesRequest request);
+
+        Task<Stream> ExportMarketsAsync(ExportMarketsRequest request);
+        Task<Stream> ExportPlayerContributionsAsync(ExportPlayerContributionsRequest request);
+        Task<Stream> ExportAgentContributionsAsync(ExportAgentContributionsRequest request);
+        Task<Stream> ExportAgentDividendsAsync(ExportAgentDividendsRequest request);
+        Task<Stream> ExportVipsAsync(ExportVipReportRequest request);
     }
 
     public class ReportClient : BaseApiClient, IReportClient
     {
+        private readonly HttpClient _client;
+
         public ReportClient(HttpClient client, IApiClientLogger logger,
             IJsonSerializationProvider json)
             : base(client, logger, json)
         {
+            _client = client;
         }
 
         async Task<PagedResponse<VipModel>> IReportClient.GetVipReportAsync(GetVipReportRequest request)
@@ -187,6 +197,91 @@ namespace TGS.Clients.Report.Client
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() {PropertyNameCaseInsensitive = true});
+        }
+
+        public async Task<Stream> ExportMarketsAsync(ExportMarketsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/marketReport/exportMarkets?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportPlayerContributionsAsync(ExportPlayerContributionsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/playerReport/exportPlayerContributions?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportAgentContributionsAsync(ExportAgentContributionsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/agentReport/exportAgentContributions?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportAgentDividendsAsync(ExportAgentDividendsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/agentReport/exportAgentDividends?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportVipsAsync(ExportVipReportRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/agentReport/exportVips?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
         }
     }
 }
