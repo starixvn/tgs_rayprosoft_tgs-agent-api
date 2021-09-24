@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Filters;
@@ -72,10 +71,6 @@ namespace TGS.Apis.BackendOffice
 
                 endpoints.MapMetrics();
             });
-
-            var requestLocalizationOptions =
-                app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
-            app.UseRequestLocalization(requestLocalizationOptions);
 
             if (!env.IsProduction())
             {
