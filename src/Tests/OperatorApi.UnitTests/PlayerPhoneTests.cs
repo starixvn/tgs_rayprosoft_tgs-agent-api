@@ -54,6 +54,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
             var phone = "0988123456";
+            var areaCode = "886";
 
             var command = new CommitSetPlayerPhoneCommand(playerCode, securityKey, validateCode);
 
@@ -62,7 +63,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     fake => fake.GetValidateCodeDataAsync<PhoneValidateData>(
                         It.Is<string>(x => x == validateCode),
                         It.Is<string>(x => x == securityKey)))
-                .Returns(ValueTask.FromResult(new PhoneValidateData(phone, playerCode)));
+                .Returns(ValueTask.FromResult(new PhoneValidateData(
+                    areaCode,
+                    phone,
+                    playerCode)));
 
             await sut.ExecuteAsync(command);
 
@@ -89,6 +93,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 moqValidateCodeOperator.Object,
                 moqSmsServiceClient.Object);
 
+            var areaCode = "886";
             var phone = "0988123456";
             var player = new Player
             {
@@ -99,7 +104,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 DefaultWalletCurrencyCode = "CNY"
             };
 
-            var command = new StartSetPlayerPhoneCommand(player.PlayerCode, phone, CultureInfo.GetCultureInfo("en-US"));
+            var command = new StartSetPlayerPhoneCommand(
+                player.PlayerCode, 
+                areaCode,
+                phone, 
+                CultureInfo.GetCultureInfo("en-US"));
 
             var validateCode = "123456";
             var expectedSecurityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";

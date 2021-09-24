@@ -419,6 +419,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var command = new StartSetPlayerPhoneCommand(
                 playerTokenData.PlayerCode,
+                request.AreaCode,
                 request.Phone,
                 CultureInfo.CurrentUICulture);
 
