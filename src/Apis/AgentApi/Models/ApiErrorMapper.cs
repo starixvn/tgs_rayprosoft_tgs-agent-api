@@ -16,10 +16,10 @@ namespace TGS.Apis.AgentApi.Models
             new Dictionary<TgsApiError, string>
             {
                 [TgsApiError.InvalidCredentials] = "InvalidCredentials",
-                [TgsApiError.InvalidOrExpiredUserToken] = "InvalidOrExpiredUserToken",
+                [TgsApiError.InvalidOrExpiredAgentToken] = "InvalidOrExpiredAgentToken",
                 [TgsApiError.InvalidCaptcha] = "InvalidCaptcha",
                 [TgsApiError.ClientIdNotFound] = "ClientIdNotFound",
-                [TgsApiError.UserNotFound] = "UserNotFound",
+                [TgsApiError.AgentNotFound] = "AgentNotFound",
                 [TgsApiError.UserBlocked] = "UserBlocked",
                 [TgsApiError.CountryRestricted] = "CountryRestricted",
                 [TgsApiError.CurrencyMismatch] = "CurrencyMismatch",
@@ -52,10 +52,10 @@ namespace TGS.Apis.AgentApi.Models
             new Dictionary<TgsApiError, int>
             {
                 [TgsApiError.InvalidCredentials] = StatusCodes.Status401Unauthorized,
-                [TgsApiError.InvalidOrExpiredUserToken] = StatusCodes.Status401Unauthorized,
+                [TgsApiError.InvalidOrExpiredAgentToken] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.InvalidCaptcha] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.ClientIdNotFound] = StatusCodes.Status401Unauthorized,
-                [TgsApiError.UserNotFound] = StatusCodes.Status401Unauthorized,
+                [TgsApiError.AgentNotFound] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.UserBlocked] = StatusCodes.Status403Forbidden,
                 [TgsApiError.CountryRestricted] = StatusCodes.Status403Forbidden,
                 [TgsApiError.CurrencyMismatch] = StatusCodes.Status500InternalServerError,
@@ -74,7 +74,7 @@ namespace TGS.Apis.AgentApi.Models
                 [TgsApiError.OperationNotAllowed] = StatusCodes.Status405MethodNotAllowed,
                 [TgsApiError.ProviderApiError] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
-                [TgsApiError.UserNotFound] = StatusCodes.Status404NotFound,
+                [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
                 [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
                 [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest,
@@ -89,11 +89,11 @@ namespace TGS.Apis.AgentApi.Models
             new Dictionary<Type, TgsApiError>
             {
                 [typeof(InvalidCredentialsException)] = TgsApiError.InvalidCredentials,
-                [typeof(MissingTokenException)] = TgsApiError.InvalidOrExpiredUserToken,
-                [typeof(AgentLoginExpiredException)] = TgsApiError.InvalidOrExpiredUserToken,
+                [typeof(MissingTokenException)] = TgsApiError.InvalidOrExpiredAgentToken,
+                [typeof(AgentLoginExpiredException)] = TgsApiError.InvalidOrExpiredAgentToken,
                 [typeof(InvalidCaptchaException)] = TgsApiError.InvalidCaptcha,
                 [typeof(ClientIdNotFoundException)] = TgsApiError.ClientIdNotFound,
-                [typeof(AgentNotFoundException)] = TgsApiError.UserNotFound,
+                [typeof(AgentNotFoundException)] = TgsApiError.AgentNotFound,
                 [typeof(PlayerDisabledException)] = TgsApiError.UserBlocked,
                 [typeof(CountryRestrictedException)] = TgsApiError.CountryRestricted,
                 [typeof(CurrencyNotMatchingException)] = TgsApiError.CurrencyMismatch,
@@ -111,7 +111,7 @@ namespace TGS.Apis.AgentApi.Models
                 [typeof(InvalidOperationException)] = TgsApiError.SystemError,
                 [typeof(OperationNotAllowedException)] = TgsApiError.OperationNotAllowed,
                 [typeof(GameProviderApiErrorException)] = TgsApiError.ProviderApiError,
-                [typeof(Services.Agent.Exceptions.AgentNotFoundException)] = TgsApiError.UserNotFound,
+                [typeof(Services.Agent.Exceptions.AgentNotFoundException)] = TgsApiError.AgentNotFound,
                 [typeof(UserBannedException)] = TgsApiError.UserBanned
             };
 

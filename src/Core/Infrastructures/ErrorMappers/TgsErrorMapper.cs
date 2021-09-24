@@ -16,11 +16,11 @@ namespace TGS.Core.Infrastructures.ErrorMappers
             new Dictionary<Type, TgsApiError>
             {
                 {typeof(InvalidCredentialsException), InvalidCredentials},
-                {typeof(MissingTokenException), InvalidOrExpiredUserToken},
-                {typeof(PlayerLoginExpiredException), InvalidOrExpiredUserToken},
+                {typeof(MissingTokenException), InvalidOrExpiredPlayerToken},
+                {typeof(PlayerLoginExpiredException), InvalidOrExpiredPlayerToken},
                 {typeof(InvalidCaptchaException), InvalidCaptcha},
                 {typeof(ClientIdNotFoundException), ClientIdNotFound},
-                {typeof(PlayerNotFoundException), UserNotFound},
+                {typeof(PlayerNotFoundException), PlayerNotFound},
                 {typeof(PlayerDisabledException), UserBlocked},
                 {typeof(CountryRestrictedException), CountryRestricted},
                 {typeof(CurrencyNotMatchingException), CurrencyMismatch},
@@ -55,10 +55,10 @@ namespace TGS.Core.Infrastructures.ErrorMappers
             new Dictionary<TgsApiError, int>
             {
                 {InvalidCredentials, Status401Unauthorized},
-                {InvalidOrExpiredUserToken, Status401Unauthorized},
+                {InvalidOrExpiredPlayerToken, Status401Unauthorized},
                 {InvalidCaptcha, Status401Unauthorized},
                 {ClientIdNotFound, Status401Unauthorized},
-                {UserNotFound, Status401Unauthorized},
+                {PlayerNotFound, Status401Unauthorized},
                 {UserBlocked, Status403Forbidden},
                 {CountryRestricted, Status403Forbidden},
                 {CurrencyMismatch, Status500InternalServerError},

@@ -19,10 +19,10 @@ namespace TGS.Apis.OperatorApi.Models
             new Dictionary<TgsApiError, string>
             {
                 [TgsApiError.InvalidCredentials] = "InvalidCredentials",
-                [TgsApiError.InvalidOrExpiredUserToken] = "InvalidOrExpiredPlayerToken",
+                [TgsApiError.InvalidOrExpiredPlayerToken] = "InvalidOrExpiredPlayerToken",
                 [TgsApiError.InvalidCaptcha] = "InvalidCaptcha",
                 [TgsApiError.ClientIdNotFound] = "ClientIdNotFound",
-                [TgsApiError.UserNotFound] = "PlayerNotFound",
+                [TgsApiError.PlayerNotFound] = "PlayerNotFound",
                 [TgsApiError.UserBlocked] = "UserBlocked",
                 [TgsApiError.CountryRestricted] = "CountryRestricted",
                 [TgsApiError.CurrencyMismatch] = "CurrencyMismatch",
@@ -55,10 +55,10 @@ namespace TGS.Apis.OperatorApi.Models
             new Dictionary<TgsApiError, int>
             {
                 [TgsApiError.InvalidCredentials] = StatusCodes.Status401Unauthorized,
-                [TgsApiError.InvalidOrExpiredUserToken] = StatusCodes.Status401Unauthorized,
+                [TgsApiError.InvalidOrExpiredPlayerToken] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.InvalidCaptcha] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.ClientIdNotFound] = StatusCodes.Status401Unauthorized,
-                [TgsApiError.UserNotFound] = StatusCodes.Status401Unauthorized,
+                [TgsApiError.PlayerNotFound] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.UserBlocked] = StatusCodes.Status403Forbidden,
                 [TgsApiError.CountryRestricted] = StatusCodes.Status403Forbidden,
                 [TgsApiError.CurrencyMismatch] = StatusCodes.Status500InternalServerError,
@@ -77,7 +77,7 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.OperationNotAllowed] = StatusCodes.Status405MethodNotAllowed,
                 [TgsApiError.ProviderApiError] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
-                [TgsApiError.UserNotFound] = StatusCodes.Status404NotFound,
+                [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
                 [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
                 [TgsApiError.InsufficientBucket] = StatusCodes.Status400BadRequest,
                 [TgsApiError.PromotionCannotJoin] = StatusCodes.Status400BadRequest,
@@ -92,11 +92,11 @@ namespace TGS.Apis.OperatorApi.Models
             new Dictionary<Type, TgsApiError>
             {
                 [typeof(InvalidCredentialsException)] = TgsApiError.InvalidCredentials,
-                [typeof(MissingTokenException)] = TgsApiError.InvalidOrExpiredUserToken,
-                [typeof(PlayerLoginExpiredException)] = TgsApiError.InvalidOrExpiredUserToken,
+                [typeof(MissingTokenException)] = TgsApiError.InvalidOrExpiredPlayerToken,
+                [typeof(PlayerLoginExpiredException)] = TgsApiError.InvalidOrExpiredPlayerToken,
                 [typeof(InvalidCaptchaException)] = TgsApiError.InvalidCaptcha,
                 [typeof(ClientIdNotFoundException)] = TgsApiError.ClientIdNotFound,
-                [typeof(PlayerNotFoundException)] = TgsApiError.UserNotFound,
+                [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
                 [typeof(PlayerDisabledException)] = TgsApiError.UserBlocked,
                 [typeof(CountryRestrictedException)] = TgsApiError.CountryRestricted,
                 [typeof(CurrencyNotMatchingException)] = TgsApiError.CurrencyMismatch,
@@ -114,7 +114,7 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(InvalidOperationException)] = TgsApiError.SystemError,
                 [typeof(OperationNotAllowedException)] = TgsApiError.OperationNotAllowed,
                 [typeof(GameProviderApiErrorException)] = TgsApiError.ProviderApiError,
-                [typeof(Services.Operator.PlayerNotFoundException)] = TgsApiError.UserNotFound,
+                [typeof(Services.Operator.PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
                 [typeof(ValidateCodeNotVerifyException)] = TgsApiError.ValidateCodeNotVerify,
                 [typeof(EmailNotVerifyException)] = TgsApiError.EmailNotVerify,
                 [typeof(InsufficientBucketException)] = TgsApiError.InsufficientBucket,

@@ -5,11 +5,13 @@
         None = 0,
 
         InvalidCredentials = 101,
-        InvalidOrExpiredUserToken = 102,
+        InvalidOrExpiredPlayerToken = 102,
+        InvalidOrExpiredAgentToken = 102,
         InvalidCaptcha = 103,
         ClientIdNotFound = 104,
 
-        UserNotFound = 201,
+        PlayerNotFound = 201,
+        AgentNotFound = 201,
         UserBlocked = 202,
         CountryRestricted = 203,
         CurrencyMismatch = 204,
