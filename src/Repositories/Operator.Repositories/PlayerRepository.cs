@@ -28,9 +28,7 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
         {
-            var playerData = await _tgsRepository.Players
-                .FindAsync(playerCode)
-                .ConfigureAwait(false);
+            var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
             return new PlayerInfo(
                 playerData.PlayerCode,
@@ -40,7 +38,7 @@ namespace TGS.Operator.Repositories
                 playerData.VipId);
         }
 
-        public async ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode)
+        public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
         {
             var playerData = await _tgsRepository.Players
                 .FirstOrDefaultAsync(p => p.BrandId == brandId &&
@@ -100,23 +98,20 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
         {
-            var datas = new PlayerIpRecord[]
-            {
-                new()
-                {
+            var datas = new PlayerIpRecord[] {
+                new() {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.RegisterIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                },
+                } ,
                 new()
                 {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.LoginIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                }
-            };
+                } };
             await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -152,16 +147,6 @@ namespace TGS.Operator.Repositories
                     PlayerCode = playerCode,
                     IsAutoTransferToGame = false
                 };
-
-                await _tgsRepository.PlayerGameSettings
-                    .AddAsync(settingData)
-                    .ConfigureAwait(false);
-            }
-
-            settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
-
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
-        }
 
                 await _tgsRepository.PlayerGameSettings
                     .AddAsync(settingData)
