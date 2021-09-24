@@ -35,5 +35,12 @@ namespace TGS.Apis.ReportApi.Controllers
         public Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
             [FromQuery] GetPlayerAccountChangesRequest request) =>
             _mediator.Send(request);
+
+        [HttpGet("exportPlayerContributions")]
+        [Description("export player contributions")]
+        public async Task<IActionResult> ExportPlayerContributionsAsync(
+            [FromQuery] ExportPlayerContributionsRequest request) => File(
+            await _mediator.Send(request).ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 }

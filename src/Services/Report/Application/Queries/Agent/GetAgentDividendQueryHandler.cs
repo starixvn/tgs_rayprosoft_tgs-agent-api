@@ -75,7 +75,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     AdjustmentAmount = ad.WithdrawalAmount,
                     BonusAmount = ad.BonusAmount,
                     BetAmount = ad.BetAmount,
-                    Turnover = ad.Turnover,
+                    ValidBetAmount = ad.Turnover,
                     WinLossAmount = ad.WinLossAmount,
                     NetProfit = ad.NetProfit,
                     AgentDividendAmount = ad.AgentDividendAmount

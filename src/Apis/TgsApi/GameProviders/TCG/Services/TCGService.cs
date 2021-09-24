@@ -34,6 +34,7 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         ValueTask<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode);
         ValueTask<RoundStatus?> GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
         ValueTask<GameActionData> GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
+        ValueTask<(RoundRecord, GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId);
         string GetGameProviderCode();
     }
     public class TCGService : ITCGService
@@ -131,8 +132,18 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
         ValueTask<GameActionExternalIds> ITCGService.GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
             => _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId);
 
+        public async ValueTask<(RoundRecord, GameActionRecord)> GetGameActionsByBetAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
+        {
+            var data = await _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId).ConfigureAwait(false);
+            var gameAction = data.GameActions.Where(x => x.Type == GameActionType.PlaceBet).FirstOrDefault();
+            return new(data.Round, gameAction);
+        }
+
+
         ValueTask<RoundStatus?> ITCGService.GetRoundStatusAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
           => _roundQueries.GetRoundStatusAsync(gameProviderId, playerCode, externalRoundId, gameId);
+
+
 
         ValueTask<GameActionData> ITCGService.GetGameActionsByExternalRoundIdAsync(Guid gameProviderId, string playerCode, string externalRoundId, int gameId)
             => _gameActionQueries.GetGameActionsByExternalRoundIdAsync(gameProviderId, playerCode, externalRoundId, gameId);

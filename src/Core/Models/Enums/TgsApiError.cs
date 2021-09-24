@@ -8,6 +8,7 @@
         InvalidOrExpiredPlayerToken = 102,
         InvalidCaptcha = 103,
         ClientIdNotFound = 104,
+        InvalidOrExpiredAgentToken = 105,
 
         PlayerNotFound = 201,
         UserBlocked = 202,
@@ -19,6 +20,7 @@
         GameBalanceFundInFailed = 208,
         GameBalanceFundOutFailed = 209,
         UserBanned = 210,
+        AgentNotFound = 211,
 
         InvalidGameAction = 301,
         TransactionIdNotFound = 302,
@@ -36,6 +38,7 @@
         PromotionCannotJoin = 407,
         FavoriteFull = 408,
         BrandEmailDuplicate = 409,
+        MaticPayDepositNeedRealName = 410,
 
         SystemError = 900,
         OperationNotAllowed = 901,

@@ -20,17 +20,14 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                 {typeof(PlayerLoginExpiredException), InvalidOrExpiredPlayerToken},
                 {typeof(InvalidCaptchaException), InvalidCaptcha},
                 {typeof(ClientIdNotFoundException), ClientIdNotFound},
-
                 {typeof(PlayerNotFoundException), PlayerNotFound},
                 {typeof(PlayerDisabledException), UserBlocked},
                 {typeof(CountryRestrictedException), CountryRestricted},
                 {typeof(CurrencyNotMatchingException), CurrencyMismatch},
                 {typeof(PlayerHasInsufficientFundsException), InsufficientFunds},
                 {typeof(InvalidInvitationCodeException), InvalidInvitationCode},
-
                 {typeof(InvalidGameActionException), InvalidGameAction},
                 {typeof(InvalidAmountException), InvalidAmount},
-
                 {typeof(ArgumentException), InvalidArguments},
                 {typeof(ModelBindingException), InvalidArguments},
                 {typeof(FormatException), IncorrectFormat},
@@ -38,7 +35,6 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                 {typeof(GameProviderUnderMaintenanceException), UnderMaintenance},
                 {typeof(GameUnderMaintenanceException), UnderMaintenance},
                 {typeof(InvalidStatusException), InvalidStatus},
-
                 {typeof(InvalidOperationException), SystemError},
                 {typeof(OperationNotAllowedException), OperationNotAllowed},
                 {typeof(GameProviderApiErrorException), ProviderApiError}
@@ -62,24 +58,20 @@ namespace TGS.Core.Infrastructures.ErrorMappers
                 {InvalidOrExpiredPlayerToken, Status401Unauthorized},
                 {InvalidCaptcha, Status401Unauthorized},
                 {ClientIdNotFound, Status401Unauthorized},
-
                 {PlayerNotFound, Status401Unauthorized},
                 {UserBlocked, Status403Forbidden},
                 {CountryRestricted, Status403Forbidden},
                 {CurrencyMismatch, Status500InternalServerError},
                 {InsufficientFunds, Status500InternalServerError},
                 {InvalidInvitationCode, Status500InternalServerError},
-
                 {InvalidGameAction, Status500InternalServerError},
                 {TransactionIdNotFound, Status500InternalServerError},
                 {DuplicateTransaction, Status500InternalServerError},
                 {InvalidAmount, Status500InternalServerError},
-
                 {InvalidArguments, Status400BadRequest},
                 {IncorrectFormat, Status400BadRequest},
                 {UnderMaintenance, Status500InternalServerError},
                 {InvalidStatus, Status500InternalServerError},
-
                 {SystemError, Status500InternalServerError},
                 {OperationNotAllowed, Status405MethodNotAllowed},
                 {ProviderApiError, Status500InternalServerError}

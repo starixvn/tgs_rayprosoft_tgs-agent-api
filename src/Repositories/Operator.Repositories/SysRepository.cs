@@ -25,8 +25,8 @@ namespace TGS.Operator.Repositories
                 .Where(loc => loc.SystemCode == "OP-API" && loc.CultureCode == cultureCode)
                 .Select(loc => new
                 {
-                    MessageId = loc.MessageId,
-                    Text = loc.Text
+                    loc.MessageId,
+                    loc.Text
                 });
 
             return rows.ToAsyncEnumerable()
@@ -39,10 +39,10 @@ namespace TGS.Operator.Repositories
 
             var rows = from banner in _tgsRepository.Banners.AsQueryable()
                        where banner.Status == 1000
-                        && banner.BrandId == brandId
-                        && banner.BeginTime <= currentTime
-                        && (banner.EndTime == null || banner.EndTime > currentTime)
-                        && banner.IsEnabled
+                           && banner.BrandId == brandId
+                           && banner.BeginTime <= currentTime
+                           && (banner.EndTime == null || banner.EndTime > currentTime)
+                           && banner.IsEnabled
                        orderby banner.DisplayOrder
                        select new BannerInfo(
                            banner.Id,
@@ -65,6 +65,7 @@ namespace TGS.Operator.Repositories
             {
                 return new BrandInfo(
                     brandId,
+                    brand.Code,
                     default!,
                     default!,
                     default!,
@@ -75,6 +76,7 @@ namespace TGS.Operator.Repositories
 
             return new BrandInfo(
                 brand.Id,
+                brand.Code,
                 logo.DesktopLogoUrl,
                 logo.MobileLogoUrl,
                 logo.LoadingUrl,
