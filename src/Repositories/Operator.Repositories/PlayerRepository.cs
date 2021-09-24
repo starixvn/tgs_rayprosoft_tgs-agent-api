@@ -28,7 +28,9 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
         {
-            var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
+            var playerData = await _tgsRepository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
 
             return new PlayerInfo(
                 playerData.PlayerCode,
@@ -36,6 +38,35 @@ namespace TGS.Operator.Repositories
                 playerData.IdentityAuthentication,
                 playerData.PhoneAuthentication,
                 playerData.VipId);
+        }
+
+        public async ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode)
+        {
+            var playerData = await _tgsRepository.Players
+                .FirstOrDefaultAsync(p => p.BrandId == brandId &&
+                    p.Username.ToLower() == userName.ToLower())
+                .ConfigureAwait(false);
+
+            if (playerData == null)
+                return null;
+
+            return new PlayerInfo(
+                playerData.PlayerCode,
+                playerData.AccumulatedDeposit,
+                playerData.IdentityAuthentication,
+                playerData.PhoneAuthentication,
+                playerData.VipId);
+        }
+
+        public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)
+        {
+            var playerData = await _tgsRepository.Players
+                 .FindAsync(playerCode)
+                 .ConfigureAwait(false);
+
+            return new PasswordInfo(
+                playerData.Password,
+                playerData.Salt);
         }
 
         public async ValueTask PlayerLoginIpAsync(string playerCode, string ip)
@@ -132,23 +163,14 @@ namespace TGS.Operator.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public async ValueTask<PlayerPasswordInfo?> GetPlayerPasswordInfoByUsernameAsync(Guid brandId, string username)
-        {
-            var playerData = await _tgsRepository.Players
-                .FirstOrDefaultAsync(p => p.BrandId == brandId &&
-                    p.Username.ToLower() == username.ToLower())
-                .ConfigureAwait(false);
-
-            if (playerData == null)
-            {
-                return null;
+                await _tgsRepository.PlayerGameSettings
+                    .AddAsync(settingData)
+                    .ConfigureAwait(false);
             }
 
-            return new PlayerPasswordInfo(
-                playerData.PlayerCode,
-                playerData.Username,
-                playerData.Salt,
-                playerData.Password);
+            settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

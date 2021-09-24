@@ -12,12 +12,12 @@ namespace TGS.Services.Operator
         ValueTask PlayerLoginIpAsync(string playerCode, string ip);
 
         ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn);
-
-        ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone);
+        ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
 
         ValueTask PlayerLoginIpAsync(string playerCode, string ip);
 
-        ValueTask<PlayerPasswordInfo?> GetPlayerPasswordInfoByUsernameAsync(Guid brandId, string username);
+        ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone);
+
         ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
     }
 }
