@@ -43,7 +43,10 @@ namespace TGS.Services.Operator.Services.Player
                     var validateCode = _codeGenerator.GenerateCode();
                     var token = _codeGenerator.GenerateSecurityKey();
 
-                    var data = new PhoneValidateData(command.Phone, command.PlayerCode);
+                    var data = new PhoneValidateData(
+                        command.AreaCode,
+                        command.Phone,
+                        command.PlayerCode);
 
                     var result = await _validateCodeOperator
                         .SaveValidateDataAsync(validateCode, token, data)
