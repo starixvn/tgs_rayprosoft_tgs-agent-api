@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Clients.Report.Client;
+using TGS.Clients.Report.Client.Models.LicenseeMarket;
 using TGS.Core.Models.Messages;
-using TGS.Services.Report.Application.Models.LicenseeMarket;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
