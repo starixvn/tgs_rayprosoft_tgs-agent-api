@@ -26,7 +26,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             _client.GetMarketsAsync(request);
 
         [HttpGet("exportMarkets")]
-        public async Task<IActionResult> GetFileAsync([FromQuery] ExportMarketsRequest request)
+        public async Task<IActionResult> ExportMarketsAsync([FromQuery] ExportMarketsRequest request)
         {
             Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
             request.AcceptLanguage = acceptLanguage.FirstOrDefault() ?? CultureInfo.CurrentCulture.Name;

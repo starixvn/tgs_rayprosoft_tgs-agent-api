@@ -58,7 +58,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         }
 
         [HttpGet("exportAgentContributions")]
-        public async Task<IActionResult> GetAgentContributionsFileAsync(
+        public async Task<IActionResult> ExportAgentContributionsFileAsync(
             [FromQuery] ExportAgentContributionsRequest request)
         {
             Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
@@ -70,7 +70,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         }
 
         [HttpGet("exportAgentDividends")]
-        public async Task<IActionResult> GetAgentDividendsFileAsync(
+        public async Task<IActionResult> ExportAgentDividendsFileAsync(
             [FromQuery] ExportAgentDividendsRequest request)
         {
             Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);

@@ -35,7 +35,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         }
 
         [HttpGet("exportVips")]
-        public async Task<IActionResult> GetFileAsync([FromQuery] ExportVipReportRequest request)
+        public async Task<IActionResult> ExportVipsAsync([FromQuery] ExportVipReportRequest request)
         {
             Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
             request.AcceptLanguage = acceptLanguage.FirstOrDefault() ?? CultureInfo.CurrentCulture.Name;

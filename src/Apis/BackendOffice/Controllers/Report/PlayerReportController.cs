@@ -27,7 +27,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             _client.GetPlayerContributionsAsync(request);
 
         [HttpGet("exportPlayerContributions")]
-        public async Task<IActionResult> GetFileAsync([FromQuery] ExportPlayerContributionsRequest request)
+        public async Task<IActionResult> ExportPlayerContributionsAsync(
+            [FromQuery] ExportPlayerContributionsRequest request)
         {
             Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
             request.AcceptLanguage = acceptLanguage.FirstOrDefault() ?? CultureInfo.CurrentCulture.Name;
