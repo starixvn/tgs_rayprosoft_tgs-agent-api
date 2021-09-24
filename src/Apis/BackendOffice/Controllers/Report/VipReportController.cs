@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Clients.Report.Client;
@@ -30,6 +32,17 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         {
             request.Username = username;
             return _client.GetVipRebateReportAsync(request);
+        }
+
+        [HttpGet("exportVips")]
+        public async Task<IActionResult> GetFileAsync([FromQuery] ExportVipReportRequest request)
+        {
+            Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
+            request.AcceptLanguage = acceptLanguage.FirstOrDefault() ?? CultureInfo.CurrentCulture.Name;
+
+            return File(
+                await _client.ExportVipsAsync(request).ConfigureAwait(false),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Vips.xlsx");
         }
     }
 }

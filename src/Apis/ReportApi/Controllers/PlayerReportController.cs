@@ -36,7 +36,7 @@ namespace TGS.Apis.ReportApi.Controllers
             [FromQuery] GetPlayerAccountChangesRequest request) =>
             _mediator.Send(request);
 
-        [HttpGet("export")]
+        [HttpGet("exportPlayerContributions")]
         [Description("export player contributions")]
         public async Task<IActionResult> ExportPlayerContributionsAsync(
             [FromQuery] ExportPlayerContributionsRequest request) => File(

@@ -23,7 +23,7 @@ namespace TGS.Apis.ReportApi.Controllers
         public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
             _mediator.Send(request);
 
-        [HttpGet("export")]
+        [HttpGet("exportMarkets")]
         [Description("export markets")]
         public async Task<IActionResult> ExportMarketsAsync([FromQuery] ExportMarketsRequest request) => File(
             await _mediator.Send(request).ConfigureAwait(false),

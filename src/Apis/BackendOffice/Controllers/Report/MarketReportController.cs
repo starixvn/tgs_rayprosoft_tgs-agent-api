@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Clients.Report.Client;
@@ -23,9 +25,15 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         public Task<PagedResponse<MarketModel>> GetMarketsAsync([FromQuery] GetMarketsRequest request) =>
             _client.GetMarketsAsync(request);
 
-        [HttpGet("export")]
-        public async Task<IActionResult> GetFileAsync([FromQuery] ExportMarketsRequest request) => File(
-            await _client.ExportMarketsAsync(request).ConfigureAwait(false),
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Markets.xlsx");
+        [HttpGet("exportMarkets")]
+        public async Task<IActionResult> GetFileAsync([FromQuery] ExportMarketsRequest request)
+        {
+            Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
+            request.AcceptLanguage = acceptLanguage.FirstOrDefault() ?? CultureInfo.CurrentCulture.Name;
+
+            return File(
+                await _client.ExportMarketsAsync(request).ConfigureAwait(false),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Markets.xlsx");
+        }
     }
 }

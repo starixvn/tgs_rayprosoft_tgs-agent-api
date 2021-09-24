@@ -46,6 +46,11 @@ namespace TGS.Core.Infrastructures.Utility
                 sheet.Cell(1, colIdx++).Value = resourceManager.GetString(item.Name) ?? item.Name;
             }
 
+            if (models == null)
+            {
+                return workbook;
+            }
+
             var rowIdx = 2;
             foreach (var model in models)
             {

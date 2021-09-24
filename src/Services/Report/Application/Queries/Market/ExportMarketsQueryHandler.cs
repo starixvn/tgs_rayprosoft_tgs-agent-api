@@ -34,7 +34,7 @@ namespace TGS.Services.Report.Application.Queries.Market
 
             var markets = await _mediator.Send(getMarketsRequest, cancellationToken).ConfigureAwait(false);
 
-            var exportData = markets.Items.Select(x => new ExportMarketModel
+            var exportData = markets.Items?.Select(x => new ExportMarketModel
             {
                 ReportDate = x.ReportDate,
                 RegisteredCount = x.RegisteredCount,
@@ -44,7 +44,7 @@ namespace TGS.Services.Report.Application.Queries.Market
                 AdjustmentAmount = x.AdjustmentAmount,
                 BonusAmount = x.BonusAmount,
                 BetAmount = x.BetAmount,
-                Turnover = x.Turnover,
+                ValidBetAmount = x.Turnover,
                 WinLossAmount = x.WinLossAmount,
                 NetProfit = x.NetProfit
             });

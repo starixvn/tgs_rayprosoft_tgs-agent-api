@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Services.Report.Application.Models.Player;
+using TGS.Services.Report.Application.Resources;
 
 namespace TGS.Services.Report.Application.Queries.Player
 {
@@ -32,12 +33,12 @@ namespace TGS.Services.Report.Application.Queries.Player
                 Page = 1,
                 ShowAll = true
             };
-            var resource = new ResourceManager(typeof(Resources.Market));
+            var resource = new ResourceManager(typeof(PlayerContribution));
 
             var playerContributions =
                 await _mediator.Send(getPlayerContributionsRequest, cancellationToken).ConfigureAwait(false);
 
-            var exportData = playerContributions.Items.Select(x => new ExportPlayerContributionModel
+            var exportData = playerContributions.Items?.Select(x => new ExportPlayerContributionModel
             {
                 Username = x.Username,
                 Type = x.Type,
