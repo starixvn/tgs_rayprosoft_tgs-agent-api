@@ -135,7 +135,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqSmsServiceClient
                 .Verify(
                     smsClient => smsClient.SendShortMessageAsync(
-                        It.Is<string>(x => x == phone),
+                        It.Is<string>(x => x == $"{areaCode}{phone}"),
                         It.Is<string>(x => x == expectedShortMessage),
                         It.IsAny<Guid>()),
                     Times.Exactly(1));

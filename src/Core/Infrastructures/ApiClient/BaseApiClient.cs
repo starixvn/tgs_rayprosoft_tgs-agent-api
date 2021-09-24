@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -88,6 +89,9 @@ namespace TGS.Core.Infrastructures.ApiClient
             var response = await SendAsync(httpRequestMessage, logPrefix, timeout);
             return await ReadJsonContentAsync<TResponse>(response.Content, options);
         }
+
+        protected async ValueTask<Stream> GetFileAsync(string path)
+            => await _client.GetStreamAsync(path).ConfigureAwait(false);
 
         #region Private Methods
 

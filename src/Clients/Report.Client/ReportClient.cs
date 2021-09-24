@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Clients.Report.Client.Models.Market;
@@ -16,38 +17,56 @@ namespace TGS.Clients.Report.Client
     public interface IReportClient
     {
         Task<PagedResponse<VipModel>> GetVipReportAsync(GetVipReportRequest request);
-        Task<PagedResponse<VipRebateModel>> GetVipRebateReportAsync(GetVipRebateReportRequest request);
-        Task<PagedResponse<RoundModel>> GetRoundsAsync(GetRoundsRequest request);
-        Task<GetRoundHistoryResponse> GetRoundHistoriesAsync(GetRoundHistoryRequest request);
-        Task<PagedResponse<MarketModel>> GetMarketsAsync(GetMarketsRequest request);
-        Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(GetAgentContributionsRequest request);
-        Task<PagedResponse<PlayerContributionModel>> GetPlayerContributionsAsync(GetPlayerContributionsRequest request);
-        Task<PagedResponse<TeamInfoModel>> GetAgentTeamInfoAsync(GetAgentTeamInfoRequest request);
-        Task<PagedResponse<AgentDividendModel>> GetAgentDividendsAsync(GetAgentDividendsRequest request);
 
-        Task<PagedResponse<AgentDividendDetailModel>> GetAgentDividendDetailsAsync(
-            GetAgentDividendDetailsRequest request);
+        Task<PagedResponse<VipRebateModel>> GetVipRebateReportAsync(GetVipRebateReportRequest request);
+
+        Task<PagedResponse<RoundModel>> GetRoundsAsync(GetRoundsRequest request);
+
+        Task<GetRoundHistoryResponse> GetRoundHistoriesAsync(GetRoundHistoryRequest request);
+
+        Task<PagedResponse<MarketModel>> GetMarketsAsync(GetMarketsRequest request);
+
+        Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(GetAgentContributionsRequest request);
+
+        Task<PagedResponse<PlayerContributionModel>> GetPlayerContributionsAsync(GetPlayerContributionsRequest request);
+
+        Task<PagedResponse<TeamInfoModel>> GetAgentTeamInfoAsync(GetAgentTeamInfoRequest request);
+
+        Task<PagedResponse<AgentDividendModel>> GetAgentDividendsAsync(GetAgentDividendsRequest request);
 
         Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(GetAgentPlayerWinLossRequest request);
 
-        Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
-            GetPlayerAccountChangesRequest request);
+        Task<PagedResponse<AgentDividendDetailModel>> GetAgentDividendDetailsAsync(GetAgentDividendDetailsRequest request);
 
-        Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
-            GetAgentAccountChangesRequest request);
+        Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(GetPlayerAccountChangesRequest request);
+
+        Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
 
         Task<PagedResponse<LicenseeMarketModel>> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
+
+        Task<Stream> ExportMarketsAsync(ExportMarketsRequest request);
+
+        Task<Stream> ExportPlayerContributionsAsync(ExportPlayerContributionsRequest request);
+
+        Task<Stream> ExportAgentContributionsAsync(ExportAgentContributionsRequest request);
+
+        Task<Stream> ExportAgentDividendsAsync(ExportAgentDividendsRequest request);
+
+        Task<Stream> ExportVipsAsync(ExportVipReportRequest request);
     }
 
     public class ReportClient : BaseApiClient, IReportClient
     {
+        private readonly HttpClient _client;
+
         public ReportClient(HttpClient client, IApiClientLogger logger,
             IJsonSerializationProvider json)
             : base(client, logger, json)
         {
+            _client = client;
         }
 
-        async Task<PagedResponse<VipModel>> IReportClient.GetVipReportAsync(GetVipReportRequest request)
+        public async Task<PagedResponse<VipModel>> GetVipReportAsync(GetVipReportRequest request)
         {
             var prefix = $"Report.{request.BrandId}.GetVipReport";
             var path = ClientPath.AppendWithProperties("/api/vipReport?", request);
@@ -57,7 +76,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<VipRebateModel>> IReportClient.GetVipRebateReportAsync(
+        public async Task<PagedResponse<VipRebateModel>> GetVipRebateReportAsync(
             GetVipRebateReportRequest request)
         {
             var prefix = $"Report.{request.BrandId}.GetVipRebateReport";
@@ -66,7 +85,7 @@ namespace TGS.Clients.Report.Client
                 HttpMethod.Get, path, request, logPrefix: prefix, options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<RoundModel>> IReportClient.GetRoundsAsync(GetRoundsRequest request)
+        public async Task<PagedResponse<RoundModel>> GetRoundsAsync(GetRoundsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetRounds";
             var path = ClientPath.AppendWithProperties("/api/roundReport?", request);
@@ -76,7 +95,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<GetRoundHistoryResponse> IReportClient.GetRoundHistoriesAsync(GetRoundHistoryRequest request)
+        public async Task<GetRoundHistoryResponse> GetRoundHistoriesAsync(GetRoundHistoryRequest request)
         {
             var prefix = $"Report.RoundId.{request.RoundId}.GetRound";
             var path = ClientPath.AppendWithProperties($"/api/roundReport/{request.RoundId}?", request);
@@ -86,7 +105,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<MarketModel>> IReportClient.GetMarketsAsync(GetMarketsRequest request)
+        public async Task<PagedResponse<MarketModel>> GetMarketsAsync(GetMarketsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetMarkets";
             var path = ClientPath.AppendWithProperties("/api/marketReport?", request);
@@ -96,7 +115,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<AgentContributionModel>> IReportClient.GetAgentContributionsAsync(
+        public async Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(
             GetAgentContributionsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetAgentContributions";
@@ -105,7 +124,7 @@ namespace TGS.Clients.Report.Client
                 HttpMethod.Get, path, request, logPrefix: prefix, options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<PlayerContributionModel>> IReportClient.GetPlayerContributionsAsync(
+        public async Task<PagedResponse<PlayerContributionModel>> GetPlayerContributionsAsync(
             GetPlayerContributionsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetPlayerContributions";
@@ -117,7 +136,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<TeamInfoModel>> IReportClient.GetAgentTeamInfoAsync(
+        public async Task<PagedResponse<TeamInfoModel>> GetAgentTeamInfoAsync(
             GetAgentTeamInfoRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentTeamInfo";
@@ -129,7 +148,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<AgentDividendModel>> IReportClient.GetAgentDividendsAsync(
+        public async Task<PagedResponse<AgentDividendModel>> GetAgentDividendsAsync(
             GetAgentDividendsRequest request)
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetAgentDividends";
@@ -141,7 +160,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<AgentPlayerWinLossModel>> IReportClient.GetAgentPlayerWinLossAsync(
+        public async Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(
             GetAgentPlayerWinLossRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentPlayerWinLoss";
@@ -153,7 +172,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<AgentDividendDetailModel>> IReportClient.GetAgentDividendDetailsAsync(
+        public async Task<PagedResponse<AgentDividendDetailModel>> GetAgentDividendDetailsAsync(
             GetAgentDividendDetailsRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentDividendDetails";
@@ -166,7 +185,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<PlayerAccountChangeModel>> IReportClient.GetPlayerAccountChangesAsync(
+        public async Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
             GetPlayerAccountChangesRequest request)
         {
             var prefix = $"Report.PlayerCode.{request.PlayerCode}.GetPlayerAccountChanges";
@@ -179,7 +198,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<AgentAccountChangeModel>> IReportClient.GetAgentAccountChangesAsync(
+        public async Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
             GetAgentAccountChangesRequest request)
         {
             var prefix = $"Report.AgentId.{request.AgentId}.GetAgentAccountChanges";
@@ -192,7 +211,7 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        async Task<PagedResponse<LicenseeMarketModel>> IReportClient.GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request)
+        public async Task<PagedResponse<LicenseeMarketModel>> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request)
         {
             var prefix = $"Report.LicenseeId.{request.LicenseeId}.GetMarkets";
             var path = ClientPath.AppendWithProperties("/api/LicenseeMarketReport?", request);
@@ -202,6 +221,91 @@ namespace TGS.Clients.Report.Client
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
+        }
+
+        public async Task<Stream> ExportMarketsAsync(ExportMarketsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/marketReport/exportMarkets?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportPlayerContributionsAsync(ExportPlayerContributionsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/playerReport/exportPlayerContributions?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportAgentContributionsAsync(ExportAgentContributionsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/agentReport/exportAgentContributions?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportAgentDividendsAsync(ExportAgentDividendsRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/agentReport/exportAgentDividends?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
+        }
+
+        public async Task<Stream> ExportVipsAsync(ExportVipReportRequest request)
+        {
+            var path = ClientPath.AppendWithProperties("/api/agentReport/exportVips?", request);
+
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
+
+            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+
+            var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            return stream;
         }
     }
 }
