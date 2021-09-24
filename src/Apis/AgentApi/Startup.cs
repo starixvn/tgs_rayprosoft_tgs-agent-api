@@ -52,8 +52,12 @@ namespace TGS.Apis.AgentApi
 
             app.UseRequestLocalization(options =>
             {
-                options.DefaultRequestCulture = new("en-US");
-                options.ApplyCurrentCultureToResponseHeaders = true;
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+                options.SupportedCultures.Clear();
+                options.SupportedUICultures.Clear();
+
+                config.GetSection("RequestLocalization").Bind(options);
             });
 
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
