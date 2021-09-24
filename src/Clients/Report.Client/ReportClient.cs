@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Clients.Report.Client.Models.Agent;
+using TGS.Clients.Report.Client.Models.LicenseeMarket;
 using TGS.Clients.Report.Client.Models.Market;
 using TGS.Clients.Report.Client.Models.Player;
 using TGS.Clients.Report.Client.Models.Round;
@@ -10,7 +11,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Messages;
-using TGS.Services.Report.Application.Models.LicenseeMarket;
 
 namespace TGS.Clients.Report.Client
 {
