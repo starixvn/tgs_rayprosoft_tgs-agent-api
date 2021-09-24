@@ -9,22 +9,21 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
 using TGS.ServiceUtility;
-
 using CoreExceptions = TGS.Core.Models.Exceptions;
-using PlayerNotFoundException = TGS.Services.Operator.PlayerNotFoundException;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Produces(MediaTypeNames.Application.Json)]
-    public partial class PlayerController : ControllerBase
+    public class PlayerController : ControllerBase
     {
         private readonly ILogger<PlayerController> _logger;
 
@@ -59,12 +58,12 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .GetAsync(query)
                     .ConfigureAwait(false);
             }
-            catch (Core.Models.Exceptions.InvalidCredentialsException)
+            catch (CoreExceptions.InvalidCredentialsException)
             {
-                throw new Core.Models.Exceptions.InvalidCredentialsException(Resources.Player.PasswordMismatched);
+                throw new CoreExceptions.InvalidCredentialsException(Player.PasswordMismatched);
             }
 
-            return new ChangePasswordResponse()
+            return new ChangePasswordResponse
             {
                 PlayerCode = info.PlayerCode,
                 UpdateTime = info.UpdateTime
@@ -109,10 +108,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var query = new GetUserNameQuery(brandId, request.Username);
             var isExist = await getUserNameQueryService.GetAsync(query).ConfigureAwait(false);
 
-            return new CheckUsernameResponse()
-            {
-                Exists = isExist
-            };
+            return new CheckUsernameResponse { Exists = isExist };
         }
 
         /// <summary>
@@ -135,9 +131,10 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.AgentInvitationCode,
                 request.IsTestPlayer,
                 ipAddress);
+
             var info = await createPlayerQueryService.GetAsync(query).ConfigureAwait(false);
 
-            return new CreatePlayerResponse()
+            return new CreatePlayerResponse
             {
                 PlayerCode = info.PlayerCode,
                 IsNew = info.IsNew
@@ -163,7 +160,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("game/auto-transfer")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public ValueTask<bool> GetAutoTransferToGameFlagAsync(
-                    [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
+            [FromServices] IGetService<GetPlayerIsAutoTransferToGameQuery, bool> getService)
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
@@ -206,13 +203,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
             catch (PlayerNotFoundException)
             {
-                throw new CoreExceptions.PlayerNotFoundException(query.PlayerCode, Resources.Player.NotFound);
+                throw new CoreExceptions.PlayerNotFoundException(query.PlayerCode, Player.NotFound);
             }
 
-            return new GetPlayerResponse()
-            {
-                Data = playerData
-            };
+            return new GetPlayerResponse { Data = playerData };
         }
 
         /// <summary>
@@ -227,6 +221,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromBody] LoginRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
+
             try
             {
                 var ipAddress = requestAnalyzer.GetIp(HttpContext);
@@ -246,7 +241,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .GetAsync(query)
                     .ConfigureAwait(false);
 
-                return new LoginResponse()
+                return new LoginResponse
                 {
                     LoginTime = info.LoginTime,
                     PlayerToken = info.PlayerToken
@@ -254,11 +249,11 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
             catch (PlayerNotFoundException)
             {
-                throw new CoreExceptions.PlayerNotFoundException(request.Username, Resources.Player.NotFound);
+                throw new CoreExceptions.PlayerNotFoundException(request.Username, Player.NotFound);
             }
             catch (CoreExceptions.InvalidCredentialsException)
             {
-                throw new CoreExceptions.InvalidCredentialsException(Resources.Player.PasswordMismatched);
+                throw new CoreExceptions.InvalidCredentialsException(Player.PasswordMismatched);
             }
             catch (Exception ex)
             {
@@ -269,7 +264,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                         break;
 
                     case CoreExceptions.InvalidCredentialsException invalidCredException:
-                        _logger.LogWarning(invalidCredException, Resources.Player.PasswordMismatched);
+                        _logger.LogWarning(invalidCredException, Player.PasswordMismatched);
                         break;
 
                     default:
@@ -302,13 +297,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             }
             catch (CoreExceptions.PlayerNotFoundException)
             {
-                throw new CoreExceptions.PlayerNotFoundException(playerTokenData.PlayerCode, Resources.Player.NotFound);
+                throw new CoreExceptions.PlayerNotFoundException(playerTokenData.PlayerCode, Player.NotFound);
             }
 
-            return new LogoutResponse()
-            {
-                UpdateTime = info.UpdateTime
-            };
+            return new LogoutResponse { UpdateTime = info.UpdateTime };
         }
 
         /// <summary>
@@ -324,11 +316,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         public async ValueTask ResetPasswordAsync(
             [FromServices] ICommandService<ResetPasswordCommand> resetService,
             [FromBody] ResetPasswordRequest request)
-        {
-            await resetService
+            => await resetService
                 .ExecuteAsync(new ResetPasswordCommand(request.SecurityKey, request.ValidateCode, request.NewPassword))
                 .ConfigureAwait(false);
-        }
 
         /// <summary>
         /// Sets the player identity.
@@ -399,7 +389,8 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var command = new StartSetPlayerEmailCommand(playerTokenData.PlayerCode, request.Email, CultureInfo.CurrentUICulture);
+            var command = new StartSetPlayerEmailCommand(playerTokenData.PlayerCode, request.Email,
+                CultureInfo.CurrentUICulture);
 
             return setPlayerEmailService.GetAsync(command);
         }
