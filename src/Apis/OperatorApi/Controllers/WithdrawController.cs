@@ -91,9 +91,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .GetAsync(getPaymentQuery)
                     .ConfigureAwait(false);
 
-                if (paymentInfo.Code == "Manual")
-                    continue;
-
                 var paymentMethod = paymentMethods[bp.MethodId];
 
                 yield return new()
