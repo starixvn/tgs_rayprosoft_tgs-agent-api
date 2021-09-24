@@ -34,15 +34,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var brandId = HttpContext.Items.GetBrandId();
                 var playerData = HttpContext.Items.GetPlayerTokenData();
 
-                var checkPasswordCommand =
-                    new CheckWithdrawPayPasswordCommand(playerData.PlayerCode, request.PayPassword);
-                await checkPasswordService
-                    .ExecuteAsync(checkPasswordCommand)
-                    .ConfigureAwait(false);
-
-                if (!await checkPasswordCommand.ReturnSource.Task.ConfigureAwait(false))
-                    throw new OperationNotAllowedException();
-
                 var command = new CreateWithdrawFormCommand(
                     playerData.PlayerCode,
                     brandId,
