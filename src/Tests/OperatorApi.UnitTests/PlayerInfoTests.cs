@@ -119,6 +119,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakePlayerOperations
                 .GetPlayerByCodeAsync(Arg.Any<string>())
                 .Returns(player);
+
             var sut = new CheckPlayerBannedCommandService(fakePlayerOperations);
 
             var command = new CheckPlayerBannedCommand(
@@ -134,13 +135,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var sut = new GetPlayerInfoByUserNameQueryService(fakePlayerRepository);
 
-            var playerInfo = new PlayerInfo
-            ("playerCode",
+            var playerInfo = new PlayerInfo(
+                "playerCode",
                 100,
                 false,
                 false,
-                Guid.NewGuid()
-            );
+                Guid.NewGuid());
 
             fakePlayerRepository.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
                 .Returns(ValueTask.FromResult(playerInfo));

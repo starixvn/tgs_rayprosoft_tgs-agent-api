@@ -19,7 +19,7 @@ using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
 
-namespace OperatorApi.UnitTests
+namespace TGS.Tests.OperatorApi.UnitTests
 {
     public class PlayerPasswordTests
     {
@@ -236,8 +236,7 @@ namespace OperatorApi.UnitTests
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
             fakePlayerRepository.GetPlayerLoginPasswordInfoAsync(Arg.Any<string>())
-                .Returns(ValueTask.FromResult(new PasswordInfo
-                (
+                .Returns(ValueTask.FromResult(new PasswordInfo(
                     Array.Empty<byte>(),
                     Array.Empty<byte>()
                 )));
