@@ -418,6 +418,38 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
+        /// Starts to set phone with username and password
+        /// </summary>
+        /// <param name="validateInitPhoneService">The validate init phone service</param>
+        /// <param name="startSetPlayerPhoneService">The start set player phone service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns>security code</returns>
+        [HttpPost("init-phone")]
+        public async ValueTask<string> StartChangePhoneAsync(
+            [FromServices] IGetService<ValidateInitPhoneCommand, string> validateInitPhoneService,
+            [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
+            [FromBody] InitPhoneRequest request)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var validateInitPhoneCommand = new ValidateInitPhoneCommand(
+                brandId,
+                request.Username,
+                request.Password);
+
+            var playerCode = await validateInitPhoneService.GetAsync(validateInitPhoneCommand)
+                .ConfigureAwait(false);
+
+            var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
+                playerCode,
+                request.AreaCode,
+                request.Phone,
+                CultureInfo.CurrentUICulture);
+
+            return await startSetPlayerPhoneService.GetAsync(startSetPlayerPhoneCommand).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Submits the change email.
         /// </summary>
         /// <param name="commitPlayerEmailService">The commit player email service.</param>
