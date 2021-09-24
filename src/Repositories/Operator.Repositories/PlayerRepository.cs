@@ -28,7 +28,9 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
         {
-            var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
+            var playerData = await _tgsRepository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
 
             return new PlayerInfo(
                 playerData.PlayerCode,
@@ -98,20 +100,24 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
         {
-            var datas = new PlayerIpRecord[] {
-                new() {
+            var datas = new PlayerIpRecord[]
+            {
+                new()
+                {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.RegisterIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                } ,
+                },
                 new()
                 {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.LoginIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                } };
+                }
+            };
+
             await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -152,6 +158,19 @@ namespace TGS.Operator.Repositories
                     .AddAsync(settingData)
                     .ConfigureAwait(false);
             }
+
+            settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus)
+        {
+            var player = await _tgsRepository.Players.FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            player.Status = playerStatus;
+            player.UpdatedOn = DateTimeOffset.UtcNow;
 
             settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
 

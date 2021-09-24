@@ -203,7 +203,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     .GetAsync(new GetPlayerIsAutoTransferToGameQuery(playerCode))
                     .ConfigureAwait(false);
             }
-            catch (PlayerNotFoundException)
+            catch (CoreExceptions.PlayerNotFoundException)
             {
                 throw new CoreExceptions.PlayerNotFoundException(query.PlayerCode, Player.NotFound);
             }
@@ -249,7 +249,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                     PlayerToken = info.PlayerToken
                 };
             }
-            catch (PlayerNotFoundException)
+            catch (CoreExceptions.PlayerNotFoundException)
             {
                 throw new CoreExceptions.PlayerNotFoundException(request.Username, Player.NotFound);
             }
@@ -434,7 +434,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<GetPlayerInfoByUserNameQuery, PlayerInfo> getPlayerInfoService,
             [FromServices] IGetService<PlayerPasswordValidateCommand, bool> validatePlayerService,
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
-            [FromBody] InitPhoneRequest request)
+            [FromBody] StartInitPhoneRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
@@ -443,18 +443,18 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .ConfigureAwait(false);
 
             if (playerInfo == null)
-                throw new PlayerNotFoundException("Player not found.");
+                throw new CoreExceptions.PlayerNotFoundException("Player not found.");
 
-            var validateInitPhoneCommand = new PlayerPasswordValidateCommand(
+            var playerPasswordValidateCommand = new PlayerPasswordValidateCommand(
                 playerInfo.PlayerCode,
                 request.Password);
 
             var isValid = await validatePlayerService
-                .GetAsync(validateInitPhoneCommand)
+                .GetAsync(playerPasswordValidateCommand)
                 .ConfigureAwait(false);
 
             if (!isValid)
-                throw new InvalidCredentialsException("Login fail.");
+                throw new CoreExceptions.InvalidCredentialsException("Login fail.");
 
             var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
                 playerInfo.PlayerCode,
@@ -511,6 +511,24 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.ValidateCode);
 
             return commitPlayerPhoneService.ExecuteAsync(command);
+        }
+
+        /// <summary>
+        /// Submits the change phone.
+        /// </summary>
+        /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPut("init-phone")]
+        public ValueTask SubmitInitPhoneAsync(
+            [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
+            [FromBody] SubmitInitPhoneRequest request)
+        {
+            var command = new CommitPlayerInitPhoneCommand(
+                request.SecurityKey,
+                request.ValidateCode);
+
+            return commitPlayerInitPhoneService.ExecuteAsync(command);
         }
 
         [HttpPost("game/auto-transfer")]
