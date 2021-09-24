@@ -226,9 +226,30 @@ namespace OperatorApi.UnitTests
                 .ChangePlayerPasswordAsync(Arg.Any<ChangePlayerPasswordData>());
         }
 
-        [SetUp]
-        public void Setup()
+        [Test]
+        public async Task Validate_Password_Should_Success()
         {
+            var playerCode = "playerCode";
+            var password = "password";
+
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakePasswordHandler = Substitute.For<IPasswordHandler>();
+
+            fakePlayerRepository.GetPlayerLoginPasswordInfoAsync(Arg.Any<string>())
+                .Returns(ValueTask.FromResult(new PasswordInfo
+                (
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>()
+                )));
+
+            var sut = new PlayerPasswordValidateCommandService(fakePlayerRepository, fakePasswordHandler);
+
+            var command = new PlayerPasswordValidateCommand(playerCode, password);
+
+            await sut.GetAsync(command);
+
+            _ = fakePasswordHandler.Received(1)
+                .Verify(Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Any<string>());
         }
     }
 }
