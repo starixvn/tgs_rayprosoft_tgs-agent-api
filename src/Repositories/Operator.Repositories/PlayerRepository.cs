@@ -81,6 +81,7 @@ namespace TGS.Operator.Repositories
                     RecordOn = registeredOn
                 }
             };
+
             await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -131,6 +132,17 @@ namespace TGS.Operator.Repositories
                 playerData.Username,
                 playerData.Salt,
                 playerData.Password);
+        }
+
+        public async ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus)
+        {
+            var player = await _tgsRepository.Players.FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            player.Status = playerStatus;
+            player.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

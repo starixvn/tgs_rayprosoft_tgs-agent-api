@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator
 {
@@ -16,5 +17,7 @@ namespace TGS.Services.Operator
         ValueTask PlayerLoginIpAsync(string playerCode, string ip);
 
         ValueTask<PlayerPasswordInfo?> GetPlayerPasswordInfoByUsernameAsync(Guid brandId, string username);
+
+        ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
     }
 }

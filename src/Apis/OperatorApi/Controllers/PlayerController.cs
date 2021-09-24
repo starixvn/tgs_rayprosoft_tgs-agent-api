@@ -425,10 +425,10 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// <param name="request">The request.</param>
         /// <returns>security code</returns>
         [HttpPost("init-phone")]
-        public async ValueTask<string> StartChangePhoneAsync(
+        public async ValueTask<string> StartInitPhoneAsync(
             [FromServices] IGetService<ValidateInitPhoneCommand, string> validateInitPhoneService,
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
-            [FromBody] InitPhoneRequest request)
+            [FromBody] StartInitPhoneRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
@@ -493,6 +493,24 @@ namespace TGS.Apis.OperatorApi.Controllers
                 request.ValidateCode);
 
             return commitPlayerPhoneService.ExecuteAsync(command);
+        }
+
+        /// <summary>
+        /// Submits the change phone.
+        /// </summary>
+        /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
+        /// <param name="request">The request.</param>
+        /// <returns></returns>
+        [HttpPut("init-phone")]
+        public ValueTask SubmitInitPhoneAsync(
+            [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
+            [FromBody] SubmitInitPhoneRequest request)
+        {
+            var command = new CommitPlayerInitPhoneCommand(
+                request.SecurityKey,
+                request.ValidateCode);
+
+            return commitPlayerInitPhoneService.ExecuteAsync(command);
         }
 
         [HttpPost("game/auto-transfer")]

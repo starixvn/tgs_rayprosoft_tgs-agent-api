@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace TGS.Apis.OperatorApi.Models.Messages
 {
-    public class InitPhoneRequest
+    public class StartInitPhoneRequest
     {
         [Required]
         [JsonPropertyName("username")]
