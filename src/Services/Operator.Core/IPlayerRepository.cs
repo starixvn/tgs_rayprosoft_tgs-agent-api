@@ -18,6 +18,8 @@ namespace TGS.Services.Operator
 
         ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn);
 
+        ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone);
+
         ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
 
         ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
