@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Extensions;
 using TGS.Services.Operator;
@@ -16,15 +15,12 @@ namespace TGS.Operator.Repositories
 {
     internal class GameProviderRepository : IGameProviderRepository
     {
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly ITgsRepository _tgsRepository;
 
         public GameProviderRepository(
-            ITgsRepository tgsRepository,
-            IJsonSerializationProvider jsonSerializationProvider)
+            ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
         }
 
         public async ValueTask AddFavoriteGameAsync(Guid brandId, FavoriteGameInfo gameInfo)
@@ -103,7 +99,12 @@ namespace TGS.Operator.Repositories
 
         public IAsyncEnumerable<BrandGameInfo> QueryAllGamesAsync(Guid brandId)
         {
-            var status = new[] { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
+            var status = new[]
+            {
+                GameStatus.Active,
+                GameStatus.Maintenance,
+                GameStatus.Testing
+            };
 
             var query = from bg in _tgsRepository.BrandGames.AsQueryable()
                         from game in _tgsRepository.Games
@@ -153,9 +154,8 @@ namespace TGS.Operator.Repositories
                     info.DisplayOrder,
                     string.IsNullOrEmpty(info.Localization)
                         ? new Dictionary<string, JsonDocument>()
-                        : _jsonSerializationProvider.DeserializeFromString<Dictionary<string, JsonDocument>>(
-                            info.Localization,
-                            null)));
+                        : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(
+                            info.Localization)));
         }
 
         public IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId)
