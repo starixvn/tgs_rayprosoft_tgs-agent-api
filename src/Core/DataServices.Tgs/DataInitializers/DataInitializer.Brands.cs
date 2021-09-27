@@ -19,20 +19,7 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             SettlementIntervalType Type { get; }
             int? SettlementDay { get; }
 
-            ICurrency[] Currencies => new ICurrency[]
-            {
-                new CNYCurrency(),
-                new IDRCurrency(),
-                new IDR1000Currency(),
-                new INRCurrency(),
-                new VNDCurrency(),
-                new VND1000Currency(),
-                new THBCurrency(),
-                new EURCurrency(),
-                new GBPCurrency(),
-                new KRWCurrency(),
-                new JPYCurrency()
-            };
+            ICurrency[] Currencies { get; }
 
             ILanguage[] Languages => new ILanguage[]
             {
@@ -78,8 +65,12 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
 
             string[] IBrand.GameProviders => new[]
             {
-                //Consts.GameProvider.RedTiger,
                 Consts.GameProvider.SBOBET
+            };
+
+            ICurrency[] IBrand.Currencies => new ICurrency[]
+            {
+                new CNYCurrency()
             };
         }
 
@@ -104,6 +95,11 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
             SettlementIntervalType IBrand.Type => SettlementIntervalType.Daily;
 
             int? IBrand.SettlementDay => null;
+
+            ICurrency[] IBrand.Currencies => new ICurrency[]
+            {
+                new CNYCurrency()
+            };
         }
     }
 }
