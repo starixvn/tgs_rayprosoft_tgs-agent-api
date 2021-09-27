@@ -119,7 +119,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 CreatedByUsername = request.EditorUsername,
                 UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
+                UpdatedOn = DateTimeOffset.Now,
+                ProductCost = request.ProductCost
             };
 
             brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
