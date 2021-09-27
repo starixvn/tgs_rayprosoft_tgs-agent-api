@@ -205,7 +205,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+            httpRequest.Headers.Add("Accept-Language", request.Culture);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
@@ -222,7 +222,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+            httpRequest.Headers.Add("Accept-Language", request.Culture);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
@@ -239,7 +239,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+            httpRequest.Headers.Add("Accept-Language", request.Culture);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
@@ -256,7 +256,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+            httpRequest.Headers.Add("Accept-Language", request.Culture);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
@@ -273,7 +273,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.AcceptLanguage);
+            httpRequest.Headers.Add("Accept-Language", request.Culture);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 

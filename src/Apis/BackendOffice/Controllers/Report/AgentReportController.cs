@@ -1,7 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Clients.Report.Client;
@@ -60,25 +58,15 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         [HttpGet("exportAgentContributions")]
         public async Task<IActionResult> ExportAgentContributionsFileAsync(
             [FromQuery] ExportAgentContributionsRequest request)
-        {
-            Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
-            request.AcceptLanguage = acceptLanguage.FirstOrDefault() ?? CultureInfo.CurrentCulture.Name;
-
-            return File(
+            => File(
                 await _client.ExportAgentContributionsAsync(request).ConfigureAwait(false),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AgentContributions.xlsx");
-        }
 
         [HttpGet("exportAgentDividends")]
         public async Task<IActionResult> ExportAgentDividendsFileAsync(
             [FromQuery] ExportAgentDividendsRequest request)
-        {
-            Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
-            request.AcceptLanguage = acceptLanguage.FirstOrDefault() ?? CultureInfo.CurrentCulture.Name;
-
-            return File(
+            => File(
                 await _client.ExportAgentDividendsAsync(request).ConfigureAwait(false),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AgentDividends.xlsx");
-        }
     }
 }
