@@ -247,7 +247,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             {
                 var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
                     createdFormId,
-                    ((PrimePayDepositSuccessResponse)applyInfo.Response).ReferenceNo.ToString());
+                    ((PrimePayDepositSuccessResponse)applyInfo.Response).ReferenceId);
 
                 await updateDepositFormService
                     .ExecuteAsync(updateThirdPartyOrderNoCommand)
