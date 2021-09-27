@@ -1199,6 +1199,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("operational_email");
 
+                    b.Property<decimal>("PlatformCharge")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("platform_charge");
+
                     b.Property<DateTimeOffset>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("previous_settlement_from");
