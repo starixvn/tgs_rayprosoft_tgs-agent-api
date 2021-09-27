@@ -13,6 +13,7 @@ using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
+using TGS.Core.Models.Exceptions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Deposit;
 using TGS.Services.Operator.Services.Player;
@@ -115,6 +116,9 @@ namespace TGS.Apis.OperatorApi.Controllers
             var brandPaymentInfo = JsonDocument.Parse(brandPayment.ExtendedData);
 
             var player = await getPlayerInfoService.GetAsync(new GetPlayerQuery(brandId, playerTokenData.PlayerCode));
+
+            if (!player.IdentityAuthentication)
+                throw new MaticPayDepositNeedRealNameException();
 
             var command = new CreateDepositFormCommand(
                 playerTokenData.PlayerCode,
