@@ -19,7 +19,7 @@ using TGS.Services.Operations.Validators;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
 
-namespace OperatorApi.UnitTests
+namespace TGS.Tests.OperatorApi.UnitTests
 {
     public class PlayerCreateTests
     {
@@ -62,7 +62,7 @@ namespace OperatorApi.UnitTests
                 "::1");
 
             // act
-            var actual = await sut.GetAsync(query, default);
+            var actual = await sut.GetAsync(query);
 
             // assert
             Assert.IsTrue(actual.IsNew);
@@ -110,7 +110,7 @@ namespace OperatorApi.UnitTests
             var query = new CreatePlayerCommand(brandId, "username", password, "CNY", null, false, "::1");
 
             // act
-            var actual = await sut.GetAsync(query, default);
+            var actual = await sut.GetAsync(query);
             // assert
             Assert.IsTrue(actual.IsNew);
         }
@@ -141,7 +141,7 @@ namespace OperatorApi.UnitTests
 
             var query = new CreatePlayerCommand(brandId, "username", password, "CNY", invitationCode, false, "::1");
 
-            Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query, default));
+            Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query));
         }
 
         [Test]
@@ -184,7 +184,7 @@ namespace OperatorApi.UnitTests
 
             // act
             Assert.ThrowsAsync<InvalidInvitationCodeException>(
-                async () => await sut.GetAsync(query, default));
+                async () => await sut.GetAsync(query));
         }
 
         [Test]
