@@ -103,7 +103,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakePasswordHandler.Received(1).GenerateCredential(Arg.Is(newPassword));
             _ = fakePlayerOperations
                 .Received(1)
-                .SetPayPasswordAsync(Arg.Is(player.PlayerCode), Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Any<DateTimeOffset>());
+                .SetPayPasswordAsync(Arg.Is(player.PlayerCode), Arg.Any<byte[]>(), Arg.Any<byte[]>(),
+                    Arg.Any<DateTimeOffset>());
         }
 
         [Test]
@@ -126,7 +127,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 {
                     PlayerCode = playerCode,
                     Username = "Tester",
-                    WithdrawPassword = new byte[] { 1, 2, 3 }
+                    WithdrawPassword = new byte[]
+                    {
+                        1,
+                        2,
+                        3
+                    }
                 });
 
             Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
@@ -160,7 +166,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakePasswordHandler.Received(1).GenerateCredential(Arg.Is(password));
             _ = fakePlayerOperations
                 .Received(1)
-                .SetPayPasswordAsync(Arg.Is(playerCode), Arg.Any<byte[]>(), Arg.Any<byte[]>(), Arg.Any<DateTimeOffset>());
+                .SetPayPasswordAsync(Arg.Is(playerCode), Arg.Any<byte[]>(), Arg.Any<byte[]>(),
+                    Arg.Any<DateTimeOffset>());
         }
 
         [Test]
@@ -211,7 +218,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var expected = new
             {
-                Receivers = new[] { email },
+                Receivers = new[]
+                {
+                    email
+                },
                 Subject = "Verification Code",
                 Content = $"Your ID verification code is : {validateCode}"
             }.ToExpectedObject();
@@ -227,6 +237,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeSysRepository.GetBrandInfoAsync(Arg.Any<Guid>())
                 .Returns(new BrandInfo(
                     player.BrandId,
+                    "brandCode",
                     new Uri("http://img.org/1.png"),
                     new Uri("http://img.org/2.png"),
                     new Uri("http://img.org/3.png"),
@@ -281,10 +292,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
-            var request = new ChangePayPasswordRequest()
-            {
-                NewPassword = "123456789012345678901"
-            };
+            var request = new ChangePayPasswordRequest { NewPassword = "123456789012345678901" };
 
             // act
             var actual = sut.TestValidate(request);
@@ -298,10 +306,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
-            var request = new ChangePayPasswordRequest()
-            {
-                NewPassword = "12345"
-            };
+            var request = new ChangePayPasswordRequest { NewPassword = "12345" };
 
             // act
             var actual = sut.TestValidate(request);
@@ -315,10 +320,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new ChangePayPasswordRequestValidator();
-            var request = new ChangePayPasswordRequest()
-            {
-                NewPassword = string.Empty
-            };
+            var request = new ChangePayPasswordRequest { NewPassword = string.Empty };
 
             // act
             var actual = sut.TestValidate(request);
@@ -332,10 +334,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
-            {
-                Password = "123456789012345678901"
-            };
+            var request = new SetPayPasswordRequest { Password = "123456789012345678901" };
 
             // act
             var actual = sut.TestValidate(request);
@@ -349,10 +348,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
-            {
-                Password = "12345"
-            };
+            var request = new SetPayPasswordRequest { Password = "12345" };
 
             // act
             var actual = sut.TestValidate(request);
@@ -366,10 +362,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             // arrange
             var sut = new SetPayPasswordRequestValidator();
-            var request = new SetPayPasswordRequest()
-            {
-                Password = string.Empty
-            };
+            var request = new SetPayPasswordRequest { Password = string.Empty };
 
             // act
             var actual = sut.TestValidate(request);

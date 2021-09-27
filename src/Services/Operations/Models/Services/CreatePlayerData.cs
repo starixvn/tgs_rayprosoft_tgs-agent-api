@@ -15,7 +15,8 @@ namespace TGS.Services.Operations.Models.Services
         public string ExternalCurrencyCode { get; init; }
         public int BetLimitId { get; init; }
         public PlayerType Type { get; init; }
-        public Guid? AgentId { get; set; }
-        public string AgentInvitationCode { get; set; }
+        public Guid? AgentId { get; init; }
+        public string AgentInvitationCode { get; init; }
+        public PlayerStatus PlayerStatus { get; init; }
     }
 }
