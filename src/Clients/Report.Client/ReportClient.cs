@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Globalization;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using TGS.Clients.Report.Client.Models.Agent;
@@ -205,7 +206,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.Culture);
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
@@ -222,7 +223,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.Culture);
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
@@ -239,7 +240,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.Culture);
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
@@ -256,7 +257,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.Culture);
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
@@ -273,7 +274,7 @@ namespace TGS.Clients.Report.Client
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
-            httpRequest.Headers.Add("Accept-Language", request.Culture);
+            httpRequest.Headers.Add("Accept-Language", CultureInfo.CurrentCulture.Name);
 
             var response = await _client.SendAsync(httpRequest, HttpCompletionOption.ResponseHeadersRead);
 
