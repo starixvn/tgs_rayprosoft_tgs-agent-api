@@ -14,11 +14,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Get_Brand_Should_Success()
         {
             var brandId = new Guid("4e86719f-243f-46f6-b010-5c758b7285af");
-            var fakeSysRepository = NSubstitute.Substitute.For<ISysRepository>();
+            var brandCode = "brandCode";
+            var fakeSysRepository = Substitute.For<ISysRepository>();
 
             fakeSysRepository.GetBrandInfoAsync(Arg.Any<Guid>())
                 .Returns(new BrandInfo(
                     brandId,
+                    brandCode,
                     new Uri("https://img.org/1.png"),
                     new Uri("https://img.org/2.png"),
                     new Uri("https://img.org/3.png"),

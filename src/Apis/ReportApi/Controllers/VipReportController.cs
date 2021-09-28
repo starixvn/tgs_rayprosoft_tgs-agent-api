@@ -31,5 +31,12 @@ namespace TGS.Apis.ReportApi.Controllers
             request.Username = username;
             return _mediator.Send(request);
         }
+
+        [HttpGet("exportVips")]
+        [Description("export vips")]
+        public async Task<IActionResult> ExportVipsAsync(
+            [FromQuery] ExportVipReportRequest request) => File(
+            await _mediator.Send(request).ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 }

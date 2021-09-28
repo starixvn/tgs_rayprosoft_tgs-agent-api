@@ -10,8 +10,5 @@ namespace TGS.Apis.OperatorApi.Models.Messages
 
         [JsonPropertyName("bankinfoid")]
         public Guid BankInfoId { get; init; }
-
-        [JsonPropertyName("paypassword")]
-        public string PayPassword { get; init; }
     }
 }

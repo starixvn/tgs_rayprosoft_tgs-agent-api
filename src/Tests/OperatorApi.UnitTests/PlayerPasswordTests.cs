@@ -165,6 +165,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeSysRepository.GetBrandInfoAsync(Arg.Any<Guid>())
                 .Returns(new BrandInfo(
                     player.BrandId,
+                    "brandCode",
                     new Uri("http://img.org/1.png"),
                     new Uri("http://img.org/2.png"),
                     new Uri("http://img.org/3.png"),

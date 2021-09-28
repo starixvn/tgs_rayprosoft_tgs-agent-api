@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text.Json;
@@ -11,12 +10,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Filters;
@@ -75,10 +72,6 @@ namespace TGS.Apis.BackendOffice
                 endpoints.MapMetrics();
             });
 
-            var requestLocalizationOptions =
-                app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value;
-            app.UseRequestLocalization(requestLocalizationOptions);
-
             if (!env.IsProduction())
             {
                 app.UseSwagger();
@@ -100,9 +93,7 @@ namespace TGS.Apis.BackendOffice
                 options.JsonSerializerOptions = new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    Converters = {
-                        new JsonStringEnumConverter()
-                    }
+                    Converters = {new JsonStringEnumConverter()}
                 };
             });
 
@@ -126,7 +117,7 @@ namespace TGS.Apis.BackendOffice
                 {
                     c.RegisterValidatorsFromAssembly(
                         Assembly.GetExecutingAssembly(),
-                        lifetime: ServiceLifetime.Singleton);
+                        lifetime: ServiceLifetime.Scoped);
                 })
                 .AddJsonOptions(options =>
                 {
@@ -168,7 +159,11 @@ namespace TGS.Apis.BackendOffice
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() { Title = "TGS BackOffice API", Version = "v1" });
+                c.SwaggerDoc("v1", new()
+                {
+                    Title = "TGS BackOffice API",
+                    Version = "v1"
+                });
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 

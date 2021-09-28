@@ -4,17 +4,16 @@ using System.Threading.Tasks;
 using Polly;
 using TGS.Services.Operations;
 using TGS.Services.Operator.Properties;
+using TGS.Services.Operator.ValidateCode;
 using TGS.ServiceUtility;
 using TGS.SmsService.Client;
-using TGS.Services.Operator.Services.Player;
-using TGS.Services.Operator.ValidateCode;
 
 namespace TGS.Services.Operator.Services.Player
 {
     internal class StartSetPlayerPhoneCommandService : IGetService<StartSetPlayerPhoneCommand, string>
     {
-        private readonly IPlayerOperations _playerOperations;
         private readonly IValidateCodeGenerator _codeGenerator;
+        private readonly IPlayerOperations _playerOperations;
         private readonly ISmsServiceClient _smsServiceClient;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
@@ -27,23 +26,29 @@ namespace TGS.Services.Operator.Services.Player
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _codeGenerator = codeGenerator ?? throw new ArgumentNullException(nameof(codeGenerator));
             _smsServiceClient = smsServiceClient ?? throw new ArgumentNullException(nameof(smsServiceClient));
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+            _validateCodeOperator =
+                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask<string> GetAsync(StartSetPlayerPhoneCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask<string> GetAsync(StartSetPlayerPhoneCommand command,
+            CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)
                 .ConfigureAwait(false);
 
-            var saveResult = await Policy.HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
+            var saveResult = await Policy
+                .HandleResult<(bool Result, string ValidateCode, string SecurityKey)>(data => !data.Result)
                 .RetryAsync(5)
                 .ExecuteAsync(async () =>
                 {
                     var validateCode = _codeGenerator.GenerateCode();
                     var token = _codeGenerator.GenerateSecurityKey();
 
-                    var data = new PhoneValidateData(command.Phone, command.PlayerCode);
+                    var data = new PhoneValidateData(
+                        command.AreaCode,
+                        command.Phone,
+                        command.PlayerCode);
 
                     var result = await _validateCodeOperator
                         .SaveValidateDataAsync(validateCode, token, data)
@@ -61,7 +66,7 @@ namespace TGS.Services.Operator.Services.Player
                 saveResult.ValidateCode);
 
             await _smsServiceClient
-                .SendShortMessageAsync(command.Phone, shortMessage, player.BrandId)
+                .SendShortMessageAsync($"{command.AreaCode}{command.Phone}", shortMessage, player.BrandId)
                 .ConfigureAwait(false);
 
             return saveResult.SecurityKey;

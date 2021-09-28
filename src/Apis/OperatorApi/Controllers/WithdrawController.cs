@@ -34,15 +34,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                 var brandId = HttpContext.Items.GetBrandId();
                 var playerData = HttpContext.Items.GetPlayerTokenData();
 
-                var checkPasswordCommand =
-                    new CheckWithdrawPayPasswordCommand(playerData.PlayerCode, request.PayPassword);
-                await checkPasswordService
-                    .ExecuteAsync(checkPasswordCommand)
-                    .ConfigureAwait(false);
-
-                if (!await checkPasswordCommand.ReturnSource.Task.ConfigureAwait(false))
-                    throw new OperationNotAllowedException();
-
                 var command = new CreateWithdrawFormCommand(
                     playerData.PlayerCode,
                     brandId,
@@ -180,6 +171,19 @@ namespace TGS.Apis.OperatorApi.Controllers
                .Where(x => x != FlowState.Unknown)
                .ToDictionary(t => (int)t, t => t.ToString());
             return Task.FromResult(dict);
+        }
+
+        [HttpGet("player/amount")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<decimal> GetWithdrawRequireAmountAsync(
+            [FromServices] IGetService<GetRequireAmountQuery, decimal> getService)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var query = new GetRequireAmountQuery(playerTokenData.PlayerCode);
+            var WageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
+
+            return WageringRequirement;
         }
     }
 }

@@ -31,5 +31,10 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
             request.Username = username;
             return _client.GetVipRebateReportAsync(request);
         }
+
+        [HttpGet("exportVips")]
+        public async Task<IActionResult> ExportVipsAsync([FromQuery] ExportVipReportRequest request) => File(
+            await _client.ExportVipsAsync(request).ConfigureAwait(false),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Vips.xlsx");
     }
 }
