@@ -16,12 +16,15 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
     {
         private readonly IAgentService _service;
 
-        public UpdateAgentHandler(IAgentService service, IHttpContextAccessor accessor) : base(accessor)
+        public UpdateAgentHandler(
+            IAgentService service,
+            IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
         }
 
-        public override async Task<MessageResponse> Handle(UpdateAgentRequest request,
+        public override async Task<MessageResponse> Handle(
+            UpdateAgentRequest request,
             CancellationToken cancellationToken)
         {
             var agent = await _service.GetAgentAsync(q => q.Id == request.Id);
@@ -36,7 +39,7 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 var parentAgent = await _service.GetAgentAsync(x => x.BrandId == request.BrandId &&
                     x.Username == request.ParentUsername);
 
-                if (parentAgent == null)
+                if (request.ParentUsername == agent.Username || parentAgent == null)
                 {
                     return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
                 }
