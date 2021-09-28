@@ -22,7 +22,8 @@ namespace TGS.Services.Operator.Services.Withdraw
             var playerBuckets = await _tgsRepository.PlayerBuckets
                 .AsQueryable()
                 .Where(x => x.PlayerCode == query.PlayerCode)
-                .ToArrayAsync(cancellationToken);
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             return playerBuckets.Sum(p => p.BucketAmount) - playerBuckets.Sum(p => p.CurrentBucketAmount);
         }
