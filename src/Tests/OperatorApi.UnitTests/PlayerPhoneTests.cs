@@ -21,11 +21,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public void Commit_Set_Player_Phone_If_Not_Verify_ValidateCode_Should_Throw_Exception()
         {
             var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
-            var moqPlayerOperations = new Mock<IPlayerOperations>();
+            var moqPlayerRepository = new Mock<IPlayerRepository>();
+            var moqCacheManager = new Mock<IRedisCacheManager>();
 
             var sut = new CommitSetPlayerPhoneCommandService(
                 moqValidateCodeOperator.Object,
-                moqPlayerOperations.Object);
+                moqPlayerRepository.Object,
+                moqCacheManager.Object);
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
@@ -47,11 +49,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public async Task Commit_Set_Player_Phone_Should_Success()
         {
             var moqValidateCodeOperator = new Mock<IValidateCodeOperator>();
-            var moqPlayerOperations = new Mock<IPlayerOperations>();
+            var moqPlayerRepository = new Mock<IPlayerRepository>();
+            var moqCacheManager = new Mock<IRedisCacheManager>();
 
             var sut = new CommitSetPlayerPhoneCommandService(
                 moqValidateCodeOperator.Object,
-                moqPlayerOperations.Object);
+                moqPlayerRepository.Object,
+                moqCacheManager.Object);
 
             var playerCode = "testPlayerCode";
             var validateCode = "123456";
@@ -73,13 +77,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqPlayerOperations
-                .Verify(
-                    fake => fake.SetPhoneAsync(
-                        It.Is<string>(x => x == playerCode),
-                        It.Is<string>(x => x == phone),
-                        It.IsAny<DateTimeOffset>()),
-                    Times.Exactly(1));
+            moqPlayerRepository.Verify(
+                fake => fake.SetPlayerPhoneAsync(
+                    It.Is<string>(x => x == playerCode),
+                    It.Is<string>(x => x == areaCode),
+                    It.Is<string>(x => x == phone)),
+                Times.Exactly(1));
         }
 
         [Test]
@@ -138,7 +141,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             moqSmsServiceClient
                 .Verify(
                     smsClient => smsClient.SendShortMessageAsync(
-                        It.Is<string>(x => x == phone),
+                        It.Is<string>(x => x == $"{areaCode}{phone}"),
                         It.Is<string>(x => x == expectedShortMessage),
                         It.IsAny<Guid>()),
                     Times.Exactly(1));
@@ -159,7 +162,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 moqPlayerOperations.Object,
                 moqCacheManager.Object);
 
-            var playerCode = "testPlayerCode";
             var validateCode = "123456";
             var securityKey = "3F8E5681-50C8-4F2F-8379-3AA6EF2C6064";
 

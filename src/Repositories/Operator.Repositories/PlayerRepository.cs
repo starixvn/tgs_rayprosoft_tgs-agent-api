@@ -122,6 +122,24 @@ namespace TGS.Operator.Repositories
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
+        public async ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone)
+        {
+            var playerData = await _tgsRepository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            if (playerData == null)
+                return;
+
+            playerData.AreaCode = areaCode;
+            playerData.Phone = phone;
+            playerData.PhoneAuthentication = true;
+
+            playerData.UpdatedOn = DateTimeOffset.UtcNow;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
         public async ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode)
         {
             var settingData = await _tgsRepository.PlayerGameSettings

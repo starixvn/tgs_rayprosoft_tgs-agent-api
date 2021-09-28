@@ -10,10 +10,19 @@ namespace TGS.Core.Infrastructures.CodeMapper
 {
     public interface ICodeMapper
     {
-        Task<string> ExternalToInternalAsync(string externalCode, Guid id);
-        Task<string> InternalToExternalAsync(string internalCode, Guid id);
-        Task<Dictionary<string, string>> GetMapByExternalCodeAsync(Guid id);
-        Task<Dictionary<string, string>> GetMapByInternalCodeAsync(Guid id);
+        Task<string> ExternalToInternalAsync(
+            string externalCode,
+            Guid id);
+
+        Task<string> InternalToExternalAsync(
+            string internalCode,
+            Guid id);
+
+        Task<Dictionary<string, string>> GetMapByExternalCodeAsync(
+            Guid id);
+
+        Task<Dictionary<string, string>> GetMapByInternalCodeAsync(
+            Guid id);
     }
 
     public abstract class BaseCodeMapper
@@ -41,7 +50,7 @@ namespace TGS.Core.Infrastructures.CodeMapper
             if (string.IsNullOrWhiteSpace(lookUpCode))
             {
                 throw new ArgumentException(
-                    $"Missing key for \'{cacheKeyPrefix}\' used for \'{usedFor}\' with filter id {filterId} (intended to be cached as {cacheType})");
+                    $"Missing key '{lookUpCode}' for \'{cacheKeyPrefix}\' used for \'{usedFor}\' with filter id {filterId} (intended to be cached as {cacheType})");
             }
 
             var dict = await GetMappedCodesAsync(filterId, cacheType, cacheKeyPrefix, cacheForMinutes, getDictionary);
@@ -50,10 +59,10 @@ namespace TGS.Core.Infrastructures.CodeMapper
         }
 
         protected async Task<Dictionary<string, string>> GetMappedCodesAsync(
-            Guid filterId, 
+            Guid filterId,
             RedisCacheType cacheType,
-            string cacheKeyPrefix, 
-            int cacheForMinutes, 
+            string cacheKeyPrefix,
+            int cacheForMinutes,
             Func<Guid, Task<Dictionary<string, string>>> getDictionary)
         {
             Dictionary<string, string> dict;
@@ -67,10 +76,13 @@ namespace TGS.Core.Infrastructures.CodeMapper
             {
                 dict = await getDictionary(filterId);
 
-                await _cacheManager.SafeCacheHashSetAsync(cacheType, filterId, new HashEntry[]
-                {
-                    new(cacheKeyPrefix, _json.SerializeToString(dict))
-                }, TimeSpan.FromMinutes(cacheForMinutes));
+                await _cacheManager.SafeCacheHashSetAsync(cacheType,
+                    filterId,
+                    new HashEntry[]
+                    {
+                        new(cacheKeyPrefix, _json.SerializeToString(dict))
+                    },
+                    TimeSpan.FromMinutes(cacheForMinutes));
             }
 
             return dict;

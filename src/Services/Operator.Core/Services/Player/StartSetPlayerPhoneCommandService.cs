@@ -66,7 +66,7 @@ namespace TGS.Services.Operator.Services.Player
                 saveResult.ValidateCode);
 
             await _smsServiceClient
-                .SendShortMessageAsync(command.Phone, shortMessage, player.BrandId)
+                .SendShortMessageAsync($"{command.AreaCode}{command.Phone}", shortMessage, player.BrandId)
                 .ConfigureAwait(false);
 
             return saveResult.SecurityKey;
