@@ -16,7 +16,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public decimal Balance { get; init; }
         public PlayerStatus Status { get; init; }
         public string StatusName { get; init; }
-
+        public string AreaCode { get; init; }
         public string Phone { get; init; }
         public string Email { get; init; }
         public string QQ { get; init; }

@@ -157,7 +157,7 @@ namespace TGS.Shared.Game.ApiClients.KY
                 Key = key
             };
 
-            return GetAPIAsync<KYGameRecordResponse>(brandMerchant.ApiUrl, action, apiKYRequest);
+            return GetAPIAsync<KYGameRecordResponse>(brandMerchant.ApiRecordUrl, action, apiKYRequest);
         }
 
         public ValueTask<KYApiResponse<KYKickResponse>> KickAsync(KYBrandMerchant brandMerchant, string agentId, KYKickRequest request)

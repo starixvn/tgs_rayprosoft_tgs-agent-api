@@ -21,8 +21,9 @@ namespace TGS.Services.Operator.Services.Player
         private readonly IBrandCurrencyCodeMapper _currencyCodeMapper;
         private readonly IPasswordHandler _passwordHandler;
         private readonly IPlayerOperations _playerOperations;
-        private readonly IStatusValidator _statusValidator;
         private readonly IPlayerRepository _playerRepository;
+        private readonly IStatusValidator _statusValidator;
+        private readonly ISysRepository _sysRepository;
 
         public CreatePlayerCommandService(
             IStatusValidator statusValidator,
@@ -31,7 +32,8 @@ namespace TGS.Services.Operator.Services.Player
             IBrandCurrencyCodeMapper currencyCodeMapper,
             IBrandOperations brandOperations,
             IAgentOperations agentOperations,
-            IPlayerRepository playerRepository)
+            IPlayerRepository playerRepository,
+            ISysRepository sysRepository)
         {
             _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -40,52 +42,68 @@ namespace TGS.Services.Operator.Services.Player
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _agentOperations = agentOperations ?? throw new ArgumentNullException(nameof(agentOperations));
             _playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
+            _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
         }
 
-        public async ValueTask<CreatePlayerInfo> GetAsync(CreatePlayerCommand query, CancellationToken cancellationToken = default)
+        public async ValueTask<CreatePlayerInfo> GetAsync(CreatePlayerCommand query,
+            CancellationToken cancellationToken = default)
         {
             await _statusValidator
                 .ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default)
                 .ConfigureAwait(false);
 
-            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(query.BrandId, query.UserName);
+            var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(query.BrandId, query.UserName)
+                .ConfigureAwait(false);
+
             if (playerCode.IsNotNullOrEmpty())
-                return new CreatePlayerInfo(playerCode, IsNew: false);
+                return new CreatePlayerInfo(playerCode, false);
 
             var (salt, password) = _passwordHandler.GenerateCredential(query.Password);
 
+            var brand = await _sysRepository.GetBrandInfoAsync(query.BrandId).ConfigureAwait(false);
+
+            if (brand == null)
+                throw new BrandNotFoundException();
+
             var currency = await _currencyCodeMapper.ExternalToInternalAsync(query.CurrencyCode, query.BrandId);
-            var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(query.BrandId, currency);
+            var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(query.BrandId, currency)
+                .ConfigureAwait(false);
+
+            var playerStatus = brand.Code.Equals("HKJP") ? PlayerStatus.InBlacklist : PlayerStatus.Enabled;
 
             var resultPlayerCode = default(string);
+
             if (string.IsNullOrWhiteSpace(query.AgentInvitationCode))
             {
                 resultPlayerCode = await CreatePlayerAsync(
-                   query,
-                   salt,
-                   password,
-                   currency,
-                   betLimitId).ConfigureAwait(false);
-
-
+                    query,
+                    salt,
+                    password,
+                    currency,
+                    betLimitId,
+                    playerStatus).ConfigureAwait(false);
             }
             else
             {
                 resultPlayerCode = await CreatePlayerByAgentAsync(
-                  query,
-                  salt,
-                  password,
-                  currency,
-                  betLimitId).ConfigureAwait(false);
+                    query,
+                    salt,
+                    password,
+                    currency,
+                    betLimitId,
+                    playerStatus).ConfigureAwait(false);
             }
-
 
             if (!string.IsNullOrEmpty(resultPlayerCode))
             {
-                var player = await _playerOperations.GetPlayerByCodeAsync(resultPlayerCode);
-                await _playerRepository.PlayerRegisterIpAsync(resultPlayerCode, query.IpAddress, player.RegisteredOn).ConfigureAwait(false);
+                var player = await _playerOperations.GetPlayerByCodeAsync(resultPlayerCode)
+                    .ConfigureAwait(false);
+
+                await _playerRepository.PlayerLoginIpAsync(resultPlayerCode, query.IpAddress)
+                    .ConfigureAwait(false);
             }
-            return new CreatePlayerInfo(resultPlayerCode, IsNew: true);
+
+            return new CreatePlayerInfo(resultPlayerCode, true);
         }
 
         private Task<string> CreatePlayerAsync(
@@ -93,10 +111,10 @@ namespace TGS.Services.Operator.Services.Player
             byte[]? salt,
             byte[]? password,
             string currency,
-            int betLimitId)
-        {
-            return _playerOperations.CreatePlayerAsync(
-                new CreatePlayerData()
+            int betLimitId,
+            PlayerStatus status)
+            => _playerOperations.CreatePlayerAsync(
+                new CreatePlayerData
                 {
                     BrandId = query.BrandId,
                     Username = query.UserName,
@@ -107,16 +125,17 @@ namespace TGS.Services.Operator.Services.Player
                     BetLimitId = betLimitId,
                     AgentId = null,
                     AgentInvitationCode = null,
-                    Type = query.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
+                    Type = query.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer,
+                    PlayerStatus = status
                 });
-        }
 
         private async Task<string> CreatePlayerByAgentAsync(
-                    CreatePlayerCommand query,
+            CreatePlayerCommand query,
             byte[]? salt,
             byte[]? password,
             string currency,
-            int betLimitId)
+            int betLimitId,
+            PlayerStatus status)
         {
             var agent = await _agentOperations
                 .GetAgentByInvitationCodeAsync(query.BrandId, query.AgentInvitationCode)
@@ -129,7 +148,7 @@ namespace TGS.Services.Operator.Services.Player
 
             var result = await _playerOperations
                 .CreatePlayerAsync(
-                    new CreatePlayerData()
+                    new CreatePlayerData
                     {
                         BrandId = query.BrandId,
                         Username = query.UserName,
@@ -140,7 +159,8 @@ namespace TGS.Services.Operator.Services.Player
                         BetLimitId = betLimitId,
                         AgentId = agent.Id,
                         AgentInvitationCode = query.AgentInvitationCode,
-                        Type = query.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer
+                        Type = query.IsTestPlayer ? PlayerType.TestPlayer : PlayerType.RealPlayer,
+                        PlayerStatus = status
                     })
                 .ConfigureAwait(false);
             return result;

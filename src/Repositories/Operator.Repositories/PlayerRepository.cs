@@ -28,7 +28,9 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
         {
-            var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
+            var playerData = await _tgsRepository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
 
             return new PlayerInfo(
                 playerData.PlayerCode,
@@ -36,6 +38,35 @@ namespace TGS.Operator.Repositories
                 playerData.IdentityAuthentication,
                 playerData.PhoneAuthentication,
                 playerData.VipId);
+        }
+
+        public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
+        {
+            var playerData = await _tgsRepository.Players
+                .FirstOrDefaultAsync(p => p.BrandId == brandId &&
+                    p.Username.ToLower() == userName.ToLower())
+                .ConfigureAwait(false);
+
+            if (playerData == null)
+                return null;
+
+            return new PlayerInfo(
+                playerData.PlayerCode,
+                playerData.AccumulatedDeposit,
+                playerData.IdentityAuthentication,
+                playerData.PhoneAuthentication,
+                playerData.VipId);
+        }
+
+        public async ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode)
+        {
+            var playerData = await _tgsRepository.Players
+                 .FindAsync(playerCode)
+                 .ConfigureAwait(false);
+
+            return new PasswordInfo(
+                playerData.Password,
+                playerData.Salt);
         }
 
         public async ValueTask PlayerLoginIpAsync(string playerCode, string ip)
@@ -69,20 +100,24 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
         {
-            var datas = new PlayerIpRecord[] {
-                new() {
+            var datas = new PlayerIpRecord[]
+            {
+                new()
+                {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.RegisterIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                } ,
+                },
                 new()
                 {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.LoginIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                } };
+                }
+            };
+
             await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
@@ -125,6 +160,17 @@ namespace TGS.Operator.Repositories
             }
 
             settingData.IsAutoTransferToGame = !settingData.IsAutoTransferToGame;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus)
+        {
+            var player = await _tgsRepository.Players.FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            player.Status = playerStatus;
+            player.UpdatedOn = DateTimeOffset.UtcNow;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }

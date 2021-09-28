@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -31,7 +32,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeGameProviderRepository
                 .QueryAllSubGameProvidersAsync(Arg.Is(query.BrandId))
                 .Returns(
-                    new[]{
+                    new[]
+                    {
                         new BrandSubGameProviderInfo(
                             "SubGpCode",
                             "SubGpCode",
@@ -98,6 +100,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .QueryGameProvidersAsync();
             _ = fakeGameProviderRepository.Received(1)
                 .QuerySubGameProvidersAsync();
+            _ = fakeGameProviderRepository.Received(1)
+                .QueryAllGamesAsync(Arg.Any<Guid>(), Arg.Any<IEnumerable<GameStatus>>());
         }
     }
 }

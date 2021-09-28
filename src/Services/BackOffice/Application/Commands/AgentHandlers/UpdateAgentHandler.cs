@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
 using TGS.Services.BackOffice.Application.Models.Agent;
 using TGS.Services.BackOffice.Application.Resources;
@@ -30,14 +29,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             if (agent == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Agent.NotFound);
-            }
-
-            if (request.ParentUsername.IsNotNullOrEmpty() &&
-                !await _service.ExistsAsync(x =>
-                    x.BrandId == request.BrandId && x.Username == request.ParentUsername &&
-                    x.LevelType == AgentLevelType.Chief))
-            {
-                return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
             }
 
             if (request.ParentUsername.IsNotNullOrEmpty())

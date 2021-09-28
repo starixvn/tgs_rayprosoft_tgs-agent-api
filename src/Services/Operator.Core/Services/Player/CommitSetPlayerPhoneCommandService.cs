@@ -25,7 +25,8 @@ namespace TGS.Services.Operator.Services.Player
             _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
         }
 
-        public async ValueTask ExecuteAsync(CommitSetPlayerPhoneCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(CommitSetPlayerPhoneCommand command,
+            CancellationToken cancellationToken = default)
         {
             var result = await _validateCodeOperator
                 .GetValidateCodeDataAsync<PhoneValidateData>(command.ValidateCode, command.SecurityKey)

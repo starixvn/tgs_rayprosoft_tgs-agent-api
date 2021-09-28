@@ -169,6 +169,15 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Phone is required..
+        /// </summary>
+        public static string PhoneRequired {
+            get {
+                return ResourceManager.GetString("PhoneRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update type is not found..
         /// </summary>
         public static string UpdateTypeNotFound {

@@ -13,6 +13,7 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public Guid VipId { get; init; }
         public string AgentUsername { get; init; }
         public PlayerStatus Status { get; init; }
+        public string AreaCode { get; set; }
         public string Phone { get; init; }
         public string Email { get; init; }
         public string QQ { get; init; }
