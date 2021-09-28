@@ -181,7 +181,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
             var query = new GetRequireAmountQuery(playerTokenData.PlayerCode);
-            var WageringRequirement = await getService.GetAsync(query);
+            var WageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
 
             return WageringRequirement;
         }
