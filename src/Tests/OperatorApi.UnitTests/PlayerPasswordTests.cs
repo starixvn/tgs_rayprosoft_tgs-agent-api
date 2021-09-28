@@ -19,7 +19,7 @@ using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
 using TGS.SmsService.Client;
 
-namespace OperatorApi.UnitTests
+namespace TGS.Tests.OperatorApi.UnitTests
 {
     public class PlayerPasswordTests
     {
@@ -28,7 +28,10 @@ namespace OperatorApi.UnitTests
         {
             var playerCode = "testPlayerCode";
             var fakeHttpContext = new DefaultHttpContext();
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData { PlayerCode = playerCode });
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData
+            {
+                PlayerCode = playerCode
+            });
 
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakePlayerQueries = Substitute.For<IPlayerQueries>();
