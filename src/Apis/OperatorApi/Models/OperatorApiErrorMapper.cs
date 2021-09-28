@@ -49,7 +49,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
                 [TgsApiError.UserBanned] = "UserBanned",
                 [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
-                [TgsApiError.MaticPayDepositNeedRealName] = "MaticPayDepositNeedRealName"
+                [TgsApiError.MaticPayDepositNeedRealName] = "MaticPayDepositNeedRealName",
+                [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired"
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -87,7 +88,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
                 [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
                 [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
-                [TgsApiError.MaticPayDepositNeedRealName] = StatusCodes.Status400BadRequest
+                [TgsApiError.MaticPayDepositNeedRealName] = StatusCodes.Status400BadRequest,
+                [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -127,7 +129,8 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(FavoriteCountFullException)] = TgsApiError.FavoriteFull,
                 [typeof(UserBannedException)] = TgsApiError.UserBanned,
                 [typeof(BrandEmailDuplicateException)] = TgsApiError.BrandEmailDuplicate,
-                [typeof(MaticPayDepositNeedRealNameException)] = TgsApiError.MaticPayDepositNeedRealName
+                [typeof(MaticPayDepositNeedRealNameException)] = TgsApiError.MaticPayDepositNeedRealName,
+                [typeof(PlayerPhoneRequiredException)] = TgsApiError.PhoneNumberRequired
             };
 
         public bool CanProcess(Exception exception)
