@@ -64,7 +64,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 player.AgentId = agent.Id;
             }
 
-            if (request.Type == updatePlayerType[1] &&
+            if (request.Email.IsNotNullOrEmpty() && request.Type == updatePlayerType[1] &&
                 await _service.ExistsAsync(x
                     => x.BrandId == player.BrandId && x.PlayerCode != player.PlayerCode &&
                     x.Email.ToLower() == request.Email.ToLower()))

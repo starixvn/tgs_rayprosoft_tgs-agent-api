@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.ApplePay;
@@ -102,6 +103,7 @@ namespace TGS.Apis.OperatorApi.Controllers
            [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
            [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
            [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+           [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
            [FromServices] MaticPaySerializer serializer,
            [FromBody] SubmitMaticPayDepositRequest request
            )
@@ -155,6 +157,18 @@ namespace TGS.Apis.OperatorApi.Controllers
             if (applyInfo.Response.Code == "0")
             {
                 var paymentUrl = applyInfo.Response.Detail.PayURL.ToString();
+
+                var payUri = new Uri(paymentUrl);
+                var thirdPartyOrderNo = HttpUtility.ParseQueryString(payUri.Query).Get("oid");
+
+                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                    createdFormId,
+                    thirdPartyOrderNo);
+
+                await updateDepositFormService
+                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                    .ConfigureAwait(false);
+
                 if (applyInfo.Response.Detail.PayURL.ToString() == string.Empty)
                 {
                     paymentUrl = applyInfo.Response.Detail.PayHtml.ToString();
@@ -180,6 +194,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] ICommandService<CreateDepositFormCommand> createDepositFormService,
             [FromServices] IGetService<GetBrandPaymentQuery, BrandPaymentInfo> getBrandPaymentService,
             [FromServices] IGetService<GetDepositFormQuery, DepositFormInfo> getDepositFormService,
+            [FromServices] ICommandService<SubmitDepositFormThirdPartyOrderNoCommand> updateDepositFormService,
             [FromServices] PrimePaySerializer serializer,
             [FromBody] SubmitDepositRequest request)
         {
@@ -229,11 +244,21 @@ namespace TGS.Apis.OperatorApi.Controllers
             var applyInfo = serializer.Deserialize<PrimePayDepositApplyInfo>(formData.ApplyInfo!);
 
             if (applyInfo.Response is PrimePayDepositSuccessResponse response)
+            {
+                var updateThirdPartyOrderNoCommand = new SubmitDepositFormThirdPartyOrderNoCommand(
+                    createdFormId,
+                    ((PrimePayDepositSuccessResponse)applyInfo.Response).ReferenceId);
+
+                await updateDepositFormService
+                    .ExecuteAsync(updateThirdPartyOrderNoCommand)
+                    .ConfigureAwait(false);
+
                 return new PrimePayDepositFormCreatedResponse
                 {
                     FormId = createdFormId,
                     PaymentUrl = ((PrimePayDepositSuccessResponse)applyInfo.Response).RedirectUrl.ToString()
                 };
+            }
             else
             {
                 var failResponse = (PrimePayDepositFailResponse)applyInfo.Response;

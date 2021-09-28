@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Clients.Report.Client;
@@ -29,13 +27,8 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
         [HttpGet("exportPlayerContributions")]
         public async Task<IActionResult> ExportPlayerContributionsAsync(
             [FromQuery] ExportPlayerContributionsRequest request)
-        {
-            Request.Headers.TryGetValue("Accept-Language", out var acceptLanguage);
-            request.AcceptLanguage = acceptLanguage.FirstOrDefault() ?? CultureInfo.CurrentCulture.Name;
-
-            return File(
+            => File(
                 await _client.ExportPlayerContributionsAsync(request).ConfigureAwait(false),
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PlayerContributions.xlsx");
-        }
     }
 }
