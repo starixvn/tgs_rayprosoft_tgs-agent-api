@@ -76,65 +76,39 @@ namespace TGS.Services.Operator.Services.GameProvider
             var brandGameProviders = await _brandOperations.GetBrandGameProvidersAsync(brandId)
                 .ConfigureAwait(false);
 
-            var statuses = Array.Empty<Status>();
-            switch (playerType)
-            {
-                case PlayerType.RealPlayer:
-                case PlayerType.TestPlayer:
-                case PlayerType.All:
-                    {
-                        statuses = new Status[] { Status.Active, Status.Maintenance };
-                        break;
-                    }
-                default:
-                    break;
-            }
-
-            var gameStatuses = Array.Empty<GameStatus>();
-            switch (playerType)
-            {
-                case PlayerType.RealPlayer:
-                    {
-                        gameStatuses = new GameStatus[] { GameStatus.Active, GameStatus.Maintenance };
-                        break;
-                    }
-                case PlayerType.TestPlayer:
-                case PlayerType.All:
-                    {
-                        gameStatuses = new GameStatus[] { GameStatus.Active, GameStatus.Maintenance, GameStatus.Testing };
-                        break;
-                    }
-                default:
-                    break;
-            }
+            var statuses = GetAvailableStatus(playerType);
+            var gameStatuses = GetAvailableGameStatus(playerType);
 
             var gamePlatformTypes = platformType.ToGamePlatformTypes();
             var gameProviderIds = brandGameProviders.Where(bgp => statuses.Contains(bgp.BrandGameProviderStatus))
                 .Select(bgp => bgp.GameProviderId).Distinct().ToArray();
 
             var gameProviders = await _gameProviderRepository
-                    .QueryGameProvidersAsync()
-                    .Where(gp => gameProviderIds.Contains(gp.Id)
-                        && statuses.Contains(gp.Status))
-                    .ToArrayAsync(cancellationToken)
-                    .ConfigureAwait(false);
+                .QueryGameProvidersAsync()
+                .Where(gp => gameProviderIds.Contains(gp.Id)
+                    && statuses.Contains(gp.Status))
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             var subGameProviders = await _gameProviderRepository.QuerySubGameProvidersAsync()
                 .Where(sgp => gameProviderIds.Contains(sgp.GameProviderId))
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
 
-            var gameTypeInfos = await _gameProviderRepository
-                .QueryGameTypeInfosAsync(gameProviderIds, gameStatuses, gamePlatformTypes)
+            var allGames = await _gameProviderRepository.QueryAllGamesAsync(brandId, gameStatuses)
                 .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+
+            var gameTypeInfos = (from game in allGames
+                                 where gamePlatformTypes.Contains(game.PlatformType)
+                                 group game.Type by game.SubGameProviderCode
+                                 into g
+                                 select g)
+                .ToDictionary(x => x.Key, x => x.Distinct().ToArray());
 
             foreach (var gp in gameProviders)
             {
                 foreach (var sgp in subGameProviders.Where(sgp => sgp.GameProviderId == gp.Id))
                 {
-                    var gameTypes = gameTypeInfos.Where(g => g.SubGameProviderCode.IgnoreCaseEquals(sgp.Code))
-                        .Select(g => g.Type).OrderBy(t => (int)t).ToArray();
-
-                    if (gameTypes.Length == 0)
+                    if (!gameTypeInfos.TryGetValue(sgp.Code, out var gameTypes) || gameTypes.Length == 0)
                     {
                         continue;
                     }
@@ -186,6 +160,49 @@ namespace TGS.Services.Operator.Services.GameProvider
                 {
                     yield break;
                 }
+            }
+        }
+
+        private static GameStatus[] GetAvailableGameStatus(PlayerType playerType)
+        {
+            switch (playerType)
+            {
+                case PlayerType.RealPlayer:
+                    return new[]
+                    {
+                        GameStatus.Active,
+                        GameStatus.Maintenance
+                    };
+
+                case PlayerType.TestPlayer:
+                case PlayerType.All:
+                    return new[]
+                    {
+                        GameStatus.Active,
+                        GameStatus.Maintenance,
+                        GameStatus.Testing
+                    };
+
+                default:
+                    return Array.Empty<GameStatus>();
+            }
+        }
+
+        private static Status[] GetAvailableStatus(PlayerType playerType)
+        {
+            switch (playerType)
+            {
+                case PlayerType.RealPlayer:
+                case PlayerType.TestPlayer:
+                case PlayerType.All:
+                    return new[]
+                    {
+                        Status.Active,
+                        Status.Maintenance
+                    };
+
+                default:
+                    return Array.Empty<Status>();
             }
         }
 
