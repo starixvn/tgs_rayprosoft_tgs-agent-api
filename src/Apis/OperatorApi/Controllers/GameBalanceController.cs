@@ -48,6 +48,60 @@ namespace TGS.Apis.OperatorApi.Controllers
             };
         }
 
+        [HttpGet("list")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagedResponse<GameBalanceInfosViewModel>> GetGameBalanceInfosAsync(
+                    [FromServices] IQueryService<GetGameBalanceInfosQuery, GameBalanceRecord> queryService,
+                    [FromQuery] GetGameBalanceInfosRequest request,
+                    [FromQuery] PageableRequest pageableRequest)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var recordOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+            if (request.BeginRecordOn != null && request.EndRecordOn != null)
+                recordOnRange = (request.BeginRecordOn.Value, request.EndRecordOn.Value);
+
+            var query = new GetGameBalanceInfosQuery(brandId, playerTokenData.PlayerCode, recordOnRange);
+
+            var gameBalanceRecords = queryService.QueryAsync(query);
+
+            var paging = new Paging<GameBalanceInfosViewModel>();
+
+            if (!string.IsNullOrWhiteSpace(pageableRequest.SortBy))
+            {
+                paging.SortByPropertyName(pageableRequest.SortBy, pageableRequest.IsDesc);
+            }
+
+            if (pageableRequest.ShowAll)
+            {
+                return new PagedResponse<GameBalanceInfosViewModel>
+                {
+                    TotalCount = await gameBalanceRecords.CountAsync().ConfigureAwait(false),
+                    Items = await gameBalanceRecords
+                        .Select(x => new GameBalanceInfosViewModel(x))
+                        .ApplyOrderBy(paging)
+                        .ToArrayAsync()
+                        .ConfigureAwait(false)
+                };
+            }
+
+            paging.Page = pageableRequest.Page;
+            paging.RowCount = pageableRequest.Rows;
+
+            return new PagedResponse<GameBalanceInfosViewModel>()
+            {
+                TotalCount = await gameBalanceRecords.CountAsync().ConfigureAwait(false),
+                Items = await gameBalanceRecords
+                    .Select(x => new GameBalanceInfosViewModel(x))
+                    .ApplyOrderBy(paging)
+                    .ApplyPaging(paging)
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
+            };
+        }
+
         /// <summary>
         /// Transfer wallet fund in(GP -> Tgs)
         /// </summary>
@@ -108,60 +162,6 @@ namespace TGS.Apis.OperatorApi.Controllers
             await submitGameBalanceFundOutCommandService
                 .ExecuteAsync(command)
                 .ConfigureAwait(false);
-        }
-
-        [HttpGet("list")]
-        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagedResponse<GameBalanceInfosViewModel>> GetGameBalanceInfosAsync(
-            [FromServices] IQueryService<GetGameBalanceInfosQuery, GameBalanceRecord> queryService,
-            [FromQuery] GetGameBalanceInfosRequest request,
-            [FromQuery] PageableRequest pageableRequest)
-        {
-            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var recordOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
-
-            if (request.BeginRecordOn != null && request.EndRecordOn != null)
-                recordOnRange = (request.BeginRecordOn.Value, request.EndRecordOn.Value);
-
-            var query = new GetGameBalanceInfosQuery(brandId, playerTokenData.PlayerCode, recordOnRange);
-
-            var gameBalanceRecords = queryService.QueryAsync(query);
-
-            var paging = new Paging<GameBalanceInfosViewModel>();
-
-            if (!string.IsNullOrWhiteSpace(pageableRequest.SortBy))
-            {
-                paging.SortByPropertyName(pageableRequest.SortBy, pageableRequest.IsDesc);
-            }
-
-            if (!pageableRequest.ShowAll)
-            {
-                return new PagedResponse<GameBalanceInfosViewModel>
-                {
-                    TotalCount = await gameBalanceRecords.CountAsync().ConfigureAwait(false),
-                    Items = await gameBalanceRecords
-                        .Select(x => new GameBalanceInfosViewModel(x))
-                        .ApplyOrderBy(paging)
-                        .ToArrayAsync()
-                        .ConfigureAwait(false)
-                };
-            }
-
-            paging.Page = pageableRequest.Page;
-            paging.RowCount = pageableRequest.Rows;
-
-            return new PagedResponse<GameBalanceInfosViewModel>()
-            {
-                TotalCount = await gameBalanceRecords.CountAsync().ConfigureAwait(false),
-                Items = await gameBalanceRecords
-                    .Select(x => new GameBalanceInfosViewModel(x))
-                    .ApplyOrderBy(paging)
-                    .ApplyPaging(paging)
-                    .ToArrayAsync()
-                    .ConfigureAwait(false)
-            };
         }
     }
 }
