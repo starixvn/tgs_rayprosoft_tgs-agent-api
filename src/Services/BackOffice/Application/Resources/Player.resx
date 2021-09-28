@@ -156,4 +156,7 @@
   <data name="BrandEmailDuplicate" xml:space="preserve">
     <value>Email is existed.</value>
   </data>
+  <data name="PhoneRequired" xml:space="preserve">
+    <value>Phone is required.</value>
+  </data>
 </root>

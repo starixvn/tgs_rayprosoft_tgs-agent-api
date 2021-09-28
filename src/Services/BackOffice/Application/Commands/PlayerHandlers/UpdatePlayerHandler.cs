@@ -72,6 +72,11 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.BrandEmailDuplicate);
             }
 
+            if (player.Phone.IsNotNullOrEmpty() && request.Phone.IsNullOrEmpty())
+            {
+                return CreateInvalidResponse<MessageResponse>(Player.PhoneRequired);
+            }
+
             await _service.UpdatePlayerAsync(player, request);
 
             return CreateValidResponse<MessageResponse>();
