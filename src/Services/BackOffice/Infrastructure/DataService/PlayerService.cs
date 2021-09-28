@@ -87,6 +87,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 player.Email = request.Email;
                 player.QQ = request.QQ;
                 player.Wechat = request.Wechat;
+                player.PhoneAuthentication = player.Phone.IsNotNullOrEmpty();
             }
 
             if (request.Type == updatePlayerType[2])
