@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.LicenseeMarket;
-using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Report
 {
@@ -20,7 +19,7 @@ namespace TGS.Apis.BackendOffice.Controllers.Report
 
         [HttpGet]
         [Description("Get licensee market report")]
-        public Task<PagedResponse<LicenseeMarketModel>> GetLicenseeMarketsAsync([FromQuery] GetLicenseeMarketsRequest request) =>
+        public Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync([FromQuery] GetLicenseeMarketsRequest request) =>
             _client.GetLicenseeMarketsAsync(request);
     }
 }

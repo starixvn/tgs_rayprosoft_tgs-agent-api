@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace TGS.Services.Report.Application.Models.LicenseeMarket
+namespace TGS.Clients.Report.Client.Models.LicenseeMarket
 {
-    public class LicenseeMarketModel
+    public class LicenseeMarketTotalModel
     {
-        public DateTimeOffset ReportDate { get; set; }
+        public string CurrencyCode { get; set; }
         public int RegisteredCount { get; set; }
         public int FirstFundInCount { get; set; }
         public decimal DepositAmount { get; set; }

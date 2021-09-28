@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using TGS.Core.Models.Messages;
 using TGS.Services.Report.Application.Models.LicenseeMarket;
 
 namespace TGS.Apis.ReportApi.Controllers
@@ -20,7 +19,7 @@ namespace TGS.Apis.ReportApi.Controllers
 
         [HttpGet]
         [Description("Get licensee markets")]
-        public Task<PagedResponse<LicenseeMarketModel>> GetLicenseeMarketAsync([FromQuery] GetLicenseeMarketsRequest request) =>
+        public Task<LicenseeMarketsResponse> GetLicenseeMarketAsync([FromQuery] GetLicenseeMarketsRequest request) =>
             _mediator.Send(request);
     }
 }

@@ -42,7 +42,7 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
 
-        Task<PagedResponse<LicenseeMarketModel>> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
+        Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request);
 
         Task<Stream> ExportMarketsAsync(ExportMarketsRequest request);
 
@@ -211,13 +211,12 @@ namespace TGS.Clients.Report.Client
                 options: new() { PropertyNameCaseInsensitive = true });
         }
 
-        public async Task<PagedResponse<LicenseeMarketModel>> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request)
+        public async Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request)
         {
             var prefix = $"Report.LicenseeId.{request.LicenseeId}.GetMarkets";
             var path = ClientPath.AppendWithProperties("/api/LicenseeMarketReport?", request);
 
-            return await ExecuteJsonRequestAsync<GetLicenseeMarketsRequest, PagedResponse<LicenseeMarketModel>
-            >(
+            return await ExecuteJsonRequestAsync<GetLicenseeMarketsRequest, LicenseeMarketsResponse>(
                 HttpMethod.Get,
                 path, request, logPrefix: prefix,
                 options: new() { PropertyNameCaseInsensitive = true });
