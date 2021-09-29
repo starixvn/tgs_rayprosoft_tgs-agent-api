@@ -138,6 +138,10 @@ namespace TGS.Apis.TgsApi.GameProviders.TCG.Services
                 foreach (var data in response.Datas)
                 {
                     var (roundsData, roundsDetail) = await _gameRoundsProcessor.GetExternalRoundIdByExternalGameIdAsync(data.OrderNum, data.Username, gameProviderId, externalGameId).ConfigureAwait(false);
+                    if (roundsData == null || roundsDetail == null)
+                    {
+                        continue;
+                    }
                     roundsDetail.AdditionalData = _json.SerializeToString(data);
                     await _gameRoundsProcessor.UpdateRoundDetailAsync(roundsDetail).ConfigureAwait(false);
                 }
