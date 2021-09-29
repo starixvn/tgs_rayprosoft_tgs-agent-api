@@ -3562,11 +3562,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("BetLimitId")
                         .HasDatabaseName("ix_players_bet_limit_id");
 
-                    b.HasIndex("BrandId")
-                        .HasDatabaseName("ix_players_brand_id");
-
                     b.HasIndex("VipId")
                         .HasDatabaseName("ix_players_vip_id");
+
+                    b.HasIndex("BrandId", "AreaCode", "Phone")
+                        .IsUnique()
+                        .HasDatabaseName("ux_players_brand_phone");
 
                     b.ToTable("players");
                 });
