@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestPlatform.Common.Utilities;
 using Moq;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs.Models;
@@ -159,7 +160,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var sut = new CommitPlayerInitPhoneService(
                 moqValidateCodeOperator.Object,
                 moqPlayerRepository.Object,
-                moqPlayerOperations.Object,
                 moqCacheManager.Object);
 
             var validateCode = "123456";
@@ -188,7 +188,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var sut = new CommitPlayerInitPhoneService(
                 moqValidateCodeOperator.Object,
                 moqPlayerRepository.Object,
-                moqPlayerOperations.Object,
                 moqCacheManager.Object);
 
             var playerCode = "testPlayerCode";
@@ -211,13 +210,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             await sut.ExecuteAsync(command);
 
-            moqPlayerOperations
-                .Verify(
-                    fake => fake.SetPhoneAsync(
-                        It.Is<string>(x => x == playerCode),
-                        It.Is<string>(x => x == phone),
-                        It.IsAny<DateTimeOffset>()),
-                    Times.Exactly(1));
+            moqPlayerRepository.Verify(
+                fake => fake.SetPlayerPhoneAsync(
+                    It.Is<string>(x => x == playerCode),
+                    It.Is<string>(x => x == areaCode),
+                    It.Is<string>(x => x == phone)),
+                Times.Exactly(1));
 
             moqPlayerRepository.Verify(
                 fake => fake.UpdatePlayerStatusAsync(
