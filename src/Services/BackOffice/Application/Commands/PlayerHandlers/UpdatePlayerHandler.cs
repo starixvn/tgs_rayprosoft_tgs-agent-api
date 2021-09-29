@@ -26,7 +26,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             _agentService = agentService;
         }
 
-        public override async Task<MessageResponse> Handle(UpdatePlayerRequest request,
+        public override async Task<MessageResponse> Handle(
+            UpdatePlayerRequest request,
             CancellationToken cancellationToken)
         {
             var updatePlayerType = new[]
@@ -72,7 +73,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.BrandEmailDuplicate);
             }
 
-            if (player.Phone.IsNotNullOrEmpty() && request.Phone.IsNullOrEmpty())
+            if (player.Phone.IsNotNullOrEmpty() && request.Phone.IsNullOrEmpty() && request.Type == updatePlayerType[1])
             {
                 return CreateInvalidResponse<MessageResponse>(Player.PhoneRequired);
             }
