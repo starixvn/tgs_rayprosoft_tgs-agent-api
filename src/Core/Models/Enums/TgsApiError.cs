@@ -21,6 +21,7 @@
         GameBalanceFundOutFailed = 209,
         UserBanned = 210,
         AgentNotFound = 211,
+        PhoneNumberRequired = 212,
 
         InvalidGameAction = 301,
         TransactionIdNotFound = 302,
