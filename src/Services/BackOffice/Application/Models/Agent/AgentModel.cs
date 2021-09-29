@@ -34,5 +34,6 @@ namespace TGS.Services.BackOffice.Application.Models.Agent
         public int TeamNumber { get; set; }
         public AgentBankModel[] Banks { get; set; }
         public int TotalCount { get; set; }
+        public AgentDividendConditionModel[] AgentDividendConditions { get; set; }
     }
 }
