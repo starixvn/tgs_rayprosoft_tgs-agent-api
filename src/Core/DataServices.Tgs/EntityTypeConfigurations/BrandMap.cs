@@ -73,6 +73,10 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.LogoInfo)
                 .HasColumnType(ColumnTypes.Jsonb);
 
+            builder.Property(c => c.PlatformCharge)
+                .HasPrecision(9, 6)
+                .IsRequired();
+
             builder.HasOne(c => c.Licensee)
                 .WithMany(c => c.Brands)
                 .HasForeignKey(c => c.LicenseeId)
