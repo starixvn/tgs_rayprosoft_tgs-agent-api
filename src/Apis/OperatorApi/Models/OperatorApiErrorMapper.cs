@@ -9,6 +9,7 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.BrandPayment;
 using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
+using PlayerNotFoundException = TGS.Core.Models.Exceptions.PlayerNotFoundException;
 
 namespace TGS.Apis.OperatorApi.Models
 {
@@ -21,29 +22,24 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.InvalidOrExpiredPlayerToken] = "InvalidOrExpiredPlayerToken",
                 [TgsApiError.InvalidCaptcha] = "InvalidCaptcha",
                 [TgsApiError.ClientIdNotFound] = "ClientIdNotFound",
-
                 [TgsApiError.PlayerNotFound] = "PlayerNotFound",
                 [TgsApiError.UserBlocked] = "UserBlocked",
                 [TgsApiError.CountryRestricted] = "CountryRestricted",
                 [TgsApiError.CurrencyMismatch] = "CurrencyMismatch",
                 [TgsApiError.InsufficientFunds] = "InsufficientFunds",
                 [TgsApiError.InvalidInvitationCode] = "InvalidInvitationCode",
-
                 [TgsApiError.InvalidGameAction] = "InvalidGameAction",
                 [TgsApiError.TransactionIdNotFound] = "TransactionIdNotFound",
                 [TgsApiError.DuplicateTransaction] = "DuplicateTransaction",
                 [TgsApiError.InvalidAmount] = "InvalidAmount",
-
                 [TgsApiError.LoginFail] = "LoginFail",
                 [TgsApiError.InvalidArguments] = "InvalidArguments",
                 [TgsApiError.IncorrectFormat] = "IncorrectFormat",
                 [TgsApiError.UnderMaintenance] = "UnderMaintenance",
                 [TgsApiError.InvalidStatus] = "InvalidStatus",
-
                 [TgsApiError.SystemError] = "SystemError",
                 [TgsApiError.OperationNotAllowed] = "OperationNotAllowed",
                 [TgsApiError.ProviderApiError] = "ProviderApiError",
-
                 [TgsApiError.ValidateCodeNotVerify] = "ValidateCodeNotVerify",
                 [TgsApiError.EmailNotVerify] = "EmailNotVerify",
                 [TgsApiError.InsufficientBucket] = "InsufficientBucket",
@@ -52,7 +48,9 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.GameBalanceFundOutFailed] = "GameBalanceFundOutFailed",
                 [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
                 [TgsApiError.UserBanned] = "UserBanned",
-                [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate"
+                [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
+                [TgsApiError.MaticPayDepositNeedRealName] = "MaticPayDepositNeedRealName",
+                [TgsApiError.PhoneNumberRequired] = "PhoneNumberRequired"
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -62,29 +60,24 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.InvalidOrExpiredPlayerToken] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.InvalidCaptcha] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.ClientIdNotFound] = StatusCodes.Status401Unauthorized,
-
                 [TgsApiError.PlayerNotFound] = StatusCodes.Status401Unauthorized,
                 [TgsApiError.UserBlocked] = StatusCodes.Status403Forbidden,
                 [TgsApiError.CountryRestricted] = StatusCodes.Status403Forbidden,
                 [TgsApiError.CurrencyMismatch] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.InsufficientFunds] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.InvalidInvitationCode] = StatusCodes.Status500InternalServerError,
-
                 [TgsApiError.InvalidGameAction] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.TransactionIdNotFound] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.DuplicateTransaction] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.InvalidAmount] = StatusCodes.Status500InternalServerError,
-
                 [TgsApiError.InvalidArguments] = StatusCodes.Status400BadRequest,
                 [TgsApiError.IncorrectFormat] = StatusCodes.Status400BadRequest,
                 [TgsApiError.UnderMaintenance] = StatusCodes.Status503ServiceUnavailable,
                 [TgsApiError.InvalidStatus] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.LoginFail] = StatusCodes.Status400BadRequest,
-
                 [TgsApiError.SystemError] = StatusCodes.Status500InternalServerError,
                 [TgsApiError.OperationNotAllowed] = StatusCodes.Status405MethodNotAllowed,
                 [TgsApiError.ProviderApiError] = StatusCodes.Status500InternalServerError,
-
                 [TgsApiError.ValidateCodeNotVerify] = StatusCodes.Status406NotAcceptable,
                 [TgsApiError.PlayerNotFound] = StatusCodes.Status404NotFound,
                 [TgsApiError.EmailNotVerify] = StatusCodes.Status400BadRequest,
@@ -94,7 +87,9 @@ namespace TGS.Apis.OperatorApi.Models
                 [TgsApiError.GameBalanceFundOutFailed] = StatusCodes.Status400BadRequest,
                 [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
                 [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
-                [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError
+                [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
+                [TgsApiError.MaticPayDepositNeedRealName] = StatusCodes.Status400BadRequest,
+                [TgsApiError.PhoneNumberRequired] = StatusCodes.Status400BadRequest
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -105,17 +100,14 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(PlayerLoginExpiredException)] = TgsApiError.InvalidOrExpiredPlayerToken,
                 [typeof(InvalidCaptchaException)] = TgsApiError.InvalidCaptcha,
                 [typeof(ClientIdNotFoundException)] = TgsApiError.ClientIdNotFound,
-
-                [typeof(Core.Models.Exceptions.PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
+                [typeof(PlayerNotFoundException)] = TgsApiError.PlayerNotFound,
                 [typeof(PlayerDisabledException)] = TgsApiError.UserBlocked,
                 [typeof(CountryRestrictedException)] = TgsApiError.CountryRestricted,
                 [typeof(CurrencyNotMatchingException)] = TgsApiError.CurrencyMismatch,
                 [typeof(PlayerHasInsufficientFundsException)] = TgsApiError.InsufficientFunds,
                 [typeof(InvalidInvitationCodeException)] = TgsApiError.InvalidInvitationCode,
-
                 [typeof(InvalidGameActionException)] = TgsApiError.InvalidGameAction,
                 [typeof(InvalidAmountException)] = TgsApiError.InvalidAmount,
-
                 [typeof(ArgumentException)] = TgsApiError.InvalidArguments,
                 [typeof(ModelBindingException)] = TgsApiError.InvalidArguments,
                 [typeof(FormatException)] = TgsApiError.IncorrectFormat,
@@ -123,7 +115,6 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(GameProviderUnderMaintenanceException)] = TgsApiError.UnderMaintenance,
                 [typeof(GameUnderMaintenanceException)] = TgsApiError.UnderMaintenance,
                 [typeof(InvalidStatusException)] = TgsApiError.InvalidStatus,
-
                 [typeof(InvalidOperationException)] = TgsApiError.SystemError,
                 [typeof(OperationNotAllowedException)] = TgsApiError.OperationNotAllowed,
                 [typeof(GameProviderApiErrorException)] = TgsApiError.ProviderApiError,
@@ -137,7 +128,9 @@ namespace TGS.Apis.OperatorApi.Models
                 [typeof(LoginFailException)] = TgsApiError.LoginFail,
                 [typeof(FavoriteCountFullException)] = TgsApiError.FavoriteFull,
                 [typeof(UserBannedException)] = TgsApiError.UserBanned,
-                [typeof(BrandEmailDuplicateException)] = TgsApiError.BrandEmailDuplicate
+                [typeof(BrandEmailDuplicateException)] = TgsApiError.BrandEmailDuplicate,
+                [typeof(MaticPayDepositNeedRealNameException)] = TgsApiError.MaticPayDepositNeedRealName,
+                [typeof(PlayerPhoneRequiredException)] = TgsApiError.PhoneNumberRequired
             };
 
         public bool CanProcess(Exception exception)
@@ -179,8 +172,7 @@ namespace TGS.Apis.OperatorApi.Models
             if (_TgsApiErrorByException.TryGetValue(type, out var errorType)
                 && _ErrorCodeMessageIdMap.TryGetValue(errorType, out var messageKey))
                 return messageKey;
-            else
-                return _ErrorCodeMessageIdMap[TgsApiError.SystemError];
+            return _ErrorCodeMessageIdMap[TgsApiError.SystemError];
         }
     }
 }

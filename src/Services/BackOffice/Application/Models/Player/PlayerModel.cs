@@ -16,13 +16,17 @@ namespace TGS.Services.BackOffice.Application.Models.Player
         public decimal Balance { get; init; }
         public PlayerStatus Status { get; init; }
         public string StatusName { get; init; }
-
+        public string AreaCode { get; init; }
         public string Phone { get; init; }
         public string Email { get; init; }
         public string QQ { get; init; }
         public string WeChat { get; init; }
         public decimal WageringRequirement { get; set; }
         public BankModel[] Banks { get; init; }
+
+        public string RegisterIp { get; init; }
+        public string LastLoginIp { get; init; }
+        public DateTimeOffset? LastLoginOn { get; init; }
 
         public class BankModel
         {

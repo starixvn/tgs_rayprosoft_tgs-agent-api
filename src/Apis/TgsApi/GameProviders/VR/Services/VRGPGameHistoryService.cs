@@ -123,7 +123,7 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
                     Rows = rows
                 };
 
-                var response = await _client.GetAPIAsync<VRGameRecordRequest, VRGameRecordResponse>(brandMerchant, GPAction.GameRecord, data);
+                var response = await _client.GetGameRecordAsync(brandMerchant, data);
 
                 if (response.Records.Length == 0)
                 {

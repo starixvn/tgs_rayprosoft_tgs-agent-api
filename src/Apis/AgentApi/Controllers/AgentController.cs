@@ -71,7 +71,7 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         /// <summary>
-        ///     Get an agent information
+        /// Get an agent information
         /// </summary>
         [HttpGet("info")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -89,7 +89,7 @@ namespace TGS.Apis.AgentApi.Controllers
 
             if (agentInfo == null)
             {
-                throw new PlayerNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
+                throw new AgentNotFoundException(agentId.ToString(), Resources.Agent.NotFound);
             }
 
             return new GetAgentResponse
@@ -113,7 +113,7 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         /// <summary>
-        ///     Agent login
+        /// Agent login
         /// </summary>
         [HttpPost]
         [Route("login")]

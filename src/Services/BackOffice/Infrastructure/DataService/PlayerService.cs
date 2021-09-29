@@ -19,14 +19,14 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<Player, bool>> predicate);
 
         Task<Player> GetPlayerAsync(Expression<Func<Player, bool>> predicate,
-                    Func<IQueryable<Player>, IQueryable<Player>> preQuery = null);
+            Func<IQueryable<Player>, IQueryable<Player>> preQuery = null);
 
         IQueryable<PlayerAuditLog> GetPlayerOperationQueries(
             Func<IQueryable<PlayerAuditLog>, IQueryable<PlayerAuditLog>> preQuery = null,
             bool tracking = false);
 
         IQueryable<Player> GetPlayerQueries(
-                    Func<IQueryable<Player>, IQueryable<Player>> preQuery = null,
+            Func<IQueryable<Player>, IQueryable<Player>> preQuery = null,
             bool tracking = false);
 
         Task UpdatePlayerAsync(Player player, UpdatePlayerRequest request);
@@ -66,7 +66,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
             using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
 
-            var updatePlayerType = new[] { "info", "contact", "password" };
+            var updatePlayerType = new[]
+            {
+                "info",
+                "contact",
+                "password"
+            };
 
             if (request.Type == updatePlayerType[0])
             {
@@ -77,10 +82,12 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
 
             if (request.Type == updatePlayerType[1])
             {
+                player.AreaCode = request.AreaCode;
                 player.Phone = request.Phone;
                 player.Email = request.Email;
                 player.QQ = request.QQ;
                 player.Wechat = request.Wechat;
+                player.PhoneAuthentication = player.Phone.IsNotNullOrEmpty();
             }
 
             if (request.Type == updatePlayerType[2])
@@ -141,7 +148,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 ModuleName = "Player",
                 CreatedByUsername = playerCode,
                 CreatedOn = DateTimeOffset.Now,
-                Operation = $"Update Player AccumulatedDeposit",
+                Operation = "Update Player AccumulatedDeposit",
                 Username = playerCode
             };
 

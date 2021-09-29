@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Amazon.S3.Model;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
@@ -19,7 +18,6 @@ using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Game;
 using TGS.Services.Operator.Services.GameBalance;
 using TGS.ServiceUtility;
-using Tag = TGS.Apis.OperatorApi.Models.Messages.Tag;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -146,7 +144,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// get game launch url via game id
+        ///     get game launch url via game id
         /// </summary>
         [HttpPost("geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -157,6 +155,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
             [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
             [FromServices] IGetService<GetGameUrlQuery, GameUrlInfo> getGameUrlQueryService,
+            [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
             [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
             [FromBody] GetGameUrlRequest request)
         {
@@ -191,13 +190,22 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
+            await fundInAllService
+                .ExecuteAsync(new FundInAllGameBalanceCommand(
+                    cachedPlayer.BrandId,
+                    playerTokenData.PlayerCode,
+                    subGp.Code))
+                .ConfigureAwait(false);
+
             if (subGp.IsTransferWallet)
+            {
                 await fundService
                     .ExecuteAsync(new FundOutBeforeEnterGameCommand(
                         cachedPlayer.BrandId,
                         playerTokenData.PlayerCode,
                         subGp.Code))
                     .ConfigureAwait(false);
+            }
 
             return new GetGameUrlResponse
             {
@@ -208,7 +216,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         }
 
         /// <summary>
-        /// get game launch url for lobby type game.
+        ///     get game launch url for lobby type game.
         /// </summary>
         [HttpPost("lobby/geturl")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -218,6 +226,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IBrandLanguageCodeMapper brandLanguageCodeMapper,
             [FromServices] IGetService<GetGpCodeQuery, BrandSubGameProviderInfo> getGpCodeService,
             [FromServices] IGetService<GetLobbyGameUrlQuery, LobbyGameUrlInfo> getLobbyGameUrlQueryService,
+            [FromServices] ICommandService<FundInAllGameBalanceCommand> fundInAllService,
             [FromServices] ICommandService<FundOutBeforeEnterGameCommand> fundService,
             [FromBody] GetLobbyGameUrlRequest request)
         {
@@ -252,13 +261,23 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
+            await fundInAllService
+                .ExecuteAsync(new FundInAllGameBalanceCommand(
+                    cachedPlayer.BrandId,
+                    playerTokenData.PlayerCode,
+                    subGp.Code))
+                .ConfigureAwait(false);
+
+
             if (subGp.IsTransferWallet)
+            {
                 await fundService
                     .ExecuteAsync(new FundOutBeforeEnterGameCommand(
                         cachedPlayer.BrandId,
                         playerTokenData.PlayerCode,
                         subGp.Code))
                     .ConfigureAwait(false);
+            }
 
             return new GetGameUrlResponse
             {

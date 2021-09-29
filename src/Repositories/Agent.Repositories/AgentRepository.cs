@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +64,20 @@ namespace TGS.Agent.Repositories
             agent.UpdatedOn = updatedOn;
 
             await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
+        {
+            var rows = _tgsRepository.SystemLocalizations.AsQueryable()
+                .Where(loc => loc.SystemCode == "AGENT-API" && loc.CultureCode == cultureCode)
+                .Select(loc => new
+                {
+                    MessageId = loc.MessageId,
+                    Text = loc.Text
+                });
+
+            return rows.ToAsyncEnumerable()
+                .Select(item => new KeyValuePair<string, string>(item.MessageId, item.Text));
         }
     }
 }

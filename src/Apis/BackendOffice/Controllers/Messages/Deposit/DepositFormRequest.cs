@@ -11,6 +11,9 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
         [FromQuery(Name = "channel")]
         public string ChannelName { get; init; }
 
+        [FromQuery(Name = "thirdOrderNo")]
+        public string ThirdPartyOrderNo { get; init; }
+
         [FromQuery(Name = "method")]
         public Guid? PaymentMethodId { get; init; }
 
@@ -28,5 +31,6 @@ namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 
         [FromQuery(Name = "eu")]
         public DateTimeOffset? EndUpdateOn { get; init; }
+
     }
 }

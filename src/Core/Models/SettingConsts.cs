@@ -33,6 +33,8 @@ namespace TGS.Core.Models
             public static readonly string WGSports = string.Format(Template, Consts.GameProvider.WGSports);
             public static readonly string WGHorse = string.Format(Template, Consts.GameProvider.WGHorse);
             public static readonly string WMCasino = string.Format(Template, Consts.GameProvider.WMCasino);
+            public static readonly string TCG = string.Format(Template, Consts.GameProvider.TCG);
+            public static readonly string Card365 = string.Format(Template, Consts.GameProvider.Card365);
         }
     }
 }

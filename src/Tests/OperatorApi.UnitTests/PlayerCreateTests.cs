@@ -1,24 +1,20 @@
 using System;
 using System.Threading.Tasks;
 using FluentValidation.TestHelper;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Validators;
-using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
-using TGS.Services.Operations.Commands;
-using TGS.Services.Operations.Queries;
 using TGS.Services.Operations.Validators;
+using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
 
-namespace OperatorApi.UnitTests
+namespace TGS.Tests.OperatorApi.UnitTests
 {
     public class PlayerCreateTests
     {
@@ -35,12 +31,24 @@ namespace OperatorApi.UnitTests
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
 
             fakeAgentOperations
                 .GetAgentByInvitationCodeAsync(
                     Arg.Is(brandId),
                     Arg.Is(invitationCode))
-                .Returns(new Agent());
+                .Returns(Task.FromResult(new Agent()));
+
+            fakeSysRepository.GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(ValueTask.FromResult(
+                    new BrandInfo(
+                        brandId,
+                        "code",
+                        new Uri("http://image.com/img01"),
+                        new Uri("http://image.com/img02"),
+                        new Uri("http://image.com/img03"),
+                        false)));
 
             var sut = new CreatePlayerCommandService(
                 fakeStatusValidator,
@@ -48,7 +56,9 @@ namespace OperatorApi.UnitTests
                 fakePasswordHandler,
                 fakeBrandCurrencyCodeMapper,
                 fakeBrandOperations,
-                fakeAgentOperations);
+                fakeAgentOperations,
+                fakePlayerRepository,
+                fakeSysRepository);
 
             var query = new CreatePlayerCommand(
                 brandId,
@@ -56,10 +66,11 @@ namespace OperatorApi.UnitTests
                 "password",
                 "CNY",
                 invitationCode,
-                false);
+                false,
+                "::1");
 
             // act
-            var actual = await sut.GetAsync(query, default);
+            var actual = await sut.GetAsync(query);
 
             // assert
             Assert.IsTrue(actual.IsNew);
@@ -71,26 +82,25 @@ namespace OperatorApi.UnitTests
             // arrange
             var brandId = Guid.NewGuid();
 
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-
-            var tgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
-
-            var fakeFuncWalletQueries = Substitute.For<Func<IWalletQueries>>();
-            var fakeFuncPlayerQueries = Substitute.For<Func<IPlayerQueries>>();
-            var fakePlayerCommands = Substitute.For<IPlayerCommands>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-
-            var BrandQueries = new BrandQueries(tgsRepository);
-
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
 
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
+
+            fakeSysRepository.GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(ValueTask.FromResult(
+                    new BrandInfo(
+                        brandId,
+                        "code",
+                        new Uri("http://image.com/img01"),
+                        new Uri("http://image.com/img02"),
+                        new Uri("http://image.com/img03"),
+                        false)));
 
             var sut = new CreatePlayerCommandService(
                 fakeStatusValidator,
@@ -98,14 +108,16 @@ namespace OperatorApi.UnitTests
                 fakePasswordHandler,
                 fakeBrandCurrencyCodeMapper,
                 fakeBrandOperations,
-                fakeAgentOperations);
+                fakeAgentOperations,
+                fakePlayerRepository,
+                fakeSysRepository);
 
             var password = "password";
 
-            var query = new CreatePlayerCommand(brandId, "username", password, "CNY", null, false);
+            var query = new CreatePlayerCommand(brandId, "username", password, "CNY", null, false, "::1");
 
             // act
-            var actual = await sut.GetAsync(query, default);
+            var actual = await sut.GetAsync(query);
             // assert
             Assert.IsTrue(actual.IsNew);
         }
@@ -122,6 +134,18 @@ namespace OperatorApi.UnitTests
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
+
+            fakeSysRepository.GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(ValueTask.FromResult(
+                    new BrandInfo(
+                        brandId,
+                        "code",
+                        new Uri("http://image.com/img01"),
+                        new Uri("http://image.com/img02"),
+                        new Uri("http://image.com/img03"),
+                        false)));
 
             var sut = new CreatePlayerCommandService(
                 fakeStatusValidator,
@@ -129,17 +153,20 @@ namespace OperatorApi.UnitTests
                 fakePasswordHandler,
                 fakeBrandCurrencyCodeMapper,
                 fakeBrandOperations,
-                fakeAgentOperations);
+                fakeAgentOperations,
+                fakePlayerRepository,
+                fakeSysRepository);
+
             var password = "password";
             var invitationCode = "NonExistentCode";
 
-            var query = new CreatePlayerCommand(brandId, "username", password, "CNY", invitationCode, false);
+            var query = new CreatePlayerCommand(brandId, "username", password, "CNY", invitationCode, false, "::1");
 
-            Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query, default));
+            Assert.ThrowsAsync<InvalidInvitationCodeException>(async () => await sut.GetAsync(query));
         }
 
         [Test]
-        public async Task Register_Player_With_Other_Brand_InvitationCode_Should_Throw_Error()
+        public void Register_Player_With_Other_Brand_InvitationCode_Should_Throw_Error()
         {
             var brandId = Guid.NewGuid();
             var invitationCode = "6rd4mq";
@@ -150,12 +177,24 @@ namespace OperatorApi.UnitTests
             var fakeBrandCurrencyCodeMapper = Substitute.For<IBrandCurrencyCodeMapper>();
             var fakeAgentOperations = Substitute.For<IAgentOperations>();
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
 
             fakeAgentOperations
                 .GetAgentByInvitationCodeAsync(
                     Arg.Is(brandId),
                     Arg.Is(invitationCode))
-                .Returns(default(Agent));
+                .Returns(Task.FromResult(default(Agent)));
+
+            fakeSysRepository.GetBrandInfoAsync(Arg.Is(brandId))
+                .Returns(ValueTask.FromResult(
+                    new BrandInfo(
+                        brandId,
+                        "code",
+                        new Uri("http://image.com/img01"),
+                        new Uri("http://image.com/img02"),
+                        new Uri("http://image.com/img03"),
+                        false)));
 
             var sut = new CreatePlayerCommandService(
                 fakeStatusValidator,
@@ -163,7 +202,9 @@ namespace OperatorApi.UnitTests
                 fakePasswordHandler,
                 fakeBrandCurrencyCodeMapper,
                 fakeBrandOperations,
-                fakeAgentOperations);
+                fakeAgentOperations,
+                fakePlayerRepository,
+                fakeSysRepository);
 
             var query = new CreatePlayerCommand(
                 brandId,
@@ -171,11 +212,12 @@ namespace OperatorApi.UnitTests
                 "password",
                 "CNY",
                 invitationCode,
-                false);
+                false,
+                "::1");
 
             // act
             Assert.ThrowsAsync<InvalidInvitationCodeException>(
-                async () => await sut.GetAsync(query, default));
+                async () => await sut.GetAsync(query));
         }
 
         [Test]

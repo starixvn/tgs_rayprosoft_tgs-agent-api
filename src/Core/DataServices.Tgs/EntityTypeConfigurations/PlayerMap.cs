@@ -63,6 +63,9 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
 
             builder.Property(c => c.VipId);
 
+            builder.Property(c => c.AreaCode)
+                .HasMaxLength(10);
+
             builder.Property(c => c.Phone)
                 .HasMaxLength(32);
 

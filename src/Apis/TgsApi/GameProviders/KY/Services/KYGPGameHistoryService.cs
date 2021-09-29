@@ -63,31 +63,15 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 };
             }
 
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
-            var timestamp = date.ToUnixTimeMilliseconds();
+            var dateTimeOffset = DateTimeOffset.UtcNow.AddHours(+8);
 
             var data = new KYGameRecordRequest()
             {
-                Action = KYUtility.GetAction(GPAction.GameRecord) ?? -1,
                 StartTime = source.StartTime.ToUnixTimeMilliseconds(),
-                EndTime = source.EndTime.ToUnixTimeMilliseconds(),
+                EndTime = source.EndTime.ToUnixTimeMilliseconds()
             };
 
-            var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
-            var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
-
-            var apiKYRequest = new KYApiRequest()
-            {
-                Agent = agentId,
-                Timestamp = timestamp,
-                Param = param,
-                Key = key
-            };
-
-            var response = await _client.GetAPIAsync<KYGameRecordResponse>(brandMerchant.ApiRecordUrl, apiKYRequest);
-
+            var response = await _client.GetGameRecordAsync(brandMerchant, agentId, dateTimeOffset, data);
 
             var players = new Dictionary<string, (Player Player, Guid? GameProviderConfigurationId)>();
             var games = new Dictionary<int, CachedGame>();

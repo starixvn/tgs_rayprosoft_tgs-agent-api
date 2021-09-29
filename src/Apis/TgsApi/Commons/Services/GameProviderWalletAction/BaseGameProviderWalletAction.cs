@@ -93,33 +93,18 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 Description = string.Empty
             });
 
-
-
             #region 扣掉主錢包
             var wallet = await WalletExchangeAsync(player, amount * -1, TransactionTypes.GameProviderFundOut);
             #endregion
 
             var fundTransferStatus = wallet.Status;
 
-
             var orderId = default(string);
             if (fundTransferStatus == FundTransferTransactionStatus.Success)
             {
-                var (Success, OrderId, Balance) = await FundOutAsync(player, amount);
+                var (Success, OrderId, Balance) = await FundOutAsync(transactionGameProviderId.Value, player, amount);
                 fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
-                if (!Success)
-                {
-                    fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
-                    /*
-                    var checking = await CheckingOrderIdAsync(player, OrderId);
-                    if (checking.Checking && !string.IsNullOrEmpty(checking.OrderId))
-                    {
-                        fundTransferStatus = FundTransferTransactionStatus.Success;
-                        orderId = OrderId;
-                    }
-                    */
-                }
-                else
+                if (Success)
                 {
                     fundTransferStatus = FundTransferTransactionStatus.Success;
                     orderId = OrderId;
@@ -204,25 +189,13 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
                 Description = string.Empty
             });
 
-            var (Success, OrderId, Balance) = await FundInAsync(player, Math.Abs(request.Amount));
+            var (Success, OrderId, Balance) = await FundInAsync(transactionGameProviderId.Value, player, Math.Abs(request.Amount));
 
             FundTransferTransactionStatus fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
-            if (!Success)
-            {
-                fundTransferStatus = FundTransferTransactionStatus.FailureOnGameProvider;
-                /*
-                var checking = await CheckingOrderIdAsync(player, response.OrderId);
-                if (checking.Checking && !string.IsNullOrEmpty(checking.OrderId))
-                {
-                    fundTransferStatus = FundTransferTransactionStatus.Success;
-                }
-                */
-            }
-            else
+            if (Success)
             {
                 fundTransferStatus = FundTransferTransactionStatus.Success;
             }
-
 
             var transactionsId = default(Guid?);
             var postBalance = default(decimal?);
@@ -317,15 +290,12 @@ namespace TGS.Apis.TgsApi.Commons.Services.GameProviderWalletAction
 
         public abstract ValueTask<bool> CheckingAmountAsync(CachedPlayer player, decimal amount);
 
-        public abstract ValueTask<(bool Success, string OrderId, decimal Balance)> FundOutAsync(CachedPlayer player, decimal amount);
+        public abstract ValueTask<(bool Success, string OrderId, decimal? Balance)> FundOutAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount);
 
-        public abstract ValueTask<(bool Success, string OrderId, decimal Balance)> FundInAsync(CachedPlayer player, decimal amount);
-
-        public abstract ValueTask<(bool Checking, string OrderId)> CheckingOrderIdAsync(CachedPlayer player, string orderId);
+        public abstract ValueTask<(bool Success, string OrderId, decimal? Balance)> FundInAsync(Guid transactionGameProviderId, CachedPlayer player, decimal amount);
 
         public abstract ValueTask<(Guid GameProviderId, string GameProviderCode)> GetGameProviderAsync();
 
         public abstract ValueTask<(bool Success, decimal Balance)> GetGameProviderBalanceAsync(CachedPlayer player);
-
     }
 }

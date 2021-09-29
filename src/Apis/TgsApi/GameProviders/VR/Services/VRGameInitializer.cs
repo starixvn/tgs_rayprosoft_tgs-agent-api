@@ -61,9 +61,9 @@ namespace TGS.Apis.TgsApi.GameProviders.VR.Services
             {
                 PlayerCode = player.PlayerCode
             };
-            var response = await _client.GetAPIAsync<VRGetBalanceRequest, VRGetBalanceResponse>(brandMerchant, GPAction.GetBalance, dataGetBalance).ConfigureAwait(false);
+            var response = await _client.GetBalanceAsync(brandMerchant, dataGetBalance).ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(response.playerName) || response.balance == -1)
+            if (string.IsNullOrEmpty(response.PlayerName) || response.Balance == -1)
             {
                 await _gamePlayerCreate.CreatePlayerAsync(player).ConfigureAwait(false);
             }

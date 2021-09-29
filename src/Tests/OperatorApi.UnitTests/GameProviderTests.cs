@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Core.Models.Tokens;
@@ -32,7 +32,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeGameProviderRepository
                 .QueryAllSubGameProvidersAsync(Arg.Is(query.BrandId))
                 .Returns(
-                    new[]{
+                    new[]
+                    {
                         new BrandSubGameProviderInfo(
                             "SubGpCode",
                             "SubGpCode",
@@ -80,8 +81,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
             var fakeBrandLanguageCodeMapper = Substitute.For<IBrandLanguageCodeMapper>();
-            var fakeValidStatus = Substitute.For<IValidStatus<Status>>();
-            var fakeValidGameStatus = Substitute.For<IValidStatus<GameStatus>>();
             var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
 
             var sut = new GetGameProvidersQueryService(
@@ -89,8 +88,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 fakePlayerOperations,
                 fakeBrandLanguageCodeMapper,
                 fakeBrandOperations,
-                fakeValidStatus,
-                fakeValidGameStatus,
                 fakeGameProviderRepository);
 
             fakeBrandOperations.GetBrandGameProvidersAsync(brandId)
@@ -103,6 +100,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .QueryGameProvidersAsync();
             _ = fakeGameProviderRepository.Received(1)
                 .QuerySubGameProvidersAsync();
+            _ = fakeGameProviderRepository.Received(1)
+                .QueryAllGamesAsync(Arg.Any<Guid>(), Arg.Any<IEnumerable<GameStatus>>());
         }
     }
 }

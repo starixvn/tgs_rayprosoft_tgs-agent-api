@@ -2,6 +2,7 @@
 using TGS.Shared.Game.ApiClients.AllBet;
 using TGS.Shared.Game.ApiClients.AsiaGaming;
 using TGS.Shared.Game.ApiClients.BigGaming;
+using TGS.Shared.Game.ApiClients.Card365;
 using TGS.Shared.Game.ApiClients.Evolution;
 using TGS.Shared.Game.ApiClients.IMESports;
 using TGS.Shared.Game.ApiClients.JDB;
@@ -11,6 +12,7 @@ using TGS.Shared.Game.ApiClients.Saba;
 using TGS.Shared.Game.ApiClients.SBOBET;
 using TGS.Shared.Game.ApiClients.SexyGaming;
 using TGS.Shared.Game.ApiClients.Skywind;
+using TGS.Shared.Game.ApiClients.TCG;
 using TGS.Shared.Game.ApiClients.VR;
 using TGS.Shared.Game.ApiClients.WGHorse;
 using TGS.Shared.Game.ApiClients.WGSports;
@@ -21,18 +23,20 @@ namespace TGS.Shared.Game.ApiClients.Extensions
     public static class ServiceExtensions
     {
         /// <summary>
-        ///     Dependency Injection of Game.ApiClients, need to add following dependencies beforehand:
-        ///     1. AddApiClient() in Infrastructures.ApiClient ( if BaseApiClient is used )
+        /// Dependency Injection of Game.ApiClients, need to add following dependencies beforehand:
+        /// 1. AddApiClient() in Infrastructures.ApiClient ( if BaseApiClient is used )
         /// </summary>
         public static IServiceCollection AddGameApiClients(this IServiceCollection services)
         {
             services.AddHttpClient<ISBOApiClient, SBOApiClient>();
             services.AddHttpClient<IPragmaticPlayApiClient, PragmaticPlayApiClient>();
             services.AddHttpClient<IKYApiClient, KYApiClient>();
+            services.AddScoped<IKYUtility, KYUtility>();
             services.AddHttpClient<IJDBApiClient, JDBApiClient>();
             services.AddHttpClient<IAsiaGamingApiClient, AsiaGamingApiClient>();
             services.AddHttpClient<ISabaApiClient, SabaApiClient>();
             services.AddHttpClient<IVRApiClient, VRApiClient>();
+            services.AddScoped<IVRUtility, VRUtility>();
             services.AddHttpClient<IIMESportsApiClient, IMESportsApiClient>();
             services.AddHttpClient<IBigGamingApiClient, BigGamingApiClient>();
             services.AddHttpClient<ISexyGamingApiClient, SexyGamingApiClient>();
@@ -40,8 +44,15 @@ namespace TGS.Shared.Game.ApiClients.Extensions
             services.AddHttpClient<IAllBetApiClient, AllBetApiClient>();
             services.AddHttpClient<IEvolutionApiClient, EvolutionApiClient>();
             services.AddHttpClient<IWGSportsApiClient, WGSportsApiClient>();
+            services.AddScoped<IWGSportsUtility, WGSportsUtility>();
             services.AddHttpClient<IWGHorseApiClient, WGHorseApiClient>();
+            services.AddScoped<IWGHorseUtility, WGHorseUtility>();
             services.AddHttpClient<IWMCasinoApiClient, WMCasinoApiClient>();
+
+            services.AddHttpClient<ITCGApiClient, TCGApiClient>();
+            services.AddScoped<ITCGUtility, TCGUtility>();
+
+            services.AddHttpClient<ICard365ApiClient, Card365ApiClient>();
 
             return services;
         }

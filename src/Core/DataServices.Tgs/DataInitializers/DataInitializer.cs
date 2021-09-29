@@ -103,7 +103,9 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 new EvolutionGameProvider(env),
                 new WGSportsGameProvider(env),
                 new WGHorseGameProvider(env),
-                new WMCasinoGameProvider(env)
+                new WMCasinoGameProvider(env),
+                new TCGGameProvider(env),
+                new Card365GameProvider(env)
             };
         }
 
@@ -855,8 +857,16 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                 };
             }).ToArray();
 
-            var games = gameProviders.SelectMany(gp => gp.Games)
-                .Where(g => g.AvailableToBrand).Select((g, idx) => new BrandGame
+            var brandCurrencies = brand.Currencies.Select(b => b.Code);
+
+            var games = (from game in gameProviders.SelectMany(gp => gp.Games)
+                         let availableCurrencies =
+                             game.AvailableCurrencies.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                         where game.AvailableToBrand &&
+                             (availableCurrencies.Length == 0 ||
+                                 availableCurrencies.Any(curr => brandCurrencies.Contains(curr)))
+                         select game)
+                .Select((g, idx) => new BrandGame
                 {
                     Id = GuidExtensions.NewSequentialGuid(),
                     BrandId = brand.Id,

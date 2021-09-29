@@ -27,9 +27,9 @@ namespace TGS.Core.Models
         public static readonly IDictionary<HealthStatus, int> HealthCheckResultStatusCodes =
             new Dictionary<HealthStatus, int>
             {
-                {HealthStatus.Healthy, StatusCodes.Status200OK},
-                {HealthStatus.Unhealthy, StatusCodes.Status503ServiceUnavailable},
-                {HealthStatus.Degraded, StatusCodes.Status500InternalServerError}
+                { HealthStatus.Healthy, StatusCodes.Status200OK },
+                { HealthStatus.Unhealthy, StatusCodes.Status503ServiceUnavailable },
+                { HealthStatus.Degraded, StatusCodes.Status500InternalServerError }
             };
 
         public static GameType[] SportsGroup =
@@ -97,6 +97,8 @@ namespace TGS.Core.Models
             public const string WGSports = "WGFM";
             public const string WGHorse = "WGVIA";
             public const string WMCasino = "WM";
+            public const string TCG = "TCG";
+            public const string Card365 = "365";
         }
 
         public static class EnvironmentVariable

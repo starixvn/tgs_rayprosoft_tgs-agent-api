@@ -35,7 +35,7 @@ insert_final_newline = false
 # 組合管理 Using
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = true
-file_header_template = unset
+file_header_template = 
 
 # this. 和 Me. 喜好設定
 dotnet_style_qualification_for_event = false:silent
@@ -272,3 +272,17 @@ resharper_redundant_base_qualifier_highlighting = warning
 resharper_suggest_var_or_type_built_in_types_highlighting = hint
 resharper_suggest_var_or_type_elsewhere_highlighting = hint
 resharper_suggest_var_or_type_simple_types_highlighting = hint
+
+[*]
+
+# ReSharper properties
+resharper_blank_lines_before_control_transfer_statements = 1
+resharper_blank_lines_before_multiline_statements = 1
+resharper_csharp_wrap_after_declaration_lpar = true
+resharper_csharp_wrap_arguments_style = chop_if_long
+resharper_csharp_wrap_parameters_style = wrap_if_long
+resharper_wrap_object_and_collection_initializer_style = chop_always
+resharper_xmldoc_indent_text = RemoveIndent
+
+# Microsoft .NET properties
+csharp_new_line_before_members_in_object_initializers = true

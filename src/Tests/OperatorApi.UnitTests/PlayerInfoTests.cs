@@ -94,10 +94,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var brandId = Guid.NewGuid();
             var playerCode = "playerCode";
 
-            repository.Players.Add(new Player()
+            repository.Players.Add(new Player
             {
                 PlayerCode = playerCode,
-                Status = Core.Models.Enums.PlayerStatus.Disabled
+                Status = CoreEnums.PlayerStatus.Disabled
             });
 
             await repository.SaveChangesAsync();
@@ -105,7 +105,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var query = new GetPlayerStatusQuery(playerCode);
             var actual = await sut.GetAsync(query);
-            var expected = Core.Models.Enums.PlayerStatus.Disabled;
+            var expected = CoreEnums.PlayerStatus.Disabled;
 
             Assert.AreEqual(expected, actual);
         }
@@ -114,20 +114,44 @@ namespace TGS.Tests.OperatorApi.UnitTests
         public void Check_Player_Status_InBlacklist_Should_Throw_Exception()
         {
             var fakePlayerOperations = Substitute.For<IPlayerOperations>();
-            var player = new Player()
-            {
-                Status = CoreEnums.PlayerStatus.InBlacklist
-            };
+            var player = new Player { Status = CoreEnums.PlayerStatus.InBlacklist };
 
             fakePlayerOperations
                 .GetPlayerByCodeAsync(Arg.Any<string>())
                 .Returns(player);
+
             var sut = new CheckPlayerBannedCommandService(fakePlayerOperations);
 
             var command = new CheckPlayerBannedCommand(
                 Guid.NewGuid(),
                 "UserName");
             Assert.ThrowsAsync<UserBannedException>(async () => await sut.ExecuteAsync(command));
+        }
+
+        [Test]
+        public async Task Query_Player_By_UserName_Should_Success()
+        {
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+
+            var sut = new GetPlayerInfoByUserNameQueryService(fakePlayerRepository);
+
+            var playerInfo = new PlayerInfo(
+                "playerCode",
+                100,
+                false,
+                false,
+                Guid.NewGuid());
+
+            fakePlayerRepository.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())
+                .Returns(ValueTask.FromResult(playerInfo));
+
+            var brandId = Guid.NewGuid();
+            var username = "username";
+            var query = new GetPlayerInfoByUserNameQuery(brandId, username);
+
+            var actual = await sut.GetAsync(query);
+
+            Assert.AreEqual(playerInfo, actual);
         }
     }
 }

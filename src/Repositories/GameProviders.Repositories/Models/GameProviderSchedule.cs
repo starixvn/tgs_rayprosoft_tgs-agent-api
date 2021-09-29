@@ -5,6 +5,9 @@ namespace TGS.GameProviders.Repositories.Models
 {
     public class GameProviderSchedule
     {
+        [BsonId]
+        public Guid Id { get; set; }
+
         [BsonElement("agent_id")]
         public string AgentId { get; init; }
 
@@ -25,9 +28,6 @@ namespace TGS.GameProviders.Repositories.Models
 
         [BsonElement("game_provider_id")]
         public Guid GameProviderId { get; init; }
-
-        [BsonId]
-        public Guid Id { get; set; }
 
         [BsonElement("updated_on")]
         public DateTimeOffset UpdatedOn { get; set; }

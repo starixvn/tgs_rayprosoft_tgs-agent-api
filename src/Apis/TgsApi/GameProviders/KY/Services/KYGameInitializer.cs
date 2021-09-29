@@ -30,6 +30,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
         private readonly IRequestAnalyzer _requestAnalyzer;
         private readonly IGameProviderOperations _gameProviderOperations;
 
+
         public KYGameInitializer(
             IHttpContextAccessor httpContextAccessor,
             IKYApiClient client,
@@ -79,36 +80,21 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                 }
             }
 
-            var date = DateTimeOffset.UtcNow.AddHours(+8);
-            var timestamp = date.ToUnixTimeMilliseconds();
-            var orderId = $"{agentId}{date.ToString("yyyyMMddHHmmss")}{player.PlayerCode}";
+            var dateTimeOffset = DateTimeOffset.UtcNow.AddHours(+8);
+            var orderId = $"{agentId}{dateTimeOffset.ToString("yyyyMMddHHmmssfff")}{player.PlayerCode}";
             var ip = _requestAnalyzer.GetIp(_httpContextAccessor.HttpContext);
 
             var data = new KYGameUrlRequest()
             {
-                Action = KYUtility.GetAction(GPAction.GetGameUrl) ?? -1,
                 PlayerCode = player.PlayerCode,
                 OrderId = orderId,
                 Amount = 0m,
                 IP = ip,
                 BrandsCode = player.BrandCode,
-                ExternalID = externalID,
-
-            };
-            var dataPath = KYUtility.GetPath(data);
-            var param = KYUtility.AesEncrypt(dataPath, brandMerchant.Deskey, true);
-            var plainText = $"{agentId}{timestamp}{brandMerchant.Md5key}";
-            var key = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5);
-
-            var apiKYRequest = new KYApiRequest()
-            {
-                Agent = agentId,
-                Timestamp = timestamp,
-                Param = param,
-                Key = key
+                ExternalID = externalID
             };
 
-            var response = await _client.GetAPIAsync<KYGameUrlResponse>(brandMerchant.ApiUrl, apiKYRequest).ConfigureAwait(false);
+            var response = await _client.GetGameUrlAsync(brandMerchant, agentId, dateTimeOffset, data).ConfigureAwait(false);
 
             if (response.Data.Code != 0)
             {

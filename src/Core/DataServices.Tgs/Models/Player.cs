@@ -44,6 +44,8 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public byte[] Password { get; set; }
 
+        public string AreaCode { get; set; }
+
         public string Phone { get; set; }
 
         public bool PhoneAuthentication { get; set; }
