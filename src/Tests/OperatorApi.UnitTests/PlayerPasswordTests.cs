@@ -28,7 +28,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerCode = "testPlayerCode";
             var fakeHttpContext = new DefaultHttpContext();
-            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData { PlayerCode = playerCode });
+            fakeHttpContext.Items.Add("playerToken", new PlayerTokenData
+            {
+                PlayerCode = playerCode
+            });
 
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
             var fakePlayerQueries = Substitute.For<IPlayerQueries>();

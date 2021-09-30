@@ -119,7 +119,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 CreatedByUsername = request.EditorUsername,
                 UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
-                UpdatedOn = DateTimeOffset.Now
+                UpdatedOn = DateTimeOffset.Now,
+                PlatformCharge = request.PlatformCharge
             };
 
             brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
@@ -193,6 +194,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.OperationalEmail = request.OperationalEmail;
             brand.UpdatedByUsername = request.EditorUsername;
             brand.UpdatedOn = DateTimeOffset.Now;
+            brand.PlatformCharge = request.PlatformCharge;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 

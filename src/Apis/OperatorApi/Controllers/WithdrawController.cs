@@ -172,5 +172,18 @@ namespace TGS.Apis.OperatorApi.Controllers
                .ToDictionary(t => (int)t, t => t.ToString());
             return Task.FromResult(dict);
         }
+
+        [HttpGet("player/amount")]
+        [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<decimal> GetWithdrawRequireAmountAsync(
+            [FromServices] IGetService<GetRequireAmountQuery, decimal> getService)
+        {
+            var playerTokenData = HttpContext.Items.GetPlayerTokenData();
+
+            var query = new GetRequireAmountQuery(playerTokenData.PlayerCode);
+            var WageringRequirement = await getService.GetAsync(query).ConfigureAwait(false);
+
+            return WageringRequirement;
+        }
     }
 }

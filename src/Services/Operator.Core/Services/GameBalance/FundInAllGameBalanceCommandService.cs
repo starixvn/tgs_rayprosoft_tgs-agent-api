@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TGS.Core.Models.Enums;
 using TGS.Services.Operator.GameProviders;
 using TGS.ServiceUtility;
 
@@ -18,17 +19,20 @@ namespace TGS.Services.Operator.Services.GameBalance
             IGetService<GetGameBalanceQuery, GameBalanceInfo> getGameBalanceService,
             ICommandService<FundInGameBalanceCommand> fundInService)
         {
-            _gameProviderRepository = gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
-            _getGameBalanceService = getGameBalanceService ?? throw new ArgumentNullException(nameof(getGameBalanceService));
+            _gameProviderRepository =
+                gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+            _getGameBalanceService =
+                getGameBalanceService ?? throw new ArgumentNullException(nameof(getGameBalanceService));
             _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         }
 
-        public async ValueTask ExecuteAsync(FundInAllGameBalanceCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(FundInAllGameBalanceCommand command,
+            CancellationToken cancellationToken = default)
         {
             var processGps = _gameProviderRepository
                 .QueryAllSubGameProvidersAsync(command.BrandId)
                 .Where(gp => gp.IsTransferWallet
-                    && gp.Status == Core.Models.Enums.Status.Active)
+                    && gp.Status == Status.Active)
                 .Select(gp => gp.GpCode)
                 .Distinct();
 
@@ -39,18 +43,25 @@ namespace TGS.Services.Operator.Services.GameBalance
 
                 try
                 {
-                    var balance = await _getGameBalanceService
+                    var balanceInfo = await _getGameBalanceService
                         .GetAsync(
-                            new GetGameBalanceQuery(command.PlayerCode, gpCode))
+                            new GetGameBalanceQuery(command.PlayerCode, gpCode),
+                            cancellationToken)
                         .ConfigureAwait(false);
 
-                    if (balance.Error == 0)
+                    if (balanceInfo.Error != 0)
+                        continue;
+
+                    var fundInAmount = (int)Math.Floor(balanceInfo.Balance);
+
+                    if (fundInAmount > 0)
                     {
                         await _fundInService
                             .ExecuteAsync(new FundInGameBalanceCommand(
-                                gpCode,
-                                command.PlayerCode,
-                                (int)Math.Floor(balance.Balance)))
+                                    gpCode,
+                                    command.PlayerCode,
+                                    fundInAmount),
+                                cancellationToken)
                             .ConfigureAwait(false);
                     }
                 }

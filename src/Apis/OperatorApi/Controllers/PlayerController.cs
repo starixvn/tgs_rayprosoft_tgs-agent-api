@@ -11,12 +11,14 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Infrastructures.WebApiServices;
+using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
 using TGS.ServiceUtility;
 using CoreExceptions = TGS.Core.Models.Exceptions;
+using PlayerNotFoundException = TGS.Core.Models.Exceptions.PlayerNotFoundException;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -246,14 +248,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                     LoginTime = info.LoginTime,
                     PlayerToken = info.PlayerToken
                 };
-            }
-            catch (CoreExceptions.PlayerNotFoundException)
-            {
-                throw new CoreExceptions.PlayerNotFoundException(request.Username, Player.NotFound);
-            }
-            catch (CoreExceptions.InvalidCredentialsException)
-            {
-                throw new CoreExceptions.InvalidCredentialsException(Player.PasswordMismatched);
             }
             catch (Exception ex)
             {

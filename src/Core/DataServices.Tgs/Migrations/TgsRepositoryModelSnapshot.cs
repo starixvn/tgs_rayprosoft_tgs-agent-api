@@ -613,6 +613,39 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.ToTable("agent_dividends");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividendCondition", b =>
+                {
+                    b.Property<int>("Rank")
+                        .HasColumnType("integer")
+                        .HasColumnName("rank");
+
+                    b.Property<Guid>("AgentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("agent_id");
+
+                    b.Property<int>("ActiveNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("active_number");
+
+                    b.Property<decimal>("DividendPercentage")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("dividend_percentage");
+
+                    b.Property<decimal>("NetProfit")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)")
+                        .HasColumnName("net_profit");
+
+                    b.HasKey("Rank", "AgentId")
+                        .HasName("pk_agent_dividend_conditions_rank_agent_id");
+
+                    b.HasIndex("AgentId")
+                        .HasDatabaseName("ix_agent_dividend_conditions_agent_id");
+
+                    b.ToTable("agent_dividend_conditions");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividendMultipleLayer", b =>
                 {
                     b.Property<int>("Id")
@@ -1198,6 +1231,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("operational_email");
+
+                    b.Property<decimal>("PlatformCharge")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("platform_charge");
 
                     b.Property<DateTimeOffset>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
@@ -3557,11 +3595,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("BetLimitId")
                         .HasDatabaseName("ix_players_bet_limit_id");
 
-                    b.HasIndex("BrandId")
-                        .HasDatabaseName("ix_players_brand_id");
-
                     b.HasIndex("VipId")
                         .HasDatabaseName("ix_players_vip_id");
+
+                    b.HasIndex("BrandId", "AreaCode", "Phone")
+                        .IsUnique()
+                        .HasDatabaseName("ux_players_brand_phone");
 
                     b.ToTable("players");
                 });
@@ -5942,6 +5981,18 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.Navigation("Player");
                 });
 
+            modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividendCondition", b =>
+                {
+                    b.HasOne("TGS.Core.DataServices.Tgs.Models.Agent", "Agent")
+                        .WithMany("AgentDividendConditions")
+                        .HasForeignKey("AgentId")
+                        .HasConstraintName("fk_agents_dividend_conditions_agent_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Agent");
+                });
+
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.AgentDividendMultipleLayer", b =>
                 {
                     b.HasOne("TGS.Core.DataServices.Tgs.Models.AgentDividend", "AgentDividend")
@@ -7317,6 +7368,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
 
             modelBuilder.Entity("TGS.Core.DataServices.Tgs.Models.Agent", b =>
                 {
+                    b.Navigation("AgentDividendConditions");
+
                     b.Navigation("Banks");
 
                     b.Navigation("Players");
