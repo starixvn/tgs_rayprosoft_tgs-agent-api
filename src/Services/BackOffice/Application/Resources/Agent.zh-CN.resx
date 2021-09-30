@@ -153,4 +153,34 @@
   <data name="DividendPercentageMustLessThanOrEqualToUpperLayer" xml:space="preserve">
     <value>分红百分比必须小于或等于上层</value>
   </data>
+  <data name="RankMustGreaterThanPervious" xml:space="preserve">
+    <value>层级 {0} 必须大于之前的层级</value>
+  </data>
+  <data name="RankInvalid" xml:space="preserve">
+    <value>层级 {0} 无效</value>
+  </data>
+  <data name="NetProfitMustGreaterThan" xml:space="preserve">
+    <value>层级 {0} 的净盈利必须大于或等于 {1}</value>
+  </data>
+  <data name="ActiveNumberMustGreaterThan" xml:space="preserve">
+    <value>层级 {0} 的活跃人数必须大于或等于 {1}</value>
+  </data>
+  <data name="DividendPercentageMustLessThan" xml:space="preserve">
+    <value>层级 {0} 的分红比例必须小于或等于 {1}</value>
+  </data>
+  <data name="ParentRankNotFound" xml:space="preserve">
+    <value>找不到上层层级 {0}</value>
+  </data>
+  <data name="NetProfitMustLessThan" xml:space="preserve">
+    <value>层级 {0} 的净盈利必须小于或等于 {1}</value>
+  </data>
+  <data name="ActiveNumberMustLessThan" xml:space="preserve">
+    <value>层级 {0} 的活跃人数必须小于或等于 {1}</value>
+  </data>
+  <data name="DividendPercentageMustGreaterThan" xml:space="preserve">
+    <value>层级 {0} 的分红比例必须大于或等于 {1}</value>
+  </data>
+  <data name="RankCountInvaild" xml:space="preserve">
+    <value>子代理的层级总数为 {0} ，必须大于它</value>
+  </data>
 </root>
