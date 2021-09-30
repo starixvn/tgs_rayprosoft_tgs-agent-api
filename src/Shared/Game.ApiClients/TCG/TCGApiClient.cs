@@ -1,22 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log.Events;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
-using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings.TCG;
-using TGS.Shared.Game.Models.KY.Commons;
 using TGS.Shared.Game.Models.TCG.Common;
 using TGS.Shared.Game.Models.TCG.Incoming;
 using TGS.Shared.Game.Models.TCG.Outgoing;
@@ -25,7 +18,7 @@ namespace TGS.Shared.Game.ApiClients.TCG
 {
     public interface ITCGApiClient
     {
-        ValueTask<TCGRegisterPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGRegisterPlayerRequest request);
+        ValueTask<TCGGPGameRecordResponse> GameRecordAsync(Uri apiUrl, TCGGPGameRecordRequest request);
 
         ValueTask<TCGKickOutLottoPlayerResponse> KickOutLottoPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGKickOutLottoPlayerRequest request);
 
@@ -35,18 +28,17 @@ namespace TGS.Shared.Game.ApiClients.TCG
 
         ValueTask<TCGLaunchGameResponse> LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByLOTTOVNRequest request);
 
-        ValueTask<TCGUpdatePasswordPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request);
+        ValueTask<TCGRegisterPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGRegisterPlayerRequest request);
 
-        ValueTask<TCGGPGameRecordResponse> GameRecordAsync(Uri apiUrl, TCGGPGameRecordRequest request);
+        ValueTask<TCGUpdatePasswordPlayerResponse> RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request);
     }
+
     public class TCGApiClient : BaseApiClient, ITCGApiClient
     {
         private readonly HttpClient _client;
 
-        private readonly IApiClientLogger _logger;
-
         private readonly IJsonSerializationProvider _json;
-
+        private readonly IApiClientLogger _logger;
         private readonly ITCGUtility _utility;
 
         public TCGApiClient(
@@ -62,8 +54,8 @@ namespace TGS.Shared.Game.ApiClients.TCG
             _utility = utility ?? throw new ArgumentNullException(nameof(utility));
         }
 
-        ValueTask<TCGRegisterPlayerResponse> ITCGApiClient.RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGRegisterPlayerRequest request)
-            => GetAPIAsync<TCGRegisterPlayerRequest, TCGRegisterPlayerResponse>(ApiUrl, merchant, request, "RegisterPlayer");
+        ValueTask<TCGGPGameRecordResponse> ITCGApiClient.GameRecordAsync(Uri apiUrl, TCGGPGameRecordRequest request) =>
+         ExecuteJsonRequestAsync<TCGGPGameRecordRequest, TCGGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/tcg/GameRecord", request, logPrefix: _utility.GetPrefix("GameRecord"));
 
         ValueTask<TCGKickOutLottoPlayerResponse> ITCGApiClient.KickOutLottoPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGKickOutLottoPlayerRequest request)
        => GetAPIAsync<TCGKickOutLottoPlayerRequest, TCGKickOutLottoPlayerResponse>(ApiUrl, merchant, request, "KickOutLottoPlayer");
@@ -77,15 +69,14 @@ namespace TGS.Shared.Game.ApiClients.TCG
         ValueTask<TCGLaunchGameResponse> ITCGApiClient.LaunchGameAsync(Uri ApiUrl, TCGMerchant merchant, TCGLaunchGameByLOTTOVNRequest request)
          => GetAPIAsync<TCGLaunchGameByLOTTOVNRequest, TCGLaunchGameResponse>(ApiUrl, merchant, request, "LaunchGameByLOTTOVN");
 
+        ValueTask<TCGRegisterPlayerResponse> ITCGApiClient.RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGRegisterPlayerRequest request)
+                                                    => GetAPIAsync<TCGRegisterPlayerRequest, TCGRegisterPlayerResponse>(ApiUrl, merchant, request, "RegisterPlayer");
+
         ValueTask<TCGUpdatePasswordPlayerResponse> ITCGApiClient.RegisterPlayerAsync(Uri ApiUrl, TCGMerchant merchant, TCGUpdatePasswordPlayerRequest request)
             => GetAPIAsync<TCGUpdatePasswordPlayerRequest, TCGUpdatePasswordPlayerResponse>(ApiUrl, merchant, request, "RegisterPlayer");
 
-        ValueTask<TCGGPGameRecordResponse> ITCGApiClient.GameRecordAsync(Uri apiUrl, TCGGPGameRecordRequest request) =>
-         ExecuteJsonRequestAsync<TCGGPGameRecordRequest, TCGGPGameRecordResponse>(HttpMethod.Post, apiUrl, "/api/tcg/GameRecord", request, logPrefix: _utility.GetPrefix("GameRecord"));
-
         private async ValueTask<TResponse> GetAPIAsync<TRequest, TResponse>(Uri apiUrl, TCGMerchant merchant, TRequest request, string prefix) where TResponse : TCGBaseResponse
         {
-
             var sw = Stopwatch.StartNew();
             var responseMessage = default(string);
             var response = default(TResponse);
@@ -108,18 +99,18 @@ namespace TGS.Shared.Game.ApiClients.TCG
 
             _logger.LogHttpResponse(new ApiLogEvent
             {
-                ip = string.Empty,
-                path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
-                method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
-                prefix = _utility.GetPrefix(prefix),
-                servername = Environment.MachineName.NoLongerThan(128),
-                requestheaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
-                requestcontent = _json.SerializeToString(request),
-                responseheaders = httpResponseMessage.RequestMessage.Headers.ToString(),
-                responsecontent = responseMessage,
-                responsecode = (int)httpResponseMessage.StatusCode,
-                executiontimems = (int)sw.ElapsedMilliseconds,
-                recordedon = DateTimeOffset.UtcNow
+                Ip = string.Empty,
+                Path = httpResponseMessage.RequestMessage.RequestUri.AbsoluteUri.NoLongerThan(512),
+                Method = httpResponseMessage.RequestMessage.Method.ToString().NoLongerThan(8),
+                Prefix = _utility.GetPrefix(prefix),
+                ServerName = Environment.MachineName.NoLongerThan(128),
+                RequestHeaders = httpResponseMessage.RequestMessage.Headers + httpResponseMessage.RequestMessage.Content?.Headers?.ToString(),
+                RequestContent = _json.SerializeToString(request),
+                ResponseHeaders = httpResponseMessage.RequestMessage.Headers.ToString(),
+                ResponseContent = responseMessage,
+                ResponseCode = (short)httpResponseMessage.StatusCode,
+                ExecutionTimeMs = (int)sw.ElapsedMilliseconds,
+                RecordedOn = DateTimeOffset.UtcNow
             });
 
             if (!string.IsNullOrEmpty(responseMessage) && httpResponseMessage.StatusCode == HttpStatusCode.OK)
@@ -129,6 +120,5 @@ namespace TGS.Shared.Game.ApiClients.TCG
 
             return response;
         }
-
     }
 }

@@ -18,6 +18,7 @@ using Prometheus;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Apis.BackendOffice.Filters;
 using TGS.Apis.BackendOffice.Middlewares;
+using TGS.Apis.BackendOffice.Services;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Models;
@@ -87,7 +88,19 @@ namespace TGS.Apis.BackendOffice
         {
             services
                 .AddBackendOfficeServices(_configuration)
-                .AddBackendOfficeRepositories();
+                .AddBackendOfficeRepositories()
+                .AddNatsMessageQueue(config =>
+                {
+                    config
+                        .ConfigQueueOptions((options, sp) =>
+                        {
+                            var configuration = sp.GetRequiredService<IConfiguration>();
+
+                            options.Url = configuration.GetValue<string>("NatsSetting:Urls");
+                        })
+                        .AddReplyHandler<AutoApproveDepositProcessor>("tgs.payment.approve", "tgs.payment.approve")
+                        .ProcessAllSubjects();
+                }); ;
 
             services.AddPaymentServiceClient((options, sp) =>
             {

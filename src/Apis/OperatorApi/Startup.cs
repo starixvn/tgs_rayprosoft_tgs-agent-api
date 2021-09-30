@@ -163,6 +163,18 @@ namespace TGS.Apis.OperatorApi
                 .AddSingleton<UmPaySerializer>()
                 .AddSingleton<MaticPaySerializer>();
 
+            services.AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var config = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .ProcessAllSubjects();
+            });
+
             services
                 .AddOptions<ConstValidateCodeOptions>()
                 .Configure<IConfiguration>((options, config) =>

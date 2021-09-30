@@ -73,6 +73,18 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 .AddRedis()
                 .AddOperations();
 
+            services.AddNatsMessageQueue(natsConfig =>
+            {
+                natsConfig
+                    .ConfigQueueOptions((options, sp) =>
+                    {
+                        var config = sp.GetRequiredService<IConfiguration>();
+
+                        options.Url = config.GetValue<string>("NatsSetting:Urls");
+                    })
+                    .ProcessAllSubjects();
+            });
+
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
             if (isDev)

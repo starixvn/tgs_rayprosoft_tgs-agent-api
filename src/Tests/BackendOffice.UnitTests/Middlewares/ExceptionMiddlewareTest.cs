@@ -12,10 +12,9 @@ using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using NUnit.Framework;
+using Tgs.Logging;
 using TGS.Apis.BackendOffice.Middlewares;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Messages;
 
@@ -25,25 +24,20 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
     [Parallelizable]
     public class ExceptionMiddlewareTest
     {
-        [SetUp]
-        public void Setup()
-        {
-            _requestDelegate = innerContext => Task.FromResult(0);
-            _target = new ExceptionMiddleware(
-                _requestAnalyzerMock.Object,
-                _tgsLogMock.Object,
-                _json.Object,
-                _envMock.Object,
-                new NullLogger<ExceptionMiddleware>());
-        }
+        private readonly Mock<IWebHostEnvironment> _envMock = new();
+
+        private readonly Mock<IJsonSerializationProvider> _json = new();
 
         private readonly Mock<IRequestAnalyzer> _requestAnalyzerMock = new();
-        private readonly Mock<ITgsLog> _tgsLogMock = new();
-        private readonly Mock<IJsonSerializationProvider> _json = new();
+
         private readonly string _requestString = "Hello World Request!!";
+
         private readonly string _responseString = "Hello World Response!!";
-        private readonly Mock<IWebHostEnvironment> _envMock = new();
+
+        private readonly Mock<ITgsLog> _tgsLogMock = new();
+
         private RequestDelegate _requestDelegate;
+
         private IMiddleware _target;
 
         ///TODO: fix  cannot pass   using var sr = new StreamReader(context.Response.Body);
@@ -67,7 +61,19 @@ namespace TGS.Tests.BackendOffice.UnitTests.Middlewares
             await action.Should().NotThrowAsync();
 
             _tgsLogMock.Verify(p => p.LogAdmin(It.Is<AdminLogEvent>(l =>
-                l.exception != string.Empty)));
+                l.Exception != string.Empty)));
+        }
+
+        [SetUp]
+        public void Setup()
+        {
+            _requestDelegate = innerContext => Task.FromResult(0);
+            _target = new ExceptionMiddleware(
+                _requestAnalyzerMock.Object,
+                _tgsLogMock.Object,
+                _json.Object,
+                _envMock.Object,
+                new NullLogger<ExceptionMiddleware>());
         }
 
         private Mock<HttpContext> SetupHttpContext(bool hasNoException = true)
