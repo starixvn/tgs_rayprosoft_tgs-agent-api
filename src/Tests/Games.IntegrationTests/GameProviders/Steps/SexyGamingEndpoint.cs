@@ -12,7 +12,9 @@ using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using TechTalk.SpecFlow;
+using Tgs.Logging;
 using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
@@ -85,6 +87,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     })
                     .ProcessAllSubjects();
             });
+
+            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
 
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
