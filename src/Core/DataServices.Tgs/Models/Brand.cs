@@ -78,5 +78,6 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public virtual ICollection<VipLevel> VipLevels { get; set; }
         public decimal PlatformCharge { get; set; }
+        public bool CheckDividendActiveCount { get; set; }
     }
 }

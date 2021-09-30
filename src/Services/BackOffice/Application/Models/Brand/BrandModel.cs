@@ -30,5 +30,7 @@ namespace TGS.Services.BackOffice.Application.Models.Brand
         public DateTimeOffset UpdatedOn { get; set; }
         public string CreatedByUsername { get; set; }
         public string UpdatedByUsername { get; set; }
+        public decimal PlatformCharge { get; set; }
+        public bool CheckDividendActiveCount { get; set; }
     }
 }

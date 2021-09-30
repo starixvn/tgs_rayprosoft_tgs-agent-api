@@ -7,6 +7,14 @@ namespace TGS.Core.DataServices.Tgs.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "check_dividend_active_count",
+                schema: "dbo",
+                table: "brands",
+                type: "boolean",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.CreateTable(
                 name: "agent_dividend_conditions",
                 schema: "dbo",
@@ -42,6 +50,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
             migrationBuilder.DropTable(
                 name: "agent_dividend_conditions",
                 schema: "dbo");
+
+            migrationBuilder.DropColumn(
+                name: "check_dividend_active_count",
+                schema: "dbo",
+                table: "brands");
         }
     }
 }

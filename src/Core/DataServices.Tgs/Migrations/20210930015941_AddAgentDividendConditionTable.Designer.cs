@@ -10,7 +10,7 @@ using TGS.Core.DataServices.Tgs;
 namespace TGS.Core.DataServices.Tgs.Migrations
 {
     [DbContext(typeof(TgsRepository))]
-    [Migration("20210929075607_AddAgentDividendConditionTable")]
+    [Migration("20210930015941_AddAgentDividendConditionTable")]
     partial class AddAgentDividendConditionTable
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1166,6 +1166,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("auto_sent_player_bonus");
 
+                    b.Property<bool>("CheckDividendActiveCount")
+                        .HasColumnType("boolean")
+                        .HasColumnName("check_dividend_active_count");
+
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -1233,6 +1237,11 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("operational_email");
+
+                    b.Property<decimal>("PlatformCharge")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("numeric(9,6)")
+                        .HasColumnName("platform_charge");
 
                     b.Property<DateTimeOffset>("PreviousSettlementFrom")
                         .HasColumnType("timestamp with time zone")
@@ -3592,11 +3601,12 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                     b.HasIndex("BetLimitId")
                         .HasDatabaseName("ix_players_bet_limit_id");
 
-                    b.HasIndex("BrandId")
-                        .HasDatabaseName("ix_players_brand_id");
-
                     b.HasIndex("VipId")
                         .HasDatabaseName("ix_players_vip_id");
+
+                    b.HasIndex("BrandId", "AreaCode", "Phone")
+                        .IsUnique()
+                        .HasDatabaseName("ux_players_brand_phone");
 
                     b.ToTable("players");
                 });
