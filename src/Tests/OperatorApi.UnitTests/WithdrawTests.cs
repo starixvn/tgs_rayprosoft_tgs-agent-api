@@ -3,10 +3,13 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
+using TGS.Core.DataServices.Tgs;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models.Services.Caches;
@@ -16,6 +19,7 @@ using TGS.Services.Operator.BrandPayment;
 using TGS.Services.Operator.Services.Withdraw;
 using TGS.Services.PlayerBucket;
 using TGS.Services.WalletService;
+using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -209,6 +213,28 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Arg.Is(PaymentFlowState.WaitApprove),
                     Arg.Any<string>(),
                     Arg.Any<decimal?>());
+        }
+
+        [Test]
+        public async Task Player_Can_Get_Withdraw_Required_Amount()
+        {
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+            var playerCode = "4ucmqplxb029";
+
+            repository.PlayerBuckets.AddRange(
+                new CoreModels.PlayerBucket() { PlayerCode = playerCode, BucketAmount = 100, CurrentBucketAmount = 100 },
+                new CoreModels.PlayerBucket() { PlayerCode = playerCode, BucketAmount = 200, CurrentBucketAmount = 100 });
+
+            await repository.SaveChangesAsync();
+
+            var sut = new GetRequireAmountQueryService(repository);
+            var actual = await sut.GetAsync(new GetRequireAmountQuery(playerCode));
+
+            Assert.AreEqual(100, actual);
         }
 
         [Test]

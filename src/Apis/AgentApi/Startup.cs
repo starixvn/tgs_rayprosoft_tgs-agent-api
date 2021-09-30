@@ -48,12 +48,18 @@ namespace TGS.Apis.AgentApi
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseGlobalExceptionHandler();
+            app.UseTgsErrorHandler();
 
             app.UseRequestLocalization(options =>
             {
-                options.DefaultRequestCulture = new("en-US");
-                options.ApplyCurrentCultureToResponseHeaders = true;
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+                options.SupportedCultures.Clear();
+                options.SupportedUICultures.Clear();
+
+                config.GetSection("RequestLocalization").Bind(options);
+
+                options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture"));
             });
 
             app.UseApiLogger(bypassRouting: Consts.DefaultBypassRouting);
@@ -69,12 +75,14 @@ namespace TGS.Apis.AgentApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                });
+
+                endpoints.MapHealthChecks("/health",
+                    new()
+                    {
+                        ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                        ResponseWriter = (httpContext, result) =>
+                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                    });
                 endpoints.MapMetrics();
             });
 
@@ -103,17 +111,8 @@ namespace TGS.Apis.AgentApi
                 .AddReportClientServices(_configuration)
                 .AddTransactions();
 
-            services.AddNatsMessageQueue(natsConfig =>
-            {
-                natsConfig
-                    .ConfigQueueOptions((options, sp) =>
-                    {
-                        var config = sp.GetRequiredService<IConfiguration>();
-
-                        options.Url = config.GetValue<string>("NatsSetting:Urls");
-                    })
-                    .ProcessAllSubjects();
-            });
+            services.AddErrorMapper()
+                .AddErrorMapper<ApiErrorMapper>();
 
             services
                 .AddAgentApiCore()
@@ -130,10 +129,12 @@ namespace TGS.Apis.AgentApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Agent:PaymentServiceBaseUrl");
+
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = {
+                        Converters =
+                        {
                             new JsonStringEnumConverter()
                         }
                     };
@@ -151,6 +152,7 @@ namespace TGS.Apis.AgentApi
             });
 
             services.AddRouting(options => options.LowercaseUrls = true);
+
             services.AddControllers(options =>
                 {
                     options.Filters.Add<CheckAgentEnabledFilter>();
@@ -178,7 +180,12 @@ namespace TGS.Apis.AgentApi
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new() { Title = "TGS Agent API", Version = "v1" });
+                    c.SwaggerDoc("v1",
+                        new()
+                        {
+                            Title = "TGS Agent API",
+                            Version = "v1"
+                        });
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -203,6 +210,7 @@ namespace TGS.Apis.AgentApi
 
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);
+
                     if (File.Exists(path))
                     {
                         c.IncludeXmlComments(path);
@@ -213,6 +221,7 @@ namespace TGS.Apis.AgentApi
             services.AddCors(options =>
             {
                 var corsDomain = _configuration.GetSection("CorsDomain").Get<CorsDomain>();
+
                 options.AddDefaultPolicy(
                     builder =>
                     {

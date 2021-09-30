@@ -14,12 +14,6 @@ using Microsoft.OpenApi.Models;
 using OpenTelemetry.Exporter.ProfileViewer.Filters;
 using OpenTelemetry.Trace;
 using Prometheus;
-using Tgs.Payment.ApplePay;
-using Tgs.Payment.Clients;
-using Tgs.Payment.LeePay;
-using Tgs.Payment.MaticPay;
-using Tgs.Payment.PrimePay;
-using Tgs.Payment.UmPay;
 using TGS.Apis.OperatorApi.Attributes;
 using TGS.Apis.OperatorApi.Extensions;
 using TGS.Apis.OperatorApi.Filters;
@@ -37,7 +31,13 @@ using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
+using Tgs.Payment.ApplePay;
+using Tgs.Payment.Clients;
+using Tgs.Payment.LeePay;
 using TGS.Payment.ManualDeposit;
+using Tgs.Payment.MaticPay;
+using Tgs.Payment.PrimePay;
+using Tgs.Payment.UmPay;
 using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator.ValidateCode;
 using TGS.Services.PluggableServices.Extensions;
@@ -66,6 +66,8 @@ namespace TGS.Apis.OperatorApi
                 options.SupportedUICultures.Clear();
 
                 config.GetSection("RequestLocalization").Bind(options);
+
+                options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture"));
             });
 
             app.UseTgsErrorHandler();
@@ -83,12 +85,14 @@ namespace TGS.Apis.OperatorApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
-                });
+
+                endpoints.MapHealthChecks("/health",
+                    new()
+                    {
+                        ResultStatusCodes = GlobalConsts.HealthCheckResultStatusCodes,
+                        ResponseWriter = (httpContext, result) =>
+                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, _env)
+                    });
                 endpoints.MapMetrics();
                 endpoints.MapProfileViewer();
             });
@@ -141,10 +145,12 @@ namespace TGS.Apis.OperatorApi
                     var config = sp.GetRequiredService<IConfiguration>();
 
                     options.PaymentServiceBaseUrl = config.GetValue<Uri>("Operator:PaymentServiceBaseUrl");
+
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = {
+                        Converters =
+                        {
                             new JsonStringEnumConverter()
                         }
                     };
@@ -185,6 +191,7 @@ namespace TGS.Apis.OperatorApi
 
             services
                 .AddRouting(options => options.LowercaseUrls = true);
+
             services
                 .AddControllers(options =>
                 {
@@ -215,7 +222,7 @@ namespace TGS.Apis.OperatorApi
                 .ForwardToPrometheus();
 
             services.AddOpenTelemetryTracing(
-                (builder) => builder
+                builder => builder
                     .AddSource("Tgs.*")
                     .AddSource("TGS.*")
                     .AddAspNetCoreInstrumentation()
@@ -241,7 +248,12 @@ namespace TGS.Apis.OperatorApi
             {
                 services.AddSwaggerGen(c =>
                 {
-                    c.SwaggerDoc("v1", new() { Title = "TGS Operator API", Version = "v1" });
+                    c.SwaggerDoc("v1",
+                        new()
+                        {
+                            Title = "TGS Operator API",
+                            Version = "v1"
+                        });
 
                     var securityScheme = new OpenApiSecurityScheme
                     {
@@ -266,6 +278,7 @@ namespace TGS.Apis.OperatorApi
 
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);
+
                     if (File.Exists(path))
                     {
                         c.IncludeXmlComments(path);
@@ -276,6 +289,7 @@ namespace TGS.Apis.OperatorApi
             services.AddCors(options =>
             {
                 var corsDomain = _configuration.GetSection("CorsDomain").Get<CorsDomain>();
+
                 options.AddDefaultPolicy(
                     builder =>
                     {

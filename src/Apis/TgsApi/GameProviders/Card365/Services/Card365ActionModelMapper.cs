@@ -4,8 +4,6 @@ using System.Linq;
 using System.Text.Json;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
-using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Services.Data;
 using TGS.Core.Models.Services.Games;
 using TGS.Shared.Game.Models.Card365.Enums;
@@ -151,41 +149,19 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         public BetData VoidRoundRequest(string playerCode, GameProviderConfigurationData data,
             GameActionExternalIds[] externalIds, VoidGameRequest request)
         {
-            var bet = externalIds.FirstOrDefault(t => t.GameActionType == PlaceBet);
-
-            if (bet == null)
+            var transactions = externalIds.Select(ga => new TransactionData
             {
-                throw new InvalidGameActionException($"Bet of round '{request.ExternalRoundId}' is not found",
-                    InvalidGameActionErrorCode.TransactionNotFound);
-            }
-
-            var transactions = new[]
-            {
-                new TransactionData
-                {
-                    ExternalGameId = bet.ExternalGameId,
-                    ExternalRoundId = bet.ExternalRoundId,
-                    ExternalTransactionId = $"{bet.ExternalTransactionId}_settle_cancel",
-                    ExternalTransactionReferenceId = $"{bet.ExternalTransactionId}_settle",
-                    ExternalGameActionGroupId = bet.ExternalGameActionGroupId,
-                    ExternalBetId = bet.ExternalBetId,
-                    GameActionType = CancelTransaction,
-                    RoundClosed = false,
-                    TimeStamp = ParseDateTimeOffset(request.Timestamp)
-                },
-                new TransactionData
-                {
-                    ExternalGameId = bet.ExternalGameId,
-                    ExternalRoundId = bet.ExternalRoundId,
-                    ExternalTransactionId = $"{bet.ExternalTransactionId}_cancel",
-                    ExternalTransactionReferenceId = $"{bet.ExternalTransactionId}",
-                    ExternalGameActionGroupId = bet.ExternalGameActionGroupId,
-                    ExternalBetId = bet.ExternalBetId,
-                    GameActionType = CancelTransaction,
-                    RoundClosed = true,
-                    TimeStamp = ParseDateTimeOffset(request.Timestamp)
-                }
-            };
+                Amount = ga.Amount,
+                ExternalGameId = ga.ExternalGameId,
+                ExternalRoundId = ga.ExternalRoundId,
+                ExternalTransactionId = $"{ga.ExternalTransactionId}_cancel",
+                ExternalTransactionReferenceId = ga.ExternalTransactionId,
+                ExternalGameActionGroupId = ga.ExternalGameActionGroupId,
+                ExternalBetId = ga.ExternalRoundId,
+                GameActionType = CancelTransaction,
+                TimeStamp = ParseDateTimeOffset(request.Timestamp),
+                RoundClosed = true
+            }).ToArray();
 
             return GetBetData(playerCode, data, transactions);
         }

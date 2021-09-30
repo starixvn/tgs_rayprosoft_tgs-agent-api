@@ -53,7 +53,10 @@ namespace TGS.Services.Operations
             var playerCode = await _playerCommands.CreatePlayerAsync(data);
 
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.UsernameToPlayerCode, data.BrandId,
-                new HashEntry[] { new(data.Username, playerCode) }, TimeSpan.FromHours(12), true);
+                new HashEntry[]
+                {
+                    new(data.Username, playerCode)
+                }, TimeSpan.FromHours(12), true);
 
             return playerCode;
         }
@@ -89,7 +92,7 @@ namespace TGS.Services.Operations
                 cachedPlayer => cachedPlayer?.DefaultWalletId ?? Guid.Empty);
 
         public Task<decimal> GetPlayerBalanceAsync(Guid walletId, bool dirtyRead) =>
-                    _walletQueriesFactory().GetBalanceAsync(walletId);
+            _walletQueriesFactory().GetBalanceAsync(walletId);
 
         public Task<Player> GetPlayerByCodeAsync(string playerCode) =>
             _playerQueriesFactory().GetPlayerByCodeAsync(playerCode);
@@ -107,7 +110,10 @@ namespace TGS.Services.Operations
             }
 
             var playerCode = await _playerQueriesFactory().GetPlayerCodeByUsernameAsync(brandId, username);
-            await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[] { new(field, playerCode) },
+            await _cacheManager.SafeCacheHashSetAsync(cacheType, cacheKey, new HashEntry[]
+                {
+                    new(field, playerCode)
+                },
                 TimeSpan.FromHours(12));
 
             return playerCode;
@@ -124,7 +130,7 @@ namespace TGS.Services.Operations
         }
 
         public async Task<CachedPlayerLoginRecord> GetPlayerLatestEnabledLoginRecordAsync(string playerCode,
-                                    PlatformType? platform)
+            PlatformType? platform)
         {
             var loginRecords = await _interface.GetPlayerEnabledLoginRecordsAsync(playerCode);
 
@@ -154,8 +160,16 @@ namespace TGS.Services.Operations
             await _playerCommands.DeauthorizePlayerAsync(data.PlayerCode, data.LoginRecordId);
             await _cacheManager.ClearCacheByBatchAsync(new CacheKey[]
             {
-                new() {CacheType = RedisCacheType.PlayerLoginRecords, Key = data.PlayerCode},
-                new() {CacheType = RedisCacheType.PlayerLoginRecords, Key = data.LoginRecordId}
+                new()
+                {
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = data.PlayerCode
+                },
+                new()
+                {
+                    CacheType = RedisCacheType.PlayerLoginRecords,
+                    Key = data.LoginRecordId
+                }
             });
         }
 
@@ -179,7 +193,7 @@ namespace TGS.Services.Operations
         }
 
         public async Task SetPayPasswordAsync(string playerCode, byte[] newPassword, byte[] newSalt,
-                            DateTimeOffset updatedOn)
+            DateTimeOffset updatedOn)
         {
             await _playerCommands.SetPayPasswordAsync(playerCode, newPassword, newSalt, updatedOn);
             await _cacheManager.ClearCacheAsync(RedisCacheType.Player, playerCode);
@@ -208,7 +222,8 @@ namespace TGS.Services.Operations
             var fields = new HashEntry[]
             {
                 new(CachedPlayerFields.BrandId, player.BrandId.ToString()),
-                new(CachedPlayerFields.BrandCode, player.BrandCode), new(CachedPlayerFields.Type, (int)player.Type),
+                new(CachedPlayerFields.BrandCode, player.BrandCode),
+                new(CachedPlayerFields.Type, (int)player.Type),
                 new(CachedPlayerFields.Username, player.Username),
                 new(CachedPlayerFields.Status, (int)player.Status),
                 new(CachedPlayerFields.DefaultWalletId, player.DefaultWalletId.ToString()),
@@ -241,7 +256,10 @@ namespace TGS.Services.Operations
 
             var expiresIn = loginRecords.Max(r => r.ExpiredOn) - DateTimeOffset.UtcNow;
             await _cacheManager.SafeCacheHashSetAsync(RedisCacheType.PlayerLoginRecords, playerCode,
-                new HashEntry[] { new(field, _json.SerializeToString(loginRecords)) }, expiresIn);
+                new HashEntry[]
+                {
+                    new(field, _json.SerializeToString(loginRecords))
+                }, expiresIn);
 
             return loginRecords;
         }
@@ -251,9 +269,14 @@ namespace TGS.Services.Operations
             var values = await _cacheManager.SafeGetHashSetAsync(RedisCacheType.Player, playerCode,
                 new RedisValue[]
                 {
-                    CachedPlayerFields.BrandId, CachedPlayerFields.Status, CachedPlayerFields.Type,
-                    CachedPlayerFields.Username, CachedPlayerFields.DefaultWalletId, CachedPlayerFields.BetLimitId,
-                    CachedPlayerFields.BrandCode, CachedPlayerFields.DefaultWalletCurrencyCode,
+                    CachedPlayerFields.BrandId,
+                    CachedPlayerFields.Status,
+                    CachedPlayerFields.Type,
+                    CachedPlayerFields.Username,
+                    CachedPlayerFields.DefaultWalletId,
+                    CachedPlayerFields.BetLimitId,
+                    CachedPlayerFields.BrandCode,
+                    CachedPlayerFields.DefaultWalletCurrencyCode,
                     CachedPlayerFields.ExternalCurrencyCode
                 });
 

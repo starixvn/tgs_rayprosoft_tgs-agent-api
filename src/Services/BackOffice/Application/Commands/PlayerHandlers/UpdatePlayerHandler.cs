@@ -26,7 +26,8 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
             _agentService = agentService;
         }
 
-        public override async Task<MessageResponse> Handle(UpdatePlayerRequest request,
+        public override async Task<MessageResponse> Handle(
+            UpdatePlayerRequest request,
             CancellationToken cancellationToken)
         {
             var updatePlayerType = new[]
@@ -64,12 +65,17 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 player.AgentId = agent.Id;
             }
 
-            if (request.Type == updatePlayerType[1] &&
+            if (request.Email.IsNotNullOrEmpty() && request.Type == updatePlayerType[1] &&
                 await _service.ExistsAsync(x
                     => x.BrandId == player.BrandId && x.PlayerCode != player.PlayerCode &&
                     x.Email.ToLower() == request.Email.ToLower()))
             {
                 return CreateInvalidResponse<MessageResponse>(Player.BrandEmailDuplicate);
+            }
+
+            if (player.Phone.IsNotNullOrEmpty() && request.Phone.IsNullOrEmpty() && request.Type == updatePlayerType[1])
+            {
+                return CreateInvalidResponse<MessageResponse>(Player.PhoneRequired);
             }
 
             await _service.UpdatePlayerAsync(player, request);

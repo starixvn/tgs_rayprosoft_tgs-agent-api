@@ -2,31 +2,27 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Messages;
 using TGS.Core.Models.Settings;
-using Tgs.FileService.Clients;
 using TGS.Services.Promotion.Models.Promotion;
 
 namespace TGS.Services.Promotion.Handlers
 {
     public class UpdatePromotionHandler : Handler<UpdatePromotionRequest, MessageResponse>
     {
-        private readonly IFileServiceClient _fileServiceClient;
         private readonly IJsonSerializationProvider _jsonSerializationProvider;
         private readonly IPromotionRepository _service;
         private readonly ISettingsService _settingsService;
 
         public UpdatePromotionHandler(IPromotionRepository service, ISettingsService settingsService,
-            IJsonSerializationProvider jsonSerializationProvider, IFileServiceClient fileServiceClient,
+            IJsonSerializationProvider jsonSerializationProvider,
             IHttpContextAccessor accessor) : base(accessor)
         {
             _service = service;
             _settingsService = settingsService;
             _jsonSerializationProvider = jsonSerializationProvider;
-            _fileServiceClient = fileServiceClient;
         }
 
         public override async Task<MessageResponse> Handle(UpdatePromotionRequest request,
@@ -58,18 +54,7 @@ namespace TGS.Services.Promotion.Handlers
 
             promotion.SettlementIntervalType = promotionType.SettlementIntervalType;
 
-            var bannerImages = request.Localization.ToJson().GetMatchStrings(Consts.UploadFile.ImagePattern);
-            var contentImages = request.Content?.GetMatchStrings(Consts.UploadFile.ImagePattern);
-            var images = contentImages is null ? bannerImages : bannerImages.Union(contentImages).ToArray();
-
             await _service.UpdatePromotionAsync(promotion, request);
-
-            if (images.Length > 0)
-            {
-                await _fileServiceClient.UpdateStationLetterFileAsync(Consts.UploadFile.Promotion,
-                    promotion.Id.ToString(),
-                    new(images));
-            }
 
             return CreateValidResponse<MessageResponse>();
         }

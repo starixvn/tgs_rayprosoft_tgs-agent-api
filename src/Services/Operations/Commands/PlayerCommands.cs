@@ -79,7 +79,7 @@ namespace TGS.Services.Operations.Commands
                         DefaultWalletCurrencyCode = data.CurrencyCode,
                         RegisteredOn = createdOn,
                         LastActiveOn = createdOn,
-                        Status = PlayerStatus.Enabled,
+                        Status = data.PlayerStatus,
                         Type = data.Type,
                         BetLimitId = data.BetLimitId,
                         AgentId = data.AgentId,
@@ -135,8 +135,8 @@ namespace TGS.Services.Operations.Commands
             return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
                 new Dictionary<string, object>
                 {
-                    {":player_code", playerCode},
-                    {":login_record_id", loginRecordId}
+                    { ":player_code", playerCode },
+                    { ":login_record_id", loginRecordId }
                 });
         }
 
@@ -146,8 +146,8 @@ namespace TGS.Services.Operations.Commands
             return _repository.ExecuteSqlCommandAsync(sql, CommandType.Text,
                 new Dictionary<string, object>
                 {
-                    {":player_code", playerCode},
-                    {":platform_type", platformType}
+                    { ":player_code", playerCode },
+                    { ":platform_type", platformType }
                 });
         }
 

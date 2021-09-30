@@ -141,7 +141,10 @@ namespace TGS.Shared.Game.ApiClients.KY
             return GetAPIAsync<KYGameRecordResponse>(brandMerchant.ApiUrl, action, apiKYRequest);
         }
 
-        public ValueTask<KYApiResponse<KYGameUrlResponse>> GetGameUrlAsync(KYBrandMerchant brandMerchant, string agentId, DateTimeOffset dateTimeOffset, KYGameUrlRequest request)
+        public ValueTask<KYApiResponse<KYGameUrlResponse>> GetGameUrlAsync(
+            KYBrandMerchant brandMerchant, 
+            string agentId, 
+            DateTimeOffset dateTimeOffset, KYGameUrlRequest request)
         {
             var action = GPAction.GetGameUrl;
             request.Action = _utility.GetAction(GPAction.GetGameUrl) ?? -1;

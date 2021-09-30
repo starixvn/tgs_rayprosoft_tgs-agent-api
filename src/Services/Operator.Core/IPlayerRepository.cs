@@ -1,18 +1,27 @@
 ﻿using System;
 using System.Threading.Tasks;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Operator
 {
     public interface IPlayerRepository
     {
+        ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
+
         ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode);
 
-        ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
+        ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName);
 
-        ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
+        ValueTask<PasswordInfo> GetPlayerLoginPasswordInfoAsync(string playerCode);
+
+        ValueTask PlayerLoginIpAsync(string playerCode, string ip);
 
         ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn);
 
-        ValueTask PlayerLoginIpAsync(string playerCode, string ip);
+        ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone);
+
+        ValueTask TogglePlayerAutoTransferFlagAsync(string playerCode);
+
+        ValueTask UpdatePlayerStatusAsync(string playerCode, PlayerStatus playerStatus);
     }
 }

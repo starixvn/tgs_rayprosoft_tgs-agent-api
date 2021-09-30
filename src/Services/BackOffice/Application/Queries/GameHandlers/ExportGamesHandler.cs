@@ -8,7 +8,7 @@ using TGS.Core.Infrastructures.Utility;
 using TGS.Services.BackOffice.Application.Models.Game;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
-namespace TGS.Services.BackOffice.Application.Commands.GameHandlers
+namespace TGS.Services.BackOffice.Application.Queries.GameHandlers
 {
     public class ExportGamesHandler : Handler<ExportGamesRequest, MemoryStream>
     {

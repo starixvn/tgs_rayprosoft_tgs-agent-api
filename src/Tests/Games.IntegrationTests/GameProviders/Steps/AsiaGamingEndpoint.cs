@@ -427,7 +427,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             GameActionType type, decimal amount)
         {
             var gas = await GetGameActionsByRoundId();
-            var placeGa = gas.First(ga => ga.ExternalTransactionId.IgnoreCaseContains(playType));
+            var placeGa = gas.First(ga => ga.ExternalTransactionId.IgnoreCaseContains(playType)
+                && ga.Type == GameActionType.PlaceBet);
             var ga = gas.First(ga => ga.ReferencedGameActionId == placeGa.Id);
             ga.Type.Should().Be(type);
             ga.Amount.Should().Be(amount);

@@ -92,6 +92,16 @@ namespace TGS.Apis.ReportApi
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseRequestLocalization(options =>
+            {
+                var config = app.ApplicationServices.GetRequiredService<IConfiguration>();
+
+                options.SupportedCultures.Clear();
+                options.SupportedUICultures.Clear();
+
+                config.GetSection("RequestLocalization").Bind(options);
+            });
+
             var defaultBypassRouting = new[]
             {
                 "/health",
