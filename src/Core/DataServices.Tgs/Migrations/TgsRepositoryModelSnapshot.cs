@@ -1164,6 +1164,10 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("auto_sent_player_bonus");
 
+                    b.Property<bool>("CheckDividendActiveCount")
+                        .HasColumnType("boolean")
+                        .HasColumnName("check_dividend_active_count");
+
                     b.Property<string>("ClientId")
                         .IsRequired()
                         .HasMaxLength(128)

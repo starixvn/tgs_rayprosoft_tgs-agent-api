@@ -120,7 +120,8 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
                 UpdatedByUsername = request.EditorUsername,
                 CreatedOn = DateTimeOffset.Now,
                 UpdatedOn = DateTimeOffset.Now,
-                PlatformCharge = request.PlatformCharge
+                PlatformCharge = request.PlatformCharge,
+                CheckDividendActiveCount = request.CheckDividendActiveCount
             };
 
             brand.Languages = await GenerateBrandLanguagesAsync(brand, request);
@@ -195,6 +196,7 @@ namespace TGS.Services.BackOffice.Infrastructure.DataService
             brand.UpdatedByUsername = request.EditorUsername;
             brand.UpdatedOn = DateTimeOffset.Now;
             brand.PlatformCharge = request.PlatformCharge;
+            brand.CheckDividendActiveCount = request.CheckDividendActiveCount;
 
             await using var tran = await _repository.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
