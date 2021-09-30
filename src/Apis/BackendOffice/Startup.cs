@@ -43,6 +43,8 @@ namespace TGS.Apis.BackendOffice
                 options.SupportedUICultures.Clear();
 
                 config.GetSection("RequestLocalization").Bind(options);
+
+                options.SetDefaultCulture(config.GetValue<string>("RequestLocalization:DefaultRequestCulture"));
             });
 
             if (env.IsDevelopmentOrDocker())
@@ -62,12 +64,14 @@ namespace TGS.Apis.BackendOffice
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
-                });
+
+                endpoints.MapHealthChecks("/health",
+                    new()
+                    {
+                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
+                        ResponseWriter = (httpContext, result) =>
+                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
+                    });
 
                 endpoints.MapMetrics();
             });
@@ -90,10 +94,14 @@ namespace TGS.Apis.BackendOffice
                 var config = sp.GetRequiredService<IConfiguration>();
 
                 options.PaymentServiceBaseUrl = config.GetValue<Uri>("BackOffice:PaymentServiceBaseUrl");
+
                 options.JsonSerializerOptions = new JsonSerializerOptions
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    Converters = {new JsonStringEnumConverter()}
+                    Converters =
+                    {
+                        new JsonStringEnumConverter()
+                    }
                 };
             });
 
@@ -102,6 +110,7 @@ namespace TGS.Apis.BackendOffice
             services
                 .AddHttpContextAccessor()
                 .AddRouting(options => options.LowercaseUrls = true);
+
             services
                 .AddControllers(options =>
                 {
@@ -142,10 +151,12 @@ namespace TGS.Apis.BackendOffice
                 {
                     options.LoginPath = new("/api/auth");
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+
                     options.Events.OnRedirectToLogin = context =>
                     {
                         context.Response.Headers["Location"] = context.RedirectUri;
                         context.Response.StatusCode = 401;
+
                         return Task.CompletedTask;
                     };
                 });
@@ -159,16 +170,18 @@ namespace TGS.Apis.BackendOffice
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new()
-                {
-                    Title = "TGS BackOffice API",
-                    Version = "v1"
-                });
+                c.SwaggerDoc("v1",
+                    new()
+                    {
+                        Title = "TGS BackOffice API",
+                        Version = "v1"
+                    });
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 
                 var xml = "TGS.Apis.BackendOffice.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);
+
                 if (File.Exists(path))
                 {
                     c.IncludeXmlComments(path);

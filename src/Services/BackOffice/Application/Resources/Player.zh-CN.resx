@@ -141,4 +141,7 @@
   <data name="UpdateTypeNotFound" xml:space="preserve">
     <value>Update type is not found.</value>
   </data>
+  <data name="PhoneRequired" xml:space="preserve">
+    <value>手机号码为必填</value>
+  </data>
 </root>

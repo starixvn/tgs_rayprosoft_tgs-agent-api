@@ -276,4 +276,13 @@ resharper_suggest_var_or_type_simple_types_highlighting = hint
 [*]
 
 # ReSharper properties
+resharper_blank_lines_before_control_transfer_statements = 1
+resharper_blank_lines_before_multiline_statements = 1
+resharper_csharp_wrap_after_declaration_lpar = true
+resharper_csharp_wrap_arguments_style = chop_if_long
+resharper_csharp_wrap_parameters_style = wrap_if_long
+resharper_wrap_object_and_collection_initializer_style = chop_always
 resharper_xmldoc_indent_text = RemoveIndent
+
+# Microsoft .NET properties
+csharp_new_line_before_members_in_object_initializers = true

@@ -383,7 +383,9 @@ namespace TGS.Apis.OperatorApi.Controllers
         {
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
-            var command = new StartSetPlayerEmailCommand(playerTokenData.PlayerCode, request.Email,
+            var command = new StartSetPlayerEmailCommand(
+                playerTokenData.PlayerCode, 
+                request.Email,
                 CultureInfo.CurrentUICulture);
 
             return setPlayerEmailService.GetAsync(command);
@@ -400,12 +402,16 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartSetPhoneRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Phone)
+                || string.IsNullOrWhiteSpace(request.AreaCode))
+                throw new PlayerPhoneRequiredException();
+
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
             var command = new StartSetPlayerPhoneCommand(
                 playerTokenData.PlayerCode,
-                request.AreaCode,
-                request.Phone,
+                request.AreaCode.Trim(),
+                request.Phone.Trim(),
                 CultureInfo.CurrentUICulture);
 
             return startSetPlayerPhoneService.GetAsync(command);
@@ -428,6 +434,10 @@ namespace TGS.Apis.OperatorApi.Controllers
             [FromServices] IGetService<StartSetPlayerPhoneCommand, string> startSetPlayerPhoneService,
             [FromBody] StartInitPhoneRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Phone)
+                || string.IsNullOrWhiteSpace(request.AreaCode))
+                throw new PlayerPhoneRequiredException();
+
             var brandId = HttpContext.Items.GetBrandId();
 
             var playerInfo = await getPlayerInfoService
@@ -450,8 +460,8 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var startSetPlayerPhoneCommand = new StartSetPlayerPhoneCommand(
                 playerInfo.PlayerCode,
-                request.AreaCode,
-                request.Phone,
+                request.AreaCode.Trim(),
+                request.Phone.Trim(),
                 CultureInfo.CurrentUICulture);
 
             return await startSetPlayerPhoneService
