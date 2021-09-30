@@ -249,14 +249,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                     PlayerToken = info.PlayerToken
                 };
             }
-            catch (CoreExceptions.PlayerNotFoundException)
-            {
-                throw new CoreExceptions.PlayerNotFoundException(request.Username, Player.NotFound);
-            }
-            catch (CoreExceptions.InvalidCredentialsException)
-            {
-                throw new CoreExceptions.InvalidCredentialsException(Player.PasswordMismatched);
-            }
             catch (Exception ex)
             {
                 switch (ex)
