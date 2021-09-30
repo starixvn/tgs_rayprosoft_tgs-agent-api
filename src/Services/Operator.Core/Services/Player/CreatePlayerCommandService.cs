@@ -99,7 +99,7 @@ namespace TGS.Services.Operator.Services.Player
                 var player = await _playerOperations.GetPlayerByCodeAsync(resultPlayerCode)
                     .ConfigureAwait(false);
 
-                await _playerRepository.PlayerLoginIpAsync(resultPlayerCode, query.IpAddress)
+                await _playerRepository.PlayerRegisterIpAsync(resultPlayerCode, query.IpAddress, player.RegisteredOn)
                     .ConfigureAwait(false);
             }
 
