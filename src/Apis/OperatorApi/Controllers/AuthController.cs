@@ -19,6 +19,7 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost("jwt")]
         [AllowAnonymous]
+
         public async Task<AuthResponse> AuthenticateAsync(
             [FromServices] IGetService<GetAuthQuery, AuthInfo> getAuthQueryService,
             [FromBody] AuthRequest request)
@@ -33,15 +34,13 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            var responseFeature = HttpContext.Features.Get<IHttpResponseFeature>();
-
-            responseFeature.StatusCode = StatusCodes.Status503ServiceUnavailable;
-
-            return new AuthResponse()
-            {
-                Token = info.Token,
-                ExpiredOn = info.ExpiredOn
-            };
+            return await this.FailAsync<AuthResponse, AuthResponse>(
+                StatusCodes.Status503ServiceUnavailable,
+                new AuthResponse()
+                {
+                    Token = info.Token,
+                    ExpiredOn = info.ExpiredOn
+                });
         }
     }
 }
