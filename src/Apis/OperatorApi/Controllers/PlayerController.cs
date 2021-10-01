@@ -11,14 +11,12 @@ using TGS.Apis.OperatorApi.Models;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Infrastructures.WebApiServices;
-using TGS.Core.Models.Exceptions;
 using TGS.IdentityVerifiers;
 using TGS.Services.Operations;
 using TGS.Services.Operator;
 using TGS.Services.Operator.Services.Player;
 using TGS.ServiceUtility;
 using CoreExceptions = TGS.Core.Models.Exceptions;
-using PlayerNotFoundException = TGS.Core.Models.Exceptions.PlayerNotFoundException;
 
 namespace TGS.Apis.OperatorApi.Controllers
 {
@@ -218,19 +216,22 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<LoginResponse> LoginAsync(
             [FromServices] IRequestAnalyzer requestAnalyzer,
-            [FromServices] ICommandService<CheckPlayerBannedCommand> commandService,
+            [FromServices] IGetService<CheckPlayerBannedQuery, bool> getService,
             [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
             [FromBody] LoginRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
+            var isBanned = await getService
+                    .GetAsync(new CheckPlayerBannedQuery(brandId, request.Username))
+                    .ConfigureAwait(false);
+
+            if (isBanned)
+                throw new UserBannedException();
+
             try
             {
                 var ipAddress = requestAnalyzer.GetIp(HttpContext);
-
-                await commandService
-                    .ExecuteAsync(new CheckPlayerBannedCommand(brandId, request.Username))
-                    .ConfigureAwait(false);
 
                 var query = new LoginCommand(
                     brandId,
@@ -384,7 +385,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
             var command = new StartSetPlayerEmailCommand(
-                playerTokenData.PlayerCode, 
+                playerTokenData.PlayerCode,
                 request.Email,
                 CultureInfo.CurrentUICulture);
 
