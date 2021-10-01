@@ -12,7 +12,7 @@ namespace TGS.Apis.OperatorApi.Validators
                 .NotEmpty()
                 .WithName(x => GetJsonPropertyName(x, nameof(x.Username)))
                 .Length(6, 32)
-                .SetValidator(new RegularExpressionValidator("^[0-9a-zA-Z]+$"));
+                .SetValidator(new RegularExpressionValidator<CreatePlayerRequest>("^[0-9a-zA-Z]+$"));
 
             RuleFor(x => x.CurrencyCode)
                 .NotEmpty()

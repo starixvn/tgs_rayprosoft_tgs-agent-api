@@ -10,7 +10,6 @@ namespace TGS.Core.Infrastructures.Prometheus
                .Customize()
                .WithContentionStats(sampleRate: SampleEvery.FiveEvents)
                .WithJitStats(sampleRate: SampleEvery.TenEvents)
-               .WithThreadPoolSchedulingStats(sampleRate: SampleEvery.HundredEvents)
                .WithThreadPoolStats()
                .WithGcStats()
                .WithExceptionStats()

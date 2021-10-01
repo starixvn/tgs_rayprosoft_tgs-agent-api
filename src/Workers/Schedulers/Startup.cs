@@ -11,7 +11,6 @@ using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Hangfire;
 using TGS.Core.Infrastructures.Hangfire.Filters;
 using TGS.Core.Infrastructures.HealthChecks;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Mail;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
@@ -54,13 +53,7 @@ namespace TGS.Workers.Schedulers
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseHangfireScheduler(new[]
-            {
-                Consts.Queue.Schedule,
-                Consts.Queue.GameProvider,
-                Consts.Queue.Report,
-                Consts.Queue.ArrearsEmail
-            });
+            app.UseHangfireScheduler();
 
             app.UseRouting();
 
@@ -126,6 +119,19 @@ namespace TGS.Workers.Schedulers
                     .ProcessAllSubjects();
             });
 
+            services.AddHangfireServer((sp, options) =>
+            {
+                var setting = sp.GetRequiredService<HangfireSettings>();
+                options.Queues = new[]
+                {
+                    Consts.Queue.Schedule,
+                    Consts.Queue.GameProvider,
+                    Consts.Queue.Report,
+                    Consts.Queue.ArrearsEmail
+                };
+
+                options.SchedulePollingInterval = TimeSpan.FromSeconds(setting.Schedule.SchedulePollingInterval);
+            });
             services.AddControllers();
 
             services.AddGameProvidersMognoRepository((options, sp) =>
@@ -162,7 +168,7 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<IPromotionSettlementMonthlyWorkerService, PromotionSettlementMonthlyWorkerService>();
             services.AddTransient<IFillPlayerBucketMinutelyWorkerService, FillPlayerBucketMinutelyWorkerService>();
 
-            // GameProviders Services 
+            // GameProviders Services
             services.AddTransient<IBigGamingGameProviderFishingService, BigGamingGameProviderFishingService>();
             services.AddTransient<IKYGameProviderService, KYGameProviderService>();
             services.AddTransient<IVRGameProviderService, VRGameProviderService>();
@@ -172,8 +178,8 @@ namespace TGS.Workers.Schedulers
             services.AddTransient<ITCGGameProviderService, TCGGameProviderService>();
         }
 
-        private static Type[] GetModuleTypes() =>
-            new[]
+        private static Type[] GetModuleTypes()
+            => new[]
             {
                 typeof(AggregateJobManagement),
                 typeof(RebateAndDividendJobManagement),
