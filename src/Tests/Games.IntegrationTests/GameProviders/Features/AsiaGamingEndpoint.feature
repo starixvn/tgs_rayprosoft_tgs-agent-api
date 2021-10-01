@@ -2,7 +2,7 @@
 @AsiaGaming
 
 Feature: AsiaGaming Endpoint
-	Test AsiaGaming Endpoint
+    Test AsiaGaming Endpoint
 
 Scenario: 01.a - Place desktop bet
     Given player "RP01cny" of brand "GPI" with "CNY" login via "Desktop"
@@ -21,7 +21,7 @@ Scenario: 01.b - Place mobile bet
         And game action will be recorded in the database of type "PlaceBet" for $-10
         
 Scenario: 01.c - Player cannot place bet without login
-	Given player "RP01cny" of brand "GPI" without login
+    Given player "RP01cny" of brand "GPI" without login
         And player having balance of $100
     When I place bet of $10 for game "AGIN_DSP_BAC"
     Then I will receive bet response of INVALID_SESSION and balance of $0
@@ -65,7 +65,7 @@ Scenario: 02.b - Lock mobile bet
         And game action will be recorded in the database of type "LockAmount" for $-10
         
 Scenario: 02.c - Player cannot lock bet without login
-	Given player "RP01cny" of brand "GPI" without login
+    Given player "RP01cny" of brand "GPI" without login
         And player having balance of $100
     When I place bet of $10 for game "AGIN_DSP_ROU"
     Then I will receive bet response of INVALID_SESSION and balance of $0
@@ -98,9 +98,9 @@ Scenario: 03.a - Bet response for ROU game
         And I place bet of $10 for game "AGIN_DSP_ROU"
         And balance now being $90
     When I send bet response
-		| PlayType | Amount | Val |
-		| 101      | 4      | 1   |
-		| 103      | 6      |     |
+        | PlayType | Amount | Val |
+        | 101      | 4      | 1   |
+        | 103      | 6      |     |
     Then I will receive bet response of OK and balance of $0
         And player wallet database record will be for $90
         And round will have record of type "LockAmount" in the database for $-10
@@ -181,13 +181,13 @@ Scenario: 04.g - Settle bet for ROU game
         And I place bet of $10 for game "AGIN_DSP_ROU"
         And balance now being $90
         And I send bet response
-		| PlayType | Amount | Val |
-		| 101      | 4      | 1   |
-		| 103      | 6      |     |
+        | PlayType | Amount | Val |
+        | 101      | 4      | 1   |
+        | 103      | 6      |     |
     When I settle bet
-		| PlayType | WinAmount | RoundFinish |
-		| 101      | 8         | false       |
-		| 103      | -6        | true        |
+        | PlayType | WinAmount | RoundFinish |
+        | 101      | 8         | false       |
+        | 103      | -6        | true        |
     Then I will receive bet response of OK and balance of $102
         And player wallet database record will be for $102
         And game action id contains 101 will be recorded in the database of type "WinBet" for $12
@@ -199,13 +199,13 @@ Scenario: 04.h - Settle all lose bet for ROU game
         And I place bet of $10 for game "AGIN_DSP_ROU"
         And balance now being $90
         And I send bet response
-		| PlayType | Amount | Val |
-		| 101      | 4      | 1   |
-		| 103      | 6      |     |
+        | PlayType | Amount | Val |
+        | 101      | 4      | 1   |
+        | 103      | 6      |     |
     When I settle bet
-		| PlayType | WinAmount | RoundFinish |
-		| 101      | -4        | false       |
-		| 103      | -6        | true        |
+        | PlayType | WinAmount | RoundFinish |
+        | 101      | -4        | false       |
+        | 103      | -6        | true        |
     Then I will receive bet response of OK and balance of $90
         And player wallet database record will be for $90
         And game action id contains 101 will be recorded in the database of type "LoseBet" for $0
@@ -251,4 +251,4 @@ Scenario: 05.d - Cancel transaction for ROU game
         And player wallet database record will be for $100
         And game action will be recorded in the database of type "CancelTransaction" for $10
         And the round will be closed
-	
+    
