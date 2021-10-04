@@ -38,17 +38,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             fakePlayerQueries
                 .GetSaltAndPasswordByPlayerCodeAsync(Arg.Any<string>())
-                .Returns((Salt: new byte[]
-                {
-                    1,
-                    2,
-                    3
-                }, Password: new byte[]
-                {
-                    4,
-                    5,
-                    6
-                }));
+                .Returns((
+                    Salt: new byte[] { 1, 2, 3 },
+                    Password: new byte[] { 4, 5, 6 }));
 
             var fakePasswordHandler = Substitute.For<IPasswordHandler>();
 
@@ -65,17 +57,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(true);
             fakePasswordHandler
                 .GenerateCredential(Arg.Is(query.NewPassword))
-                .Returns((Salt: new byte[]
-                {
-                    1,
-                    2,
-                    3
-                }, HashedPassword: new byte[]
-                {
-                    4,
-                    5,
-                    6
-                }));
+                .Returns((
+                    Salt: new byte[] { 1, 2, 3 },
+                    HashedPassword: new byte[] { 4, 5, 6 }));
 
             var expected = playerCode;
 
@@ -90,25 +74,93 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
-        public void Forgot_Password_Not_Found_Player_By_Phone_Will_Throw_Exception()
+        public async Task Forgot_Password_By_Sms_Will_Send_Message()
         {
-            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
-            dbContextOptionsBuilder
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-
-            var fakeTgsRepository = new TgsRepository(dbContextOptionsBuilder.Options);
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
             var fakeSysRepository = Substitute.For<ISysRepository>();
             var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
-            var sut = new ForgotPasswordCommandService(
-                fakeTgsRepository,
-                Substitute.For<IValidateCodeGenerator>(),
-                Substitute.For<IValidateCodeOperator>(),
+            var sut = new ForgotPasswordBySmsCommandService(
+                fakePlayerRepository,
+                fakeValidateCodeGenerator,
+                fakeValidateCodeOperator,
                 fakeSysRepository,
                 fakeSmsServiceClient);
 
-            var command = new ForgotPasswordCommand(CultureInfo.GetCultureInfo("en-US"), "0911123456");
+            var command = new ForgotPasswordBySmsCommand(
+                Guid.NewGuid(),
+                CultureInfo.GetCultureInfo("en-US"),
+                "886",
+                "0912345678");
+
+            fakePlayerRepository
+                .FindPlayerInfoByPhoneAsync(
+                    Arg.Is(command.BrandId),
+                    Arg.Is(command.AreaCode),
+                    Arg.Is(command.Phone))
+                .Returns(new PlayerInfo(
+                    "TestCode",
+                    command.BrandId,
+                    1000M,
+                    false,
+                    true,
+                    command.Phone,
+                    command.AreaCode,
+                    null));
+
+            var validateCode = "123456";
+            var token = "abc123";
+
+            fakeValidateCodeGenerator.GenerateCode().Returns(validateCode);
+            fakeValidateCodeGenerator.GenerateSecurityKey().Returns(token);
+
+            fakeValidateCodeOperator
+                .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
+                .Returns(true);
+
+            fakeSysRepository.GetBrandInfoAsync(Arg.Is(command.BrandId))
+                .Returns(new BrandInfo(
+                    command.BrandId,
+                    "brandCode",
+                    new Uri("http://img.org/1.png"),
+                    new Uri("http://img.org/2.png"),
+                    new Uri("http://img.org/3.png"),
+                    true));
+
+            var expected = $"Your ID verification code is : {validateCode}";
+
+            await sut.GetAsync(command);
+
+            _ = fakeSmsServiceClient.Received(1)
+                .SendShortMessageAsync(
+                    Arg.Is($"{command.AreaCode}{command.Phone}"),
+                    Arg.Is(expected),
+                    Arg.Is(command.BrandId));
+        }
+
+        [Test]
+        public void Forgot_Password_Not_Found_Player_By_Phone_Will_Throw_Exception()
+        {
+            var fakePlayerRepository = Substitute.For<IPlayerRepository>();
+            var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
+            var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
+            var fakeSysRepository = Substitute.For<ISysRepository>();
+            var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
+
+            var sut = new ForgotPasswordBySmsCommandService(
+                fakePlayerRepository,
+                fakeValidateCodeGenerator,
+                fakeValidateCodeOperator,
+                fakeSysRepository,
+                fakeSmsServiceClient);
+
+            var command = new ForgotPasswordBySmsCommand(
+                Guid.NewGuid(),
+                CultureInfo.GetCultureInfo("en-US"),
+                "886",
+                "0912345678");
 
             Assert.ThrowsAsync<PlayerNotFoundException>(async () => await sut.GetAsync(command));
         }
@@ -140,17 +192,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
-            var fakeSysRepository = Substitute.For<ISysRepository>();
-            var fakeSmsServiceClient = Substitute.For<ISmsServiceClient>();
 
-            var sut = new ForgotPasswordCommandService(
+            var sut = new ForgotPasswordByMailCommandService(
                 fakeTgsRepository,
                 fakeValidateCodeGenerator,
-                fakeValidateCodeOperator,
-                fakeSysRepository,
-                fakeSmsServiceClient);
+                fakeValidateCodeOperator);
 
-            var command = new ForgotPasswordCommand(CultureInfo.GetCultureInfo("en-US"), email);
+            var command = new ForgotPasswordByMailCommand(CultureInfo.GetCultureInfo("en-US"), email);
 
             var validateCode = "123456";
             var token = "abc123";
@@ -161,17 +209,6 @@ namespace TGS.Tests.OperatorApi.UnitTests
             fakeValidateCodeOperator
                 .SaveValidateDataAsync(Arg.Is(validateCode), Arg.Is(token), Arg.Any<ValidateCodeData>())
                 .Returns(true);
-
-            fakeSysRepository.GetBrandInfoAsync(Arg.Any<Guid>())
-                .Returns(new BrandInfo(
-                    player.BrandId,
-                    "brandCode",
-                    new Uri("http://img.org/1.png"),
-                    new Uri("http://img.org/2.png"),
-                    new Uri("http://img.org/3.png"),
-                    false));
-
-            var expected = $"Your ID verification code is : {validateCode}";
 
             await sut.GetAsync(command);
 

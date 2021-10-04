@@ -6,6 +6,8 @@ namespace TGS.Services.Operator
 {
     public interface IPlayerRepository
     {
+        ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone);
+
         ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode);
 
         ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode);
