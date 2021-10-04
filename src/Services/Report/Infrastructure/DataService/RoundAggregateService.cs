@@ -26,7 +26,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
         Task<bool> ExistsAsync(Expression<Func<RoundAggregate, bool>> predicate);
 
         Task<(PlayerAggregateModel[] playerAggregates, PlayerGameTypeAggregateModel[] playerAggregateByGameType)>
-            GetPlayerAggregatesAsync(DateTimeOffset start,
+            GetPlayerAggregatesAsync(
+                DateTimeOffset start,
                 DateTimeOffset end);
     }
 
@@ -75,8 +76,12 @@ namespace TGS.Services.Report.Infrastructure.DataService
             > IRoundAggregateService.
             GetPlayerAggregatesAsync(DateTimeOffset start, DateTimeOffset end)
         {
-            var reportDate = new DateTimeOffset(start.Year, start.Month, start.Day, 0,
-                0, 0,
+            var reportDate = new DateTimeOffset(start.Year,
+                start.Month,
+                start.Day,
+                0,
+                0,
+                0,
                 start.Offset);
 
             var roundAggregates =
@@ -85,7 +90,9 @@ namespace TGS.Services.Report.Infrastructure.DataService
                     false).ToArrayAsync();
 
             var playerAggregates = await _tgsRepository.Players.Include(x => x.Agent)
-                .GroupJoin(_tgsRepository.Transactions, p => p.PlayerCode, t => t.Wallet.PlayerCode,
+                .GroupJoin(_tgsRepository.Transactions,
+                    p => p.PlayerCode,
+                    t => t.Wallet.PlayerCode,
                     (p, t) => new
                     {
                         p.BrandId,
@@ -115,12 +122,16 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             AgentId = x.AgentId,
                             PlayerCode = x.PlayerCode,
                             RegisteredCount =
-                                players.Count(p =>
-                                    p.Player.RegisteredOn >= start && p.Player.RegisteredOn < end),
+                                players.Any(p =>
+                                    p.Player.RegisteredOn >= start && p.Player.RegisteredOn < end)
+                                    ? 1
+                                    : 0,
                             FirstFundInCount =
-                                players.Count(p =>
+                                players.Any(p =>
                                     p.Player.FirstDepositOn >= start &&
-                                    p.Player.FirstDepositOn < end),
+                                    p.Player.FirstDepositOn < end)
+                                    ? 1
+                                    : 0,
                             DepositAmount =
                                 players.Where(p =>
                                     p.transaction.Type == TransactionType.Deposit &&
@@ -157,16 +168,20 @@ namespace TGS.Services.Report.Infrastructure.DataService
                 playerAggregate.BetAmount =
                     playerRoundAggregates
                         .Sum(r => r.BetAmount);
+
                 playerAggregate.Turnover =
                     playerRoundAggregates
                         .Sum(r => r.Turnover);
+
                 playerAggregate.WinLossAmount = playerRoundAggregates
                     .Sum(r => r.WinLoss);
             }
 
             var playerAggregateByGameType = roundAggregates.GroupJoin(
                     _tgsRepository.Players.Include(x => x.Agent).Include(x => x.Vip),
-                    r => r.PlayerCode, p => p.PlayerCode, (r, p) => new
+                    r => r.PlayerCode,
+                    p => p.PlayerCode,
+                    (r, p) => new
                     {
                         r,
                         p = p.DefaultIfEmpty()
@@ -213,7 +228,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             VipRebateAmount =
                                 x.Vip == null
                                     ? 0M
-                                    : GetPlayerRebateAmountByGameType(x.Vip, x.GameType,
+                                    : GetPlayerRebateAmountByGameType(x.Vip,
+                                        x.GameType,
                                         aggregate.Select(a => a.r)),
                             CreatedOn = DateTimeOffset.Now,
                             ReportDate = reportDate
@@ -231,7 +247,8 @@ namespace TGS.Services.Report.Infrastructure.DataService
             return (playerAggregates, playerAggregateByGameType);
         }
 
-        private static decimal GetPlayerRebateAmountByGameType(VipLevel vip, GameType type,
+        private static decimal GetPlayerRebateAmountByGameType(
+            VipLevel vip, GameType type,
             IEnumerable<RoundAggregate> roundAggregates)
         {
             switch (type)
