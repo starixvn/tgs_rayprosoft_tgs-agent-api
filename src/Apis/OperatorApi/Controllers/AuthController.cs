@@ -1,8 +1,6 @@
 ﻿using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
@@ -19,7 +17,6 @@ namespace TGS.Apis.OperatorApi.Controllers
     {
         [HttpPost("jwt")]
         [AllowAnonymous]
-
         public async Task<AuthResponse> AuthenticateAsync(
             [FromServices] IGetService<GetAuthQuery, AuthInfo> getAuthQueryService,
             [FromBody] AuthRequest request)
@@ -34,13 +31,11 @@ namespace TGS.Apis.OperatorApi.Controllers
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            return await this.FailAsync<AuthResponse, AuthResponse>(
-                StatusCodes.Status503ServiceUnavailable,
-                new AuthResponse()
-                {
-                    Token = info.Token,
-                    ExpiredOn = info.ExpiredOn
-                });
+            return new AuthResponse()
+            {
+                Token = info.Token,
+                ExpiredOn = info.ExpiredOn
+            };
         }
     }
 }
