@@ -48,7 +48,7 @@ namespace TGS.Services.Report.Application.Commands.RoundAggregate
                     0, 0, previousHour.Offset).AddHours(1);
 
                 if (await _roundAggregateService.ExistsAsync(x =>
-                    x.ReportDate == previousHour && x.Hour == start.Hour))
+                    x.ReportDate == theDay && x.Hour == start.Hour))
                 {
                     return CreateInvalidResponse<MessageResponse>($"{theDay.Date} {start.Hour} is already existed.");
                 }

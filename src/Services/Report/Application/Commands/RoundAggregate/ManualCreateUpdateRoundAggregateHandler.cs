@@ -29,7 +29,6 @@ namespace TGS.Services.Report.Application.Commands.RoundAggregate
         public override async Task<MessageResponse> Handle(ManualCreateRoundAggregateModel request,
             CancellationToken cancellationToken)
         {
-            var id = DateTimeOffset.Now.ToUnixTimeMilliseconds().ToString();
             DateTimeOffset reportDate;
 
             if (request.Date.IsNotNullOrEmpty() &&
