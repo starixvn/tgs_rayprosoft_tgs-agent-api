@@ -55,8 +55,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .HasMaxLength(16)
                 .IsRequired();
 
-            builder.Property(c => c.RegisteredOn)
-                .IsRequired();
+            builder.Property(c => c.RegisteredOn);
 
             builder.Property(c => c.LastActiveOn)
                 .IsRequired();
