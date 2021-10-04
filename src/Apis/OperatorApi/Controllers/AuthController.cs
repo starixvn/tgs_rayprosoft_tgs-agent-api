@@ -1,6 +1,10 @@
-﻿using System.Net.Mime;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Mime;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.OperatorApi.Models.Messages;
 using TGS.Services.Operator;
@@ -18,24 +22,46 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPost("jwt")]
         [AllowAnonymous]
         public async Task<AuthResponse> AuthenticateAsync(
-            [FromServices] IGetService<GetAuthQuery, AuthInfo> getAuthQueryService,
+            [FromServices] IGetService<GetAuthQuery, ClaimsIdentity> getAuthQueryService,
+            [FromServices] IMaintenanceRedisRepository maintenanceRedisService,
+            [FromServices] IGetService<MakeBrandAuthTokenCommand, AuthInfo> makeTokenService,
             [FromBody] AuthRequest request)
         {
             var query = new GetAuthQuery(
                 request.ApiKey,
-                Consts.ClaimName.Currency,
-                request.Currency,
-                Consts.Site);
+                request.Currency);
 
-            var info = await getAuthQueryService
+            var id = await getAuthQueryService
                 .GetAsync(query)
                 .ConfigureAwait(false);
 
-            return new AuthResponse()
-            {
-                Token = info.Token,
-                ExpiredOn = info.ExpiredOn
-            };
+            var brandId = Guid.Parse(id.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
+
+            var isMaintenance = string.IsNullOrEmpty(
+                await maintenanceRedisService
+                    .GetBrandMaintenanceAsync(brandId)
+                    .ConfigureAwait(false));
+
+            var tokenInfo = await makeTokenService.GetAsync(
+                new MakeBrandAuthTokenCommand(
+                    brandId,
+                    id,
+                    Consts.Site)).ConfigureAwait(false);
+
+            if (isMaintenance)
+                return this.Fail<AuthResponse, AuthResponse>(
+                    StatusCodes.Status503ServiceUnavailable,
+                    new AuthResponse()
+                    {
+                        Token = tokenInfo.Token,
+                        ExpiredOn = tokenInfo.ExpiredOn
+                    });
+            else
+                return new AuthResponse()
+                {
+                    Token = tokenInfo.Token,
+                    ExpiredOn = tokenInfo.ExpiredOn
+                };
         }
     }
 }
