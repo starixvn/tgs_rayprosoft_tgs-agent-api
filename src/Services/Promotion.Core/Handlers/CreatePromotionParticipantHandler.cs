@@ -25,14 +25,17 @@ namespace TGS.Services.Promotion.Handlers
             ILogger<CreatePromotionParticipantHandler> logger) : base(accessor)
         {
             _promotionRepository = promotionRepository ?? throw new ArgumentNullException(nameof(promotionRepository));
+
             _promotionParticipantRepository = promotionParticipantRepository ??
                 throw new ArgumentNullException(nameof(promotionParticipantRepository));
+
             _promotionType = promotionType ??
                 throw new ArgumentNullException(nameof(promotionType));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public override async Task<MessageResponse> Handle(CreatePromotionParticipantRequest request,
+        public override async Task<MessageResponse> Handle(
+            CreatePromotionParticipantRequest request,
             CancellationToken cancellationToken)
         {
             var promotion = await _promotionRepository
@@ -63,6 +66,12 @@ namespace TGS.Services.Promotion.Handlers
                     $"Promotion({request.PromotionId}) Type({Consts.PromotionGroupType.Deposit}) invalid.");
 
                 return CreateInvalidResponse<MessageResponse>($"{Consts.PromotionGroupType.Deposit} invalid");
+            }
+
+            if (await _promotionParticipantRepository.ExistsAsync(x
+                => x.PlayerCode == request.PlayerCode && x.PromotionId == request.PromotionId))
+            {
+                return CreateValidResponse<MessageResponse>();
             }
 
             await _promotionParticipantRepository.CreatePromotionParticipantAsync(request.PromotionId,
