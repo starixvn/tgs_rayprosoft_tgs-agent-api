@@ -541,11 +541,15 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPut("init-phone")]
         public ValueTask SubmitInitPhoneAsync(
             [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
+            [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromBody] SubmitInitPhoneRequest request)
         {
+            var ipAddress = requestAnalyzer.GetIp(HttpContext);
+
             var command = new CommitPlayerInitPhoneCommand(
                 request.SecurityKey,
-                request.ValidateCode);
+                request.ValidateCode,
+                ipAddress);
 
             return commitPlayerInitPhoneService.ExecuteAsync(command);
         }
