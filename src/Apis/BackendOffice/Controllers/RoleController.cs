@@ -363,12 +363,15 @@ namespace TGS.Apis.BackendOffice.Controllers
                     return CreateInvalidResponse<GetRoleResponse>(Resources.Role.BrandRootExisted);
 
                 case true when request.RoleType == RoleType.Licensee &&
-                    await _roleQueries.GetCountAsync(x => x.IsRoot && x.LicenseeId == request.LicenseeId) >
+                    await _roleQueries.GetCountAsync(x
+                        => x.IsRoot && x.LicenseeId == request.LicenseeId && x.BrandId == null) >
                     0:
                     return CreateInvalidResponse<GetRoleResponse>(Resources.Role.LicenseeRootExisted);
 
                 case true when request.RoleType == RoleType.Reseller &&
-                    await _roleQueries.GetCountAsync(x => x.IsRoot && x.ResellerId == request.ResellerId) >
+                    await _roleQueries.GetCountAsync(x
+                        => x.IsRoot && x.ResellerId == request.ResellerId && x.LicenseeId == null &&
+                        x.BrandId == null) >
                     0:
                     return CreateInvalidResponse<GetRoleResponse>(Resources.Role.ResellerRootExisted);
 
