@@ -42,6 +42,7 @@ using TGS.Services.Operations.Extensions;
 using TGS.Services.Operator.ValidateCode;
 using TGS.Services.PluggableServices.Extensions;
 using GlobalConsts = TGS.Core.Models.Consts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TGS.Apis.OperatorApi
 {
@@ -196,13 +197,14 @@ namespace TGS.Apis.OperatorApi
                 {
                     options.Filters.Add<CheckPlayerEnabledFilter>();
                     options.Filters.Add<ValidateModelFilter>();
+                    options.AddWebApiToolkitFilters();
                     options.Filters.Add<TgsResponseWrapperAttribute>();
                 })
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
                 {
                     c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Scoped);
-                    c.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
+                    c.DisableDataAnnotationsValidation = true;
                     c.LocalizationEnabled = false;
                     c.ImplicitlyValidateChildProperties = true;
                 });
@@ -274,6 +276,7 @@ namespace TGS.Apis.OperatorApi
                     c.OperationFilter<SwaggerHeaderFilter>();
                     c.SchemaFilter<SwaggerEnumDescriptionFilter>();
                     c.OperationFilter<SwaggerTgsResponseWrapperFilter>();
+                    c.ApplyWebApiToolkitSupport();
 
                     var xml = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                     var path = Path.Combine(AppContext.BaseDirectory, xml);

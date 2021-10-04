@@ -162,7 +162,7 @@ namespace TGS.Apis.AgentApi
                 .AddFluentValidation(c =>
                 {
                     c.RegisterValidatorsFromAssemblyContaining<Startup>(lifetime: ServiceLifetime.Scoped);
-                    c.RunDefaultMvcValidationAfterFluentValidationExecutes = false;
+                    c.DisableDataAnnotationsValidation = true;
                     c.LocalizationEnabled = false;
                     c.ImplicitlyValidateChildProperties = true;
                 });

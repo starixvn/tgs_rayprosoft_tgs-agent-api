@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
+using FluentAssertions.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using TGS.Core.Infrastructures.Redis;
@@ -97,12 +98,12 @@ namespace TGS.Tests.Redis.IntegrationTests
             var database = _redisRepository.GetDb();
             var value = await database.StringGetWithExpiryAsync(cacheKey);
             var expiresIn = RedisCacheManager.CapExpiry(null);
-            value.Expiry.Should().BeCloseTo(expiresIn, 100);
+            value.Expiry.Should().BeCloseTo(expiresIn, 100.Milliseconds());
 
             expiresIn = TimeSpan.FromSeconds(20);
             await _cacheManager.SetKeyExpirationInAsync(CacheType, key, expiresIn);
             value = await database.StringGetWithExpiryAsync(cacheKey);
-            value.Expiry.Should().BeCloseTo(expiresIn, 100);
+            value.Expiry.Should().BeCloseTo(expiresIn, 100.Milliseconds());
         }
 
         [Test]
@@ -115,12 +116,12 @@ namespace TGS.Tests.Redis.IntegrationTests
             await _cacheManager.CacheAsync(CacheType, key, expiresIn, NewData);
             var database = _redisRepository.GetDb();
             var value = await database.StringGetWithExpiryAsync(cacheKey);
-            value.Expiry.Should().BeCloseTo(expiresIn, 100);
+            value.Expiry.Should().BeCloseTo(expiresIn, 100.Milliseconds());
 
             expiresIn = TimeSpan.FromSeconds(30);
             await _cacheManager.SetKeyExpirationInAsync(CacheType, key, expiresIn);
             value = await database.StringGetWithExpiryAsync(cacheKey);
-            value.Expiry.Should().BeCloseTo(expiresIn, 100);
+            value.Expiry.Should().BeCloseTo(expiresIn, 100.Milliseconds());
         }
 
         [Test]
