@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using NSubstitute;
@@ -14,33 +15,51 @@ namespace TGS.Tests.OperatorApi.UnitTests
     public class AuthTests
     {
         [Test]
-        public async Task Get_Token_Should_Success()
+        public async Task Can_Get_Identity_By_ApiKey()
         {
-            //arrange
             var fakeBrandOperations = Substitute.For<IBrandOperations>();
             var fakeStatusValidator = Substitute.For<IStatusValidator>();
-            var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
-
-            var apiKey = "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ";
-            var claimNameCurrency = "curr";
-            var currency = "CNY";
-            var site = "operator-api";
-
-            var query = new GetAuthQuery(apiKey, claimNameCurrency, currency, site);
 
             var sut = new GetAuthQueryService(
                 fakeBrandOperations,
-                fakeStatusValidator,
-                fakeJwtTokenHandler);
+                fakeStatusValidator);
 
-            //act
-            await sut.GetAsync(query);
+            var apiKey = "I7nKiimrZQOqnJ6ryjUw74c0Hi64KC6Myunhob4cHh8VOUIuZh4p63czefxyyzbZ";
+            var currency = "CNY";
 
-            //assert
-            _ = fakeJwtTokenHandler
-                .Received(1)
-                .GenerateToken(Arg.Any<ClaimsIdentity>(), Arg.Any<byte[]>(),
-                query.Site, Arg.Any<DateTime>());
+            var query = new GetAuthQuery(apiKey, currency);
+
+            var actual = await sut.GetAsync(query);
+
+            _ = fakeBrandOperations.Received(1)
+                .GetBrandIdByApiKeyAsync(Arg.Is(apiKey));
+
+            Assert.IsNotNull(actual);
+        }
+
+        [Test]
+        public async Task Can_Make_Token()
+        {
+            var fakeBrandOperations = Substitute.For<IBrandOperations>();
+            var fakeJwtTokenHandler = Substitute.For<IJwtTokenHandler>();
+
+            var sut = new MakeBrandAuthTokenCommandService(fakeJwtTokenHandler, fakeBrandOperations);
+
+            var brandId = Guid.NewGuid();
+            var currency = "CNY";
+            var identity = new ClaimsIdentity(
+                new[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, brandId.ToString()),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim("curr", currency)
+                });
+
+            var command = new MakeBrandAuthTokenCommand(brandId, identity, "operator-api");
+
+            var actual = await sut.GetAsync(command);
+
+            Assert.IsNotNull(actual);
         }
     }
 }
