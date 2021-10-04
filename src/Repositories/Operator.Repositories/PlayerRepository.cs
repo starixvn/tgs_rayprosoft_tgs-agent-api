@@ -128,6 +128,14 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
         {
+            var player = await _tgsRepository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            player.RegisteredOn = registeredOn;
+            player.UpdatedByUsername = playerCode;
+            player.UpdatedOn = DateTimeOffset.UtcNow;
+
             var datas = new PlayerIpRecord[] {
                 new() {
                     PlayerCode = playerCode,
@@ -142,8 +150,14 @@ namespace TGS.Operator.Repositories
                     Ip = ip,
                     RecordOn = registeredOn
                 } };
-            await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+
+            await _tgsRepository.PlayerIpRecords
+                .AddRangeAsync(datas)
+                .ConfigureAwait(false);
+
+            await _tgsRepository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
         }
 
         public async ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone)

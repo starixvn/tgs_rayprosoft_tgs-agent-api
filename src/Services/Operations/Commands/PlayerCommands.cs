@@ -9,7 +9,6 @@ using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -77,7 +76,6 @@ namespace TGS.Services.Operations.Commands
                         BrandId = data.BrandId,
                         DefaultWalletId = walletId,
                         DefaultWalletCurrencyCode = data.CurrencyCode,
-                        RegisteredOn = createdOn,
                         LastActiveOn = createdOn,
                         Status = data.PlayerStatus,
                         Type = data.Type,
