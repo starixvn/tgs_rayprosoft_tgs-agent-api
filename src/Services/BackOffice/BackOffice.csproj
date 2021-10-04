@@ -34,7 +34,7 @@
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />    
     <PackageReference Include="Tgs.Payment.Client" Version="0.1.5" />
-    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.20" />
+    <PackageReference Include="Tgs.PaymentService.Client" Version="0.0.22-alpha" />
     <PackageReference Include="TGS.ServiceUtility" Version="0.0.3" />
   </ItemGroup>
 
