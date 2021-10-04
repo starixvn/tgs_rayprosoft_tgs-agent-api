@@ -16,9 +16,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -81,9 +84,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -135,9 +141,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -179,9 +188,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -223,9 +235,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 true,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -267,9 +282,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -311,9 +329,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 true,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -355,9 +376,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -405,9 +429,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -449,9 +476,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 10M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -493,9 +523,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -537,9 +570,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -581,9 +617,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -631,9 +670,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -696,9 +738,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 null);
 
             var brandPayment = new BrandPaymentInfo
@@ -740,9 +785,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var playerInfo = new PlayerInfo(
                 "ThisIsPlayerCode",
+                Guid.NewGuid(),
                 100M,
                 false,
                 false,
+                null,
+                null,
                 Guid.NewGuid());
 
             var brandPayment = new BrandPaymentInfo

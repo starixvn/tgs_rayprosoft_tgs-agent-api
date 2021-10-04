@@ -80,9 +80,12 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var playerInfo = new PlayerInfo(
                 "playerCode",
+                Guid.NewGuid(),
                 100,
                 false,
                 false,
+                null,
+                null,
                 Guid.NewGuid());
 
             fakePlayerRepository.GetPlayerInfoByUserNameAsync(Arg.Any<Guid>(), Arg.Any<string>())

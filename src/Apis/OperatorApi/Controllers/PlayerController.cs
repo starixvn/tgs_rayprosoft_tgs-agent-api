@@ -145,17 +145,33 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Start forgot password flow.
         /// </summary>
         /// <param name="forgotPasswordService">The forgot password service.</param>
+        /// <param name="forgotPasswordBySmsService">The forgot password by SMS service.</param>
         /// <param name="request">The request.</param>
+        /// <returns></returns>
         /// <response code="200">Return the token, when reset password, must input to verify.</response>
         [HttpPost("password/forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         public ValueTask<string> ForgotPasswordAsync(
-            [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
+            [FromServices] IGetService<ForgotPasswordByMailCommand, string> forgotPasswordService,
+            [FromServices] IGetService<ForgotPasswordBySmsCommand, string> forgotPasswordBySmsService,
             [FromBody] ForgotPasswordRequest request)
-            => forgotPasswordService.GetAsync(new ForgotPasswordCommand(
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+            {
+                return forgotPasswordBySmsService.GetAsync(new ForgotPasswordBySmsCommand(
+                    brandId,
+                    CultureInfo.CurrentUICulture,
+                    request.AreaCode,
+                    request.Phone));
+            }
+
+            return forgotPasswordService.GetAsync(new ForgotPasswordByMailCommand(
                 CultureInfo.CurrentUICulture,
                 request.Email));
+        }
 
         [HttpGet("game/auto-transfer")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]

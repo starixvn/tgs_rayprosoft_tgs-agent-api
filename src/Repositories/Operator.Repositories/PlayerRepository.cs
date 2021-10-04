@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
@@ -15,6 +16,29 @@ namespace TGS.Operator.Repositories
         public PlayerRepository(ITgsRepository tgsRepository)
         {
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
+        }
+
+        public async ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone)
+        {
+            var player = await _tgsRepository.Players.AsQueryable()
+                .Where(player => player.BrandId == brandId
+                    && player.AreaCode == areaCode
+                    && player.Phone == phone)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (player == null)
+                return null;
+
+            return new PlayerInfo(
+                player.PlayerCode,
+                player.BrandId,
+                player.AccumulatedDeposit,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                player.Phone,
+                player.AreaCode,
+                player.VipId);
         }
 
         public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
@@ -32,15 +56,18 @@ namespace TGS.Operator.Repositories
 
             return new PlayerInfo(
                 playerData.PlayerCode,
+                playerData.BrandId,
                 playerData.AccumulatedDeposit,
                 playerData.IdentityAuthentication,
                 playerData.PhoneAuthentication,
+                playerData.Phone,
+                playerData.AreaCode,
                 playerData.VipId);
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
         {
-            var playerData = await _tgsRepository.Players
+            var playerData = await _tgsRepository.Players.AsQueryable()
                 .FirstOrDefaultAsync(p => p.BrandId == brandId &&
                     p.Username.ToLower() == userName.ToLower())
                 .ConfigureAwait(false);
@@ -50,9 +77,12 @@ namespace TGS.Operator.Repositories
 
             return new PlayerInfo(
                 playerData.PlayerCode,
+                playerData.BrandId,
                 playerData.AccumulatedDeposit,
                 playerData.IdentityAuthentication,
                 playerData.PhoneAuthentication,
+                playerData.Phone,
+                playerData.AreaCode,
                 playerData.VipId);
         }
 
