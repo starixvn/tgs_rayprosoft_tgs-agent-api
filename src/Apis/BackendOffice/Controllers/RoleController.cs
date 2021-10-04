@@ -59,30 +59,39 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .Where(LicenseeId, x => x.LicenseeId == LicenseeId)
                 .Where(BrandId, x => x.BrandId == BrandId)
                 .Where(request.Name, x => EF.Functions.ILike(x.Name, $"%{request.Name}%"))
-                .GroupJoin(_resellerQueries.GetQueries(), r => r.ResellerId, r => r.Id, (role, resellers) => new
-                {
-                    role,
-                    resellers
-                })
-                .SelectMany(x => x.resellers.DefaultIfEmpty(), (x, reseller) => new
-                {
-                    x.role,
-                    reseller
-                })
-                .GroupJoin(_licenseeQueries.GetQueries(), combine => combine.role.LicenseeId, l => l.Id,
+                .GroupJoin(_resellerQueries.GetQueries(),
+                    r => r.ResellerId,
+                    r => r.Id,
+                    (role, resellers) => new
+                    {
+                        role,
+                        resellers
+                    })
+                .SelectMany(x => x.resellers.DefaultIfEmpty(),
+                    (x, reseller) => new
+                    {
+                        x.role,
+                        reseller
+                    })
+                .GroupJoin(_licenseeQueries.GetQueries(),
+                    combine => combine.role.LicenseeId,
+                    l => l.Id,
                     (combine, licensees) => new
                     {
                         combine.role,
                         combine.reseller,
                         licensees
                     })
-                .SelectMany(x => x.licensees.DefaultIfEmpty(), (x, licensee) => new
-                {
-                    x.role,
-                    x.reseller,
-                    licensee
-                })
-                .GroupJoin(_brandQueries.GetQueries(), combine => combine.role.BrandId, b => b.Id,
+                .SelectMany(x => x.licensees.DefaultIfEmpty(),
+                    (x, licensee) => new
+                    {
+                        x.role,
+                        x.reseller,
+                        licensee
+                    })
+                .GroupJoin(_brandQueries.GetQueries(),
+                    combine => combine.role.BrandId,
+                    b => b.Id,
                     (combine, brands) => new
                     {
                         combine.role,
@@ -90,13 +99,14 @@ namespace TGS.Apis.BackendOffice.Controllers
                         combine.licensee,
                         brands
                     })
-                .SelectMany(x => x.brands.DefaultIfEmpty(), (x, brand) => new
-                {
-                    x.role,
-                    x.reseller,
-                    x.licensee,
-                    brand
-                })
+                .SelectMany(x => x.brands.DefaultIfEmpty(),
+                    (x, brand) => new
+                    {
+                        x.role,
+                        x.reseller,
+                        x.licensee,
+                        brand
+                    })
                 .Select(x => new RoleModel
                 {
                     Id = x.role.Id,
@@ -122,10 +132,11 @@ namespace TGS.Apis.BackendOffice.Controllers
         [Description("Get a role")]
         public async Task<GetRoleResponse> GetSingleAsync(Guid roleId)
         {
-            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId, x => x
-                .Where(ResellerId != null, r => r.ResellerId == ResellerId)
-                .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
-                .Where(BrandId != null, l => l.BrandId == BrandId));
+            var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId,
+                x => x
+                    .Where(ResellerId != null, r => r.ResellerId == ResellerId)
+                    .Where(LicenseeId != null, l => l.LicenseeId == LicenseeId)
+                    .Where(BrandId != null, l => l.BrandId == BrandId));
 
             if (role == null)
             {
@@ -135,17 +146,19 @@ namespace TGS.Apis.BackendOffice.Controllers
             var menuSetting = role.IsRoot switch
             {
                 true when role.BrandId != null => (await _roleQueries.GetSingleAsync(x =>
-                    x.IsRoot && x.LicenseeId == role.LicenseeId)).MenuSetting,
+                    x.IsRoot && x.LicenseeId == role.LicenseeId && x.BrandId == null)).MenuSetting,
                 true when role.LicenseeId != null => (await _roleQueries.GetSingleAsync(x =>
-                    x.IsRoot && x.ResellerId == role.ResellerId)).MenuSetting,
+                        x.IsRoot && x.ResellerId == role.ResellerId && x.LicenseeId == null && x.BrandId == null))
+                    .MenuSetting,
                 true when role.ResellerId != null =>
                     (await _settingQueries.GetSingleAsync(p => p.Key == "Menus")).Value,
                 false when role.BrandId != null => (await _roleQueries.GetSingleAsync(x =>
                     x.IsRoot && x.BrandId == role.BrandId)).MenuSetting,
                 false when role.LicenseeId != null => (await _roleQueries.GetSingleAsync(x =>
-                    x.IsRoot && x.LicenseeId == role.LicenseeId)).MenuSetting,
+                    x.IsRoot && x.LicenseeId == role.LicenseeId && x.BrandId == null)).MenuSetting,
                 false when role.ResellerId != null => (await _roleQueries.GetSingleAsync(x =>
-                    x.IsRoot && x.ResellerId == role.ResellerId)).MenuSetting,
+                        x.IsRoot && x.ResellerId == role.ResellerId && x.LicenseeId == null && x.BrandId == null))
+                    .MenuSetting,
                 _ => (await _settingQueries.GetSingleAsync(p => p.Key == "Menus")).Value
             };
 
@@ -173,10 +186,12 @@ namespace TGS.Apis.BackendOffice.Controllers
 
         [HttpPut("{roleId}")]
         [Description("Update role")]
-        public async Task<MessageResponse> UpdateAsync(Guid roleId,
+        public async Task<MessageResponse> UpdateAsync(
+            Guid roleId,
             [FromBody] UpdateRoleRequest request)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
+
             if (role == null)
             {
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
@@ -201,6 +216,7 @@ namespace TGS.Apis.BackendOffice.Controllers
             if (!role.IsRoot && role.RoleType == RoleType.Admin)
             {
                 await _roleCommands.UpdateAsync(role);
+
                 return CreateValidResponse<MessageResponse>();
             }
 
@@ -218,12 +234,14 @@ namespace TGS.Apis.BackendOffice.Controllers
             if (role.RoleType == RoleType.Reseller || role.RoleType == RoleType.Licensee)
             {
                 var licenseeRootRole = roles.FirstOrDefault(x => x.RoleType == RoleType.Licensee && x.IsRoot);
+
                 if (licenseeRootRole != null)
                 {
-                    UpdateRoles(role, new[]
-                    {
-                        licenseeRootRole
-                    });
+                    UpdateRoles(role,
+                        new[]
+                        {
+                            licenseeRootRole
+                        });
                 }
 
                 var licenseeRoles = roles.Where(x => x.RoleType == RoleType.Licensee).ToArray();
@@ -234,10 +252,11 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             if (brandRootRole != null)
             {
-                UpdateRoles(role, new[]
-                {
-                    brandRootRole
-                });
+                UpdateRoles(role,
+                    new[]
+                    {
+                        brandRootRole
+                    });
             }
 
             var brandRoles = roles.Where(x => x.RoleType == RoleType.Brand).ToArray();
@@ -253,6 +272,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> DeleteAsync(Guid roleId)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId, s => s.Include(x => x.Users));
+
             if (role == null)
             {
                 return CreateInvalidResponse<MessageResponse>(Resources.Role.NotFound);
@@ -275,6 +295,7 @@ namespace TGS.Apis.BackendOffice.Controllers
 
 
             await _roleCommands.DeleteAsync(role);
+
             return CreateValidResponse<MessageResponse>();
         }
 
@@ -283,6 +304,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         public async Task<MessageResponse> CopyAsync(Guid roleId, [FromBody] CopyRoleRequest request)
         {
             var role = await _roleQueries.GetSingleAsync(p => p.Id == roleId);
+
             if (role == null)
             {
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NotFound);
@@ -304,10 +326,18 @@ namespace TGS.Apis.BackendOffice.Controllers
                 return CreateInvalidResponse<GetRoleResponse>(Resources.Role.NameExists);
             }
 
-            var newRole = CreateRole(request.Name, role.DisplayName, role.Description, role.ResellerId,
-                role.RoleType, role.LicenseeId, role.BrandId, role.MenuSetting, role.IsRoot);
+            var newRole = CreateRole(request.Name,
+                role.DisplayName,
+                role.Description,
+                role.ResellerId,
+                role.RoleType,
+                role.LicenseeId,
+                role.BrandId,
+                role.MenuSetting,
+                role.IsRoot);
 
             await _roleCommands.CreateAsync(newRole);
+
             return CreateValidResponse<MessageResponse>();
         }
 
@@ -347,11 +377,18 @@ namespace TGS.Apis.BackendOffice.Controllers
                     return CreateInvalidResponse<GetRoleResponse>(Resources.Role.RootExixted);
             }
 
-            var role = CreateRole(request.Name, request.DisplayName, request.Description, request.ResellerId,
-                request.RoleType, request.LicenseeId, request.BrandId,
-                _jsonSerializationProvider.SerializeToString(request.Menus), request.IsRoot);
+            var role = CreateRole(request.Name,
+                request.DisplayName,
+                request.Description,
+                request.ResellerId,
+                request.RoleType,
+                request.LicenseeId,
+                request.BrandId,
+                _jsonSerializationProvider.SerializeToString(request.Menus),
+                request.IsRoot);
 
             await _roleCommands.CreateAsync(role);
+
             return CreateValidResponse<MessageResponse>();
         }
 
@@ -377,7 +414,8 @@ namespace TGS.Apis.BackendOffice.Controllers
             };
         }
 
-        private Role CreateRole(string name, string displayName, string description, Guid? resellerId,
+        private Role CreateRole(
+            string name, string displayName, string description, Guid? resellerId,
             RoleType roleType, Guid? licenseeId, Guid? brandId, string menuSetting, bool isRoot) =>
             new()
             {
@@ -427,6 +465,7 @@ namespace TGS.Apis.BackendOffice.Controllers
         {
             var roleMenuLevel1 = roleMenus?.FirstOrDefault(p => p.Code == menuTemplate.Code);
             menuTemplate.IsDisplay = roleMenuLevel1?.IsDisplay ?? false;
+
             return roleMenuLevel1;
         }
 
