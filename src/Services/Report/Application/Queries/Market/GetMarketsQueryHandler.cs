@@ -51,7 +51,8 @@ namespace TGS.Services.Report.Application.Queries.Market
 
             var withdrawals = await _service.Repository.WithdrawForms.AsQueryable()
                 .Where(x => x.UserType == 1 && x.Status == 8000)
-                .Where(x => x.CreatedOn >= from && x.CreatedOn < to).ToArrayAsync(cancellationToken)
+                .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
+                .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
             var withdrawalByDates = withdrawals.GroupBy(x => x.CreatedOn.ToOffset(offset).Date,
