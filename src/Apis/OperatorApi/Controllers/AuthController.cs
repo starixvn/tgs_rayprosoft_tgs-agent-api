@@ -37,7 +37,7 @@ namespace TGS.Apis.OperatorApi.Controllers
 
             var brandId = Guid.Parse(id.FindFirst(JwtRegisteredClaimNames.Sub)!.Value);
 
-            var isMaintenance = string.IsNullOrEmpty(
+            var isMaintenance = !string.IsNullOrEmpty(
                 await maintenanceRedisService
                     .GetBrandMaintenanceAsync(brandId)
                     .ConfigureAwait(false));
