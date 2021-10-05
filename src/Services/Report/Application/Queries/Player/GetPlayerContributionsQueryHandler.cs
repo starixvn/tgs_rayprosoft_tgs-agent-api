@@ -68,6 +68,7 @@ namespace TGS.Services.Report.Application.Queries.Player
                     .Select(x => x.PlayerCode).ToArray();
 
             var withdrawalByUserIds = await _playerAggregateService.Repository.WithdrawForms.AsQueryable()
+                .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.UserType == 1 && x.Status == 8000)
                 .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
                 .GroupBy(x => x.UserId,

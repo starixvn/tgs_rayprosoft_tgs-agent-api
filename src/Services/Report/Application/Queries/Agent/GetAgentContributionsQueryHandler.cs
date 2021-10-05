@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -42,25 +41,28 @@ namespace TGS.Services.Report.Application.Queries.Agent
             }
 
             var playerWithdrawals = await _service.Repository.WithdrawForms.AsQueryable()
+                .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.UserType == 1 && x.Status == 8000)
                 .Where(x => x.CreatedOn >= request.From && x.CreatedOn < request.To)
-                .GroupBy(x => x.UserId,
-                    (userId, withdrawals) => new
+                .Join(_service.Repository.Players,
+                    withdrawForm => withdrawForm.UserId,
+                    player => player.PlayerCode,
+                    (withdrawForm, player) => new
                     {
-                        PlayerCode = userId,
-                        WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
+                        player.AgentId,
+                        player.PlayerCode,
+                        WithdrawalAmount = withdrawForm.ActualAmount
                     })
-                .ToArrayAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-            var agentWithdrawals = await _service.Repository.WithdrawForms.AsQueryable()
-                .Where(x => x.UserType == 2 && x.Status == 8000)
-                .Where(x => x.CreatedOn >= request.From && x.CreatedOn < request.To)
-                .GroupBy(x => x.UserId,
-                    (userId, withdrawals) => new
+                .GroupBy(x => new
                     {
-                        AgentId = userId,
-                        WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
+                        x.AgentId,
+                        x.PlayerCode
+                    },
+                    (x, withdrawals) => new
+                    {
+                        x.AgentId,
+                        x.PlayerCode,
+                        WithdrawalAmount = withdrawals.Sum(w => w.WithdrawalAmount)
                     })
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -154,8 +156,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                             Type = AccountType.Agent,
                             DepositAmount = playerAggregate.Sum(p => p.playerAggregate?.DepositAmount ?? 0),
                             WithdrawalAmount =
-                                agentWithdrawals.FirstOrDefault(w => new Guid(w.AgentId) == agent.Id)
-                                    ?.WithdrawalAmount ?? 0,
+                                playerWithdrawals.Where(w => w.AgentId == agent.Id).Sum(w => w.WithdrawalAmount ?? 0),
                             AdjustmentAmount = playerAggregate.Sum(p => p.playerAggregate?.AdjustmentAmount ?? 0),
                             BonusAmount =
                                 playerAggregate.Sum(p

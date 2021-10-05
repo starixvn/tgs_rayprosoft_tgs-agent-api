@@ -50,8 +50,14 @@ namespace TGS.Services.Report.Application.Queries.Market
                 .ToArray();
 
             var withdrawals = await _service.Repository.WithdrawForms.AsQueryable()
+                .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.UserType == 1 && x.Status == 8000)
                 .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            var registeredPlayers = await _service.Repository.Players.AsQueryable()
+                .Where(x => x.RegisteredOn >= from && x.RegisteredOn < to)
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
@@ -60,6 +66,13 @@ namespace TGS.Services.Report.Application.Queries.Market
                 {
                     Date = date,
                     WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
+                });
+
+            var registeredPlayersByDates = registeredPlayers.GroupBy(x => x.RegisteredOn.ToOffset(offset).Date,
+                (date, players) => new
+                {
+                    Date = date,
+                    PlayerCount = players.Count()
                 });
 
             return await dates.GroupJoin(_service.GetPlayerAggregateQueries()
@@ -86,7 +99,9 @@ namespace TGS.Services.Report.Application.Queries.Market
                         new MarketModel
                         {
                             ReportDate = market.ReportDate,
-                            RegisteredCount = markets.Sum(m => m.market?.RegisteredCount ?? 0),
+                            RegisteredCount =
+                                registeredPlayersByDates.FirstOrDefault(x => x.Date == market.ReportDate)
+                                    ?.PlayerCount ?? 0,
                             FirstFundInCount = markets.Sum(m => m.market?.FirstFundInCount ?? 0),
                             DepositAmount = markets.Sum(m => m.market?.DepositAmount ?? 0),
                             WithdrawalAmount =
