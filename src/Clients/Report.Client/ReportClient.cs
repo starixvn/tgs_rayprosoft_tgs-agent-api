@@ -37,9 +37,11 @@ namespace TGS.Clients.Report.Client
 
         Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(GetAgentPlayerWinLossRequest request);
 
-        Task<PagedResponse<AgentDividendDetailModel>> GetAgentDividendDetailsAsync(GetAgentDividendDetailsRequest request);
+        Task<PagedResponse<AgentDividendDetailModel>> GetAgentDividendDetailsAsync(
+            GetAgentDividendDetailsRequest request);
 
-        Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(GetPlayerAccountChangesRequest request);
+        Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
+            GetPlayerAccountChangesRequest request);
 
         Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(GetAgentAccountChangesRequest request);
 
@@ -60,7 +62,8 @@ namespace TGS.Clients.Report.Client
     {
         private readonly HttpClient _client;
 
-        public ReportClient(HttpClient client, IApiClientLogger logger,
+        public ReportClient(
+            HttpClient client, IApiClientLogger logger,
             IJsonSerializationProvider json)
             : base(client, logger, json)
         {
@@ -73,8 +76,13 @@ namespace TGS.Clients.Report.Client
             var path = ClientPath.AppendWithProperties("/api/vipReport?", request);
 
             return await ExecuteJsonRequestAsync<GetVipReportRequest, PagedResponse<VipModel>>(HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<VipRebateModel>> GetVipRebateReportAsync(
@@ -82,8 +90,16 @@ namespace TGS.Clients.Report.Client
         {
             var prefix = $"Report.{request.BrandId}.GetVipRebateReport";
             var path = ClientPath.AppendWithProperties($"/api/vipReport/{request.Username}?", request);
+
             return await ExecuteJsonRequestAsync<GetVipRebateReportRequest, PagedResponse<VipRebateModel>>(
-                HttpMethod.Get, path, request, logPrefix: prefix, options: new() { PropertyNameCaseInsensitive = true });
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<RoundModel>> GetRoundsAsync(GetRoundsRequest request)
@@ -92,8 +108,13 @@ namespace TGS.Clients.Report.Client
             var path = ClientPath.AppendWithProperties("/api/roundReport?", request);
 
             return await ExecuteJsonRequestAsync<GetRoundsRequest, PagedResponse<RoundModel>>(HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<GetRoundHistoryResponse> GetRoundHistoriesAsync(GetRoundHistoryRequest request)
@@ -102,8 +123,13 @@ namespace TGS.Clients.Report.Client
             var path = ClientPath.AppendWithProperties($"/api/roundReport/{request.RoundId}?", request);
 
             return await ExecuteJsonRequestAsync<GetRoundHistoryRequest, GetRoundHistoryResponse>(HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<MarketModel>> GetMarketsAsync(GetMarketsRequest request)
@@ -112,8 +138,13 @@ namespace TGS.Clients.Report.Client
             var path = ClientPath.AppendWithProperties("/api/marketReport?", request);
 
             return await ExecuteJsonRequestAsync<GetMarketsRequest, PagedResponse<MarketModel>>(HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<AgentContributionModel>> GetAgentContributionsAsync(
@@ -121,8 +152,16 @@ namespace TGS.Clients.Report.Client
         {
             var prefix = $"Report.BrandId.{request.BrandId}.GetAgentContributions";
             var path = ClientPath.AppendWithProperties("/api/agentReport/contribution?", request);
+
             return await ExecuteJsonRequestAsync<GetAgentContributionsRequest, PagedResponse<AgentContributionModel>>(
-                HttpMethod.Get, path, request, logPrefix: prefix, options: new() { PropertyNameCaseInsensitive = true });
+                HttpMethod.Get,
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<PlayerContributionModel>> GetPlayerContributionsAsync(
@@ -133,8 +172,13 @@ namespace TGS.Clients.Report.Client
 
             return await ExecuteJsonRequestAsync<GetPlayerContributionsRequest, PagedResponse<PlayerContributionModel>>(
                 HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<TeamInfoModel>> GetAgentTeamInfoAsync(
@@ -145,8 +189,13 @@ namespace TGS.Clients.Report.Client
 
             return await ExecuteJsonRequestAsync<GetAgentTeamInfoRequest, PagedResponse<TeamInfoModel>>(
                 HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<AgentDividendModel>> GetAgentDividendsAsync(
@@ -157,8 +206,13 @@ namespace TGS.Clients.Report.Client
 
             return await ExecuteJsonRequestAsync<GetAgentDividendsRequest, PagedResponse<AgentDividendModel>>(
                 HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<AgentPlayerWinLossModel>> GetAgentPlayerWinLossAsync(
@@ -169,8 +223,13 @@ namespace TGS.Clients.Report.Client
 
             return await ExecuteJsonRequestAsync<GetAgentPlayerWinLossRequest, PagedResponse<AgentPlayerWinLossModel>>(
                 HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<AgentDividendDetailModel>> GetAgentDividendDetailsAsync(
@@ -182,8 +241,13 @@ namespace TGS.Clients.Report.Client
             return await ExecuteJsonRequestAsync<GetAgentDividendDetailsRequest, PagedResponse<AgentDividendDetailModel>
             >(
                 HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<PlayerAccountChangeModel>> GetPlayerAccountChangesAsync(
@@ -195,8 +259,13 @@ namespace TGS.Clients.Report.Client
             return await ExecuteJsonRequestAsync<GetPlayerAccountChangesRequest, PagedResponse<PlayerAccountChangeModel>
             >(
                 HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<PagedResponse<AgentAccountChangeModel>> GetAgentAccountChangesAsync(
@@ -208,8 +277,13 @@ namespace TGS.Clients.Report.Client
             return await ExecuteJsonRequestAsync<GetAgentAccountChangesRequest, PagedResponse<AgentAccountChangeModel>
             >(
                 HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<LicenseeMarketsResponse> GetLicenseeMarketsAsync(GetLicenseeMarketsRequest request)
@@ -219,8 +293,13 @@ namespace TGS.Clients.Report.Client
 
             return await ExecuteJsonRequestAsync<GetLicenseeMarketsRequest, LicenseeMarketsResponse>(
                 HttpMethod.Get,
-                path, request, logPrefix: prefix,
-                options: new() { PropertyNameCaseInsensitive = true });
+                path,
+                request,
+                logPrefix: prefix,
+                options: new()
+                {
+                    PropertyNameCaseInsensitive = true
+                });
         }
 
         public async Task<Stream> ExportMarketsAsync(ExportMarketsRequest request)
@@ -293,7 +372,7 @@ namespace TGS.Clients.Report.Client
 
         public async Task<Stream> ExportVipsAsync(ExportVipReportRequest request)
         {
-            var path = ClientPath.AppendWithProperties("/api/agentReport/exportVips?", request);
+            var path = ClientPath.AppendWithProperties("/api/vipReport/exportVips?", request);
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, path);
 
