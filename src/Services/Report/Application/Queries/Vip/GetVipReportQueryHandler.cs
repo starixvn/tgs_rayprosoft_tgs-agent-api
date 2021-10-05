@@ -17,7 +17,8 @@ namespace TGS.Services.Report.Application.Queries.Vip
         private readonly IPlayerAggregateService _service;
         private readonly ITgsPlayerService _tgsPlayerService;
 
-        public GetVipReportQueryHandler(IPlayerAggregateService service, ITgsPlayerService tgsPlayerService,
+        public GetVipReportQueryHandler(
+            IPlayerAggregateService service, ITgsPlayerService tgsPlayerService,
             IHttpContextAccessor accessor) :
             base(accessor)
         {
@@ -32,9 +33,21 @@ namespace TGS.Services.Report.Application.Queries.Vip
             var offset = new TimeSpan(8, 0, 0);
             var requestFrom = request.From.ToOffset(offset);
             var requestTo = request.To.ToOffset(offset);
-            DateTimeOffset from = new(requestFrom.Year, requestFrom.Month, requestFrom.Day, 0, 0, 0,
+
+            DateTimeOffset from = new(requestFrom.Year,
+                requestFrom.Month,
+                requestFrom.Day,
+                0,
+                0,
+                0,
                 requestFrom.Offset);
-            DateTimeOffset to = new(requestTo.Year, requestTo.Month, requestTo.Day, 0, 0, 0,
+
+            DateTimeOffset to = new(requestTo.Year,
+                requestTo.Month,
+                requestTo.Day,
+                0,
+                0,
+                0,
                 requestTo.Offset);
 
             var brandPlayers = await _tgsPlayerService.GetPlayerQueries(q => q.Where(x => x.BrandId == request.BrandId))
@@ -50,6 +63,18 @@ namespace TGS.Services.Report.Application.Queries.Vip
                 ? null
                 : brandPlayers.Where(x => x.Vip?.Level == request.Level)
                     .Select(x => x.PlayerCode).ToArray();
+
+            var withdrawalByUserIds = await _service.Repository.WithdrawForms.AsQueryable()
+                .Where(x => x.BrandId == request.BrandId)
+                .Where(x => x.UserType == 1 && x.Status == 8000)
+                .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
+                .GroupBy(x => x.UserId,
+                    (userId, withdrawals) => new
+                    {
+                        UserId = userId,
+                        WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
+                    }).ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
 
             var vips = await _service.GetPlayerAggregateQueries()
                 .Where(x => x.BrandId == request.BrandId)
@@ -150,7 +175,8 @@ namespace TGS.Services.Report.Application.Queries.Vip
                     BrandId = x.BrandId,
                     PlayerCode = x.PlayerCode,
                     DepositAmount = x.DepositAmount,
-                    WithdrawalAmount = x.WithdrawalAmount,
+                    WithdrawalAmount =
+                        withdrawalByUserIds.FirstOrDefault(w => w.UserId == player.PlayerCode)?.WithdrawalAmount ?? 0,
                     AdjustmentAmount = x.AdjustmentAmount,
                     RebateAmount = x.RebateAmount,
                     BonusAmount = x.BonusAmount,
