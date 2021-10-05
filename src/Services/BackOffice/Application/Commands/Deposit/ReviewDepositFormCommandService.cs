@@ -41,7 +41,7 @@ namespace TGS.Services.BackOffice.Application.Commands.Deposit
                 .GetDepositFormAsync(command.BrandId, command.FormId)
                 .ConfigureAwait(false);
 
-            if (form.Status != PaymentFlowState.WaitApprove)
+            if (form.Status != PaymentFlowState.WaitApprove || form.Status != PaymentFlowState.WaitPayment)
                 return;
 
             await _paymentServiceClient
