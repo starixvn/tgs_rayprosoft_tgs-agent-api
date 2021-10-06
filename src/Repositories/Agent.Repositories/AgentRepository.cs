@@ -42,6 +42,8 @@ namespace TGS.Agent.Repositories
                 (int)agent.LevelType,
                 agent.WithdrawPassword,
                 agent.WithdrawSalt,
+                agent.Password,
+                agent.Salt,
                 dividend,
                 agent.DividendPercentage);
         }
@@ -50,20 +52,6 @@ namespace TGS.Agent.Repositories
         {
             var agent = await _tgsRepository.Agents.FindAsync(id).ConfigureAwait(false);
             return agent.Status;
-        }
-
-        public async ValueTask SetPayPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt,
-            DateTimeOffset updatedOn)
-        {
-            var agent = await _tgsRepository.Agents
-                .FindAsync(agentId)
-                .ConfigureAwait(false);
-
-            agent.WithdrawPassword = newPassword;
-            agent.WithdrawSalt = newSalt;
-            agent.UpdatedOn = updatedOn;
-
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public IAsyncEnumerable<KeyValuePair<string, string>> QueryAllLocalizationStringsAsync(string cultureCode)
@@ -78,6 +66,36 @@ namespace TGS.Agent.Repositories
 
             return rows.ToAsyncEnumerable()
                 .Select(item => new KeyValuePair<string, string>(item.MessageId, item.Text));
+        }
+
+        public async ValueTask SetPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
+        {
+            var agent = await _tgsRepository.Agents
+                .FindAsync(agentId)
+                .ConfigureAwait(false);
+
+            agent.Password = newPassword;
+            agent.Salt = newSalt;
+            agent.UpdatedOn = updatedOn;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async ValueTask SetPayPasswordAsync(
+                            Guid agentId,
+            byte[] newPassword,
+            byte[] newSalt,
+            DateTimeOffset updatedOn)
+        {
+            var agent = await _tgsRepository.Agents
+                .FindAsync(agentId)
+                .ConfigureAwait(false);
+
+            agent.WithdrawPassword = newPassword;
+            agent.WithdrawSalt = newSalt;
+            agent.UpdatedOn = updatedOn;
+
+            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
