@@ -16,6 +16,7 @@ namespace TGS.Apis.AgentApi.Models
             new Dictionary<TgsApiError, string>
             {
                 [TgsApiError.InvalidCredentials] = "InvalidCredentials",
+                [TgsApiError.InvalidPassword] = "InvalidCredentials",
                 [TgsApiError.InvalidOrExpiredAgentToken] = "InvalidOrExpiredAgentToken",
                 [TgsApiError.InvalidCaptcha] = "InvalidCaptcha",
                 [TgsApiError.ClientIdNotFound] = "ClientIdNotFound",
@@ -82,13 +83,15 @@ namespace TGS.Apis.AgentApi.Models
                 [TgsApiError.GameBalanceFundOutFailed] = StatusCodes.Status400BadRequest,
                 [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
                 [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
-                [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError
+                [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
+                [TgsApiError.InvalidPassword] = StatusCodes.Status400BadRequest
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
             new Dictionary<Type, TgsApiError>
             {
                 [typeof(InvalidCredentialsException)] = TgsApiError.InvalidCredentials,
+                [typeof(PasswordInvalidException)] = TgsApiError.InvalidPassword,
                 [typeof(MissingTokenException)] = TgsApiError.InvalidOrExpiredAgentToken,
                 [typeof(AgentLoginExpiredException)] = TgsApiError.InvalidOrExpiredAgentToken,
                 [typeof(InvalidCaptchaException)] = TgsApiError.InvalidCaptcha,
