@@ -9,6 +9,7 @@
         InvalidCaptcha = 103,
         ClientIdNotFound = 104,
         InvalidOrExpiredAgentToken = 105,
+        InvalidPassword = 106,
 
         PlayerNotFound = 201,
         UserBlocked = 202,

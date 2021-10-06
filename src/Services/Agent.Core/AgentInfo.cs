@@ -16,6 +16,8 @@ namespace TGS.Services.Agent
         int AgentLevel,
         byte[] PayPassword,
         byte[] PaySalt,
+        byte[] Password,
+        byte[] Salt,
         decimal AccumulatedProfitSharing,
         decimal DividendPercentage);
 }

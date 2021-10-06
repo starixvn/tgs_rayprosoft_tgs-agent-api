@@ -45,7 +45,8 @@ namespace TGS.Services.Operator.Services.Player
             _sysRepository = sysRepository ?? throw new ArgumentNullException(nameof(sysRepository));
         }
 
-        public async ValueTask<CreatePlayerInfo> GetAsync(CreatePlayerCommand command,
+        public async ValueTask<CreatePlayerInfo> GetAsync(
+            CreatePlayerCommand command,
             CancellationToken cancellationToken = default)
         {
             await _statusValidator
@@ -66,6 +67,7 @@ namespace TGS.Services.Operator.Services.Player
                 throw new BrandNotFoundException();
 
             var currency = await _currencyCodeMapper.ExternalToInternalAsync(command.CurrencyCode, command.BrandId);
+
             var betLimitId = await _brandOperations.GetBrandDefaultBetLimitAsync(command.BrandId, currency)
                 .ConfigureAwait(false);
 
@@ -166,6 +168,7 @@ namespace TGS.Services.Operator.Services.Player
                         PlayerStatus = status
                     })
                 .ConfigureAwait(false);
+
             return result;
         }
     }

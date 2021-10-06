@@ -17,7 +17,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
         private readonly IAgentDividendService _service;
         private readonly ITgsAgentService _tgsAgentService;
 
-        public GetAgentDividendQueryHandler(IAgentDividendService service, ITgsAgentService tgsAgentService,
+        public GetAgentDividendQueryHandler(
+            IAgentDividendService service, ITgsAgentService tgsAgentService,
             IHttpContextAccessor accessor) :
             base(accessor)
         {
@@ -38,10 +39,40 @@ namespace TGS.Services.Report.Application.Queries.Agent
                 return CreateInvalidResponse<PagedResponse<AgentDividendModel>>(Resources.Agent.NotFound);
             }
 
+            var playerWithdrawals = await _service.Repository.WithdrawForms.AsQueryable()
+                .Where(x => x.BrandId == request.BrandId)
+                .Where(x => x.UserType == 1 && x.Status == 8000)
+                .Where(x => x.CreatedOn >= request.From && x.CreatedOn < request.To)
+                .Join(_service.Repository.Players,
+                    withdrawForm => withdrawForm.UserId,
+                    player => player.PlayerCode,
+                    (withdrawForm, player) => new
+                    {
+                        player.AgentId,
+                        player.PlayerCode,
+                        WithdrawalAmount = withdrawForm.ActualAmount
+                    })
+                .GroupBy(x => new
+                    {
+                        x.AgentId,
+                        x.PlayerCode
+                    },
+                    (x, withdrawals) => new
+                    {
+                        x.AgentId,
+                        x.PlayerCode,
+                        WithdrawalAmount = withdrawals.Sum(w => w.WithdrawalAmount)
+                    })
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
+
             var subAgents = await _tgsAgentService.GetAgentQueries().Where(x => x.ParentAgentId == mainAgent.Id)
                 .ToListAsync(cancellationToken);
 
-            var agents = new List<Core.DataServices.Tgs.Models.Agent> {mainAgent};
+            var agents = new List<Core.DataServices.Tgs.Models.Agent>
+            {
+                mainAgent
+            };
             agents.AddRange(subAgents);
 
             var agentIds = agents.Select(x => x.Id).ToArray();
@@ -65,13 +96,16 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         AgentDividendAmount = list.Sum(l => l.AgentDividendAmount)
                     }).ToArrayAsync(cancellationToken);
 
-            var models = agentDividends.Join(agents.ToArray(), ad => ad.AgentId, a => a.Id,
+            var models = agentDividends.Join(agents.ToArray(),
+                ad => ad.AgentId,
+                a => a.Id,
                 (ad, a) => new AgentDividendModel
                 {
                     Id = ad.AgentId,
                     Username = a.Username,
                     DepositAmount = ad.DepositAmount,
-                    WithdrawalAmount = ad.WithdrawalAmount,
+                    WithdrawalAmount = playerWithdrawals.Where(w => w.AgentId == ad.AgentId)
+                        .Sum(w => w.WithdrawalAmount ?? 0),
                     AdjustmentAmount = ad.WithdrawalAmount,
                     BonusAmount = ad.BonusAmount,
                     BetAmount = ad.BetAmount,

@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Prometheus;
+using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Filters;
 using TGS.Apis.AgentApi.Filters.Swaggers;
@@ -157,6 +158,7 @@ namespace TGS.Apis.AgentApi
                 {
                     options.Filters.Add<CheckAgentEnabledFilter>();
                     options.Filters.Add<ValidateModelFilter>();
+                    options.Filters.Add<TgsResponseWrapperAttribute>();
                 })
                 .ConfigureApiBehaviorOptions(options => options.SuppressModelStateInvalidFilter = true)
                 .AddFluentValidation(c =>
