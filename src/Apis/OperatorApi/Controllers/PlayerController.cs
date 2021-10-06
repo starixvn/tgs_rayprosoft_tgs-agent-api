@@ -145,17 +145,33 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Start forgot password flow.
         /// </summary>
         /// <param name="forgotPasswordService">The forgot password service.</param>
+        /// <param name="forgotPasswordBySmsService">The forgot password by SMS service.</param>
         /// <param name="request">The request.</param>
+        /// <returns></returns>
         /// <response code="200">Return the token, when reset password, must input to verify.</response>
         [HttpPost("password/forgot")]
         [AuthorizePlayerToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
         public ValueTask<string> ForgotPasswordAsync(
-            [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
+            [FromServices] IGetService<ForgotPasswordByMailCommand, string> forgotPasswordService,
+            [FromServices] IGetService<ForgotPasswordBySmsCommand, string> forgotPasswordBySmsService,
             [FromBody] ForgotPasswordRequest request)
-            => forgotPasswordService.GetAsync(new ForgotPasswordCommand(
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+
+            if (!string.IsNullOrWhiteSpace(request.Phone))
+            {
+                return forgotPasswordBySmsService.GetAsync(new ForgotPasswordBySmsCommand(
+                    brandId,
+                    CultureInfo.CurrentUICulture,
+                    request.AreaCode,
+                    request.Phone));
+            }
+
+            return forgotPasswordService.GetAsync(new ForgotPasswordByMailCommand(
                 CultureInfo.CurrentUICulture,
                 request.Email));
+        }
 
         [HttpGet("game/auto-transfer")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
@@ -216,19 +232,22 @@ namespace TGS.Apis.OperatorApi.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<LoginResponse> LoginAsync(
             [FromServices] IRequestAnalyzer requestAnalyzer,
-            [FromServices] ICommandService<CheckPlayerBannedCommand> commandService,
+            [FromServices] IGetService<CheckPlayerBannedQuery, bool> getService,
             [FromServices] IGetService<LoginCommand, LoginInfo> loginService,
             [FromBody] LoginRequest request)
         {
             var brandId = HttpContext.Items.GetBrandId();
 
+            var isBanned = await getService
+                    .GetAsync(new CheckPlayerBannedQuery(brandId, request.Username))
+                    .ConfigureAwait(false);
+
+            if (isBanned)
+                throw new UserBannedException();
+
             try
             {
                 var ipAddress = requestAnalyzer.GetIp(HttpContext);
-
-                await commandService
-                    .ExecuteAsync(new CheckPlayerBannedCommand(brandId, request.Username))
-                    .ConfigureAwait(false);
 
                 var query = new LoginCommand(
                     brandId,
@@ -246,14 +265,6 @@ namespace TGS.Apis.OperatorApi.Controllers
                     LoginTime = info.LoginTime,
                     PlayerToken = info.PlayerToken
                 };
-            }
-            catch (CoreExceptions.PlayerNotFoundException)
-            {
-                throw new CoreExceptions.PlayerNotFoundException(request.Username, Player.NotFound);
-            }
-            catch (CoreExceptions.InvalidCredentialsException)
-            {
-                throw new CoreExceptions.InvalidCredentialsException(Player.PasswordMismatched);
             }
             catch (Exception ex)
             {
@@ -390,7 +401,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             var playerTokenData = HttpContext.Items.GetPlayerTokenData();
 
             var command = new StartSetPlayerEmailCommand(
-                playerTokenData.PlayerCode, 
+                playerTokenData.PlayerCode,
                 request.Email,
                 CultureInfo.CurrentUICulture);
 
@@ -530,11 +541,15 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpPut("init-phone")]
         public ValueTask SubmitInitPhoneAsync(
             [FromServices] ICommandService<CommitPlayerInitPhoneCommand> commitPlayerInitPhoneService,
+            [FromServices] IRequestAnalyzer requestAnalyzer,
             [FromBody] SubmitInitPhoneRequest request)
         {
+            var ipAddress = requestAnalyzer.GetIp(HttpContext);
+
             var command = new CommitPlayerInitPhoneCommand(
                 request.SecurityKey,
-                request.ValidateCode);
+                request.ValidateCode,
+                ipAddress);
 
             return commitPlayerInitPhoneService.ExecuteAsync(command);
         }

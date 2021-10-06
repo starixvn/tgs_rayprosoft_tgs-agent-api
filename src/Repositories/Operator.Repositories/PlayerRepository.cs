@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
@@ -17,6 +18,29 @@ namespace TGS.Operator.Repositories
             _tgsRepository = tgsRepository ?? throw new ArgumentNullException(nameof(tgsRepository));
         }
 
+        public async ValueTask<PlayerInfo?> FindPlayerInfoByPhoneAsync(Guid brandId, string areaCode, string phone)
+        {
+            var player = await _tgsRepository.Players.AsQueryable()
+                .Where(player => player.BrandId == brandId
+                    && player.AreaCode == areaCode
+                    && player.Phone == phone)
+                .FirstOrDefaultAsync()
+                .ConfigureAwait(false);
+
+            if (player == null)
+                return null;
+
+            return new PlayerInfo(
+                player.PlayerCode,
+                player.BrandId,
+                player.AccumulatedDeposit,
+                player.IdentityAuthentication,
+                player.PhoneAuthentication,
+                player.Phone,
+                player.AreaCode,
+                player.VipId);
+        }
+
         public async ValueTask<bool> GetPlayerAutoTransferFlagAsync(string playerCode)
         {
             var settingData = await _tgsRepository.PlayerGameSettings
@@ -28,21 +52,22 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask<PlayerInfo> GetPlayerInfoAsync(string playerCode)
         {
-            var playerData = await _tgsRepository.Players
-                .FindAsync(playerCode)
-                .ConfigureAwait(false);
+            var playerData = await _tgsRepository.Players.FindAsync(playerCode).ConfigureAwait(false);
 
             return new PlayerInfo(
                 playerData.PlayerCode,
+                playerData.BrandId,
                 playerData.AccumulatedDeposit,
                 playerData.IdentityAuthentication,
                 playerData.PhoneAuthentication,
+                playerData.Phone,
+                playerData.AreaCode,
                 playerData.VipId);
         }
 
         public async ValueTask<PlayerInfo?> GetPlayerInfoByUserNameAsync(Guid brandId, string userName)
         {
-            var playerData = await _tgsRepository.Players
+            var playerData = await _tgsRepository.Players.AsQueryable()
                 .FirstOrDefaultAsync(p => p.BrandId == brandId &&
                     p.Username.ToLower() == userName.ToLower())
                 .ConfigureAwait(false);
@@ -52,9 +77,12 @@ namespace TGS.Operator.Repositories
 
             return new PlayerInfo(
                 playerData.PlayerCode,
+                playerData.BrandId,
                 playerData.AccumulatedDeposit,
                 playerData.IdentityAuthentication,
                 playerData.PhoneAuthentication,
+                playerData.Phone,
+                playerData.AreaCode,
                 playerData.VipId);
         }
 
@@ -100,26 +128,36 @@ namespace TGS.Operator.Repositories
 
         public async ValueTask PlayerRegisterIpAsync(string playerCode, string ip, DateTimeOffset registeredOn)
         {
-            var datas = new PlayerIpRecord[]
-            {
-                new()
-                {
+            var player = await _tgsRepository.Players
+                .FindAsync(playerCode)
+                .ConfigureAwait(false);
+
+            player.RegisteredOn = registeredOn;
+            player.UpdatedByUsername = playerCode;
+            player.UpdatedOn = DateTimeOffset.UtcNow;
+
+            var datas = new PlayerIpRecord[] {
+                new() {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.RegisterIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                },
+                } ,
                 new()
                 {
                     PlayerCode = playerCode,
                     IpType = (int)IpType.LoginIp,
                     Ip = ip,
                     RecordOn = registeredOn
-                }
-            };
+                } };
 
-            await _tgsRepository.PlayerIpRecords.AddRangeAsync(datas);
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            await _tgsRepository.PlayerIpRecords
+                .AddRangeAsync(datas)
+                .ConfigureAwait(false);
+
+            await _tgsRepository
+                .SaveChangesAsync()
+                .ConfigureAwait(false);
         }
 
         public async ValueTask SetPlayerPhoneAsync(string playerCode, string areaCode, string phone)

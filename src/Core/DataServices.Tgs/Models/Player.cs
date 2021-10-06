@@ -60,7 +60,7 @@ namespace TGS.Core.DataServices.Tgs.Models
 
         public string RealName { get; set; }
 
-        public DateTimeOffset RegisteredOn { get; set; }
+        public DateTimeOffset? RegisteredOn { get; set; }
 
         public byte[] Salt { get; set; }
 

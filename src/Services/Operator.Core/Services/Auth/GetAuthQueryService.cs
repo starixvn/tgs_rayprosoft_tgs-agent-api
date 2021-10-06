@@ -12,23 +12,20 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Auth
 {
-    internal class GetAuthQueryService : IGetService<GetAuthQuery, AuthInfo>
+    internal class GetAuthQueryService : IGetService<GetAuthQuery, ClaimsIdentity>
     {
         private readonly IBrandOperations _brandOperations;
         private readonly IStatusValidator _statusValidator;
-        private readonly IJwtTokenHandler _handler;
 
         public GetAuthQueryService(
             IBrandOperations brandOperations,
-            IStatusValidator statusValidator,
-            IJwtTokenHandler handler)
+            IStatusValidator statusValidator)
         {
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
             _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
-            _handler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public async ValueTask<AuthInfo> GetAsync(GetAuthQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<ClaimsIdentity> GetAsync(GetAuthQuery query, CancellationToken cancellationToken = default)
         {
             var brandId = await _brandOperations.GetBrandIdByApiKeyAsync(query.ApiKey);
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
@@ -37,19 +34,10 @@ namespace TGS.Services.Operator.Services.Auth
             {
                 new Claim(JwtRegisteredClaimNames.Sub, $"{brandId}"),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim( query.ClaimNameCurrency, query.Currency)
+                new Claim("curr", query.Currency)
             });
 
-            var secretKey = await _brandOperations.GetBrandSecretKeyAsync(brandId);
-            var signature = $"{brandId}:{query.Currency}:{secretKey}";
-            var expires = DateTime.Now.AddSeconds(Consts.TokenExpireSeconds.Jwt);
-
-            var token = _handler.GenerateToken(identity, Encoding.UTF8.GetBytes(signature),
-                query.Site, expires);
-
-            return new AuthInfo(
-                token,
-                new DateTimeOffset(expires).ToUnixTimeMilliseconds());
+            return identity;
         }
     }
 }

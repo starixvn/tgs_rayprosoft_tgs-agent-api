@@ -118,7 +118,8 @@ namespace TGS.Apis.PromotionApi
                     })
                     .AddHandler<DepositStatusChangedMessageHandler>(
                         "tgs.payment.deposit.status",
-                        "tgs.payment.deposit.status");
+                        "tgs.payment.deposit.status")
+                    .ProcessAllSubjects();
             });
 
             services

@@ -45,5 +45,6 @@ namespace TGS.Core.DataServices.Tgs.Models
         public virtual ICollection<Player> Players { get; set; }
         public virtual ICollection<AgentBank> Banks { get; set; }
         public virtual ICollection<Agent> SubAgents { get; set; }
+        public virtual ICollection<AgentDividendCondition> AgentDividendConditions { get; set; }
     }
 }

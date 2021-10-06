@@ -25,6 +25,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                     PaymentMethodId = query.PaymentMethodId,
                     Status = query.Status,
                     ThirdPartyOrderNo = query.ThirdPartyOrderNo,
+                    FormId = query.FormId,
                     UpdateOnRange = query.UpdateOnRange,
                     UserName = query.UserName
                 },

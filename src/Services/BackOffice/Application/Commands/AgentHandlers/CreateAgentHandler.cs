@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -43,8 +44,50 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     return CreateInvalidResponse<MessageResponse>(Agent
                         .DividendPercentageMustLessThanOrEqualToUpperLayer);
                 }
+
+                foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
+                {
+                    var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
+
+                    if (parent is null)
+                    {
+                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ParentRankNotFound,
+                            condition.Rank));
+                    }
+
+                    if (condition.NetProfit < parent.NetProfit)
+                    {
+                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.NetProfitMustGreaterThan,
+                            condition.Rank, parent.NetProfit));
+                    }
+
+                    if (condition.ActiveNumber < parent.ActiveNumber)
+                    {
+                        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ActiveNumberMustGreaterThan,
+                            condition.Rank, parent.ActiveNumber));
+                    }
+
+                    if (condition.DividendPercentage > parent.DividendPercentage)
+                    {
+                        return CreateInvalidResponse<MessageResponse>(string.Format(
+                            Agent.DividendPercentageMustLessThan,
+                            condition.Rank, parent.DividendPercentage));
+                    }
+                }
             }
 
+            foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
+            {
+                var previous = request.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
+
+                if (previous is not null && (condition.NetProfit < previous.NetProfit ||
+                    condition.ActiveNumber < previous.ActiveNumber ||
+                    condition.DividendPercentage < previous.DividendPercentage))
+                {
+                    return CreateInvalidResponse<MessageResponse>(string.Format(Agent.RankMustGreaterThanPervious,
+                        condition.Rank));
+                }
+            }
 
             await _service.CreateAgentAsync(request);
 

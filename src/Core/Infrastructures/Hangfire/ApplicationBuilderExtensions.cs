@@ -1,5 +1,4 @@
-﻿using System;
-using Hangfire;
+﻿using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using TGS.Core.Infrastructures.Hangfire.Services;
@@ -8,18 +7,8 @@ namespace TGS.Core.Infrastructures.Hangfire
 {
     public static class ApplicationBuilderExtensions
     {
-        public static IApplicationBuilder UseHangfireScheduler(this IApplicationBuilder app, string[] queues)
+        public static IApplicationBuilder UseHangfireScheduler(this IApplicationBuilder app)
         {
-            var setting = app.ApplicationServices.GetRequiredService<HangfireSettings>();
-
-            var options = new BackgroundJobServerOptions
-            {
-                Queues = queues,
-                SchedulePollingInterval = TimeSpan.FromSeconds(setting.Schedule.SchedulePollingInterval)
-            };
-
-            app.UseHangfireServer(options);
-
             var jobProvider = app.ApplicationServices.GetRequiredService<IJobProvider>();
             var manager = app.ApplicationServices.GetRequiredService<IRecurringJobManager>();
 
@@ -29,8 +18,11 @@ namespace TGS.Core.Infrastructures.Hangfire
                 var method = job.Worker.GetMethod("ExecuteWorkerAsync");
 
                 manager.RemoveIfExists(jobId);
-                manager.AddOrUpdate(job.Id.ToString(), new(job.Worker, method, job.Name, job.Context),
-                    job.CronExpression, job.TimeZone);
+                manager.AddOrUpdate(
+                    job.Id.ToString(),
+                    new(job.Worker, method, job.Name, job.Context),
+                    job.CronExpression,
+                    job.TimeZone);
             }
 
             return app;

@@ -11,10 +11,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
+using Tgs.Logging;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
-using TGS.Core.Infrastructures.Log.Events;
 using TGS.Core.Infrastructures.Utility;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models.Messages;
@@ -55,18 +54,18 @@ namespace TGS.Apis.BackendOffice.Middlewares
             {
                 var reqMessage = await GetRequestBodyAsync(httpContext);
 
-                adminLogEvent.ipaddress = _requestAnalyzer.GetIp(httpContext).NoLongerThan(256);
-                adminLogEvent.path = httpContext.Request.Path.Value;
-                adminLogEvent.method = httpContext.Request.Method.NoLongerThan(8);
-                adminLogEvent.host = httpContext.Request.Host.Value;
-                adminLogEvent.servername = Environment.MachineName.NoLongerThan(128);
-                adminLogEvent.requestheaders = httpContext.Request.Headers.ToDetailString();
-                adminLogEvent.requestcontent = reqMessage;
-                adminLogEvent.responseheaders = httpContext.Response.Headers.ToDetailString();
+                adminLogEvent.IpAddress = _requestAnalyzer.GetIp(httpContext).NoLongerThan(256);
+                adminLogEvent.Path = httpContext.Request.Path.Value;
+                adminLogEvent.Method = httpContext.Request.Method.NoLongerThan(8);
+                adminLogEvent.Host = httpContext.Request.Host.Value;
+                adminLogEvent.ServerName = Environment.MachineName.NoLongerThan(128);
+                adminLogEvent.RequestHeaders = httpContext.Request.Headers.ToDetailString();
+                adminLogEvent.RequestContent = reqMessage;
+                adminLogEvent.ResponseHeaders = httpContext.Response.Headers.ToDetailString();
 
-                adminLogEvent.recordedon = DateTimeOffset.Now;
-                adminLogEvent.stacktrace = string.Empty;
-                adminLogEvent.exception = string.Empty;
+                adminLogEvent.RecordedOn = DateTimeOffset.Now;
+                adminLogEvent.StackTrace = string.Empty;
+                adminLogEvent.Exception = string.Empty;
 
                 var (resMessage, ms) = await GetResponseMessageAsync(httpContext, next);
 
@@ -74,24 +73,24 @@ namespace TGS.Apis.BackendOffice.Middlewares
 
                 if (descriptionAttribute != null)
                 {
-                    adminLogEvent.description = descriptionAttribute.Description;
+                    adminLogEvent.Description = descriptionAttribute.Description;
                 }
 
-                adminLogEvent.responsecontent = resMessage?.Length > ResMessageSizeLimit
+                adminLogEvent.ResponseContent = resMessage?.Length > ResMessageSizeLimit
                     ? CutOffResponseContent(resMessage)
                     : resMessage;
 
-                adminLogEvent.responsecode = httpContext.Response.StatusCode;
-                adminLogEvent.executiontimems = ms;
+                adminLogEvent.ResponseCode = (short)httpContext.Response.StatusCode;
+                adminLogEvent.ExecutionTimeMs = ms;
             }
             catch (Exception ex)
             {
                 _systemLogger.LogError(ex, "Error!");
 
-                adminLogEvent.exception = ex.Message.NoLongerThan(4000);
-                adminLogEvent.stacktrace = ex.StackTrace;
-                adminLogEvent.innerexception = ex.InnerException?.Message;
-                adminLogEvent.responsecode = (int)HttpStatusCode.InternalServerError;
+                adminLogEvent.Exception = ex.Message.NoLongerThan(4000);
+                adminLogEvent.StackTrace = ex.StackTrace;
+                adminLogEvent.InnerException = ex.InnerException?.Message;
+                adminLogEvent.ResponseCode = (int)HttpStatusCode.InternalServerError;
 
                 httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 httpContext.Response.ContentType = "application/json";
@@ -119,7 +118,7 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 "/swagger"
             };
 
-            if (adminLogEvent.path is null || !defaultBypassRouting.Any(x => adminLogEvent.path.Contains(x)))
+            if (adminLogEvent.Path is null || !defaultBypassRouting.Any(x => adminLogEvent.Path.Contains(x)))
             {
                 _tgsLog.LogAdmin(adminLogEvent);
             }
@@ -128,8 +127,21 @@ namespace TGS.Apis.BackendOffice.Middlewares
         private static string CutOffResponseContent(string responseContent) =>
             $"{responseContent.NoLongerThan(ResMessageSizeLimit)} ... Response content is too long. Length: {responseContent.Length}";
 
+        private async Task<string> GetRequestBodyAsync(HttpContext context)
+        {
+            context.Request.EnableBuffering();
+
+            await using var requestStream = _recyclableMemoryStreamManager.GetStream();
+            await context.Request.Body.CopyToAsync(requestStream);
+            requestStream.Seek(0, SeekOrigin.Begin);
+            using var sr = new StreamReader(requestStream);
+            var message = await sr.ReadToEndAsync();
+            context.Request.Body.Seek(0, SeekOrigin.Begin);
+            return message;
+        }
+
         private async Task<(string resMessage, int elapsedMilliseconds)> GetResponseMessageAsync(HttpContext context,
-            RequestDelegate next)
+                    RequestDelegate next)
         {
             var originalBodyStream = context.Response.Body;
             var responseStream = _recyclableMemoryStreamManager.GetStream();
@@ -152,19 +164,6 @@ namespace TGS.Apis.BackendOffice.Middlewares
                 context.Response.Body = originalBodyStream;
                 await responseStream.DisposeAsync();
             }
-        }
-
-        private async Task<string> GetRequestBodyAsync(HttpContext context)
-        {
-            context.Request.EnableBuffering();
-
-            await using var requestStream = _recyclableMemoryStreamManager.GetStream();
-            await context.Request.Body.CopyToAsync(requestStream);
-            requestStream.Seek(0, SeekOrigin.Begin);
-            using var sr = new StreamReader(requestStream);
-            var message = await sr.ReadToEndAsync();
-            context.Request.Body.Seek(0, SeekOrigin.Begin);
-            return message;
         }
     }
 }

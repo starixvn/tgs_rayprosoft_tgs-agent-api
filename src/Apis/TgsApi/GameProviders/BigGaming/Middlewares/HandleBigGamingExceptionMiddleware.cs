@@ -4,6 +4,7 @@ using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.Logging;
 using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Apis.TgsApi.GameProviders.BigGaming.Services;
 using TGS.Core.Infrastructures.Extensions;

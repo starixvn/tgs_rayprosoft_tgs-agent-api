@@ -68,12 +68,15 @@ namespace TGS.Services.Report.Application.Queries.Market
                     WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
                 });
 
-            var registeredPlayersByDates = registeredPlayers.GroupBy(x => x.RegisteredOn.ToOffset(offset).Date,
-                (date, players) => new
-                {
-                    Date = date,
-                    PlayerCount = players.Count()
-                });
+            var registeredPlayersByDates = registeredPlayers
+                .Where(x => x.RegisteredOn != null)
+                .GroupBy(
+                    x => x.RegisteredOn?.ToOffset(offset).Date,
+                    (date, players) => new
+                    {
+                        Date = date,
+                        PlayerCount = players.Count()
+                    });
 
             return await dates.GroupJoin(_service.GetPlayerAggregateQueries()
                         .Where(x => x.BrandId == request.BrandId)

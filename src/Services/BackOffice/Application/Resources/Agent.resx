@@ -133,4 +133,34 @@
   <data name="DividendPercentageMustLessThanOrEqualToUpperLayer" xml:space="preserve">
     <value>Dividend percentage must less than or equal to upper layer.</value>
   </data>
+  <data name="RankMustGreaterThanPervious" xml:space="preserve">
+    <value>Rank {0} must greater than pervious rank.</value>
+  </data>
+  <data name="RankInvalid" xml:space="preserve">
+    <value>Rank {0} is invalid.</value>
+  </data>
+  <data name="NetProfitMustGreaterThan" xml:space="preserve">
+    <value>Rank {0} net profit must greater than or equal {1}.</value>
+  </data>
+  <data name="ActiveNumberMustGreaterThan" xml:space="preserve">
+    <value>Rank {0} active number must greater than or equal {1}.</value>
+  </data>
+  <data name="DividendPercentageMustLessThan" xml:space="preserve">
+    <value>Rank {0} dividend percentage must less than or equal {1}.</value>
+  </data>
+  <data name="ParentRankNotFound" xml:space="preserve">
+    <value>Parent rank {0} is not found.</value>
+  </data>
+  <data name="NetProfitMustLessThan" xml:space="preserve">
+    <value>Rank {0} net profit must less than or equal {1}.</value>
+  </data>
+  <data name="ActiveNumberMustLessThan" xml:space="preserve">
+    <value>Rank {0} active number must less than or equal {1}.</value>
+  </data>
+  <data name="DividendPercentageMustGreaterThan" xml:space="preserve">
+    <value>Rank {0} dividend percentage must greater than or equal {1}.</value>
+  </data>
+  <data name="RankCountInvaild" xml:space="preserve">
+    <value>Total count of rank of child agent is {0} , must greater than it.</value>
+  </data>
 </root>

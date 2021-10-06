@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Tgs.Logging;
 using TGS.Apis.TgsApi.Commons.Middlewares;
 using TGS.Apis.TgsApi.Extensions;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Services;

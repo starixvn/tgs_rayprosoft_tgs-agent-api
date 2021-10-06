@@ -61,11 +61,47 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rank {0} active number must greater than or equal {1}..
+        /// </summary>
+        public static string ActiveNumberMustGreaterThan {
+            get {
+                return ResourceManager.GetString("ActiveNumberMustGreaterThan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rank {0} active number must less than or equal {1}..
+        /// </summary>
+        public static string ActiveNumberMustLessThan {
+            get {
+                return ResourceManager.GetString("ActiveNumberMustLessThan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Balance must greater than 0..
         /// </summary>
         public static string BalanceMustGreaterThanZero {
             get {
                 return ResourceManager.GetString("BalanceMustGreaterThanZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rank {0} dividend percentage must greater than or equal {1}..
+        /// </summary>
+        public static string DividendPercentageMustGreaterThan {
+            get {
+                return ResourceManager.GetString("DividendPercentageMustGreaterThan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rank {0} dividend percentage must less than or equal {1}..
+        /// </summary>
+        public static string DividendPercentageMustLessThan {
+            get {
+                return ResourceManager.GetString("DividendPercentageMustLessThan", resourceCulture);
             }
         }
         
@@ -106,6 +142,24 @@ namespace TGS.Services.BackOffice.Application.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rank {0} net profit must greater than or equal {1}..
+        /// </summary>
+        public static string NetProfitMustGreaterThan {
+            get {
+                return ResourceManager.GetString("NetProfitMustGreaterThan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rank {0} net profit must less than or equal {1}..
+        /// </summary>
+        public static string NetProfitMustLessThan {
+            get {
+                return ResourceManager.GetString("NetProfitMustLessThan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Agent is not found..
         /// </summary>
         public static string NotFound {
@@ -120,6 +174,42 @@ namespace TGS.Services.BackOffice.Application.Resources {
         public static string ParentAgentNotExists {
             get {
                 return ResourceManager.GetString("ParentAgentNotExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Parent rank {0} is not found..
+        /// </summary>
+        public static string ParentRankNotFound {
+            get {
+                return ResourceManager.GetString("ParentRankNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Total count of rank of child agent is {0} , must greater than it..
+        /// </summary>
+        public static string RankCountInvaild {
+            get {
+                return ResourceManager.GetString("RankCountInvaild", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rank {0} is invalid..
+        /// </summary>
+        public static string RankInvalid {
+            get {
+                return ResourceManager.GetString("RankInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rank {0} must greater than pervious rank..
+        /// </summary>
+        public static string RankMustGreaterThanPervious {
+            get {
+                return ResourceManager.GetString("RankMustGreaterThanPervious", resourceCulture);
             }
         }
         

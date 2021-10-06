@@ -13,8 +13,11 @@ namespace TGS.Core.Infrastructures.Hangfire
 {
     public static class ServiceExtensions
     {
-        public static IServiceCollection AddHangfireScheduler(this IServiceCollection services,
-            IConfiguration configuration, string configSectionName = "Hangfire", BaseJobProvider jobProvider = null,
+        public static IServiceCollection AddHangfireScheduler(
+            this IServiceCollection services,
+            IConfiguration configuration, 
+            string configSectionName = "Hangfire", 
+            BaseJobProvider jobProvider = null,
             Type[] typesToUseManagementPage = null)
         {
             services.Configure<HangfireSettings>(configuration.GetSection(configSectionName));

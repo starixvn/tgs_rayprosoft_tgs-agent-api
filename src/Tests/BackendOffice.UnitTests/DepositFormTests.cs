@@ -4,11 +4,12 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using NSubstitute;
 using NUnit.Framework;
+using Tgs.Payment.Clients;
 using TGS.Clients.Promotion.Client;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
-using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.Services.BackOffice.Infrastructure.DataService;
@@ -39,6 +40,59 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<Guid>(x => x == brandId),
                     It.Is<Guid>(x => x == formId)),
                 Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Manager_Can_Not_Review_DepositForm_When_Form_Status_Is_Approved()
+        {
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+            var fakePlayerService = Substitute.For<IPlayerService>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+            var fakePromotionClient = Substitute.For<IPromotionClient>();
+            var sut = new ReviewDepositFormCommandService(
+                fakePaymentServiceClient,
+                fakePlayerService,
+                fakePlayerBucketRepository,
+                fakePromotionClient,
+                NullLogger<ReviewDepositFormCommandService>.Instance);
+
+            var brandId = Guid.NewGuid();
+            var formId = Guid.NewGuid();
+
+            fakePaymentServiceClient.GetDepositFormAsync(brandId, formId)
+                .Returns(new DepositFormInfo { Status = PaymentFlowState.Approved });
+
+            var command = new ReviewDepositFormCommand(brandId, formId, ReviewState.Approve, null);
+            await sut.ExecuteAsync(command);
+
+            _ = fakePaymentServiceClient.Received(0)
+                .ReviewDepositFormAsync(brandId, ReviewState.Approve, null);
+        }
+
+        public async Task Manager_Can_Not_Review_DepositForm_When_Form_Status_Is_Reject()
+        {
+            var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
+            var fakePlayerService = Substitute.For<IPlayerService>();
+            var fakePlayerBucketRepository = Substitute.For<IPlayerBucketRepository>();
+            var fakePromotionClient = Substitute.For<IPromotionClient>();
+            var sut = new ReviewDepositFormCommandService(
+                fakePaymentServiceClient,
+                fakePlayerService,
+                fakePlayerBucketRepository,
+                fakePromotionClient,
+                NullLogger<ReviewDepositFormCommandService>.Instance);
+
+            var brandId = Guid.NewGuid();
+            var formId = Guid.NewGuid();
+
+            fakePaymentServiceClient.GetDepositFormAsync(brandId, formId)
+                .Returns(new DepositFormInfo { Status = PaymentFlowState.Reject });
+
+            var command = new ReviewDepositFormCommand(brandId, formId, ReviewState.Reject, null);
+            await sut.ExecuteAsync(command);
+
+            _ = fakePaymentServiceClient.Received(0)
+                .ReviewDepositFormAsync(brandId, ReviewState.Reject, null);
         }
 
         [Test]
@@ -117,6 +171,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var query = new DepositFormQuery(
                 Guid.NewGuid(),
+                null,
                 null,
                 null,
                 null,

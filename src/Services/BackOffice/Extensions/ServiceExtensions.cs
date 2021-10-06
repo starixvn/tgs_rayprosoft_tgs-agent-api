@@ -16,7 +16,7 @@ namespace TGS.Services.BackOffice.Extensions
         {
             services.RegisterAllServiceUtilityTypes(Assembly.GetExecutingAssembly(), ServiceLifetime.Transient);
             services.AddMediatR(Assembly.GetExecutingAssembly());
-            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Singleton);
+            services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly(), ServiceLifetime.Scoped);
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(PipelineBehavior<,>));
             services.AddTransient<IBetLimitService, BetLimitService>();
             services.AddTransient<IBrandService, BrandService>();

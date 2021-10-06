@@ -5,6 +5,7 @@ using AutoFixture;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
+using Tgs.Logging;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;

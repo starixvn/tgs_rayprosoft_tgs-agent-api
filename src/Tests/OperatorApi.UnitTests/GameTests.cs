@@ -151,6 +151,124 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public async Task FundInAllGameBalance_Should_Call_GP_FundIn_When_Amount_Equals_One_Dollar()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, GameBalanceInfo>>();
+            var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
+
+            var sut = new FundInAllGameBalanceCommandService(
+                fakeGameProviderRepository,
+                fakeGetGameBalanceService,
+                fakeGameFundInService);
+
+            var command = new FundInAllGameBalanceCommand(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                "GpCode");
+
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
+                .Returns(new[]
+                {
+                    new BrandSubGameProviderInfo(
+                        "sub1",
+                        "sub1",
+                        "sub1",
+                        Guid.NewGuid(),
+                        "gp1",
+                        true,
+                        Status.Active),
+                    new BrandSubGameProviderInfo(
+                        "sub2",
+                        "sub2",
+                        "sub2",
+                        Guid.NewGuid(),
+                        "gp1",
+                        true,
+                        Status.Active),
+                    new BrandSubGameProviderInfo(
+                        "sub3",
+                        "sub3",
+                        "sub3",
+                        Guid.NewGuid(),
+                        "gp2",
+                        true,
+                        Status.Active)
+                }.ToAsyncEnumerable());
+
+            fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
+                .Returns(new GameBalanceInfo
+                {
+                    Balance = 1m,
+                    Error = 0
+                });
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeGameFundInService.Received(2)
+                .ExecuteAsync(Arg.Any<FundInGameBalanceCommand>());
+        }
+
+        [Test]
+        public async Task FundInAllGameBalance_Should_Not_Call_GP_FundIn_When_Amount_LessThan_One_Dollar()
+        {
+            var fakeGameProviderRepository = Substitute.For<IGameProviderRepository>();
+            var fakeGetGameBalanceService = Substitute.For<IGetService<GetGameBalanceQuery, GameBalanceInfo>>();
+            var fakeGameFundInService = Substitute.For<ICommandService<FundInGameBalanceCommand>>();
+
+            var sut = new FundInAllGameBalanceCommandService(
+                fakeGameProviderRepository,
+                fakeGetGameBalanceService,
+                fakeGameFundInService);
+
+            var command = new FundInAllGameBalanceCommand(
+                Guid.NewGuid(),
+                "ThisIsPlayerCode",
+                "GpCode");
+
+            fakeGameProviderRepository.QueryAllSubGameProvidersAsync(Arg.Is(command.BrandId))
+                .Returns(new[]
+                {
+                    new BrandSubGameProviderInfo(
+                        "sub1",
+                        "sub1",
+                        "sub1",
+                        Guid.NewGuid(),
+                        "gp1",
+                        true,
+                        Status.Active),
+                    new BrandSubGameProviderInfo(
+                        "sub2",
+                        "sub2",
+                        "sub2",
+                        Guid.NewGuid(),
+                        "gp1",
+                        true,
+                        Status.Active),
+                    new BrandSubGameProviderInfo(
+                        "sub3",
+                        "sub3",
+                        "sub3",
+                        Guid.NewGuid(),
+                        "gp2",
+                        true,
+                        Status.Active)
+                }.ToAsyncEnumerable());
+
+            fakeGetGameBalanceService.GetAsync(Arg.Any<GetGameBalanceQuery>())
+                .Returns(new GameBalanceInfo
+                {
+                    Balance = 0.88m,
+                    Error = 0
+                });
+
+            await sut.ExecuteAsync(command);
+
+            _ = fakeGameFundInService.Received(0)
+                .ExecuteAsync(Arg.Any<FundInGameBalanceCommand>());
+        }
+
+        [Test]
         public async Task Get_Game_List_Of_All_GameProviders()
         {
             // arrange
@@ -615,7 +733,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             fakePlayerOperations
                 .GetCachedPlayerAsync(playerCode)
-                .Returns(Task.FromResult(new CachedPlayer { Status = PlayerStatus.Enabled }));
+                .Returns(Task.FromResult(new CachedPlayer
+                {
+                    Status = PlayerStatus.Enabled
+                }));
 
             fakePluggableOperations
                 .GetEndpointUrlByGameProviderCodeAsync(gameProvider.Code)
@@ -854,7 +975,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Status = PlayerStatus.Enabled
                 }));
 
-            var sut = new GameController { ControllerContext = new ControllerContext { HttpContext = httpContext } };
+            var sut = new GameController
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = httpContext
+                }
+            };
 
             var request = new GetGameUrlRequest
             {
@@ -921,7 +1048,13 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Status = PlayerStatus.Enabled
                 }));
 
-            var sut = new GameController { ControllerContext = new ControllerContext { HttpContext = httpContext } };
+            var sut = new GameController
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = httpContext
+                }
+            };
 
             var request = new GetLobbyGameUrlRequest
             {
