@@ -100,12 +100,13 @@ namespace TGS.Services.Report.Application.Queries.Market
                         {
                             ReportDate = market.ReportDate,
                             RegisteredCount =
-                                registeredPlayersByDates.FirstOrDefault(x => x.Date == market.ReportDate)
+                                registeredPlayersByDates.FirstOrDefault(x => x.Date == market.ReportDate.Date)
                                     ?.PlayerCount ?? 0,
                             FirstFundInCount = markets.Sum(m => m.market?.FirstFundInCount ?? 0),
                             DepositAmount = markets.Sum(m => m.market?.DepositAmount ?? 0),
                             WithdrawalAmount =
-                                -withdrawalByDates.FirstOrDefault(w => w.Date == market.ReportDate)?.WithdrawalAmount ??
+                                -withdrawalByDates.FirstOrDefault(w => w.Date == market.ReportDate.Date)
+                                    ?.WithdrawalAmount ??
                                 0,
                             AdjustmentAmount = markets.Sum(m => m.market?.AdjustmentAmount ?? 0),
                             BonusAmount =
