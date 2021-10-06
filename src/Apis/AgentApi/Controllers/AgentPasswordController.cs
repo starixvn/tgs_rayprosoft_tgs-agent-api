@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
+using TGS.Apis.AgentApi.Models;
 using TGS.Apis.AgentApi.Models.Messages;
-using TGS.Core.Models.Exceptions;
 using TGS.Services.Agent.Services.Agent;
 using TGS.ServiceUtility;
 
@@ -36,7 +36,7 @@ namespace TGS.Apis.AgentApi.Controllers
                 .ConfigureAwait(false);
 
             if (!isValid)
-                throw new InvalidCredentialsException("PasswordMismatched");
+                throw new PasswordInvalidException();
 
             var command = new SetAgentPasswordCommand(
                 agentTokenData.AgentId,
@@ -56,7 +56,6 @@ namespace TGS.Apis.AgentApi.Controllers
         [HttpPost("forgot")]
         [AuthorizeAgentToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
-        [TgsResponseWrapper]
         public ValueTask<string> ForgotPasswordAsync(
             [FromServices] IGetService<ForgotPasswordCommand, string> forgotPasswordService,
             [FromBody] ForgotPasswordRequest request)
@@ -75,7 +74,6 @@ namespace TGS.Apis.AgentApi.Controllers
         [AuthorizeAgentToken(AllowNullOrEmpty = true, NeedAuthorize = false)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status406NotAcceptable)]
-        [TgsResponseWrapper]
         public async ValueTask ResetPasswordAsync(
             [FromServices] ICommandService<ResetPasswordCommand> resetService,
             [FromBody] ResetPasswordRequest request)
