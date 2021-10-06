@@ -122,14 +122,14 @@ namespace TGS.Services.Report.Infrastructure.DataService
                             AgentId = x.AgentId,
                             PlayerCode = x.PlayerCode,
                             RegisteredCount =
-                                players.Any(p =>
-                                    p.Player.RegisteredOn >= start && p.Player.RegisteredOn < end)
+                                players.Count(p =>
+                                    p.Player.RegisteredOn >= start && p.Player.RegisteredOn < end) > 0
                                     ? 1
                                     : 0,
                             FirstFundInCount =
-                                players.Any(p =>
+                                players.Count(p =>
                                     p.Player.FirstDepositOn >= start &&
-                                    p.Player.FirstDepositOn < end)
+                                    p.Player.FirstDepositOn < end) > 0
                                     ? 1
                                     : 0,
                             DepositAmount =
