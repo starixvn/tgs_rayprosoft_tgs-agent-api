@@ -57,9 +57,16 @@ namespace TGS.Services.Report.Application.Commands.Agent
             return CreateValidResponse<MessageResponse>();
         }
 
+        private static decimal GetAgentDividendPercentage(AgentDividendCondition[] agentDividendCondition,
+            AgentConditionModel currentCondition, bool checkDividendActiveCount)
+            => agentDividendCondition.OrderByDescending(x => x.Rank).Where(!checkDividendActiveCount,
+                    x => currentCondition.NetProfit > x.NetProfit)
+                .Where(checkDividendActiveCount, x => currentCondition.ActiveCount >= x.ActiveNumber &&
+                    currentCondition.NetProfit > x.NetProfit).Select(x => x.DividendPercentage).FirstOrDefault();
+
         private static IEnumerable<AgentDividendMultipleLayerModel> GetAgentDividends(
-            Core.DataServices.Tgs.Models.Agent[] agents, Guid brandId, Guid agentId,
-            decimal netProfit)
+            Core.DataServices.Tgs.Models.Agent[] agents, AgentConditionModel[] agentCurrentConditions, Guid agentId,
+            decimal netProfit, bool checkDividendActiveCount)
         {
             bool hasParentAgentId;
 
@@ -71,12 +78,14 @@ namespace TGS.Services.Report.Application.Commands.Agent
 
             do
             {
+                var dividendPercentage = GetAgentDividendPercentage(agent.AgentDividendConditions.ToArray(),
+                    agentCurrentConditions.First(x => x.AgentId == currentAgentId), checkDividendActiveCount);
                 yield return new AgentDividendMultipleLayerModel
                 {
                     AgentId = currentAgentId,
                     DividendProviderAgentId = providerAgentId,
                     Layer = layer,
-                    Dividend = netProfit * (agent.DividendPercentage - childDividendPercentage) / 100M
+                    Dividend = netProfit * (dividendPercentage - childDividendPercentage) / 100M
                 };
 
                 hasParentAgentId = agent.ParentAgentId != null;
@@ -97,11 +106,44 @@ namespace TGS.Services.Report.Application.Commands.Agent
             } while (hasParentAgentId);
         }
 
+        private static IEnumerable<AgentConditionModel> GetAgentTotalNetProfits(
+            Core.DataServices.Tgs.Models.Agent[] agents, Guid agentId, decimal activeCount,
+            decimal netProfit)
+        {
+            bool hasParentAgentId;
+
+            var agent = agents.First(x => x.Id == agentId);
+            var currentAgentId = agentId;
+
+            do
+            {
+                yield return new AgentConditionModel
+                {
+                    AgentId = currentAgentId,
+                    ActiveCount = activeCount,
+                    NetProfit = netProfit
+                };
+
+                hasParentAgentId = agent.ParentAgentId != null;
+
+                if (!hasParentAgentId)
+                {
+                    continue;
+                }
+
+                var parentAgent = agents.First(x => x.Id == agent.ParentAgentId);
+                currentAgentId = parentAgent.Id;
+
+                agent = parentAgent;
+            } while (hasParentAgentId);
+        }
+
         private async Task<(List<CreateAgentDividendModel>, List<CreateAgentDividendModel>, List<AgentDividend>)>
             GetAgentDividends(Brand brand, int idNumber, CancellationToken cancellationToken)
         {
             var agents = await _agentService
                 .GetAgentQueries(q => q.Where(x => x.BrandId == brand.Id))
+                .Include(x => x.AgentDividendConditions)
                 .ToArrayAsync(cancellationToken);
 
             var playerData = await _playerAggregateService.GetPlayerAggregateQueries()
@@ -150,8 +192,22 @@ namespace TGS.Services.Report.Application.Commands.Agent
                     x.NetProfit
                 }).ToArrayAsync(cancellationToken);
 
-            var parentAgentDividends = playerData.SelectMany(x => GetAgentDividends(agents, brand.Id, x.AgentId,
-                x.NetProfit)).ToArray();
+            var agentCurrentConditions = playerData.GroupBy(x => x.AgentId, (agentId, items) => new
+            {
+                AgentId = agentId,
+                ActiveCount = items.Distinct().Count(),
+                NetProfit = items.Sum(s => s.NetProfit)
+            }).SelectMany(x => GetAgentTotalNetProfits(agents, x.AgentId, x.ActiveCount, x.NetProfit)).GroupBy(
+                x => x.AgentId, (agentId, items) => new AgentConditionModel
+                {
+                    AgentId = agentId,
+                    ActiveCount = items.Sum(s => s.ActiveCount),
+                    NetProfit = items.Sum(s => s.NetProfit)
+                }).ToArray();
+
+            var parentAgentDividends = playerData.SelectMany(x => GetAgentDividends(agents, agentCurrentConditions,
+                x.AgentId,
+                x.NetProfit, brand.CheckDividendActiveCount)).ToArray();
 
             var agentData = playerData.GroupBy(x => new
             {
