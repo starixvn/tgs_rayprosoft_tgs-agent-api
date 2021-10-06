@@ -24,7 +24,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var agentId = Guid.NewGuid();
             var paymentChannelId = Guid.NewGuid();
             var bankType = "Transfer";
-            var detail = new {bankAccount = "0987654321"};
+            var detail = new { bankAccount = "0987654321" };
 
             var command = new CreateBankInfoCommand(
                 brandId,
@@ -47,6 +47,8 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     "aaabbb",
                     null,
                     1,
+                    Array.Empty<byte>(),
+                    Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
