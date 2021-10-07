@@ -31,9 +31,7 @@ namespace TGS.Services.Report.Application.Queries.Player
                 From = request.From,
                 To = request.To,
                 Page = 1,
-                ShowAll = true,
-                Username = request.Username,
-                Level = request.Level
+                ShowAll = true
             };
             var resource = new ResourceManager(typeof(PlayerContribution));
 
@@ -58,7 +56,6 @@ namespace TGS.Services.Report.Application.Queries.Player
             var xlsx = exportData.ExportWithLocalization("playerContributions", resource);
             await using var stream = new MemoryStream();
             xlsx.SaveAs(stream);
-
             return new MemoryStream(stream.ToArray());
         }
     }
