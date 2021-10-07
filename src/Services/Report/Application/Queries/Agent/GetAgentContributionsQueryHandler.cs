@@ -157,7 +157,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                             Type = AccountType.Agent,
                             DepositAmount = playerAggregate.Sum(p => p.playerAggregate?.DepositAmount ?? 0),
                             WithdrawalAmount =
-                                playerWithdrawals.Where(w => w.AgentId == agent.Id).Sum(w => w.WithdrawalAmount ?? 0),
+                                playerWithdrawals.Where(w => w.AgentId == agent.Id).Sum(w => w.WithdrawalAmount),
                             AdjustmentAmount = playerAggregate.Sum(p => p.playerAggregate?.AdjustmentAmount ?? 0),
                             BonusAmount =
                                 playerAggregate.Sum(p
