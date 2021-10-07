@@ -138,11 +138,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 .MaxAsync(x => (decimal?)x.DividendPercentage, cancellationToken)
                 .ConfigureAwait(false) ?? 0M;
 
-            if (request.DividendPercentage < childAgentMaxDividendPercentage)
-            {
-                return CreateInvalidResponse<MessageResponse>(Agent.DividendPercentageMustLessThanOrEqualToUpperLayer);
-            }
-
             if (request.UpdateType == MemberUpdateType.Contact &&
                 request.Email.IsNotNullOrEmpty() &&
                 await _service.ExistsAsync(x => x.Id != agent.Id && EF.Functions.ILike(x.Email, $"%{request.Email}%")))
