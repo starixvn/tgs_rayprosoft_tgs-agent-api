@@ -27,11 +27,13 @@ namespace TGS.Services.Agent.Services.Agent
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         }
 
-        public async ValueTask<CreateAgentInfo> GetAsync(GetCreateAgentQuery query,
+        public async ValueTask<CreateAgentInfo> GetAsync(
+            GetCreateAgentQuery query,
             CancellationToken cancellationToken = default)
         {
             var parentAgent = await _tgsRepository.Agents.AsQueryable()
                 .FirstAsync(x => x.Id == query.ParentAgentId);
+
             var brand = await _tgsRepository.Brands.AsQueryable()
                 .FirstAsync(x => x.Id == query.BrandId)
                 .ConfigureAwait(false);
@@ -46,10 +48,43 @@ namespace TGS.Services.Agent.Services.Agent
                 throw new UsernameException();
             }
 
-            if (parentAgent.DividendPercentage < query.DividendPercentage)
-            {
-                throw new DividendPercentageException(parentAgent.DividendPercentage);
-            }
+            //if (parentAgent.DividendPercentage < query.DividendPercentage)
+            //{
+            //    throw new DividendPercentageException(parentAgent.DividendPercentage);
+            //}
+
+            //foreach (var condition in query.AgentDividendConditions.OrderBy(x => x.Rank))
+            //{
+            //    var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
+
+            //    if (parent is null)
+            //    {
+            //        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ParentRankNotFound,
+            //            condition.Rank));
+            //    }
+
+            //    if (condition.NetProfit < parent.NetProfit)
+            //    {
+            //        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.NetProfitMustGreaterThan,
+            //            condition.Rank,
+            //            parent.NetProfit));
+            //    }
+
+            //    if (condition.ActiveNumber < parent.ActiveNumber)
+            //    {
+            //        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ActiveNumberMustGreaterThan,
+            //            condition.Rank,
+            //            parent.ActiveNumber));
+            //    }
+
+            //    if (condition.DividendPercentage > parent.DividendPercentage)
+            //    {
+            //        return CreateInvalidResponse<MessageResponse>(string.Format(
+            //            Agent.DividendPercentageMustLessThan,
+            //            condition.Rank,
+            //            parent.DividendPercentage));
+            //    }
+            //}
 
             var invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
 
@@ -73,7 +108,6 @@ namespace TGS.Services.Agent.Services.Agent
                 DefaultWalletId = defaultWalletId,
                 AgentStatus =
                     query.LiveDealerRebatePercentage == 0
-                    && query.DividendPercentage == 0
                     && query.SlotRebatePercentage == 0
                     && query.LotteryRebatePercentage == 0
                     && query.CardGameRebatePercentage == 0
@@ -81,7 +115,6 @@ namespace TGS.Services.Agent.Services.Agent
                     && query.VirtualSportsRebatePercentage == 0
                         ? AgentConfigStatus.WaitForConfigurePercentage
                         : AgentConfigStatus.DoneForConfigurePercentage,
-                DividendPercentage = query.DividendPercentage,
                 LiveDealerRebatePercentage = query.LiveDealerRebatePercentage,
                 SlotRebatePercentage = query.SlotRebatePercentage,
                 LotteryRebatePercentage = query.LotteryRebatePercentage,
@@ -106,6 +139,7 @@ namespace TGS.Services.Agent.Services.Agent
             agent.Salt = salt;
             agent.WithdrawPassword = Array.Empty<byte>();
             agent.WithdrawSalt = Array.Empty<byte>();
+
             agent.Wallets = new[]
                 {
                     new CoreModels.AgentWallet
