@@ -8,12 +8,9 @@ namespace TGS.Apis.OperatorApi.Validators
     {
         public ChangePasswordRequestValidator()
         {
-            RuleFor(x => x.OldPassword)
-                .NotEmpty()
-                .WithName(x => GetJsonPropertyName(x, nameof(x.OldPassword)));
-
             RuleFor(x => x.NewPassword)
                 .NotEmpty()
+                .Length(6, 20)
                 .WithName(x => GetJsonPropertyName(x, nameof(x.NewPassword)));
         }
     }

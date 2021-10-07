@@ -121,6 +121,21 @@ namespace TGS.Tests.OperatorApi.UnitTests
         }
 
         [Test]
+        public void ChangePasswordRequestValidator_LengthCheck()
+        {
+            var sut = new ChangePasswordRequestValidator();
+
+            var data = new ChangePasswordRequest
+            {
+                NewPassword = "12345"
+            };
+
+            var actual = sut.Validate(data);
+
+            Assert.IsFalse(actual.IsValid);
+        }
+
+        [Test]
         public void If_Already_Set_Pay_Password_Will_Throw_Exception()
         {
             var fakeAgentRepository = Substitute.For<IAgentRepository>();
