@@ -51,7 +51,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     {
                         player.AgentId,
                         player.PlayerCode,
-                        WithdrawalAmount = withdrawForm.ActualAmount
+                        WithdrawalAmount = withdrawForm.ActualAmount ?? withdrawForm.Amount
                     })
                 .GroupBy(x => new
                     {
@@ -64,6 +64,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         x.PlayerCode,
                         WithdrawalAmount = withdrawals.Sum(w => w.WithdrawalAmount)
                     })
+                .Where(x => x.AgentId == agent.Id)
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 

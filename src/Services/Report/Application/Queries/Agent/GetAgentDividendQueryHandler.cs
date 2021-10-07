@@ -50,7 +50,7 @@ namespace TGS.Services.Report.Application.Queries.Agent
                     {
                         player.AgentId,
                         player.PlayerCode,
-                        WithdrawalAmount = withdrawForm.ActualAmount
+                        WithdrawalAmount = withdrawForm.ActualAmount ?? withdrawForm.Amount
                     })
                 .GroupBy(x => new
                     {
