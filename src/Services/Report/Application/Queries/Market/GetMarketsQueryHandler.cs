@@ -56,27 +56,12 @@ namespace TGS.Services.Report.Application.Queries.Market
                 .ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            var registeredPlayers = await _service.Repository.Players.AsQueryable()
-                .Where(x => x.RegisteredOn >= from && x.RegisteredOn < to)
-                .ToArrayAsync(cancellationToken)
-                .ConfigureAwait(false);
-
             var withdrawalByDates = withdrawals.GroupBy(x => x.CreatedOn.ToOffset(offset).Date,
                 (date, withdrawals) => new
                 {
                     Date = date,
                     WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
                 });
-
-            var registeredPlayersByDates = registeredPlayers
-                .Where(x => x.RegisteredOn != null)
-                .GroupBy(
-                    x => x.RegisteredOn?.ToOffset(offset).Date,
-                    (date, players) => new
-                    {
-                        Date = date,
-                        PlayerCount = players.Count()
-                    });
 
             return await dates.GroupJoin(_service.GetPlayerAggregateQueries()
                         .Where(x => x.BrandId == request.BrandId)
@@ -102,9 +87,7 @@ namespace TGS.Services.Report.Application.Queries.Market
                         new MarketModel
                         {
                             ReportDate = market.ReportDate,
-                            RegisteredCount =
-                                registeredPlayersByDates.FirstOrDefault(x => x.Date == market.ReportDate.Date)
-                                    ?.PlayerCount ?? 0,
+                            RegisteredCount = markets.Sum(m => m.market?.RegisteredCount ?? 0),
                             FirstFundInCount = markets.Sum(m => m.market?.FirstFundInCount ?? 0),
                             DepositAmount = markets.Sum(m => m.market?.DepositAmount ?? 0),
                             WithdrawalAmount =
