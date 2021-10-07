@@ -5,7 +5,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Operator.Services.Withdraw
 {
-    public record GetWithdrawFormsQuery(
+    public record WithdrawFormsQuery(
         Guid BrandId,
         string PlayerCode,
         IEnumerable<PaymentFlowState> Status,

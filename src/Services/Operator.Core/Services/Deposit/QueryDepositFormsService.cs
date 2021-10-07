@@ -7,30 +7,25 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Deposit
 {
-    internal class GetDepositFormsQueryService : IGetService<GetDepositFormsQuery, PagingResponse<DepositFormInfo>>
+    internal class QueryDepositFormsService : IGetService<DepositFormsQuery, PagingResponse<DepositFormInfo>>
     {
-        private readonly IPlayerOperations _playerOperations;
         private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public GetDepositFormsQueryService(
-            IPlayerOperations playerOperations,
+        public QueryDepositFormsService(
             IPaymentServiceClient paymentServiceClient)
         {
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public async ValueTask<PagingResponse<DepositFormInfo>> GetAsync(
-            GetDepositFormsQuery query,
+            DepositFormsQuery query,
             CancellationToken cancellationToken = default)
         {
-            var player = await _playerOperations.GetPlayerByCodeAsync(query.PlayerCode).ConfigureAwait(false);
-
             return await _paymentServiceClient.QueryDepositFormsAsync(
                new DepositFormQueryConditions
                {
                    BrandId = query.BrandId,
-                   UserName = player.Username,
+                   UserId = query.PlayerCode,
                    CreateOnRange = query.CreateOnRange,
                    UpdateOnRange = query.UpdateOnRange,
                    Status = query.Status
