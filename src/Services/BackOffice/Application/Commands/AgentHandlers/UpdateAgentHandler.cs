@@ -44,12 +44,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
                 }
 
-                if (parentAgent.DividendPercentage < request.DividendPercentage)
-                {
-                    return CreateInvalidResponse<MessageResponse>(Agent
-                        .DividendPercentageMustLessThanOrEqualToUpperLayer);
-                }
-
                 foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
                 {
                     var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
@@ -63,20 +57,23 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     if (condition.NetProfit < parent.NetProfit)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(Agent.NetProfitMustGreaterThan,
-                            condition.Rank, parent.NetProfit));
+                            condition.Rank,
+                            parent.NetProfit));
                     }
 
                     if (condition.ActiveNumber < parent.ActiveNumber)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ActiveNumberMustGreaterThan,
-                            condition.Rank, parent.ActiveNumber));
+                            condition.Rank,
+                            parent.ActiveNumber));
                     }
 
                     if (condition.DividendPercentage > parent.DividendPercentage)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(
                             Agent.DividendPercentageMustLessThan,
-                            condition.Rank, parent.DividendPercentage));
+                            condition.Rank,
+                            parent.DividendPercentage));
                     }
                 }
             }
@@ -107,20 +104,23 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     if (condition.NetProfit > child.MinNetProfit)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(Agent.NetProfitMustLessThan,
-                            condition.Rank, child.MinNetProfit));
+                            condition.Rank,
+                            child.MinNetProfit));
                     }
 
                     if (condition.ActiveNumber > child.MinActiveNumber)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ActiveNumberMustLessThan,
-                            condition.Rank, child.MinActiveNumber));
+                            condition.Rank,
+                            child.MinActiveNumber));
                     }
 
                     if (condition.DividendPercentage < child.MaxDividendPercentage)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(
                             Agent.DividendPercentageMustGreaterThan,
-                            condition.Rank, child.MaxDividendPercentage));
+                            condition.Rank,
+                            child.MaxDividendPercentage));
                     }
                 }
 
@@ -137,11 +137,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                 .Where(x => x.ParentAgentId == agent.Id)
                 .MaxAsync(x => (decimal?)x.DividendPercentage, cancellationToken)
                 .ConfigureAwait(false) ?? 0M;
-
-            if (request.DividendPercentage < childAgentMaxDividendPercentage)
-            {
-                return CreateInvalidResponse<MessageResponse>(Agent.DividendPercentageMustLessThanOrEqualToUpperLayer);
-            }
 
             if (request.UpdateType == MemberUpdateType.Contact &&
                 request.Email.IsNotNullOrEmpty() &&
