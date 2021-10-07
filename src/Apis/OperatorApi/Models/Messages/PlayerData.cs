@@ -16,6 +16,9 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         [JsonPropertyName("email")]
         public string Email { get; set; }
 
+        [JsonPropertyName("viplevel")]
+        public int VipLevel { get; set; }
+
         [JsonPropertyName("qq")]
         public string QQ { get; set; }
 
@@ -29,6 +32,6 @@ namespace TGS.Apis.OperatorApi.Models.Messages
         public bool IdentityAuthentication { get; set; }
 
         [JsonPropertyName("autotransfertogame")]
-        public bool IsAutoTransferToGame { get;set; }
+        public bool IsAutoTransferToGame { get; set; }
     }
 }

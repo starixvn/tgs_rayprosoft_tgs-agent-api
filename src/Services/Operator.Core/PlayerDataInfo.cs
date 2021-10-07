@@ -5,6 +5,7 @@
         string RealName,
         string Phone,
         string Email,
+        int VipLevel,
         string QQ,
         string Wechat,
         bool IsSetPayPassword,

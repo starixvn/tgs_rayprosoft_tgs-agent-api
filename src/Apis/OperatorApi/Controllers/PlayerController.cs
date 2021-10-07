@@ -209,6 +209,7 @@ namespace TGS.Apis.OperatorApi.Controllers
                 playerData.RealName = player.RealName;
                 playerData.Email = player.Email;
                 playerData.Phone = player.Phone;
+                playerData.VipLevel = player.VipLevel;
                 playerData.QQ = player.QQ;
                 playerData.Wechat = player.Wechat;
                 playerData.IsSetPayPassword = player.IsSetPayPassword;
