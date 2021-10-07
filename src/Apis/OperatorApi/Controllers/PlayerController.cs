@@ -536,6 +536,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         /// Submits the change phone.
         /// </summary>
         /// <param name="commitPlayerInitPhoneService">The commit player init phone service.</param>
+        /// <param name="requestAnalyzer">The request analyzer.</param>
         /// <param name="request">The request.</param>
         /// <returns></returns>
         [HttpPut("init-phone")]

@@ -7,30 +7,26 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Withdraw
 {
-    internal class GetWithdrawFormsQueryService : IGetService<GetWithdrawFormsQuery, PagingResponse<WithdrawFormInfo>>
+    internal class WithdrawFormsQueryService : IGetService<WithdrawFormsQuery, PagingResponse<WithdrawFormInfo>>
     {
-        private readonly IPlayerOperations _playerOperations;
         private readonly IPaymentServiceClient _paymentServiceClient;
 
-        public GetWithdrawFormsQueryService(
-            IPlayerOperations playerOperations,
+        public WithdrawFormsQueryService(
             IPaymentServiceClient paymentServiceClient)
         {
-            _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
         public async ValueTask<PagingResponse<WithdrawFormInfo>> GetAsync(
-            GetWithdrawFormsQuery query,
+            WithdrawFormsQuery query,
             CancellationToken cancellationToken = default)
         {
-            var player = await _playerOperations.GetPlayerByCodeAsync(query.PlayerCode);
-
             return await _paymentServiceClient.QueryWithdrawFormsAsync(
                 new WithdrawFormQueryConditions
                 {
                     BrandId = query.BrandId,
-                    UserName = player.Username,
+                    UserId = query.PlayerCode,
+                    UserType = UserType.Player,
                     Status = query.Status,
                     CreateOnRange = query.CreateOnRange,
                     UpdateOnRange = query.UpdateOnRange

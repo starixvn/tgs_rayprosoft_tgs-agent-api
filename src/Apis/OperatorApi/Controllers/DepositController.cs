@@ -95,7 +95,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("player/list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagedResponse<DepositFormViewModel>> GetDepositFormsAsync(
-            [FromServices] IGetService<GetDepositFormsQuery, Tgs.Payment.Clients.PagingResponse<DepositFormInfo>> getDepositFormsQueryService,
+            [FromServices] IGetService<DepositFormsQuery, Tgs.Payment.Clients.PagingResponse<DepositFormInfo>> getDepositFormsQueryService,
             [FromServices] IQueryService<BrandPaymentsQuery, BrandPaymentInfo> brandPaymentsQueryService,
             [FromServices] IGetService<GetPaymentQuery, PaymentInfo> getPaymentService,
             [FromQuery] GetDepositFormsRequest request,
@@ -113,7 +113,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
                 updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
 
-            var query = new GetDepositFormsQuery(
+            var query = new DepositFormsQuery(
                 brandId,
                 playerTokenData.PlayerCode,
                 request.Status.ToPaymentFlowState(),
