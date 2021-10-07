@@ -115,7 +115,7 @@ namespace TGS.Apis.OperatorApi.Controllers
         [HttpGet("player/list")]
         [AuthorizePlayerToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagedResponse<WithdrawFormViewModel>> GetWithdrawFormsAsync(
-            [FromServices] IGetService<GetWithdrawFormsQuery, Tgs.Payment.Clients.PagingResponse<WithdrawFormInfo>> getWithdrawFormsQueryService,
+            [FromServices] IGetService<WithdrawFormsQuery, Tgs.Payment.Clients.PagingResponse<WithdrawFormInfo>> getWithdrawFormsQueryService,
             [FromQuery] GetWithdrawFormsRequest request,
             [FromQuery] PageableRequest paging)
         {
@@ -131,7 +131,7 @@ namespace TGS.Apis.OperatorApi.Controllers
             if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
                 updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
 
-            var query = new GetWithdrawFormsQuery(
+            var query = new WithdrawFormsQuery(
                 brandId,
                 playerTokenData.PlayerCode,
                 request.Status.ToPaymentFlowState(),
