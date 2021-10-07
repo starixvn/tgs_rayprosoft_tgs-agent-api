@@ -46,7 +46,8 @@ namespace TGS.Apis.AgentApi.Models
                 [TgsApiError.GameBalanceFundOutFailed] = "GameBalanceFundOutFailed",
                 [TgsApiError.FavoriteFull] = "FavoriteAlreadyFull",
                 [TgsApiError.UserBanned] = "UserBanned",
-                [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate"
+                [TgsApiError.BrandEmailDuplicate] = "BrandEmailDuplicate",
+                [TgsApiError.DividendConditionError] = "DividendConditionError"
             };
 
         private static readonly IReadOnlyDictionary<TgsApiError, int> _HttpCodeByException =
@@ -84,7 +85,8 @@ namespace TGS.Apis.AgentApi.Models
                 [TgsApiError.FavoriteFull] = StatusCodes.Status400BadRequest,
                 [TgsApiError.UserBanned] = StatusCodes.Status403Forbidden,
                 [TgsApiError.BrandEmailDuplicate] = StatusCodes.Status500InternalServerError,
-                [TgsApiError.InvalidPassword] = StatusCodes.Status400BadRequest
+                [TgsApiError.InvalidPassword] = StatusCodes.Status400BadRequest,
+                [TgsApiError.DividendConditionError] = StatusCodes.Status500InternalServerError
             };
 
         private static readonly IReadOnlyDictionary<Type, TgsApiError> _TgsApiErrorByException =
@@ -115,7 +117,8 @@ namespace TGS.Apis.AgentApi.Models
                 [typeof(OperationNotAllowedException)] = TgsApiError.OperationNotAllowed,
                 [typeof(GameProviderApiErrorException)] = TgsApiError.ProviderApiError,
                 [typeof(Services.Agent.Exceptions.AgentNotFoundException)] = TgsApiError.AgentNotFound,
-                [typeof(UserBannedException)] = TgsApiError.UserBanned
+                [typeof(UserBannedException)] = TgsApiError.UserBanned,
+                [typeof(DividendConditionException)] = TgsApiError.DividendConditionError
             };
 
         public bool CanProcess(Exception exception)
@@ -129,6 +132,7 @@ namespace TGS.Apis.AgentApi.Models
             }
 
             var type = exception.GetType();
+
             return _TgsApiErrorByException.TryGetValue(type, out var error)
                 ? (int)error
                 : (int)TgsApiError.SystemError;
@@ -142,6 +146,7 @@ namespace TGS.Apis.AgentApi.Models
             }
 
             var type = exception.GetType();
+
             return _TgsApiErrorByException.TryGetValue(type, out var error) &&
                 _HttpCodeByException.TryGetValue(error, out var statusCode)
                     ? statusCode
@@ -154,9 +159,11 @@ namespace TGS.Apis.AgentApi.Models
         public string GetMessageKeyByException(Exception exception)
         {
             var type = exception.GetType();
+
             if (_TgsApiErrorByException.TryGetValue(type, out var errorType)
                 && _ErrorCodeMessageIdMap.TryGetValue(errorType, out var messageKey))
                 return messageKey;
+
             return _ErrorCodeMessageIdMap[TgsApiError.SystemError];
         }
     }

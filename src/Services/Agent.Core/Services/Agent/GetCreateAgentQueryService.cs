@@ -48,48 +48,48 @@ namespace TGS.Services.Agent.Services.Agent
                 throw new UsernameException();
             }
 
-            //if (parentAgent.DividendPercentage < query.DividendPercentage)
-            //{
-            //    throw new DividendPercentageException(parentAgent.DividendPercentage);
-            //}
+            foreach (var condition in query.AgentDividendConditions.OrderBy(x => x.Rank))
+            {
+                var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
 
-            //foreach (var condition in query.AgentDividendConditions.OrderBy(x => x.Rank))
-            //{
-            //    var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
+                if (parent is null)
+                {
+                    throw new DividendConditionException($"Parent rank {condition.Rank} is not found.");
+                }
 
-            //    if (parent is null)
-            //    {
-            //        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ParentRankNotFound,
-            //            condition.Rank));
-            //    }
+                if (condition.NetProfit < parent.NetProfit)
+                {
+                    throw new DividendConditionException(
+                        $"Rank {condition.Rank} net profit must greater than or equal {parent.NetProfit}.");
+                }
 
-            //    if (condition.NetProfit < parent.NetProfit)
-            //    {
-            //        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.NetProfitMustGreaterThan,
-            //            condition.Rank,
-            //            parent.NetProfit));
-            //    }
+                if (condition.ActiveNumber < parent.ActiveNumber)
+                {
+                    throw new DividendConditionException(
+                        $"Rank {condition.Rank} active number must greater than or equal {parent.ActiveNumber}.");
+                }
 
-            //    if (condition.ActiveNumber < parent.ActiveNumber)
-            //    {
-            //        return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ActiveNumberMustGreaterThan,
-            //            condition.Rank,
-            //            parent.ActiveNumber));
-            //    }
+                if (condition.DividendPercentage > parent.DividendPercentage)
+                {
+                    throw new DividendConditionException(
+                        $"Rank {condition.Rank} dividend percentage must less than or equal {parent.DividendPercentage}.");
+                }
 
-            //    if (condition.DividendPercentage > parent.DividendPercentage)
-            //    {
-            //        return CreateInvalidResponse<MessageResponse>(string.Format(
-            //            Agent.DividendPercentageMustLessThan,
-            //            condition.Rank,
-            //            parent.DividendPercentage));
-            //    }
-            //}
+                var previous = query.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank - 1);
+
+                if (previous is not null && (condition.NetProfit < previous.NetProfit ||
+                    condition.ActiveNumber < previous.ActiveNumber ||
+                    condition.DividendPercentage < previous.DividendPercentage))
+                {
+                    throw new DividendConditionException(
+                        $"Rank {condition.Rank} must greater than previous rank.");
+                }
+            }
 
             var invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
 
             while (await _tgsRepository.Agents.AsQueryable()
-                .AnyAsync(agent => agent.InvitationCode == invitationCode)
+                .AnyAsync(agent => agent.InvitationCode == invitationCode, cancellationToken)
                 .ConfigureAwait(false))
             {
                 invitationCode = CoreUtility.InvitationCodeGenerator.NewId();
@@ -154,8 +154,8 @@ namespace TGS.Services.Agent.Services.Agent
                 }
                 .ToHashSet();
 
-            await _tgsRepository.Agents.AddAsync(agent).ConfigureAwait(false);
-            await _tgsRepository.SaveChangesAsync().ConfigureAwait(false);
+            await _tgsRepository.Agents.AddAsync(agent, cancellationToken).ConfigureAwait(false);
+            await _tgsRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return new CreateAgentInfo
             {
