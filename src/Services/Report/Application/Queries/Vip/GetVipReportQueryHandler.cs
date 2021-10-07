@@ -72,7 +72,7 @@ namespace TGS.Services.Report.Application.Queries.Vip
                     (userId, withdrawals) => new
                     {
                         UserId = userId,
-                        WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
+                        WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount ?? w.Amount)
                     }).ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 

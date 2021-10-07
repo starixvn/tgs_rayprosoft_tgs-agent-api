@@ -7,7 +7,7 @@ namespace TGS.Apis.AgentApi.Validators
     public sealed class ChangePasswordRequestValidator : BaseFluentValidator<ChangePasswordRequest>
     {
         public ChangePasswordRequestValidator()
-        {
+        { 
             RuleFor(x => x.NewPassword)
                 .NotEmpty()
                 .Length(6, 20)

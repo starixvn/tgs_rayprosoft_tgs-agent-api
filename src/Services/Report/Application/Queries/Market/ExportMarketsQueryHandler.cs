@@ -44,7 +44,7 @@ namespace TGS.Services.Report.Application.Queries.Market
                 AdjustmentAmount = x.AdjustmentAmount,
                 BonusAmount = x.BonusAmount,
                 BetAmount = x.BetAmount,
-                ValidBetAmount = x.Turnover,
+                ValidBetAmount = x.ValidBetAmount,
                 WinLossAmount = x.WinLossAmount,
                 NetProfit = x.NetProfit
             });

@@ -5,7 +5,7 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Services.Operator.Services.Deposit
 {
-    public record GetDepositFormsQuery(
+    public record DepositFormsQuery(
         Guid BrandId,
         string PlayerCode,
         IEnumerable<PaymentFlowState> Status,

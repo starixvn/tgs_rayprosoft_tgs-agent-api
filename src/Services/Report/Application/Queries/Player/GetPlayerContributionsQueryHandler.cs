@@ -71,18 +71,20 @@ namespace TGS.Services.Report.Application.Queries.Player
                 .Where(x => x.BrandId == request.BrandId)
                 .Where(x => x.UserType == 1 && x.Status == 8000)
                 .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
+                .Where(request.Username.IsNotNullOrEmpty(), x => x.UserId == tgsPlayer.PlayerCode)
+                .Where(request.Level, x => tgsPlayers.Contains(x.UserId))
                 .GroupBy(x => x.UserId,
                     (userId, withdrawals) => new
                     {
                         UserId = userId,
-                        WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
+                        WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount ?? w.Amount)
                     }).ToArrayAsync(cancellationToken)
                 .ConfigureAwait(false);
 
             var reportPlayers = await _playerAggregateService
                 .GetPlayerAggregateQueries(q => q.Where(x => x.BrandId == request.BrandId)
                     .Where(x => x.ReportDate >= from && x.ReportDate < to)
-                    .Where(tgsPlayer != null, x => x.PlayerCode == tgsPlayer.PlayerCode)
+                    .Where(request.Username.IsNotNullOrEmpty(), x => x.PlayerCode == tgsPlayer.PlayerCode)
                     .Where(request.Level, x => tgsPlayers.Contains(x.PlayerCode)))
                 .GroupBy(x => x.PlayerCode,
                     (playerCode, players) => new

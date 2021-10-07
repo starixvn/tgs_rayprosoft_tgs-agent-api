@@ -20,7 +20,8 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
             _service = service;
         }
 
-        public override async Task<MessageResponse> Handle(CreateAgentRequest request,
+        public override async Task<MessageResponse> Handle(
+            CreateAgentRequest request,
             CancellationToken cancellationToken)
         {
             if (await _service.ExistsAsync(x =>
@@ -39,12 +40,6 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     return CreateInvalidResponse<MessageResponse>(Agent.ParentAgentNotExists);
                 }
 
-                if (parentAgent.DividendPercentage < request.DividendPercentage)
-                {
-                    return CreateInvalidResponse<MessageResponse>(Agent
-                        .DividendPercentageMustLessThanOrEqualToUpperLayer);
-                }
-
                 foreach (var condition in request.AgentDividendConditions.OrderBy(x => x.Rank))
                 {
                     var parent = parentAgent.AgentDividendConditions.FirstOrDefault(x => x.Rank == condition.Rank);
@@ -58,20 +53,23 @@ namespace TGS.Services.BackOffice.Application.Commands.AgentHandlers
                     if (condition.NetProfit < parent.NetProfit)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(Agent.NetProfitMustGreaterThan,
-                            condition.Rank, parent.NetProfit));
+                            condition.Rank,
+                            parent.NetProfit));
                     }
 
                     if (condition.ActiveNumber < parent.ActiveNumber)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(Agent.ActiveNumberMustGreaterThan,
-                            condition.Rank, parent.ActiveNumber));
+                            condition.Rank,
+                            parent.ActiveNumber));
                     }
 
                     if (condition.DividendPercentage > parent.DividendPercentage)
                     {
                         return CreateInvalidResponse<MessageResponse>(string.Format(
                             Agent.DividendPercentageMustLessThan,
-                            condition.Rank, parent.DividendPercentage));
+                            condition.Rank,
+                            parent.DividendPercentage));
                     }
                 }
             }
