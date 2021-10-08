@@ -3,6 +3,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using Tgs.Payment.Clients;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.BankInfos;
@@ -24,7 +26,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var agentId = Guid.NewGuid();
             var paymentChannelId = Guid.NewGuid();
             var bankType = "Transfer";
-            var detail = new { bankAccount = "0987654321" };
+
+            var detail = new
+            {
+                bankAccount = "0987654321"
+            };
 
             var command = new CreateBankInfoCommand(
                 brandId,
@@ -52,7 +58,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    10M));
+                    10M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>()));
 
             await sut.ExecuteAsync(command);
 
