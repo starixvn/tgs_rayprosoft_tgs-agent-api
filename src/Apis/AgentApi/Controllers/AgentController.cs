@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
+
 using TGS.Clients.Report.Client;
 using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Core.Models;
@@ -19,6 +20,7 @@ using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Operations.Validators;
 using TGS.ServiceUtility;
+using AgentDividendConditionModel = TGS.Services.Agent.Services.Agent.AgentDividendConditionModel;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -27,13 +29,11 @@ namespace TGS.Apis.AgentApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AgentController : ControllerBase
     {
-        private readonly IReportClient _client;
         private readonly IMediator _mediator;
 
-        public AgentController(IMediator mediator, IReportClient client)
+        public AgentController(IMediator mediator)
         {
             _mediator = mediator;
-            _client = client;
         }
 
         [HttpPost("create")]
@@ -50,7 +50,6 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 BrandId = brandId,
                 CardGameRebatePercentage = request.CardGameRebatePercentage,
-                DividendPercentage = request.DividendPercentage,
                 LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
                 LotteryRebatePercentage = request.LotteryRebatePercentage,
                 ParentAgentId = agentTokenData.AgentId,
@@ -62,7 +61,14 @@ namespace TGS.Apis.AgentApi.Controllers
                 SlotRebatePercentage = request.SlotRebatePercentage,
                 SportsRebatePercentage = request.SportsRebatePercentage,
                 Username = request.UserName,
-                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage
+                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage,
+                AgentDividendConditions = request.AgentDividendConditions.Select(x => new AgentDividendConditionModel
+                {
+                    Rank = x.Rank,
+                    NetProfit = x.NetProfit,
+                    ActiveNumber = x.ActiveNumber,
+                    DividendPercentage = x.DividendPercentage
+                }).ToArray()
             };
 
             var info = await getCreateAgentQueryService
@@ -77,69 +83,7 @@ namespace TGS.Apis.AgentApi.Controllers
             };
         }
 
-        /// <summary>
-        /// Get account changes
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="pagingRequest"></param>
-        /// <returns></returns>
-        [HttpGet("accountChanges")]
-        [Description("Get account changes")]
-        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagingResponse<AgentAccountChangeModel>> GetAccountChangesAsync(
-                   [FromQuery] GetAccountChangesRequest request,
-                   [FromQuery] PagingRequest pagingRequest)
-        {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
-            var brandId = HttpContext.Items.GetBrandId();
-
-            var accountChangesRequest = new GetAgentAccountChangesRequest
-            {
-                AgentId = agentTokenData.AgentId,
-                BrandId = brandId,
-                From = request.From,
-                To = request.To,
-                TransactionType = request.TransactionType,
-                Page = pagingRequest.Page,
-                Rows = pagingRequest.Rows,
-                OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
-                SortBy = pagingRequest.SortBy,
-                ShowAll = pagingRequest.ShowAll
-            };
-
-            var response = await _client.GetAgentAccountChangesAsync(accountChangesRequest);
-
-            return new()
-            {
-                TotalCount = response.TotalCount,
-                Items = response.Items ?? Array.Empty<AgentAccountChangeModel>()
-            };
-        }
-
-        /// <summary>
-        /// Get account changes transaction types
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("accountChanges/TransactionTypes")]
-        [Description("Get account changes transaction types")]
-        public Task<Dictionary<int, string>> GetAccountChangesTransactionTypesAsync()
-        {
-            var allowType = new TransactionType[]
-           {
-                TransactionType.Deposit,
-                TransactionType.Withdrawal,
-                TransactionType.CancelWithdrawal,
-                TransactionType.Adjust,
-                TransactionType.Dividend
-           };
-
-            var dict = Enum.GetValues(typeof(TransactionType))
-                   .Cast<TransactionType>()
-                   .Where(x => allowType.Contains(x))
-                   .ToDictionary(t => (int)t, t => t.ToString());
-
-            return Task.FromResult(dict);
-        }
+        
 
         /// <summary>
         /// Get an agent information
