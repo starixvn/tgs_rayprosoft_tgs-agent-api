@@ -60,7 +60,7 @@ namespace TGS.Services.Report.Application.Queries.Market
                 (date, withdrawals) => new
                 {
                     Date = date,
-                    WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount)
+                    WithdrawalAmount = withdrawals.Sum(w => w.ActualAmount ?? w.Amount)
                 });
 
             return await dates.GroupJoin(_service.GetPlayerAggregateQueries()
