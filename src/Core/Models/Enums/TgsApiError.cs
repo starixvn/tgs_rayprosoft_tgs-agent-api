@@ -42,6 +42,8 @@
         BrandEmailDuplicate = 409,
         MaticPayDepositNeedRealName = 410,
 
+        DividendConditionError = 600,
+
         SystemError = 900,
         OperationNotAllowed = 901,
         ProviderApiError = 902

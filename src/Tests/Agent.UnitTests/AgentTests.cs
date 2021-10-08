@@ -122,12 +122,14 @@ namespace Agent.UnitTests
         public async Task Create_Agent_Should_Success()
         {
             var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+
             dbContextOptionsBuilder
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
 
             var brandId = Guid.NewGuid();
+
             var brand = new CoreModels.Brand
             {
                 Id = brandId,
@@ -143,7 +145,21 @@ namespace Agent.UnitTests
 
             await repository.Brands.AddAsync(brand);
             var parentAgentId = Guid.NewGuid();
-            var parentAgent = new CoreModels.Agent { Id = parentAgentId };
+
+            var parentAgent = new CoreModels.Agent
+            {
+                Id = parentAgentId,
+                AgentDividendConditions = new[]
+                {
+                    new CoreModels.AgentDividendCondition
+                    {
+                        Rank = 1,
+                        NetProfit = 1,
+                        ActiveNumber = 1,
+                        DividendPercentage = 50
+                    }
+                }
+            };
             await repository.Agents.AddAsync(parentAgent);
             await repository.SaveChangesAsync();
 
@@ -157,7 +173,17 @@ namespace Agent.UnitTests
                 BrandId = brandId,
                 Username = "UserName",
                 Password = "Password",
-                Remarks = "Remarks"
+                Remarks = "Remarks",
+                AgentDividendConditions = new[]
+                {
+                    new AgentDividendConditionModel
+                    {
+                        Rank = 1,
+                        NetProfit = 1,
+                        ActiveNumber = 1,
+                        DividendPercentage = 50
+                    }
+                }
             };
 
             var info = await sut.GetAsync(query);

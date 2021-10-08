@@ -26,5 +26,6 @@
         public decimal VirtualSportsRebatePercentage { get; init; }
 
         public string Remarks { get; init; }
+        public AgentDividendConditionModel[] AgentDividendConditions { get; init; }
     }
 }
