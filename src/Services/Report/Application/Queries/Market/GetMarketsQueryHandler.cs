@@ -87,8 +87,7 @@ namespace TGS.Services.Report.Application.Queries.Market
                         new MarketModel
                         {
                             ReportDate = market.ReportDate,
-                            RegisteredCount =
-                                markets.Sum(m => m.market?.RegisteredCount ?? 0),
+                            RegisteredCount = markets.Sum(m => m.market?.RegisteredCount ?? 0),
                             FirstFundInCount = markets.Sum(m => m.market?.FirstFundInCount ?? 0),
                             DepositAmount = markets.Sum(m => m.market?.DepositAmount ?? 0),
                             WithdrawalAmount =
