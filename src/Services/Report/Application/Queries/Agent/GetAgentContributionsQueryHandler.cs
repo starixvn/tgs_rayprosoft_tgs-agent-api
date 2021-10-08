@@ -17,7 +17,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
         private readonly IPlayerAggregateService _service;
         private readonly ITgsAgentService _tgsAgentService;
 
-        public GetAgentContributionsQueryHandler(IPlayerAggregateService service, ITgsAgentService tgsAgentService,
+        public GetAgentContributionsQueryHandler(
+            IPlayerAggregateService service, ITgsAgentService tgsAgentService,
             IHttpContextAccessor accessor) :
             base(accessor)
         {
@@ -39,6 +40,33 @@ namespace TGS.Services.Report.Application.Queries.Agent
                 return CreateInvalidResponse<PagedResponse<AgentContributionModel>>(Resources.Agent.NotFound);
             }
 
+            var playerWithdrawals = await _service.Repository.WithdrawForms.AsQueryable()
+                .Where(x => x.BrandId == request.BrandId)
+                .Where(x => x.UserType == 1 && x.Status == 8000)
+                .Where(x => x.CreatedOn >= request.From && x.CreatedOn < request.To)
+                .Join(_service.Repository.Players,
+                    withdrawForm => withdrawForm.UserId,
+                    player => player.PlayerCode,
+                    (withdrawForm, player) => new
+                    {
+                        player.AgentId,
+                        player.PlayerCode,
+                        WithdrawalAmount = withdrawForm.ActualAmount
+                    })
+                .GroupBy(x => new
+                    {
+                        x.AgentId,
+                        x.PlayerCode
+                    },
+                    (x, withdrawals) => new
+                    {
+                        x.AgentId,
+                        x.PlayerCode,
+                        WithdrawalAmount = withdrawals.Sum(w => w.WithdrawalAmount)
+                    })
+                .ToArrayAsync(cancellationToken)
+                .ConfigureAwait(false);
+
             var childAgents = await _tgsAgentService.GetAgentQueries(q => q.Where(x => x.ParentAgentId == agent.Id))
                 .Include(x => x.Players)
                 .ToArrayAsync(cancellationToken);
@@ -47,7 +75,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
             var players = agent.Players.GroupJoin(_service.GetPlayerAggregateQueries()
                         .Where(x => x.BrandId == request.BrandId)
                         .Where(x => x.AgentId == agent.Id)
-                        .Where(x => x.ReportDate >= request.From && x.ReportDate < request.To), p => p.PlayerCode,
+                        .Where(x => x.ReportDate >= request.From && x.ReportDate < request.To),
+                    p => p.PlayerCode,
                     playerAggregate => playerAggregate.PlayerCode,
                     (player, players) => new
                     {
@@ -61,31 +90,34 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         playerAggregate
                     })
                 .GroupBy(x => new
-                {
-                    x.player.Username,
-                    x.player.PlayerCode
-                }, (player, playerAggregate) =>
-                    new AgentContributionModel
                     {
-                        Username = player.Username,
-                        Type = AccountType.Player,
-                        DepositAmount = playerAggregate.Sum(p => p.playerAggregate?.DepositAmount ?? 0),
-                        WithdrawalAmount = playerAggregate.Sum(p => p.playerAggregate?.WithdrawalAmount ?? 0),
-                        AdjustmentAmount = playerAggregate.Sum(p => p.playerAggregate?.AdjustmentAmount ?? 0),
-                        BonusAmount =
-                            playerAggregate.Sum(p
-                                => p.playerAggregate == null
-                                    ? 0
-                                    : p.playerAggregate.RebateAmount + p.playerAggregate.PromotionAmount),
-                        BetAmount = playerAggregate.Sum(p => p.playerAggregate?.BetAmount ?? 0),
-                        ValidBetAmount = playerAggregate.Sum(p => p.playerAggregate?.Turnover ?? 0),
-                        WinLossAmount = playerAggregate.Sum(p => p.playerAggregate?.WinLossAmount ?? 0),
-                        NetProfit = playerAggregate.Sum(p => p.playerAggregate == null
-                            ? 0
-                            : p.playerAggregate.WinLossAmount - p.playerAggregate.AdjustmentAmount -
-                            p.playerAggregate.RebateAmount -
-                            p.playerAggregate.PromotionAmount)
-                    }).ToArray();
+                        x.player.Username,
+                        x.player.PlayerCode
+                    },
+                    (player, playerAggregate) =>
+                        new AgentContributionModel
+                        {
+                            Username = player.Username,
+                            Type = AccountType.Player,
+                            DepositAmount = playerAggregate.Sum(p => p.playerAggregate?.DepositAmount ?? 0),
+                            WithdrawalAmount =
+                                playerWithdrawals.FirstOrDefault(w => w.PlayerCode == player.PlayerCode)
+                                    ?.WithdrawalAmount ?? 0,
+                            AdjustmentAmount = playerAggregate.Sum(p => p.playerAggregate?.AdjustmentAmount ?? 0),
+                            BonusAmount =
+                                playerAggregate.Sum(p
+                                    => p.playerAggregate == null
+                                        ? 0
+                                        : p.playerAggregate.RebateAmount + p.playerAggregate.PromotionAmount),
+                            BetAmount = playerAggregate.Sum(p => p.playerAggregate?.BetAmount ?? 0),
+                            ValidBetAmount = playerAggregate.Sum(p => p.playerAggregate?.Turnover ?? 0),
+                            WinLossAmount = playerAggregate.Sum(p => p.playerAggregate?.WinLossAmount ?? 0),
+                            NetProfit = playerAggregate.Sum(p => p.playerAggregate == null
+                                ? 0
+                                : p.playerAggregate.WinLossAmount - p.playerAggregate.AdjustmentAmount -
+                                p.playerAggregate.RebateAmount -
+                                p.playerAggregate.PromotionAmount)
+                        }).ToArray();
 
             if (!request.IncludeAgents)
             {
@@ -98,7 +130,8 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         .Where(x => playerCodes
                             .Contains(x.PlayerCode))
                         .Where(x => x.AgentId != null)
-                        .Where(x => x.ReportDate >= request.From && x.ReportDate <= request.To), a => a.Id,
+                        .Where(x => x.ReportDate >= request.From && x.ReportDate <= request.To),
+                    a => a.Id,
                     playerAggregate => playerAggregate.AgentId,
                     (agent, players) => new
                     {
@@ -112,31 +145,33 @@ namespace TGS.Services.Report.Application.Queries.Agent
                         playerAggregate
                     })
                 .GroupBy(x => new
-                {
-                    x.agent.Username,
-                    x.agent.Id
-                }, (agent, playerAggregate) =>
-                    new AgentContributionModel
                     {
-                        Username = agent.Username,
-                        Type = AccountType.Agent,
-                        DepositAmount = playerAggregate.Sum(p => p.playerAggregate?.DepositAmount ?? 0),
-                        WithdrawalAmount = playerAggregate.Sum(p => p.playerAggregate?.WithdrawalAmount ?? 0),
-                        AdjustmentAmount = playerAggregate.Sum(p => p.playerAggregate?.AdjustmentAmount ?? 0),
-                        BonusAmount =
-                            playerAggregate.Sum(p
-                                => p.playerAggregate == null
-                                    ? 0
-                                    : p.playerAggregate.RebateAmount + p.playerAggregate.PromotionAmount),
-                        BetAmount = playerAggregate.Sum(p => p.playerAggregate?.BetAmount ?? 0),
-                        ValidBetAmount = playerAggregate.Sum(p => p.playerAggregate?.Turnover ?? 0),
-                        WinLossAmount = playerAggregate.Sum(p => p.playerAggregate?.WinLossAmount ?? 0),
-                        NetProfit = playerAggregate.Sum(p => p.playerAggregate == null
-                            ? 0
-                            : p.playerAggregate.WinLossAmount - p.playerAggregate.AdjustmentAmount -
-                            p.playerAggregate.RebateAmount -
-                            p.playerAggregate.PromotionAmount)
-                    }).ToArray();
+                        x.agent.Username,
+                        x.agent.Id
+                    },
+                    (agent, playerAggregate) =>
+                        new AgentContributionModel
+                        {
+                            Username = agent.Username,
+                            Type = AccountType.Agent,
+                            DepositAmount = playerAggregate.Sum(p => p.playerAggregate?.DepositAmount ?? 0),
+                            WithdrawalAmount =
+                                playerWithdrawals.Where(w => w.AgentId == agent.Id).Sum(w => w.WithdrawalAmount ?? 0),
+                            AdjustmentAmount = playerAggregate.Sum(p => p.playerAggregate?.AdjustmentAmount ?? 0),
+                            BonusAmount =
+                                playerAggregate.Sum(p
+                                    => p.playerAggregate == null
+                                        ? 0
+                                        : p.playerAggregate.RebateAmount + p.playerAggregate.PromotionAmount),
+                            BetAmount = playerAggregate.Sum(p => p.playerAggregate?.BetAmount ?? 0),
+                            ValidBetAmount = playerAggregate.Sum(p => p.playerAggregate?.Turnover ?? 0),
+                            WinLossAmount = playerAggregate.Sum(p => p.playerAggregate?.WinLossAmount ?? 0),
+                            NetProfit = playerAggregate.Sum(p => p.playerAggregate == null
+                                ? 0
+                                : p.playerAggregate.WinLossAmount - p.playerAggregate.AdjustmentAmount -
+                                p.playerAggregate.RebateAmount -
+                                p.playerAggregate.PromotionAmount)
+                        }).ToArray();
 
 
             return await childAgentPlayers.Union(players)
