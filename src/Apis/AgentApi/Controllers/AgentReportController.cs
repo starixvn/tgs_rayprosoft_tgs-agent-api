@@ -27,6 +27,33 @@ namespace TGS.Apis.AgentApi.Controllers
             _client = client;
         }
 
+        [HttpGet("dividendDetails")]
+        [Description("Get agent dividend details")]
+        [TgsResponseWrapper]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<AgentDividendDetailModel>>
+                    GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
+        {
+            var dividendRequest = new GetAgentDividendDetailsRequest
+            {
+                AgentId = request.AgentId,
+                From = request.From,
+                To = request.To,
+                Page = request.Page,
+                Rows = request.Rows,
+                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = request.SortBy,
+                ShowAll = request.ShowAll
+            };
+            var response = await _client.GetAgentDividendDetailsAsync(dividendRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentDividendDetailModel>()
+            };
+        }
+
         /// <summary>
         ///     Get agent contributions
         /// </summary>
@@ -100,30 +127,35 @@ namespace TGS.Apis.AgentApi.Controllers
             };
         }
 
-        [HttpGet("dividendDetails")]
-        [Description("Get agent dividend details")]
-        [TgsResponseWrapper]
+        /// <summary>
+        /// Get team Information
+        /// </summary>
+        /// <param name="pagingRequest"></param>
+        /// <returns></returns>
+        [HttpGet("teamInfo")]
+        [Description("Get team Information")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
-        public async Task<PagingResponse<AgentDividendDetailModel>>
-            GetAgentDividendDetailsAsync([FromQuery] GetDividendDetailsRequest request)
+        public async Task<PagingResponse<TeamInfoModel>> GetTeamInformationAsync(
+            [FromQuery] PagingRequest pagingRequest)
         {
-            var dividendRequest = new GetAgentDividendDetailsRequest
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+            var request = new GetAgentTeamInfoRequest
             {
-                AgentId = request.AgentId,
-                From = request.From,
-                To = request.To,
-                Page = request.Page,
-                Rows = request.Rows,
-                OrderBy = request.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
-                SortBy = request.SortBy,
-                ShowAll = request.ShowAll
+                AgentId = agentTokenData.AgentId,
+                Page = pagingRequest.Page,
+                Rows = pagingRequest.Rows,
+                OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = pagingRequest.SortBy,
+                ShowAll = pagingRequest.ShowAll
             };
-            var response = await _client.GetAgentDividendDetailsAsync(dividendRequest);
+
+            var response = await _client.GetAgentTeamInfoAsync(request);
 
             return new()
             {
                 TotalCount = response.TotalCount,
-                Items = response.Items ?? Array.Empty<AgentDividendDetailModel>()
+                Items = response.Items ?? Array.Empty<TeamInfoModel>()
             };
         }
     }

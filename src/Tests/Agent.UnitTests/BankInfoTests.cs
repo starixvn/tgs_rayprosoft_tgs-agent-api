@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using Tgs.Payment.Clients;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.BankInfos;
 
@@ -52,7 +54,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    10M));
+                    10M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>()));
 
             await sut.ExecuteAsync(command);
 

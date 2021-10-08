@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
 using NUnit.Framework;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Wallet;
 using TGS.Services.WalletService;
@@ -42,7 +44,14 @@ namespace Agent.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    10M)));
+                    10M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>())));
             var expected = new BalanceInfo(10000M).ToExpectedObject();
 
             moqAgentWalletRepository

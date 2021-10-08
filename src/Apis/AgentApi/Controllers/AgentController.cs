@@ -1,4 +1,9 @@
-﻿using System.Net.Mime;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +11,9 @@ using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Clients.Report.Client;
+using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
@@ -71,6 +78,70 @@ namespace TGS.Apis.AgentApi.Controllers
         }
 
         /// <summary>
+        /// Get account changes
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="pagingRequest"></param>
+        /// <returns></returns>
+        [HttpGet("accountChanges")]
+        [Description("Get account changes")]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagingResponse<AgentAccountChangeModel>> GetAccountChangesAsync(
+                   [FromQuery] GetAccountChangesRequest request,
+                   [FromQuery] PagingRequest pagingRequest)
+        {
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+            var brandId = HttpContext.Items.GetBrandId();
+
+            var accountChangesRequest = new GetAgentAccountChangesRequest
+            {
+                AgentId = agentTokenData.AgentId,
+                BrandId = brandId,
+                From = request.From,
+                To = request.To,
+                TransactionType = request.TransactionType,
+                Page = pagingRequest.Page,
+                Rows = pagingRequest.Rows,
+                OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending,
+                SortBy = pagingRequest.SortBy,
+                ShowAll = pagingRequest.ShowAll
+            };
+
+            var response = await _client.GetAgentAccountChangesAsync(accountChangesRequest);
+
+            return new()
+            {
+                TotalCount = response.TotalCount,
+                Items = response.Items ?? Array.Empty<AgentAccountChangeModel>()
+            };
+        }
+
+        /// <summary>
+        /// Get account changes transaction types
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("accountChanges/TransactionTypes")]
+        [Description("Get account changes transaction types")]
+        public Task<Dictionary<int, string>> GetAccountChangesTransactionTypesAsync()
+        {
+            var allowType = new TransactionType[]
+           {
+                TransactionType.Deposit,
+                TransactionType.Withdrawal,
+                TransactionType.CancelWithdrawal,
+                TransactionType.Adjust,
+                TransactionType.Dividend
+           };
+
+            var dict = Enum.GetValues(typeof(TransactionType))
+                   .Cast<TransactionType>()
+                   .Where(x => allowType.Contains(x))
+                   .ToDictionary(t => (int)t, t => t.ToString());
+
+            return Task.FromResult(dict);
+        }
+
+        /// <summary>
         /// Get an agent information
         /// </summary>
         [HttpGet("info")]
@@ -107,7 +178,20 @@ namespace TGS.Apis.AgentApi.Controllers
                     IsSetPayPassword = agentInfo.PayPassword.Length > 0,
                     AgentLevel = agentInfo.AgentLevel,
                     AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing,
-                    DividendPercentage = agentInfo.DividendPercentage
+                    DividendPercentage = agentInfo.DividendPercentage,
+                    ParentUsername = agentInfo.ParentUserName,
+                    RegisteredOn = agentInfo.RegisteredOn,
+                    Balance = agentInfo.Balance,
+                    Status = agentInfo.Status.ToString(),
+                    Type = agentInfo.Type.ToString(),
+                    LevelType = agentInfo.AgentLevelType.ToString(),
+                    DividendConditions = agentInfo.AgentDividendConditions.Select(x => new DividendConditionModel
+                    {
+                        Rank = x.Rank,
+                        NetProfit = x.NetProfit,
+                        ActiveNumber = x.ActiveNumber,
+                        DividendPercentage = x.DividendPercentage
+                    }).OrderBy(x => x.Rank).ToArray()
                 }
             };
         }

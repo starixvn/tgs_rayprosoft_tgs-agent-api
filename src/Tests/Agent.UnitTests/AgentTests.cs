@@ -6,9 +6,12 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
+using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Security;
+using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
+
 using CoreModels = TGS.Core.DataServices.Tgs.Models;
 
 namespace Agent.UnitTests
@@ -70,7 +73,15 @@ namespace Agent.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    0M));
+                    0M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>()
+                    ));
 
             await sut.GetAsync(command);
 
@@ -111,7 +122,14 @@ namespace Agent.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    0M));
+                    0M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>()));
 
             var actual = await sut.GetAsync(command);
 

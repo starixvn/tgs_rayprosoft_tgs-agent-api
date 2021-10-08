@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 
 namespace TGS.Services.Agent
 {
@@ -19,5 +22,12 @@ namespace TGS.Services.Agent
         byte[] Password,
         byte[] Salt,
         decimal AccumulatedProfitSharing,
-        decimal DividendPercentage);
+        decimal DividendPercentage,
+        string ParentUserName,
+        DateTimeOffset RegisteredOn,
+        decimal Balance,
+        AgentStatus Status,
+        AgentType Type,
+        AgentLevelType AgentLevelType,
+        IEnumerable<AgentDividendCondition> AgentDividendConditions);
 }
