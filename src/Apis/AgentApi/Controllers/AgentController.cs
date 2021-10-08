@@ -1,7 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -10,11 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
-
-using TGS.Clients.Report.Client;
-using TGS.Clients.Report.Client.Models.Agent;
 using TGS.Core.Models;
-using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
@@ -82,8 +74,6 @@ namespace TGS.Apis.AgentApi.Controllers
                 Message = info.Message
             };
         }
-
-        
 
         /// <summary>
         /// Get an agent information
