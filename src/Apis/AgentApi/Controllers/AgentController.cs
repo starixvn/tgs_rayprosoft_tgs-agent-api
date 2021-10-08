@@ -1,17 +1,18 @@
-﻿using System.Net.Mime;
+﻿using System.Linq;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
-using TGS.Clients.Report.Client;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Operations.Validators;
 using TGS.ServiceUtility;
+using AgentDividendConditionModel = TGS.Services.Agent.Services.Agent.AgentDividendConditionModel;
 
 namespace TGS.Apis.AgentApi.Controllers
 {
@@ -20,13 +21,11 @@ namespace TGS.Apis.AgentApi.Controllers
     [Produces(MediaTypeNames.Application.Json)]
     public class AgentController : ControllerBase
     {
-        private readonly IReportClient _client;
         private readonly IMediator _mediator;
 
-        public AgentController(IMediator mediator, IReportClient client)
+        public AgentController(IMediator mediator)
         {
             _mediator = mediator;
-            _client = client;
         }
 
         [HttpPost("create")]
@@ -43,7 +42,6 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 BrandId = brandId,
                 CardGameRebatePercentage = request.CardGameRebatePercentage,
-                DividendPercentage = request.DividendPercentage,
                 LiveDealerRebatePercentage = request.LiveDealerRebatePercentage,
                 LotteryRebatePercentage = request.LotteryRebatePercentage,
                 ParentAgentId = agentTokenData.AgentId,
@@ -55,7 +53,14 @@ namespace TGS.Apis.AgentApi.Controllers
                 SlotRebatePercentage = request.SlotRebatePercentage,
                 SportsRebatePercentage = request.SportsRebatePercentage,
                 Username = request.UserName,
-                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage
+                VirtualSportsRebatePercentage = request.VirtualSportsRebatePercentage,
+                AgentDividendConditions = request.AgentDividendConditions.Select(x => new AgentDividendConditionModel
+                {
+                    Rank = x.Rank,
+                    NetProfit = x.NetProfit,
+                    ActiveNumber = x.ActiveNumber,
+                    DividendPercentage = x.DividendPercentage
+                }).ToArray()
             };
 
             var info = await getCreateAgentQueryService
