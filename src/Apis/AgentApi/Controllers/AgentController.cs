@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using MediatR;
@@ -112,7 +112,20 @@ namespace TGS.Apis.AgentApi.Controllers
                     IsSetPayPassword = agentInfo.PayPassword.Length > 0,
                     AgentLevel = agentInfo.AgentLevel,
                     AccumulatedProfitSharing = agentInfo.AccumulatedProfitSharing,
-                    DividendPercentage = agentInfo.DividendPercentage
+                    DividendPercentage = agentInfo.DividendPercentage,
+                    ParentUsername = agentInfo.ParentUserName,
+                    RegisteredOn = agentInfo.RegisteredOn,
+                    Balance = agentInfo.Balance,
+                    Status = agentInfo.Status.ToString(),
+                    Type = agentInfo.Type.ToString(),
+                    LevelType = agentInfo.AgentLevelType.ToString(),
+                    DividendConditions = agentInfo.AgentDividendConditions.Select(x => new DividendConditionModel
+                    {
+                        Rank = x.Rank,
+                        NetProfit = x.NetProfit,
+                        ActiveNumber = x.ActiveNumber,
+                        DividendPercentage = x.DividendPercentage
+                    }).OrderBy(x => x.Rank).ToArray()
                 }
             };
         }

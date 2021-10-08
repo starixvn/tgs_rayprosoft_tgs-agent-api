@@ -45,7 +45,14 @@ namespace TGS.Agent.Repositories
                 agent.Password,
                 agent.Salt,
                 dividend,
-                agent.DividendPercentage);
+                agent.DividendPercentage,
+                agent.ParentAgent?.Username,
+                agent.RegisteredOn,
+                agent.Wallets.FirstOrDefault()?.Balance ?? 0,
+                agent.Status,
+                agent.Type,
+                agent.LevelType,
+                agent.AgentDividendConditions);
         }
 
         public async ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id)
