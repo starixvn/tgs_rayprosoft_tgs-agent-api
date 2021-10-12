@@ -35,11 +35,7 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
             var offset = new TimeSpan(8, 0, 0);
             var requestFrom = request.From.ToOffset(offset);
             var requestTo = request.To.ToOffset(offset);
-            var currencyCodes = request.CurrencyCodes.Where(x => x is not null).ToArray();
-            if (request.CurrencyCodes.Where(x => x is not null).Count() == 0)
-            {
-                currencyCodes = null;
-            }
+
             DateTimeOffset from = new(requestFrom.Year, requestFrom.Month, requestFrom.Day, 0, 0, 0,
                 requestFrom.Offset);
             DateTimeOffset to = new(requestTo.Year, requestTo.Month, requestTo.Day, 0, 0, 0,
@@ -47,7 +43,7 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
 
             var brands = await _brandService.GetBrandQueries(q =>
             q.Where(x => x.LicenseeId == request.LicenseeId)
-            .Where(currencyCodes is not null, x => currencyCodes.Contains(x.Currencies.FirstOrDefault().CurrencyCode)), true)
+            .Where(!string.IsNullOrEmpty(request.CurrencyCode), x => request.CurrencyCode.Contains(x.Currencies.FirstOrDefault().CurrencyCode)), true)
                 .ToArrayAsync()
                 .ConfigureAwait(false);
 
@@ -70,12 +66,13 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
                         licenseeId = x.brand.LicenseeId,
                         brandId = x.brand.Id,
                         brandCode = x.brand.Code,
-                        currencyCode = x.brand.Currencies.First().CurrencyCode,
+                        currencyCode = string.Join(',', x.brand.Currencies.Select(x=>x.CurrencyCode).ToArray()),
                         market
                     })
                 .GroupBy(x => x, (playerAggregate, playerAggregates) =>
-                      new LicenseeMarketDataModel
+                      new
                       {
+                          LicenseeId = playerAggregate.licenseeId,
                           BarndId = playerAggregate.brandId,
                           BrandCode = playerAggregate.brandCode,
                           CurrencyCode = playerAggregate.currencyCode,
@@ -94,7 +91,32 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
                                   ? 0
                                   : m.market.WinLossAmount - m.market.AdjustmentAmount - m.market.RebateAmount -
                                   m.market.PromotionAmount)
-                      }).ToArray();
+                      })
+                .GroupBy(x => new
+                {
+                    licenseeId = x.LicenseeId,
+                    brandId = x.BarndId,
+                    brandCode = x.BrandCode,
+                    currencyCode = x.CurrencyCode,
+
+                }).Select(x => new LicenseeMarketDataModel
+                {
+
+                    BarndId = x.Key.brandId,
+                    BrandCode = x.Key.brandCode,
+                    CurrencyCode = x.Key.currencyCode,
+                    RegisteredCount = x.Sum(m => m.RegisteredCount),
+                    FirstFundInCount = x.Sum(m => m.FirstFundInCount),
+                    DepositAmount = x.Sum(m => m.DepositAmount),
+                    WithdrawalAmount = x.Sum(m => m.WithdrawalAmount),
+                    AdjustmentAmount = x.Sum(m => m.AdjustmentAmount),
+                    BonusAmount = x.Sum(m => m.BonusAmount),
+                    BetAmount = x.Sum(m => m.BetAmount),
+                    Turnover = x.Sum(m => m.Turnover),
+                    WinLossAmount = x.Sum(m => m.WinLossAmount),
+                    NetProfit = x.Sum(m => m.NetProfit)
+                }).ToArray();
+
 
             var total = groupDatas.
                 GroupBy(c => c.CurrencyCode).
