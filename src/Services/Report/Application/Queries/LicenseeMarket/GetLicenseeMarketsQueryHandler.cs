@@ -52,6 +52,20 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
                 .Where(x => x.ReportDate >= from && x.ReportDate < to).ToArrayAsync()
                 .ConfigureAwait(false);
 
+            var withdrawals = await _service.Repository.WithdrawForms.AsQueryable()
+              .Where(x => brands.Select(x => x.Id).Contains(x.BrandId))
+              .Where(x => x.UserType == 1 && x.Status == 8000)
+              .Where(x => x.CreatedOn >= from && x.CreatedOn < to)
+              .GroupBy(x => x.BrandId)
+              .Select(withdrawal => new
+              {
+                  BrandId = withdrawal.Key,
+                  WithdrawalAmount = -withdrawal.Sum(w => w.ActualAmount ?? w.Amount)
+              })
+              .ToArrayAsync(cancellationToken)
+              .ConfigureAwait(false);
+
+
             var groupDatas = brands.GroupJoin(
                 playerAggregates,
                 brand => brand.Id,
@@ -66,7 +80,7 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
                         licenseeId = x.brand.LicenseeId,
                         brandId = x.brand.Id,
                         brandCode = x.brand.Code,
-                        currencyCode = string.Join(',', x.brand.Currencies.Select(x=>x.CurrencyCode).ToArray()),
+                        currencyCode = string.Join(',', x.brand.Currencies.Select(x => x.CurrencyCode).ToArray()),
                         market
                     })
                 .GroupBy(x => x, (playerAggregate, playerAggregates) =>
@@ -79,7 +93,7 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
                           RegisteredCount = playerAggregates.Sum(m => m.market?.RegisteredCount ?? 0),
                           FirstFundInCount = playerAggregates.Sum(m => m.market?.FirstFundInCount ?? 0),
                           DepositAmount = playerAggregates.Sum(m => m.market?.DepositAmount ?? 0),
-                          WithdrawalAmount = -playerAggregates.Sum(m => m.market?.WithdrawalAmount ?? 0),
+                          WithdrawalAmount = withdrawals.FirstOrDefault(x => x.BrandId == playerAggregate.brandId)?.WithdrawalAmount ?? 0,
                           AdjustmentAmount = playerAggregates.Sum(m => m.market?.AdjustmentAmount ?? 0),
                           BonusAmount =
                               playerAggregates.Sum(m => m.market == null ? 0 : m.market.RebateAmount + m.market.PromotionAmount),
