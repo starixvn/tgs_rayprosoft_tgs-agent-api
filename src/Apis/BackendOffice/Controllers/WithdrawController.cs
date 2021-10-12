@@ -61,8 +61,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
         [HttpGet("{brandId}")]
-        public async Task<PagedResponse<WithdrawFormViewModel>> QueryWithdrawFormsAsync(
-            [FromServices] IGetService<WithdrawFormQuery, PagingResponse<WithdrawFormInfo>> queryService,
+        public async Task<WithdrawViewModel> QueryWithdrawFormsAsync(
+            [FromServices] IGetService<WithdrawFormQuery, WithdrawForms> queryService,
             Guid brandId,
             [FromQuery] WithdrawFormRequest request,
             [FromQuery] PageableRequest paging)
@@ -90,11 +90,13 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
-            var response = new PagedResponse<WithdrawFormViewModel>
+            var response = new WithdrawViewModel()
             {
-                Valid = true,
-                TotalCount = result.TotalCount,
-                Items = result.Items
+                Datas = new PagedResponse<WithdrawFormViewModel>
+                {
+                    Valid = true,
+                    TotalCount = result.Datas.TotalCount,
+                    Items = result.Datas.Items
                     .Select(form => new WithdrawFormViewModel
                     {
                         Id = form.Id,
@@ -113,6 +115,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                         ThirdPartyOrderNo = form.ThirdPartyOrderNo
                     })
                     .ToArray()
+                },
+                Sum = result.Sum
             };
 
             return response;

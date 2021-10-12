@@ -68,8 +68,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// <param name="paging">The paging.</param>
         /// <returns></returns>
         [HttpGet("{brandId}")]
-        public async Task<PagedResponse<DepositFormViewModel>> QueryDepositFormsAsync(
-            [FromServices] IGetService<DepositFormQuery, PagingResponse<DepositFormInfo>> queryService,
+        public async Task<DepositViewModel> QueryDepositFormsAsync(
+            [FromServices] IGetService<DepositFormQuery, DepositForms> queryService,
             Guid brandId,
             [FromQuery] DepositFormRequest request,
             [FromQuery] PageableRequest paging)
@@ -97,11 +97,13 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
-            var response = new PagedResponse<DepositFormViewModel>
+            var response = new DepositViewModel()
             {
-                Valid = true,
-                TotalCount = result.TotalCount,
-                Items = result.Items
+                Datas = new()
+                {
+                    Valid = true,
+                    TotalCount = result.Datas.TotalCount,
+                    Items = result.Datas.Items
                     .Select(form => new DepositFormViewModel
                     {
                         Id = form.Id,
@@ -119,6 +121,8 @@ namespace TGS.Apis.BackendOffice.Controllers
                         ThirdPartyOrderNo = form.ThirdPartyOrderNo
                     })
                     .ToArray()
+                },
+                Sum = result.Sum
             };
 
             return response;
