@@ -8,7 +8,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
@@ -59,7 +59,8 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
             _jwtTokenHandler = jwtTokenHandler;
         }
 
-        async Task<LoginResponse> IRequestHandler<LoginRequest, LoginResponse>.Handle(LoginRequest request,
+        async Task<LoginResponse> IRequestHandler<LoginRequest, LoginResponse>.Handle(
+            LoginRequest request,
             CancellationToken cancellationToken)
         {
             var brandId = _httpContext.Items.GetBrandId();
@@ -67,6 +68,7 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
 
             var username = request.Username;
             var agent = await _agentQueries.GetAgentAsync(x => x.BrandId == brandId && x.Username == username);
+
             if (agent is null)
             {
                 throw new AgentNotFoundException(username, Resources.Agent.NotFound);
@@ -117,6 +119,7 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
             var data = await _tokenProvider.EncryptAsync(agentTokenData);
 
             var jti = Guid.NewGuid().ToString();
+
             var identity = new ClaimsIdentity(new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, data),
@@ -127,7 +130,9 @@ namespace TGS.Apis.AgentApi.Handlers.Agent
             var secretKey = await _brandOperations.GetBrandSecretKeyAsync(brandId);
             var signature = Encoding.UTF8.GetBytes($"{payload}:{secretKey}");
 
-            return _jwtTokenHandler.GenerateToken(identity, signature, Consts.Site,
+            return _jwtTokenHandler.GenerateToken(identity,
+                signature,
+                Consts.Site,
                 agentTokenData.ExpiredOn.DateTime);
         }
     }

@@ -13,7 +13,6 @@ using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.TimeZone;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
@@ -31,8 +30,9 @@ namespace TGS.Apis.TgsApi.Commons
             Configuration = configuration;
         }
 
-        protected IWebHostEnvironment Environment { get; }
         protected IConfiguration Configuration { get; }
+
+        protected IWebHostEnvironment Environment { get; }
 
         protected abstract string LogPrefix { get; }
 
@@ -95,12 +95,13 @@ namespace TGS.Apis.TgsApi.Commons
         {
             app.UseGlobalExceptionHandler();
 
-            app.UseApiLogger(LogPrefix, new[]
-            {
-                "/health",
-                "/favicon.ico",
-                "/metrics"
-            });
+            app.UseApiLogger(LogPrefix,
+                new[]
+                {
+                    "/health",
+                    "/favicon.ico",
+                    "/metrics"
+                });
 
             UseCustomMiddlewaresBeforeRouting(app);
 
@@ -113,24 +114,36 @@ namespace TGS.Apis.TgsApi.Commons
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, Environment, async sp =>
-                        {
-                            var gpCode = Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
-                            var feature = sp.GetRequiredService<IFeatureManager>();
-                            var isFeatureEnabled = gpCode.IsNotNullOrEmpty() && await feature.IsEnabledAsync(gpCode);
+                endpoints.MapHealthChecks("/health",
+                    new()
+                    {
+                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
+                        ResponseWriter = (httpContext, result) =>
+                            HealthCheckResponseWriter.CreateResponseAsync(httpContext,
+                                result,
+                                Environment,
+                                async sp =>
+                                {
+                                    var gpCode =
+                                        Configuration.GetValue<string>(Consts.EnvironmentVariable.GameProviderCode);
 
-                            return new Dictionary<string, object>
-                            {
-                                {"GameProviderCode", gpCode},
-                                {"FeatureEnabled", isFeatureEnabled}
-                            };
-                        })
-                });
+                                    var feature = sp.GetRequiredService<IFeatureManager>();
+
+                                    var isFeatureEnabled = gpCode.IsNotNullOrEmpty() &&
+                                        await feature.IsEnabledAsync(gpCode);
+
+                                    return new Dictionary<string, object>
+                                    {
+                                        {
+                                            "GameProviderCode", gpCode
+                                        },
+                                        {
+                                            "FeatureEnabled", isFeatureEnabled
+                                        }
+                                    };
+                                })
+                    });
 
                 endpoints.MapMetrics();
             });

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using NSubstitute;
 using NUnit.Framework;
 using TGS.Core.DataServices.Tgs;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 using CoreModels = TGS.Core.DataServices.Tgs.Models;

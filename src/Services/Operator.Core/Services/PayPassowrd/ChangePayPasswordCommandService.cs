@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.PayPassowrd;
 using TGS.Services.Operator.ValidateCode;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.PayPassowrd
 {
     internal class ChangePayPasswordCommandService : ICommandService<ChangePayPasswordCommand>
     {
-        private readonly IPlayerOperations _playerOperations;
         private readonly IPasswordHandler _passwordHandler;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public ChangePayPasswordCommandService(
@@ -22,10 +21,13 @@ namespace TGS.Services.Operator.Services.PayPassowrd
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+
+            _validateCodeOperator =
+                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask ExecuteAsync(ChangePayPasswordCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(
+            ChangePayPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var player = await _playerOperations
                 .GetPlayerByCodeAsync(command.PlayerCode)

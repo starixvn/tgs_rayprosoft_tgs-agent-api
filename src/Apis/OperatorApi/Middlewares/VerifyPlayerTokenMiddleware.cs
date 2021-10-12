@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using TGS.Apis.OperatorApi.Attributes;
+using TGS.Apis.OperatorApi.Resources;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.Tokens;
 using TGS.Services.Operations;
@@ -38,6 +39,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             if (attribute == null)
             {
                 await _next(context);
+
                 return;
             }
 
@@ -47,19 +49,21 @@ namespace TGS.Apis.OperatorApi.Middlewares
             {
                 if (!attribute.AllowNullOrEmpty)
                 {
-                    throw new MissingTokenException(Resources.Player.MissingPlayerToken);
+                    throw new MissingTokenException(Player.MissingPlayerToken);
                 }
 
                 await _next(context);
+
                 return;
             }
 
             var jwt = handler.ReadToken(token);
 
             var sub = jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value;
+
             if (sub.IsNullOrEmpty())
             {
-                throw new MissingTokenException(Resources.Player.MissingPlayerToken);
+                throw new MissingTokenException(Player.MissingPlayerToken);
             }
 
             var data = await tokenProvider.DecryptAsync<PlayerTokenData>(sub);
@@ -71,6 +75,7 @@ namespace TGS.Apis.OperatorApi.Middlewares
             if (!attribute.NeedAuthorize)
             {
                 await _next(context);
+
                 return;
             }
 
@@ -81,16 +86,17 @@ namespace TGS.Apis.OperatorApi.Middlewares
             var payload = hashProvider.Hash($"{sub}:{jti}");
             var signature = $"{payload}:{secretKey}";
 
-            handler.ValidateToken(token, new()
-            {
-                ValidateIssuer = true,
-                ValidIssuer = Consts.Site,
-                ValidateAudience = false,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            },
+            handler.ValidateToken(token,
+                new()
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = Consts.Site,
+                    ValidateAudience = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signature)),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                },
                 exception => throw new InvalidCredentialsException(exception.Message),
                 _ => throw new PlayerLoginExpiredException(playerCode));
 

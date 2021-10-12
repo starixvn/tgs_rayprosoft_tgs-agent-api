@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.Withdraw
@@ -19,7 +19,8 @@ namespace TGS.Services.Agent.Services.Withdraw
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         }
 
-        public async ValueTask ExecuteAsync(CheckWithdrawPayPasswordCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(
+            CheckWithdrawPayPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var agentData = await _agentRepository
                 .GetAgentByIdAsync(command.AgentId)

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
@@ -25,7 +23,8 @@ namespace TGS.Services.Operator.Services.Auth
             _statusValidator = statusValidator ?? throw new ArgumentNullException(nameof(statusValidator));
         }
 
-        public async ValueTask<ClaimsIdentity> GetAsync(GetAuthQuery query, CancellationToken cancellationToken = default)
+        public async ValueTask<ClaimsIdentity> GetAsync(
+            GetAuthQuery query, CancellationToken cancellationToken = default)
         {
             var brandId = await _brandOperations.GetBrandIdByApiKeyAsync(query.ApiKey);
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);

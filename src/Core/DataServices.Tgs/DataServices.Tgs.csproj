@@ -129,6 +129,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Tgs.Core.Infrastructures.Security" Version="0.0.1" />
     <PackageReference Include="Tgs.Core.Infrastructures.Utility" Version="0.0.3" />
   </ItemGroup>
 

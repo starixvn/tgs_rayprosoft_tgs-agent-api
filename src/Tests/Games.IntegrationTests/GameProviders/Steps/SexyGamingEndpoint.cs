@@ -2,8 +2,6 @@
 // ReSharper disable IdentifierTypo
 
 using System;
-using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -14,20 +12,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TechTalk.SpecFlow;
-using Tgs.Logging;
-using TGS.Core.DataServices.Base.Extensions;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Tokens;
+using Tgs.Logging;
 using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.Models.SexyGaming.Enums;
 using TGS.Shared.Game.Models.SexyGaming.Incoming;
@@ -42,10 +37,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     [Scope(Tag = "SexyGaming")]
     public class SexyGamingEndpoint : BaseGameEndpoint
     {
-        private readonly ServiceProvider _serviceProvider;
         private readonly ISexyGamingApiClient _client;
 
         private readonly IHashProvider _hashProvider;
+        private readonly ServiceProvider _serviceProvider;
 
         public SexyGamingEndpoint(ScenarioContext context)
             : base(context)
@@ -88,7 +83,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     .ProcessAllSubjects();
             });
 
-            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
+            services.AddSingleton(new Mock<ITgsLog>().Object);
 
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
@@ -113,8 +108,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             _client = _serviceProvider.GetRequiredService<ISexyGamingApiClient>();
             _hashProvider = _serviceProvider.GetRequiredService<IHashProvider>();
         }
+
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandWithLoginViaAsync(string username, string brandCode,
+        public Task GivenPlayerOfBrandWithLoginViaAsync(
+            string username, string brandCode,
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
@@ -128,7 +125,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var response = Get<SexyGamingGetBalanceResponse>(SR.Response);
 
-            decimal balance = JsonSerializer.Deserialize<decimal>(JsonSerializer.Serialize(response.Balance));
+            var balance = JsonSerializer.Deserialize<decimal>(JsonSerializer.Serialize(response.Balance));
             response.Status.Should().Be("0000");
             balance.Should().Be(expectedBalance);
         }
@@ -142,13 +139,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var configuration = await GetConfigurationAsync().ConfigureAwait(false);
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-            var data = new SexyGamingGetBalanceRequest()
+
+            var data = new SexyGamingGetBalanceRequest
             {
                 Action = "getBalance",
                 UserId = playerCode
             };
 
-            var response = await _client.GetPlayerBalanceAsync(configuration.Cert, encryptedToken, data).ConfigureAwait(false);
+            var response = await _client.GetPlayerBalanceAsync(configuration.Cert, encryptedToken, data)
+                .ConfigureAwait(false);
 
             Set(SR.Response, response);
         }
@@ -200,7 +199,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I place bet of \$(.*) for game ""(.*)""")]
         public async Task GivenIPlaceBetOfForGameAsync(decimal amount, string externalGameId) =>
-           await PlaceBetAsync(amount, externalGameId);
+            await PlaceBetAsync(amount, externalGameId);
 
         [Given(@"balance now being \$(.*)")]
         public void GivenBalanceNowBeing(decimal expectedBalance)
@@ -210,10 +209,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             response.Status.Should().Be(((int)GameApiError.Success).ToString("d4"));
             response.Balance.Should().Be(expectedBalance);
         }
+
         [Given(@"player logout")]
         public Task GivenPlayerLogoutAsync()
         {
             var playerCode = Get<string>(SR.PlayerCode);
+
             return DeauthorizePlayerAsync(_serviceProvider, playerCode);
         }
 
@@ -232,13 +233,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var configuration = await GetConfigurationAsync().ConfigureAwait(false);
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-            var data = new SexyGamingGetBalanceRequest()
+
+            var data = new SexyGamingGetBalanceRequest
             {
                 Action = "getBalance",
                 UserId = playerCode
             };
 
-            var response = await _client.GetPlayerBalanceAsync(configuration.Cert, encryptedToken, data).ConfigureAwait(false);
+            var response = await _client.GetPlayerBalanceAsync(configuration.Cert, encryptedToken, data)
+                .ConfigureAwait(false);
 
             response.Should().NotBeNull();
             response.Status.Should().Be(((int)GameApiError.Success).ToString("d4"));
@@ -248,13 +251,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Then(@"the round will be closed")]
         public async void ThenTheRoundWillBeClosed() =>
-        await VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
+            await VerifyRoundStatus(_serviceProvider, RoundStatus.Closed);
 
 
         #region Private Methods
 
         private static string NewRoundId() =>
-           Guid.NewGuid().ToString();
+            Guid.NewGuid().ToString();
 
         private async ValueTask<SexyGamingConfiguration> GetConfigurationAsync() =>
             await GetSettingAsync<SexyGamingConfiguration>(_serviceProvider,
@@ -264,17 +267,19 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
             var tokenData = Get<PlayerTokenData>(key);
+
             return tokenData?.LoginRecordId ?? Guid.Empty;
         }
 
-        private Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
+        private async Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
         {
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
             var tokenData = Get<PlayerTokenData>(key);
             var loginRecordId = tokenData?.LoginRecordId ?? Guid.Empty;
 
             var tokenProvider = _serviceProvider.GetRequiredService<ITokenProvider>();
-            return tokenProvider.EncryptAsync(loginRecordId);
+
+            return await tokenProvider.EncryptAsync(loginRecordId).ConfigureAwait(false);
         }
 
         private async Task PlaceBetAsync(decimal amount, string externalGameId, string externalRoundId = null)
@@ -287,20 +292,24 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalTransactionId = externalRoundId;
             var client = _serviceProvider.GetRequiredService<ISexyGamingApiClient>();
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
-            var transactions = new SexyGamingBet[] {
-             new SexyGamingBet(){
-                 PlatformTxId =externalRoundId,
-                 UserId =playerCode,
-                 Currency =currencyCode,
-                 Platform =platform.ToString(),
-                 GameType ="SEXYBCRT",
-                 GameCode=externalGameId,
-                 GameName=externalGameId,
-                 BetType="Banker",
-                 BetAmount =amount,
-                 BetTime =DateTimeOffset.UtcNow,
-                 RoundId = externalRoundId,
-                 GameInfo =null}
+
+            var transactions = new[]
+            {
+                new SexyGamingBet
+                {
+                    PlatformTxId = externalRoundId,
+                    UserId = playerCode,
+                    Currency = currencyCode,
+                    Platform = platform.ToString(),
+                    GameType = "SEXYBCRT",
+                    GameCode = externalGameId,
+                    GameName = externalGameId,
+                    BetType = "Banker",
+                    BetAmount = amount,
+                    BetTime = DateTimeOffset.UtcNow,
+                    RoundId = externalRoundId,
+                    GameInfo = null
+                }
             };
 
 
@@ -308,7 +317,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Action = "bet",
                 Transaction = transactions
-
             };
 
             var response = await client.PlaceBetAsync(configuration.Cert, encryptedToken, request);
@@ -335,29 +343,31 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
 
             var ga = await (
-              from act in db.GameActions.AsQueryable()
-              join r in db.Rounds on act.RoundId equals r.Id
-              where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
-              select act).AsNoTracking().FirstAsync();
+                from act in db.GameActions.AsQueryable()
+                join r in db.Rounds on act.RoundId equals r.Id
+                where r.ExternalRoundId == externalRoundId && act.ExternalTransactionId == externalTransactionId
+                select act).AsNoTracking().FirstAsync();
 
-            var transactions = new SexyGamingSettle[] {
-             new SexyGamingSettle(){
-                 PlatformTxId =$"{ga.ExternalTransactionId}",
-                 UserId =playerCode,
-                 Platform =platform.ToString(),
-                 GameType ="SEXYBCRT",
-                 GameCode=externalGameId,
-                 GameName=externalGameId,
-                 BetType=ga.BetType,
-                 BetAmount =ga.Amount,
-                 BetTime =DateTimeOffset.Parse(ga.ExtraData),
-                 WinAmount=amount,
-                 UpdateTime=DateTimeOffset.UtcNow,
-                 Turnover=ga.Amount,
-                 RoundId = externalRoundId,
-                 GameInfo =null,
-                 TxTime=DateTimeOffset.UtcNow
-             }
+            var transactions = new[]
+            {
+                new SexyGamingSettle
+                {
+                    PlatformTxId = $"{ga.ExternalTransactionId}",
+                    UserId = playerCode,
+                    Platform = platform.ToString(),
+                    GameType = "SEXYBCRT",
+                    GameCode = externalGameId,
+                    GameName = externalGameId,
+                    BetType = ga.BetType,
+                    BetAmount = ga.Amount,
+                    BetTime = DateTimeOffset.Parse(ga.ExtraData),
+                    WinAmount = amount,
+                    UpdateTime = DateTimeOffset.UtcNow,
+                    Turnover = ga.Amount,
+                    RoundId = externalRoundId,
+                    GameInfo = null,
+                    TxTime = DateTimeOffset.UtcNow
+                }
             };
 
 
@@ -365,7 +375,6 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Action = "settle",
                 Transaction = transactions
-
             };
 
             var response = await client.SettleBetAsync(configuration.Cert, request);

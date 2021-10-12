@@ -8,17 +8,16 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TechTalk.SpecFlow;
-using Tgs.Logging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
+using Tgs.Logging;
 using TGS.Shared.Game.Models.Habanero.Enums;
 using TGS.Shared.Game.Models.Habanero.Incoming;
 using TGS.Tests.ApiClients.GameProviders;
@@ -87,7 +86,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     .ProcessAllSubjects();
             });
 
-            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
+            services.AddSingleton(new Mock<ITgsLog>().Object);
 
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
@@ -112,7 +111,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandWithLoginVia(string username, string brandCode,
+        public Task GivenPlayerOfBrandWithLoginVia(
+            string username, string brandCode,
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
@@ -120,6 +120,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task GivenPlayerOfBrandWithoutLoginAsync(string username, string brandCode)
         {
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var playerCode = await
                 (from p in db.Players.AsQueryable()
                  join b in db.Brands on p.BrandId equals b.Id
@@ -136,6 +137,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task GivenPlayerLogoutAsync()
         {
             var playerCode = Get<string>(SR.PlayerCode);
+
             return DeauthorizePlayerAsync(_serviceProvider, playerCode);
         }
 
@@ -143,6 +145,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task GivenDisableThePlayer()
         {
             var playerCode = Get<string>(SR.PlayerCode);
+
             return ChangePlayerStatusAsync(_serviceProvider, playerCode, PlayerStatus.Disabled);
         }
 
@@ -167,7 +170,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [Given(@"I placed bet for \$(.*) and settle it for \$(.*) for game ""(.*)""")]
         [When(@"I place bet for \$(.*) and settle it for \$(.*) for game ""(.*)""")]
-        public Task GivenIPlacedBetForAndSettleItForForGame(decimal betAmount, decimal winAmount,
+        public Task GivenIPlacedBetForAndSettleItForForGame(
+            decimal betAmount, decimal winAmount,
             string externalGameId) =>
             PlaceBetAndSettleAsync(betAmount, winAmount, externalGameId);
 
@@ -177,7 +181,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             PlaceBetAsync(amount, externalGameId);
 
         [When(@"I call authorize endpoint with username=""(.*)"" and passkey=""(.*)"" and brandid=""(.*)""")]
-        public async Task WhenICallDetailsEndpointWithUsernameAndPasswordAndPlayerAuthToken(string clientId,
+        public async Task WhenICallDetailsEndpointWithUsernameAndPasswordAndPlayerAuthToken(
+            string clientId,
             string secretKey, string habaneroBrandId)
         {
             var playerCode = Get<string>(SR.PlayerCode);
@@ -268,6 +273,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var roundId = Get<int>(SR.ExternalRoundId);
 
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+
             var response = await client.QueryGameActionAsync(new()
             {
                 Type = "queryrequest",
@@ -294,6 +300,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var roundId = Get<int>(SR.ExternalRoundId);
 
             var client = _serviceProvider.GetRequiredService<IHabaneroApiClient>();
+
             var response = await client.QueryGameActionAsync(new()
             {
                 Type = "queryrequest",
@@ -476,6 +483,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalTransactionId = Get<string>(SR.ExternalTransactionId);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
@@ -491,13 +499,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Then(@"#(.*) game action will be recorded in the database of type ""(.*)"" for \$(.*)")]
-        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeForAmount(int transactionIndex,
+        public async Task ThenGameActionWillBeRecordedInTheDatabaseOfTypeForAmount(
+            int transactionIndex,
             GameActionType type, decimal amount)
         {
             var fundTransferRequest = Get<FundTransferRequest>(SR.Request);
             var externalTransactionId = GetExternalTransactionId(fundTransferRequest, transactionIndex);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameAction = await db.GameActions
                 .AsQueryable()
                 .FirstAsync(ga => ga.ExternalTransactionId == externalTransactionId);
@@ -513,6 +523,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalTransactionId = GetExternalTransactionId(fundTransferRequest, transactionIndex);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameAction = await db.GameActions
                 .AsQueryable()
                 .FirstOrDefaultAsync(ga => ga.ExternalTransactionId == externalTransactionId);
@@ -541,8 +552,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         [After]
         public Task AfterChangeGameStatusScenarioAsync() =>
-            ChangeGameStatusAsync(_serviceProvider, GameProviderCode, Get<string>(SR.ExternalGameId),
-                GameStatus.Active, true);
+            ChangeGameStatusAsync(_serviceProvider,
+                GameProviderCode,
+                Get<string>(SR.ExternalGameId),
+                GameStatus.Active,
+                true);
 
         [After]
         public Task AfterChangeBrandStatusScenarioAsync() =>
@@ -557,6 +571,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             }
 
             var playerCode = Get<string>(SR.PlayerCode);
+
             return ChangePlayerStatusAsync(_serviceProvider, playerCode, PlayerStatus.Enabled);
         }
 
@@ -564,7 +579,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         #region Private Method
 
-        private static string GetExternalTransactionId(FundTransferRequest fundTransferRequest,
+        private static string GetExternalTransactionId(
+            FundTransferRequest fundTransferRequest,
             int? transactionIndex = null) =>
             fundTransferRequest.Detail.IsCancel
                 ? fundTransferRequest.Detail.FundTransfer.CancelTransaction.TransactionId
@@ -572,14 +588,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
         private static int NewRoundId() => (int)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-        private Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
+        private async Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
         {
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
             var tokenData = Get<PlayerTokenData>(key);
             var loginRecordId = tokenData?.LoginRecordId ?? Guid.Empty;
 
             var tokenProvider = _serviceProvider.GetRequiredService<ITokenProvider>();
-            return tokenProvider.EncryptAsync(loginRecordId);
+
+            return await tokenProvider.EncryptAsync(loginRecordId)
+                .ConfigureAwait(false);
         }
 
         private async Task PlaceBetAsync(decimal amount, string externalGameId, int? externalRoundId = null)
@@ -590,6 +608,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
                 .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
@@ -606,7 +625,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() {ExternalId = externalGameId},
+                Game = new()
+                {
+                    ExternalId = externalGameId
+                },
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -618,7 +640,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = false,
-                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
+                        Transactions = new Transaction[]
                         {
                             new()
                             {
@@ -659,12 +681,16 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
 
             var betRequest = Get<FundTransferRequest>(SR.PlaceBetRequest);
+
             var settleRequest = new FundTransferRequest
             {
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() {ExternalId = betRequest.Game.ExternalId},
+                Game = new()
+                {
+                    ExternalId = betRequest.Game.ExternalId
+                },
                 Detail = new()
                 {
                     RoundId = betRequest.Detail.RoundId,
@@ -676,7 +702,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = false,
-                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
+                        Transactions = new Transaction[]
                         {
                             new()
                             {
@@ -711,6 +737,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
                 .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
@@ -727,7 +754,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 Type = "fundtransferrequest",
                 SentOn = now,
                 Authorization = _authorization,
-                Game = new() {ExternalId = externalGameId},
+                Game = new()
+                {
+                    ExternalId = externalGameId
+                },
                 Detail = new()
                 {
                     RoundId = betExternalTransactionId,
@@ -739,7 +769,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = true,
-                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
+                        Transactions = new Transaction[]
                         {
                             new()
                             {
@@ -787,11 +817,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var betTransaction = betRequest.Detail.FundTransfer.Transactions[0];
 
             var transactionId = Guid.NewGuid().ToString();
+
             var cancelRequest = new FundTransferRequest
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() {ExternalId = betRequest.Game.ExternalId},
+                Game = new()
+                {
+                    ExternalId = betRequest.Game.ExternalId
+                },
                 Detail = new()
                 {
                     RoundId = betRequest.Detail.RoundId,
@@ -834,6 +868,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
                 .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
@@ -843,11 +878,15 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalTransactionId = Guid.NewGuid().ToString();
 
             var now = DateTimeOffset.Now;
+
             var cancelRequest = new FundTransferRequest
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() {ExternalId = externalGameId},
+                Game = new()
+                {
+                    ExternalId = externalGameId
+                },
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -893,6 +932,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var encryptedToken = await GetEncryptedTokenAsync(playerCode, platform);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
                 .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
@@ -906,7 +946,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             {
                 Type = "fundtransferrequest",
                 Authorization = _authorization,
-                Game = new() {ExternalId = externalGameId},
+                Game = new()
+                {
+                    ExternalId = externalGameId
+                },
                 Detail = new()
                 {
                     RoundId = externalTransactionId,
@@ -918,7 +961,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     FundTransfer = new()
                     {
                         IsBetAndSettle = true,
-                        Transactions = new Shared.Game.Models.Habanero.Incoming.Transaction[]
+                        Transactions = new Transaction[]
                         {
                             new()
                             {

@@ -12,7 +12,7 @@ using TGS.Apis.BackendOffice.Controllers;
 using TGS.Apis.BackendOffice.Controllers.Messages.Users;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -24,6 +24,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
+
             _controller = new(
                 _passwordHandlerMock.Object,
                 _userQueriesMock.Object,
@@ -152,6 +153,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             var response = await _controller.CreateAsync(request);
             response.Valid.Should().BeTrue();
+
             _userCommandsMock.Verify(s => s.CreateAsync(It.Is<User>(p =>
                 p.Name == request.Name &&
                 p.Username == request.Username &&
@@ -162,7 +164,10 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         [Test]
         public async Task Cannot_Create_User_With_Name_Exists()
         {
-            var role = new Role {Id = Guid.NewGuid()};
+            var role = new Role
+            {
+                Id = Guid.NewGuid()
+            };
 
             var request = new Fixture().Create<CreateUserRequest>();
             request.RoleId = role.Id;
@@ -194,6 +199,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             _userQueriesMock.Setup(s => s.ExistsAsync(It.IsAny<Expression<Func<User, bool>>>()))
                 .Returns(Task.FromResult(false));
+
             _roleQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<Role, bool>>>(),
                     It.IsAny<Func<IQueryable<Role>, IQueryable<Role>>>()))
                 .Returns(Task.FromResult<Role>(null));
@@ -325,7 +331,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var user = CreateUserFixture().Create<User>();
             var password = Generator.RandomString(6);
-            var request = new UpdatePasswordRequest {Password = password, ConfirmPassword = password};
+
+            var request = new UpdatePasswordRequest
+            {
+                Password = password,
+                ConfirmPassword = password
+            };
 
             _userQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(),
                     It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
@@ -345,7 +356,12 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             var user = CreateUserFixture().Create<User>();
             var password = Generator.RandomString(6);
-            var request = new UpdatePasswordRequest {Password = password, ConfirmPassword = password};
+
+            var request = new UpdatePasswordRequest
+            {
+                Password = password,
+                ConfirmPassword = password
+            };
 
             _userQueriesMock.Setup(s => s.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(),
                     It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()))
@@ -355,6 +371,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 
             response.Valid.Should().BeFalse();
             response.Message.Should().Be(Apis.BackendOffice.Resources.User.NotFound);
+
             _userQueriesMock.Verify(s => s.GetSingleAsync(It.IsAny<Expression<Func<User, bool>>>(),
                 It.IsAny<Func<IQueryable<User>, IQueryable<User>>>()));
             _userCommandsMock.Verify(p => p.UpdateAsync(user), Times.Never);
@@ -363,9 +380,19 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private Fixture CreateUserFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<User>(u => u
-                .With(s => s.Role, new Role {Name = Generator.RandomString(5)})
-                .With(p => p.Department, new Department {Name = Generator.RandomString(5)}));
+                .With(s => s.Role,
+                    new Role
+                    {
+                        Name = Generator.RandomString(5)
+                    })
+                .With(p => p.Department,
+                    new Department
+                    {
+                        Name = Generator.RandomString(5)
+                    }));
+
             return fixture;
         }
     }
