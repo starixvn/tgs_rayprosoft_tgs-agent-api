@@ -91,7 +91,6 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
                 .ToArrayAsync()
                 .ConfigureAwait(false);
 
-
             var groupDatas = brands.GroupJoin(
                 playerAggregates,
                 brand => brand.BrandId,
@@ -109,23 +108,30 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
                         CurrencyCode = x.brand.CurrencyCode,
                         market
                     })
-                .GroupBy(x => x, (playerAggregate, playerAggregates) =>
-                      new LicenseeMarketDataModel
-                      {
-                          BarndId = playerAggregate.BrandId,
-                          BrandCode = playerAggregate.BrandCode,
-                          CurrencyCode = playerAggregate.CurrencyCode,
-                          RegisteredCount = playerAggregates.Sum(m => m.market?.RegisteredCount ?? 0),
-                          FirstFundInCount = playerAggregates.Sum(m => m.market?.FirstFundInCount ?? 0),
-                          DepositAmount = playerAggregates.Sum(m => m.market?.DepositAmount ?? 0),
-                          WithdrawalAmount = withdrawals.FirstOrDefault(x => x.BrandId == playerAggregate.BrandId)?.WithdrawalAmount ?? 0,
-                          AdjustmentAmount = playerAggregates.Sum(m => m.market?.AdjustmentAmount ?? 0),
-                          BonusAmount = playerAggregates.Sum(m => m.market == null ? 0 : m.market.BonusAmount),
-                          BetAmount = playerAggregates.Sum(m => m.market?.BetAmount ?? 0),
-                          Turnover = playerAggregates.Sum(m => m.market?.Turnover ?? 0),
-                          WinLossAmount = playerAggregates.Sum(m => m.market?.WinLossAmount ?? 0),
-                          NetProfit = playerAggregates.Sum(m => m.market == null ? 0 : m.market.NetProfit)
-                      });
+                .GroupBy(x => new
+                {
+                    LicenseeId = x.LicenseeId,
+                    BrandId = x.BrandId,
+                    BrandCode = x.BrandCode,
+                    CurrencyCode = x.CurrencyCode
+                },
+                    (market, playerAggregates) =>
+                         new LicenseeMarketDataModel
+                         {
+                             BarndId = market.BrandId,
+                             BrandCode = market.BrandCode,
+                             CurrencyCode = market.CurrencyCode,
+                             RegisteredCount = playerAggregates.Sum(m => m.market?.RegisteredCount ?? 0),
+                             FirstFundInCount = playerAggregates.Sum(m => m.market?.FirstFundInCount ?? 0),
+                             DepositAmount = playerAggregates.Sum(m => m.market?.DepositAmount ?? 0),
+                             WithdrawalAmount = withdrawals.FirstOrDefault(x => x.BrandId == market.BrandId)?.WithdrawalAmount ?? 0,
+                             AdjustmentAmount = playerAggregates.Sum(m => m.market?.AdjustmentAmount ?? 0),
+                             BonusAmount = playerAggregates.Sum(m => m.market?.BonusAmount ?? 0),
+                             BetAmount = playerAggregates.Sum(m => m.market?.BetAmount ?? 0),
+                             Turnover = playerAggregates.Sum(m => m.market?.Turnover ?? 0),
+                             WinLossAmount = playerAggregates.Sum(m => m.market?.WinLossAmount ?? 0),
+                             NetProfit = playerAggregates.Sum(m => m.market?.NetProfit ?? 0)
+                         });
 
             var total = groupDatas.
                 GroupBy(c => c.CurrencyCode).
