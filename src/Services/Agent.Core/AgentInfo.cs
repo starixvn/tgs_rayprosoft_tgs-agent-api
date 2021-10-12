@@ -23,7 +23,7 @@ namespace TGS.Services.Agent
         byte[] Salt,
         decimal AccumulatedProfitSharing,
         decimal DividendPercentage,
-        string ParentUserName,
+        string? ParentUserName,
         DateTimeOffset RegisteredOn,
         decimal Balance,
         AgentStatus Status,

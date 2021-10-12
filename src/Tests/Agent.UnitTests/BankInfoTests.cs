@@ -3,6 +3,8 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
+using TGS.Core.DataServices.Tgs.Models;
+using TGS.Core.Models.Enums;
 using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
@@ -26,7 +28,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var agentId = Guid.NewGuid();
             var paymentChannelId = Guid.NewGuid();
             var bankType = "Transfer";
-            var detail = new { bankAccount = "0987654321" };
+
+            var detail = new
+            {
+                bankAccount = "0987654321"
+            };
 
             var command = new CreateBankInfoCommand(
                 brandId,

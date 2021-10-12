@@ -52,6 +52,7 @@ namespace Agent.UnitTests
                     AgentType.Cash,
                     AgentLevelType.Agent,
                     Array.Empty<AgentDividendCondition>())));
+
             var expected = new BalanceInfo(10000M).ToExpectedObject();
 
             moqAgentWalletRepository
