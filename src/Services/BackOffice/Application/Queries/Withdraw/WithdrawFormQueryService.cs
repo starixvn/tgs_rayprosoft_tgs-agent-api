@@ -6,7 +6,7 @@ using TGS.ServiceUtility;
 
 namespace TGS.Services.BackOffice.Application.Queries.Withdraw
 {
-    internal class WithdrawFormQueryService : IGetService<WithdrawFormQuery, PagingResponse<WithdrawFormInfo>>
+    internal class WithdrawFormQueryService : IGetService<WithdrawFormQuery, WithdrawForms>
     {
         private readonly IPaymentServiceClient _paymentServiceClient;
 
@@ -15,7 +15,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Withdraw
             _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
         }
 
-        public ValueTask<PagingResponse<WithdrawFormInfo>> GetAsync(WithdrawFormQuery query, CancellationToken cancellationToken)
+        public ValueTask<WithdrawForms> GetAsync(WithdrawFormQuery query, CancellationToken cancellationToken)
             => _paymentServiceClient.QueryWithdrawFormsAsync(
                 new WithdrawFormQueryConditions
                 {
