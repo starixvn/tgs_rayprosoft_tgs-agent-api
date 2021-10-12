@@ -43,7 +43,7 @@ namespace TGS.Services.Report.Application.Queries.LicenseeMarket
 
             var brands = await _brandService.GetBrandQueries(q =>
             q.Where(x => x.LicenseeId == request.LicenseeId)
-            .Where(!string.IsNullOrEmpty(request.CurrencyCode), x => request.CurrencyCode.Contains(x.Currencies.FirstOrDefault().CurrencyCode)), true)
+            .Where(!string.IsNullOrEmpty(request.CurrencyCode), x => x.Currencies.Where(x => x.CurrencyCode == request.CurrencyCode).Count() > 0), true)
                 .Select(x => new
                 {
                     LicenseeId = x.LicenseeId,
