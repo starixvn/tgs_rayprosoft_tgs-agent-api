@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 {
@@ -31,7 +32,12 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
             };
 
         public string GetExternalRoundIdByGameNumber(string gameNumber, string externalGameId)
-            => gameNumber.Replace($"{externalGameId}_", string.Empty);
+        {
+            var values = gameNumber.Split('_', StringSplitOptions.RemoveEmptyEntries)
+                .Where(v => v != externalGameId);
+
+            return string.Join("_", values);
+        }
 
         public string GetExternalRoundIdByBetResult(string roundId, string subRoundId)
             => $"{roundId}_{subRoundId}";
@@ -41,7 +47,9 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Services
 
         public DateTimeOffset ParseDateTimeOffset(string timestamp)
         {
-            var dateTime = DateTime.ParseExact(timestamp, _TimestampFormat, null,
+            var dateTime = DateTime.ParseExact(timestamp,
+                _TimestampFormat,
+                null,
                 DateTimeStyles.AllowWhiteSpaces);
 
             return new DateTimeOffset(dateTime, _Offset);
