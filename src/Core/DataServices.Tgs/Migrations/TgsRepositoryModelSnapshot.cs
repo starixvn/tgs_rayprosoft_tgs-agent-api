@@ -3536,8 +3536,8 @@ namespace TGS.Core.DataServices.Tgs.Migrations
                         .HasColumnName("qq");
 
                     b.Property<string>("RealName")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
                         .HasColumnName("real_name");
 
                     b.Property<DateTimeOffset?>("RegisteredOn")
