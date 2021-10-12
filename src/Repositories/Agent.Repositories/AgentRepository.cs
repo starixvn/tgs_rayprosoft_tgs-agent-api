@@ -45,12 +45,20 @@ namespace TGS.Agent.Repositories
                 agent.Password,
                 agent.Salt,
                 dividend,
-                agent.DividendPercentage);
+                agent.DividendPercentage,
+                agent.ParentAgent?.Username,
+                agent.RegisteredOn,
+                agent.Wallets.FirstOrDefault()?.Balance ?? 0,
+                agent.Status,
+                agent.Type,
+                agent.LevelType,
+                agent.AgentDividendConditions);
         }
 
         public async ValueTask<AgentStatus> GetAgentStatusByIdAsync(Guid id)
         {
             var agent = await _tgsRepository.Agents.FindAsync(id).ConfigureAwait(false);
+
             return agent.Status;
         }
 
@@ -60,15 +68,16 @@ namespace TGS.Agent.Repositories
                 .Where(loc => loc.SystemCode == "AGENT-API" && loc.CultureCode == cultureCode)
                 .Select(loc => new
                 {
-                    MessageId = loc.MessageId,
-                    Text = loc.Text
+                    loc.MessageId,
+                    loc.Text
                 });
 
             return rows.ToAsyncEnumerable()
                 .Select(item => new KeyValuePair<string, string>(item.MessageId, item.Text));
         }
 
-        public async ValueTask SetPasswordAsync(Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
+        public async ValueTask SetPasswordAsync(
+            Guid agentId, byte[] newPassword, byte[] newSalt, DateTimeOffset updatedOn)
         {
             var agent = await _tgsRepository.Agents
                 .FindAsync(agentId)
@@ -82,7 +91,7 @@ namespace TGS.Agent.Repositories
         }
 
         public async ValueTask SetPayPasswordAsync(
-                            Guid agentId,
+            Guid agentId,
             byte[] newPassword,
             byte[] newSalt,
             DateTimeOffset updatedOn)

@@ -26,7 +26,7 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
                 .IsRequired();
 
             builder.Property(c => c.RealName)
-                .HasMaxLength(32);
+                .HasMaxLength(256);
 
             builder.Property(c => c.Status)
                 .HasColumnType(ColumnTypes.SmallInt)

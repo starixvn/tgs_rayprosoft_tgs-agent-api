@@ -6,7 +6,9 @@ using NSubstitute;
 using NUnit.Framework;
 using TGS.Apis.AgentApi.Models.Messages;
 using TGS.Apis.AgentApi.Validators;
+using TGS.Core.DataServices.Tgs.Models;
 using Tgs.Core.Infrastructures.Security;
+using TGS.Core.Models.Enums;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.Services.PayPassowrd;
@@ -46,7 +48,14 @@ namespace Agent.UnitTests
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
                 0M,
-                10M);
+                10M,
+                "ParentUserName",
+                DateTimeOffset.Now,
+                0M,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                Array.Empty<AgentDividendCondition>());
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -96,7 +105,14 @@ namespace Agent.UnitTests
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
                 0M,
-                10M);
+                10M,
+                "ParentUserName",
+                DateTimeOffset.Now,
+                0M,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                Array.Empty<AgentDividendCondition>());
 
             var newPassword = "newPassword";
             var validateCode = "123456";
@@ -176,7 +192,14 @@ namespace Agent.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    10M));
+                    10M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>()));
 
             Assert.ThrowsAsync<PayPasswordAlreadySetException>(async () => await sut.ExecuteAsync(command));
         }
@@ -214,7 +237,14 @@ namespace Agent.UnitTests
                     Array.Empty<byte>(),
                     Array.Empty<byte>(),
                     0M,
-                    10M));
+                    10M,
+                    "ParentUserName",
+                    DateTimeOffset.Now,
+                    0M,
+                    AgentStatus.Enabled,
+                    AgentType.Cash,
+                    AgentLevelType.Agent,
+                    Array.Empty<AgentDividendCondition>()));
 
             await sut.ExecuteAsync(command);
 
@@ -256,7 +286,14 @@ namespace Agent.UnitTests
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
                 0M,
-                10M);
+                10M,
+                "ParentUserName",
+                DateTimeOffset.Now,
+                0M,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                Array.Empty<AgentDividendCondition>());
 
             var command = new StartChangePayPasswordCommand(agent.Id, CultureInfo.GetCultureInfo("en-US"));
 
@@ -309,7 +346,15 @@ namespace Agent.UnitTests
                 Array.Empty<byte>(),
                 Array.Empty<byte>(),
                 0M,
-                10M);
+                10M,
+                "ParentUserName",
+                DateTimeOffset.Now,
+                0M,
+                AgentStatus.Enabled,
+                AgentType.Cash,
+                AgentLevelType.Agent,
+                Array.Empty<AgentDividendCondition>());
+
             fakeAgentRepository.GetAgentByIdAsync(Arg.Is(agent.Id)).Returns(agent);
             var fakeValidateCodeGenerator = Substitute.For<IValidateCodeGenerator>();
             var fakeValidateCodeOperator = Substitute.For<IValidateCodeOperator>();
