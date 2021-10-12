@@ -6,6 +6,7 @@
         Effective = 1,
         Invalid = 2,
         Expired = 3,
-        Rejected = 4
+        Rejected = 4,
+        Archived = 5
     }
 }
