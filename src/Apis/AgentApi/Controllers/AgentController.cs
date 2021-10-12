@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Mime;
 using System.Threading.Tasks;
@@ -7,7 +10,10 @@ using TGS.Apis.AgentApi.Attributes;
 using TGS.Apis.AgentApi.Extensions;
 using TGS.Apis.AgentApi.Models;
 using TGS.Core.Models;
+using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
+using TGS.Core.Models.Messages;
+using TGS.Paging;
 using TGS.Services.Agent;
 using TGS.Services.Agent.Services.Agent;
 using TGS.Services.Operations.Validators;
@@ -75,6 +81,17 @@ namespace TGS.Apis.AgentApi.Controllers
             };
         }
 
+        [HttpGet("list/statuses")]
+        [Description("Get agent list status types")]
+        public Task<Dictionary<int, string>> GetAccountChangesTransactionTypesAsync()
+        {
+            var dict = Enum.GetValues(typeof(AgentStatus))
+                   .Cast<AgentStatus>()
+                   .ToDictionary(t => (int)t, t => t.ToString());
+
+            return Task.FromResult(dict);
+        }
+
         /// <summary>
         /// Get an agent information
         /// </summary>
@@ -82,13 +99,11 @@ namespace TGS.Apis.AgentApi.Controllers
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<GetAgentResponse> GetAgentInfoAsync(
             [FromServices] IStatusValidator statusValidator,
-            [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService)
+            [FromServices] IGetService<GetAgentInfoQuery, AgentInfo> getAgentService,
+            [FromQuery] Guid agentId)
         {
             var brandId = HttpContext.Items.GetBrandId();
             await statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(brandId, ValidStatus.Default);
-
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
-            var agentId = agentTokenData.AgentId;
 
             var agentInfo = await getAgentService.GetAsync(new GetAgentInfoQuery(agentId));
 
@@ -127,6 +142,60 @@ namespace TGS.Apis.AgentApi.Controllers
                         DividendPercentage = x.DividendPercentage
                     }).OrderBy(x => x.Rank).ToArray()
                 }
+            };
+        }
+
+        [HttpGet("list")]
+        [Description("Get agents")]
+        [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
+        public async Task<PagedResponse<AgentModel>> GetAgentsAsync(
+            [FromServices] IQueryService<GetAgentInfosQuery, AgentInfos> queryService,
+            [FromQuery] GetAgentsRequest request,
+            [FromQuery] PagingRequest pagingRequest)
+        {
+            var brandId = HttpContext.Items.GetBrandId();
+            var agentTokenData = HttpContext.Items.GetAgentTokenData();
+
+            var query = new GetAgentInfosQuery(
+                brandId,
+                agentTokenData.AgentId,
+                request.Status,
+                request.Username);
+
+            var agentInfos = queryService.QueryAsync(query);
+
+            var paging = new Paging<AgentModel>();
+
+            if (!string.IsNullOrWhiteSpace(pagingRequest.SortBy))
+            {
+                paging.SortByPropertyName(pagingRequest.SortBy, pagingRequest.IsDesc);
+            }
+
+            if (pagingRequest.ShowAll)
+            {
+                return new PagedResponse<AgentModel>
+                {
+                    TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
+                    Items = await agentInfos
+                        .Select(x => new AgentModel(x))
+                        .ApplyOrderBy(paging)
+                        .ToArrayAsync()
+                        .ConfigureAwait(false)
+                };
+            }
+
+            paging.Page = pagingRequest.Page;
+            paging.RowCount = pagingRequest.Rows;
+
+            return new PagedResponse<AgentModel>()
+            {
+                TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
+                Items = await agentInfos
+                    .Select(x => new AgentModel(x))
+                    .ApplyOrderBy(paging)
+                    .ApplyPaging(paging)
+                    .ToArrayAsync()
+                    .ConfigureAwait(false)
             };
         }
 
