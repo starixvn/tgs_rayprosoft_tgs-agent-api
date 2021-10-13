@@ -92,30 +92,27 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var response = new WithdrawViewModel()
             {
-                Datas = new PagedResponse<WithdrawFormViewModel>
+                Valid = true,
+                TotalCount = result.TotalCount,
+                Items = result.Items
+                .Select(form => new WithdrawFormViewModel
                 {
-                    Valid = true,
-                    TotalCount = result.Datas.TotalCount,
-                    Items = result.Datas.Items
-                    .Select(form => new WithdrawFormViewModel
-                    {
-                        Id = form.Id,
-                        UserId = form.UserId,
-                        UserName = form.UserName,
-                        UserType = form.UserType.ToString(),
-                        BrandId = form.BrandId,
-                        BrandPaymentId = form.BrandPaymentId,
-                        PaymentMethodId = form.PaymentMethodId,
-                        ChannelName = form.ChannelName,
-                        Status = form.Status.ToFlowState(),
-                        Amount = form.Amount,
-                        Remark = form.Remark,
-                        CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn,
-                        ThirdPartyOrderNo = form.ThirdPartyOrderNo
-                    })
-                    .ToArray()
-                },
+                    Id = form.Id,
+                    UserId = form.UserId,
+                    UserName = form.UserName,
+                    UserType = form.UserType.ToString(),
+                    BrandId = form.BrandId,
+                    BrandPaymentId = form.BrandPaymentId,
+                    PaymentMethodId = form.PaymentMethodId,
+                    ChannelName = form.ChannelName,
+                    Status = form.Status.ToFlowState(),
+                    Amount = form.Amount,
+                    Remark = form.Remark,
+                    CreatedOn = form.CreatedOn,
+                    UpdatedOn = form.UpdatedOn,
+                    ThirdPartyOrderNo = form.ThirdPartyOrderNo
+                })
+                .ToArray(),
                 Sum = result.Sum
             };
 

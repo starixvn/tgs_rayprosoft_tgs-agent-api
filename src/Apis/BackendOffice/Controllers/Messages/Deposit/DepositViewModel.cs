@@ -6,10 +6,8 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Deposit
 {
-    public class DepositViewModel
+    public class DepositViewModel : PagedResponse<DepositFormViewModel>
     {
-        public PagedResponse<DepositFormViewModel>? Datas { get; init; }
-
         public decimal Sum { get; init; }
     }
 }

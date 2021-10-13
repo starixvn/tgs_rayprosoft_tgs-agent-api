@@ -6,10 +6,8 @@ using TGS.Core.Models.Messages;
 
 namespace TGS.Apis.BackendOffice.Controllers.Messages.Withdraw
 {
-    public class WithdrawViewModel
+    public class WithdrawViewModel : PagedResponse<WithdrawFormViewModel>
     {
-        public PagedResponse<WithdrawFormViewModel>? Datas { get; init; }
-
         public decimal Sum { get; init; }
     }
 }
