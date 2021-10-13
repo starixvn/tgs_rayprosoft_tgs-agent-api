@@ -100,6 +100,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Currency.resx</DependentUpon>
     </Compile>
+    <Compile Update="Application\Resources\Deposit.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Deposit.resx</DependentUpon>
+    </Compile>
     <Compile Update="Application\Resources\GameProvider.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -134,6 +139,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>VipLevel.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Application\Resources\Withdraw.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Withdraw.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -170,6 +180,10 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Currency.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\Deposit.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Deposit.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Update="Application\Resources\GameProvider.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GameProvider.Designer.cs</LastGenOutput>
@@ -197,6 +211,10 @@
     <EmbeddedResource Update="Application\Resources\Language.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Language.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Application\Resources\Withdraw.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Withdraw.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 
