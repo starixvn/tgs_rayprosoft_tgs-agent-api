@@ -99,29 +99,27 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var response = new DepositViewModel()
             {
-                Datas = new()
+
+                Valid = true,
+                TotalCount = result.TotalCount,
+                Items = result.Items
+                .Select(form => new DepositFormViewModel
                 {
-                    Valid = true,
-                    TotalCount = result.Datas.TotalCount,
-                    Items = result.Datas.Items
-                    .Select(form => new DepositFormViewModel
-                    {
-                        Id = form.Id,
-                        PlayerCode = form.PlayerCode,
-                        UserName = form.UserName,
-                        BrandId = form.BrandId,
-                        BrandPaymentId = form.BrandPaymentId,
-                        PaymentMethodId = form.PaymentMethodId,
-                        ChannelName = form.ChannelName,
-                        Status = form.Status.ToFlowState(),
-                        Amount = form.Amount,
-                        Remark = form.Remark,
-                        CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn,
-                        ThirdPartyOrderNo = form.ThirdPartyOrderNo
-                    })
-                    .ToArray()
-                },
+                    Id = form.Id,
+                    PlayerCode = form.PlayerCode,
+                    UserName = form.UserName,
+                    BrandId = form.BrandId,
+                    BrandPaymentId = form.BrandPaymentId,
+                    PaymentMethodId = form.PaymentMethodId,
+                    ChannelName = form.ChannelName,
+                    Status = form.Status.ToFlowState(),
+                    Amount = form.Amount,
+                    Remark = form.Remark,
+                    CreatedOn = form.CreatedOn,
+                    UpdatedOn = form.UpdatedOn,
+                    ThirdPartyOrderNo = form.ThirdPartyOrderNo
+                })
+                .ToArray(),
                 Sum = result.Sum
             };
 
