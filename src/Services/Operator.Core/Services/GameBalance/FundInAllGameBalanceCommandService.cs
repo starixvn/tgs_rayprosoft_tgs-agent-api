@@ -21,18 +21,20 @@ namespace TGS.Services.Operator.Services.GameBalance
         {
             _gameProviderRepository =
                 gameProviderRepository ?? throw new ArgumentNullException(nameof(gameProviderRepository));
+
             _getGameBalanceService =
                 getGameBalanceService ?? throw new ArgumentNullException(nameof(getGameBalanceService));
             _fundInService = fundInService ?? throw new ArgumentNullException(nameof(fundInService));
         }
 
-        public async ValueTask ExecuteAsync(FundInAllGameBalanceCommand command,
+        public async ValueTask ExecuteAsync(
+            FundInAllGameBalanceCommand command,
             CancellationToken cancellationToken = default)
         {
             var processGps = _gameProviderRepository
                 .QueryAllSubGameProvidersAsync(command.BrandId)
                 .Where(gp => gp.IsTransferWallet
-                    && gp.Status == Status.Active)
+                    && gp.GpStatus == Status.Active)
                 .Select(gp => gp.GpCode)
                 .Distinct();
 

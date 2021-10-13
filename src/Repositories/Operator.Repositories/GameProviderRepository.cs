@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Enums;
-using TGS.Core.Models.Extensions;
 using TGS.Services.Operator;
 using TGS.Services.Operator.GameProviders;
 
@@ -116,46 +114,25 @@ namespace TGS.Operator.Repositories
                             && sgp.GameProviderId == gp.Id
                             && status.Contains(bg.Status)
                             && status.Contains(game.Status)
-                        select new
-                        {
+                        select new BrandGameInfo(
                             game.Id,
                             game.Code,
                             game.Name,
                             game.Description,
                             game.SubGameProviderCode,
-                            GpId = gp.Id,
-                            GpCode = gp.Code,
+                            gp.Id,
+                            gp.Code,
                             game.Status,
+                            bg.Status,
                             game.Type,
                             game.PlatformType,
                             game.AvailableToBrand,
                             game.AvailableCurrencies,
                             game.Localization,
                             bg.Tag,
-                            bg.DisplayOrder
-                        };
+                            bg.DisplayOrder);
 
-            return query.ToAsyncEnumerable()
-                .Select(info => new BrandGameInfo(
-                    info.Id,
-                    info.Code,
-                    info.Name,
-                    info.Description,
-                    info.SubGameProviderCode,
-                    info.GpId,
-                    info.GpCode,
-                    info.Type,
-                    new TagInfo
-                    {
-                        New = info.Tag.IsNew(),
-                        Hot = info.Tag.IsHot(),
-                        Recommend = info.Tag.IsRecommend()
-                    },
-                    info.DisplayOrder,
-                    string.IsNullOrEmpty(info.Localization)
-                        ? new Dictionary<string, JsonDocument>()
-                        : JsonSerializer.Deserialize<Dictionary<string, JsonDocument>>(
-                            info.Localization)));
+            return query.ToAsyncEnumerable();
         }
 
         public IAsyncEnumerable<BrandSubGameProviderInfo> QueryAllSubGameProvidersAsync(Guid brandId)
@@ -173,7 +150,8 @@ namespace TGS.Operator.Repositories
                             gp.Id,
                             gp.Code,
                             gp.TransferWallet,
-                            gp.Status);
+                            gp.Status,
+                            brandGp.Status);
 
             return query.ToAsyncEnumerable();
         }

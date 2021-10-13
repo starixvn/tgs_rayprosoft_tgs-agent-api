@@ -9,7 +9,6 @@ using NSubstitute;
 using NUnit.Framework;
 using TGS.Apis.OperatorApi.Controllers;
 using TGS.Apis.OperatorApi.Models.Messages;
-using TGS.Core.Infrastructures.Json;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
@@ -118,6 +117,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
+                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub2",
@@ -126,6 +126,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
+                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub3",
@@ -134,6 +135,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
+                        Status.Active,
                         Status.Active)
                 }.ToAsyncEnumerable());
 
@@ -177,6 +179,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
+                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub2",
@@ -185,6 +188,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
+                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub3",
@@ -193,6 +197,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
+                        Status.Active,
                         Status.Active)
                 }.ToAsyncEnumerable());
 
@@ -236,6 +241,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
+                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub2",
@@ -244,6 +250,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp1",
                         true,
+                        Status.Active,
                         Status.Active),
                     new BrandSubGameProviderInfo(
                         "sub3",
@@ -252,6 +259,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         Guid.NewGuid(),
                         "gp2",
                         true,
+                        Status.Active,
                         Status.Active)
                 }.ToAsyncEnumerable());
 
@@ -435,11 +443,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 Array.Empty<GameType>());
 
             var sut = new GetAllGamesByGameTypeQueryService(
-                fakeBrandOperations,
                 fakeValidStatus,
                 fakeValidGameStatus,
-                fakeGameProviderRepository,
-                new JsonSerializationProvider());
+                fakeGameProviderRepository);
 
             // act
             var result = await sut.QueryAsync(query).ToArrayAsync();
@@ -650,11 +656,9 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .Returns(games.ToAsyncEnumerable());
 
             var sut = new GetAllGamesByGameTypeQueryService(
-                fakeBrandOperations,
                 fakeValidStatus,
                 fakeValidGameStatus,
-                fakeGameProviderRepository,
-                new JsonSerializationProvider());
+                fakeGameProviderRepository);
 
             var gameTypes = new[]
             {
@@ -690,6 +694,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var gameId = 1000012;
             var uri = new Uri("http://www.fakeurl.com");
             var extendedData = JsonDocument.Parse(@"{""lobbyurl"":""http://www.lobbyurl.com""}");
+
             var playerToken = new PlayerTokenData
             {
                 PlayerCode = playerCode,
@@ -791,6 +796,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             // arrange
             var playerCode = "playerCode";
             var gameType = GameType.CardGameLobby;
+
             var playerToken = new PlayerTokenData
             {
                 PlayerCode = playerCode,
@@ -812,6 +818,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 .GetGameProviderIdByCodeAsync(gameProviderCode)
                 .Returns(gameProviderId);
             var externalGameId = "CardGameLobby";
+
             var cachedGameList = new List<CachedGame>
             {
                 new CachedGame
@@ -827,6 +834,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
             };
 
             var cachedGames = cachedGameList.ToArray();
+
             fakeGameProviderOperations
                 .GetCachedGamesAsync(gameProviderId, Arg.Any<GamePlatformType[]>(), gameType)
                 .Returns(cachedGames);
@@ -879,10 +887,15 @@ namespace TGS.Tests.OperatorApi.UnitTests
                         "subgp1",
                         Guid.NewGuid(),
                         "gp1",
+                        GameStatus.Active,
+                        GameStatus.Active,
                         GameType.Arcade,
-                        new TagInfo(),
-                        0,
-                        new Dictionary<string, JsonDocument>())
+                        GamePlatformType.Desktop,
+                        true,
+                        string.Empty,
+                        string.Empty,
+                        GameTag.New,
+                        0)
                 }.ToAsyncEnumerable());
 
             await sut.ExecuteAsync(command);
@@ -998,11 +1011,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Guid.NewGuid(),
                     "gp1",
                     true,
+                    Status.Active,
                     Status.Active)));
 
             _ = fakeGetGameUrlQueryService.GetAsync(Arg.Any<GetGameUrlQuery>())
-                .Returns(ValueTask.FromResult(new GameUrlInfo
-                    (0, string.Empty, "http://www.google.com")));
+                .Returns(ValueTask.FromResult(new GameUrlInfo(0, string.Empty, "http://www.google.com")));
 
             await sut.GetGameUrlForPostAsync(
                 fakePlayerOperations,
@@ -1070,11 +1083,11 @@ namespace TGS.Tests.OperatorApi.UnitTests
                     Guid.NewGuid(),
                     "gp1",
                     true,
+                    Status.Active,
                     Status.Active)));
 
             _ = fakeGetLobbyGameUrlQueryService.GetAsync(Arg.Any<GetLobbyGameUrlQuery>())
-                .Returns(ValueTask.FromResult(new LobbyGameUrlInfo
-                    (0, string.Empty, "http://www.google.com")));
+                .Returns(ValueTask.FromResult(new LobbyGameUrlInfo(0, string.Empty, "http://www.google.com")));
 
             await sut.GetLobbyGameUrlForPostAsync(
                 fakePlayerOperations,
