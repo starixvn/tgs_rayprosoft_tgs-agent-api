@@ -5,11 +5,10 @@ using AutoFixture;
 using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
-using Tgs.Logging;
 using TGS.Core.DataServices.Tgs.Models;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
+using Tgs.Logging;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.Workers.Schedulers.Jobs;
 
@@ -33,7 +32,8 @@ namespace TGS.Tests.Schedulers.UnitTests
 
         [TestCase(Status.Active, Status.Maintenance, -1, 10)]
         [TestCase(Status.Maintenance, Status.Active, 1, 10)]
-        public async Task Can_Change_Status(Status sourceStatus, Status targetStatus, int addFromMinutes,
+        public async Task Can_Change_Status(
+            Status sourceStatus, Status targetStatus, int addFromMinutes,
             int addToMinutes)
         {
             var brandGameProviders = CreateBrandGameProviderFixture()
@@ -47,6 +47,7 @@ namespace TGS.Tests.Schedulers.UnitTests
             {
                 brandGameProvider.Status = sourceStatus;
                 brandGameProvider.IsManualChangeStatus = false;
+
                 brandGameProvider.Schedules = new[]
                 {
                     new BrandGameProviderSchedule
@@ -59,7 +60,7 @@ namespace TGS.Tests.Schedulers.UnitTests
                 };
             }
 
-            _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, true))
+            _serviceMock.Setup(s => s.GetBrandGameProviderQueries(null, false))
                 .Returns(brandGameProviders);
 
             await _service.ExecuteAsync(It.IsAny<object>());
@@ -72,14 +73,17 @@ namespace TGS.Tests.Schedulers.UnitTests
         private Fixture CreateBrandGameProviderFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<BrandGameProvider>(u => u
                 .With(s => s.Brand, new Brand())
                 .With(s => s.GameProvider, new GameProvider())
                 .With(s => s.GameProviderConfiguration, new GameProviderConfiguration())
                 .With(s => s.DefaultLanguage, new Language())
-                .With(s => s.Schedules, new BrandGameProviderSchedule[]
-                {
-                }));
+                .With(s => s.Schedules,
+                    new BrandGameProviderSchedule[]
+                    {
+                    }));
+
             return fixture;
         }
     }

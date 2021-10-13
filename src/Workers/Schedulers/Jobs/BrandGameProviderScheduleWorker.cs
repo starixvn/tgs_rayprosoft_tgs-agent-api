@@ -3,13 +3,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
-using Tgs.Logging;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Hangfire.Services;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Redis;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Messages;
+using Tgs.Logging;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 
 namespace TGS.Workers.Schedulers.Jobs
@@ -40,9 +39,19 @@ namespace TGS.Workers.Schedulers.Jobs
             bool Predicate(BrandGameProviderSchedule s)
             {
                 var src = DateTimeOffset.Now.ToOffset(offset).DateTime;
-                var fromHM = new DateTime(src.Year, src.Month, src.Day, s.From.Hour,
-                    s.From.Minute, 0);
-                var toHM = new DateTime(src.Year, src.Month, src.Day, s.To.Hour, s.To.Minute,
+
+                var fromHM = new DateTime(src.Year,
+                    src.Month,
+                    src.Day,
+                    s.From.Hour,
+                    s.From.Minute,
+                    0);
+
+                var toHM = new DateTime(src.Year,
+                    src.Month,
+                    src.Day,
+                    s.To.Hour,
+                    s.To.Minute,
                     0);
 
                 return s.Status == SwitchStatus.Enabled && s.IsDefault && dayOfWeek == s.DayOfWeek &&
@@ -87,10 +96,11 @@ namespace TGS.Workers.Schedulers.Jobs
             }
         }
 
-        private async Task<BrandGameProvider[]> GetBrandGameProviders(Status sourceStatus, Status targetStatus,
+        private async Task<BrandGameProvider[]> GetBrandGameProviders(
+            Status sourceStatus, Status targetStatus,
             Func<BrandGameProviderSchedule, bool> predicate)
         {
-            var sourceBrandGameProviders = await _service.GetBrandGameProviderQueries(tracking: true)
+            var sourceBrandGameProviders = await _service.GetBrandGameProviderQueries()
                 .Where(x => x.Status == sourceStatus && !x.IsManualChangeStatus)
                 .ToArrayAsync();
 
