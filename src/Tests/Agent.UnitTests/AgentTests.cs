@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -222,6 +223,48 @@ namespace Agent.UnitTests
 
             _ = fakeAgentRepository.Received(1)
                 .GetAgentByIdAsync(Arg.Is(agentId));
+        }
+
+        [Test]
+        public async Task Get_Agent_List_Should_Success()
+        {
+            var dbContextOptionsBuilder = new DbContextOptionsBuilder<TgsRepository>();
+
+            dbContextOptionsBuilder
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            ITgsRepository repository = new TgsRepository(dbContextOptionsBuilder.Options);
+
+            var brandId = Guid.NewGuid();
+            var parentAgentId = Guid.NewGuid();
+
+            repository.Agents.AddRange(
+                new CoreModels.Agent()
+                {
+                    BrandId = brandId,
+                    ParentAgentId = parentAgentId,
+                    Id = Guid.NewGuid()
+                },
+                new CoreModels.Agent()
+                {
+                    BrandId = brandId,
+                    ParentAgentId = parentAgentId,
+                    Id = Guid.NewGuid()
+                });
+
+            await repository.SaveChangesAsync();
+
+            var sut = new GetAgentInfosQueryService(repository);
+
+            var query = new GetAgentInfosQuery(
+                brandId,
+                parentAgentId,
+                null,
+                null);
+
+            var actual = await sut.QueryAsync(query).ToArrayAsync();
+
+            Assert.AreEqual(2, actual.Length);
         }
     }
 }

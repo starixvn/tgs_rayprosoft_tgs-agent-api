@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using TGS.Services.Agent;
 
 namespace TGS.Apis.AgentApi.Models
 {
@@ -59,30 +58,5 @@ namespace TGS.Apis.AgentApi.Models
 
         [JsonPropertyName("virtualsportsrebatepercentage")]
         public decimal VirtualSportsRebatePercentage { get; set; }
-
-        public AgentModel()
-        {
-        }
-
-        public AgentModel(AgentInfos agentInfos)
-        {
-            this.AgentStatus = agentInfos.AgentStatus.ToString();
-            this.Balance = agentInfos.Balance;
-            this.CardGameRebatePercentage = agentInfos.CardGameRebatePercentage;
-            this.CommissionPercentage = agentInfos.CommissionPercentage;
-            this.DividendPercentage = agentInfos.DividendPercentage;
-            this.LevelType = agentInfos.LevelType.ToString();
-            this.LiveDealerRebatePercentage = agentInfos.LiveDealerRebatePercentage;
-            this.LotteryRebatePercentage = agentInfos.LotteryRebatePercentage;
-            this.RegisteredOn = agentInfos.RegisteredOn;
-            this.SlotRebatePercentage = agentInfos.SlotRebatePercentage;
-            this.SportsRebatePercentage = agentInfos.SportsRebatePercentage;
-            this.Status = agentInfos.Status.ToString();
-            this.TeamNumber = agentInfos.TeamNumber;
-            this.Type = agentInfos.Type.ToString();
-            this.Username = agentInfos.Username;
-            this.VirtualSportsRebatePercentage = agentInfos.VirtualSportsRebatePercentage;
-            this.AgnetId = agentInfos.AgentId;
-        }
     }
 }

@@ -177,7 +177,26 @@ namespace TGS.Apis.AgentApi.Controllers
                 {
                     TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
                     Items = await agentInfos
-                        .Select(x => new AgentModel(x))
+                        .Select(agentInfo => new AgentModel
+                        {
+                            AgentStatus = agentInfo.AgentStatus.ToString(),
+                            Balance = agentInfo.Balance,
+                            CardGameRebatePercentage = agentInfo.CardGameRebatePercentage,
+                            CommissionPercentage = agentInfo.CommissionPercentage,
+                            DividendPercentage = agentInfo.DividendPercentage,
+                            LevelType = agentInfo.LevelType.ToString(),
+                            LiveDealerRebatePercentage = agentInfo.LiveDealerRebatePercentage,
+                            LotteryRebatePercentage = agentInfo.LotteryRebatePercentage,
+                            RegisteredOn = agentInfo.RegisteredOn,
+                            SlotRebatePercentage = agentInfo.SlotRebatePercentage,
+                            SportsRebatePercentage = agentInfo.SportsRebatePercentage,
+                            Status = agentInfo.Status.ToString(),
+                            TeamNumber = agentInfo.TeamNumber,
+                            Type = agentInfo.Type.ToString(),
+                            Username = agentInfo.Username,
+                            VirtualSportsRebatePercentage = agentInfo.VirtualSportsRebatePercentage,
+                            AgnetId = agentInfo.AgentId
+                        })
                         .ApplyOrderBy(paging)
                         .ToArrayAsync()
                         .ConfigureAwait(false)
@@ -191,7 +210,26 @@ namespace TGS.Apis.AgentApi.Controllers
             {
                 TotalCount = await agentInfos.CountAsync().ConfigureAwait(false),
                 Items = await agentInfos
-                    .Select(x => new AgentModel(x))
+                    .Select(agentInfo => new AgentModel
+                    {
+                        AgentStatus = agentInfo.AgentStatus.ToString(),
+                        Balance = agentInfo.Balance,
+                        CardGameRebatePercentage = agentInfo.CardGameRebatePercentage,
+                        CommissionPercentage = agentInfo.CommissionPercentage,
+                        DividendPercentage = agentInfo.DividendPercentage,
+                        LevelType = agentInfo.LevelType.ToString(),
+                        LiveDealerRebatePercentage = agentInfo.LiveDealerRebatePercentage,
+                        LotteryRebatePercentage = agentInfo.LotteryRebatePercentage,
+                        RegisteredOn = agentInfo.RegisteredOn,
+                        SlotRebatePercentage = agentInfo.SlotRebatePercentage,
+                        SportsRebatePercentage = agentInfo.SportsRebatePercentage,
+                        Status = agentInfo.Status.ToString(),
+                        TeamNumber = agentInfo.TeamNumber,
+                        Type = agentInfo.Type.ToString(),
+                        Username = agentInfo.Username,
+                        VirtualSportsRebatePercentage = agentInfo.VirtualSportsRebatePercentage,
+                        AgnetId = agentInfo.AgentId
+                    })
                     .ApplyOrderBy(paging)
                     .ApplyPaging(paging)
                     .ToArrayAsync()
