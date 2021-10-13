@@ -421,6 +421,13 @@ namespace TGS.Core.DataServices.Tgs.DataInitializers
                             {
                                 new MenuSetting("View")
                             }
+                        },
+                        new MenuSetting("BalanceChangeReport")
+                        {
+                            SubMenus = new[]
+                            {
+                                new MenuSetting("View")
+                            }
                         }
                     }
                 },
