@@ -39,6 +39,7 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
         {
             var playerCode = HttpContext.Items.Get(Consts.ContextItems.PlayerCode, string.Empty);
             var r = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
+
             return map.Response(request.User, r);
         }
 
@@ -54,16 +55,20 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             if (request.ActionType == WalletActionType.Debit)
             {
                 var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+
                 var gameProviderConfigurationId = HttpContext.Items.Get(
-                    Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+                    Consts.ContextItems.GameProviderConfigurationId,
+                    Guid.Empty);
 
                 var betResult = await services
                     .LockAmountAsync(gameProviderId, gameProviderConfigurationId, playerCode, request)
                     .ConfigureAwait(false);
+
                 return map.Response(request, betResult.Balance);
             }
 
             var balanceResult = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
+
             return map.Response(request, balanceResult.Balance);
         }
 
@@ -79,16 +84,20 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
             if (request.ActionType == WalletActionType.Debit)
             {
                 var gameProviderId = HttpContext.Items.Get(Consts.ContextItems.GameProviderId, Guid.Empty);
+
                 var gameProviderConfigurationId = HttpContext.Items.Get(
-                    Consts.ContextItems.GameProviderConfigurationId, Guid.Empty);
+                    Consts.ContextItems.GameProviderConfigurationId,
+                    Guid.Empty);
 
                 var betResult = await services
                     .CancelLockAmountAsync(gameProviderId, gameProviderConfigurationId, playerCode, request)
                     .ConfigureAwait(false);
+
                 return map.Response(request, betResult.Balance);
             }
 
             var balanceResult = await services.GetBalanceAsync(playerCode).ConfigureAwait(false);
+
             return map.Response(request, balanceResult.Balance);
         }
 
@@ -134,7 +143,11 @@ namespace TGS.Apis.TgsApi.GameProviders.WMCasino.Controllers
                 try
                 {
                     await services.ExecuteBetResultsByRoundAsync(
-                            gameProviderId, gameProviderConfigurationId, playerCode, r.Value, false)
+                            gameProviderId,
+                            gameProviderConfigurationId,
+                            playerCode,
+                            r.Value,
+                            false)
                         .ConfigureAwait(false);
 
                     errorResponse = map.Response(GameApiError.Success, string.Empty);
