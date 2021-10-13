@@ -4,8 +4,8 @@ using TGS.Apis.TgsApi.Commons.Services.BetHistory;
 using TGS.Apis.TgsApi.Models.BetHistory;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Services.BetHistories;
@@ -37,7 +37,8 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             _hashProvider = hashProvider;
         }
 
-        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(string playerCode, Round round,
+        protected override async ValueTask<RoundResult> GetGameProviderBetHistoryAsync(
+            string playerCode, Round round,
             CachedGameProvider cachedGameProvider, CachedGame cachedGame, string language)
         {
             var configuration =
@@ -45,7 +46,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                     .GameProviderConfigurations.Habanero);
 
             var brandId = await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
-            var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id, brandId,
+
+            var culture = await _brandGameProviderOperations.MapCultureAsync(cachedGameProvider.Id,
+                brandId,
                 language);
 
             var valueToHash =
@@ -68,7 +71,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                 GameResult = round.ClientStatus.ToString(),
                 Data = new BaseData[]
                 {
-                    new UrlData {Url = url}
+                    new UrlData
+                    {
+                        Url = url
+                    }
                 }
             };
         }

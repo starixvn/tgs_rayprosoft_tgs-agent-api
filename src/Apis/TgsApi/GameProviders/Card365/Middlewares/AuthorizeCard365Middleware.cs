@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -30,6 +30,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             ITokenProvider tokenProvider)
         {
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
+
             _gameProviderOperations =
                 gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
@@ -48,6 +49,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             }
 
             var key = element.GetString();
+
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<Card365Configuration>(SettingConsts
                     .GameProviderConfigurations.Card365);
@@ -64,13 +66,16 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             if (!document.RootElement.TryGetProperty("userId", out element))
             {
                 await next(context);
+
                 return;
             }
 
             var playerCode = element.GetString();
+
             if (playerCode.IsNullOrEmpty())
             {
                 await next(context);
+
                 return;
             }
 
@@ -84,6 +89,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             if (!document.RootElement.TryGetProperty("extension3", out element))
             {
                 await next(context);
+
                 return;
             }
 
@@ -103,6 +109,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Middlewares
             }
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
+
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
         }
     }

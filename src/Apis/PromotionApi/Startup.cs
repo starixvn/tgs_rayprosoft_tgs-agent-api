@@ -1,10 +1,9 @@
 using System;
 using System.IO;
-using System.Text.Json.Serialization;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,7 +15,6 @@ using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
 using TGS.Services.Promotion.MessageQueue;
@@ -35,7 +33,13 @@ namespace TGS.Apis.PromotionApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var defaultBypassRouting = new[] { "/health", "/metrics", "/favicon.ico", "/swagger" };
+            var defaultBypassRouting = new[]
+            {
+                "/health",
+                "/metrics",
+                "/favicon.ico",
+                "/swagger"
+            };
             app.UseMiddleware<ExceptionMiddleware>();
 
             app.UseRouting();
@@ -46,12 +50,14 @@ namespace TGS.Apis.PromotionApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
-                });
+
+                endpoints.MapHealthChecks("/health",
+                    new()
+                    {
+                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
+                        ResponseWriter = (httpContext, result) =>
+                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
+                    });
 
                 endpoints.MapMetrics();
             });
@@ -93,7 +99,8 @@ namespace TGS.Apis.PromotionApi
                     options.JsonSerializerOptions = new JsonSerializerOptions
                     {
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                        Converters = {
+                        Converters =
+                        {
                             new JsonStringEnumConverter()
                         }
                     };
@@ -126,15 +133,22 @@ namespace TGS.Apis.PromotionApi
                 .AddHttpContextAccessor()
                 .AddRouting(options => options.LowercaseUrls = true);
             services.AddControllers();
+
             services.AddHealthChecks()
                 .AddPostgres(_configuration, "Tgs", "tgs-db");
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new() { Title = "TGS Promotion API", Version = "v1" });
+                c.SwaggerDoc("v1",
+                    new()
+                    {
+                        Title = "TGS Promotion API",
+                        Version = "v1"
+                    });
 
                 var xml = "TGS.Apis.Promotion.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);
+
                 if (File.Exists(path))
                 {
                     c.IncludeXmlComments(path);

@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
-using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Player;
 using TGS.Services.Operator.ValidateCode;
+using TGS.ServiceUtility;
 
 namespace TGS.Services.Operator.Services.Player
 {
     internal class ResetPasswordCommandService : ICommandService<ResetPasswordCommand>
     {
-        private readonly IPlayerOperations _playerOperations;
         private readonly IPasswordHandler _passwordHandler;
+        private readonly IPlayerOperations _playerOperations;
         private readonly IValidateCodeOperator _validateCodeOperator;
 
         public ResetPasswordCommandService(
@@ -22,7 +21,9 @@ namespace TGS.Services.Operator.Services.Player
         {
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
-            _validateCodeOperator = validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
+
+            _validateCodeOperator =
+                validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
         public async ValueTask ExecuteAsync(ResetPasswordCommand command, CancellationToken cancellationToken = default)
@@ -40,6 +41,7 @@ namespace TGS.Services.Operator.Services.Player
             var updatedOn = DateTimeOffset.UtcNow;
 
             var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);
+
             await _playerOperations
                 .ChangePlayerPasswordAsync(new()
                 {

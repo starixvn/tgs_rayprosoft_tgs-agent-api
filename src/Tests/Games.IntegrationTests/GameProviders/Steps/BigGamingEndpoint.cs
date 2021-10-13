@@ -8,20 +8,19 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TechTalk.SpecFlow;
-using Tgs.Logging;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.GameProviders.Settings.BigGaming;
 using TGS.Core.Models.Tokens;
+using Tgs.Logging;
 using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.Models.BigGaming.Commons;
 using TGS.Shared.Game.Models.BigGaming.Incoming;
@@ -35,9 +34,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
     [Scope(Tag = "BigGaming")]
     public class BigGamingEndpoint : BaseGameEndpoint
     {
-        private readonly ServiceProvider _serviceProvider;
         private readonly IBigGamingApiClient _client;
         private readonly IHashProvider _hashProvider;
+        private readonly ServiceProvider _serviceProvider;
 
         public BigGamingEndpoint(ScenarioContext context)
             : base(context)
@@ -80,7 +79,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     .ProcessAllSubjects();
             });
 
-            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
+            services.AddSingleton(new Mock<ITgsLog>().Object);
 
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
@@ -105,8 +104,10 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             _client = _serviceProvider.GetRequiredService<IBigGamingApiClient>();
             _hashProvider = _serviceProvider.GetRequiredService<IHashProvider>();
         }
+
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandWithLoginViaAsync(string username, string brandCode,
+        public Task GivenPlayerOfBrandWithLoginViaAsync(
+            string username, string brandCode,
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
@@ -120,7 +121,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var response = Get<BigGamingResponse>(SR.Response);
 
-            decimal balance = JsonSerializer.Deserialize<decimal>(JsonSerializer.Serialize(response.Result));
+            var balance = JsonSerializer.Deserialize<decimal>(JsonSerializer.Serialize(response.Result));
             response.Error.Should().BeNull();
             balance.Should().Be(expectedBalance);
         }
@@ -135,11 +136,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
 
             var configuration = await GetBrandMerchant(currencyCode).ConfigureAwait(false);
 
-            string random = GuidExtensions.NewSequentialGuid().ToString();
-            var data = new BigGamingBalanceRequest()
+            var random = GuidExtensions.NewSequentialGuid().ToString();
+
+            var data = new BigGamingBalanceRequest
             {
                 Random = random,
-                Sign = _hashProvider.Hash($"{random }{configuration.SecretCode}{playerCode}{configuration.SecretKey}", HashAlgorithmKind.Md5).ToUpper(),
+                Sign = _hashProvider.Hash($"{random}{configuration.SecretCode}{playerCode}{configuration.SecretKey}",
+                    HashAlgorithmKind.Md5).ToUpper(),
                 LoginId = playerCode
             };
 
@@ -168,18 +171,19 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
             var tokenData = Get<PlayerTokenData>(key);
+
             return tokenData?.LoginRecordId ?? Guid.Empty;
         }
 
         private async ValueTask<BigGamingBrandMerchant> GetBrandMerchant(string currencyCode)
         {
             var configuration =
-              await GetSettingAsync<BigGamingConfiguration>(_serviceProvider,
-                SettingConsts.GameProviderConfigurations.BigGaming).ConfigureAwait(false);
+                await GetSettingAsync<BigGamingConfiguration>(_serviceProvider,
+                    SettingConsts.GameProviderConfigurations.BigGaming).ConfigureAwait(false);
 
-            return configuration.BrandMerchants.Where(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode) && x.Status).First();
+            return configuration.BrandMerchants.Where(x => x.CurrencyCode.IgnoreCaseEquals(currencyCode) && x.Status)
+                .First();
         }
-
 
         #endregion
     }
