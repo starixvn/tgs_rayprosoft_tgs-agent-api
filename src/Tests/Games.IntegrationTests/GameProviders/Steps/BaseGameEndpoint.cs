@@ -14,7 +14,7 @@ using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Tokens;
 using TGS.Tests.ApiClients.Operators;
@@ -29,10 +29,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
         }
 
-        protected async Task PlayerLoginAsync(IServiceProvider serviceProvider, string username,
+        protected async Task PlayerLoginAsync(
+            IServiceProvider serviceProvider, string username,
             PlatformType platformType, string brandCode, string currencyCode)
         {
             var db = GetDb<ITgsRepository>(serviceProvider);
+
             var player = await db.Players.AsQueryable().FirstOrDefaultAsync(p => p.Brand.Code == brandCode &&
                 p.Username.ToLower() == username.ToLower());
 
@@ -48,7 +50,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 if (tokenData != null)
                 {
                     var loginRecord =
-                        await db.PlayerLoginRecords.AsQueryable().FirstOrDefaultAsync(r => r.Id == tokenData.LoginRecordId);
+                        await db.PlayerLoginRecords.AsQueryable()
+                            .FirstOrDefaultAsync(r => r.Id == tokenData.LoginRecordId);
+
                     if (loginRecord?.Status == LoginStatus.Enabled)
                     {
                         return;
@@ -88,28 +92,36 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             }
 
             const string password = "TgsP@ssw0rd";
-            var headers = new Dictionary<string, string> { { "Authorization", $"Bearer {brandToken}" } };
+
+            var headers = new Dictionary<string, string>
+            {
+                {
+                    "Authorization", $"Bearer {brandToken}"
+                }
+            };
 
             if (player == null)
             {
                 var createResponse = await apiClient.CreatePlayerAsync(new()
-                {
-                    Username = username,
-                    Password = password,
-                    ConfirmPassword = password,
-                    CurrencyCode = currencyCode,
-                    IsTestPlayer = !username.StartsWith("RP", StringComparison.OrdinalIgnoreCase)
-                }, headers);
+                    {
+                        Username = username,
+                        Password = password,
+                        ConfirmPassword = password,
+                        CurrencyCode = currencyCode,
+                        IsTestPlayer = !username.StartsWith("RP", StringComparison.OrdinalIgnoreCase)
+                    },
+                    headers);
 
                 playerCode = createResponse.PlayerCode;
             }
 
             var res = await apiClient.PlayerLoginAsync(new()
-            {
-                Username = username,
-                Password = password,
-                PlatformType = platformType
-            }, headers);
+                {
+                    Username = username,
+                    Password = password,
+                    PlatformType = platformType
+                },
+                headers);
 
             var handler = serviceProvider.GetRequiredService<IJwtTokenHandler>();
             var jwt = handler.ReadToken(res.PlayerToken);
@@ -133,11 +145,17 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(serviceProvider);
 
             const string sql = "update dbo.wallets w set balance=:balance where w.player_code=:player_code";
-            await db.ExecuteSqlCommandAsync(sql, CommandType.Text,
+
+            await db.ExecuteSqlCommandAsync(sql,
+                CommandType.Text,
                 new Dictionary<string, object>
                 {
-                    {":balance", balance},
-                    {":player_code", playerCode}
+                    {
+                        ":balance", balance
+                    },
+                    {
+                        ":player_code", playerCode
+                    }
                 });
         }
 
@@ -145,6 +163,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             await using var db = serviceProvider.GetRequiredService<Func<ITgsRepository>>()();
             var playerCode = Get<string>(SR.PlayerCode);
+
             return await db.Wallets.AsQueryable().FirstAsync(w => w.PlayerCode == playerCode);
         }
 
@@ -154,6 +173,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var setting = await db.Settings.AsQueryable().FirstAsync(s => s.Key == key);
 
             var json = serviceProvider.GetRequiredService<IJsonSerializationProvider>();
+
             return json.DeserializeFromString<T>(setting.Value);
         }
 
@@ -175,7 +195,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             await cacheManager.ClearCacheAsync(RedisCacheType.PlayerLoginRecords, playerCode);
         }
 
-        protected async Task ChangePlayerStatusAsync(ServiceProvider serviceProvider, string playerCode,
+        protected async Task ChangePlayerStatusAsync(
+            ServiceProvider serviceProvider, string playerCode,
             PlayerStatus status)
         {
             var db = GetDb<ITgsRepository>(serviceProvider);
@@ -193,6 +214,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var externalRoundId = Get<string>(SR.ExternalRoundId);
             var db = GetDb<ITgsRepository>(serviceProvider);
+
             var status = await db.Rounds.AsQueryable().Where(r => r.ExternalRoundId == externalRoundId)
                 .Select(r => r.Status)
                 .FirstAsync();
@@ -200,7 +222,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             status.Should().Be(expectedStatus);
         }
 
-        protected async Task ChangeGameProviderStatusAsync(IServiceProvider serviceProvider,
+        protected async Task ChangeGameProviderStatusAsync(
+            IServiceProvider serviceProvider,
             string gameProviderCode, Status status, bool hasTag = false)
         {
             if (hasTag && !HasTag("ChangeGameProviderStatus"))
@@ -219,7 +242,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             await cacheManager.ClearCacheAsync(RedisCacheType.GameProvider, gameProvider.Id);
         }
 
-        protected async Task ChangeGameProviderConfigurationStatusAsync(IServiceProvider serviceProvider,
+        protected async Task ChangeGameProviderConfigurationStatusAsync(
+            IServiceProvider serviceProvider,
             string gameProviderCode, Status status, bool hasTag = false)
         {
             if (hasTag && !HasTag("ChangeGameProviderConfigurationStatus"))
@@ -235,7 +259,9 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                 from bgp in db.BrandGameProviders.AsQueryable()
                 join brand in from b in db.Brands.AsQueryable() where b.Code == brandCode select b
                     on bgp.BrandId equals brand.Id
-                join gameProvider in from gp in db.GameProviders.AsQueryable() where gp.Code == gameProviderCode select gp
+                join gameProvider in from gp in db.GameProviders.AsQueryable()
+                                     where gp.Code == gameProviderCode
+                                     select gp
                     on bgp.GameProviderId equals gameProvider.Id
                 join gpc in db.GameProviderConfigurations
                     on bgp.GameProviderConfigurationId equals gpc.Id
@@ -246,11 +272,13 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             await db.SaveChangesAsync();
 
             var cacheManager = serviceProvider.GetRequiredService<IRedisCacheManager>();
+
             await cacheManager.ClearCacheAsync(RedisCacheType.GameProviderConfiguration,
                 gameProviderConfiguration.GameProviderId);
         }
 
-        protected async Task ChangeGameStatusAsync(IServiceProvider serviceProvider, string gameProviderCode,
+        protected async Task ChangeGameStatusAsync(
+            IServiceProvider serviceProvider, string gameProviderCode,
             string externalGameId, GameStatus gameStatus, bool hasTag = false)
         {
             if (hasTag && !HasTag("ChangeGameStatus"))
@@ -263,9 +291,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var db = GetDb<ITgsRepository>(serviceProvider);
 
             var gamePlatformTypes = GetGamePlatformTypes();
+
             var game = await (
                 from g in db.Games
-                join gameProvider in from gp in db.GameProviders.AsQueryable() where gp.Code == gameProviderCode select gp
+                join gameProvider in from gp in db.GameProviders.AsQueryable()
+                                     where gp.Code == gameProviderCode
+                                     select gp
                     on g.GameProviderId equals gameProvider.Id
                 where g.ExternalId == externalGameId && gamePlatformTypes.Contains(g.PlatformType)
                 select g).FirstAsync();
@@ -280,13 +311,22 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             GamePlatformType[] GetGamePlatformTypes() =>
                 platformType switch
                 {
-                    PlatformType.Desktop => new[] { GamePlatformType.Desktop, GamePlatformType.DesktopAndMobile },
-                    PlatformType.Mobile => new[] { GamePlatformType.Mobile, GamePlatformType.DesktopAndMobile },
+                    PlatformType.Desktop => new[]
+                    {
+                        GamePlatformType.Desktop,
+                        GamePlatformType.DesktopAndMobile
+                    },
+                    PlatformType.Mobile => new[]
+                    {
+                        GamePlatformType.Mobile,
+                        GamePlatformType.DesktopAndMobile
+                    },
                     _ => throw new NotImplementedException()
                 };
         }
 
-        protected async Task ChangeBrandStatusAsync(IServiceProvider serviceProvider, Status status,
+        protected async Task ChangeBrandStatusAsync(
+            IServiceProvider serviceProvider, Status status,
             bool hasTag = false)
         {
             if (hasTag && !HasTag("ChangeBrandStatus"))

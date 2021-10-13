@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -17,15 +17,22 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 {
     public interface ISkywindService
     {
-        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
-        ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId);
+        ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
+            Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType);
+
+        ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
+            Guid gameProviderId, string playerCode, string externalTransactionId);
+
         ValueTask<CachedPlayerLoginRecord> DecryptTokenAsync(string token);
         ValueTask<Guid> GetGameProviderIdAsync();
         ValueTask<SkywindConfiguration> GetConfigurationAsync();
         ValueTask<Guid> GetGameProviderIdByCodeAsync();
         ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode);
         ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode);
-        ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId);
+
+        ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(
+            Guid brandId, Guid gameProviderId);
+
         string GetExternalRoundId(string roundId, long eventId);
         string GetExternalTransactionId(string trxId, long eventId, string action);
         bool IsTest(string playerCode);
@@ -33,13 +40,13 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
 
     public class SkywindService : ISkywindService
     {
-        private readonly IGameProviderOperations _gameProviderOperations;
-        private readonly ITokenProvider _tokenProvider;
-        private readonly IPlayerOperations _playerOperations;
-        private readonly IGameActionQueries _gameActionQueries;
-        private readonly ISettingOperations _settingOperations;
-        private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
         private readonly IBrandOperations _brandOperations;
+        private readonly IGameActionQueries _gameActionQueries;
+        private readonly IGameProviderCurrencyCodeMapper _gameProviderCurrencyCodeMapper;
+        private readonly IGameProviderOperations _gameProviderOperations;
+        private readonly IPlayerOperations _playerOperations;
+        private readonly ISettingOperations _settingOperations;
+        private readonly ITokenProvider _tokenProvider;
 
         public SkywindService(
             IGameProviderOperations gameProviderOperations,
@@ -50,22 +57,28 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             IGameProviderCurrencyCodeMapper gameProviderCurrencyCodeMapper,
             IBrandOperations brandOperations)
         {
-            _gameProviderOperations = gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+            _gameProviderOperations =
+                gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
             _tokenProvider = tokenProvider ?? throw new ArgumentNullException(nameof(tokenProvider));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
             _gameActionQueries = gameActionQueries ?? throw new ArgumentNullException(nameof(gameActionQueries));
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
-            _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ?? throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
+
+            _gameProviderCurrencyCodeMapper = gameProviderCurrencyCodeMapper ??
+                throw new ArgumentNullException(nameof(gameProviderCurrencyCodeMapper));
             _brandOperations = brandOperations ?? throw new ArgumentNullException(nameof(brandOperations));
         }
 
-        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(Guid gameProviderId, string playerCode, string externalTransactionId)
-            => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId).ConfigureAwait(false);
+        public async ValueTask<GameActionExternalIds> GetGameActionExternalIdAsync(
+            Guid gameProviderId, string playerCode, string externalTransactionId)
+            => await _gameActionQueries.GetGameActionExternalIdAsync(gameProviderId, playerCode, externalTransactionId)
+                .ConfigureAwait(false);
 
-        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
+        public async ValueTask<GameProviderConfigurationData> GetGameProviderConfigurationDataAsync(
+            Guid gameProviderId, Guid gameProviderConfigurationId, PlatformType platformType)
         {
             var autoCloseRound = await _gameProviderOperations.GetAutoCloseRoundAsync(gameProviderId)
-                 .ConfigureAwait(false);
+                .ConfigureAwait(false);
 
             return new()
             {
@@ -84,44 +97,43 @@ namespace TGS.Apis.TgsApi.GameProviders.Skywind.Services
             }
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
+
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
         }
 
-        public async ValueTask<Guid> GetGameProviderIdAsync()
-        {
-            return await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind).ConfigureAwait(false);
-        }
+        public async ValueTask<Guid> GetGameProviderIdAsync() => await _gameProviderOperations
+            .GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind).ConfigureAwait(false);
 
         public async ValueTask<SkywindConfiguration> GetConfigurationAsync()
-            => await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts.GameProviderConfigurations.Skywind);
+            => await _settingOperations.GetValueFromJsonByKeyAsync<SkywindConfiguration>(SettingConsts
+                .GameProviderConfigurations.Skywind);
 
         public async ValueTask<Guid> GetGameProviderIdByCodeAsync()
-                    => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind);
+            => await _gameProviderOperations.GetGameProviderIdByCodeAsync(Consts.GameProvider.Skywind);
 
         public async ValueTask<string> GetGameProviderCurrencyCodeAsync(Guid gameProviderId, string currencyCode)
-            => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId).ConfigureAwait(false);
+            => await _gameProviderCurrencyCodeMapper.InternalToExternalAsync(currencyCode, gameProviderId)
+                .ConfigureAwait(false);
 
         public async ValueTask<Guid> GetBrandIdByPlayerCodeAsync(string playerCode)
             => await _playerOperations.GetBrandIdByPlayerCodeAsync(playerCode);
 
-        public async ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(Guid brandId, Guid gameProviderId)
+        public async ValueTask<CachedBrandGameProviderConfiguration> GetBrandGameProviderConfigurationAsync(
+            Guid brandId, Guid gameProviderId)
             => await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
 
         public string GetExternalRoundId(string roundId, long eventId) => $"{roundId}_{eventId}";
 
         public string GetExternalTransactionId(string trxId, long eventId, string action)
         {
-
             var externalTransaction = $"{trxId}_{eventId}";
+
             if (string.IsNullOrEmpty(action))
             {
                 return externalTransaction;
             }
-            else
-            {
-                return $"{externalTransaction}_{action}";
-            }
 
+            return $"{externalTransaction}_{action}";
         }
 
         public bool IsTest(string playerCode)

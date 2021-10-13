@@ -9,7 +9,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TechTalk.SpecFlow;
-using Tgs.Logging;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
 using TGS.Core.DataServices.Tgs;
@@ -17,14 +16,14 @@ using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Tokens;
+using Tgs.Logging;
 using TGS.Services.Operations;
 using TGS.Services.Operations.CodeMappers;
 using TGS.Services.Operations.Extensions;
@@ -87,7 +86,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     .ProcessAllSubjects();
             });
 
-            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
+            services.AddSingleton(new Mock<ITgsLog>().Object);
 
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
@@ -112,7 +111,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandWithLoginVia(string username, string brandCode,
+        public Task GivenPlayerOfBrandWithLoginVia(
+            string username, string brandCode,
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
@@ -124,6 +124,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public Task GivenPlayerLogoutAsync()
         {
             var playerCode = Get<string>(SR.PlayerCode);
+
             return DeauthorizePlayerAsync(_serviceProvider, playerCode);
         }
 
@@ -153,7 +154,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.AuthorizePlayerAsync(request).ConfigureAwait(false);
@@ -178,7 +183,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.GetBalanceAsync(request).ConfigureAwait(false);
@@ -195,6 +204,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         public async Task WhenIPlaceBetWithJackpotOfForGame(decimal amount, string externalGameId, Table table)
         {
             var row = table.Rows[0];
+
             var jackpotContribution =
                 new JackpotContribution(row["JackpotId"], decimal.Parse(row["ContributionAmount"]));
             await PlaceBetAsync(amount, externalGameId, jackpotContribution: jackpotContribution);
@@ -208,7 +218,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"I finish all bonus of (.*) rounds and get total win \$(.*) for game ""(.*)""")]
-        public async Task GivenIFinishAllBonusOfRoundsAndGetTotalWin(int roundCount, decimal totalAmount,
+        public async Task GivenIFinishAllBonusOfRoundsAndGetTotalWin(
+            int roundCount, decimal totalAmount,
             string externalGameId)
         {
             var bonusCode = Get<string>(SR.BonusCode);
@@ -271,7 +282,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.ResultAsync(request).ConfigureAwait(false);
@@ -305,7 +320,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.EndRoundAsync(request).ConfigureAwait(false);
@@ -341,7 +360,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.RefundAsync(request).ConfigureAwait(false);
@@ -377,7 +400,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.WinJackpotAsync(request).ConfigureAwait(false);
@@ -419,7 +446,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.WinBonusAsync(request).ConfigureAwait(false);
@@ -453,7 +484,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.WinPromoAsync(request).ConfigureAwait(false);
@@ -470,10 +505,12 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var wallet = await GetPlayerWalletAsync(_serviceProvider);
 
             var gameProviderOperations = _serviceProvider.GetRequiredService<IGameProviderOperations>();
+
             var gameProviderId = await gameProviderOperations.GetGameProviderIdByCodeAsync(GameProviderCode)
                 .ConfigureAwait(false);
 
             var mapper = _serviceProvider.GetRequiredService<IGameProviderCurrencyCodeMapper>();
+
             var gameProviderCurrency = await mapper.InternalToExternalAsync(wallet.CurrencyCode, gameProviderId)
                 .ConfigureAwait(false);
 
@@ -571,6 +608,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalTransactionId = Get<string>(SR.ExternalTransactionId);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
@@ -592,6 +630,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var ga = Get<GameAction>(SR.GameAction);
 
             var json = _serviceProvider.GetRequiredService<IJsonSerializationProvider>();
+
             var contrib =
                 json.DeserializeFromString<Core.Models.Services.Games.JackpotContribution>(ga.JackpotContribution);
 
@@ -607,6 +646,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var ga = Get<GameAction>(SR.GameAction);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var roundDetail = await (
                 from detail in db.RoundDetails.AsQueryable()
                 where detail.RoundId == ga.RoundId
@@ -628,6 +668,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             PragmaticPlayConsts.CampaignTypeMap.TryGetValue(type, out var campaignType);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var roundDetail = await (
                 from detail in db.RoundDetails.AsQueryable()
                 where detail.RoundId == ga.RoundId
@@ -695,20 +736,23 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         private string ComputeHash<T>(T model, string secretKey) where T : HashRequest
         {
             var provider = _serviceProvider.GetRequiredService<IPragmaticPlayHashProvider>();
+
             return provider.ComputeHash(model, secretKey);
         }
 
-        private Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
+        private async Task<string> GetEncryptedTokenAsync(string playerCode, PlatformType platform)
         {
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
             var tokenData = Get<PlayerTokenData>(key);
             var loginRecordId = tokenData?.LoginRecordId ?? Guid.Empty;
 
             var tokenProvider = _serviceProvider.GetRequiredService<ITokenProvider>();
-            return tokenProvider.EncryptAsync(loginRecordId);
+
+            return await tokenProvider.EncryptAsync(loginRecordId).ConfigureAwait(false);
         }
 
-        private async ValueTask PlaceBetAsync(decimal amount, string externalGameId, string bonusCode = null,
+        private async ValueTask PlaceBetAsync(
+            decimal amount, string externalGameId, string bonusCode = null,
             JackpotContribution jackpotContribution = null)
         {
             var configuration = await GetConfigurationAsync();
@@ -737,7 +781,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.PlaceBetAsync(request).ConfigureAwait(false);
@@ -782,7 +830,11 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             };
 
             var hash = ComputeHash(model, configuration.SecretKey);
-            var request = model with {Hash = hash};
+
+            var request = model with
+            {
+                Hash = hash
+            };
 
             var client = _serviceProvider.GetRequiredService<IPragmaticPlayApiClient>();
             var response = await client.ResultAsync(request).ConfigureAwait(false);

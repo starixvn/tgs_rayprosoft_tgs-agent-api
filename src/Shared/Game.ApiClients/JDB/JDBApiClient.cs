@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
@@ -52,17 +52,22 @@ namespace TGS.Shared.Game.ApiClients.JDB
         ValueTask<BetHistoryResponse> IJDBApiClient.GetBetHistoryUrlAsync(BetHistoryRequest request)
         {
             var prefix = $"{Consts.GameProvider.JDB}.BetHistory";
+
             return ExecuteRequestAsync<BetHistoryRequest, BetHistoryResponse>(request, prefix);
         }
 
         private async ValueTask<TResponse> ExecuteRequestAsync<TRequest, TResponse>(TRequest data, string logPrefix)
         {
             var jsonString = Json.SerializeToString(data);
+
             var configuration =
                 await _settingOperations.GetValueFromJsonByKeyAsync<JDBConfiguration>(SettingConsts
                     .GameProviderConfigurations.JDB);
+
             var encryptedString =
-                await _cryptoProvider.EncryptStringAsync(jsonString, configuration.AESIv, configuration.AESKey,
+                await _cryptoProvider.EncryptStringAsync(jsonString,
+                    configuration.AESIv,
+                    configuration.AESKey,
                     encoding: Encoding.UTF8);
 
             var parameters = new Dictionary<string, string>
@@ -71,7 +76,9 @@ namespace TGS.Shared.Game.ApiClients.JDB
                 ["x"] = encryptedString
             };
 
-            return await ExecuteFormRequestAsync<TResponse>(configuration.ApiUrl, "apiRequest.do", parameters,
+            return await ExecuteFormRequestAsync<TResponse>(configuration.ApiUrl,
+                "apiRequest.do",
+                parameters,
                 logPrefix: logPrefix);
         }
 

@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations.Queries;
 using TGS.ServiceUtility;
-using TGS.Services.Operator.Services.Withdraw;
 
 namespace TGS.Services.Operator.Services.Withdraw
 {
@@ -19,7 +18,8 @@ namespace TGS.Services.Operator.Services.Withdraw
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         }
 
-        public async ValueTask ExecuteAsync(CheckWithdrawPayPasswordCommand command, CancellationToken cancellationToken = default)
+        public async ValueTask ExecuteAsync(
+            CheckWithdrawPayPasswordCommand command, CancellationToken cancellationToken = default)
         {
             var (paySalt, payPassword) = await _playerQueries
                 .GetPaySaltAndPasswordByPlayerCodeAsync(command.PlayerCode)

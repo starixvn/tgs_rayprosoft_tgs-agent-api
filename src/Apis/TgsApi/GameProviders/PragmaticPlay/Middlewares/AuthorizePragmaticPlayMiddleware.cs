@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Attributes;
 using TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -48,12 +48,14 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
                     .PragmaticPlay);
 
             var providerId = form.GetValue<string>(PragmaticPlayConsts.Parameters.ProviderId);
+
             if (configuration.ProviderId.IgnoreCaseNotEquals(providerId))
             {
                 throw new InvalidCredentialsException("Invalid providerId");
             }
 
             var bypassHashVerify = form.GetValue<bool>(PragmaticPlayConsts.Parameters.BypassHashVerify);
+
             if (!bypassHashVerify)
             {
                 var hash = form.GetValue<string>(PragmaticPlayConsts.Parameters.Hash);
@@ -105,6 +107,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Middlewares
             }
 
             var loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);
+
             return await _playerOperations.GetPlayerLoginRecordAsync(loginRecordId);
         }
     }

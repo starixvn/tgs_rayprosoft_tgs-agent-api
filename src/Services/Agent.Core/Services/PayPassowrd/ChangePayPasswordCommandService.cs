@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Agent.Exceptions;
 using TGS.Services.Agent.ValidateCode;
 using TGS.ServiceUtility;
@@ -21,11 +21,13 @@ namespace TGS.Services.Agent.Services.PayPassowrd
         {
             _agentRepository = agentRepository ?? throw new ArgumentNullException(nameof(agentRepository));
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
+
             _validateCodeOperator =
                 validateCodeOperator ?? throw new ArgumentNullException(nameof(validateCodeOperator));
         }
 
-        public async ValueTask ExecuteAsync(ChangePayPasswordCommand command,
+        public async ValueTask ExecuteAsync(
+            ChangePayPasswordCommand command,
             CancellationToken cancellationToken = default)
         {
             var agent = await _agentRepository
@@ -42,6 +44,7 @@ namespace TGS.Services.Agent.Services.PayPassowrd
             var updatedOn = DateTimeOffset.UtcNow;
 
             var (newSalt, newPassword) = _passwordHandler.GenerateCredential(command.NewPassword);
+
             await _agentRepository
                 .SetPayPasswordAsync(command.AgentId, newPassword, newSalt, updatedOn)
                 .ConfigureAwait(false);

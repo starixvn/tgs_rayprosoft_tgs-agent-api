@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;

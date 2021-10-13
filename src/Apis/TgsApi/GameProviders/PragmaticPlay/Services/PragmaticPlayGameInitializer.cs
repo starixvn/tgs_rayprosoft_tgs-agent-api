@@ -2,7 +2,7 @@
 using System.Web;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -47,7 +47,9 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
 
             var brandId = player.BrandId;
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
-            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId,
+
+            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId,
+                brandId,
                 request.Language);
 
             var gpc = await _gameProviderOperations.GetCachedGameProviderConfigurationAsync(gameProviderId,
@@ -69,6 +71,7 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 .Replace("{PLATFORM}", isMobile ? "MOBILE" : "WEB");
 
             var extendedData = request.ExtendedData;
+
             if (extendedData != null && extendedData.RootElement.TryGetProperty("lobbyurl", out var prop))
             {
                 var lobbyUrl = prop.GetString();
@@ -81,7 +84,10 @@ namespace TGS.Apis.TgsApi.GameProviders.PragmaticPlay.Services
                 .Replace("{KEY}", HttpUtility.UrlEncode(queryString))
                 .Replace("{SECURELOGIN}", configuration.SecureLogin);
 
-            return new() {Url = url};
+            return new()
+            {
+                Url = url
+            };
         }
     }
 }

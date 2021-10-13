@@ -14,7 +14,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services;
@@ -106,10 +106,17 @@ namespace TGS.Apis.BackendOffice.Controllers
         private void SetCsrfToken()
         {
             var tokens = _antiForgery.GetAndStoreTokens(HttpContext);
+
             HttpContext.Response.Cookies.Append(
                 Consts.BackendOffice.CsrfTokenName,
                 tokens.RequestToken ?? string.Empty,
-                new() {HttpOnly = false, Path = "/", IsEssential = true, SameSite = SameSiteMode.Lax}
+                new()
+                {
+                    HttpOnly = false,
+                    Path = "/",
+                    IsEssential = true,
+                    SameSite = SameSiteMode.Lax
+                }
             );
         }
 
@@ -130,10 +137,12 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var authProperties = new AuthenticationProperties
             {
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1), IsPersistent = true
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
+                IsPersistent = true
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
             return HttpContext.SignInAsync(new(claimsIdentity), authProperties);
         }
     }

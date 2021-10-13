@@ -14,7 +14,6 @@ using TGS.Core.Infrastructures.HealthChecks;
 using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Infrastructures.Transactions;
 using TGS.Core.Infrastructures.WebApiServices;
 using TGS.Core.Models;
@@ -73,16 +72,18 @@ namespace TGS.Apis.ReportApi
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new()
-                {
-                    Title = "TGS Report API",
-                    Version = "v1"
-                });
+                c.SwaggerDoc("v1",
+                    new()
+                    {
+                        Title = "TGS Report API",
+                        Version = "v1"
+                    });
 
                 c.CustomSchemaIds(type => type.FullName.Replace('.', '_'));
 
                 var xml = "TGS.Apis.ReportApi.xml";
                 var path = Path.Combine(AppContext.BaseDirectory, xml);
+
                 if (File.Exists(path))
                 {
                     c.IncludeXmlComments(path);
@@ -119,12 +120,14 @@ namespace TGS.Apis.ReportApi
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHealthChecks("/health", new()
-                {
-                    ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
-                    ResponseWriter = (httpContext, result) =>
-                        HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
-                });
+
+                endpoints.MapHealthChecks("/health",
+                    new()
+                    {
+                        ResultStatusCodes = Consts.HealthCheckResultStatusCodes,
+                        ResponseWriter = (httpContext, result) =>
+                            HealthCheckResponseWriter.CreateResponseAsync(httpContext, result, env)
+                    });
 
                 endpoints.MapMetrics();
             });
