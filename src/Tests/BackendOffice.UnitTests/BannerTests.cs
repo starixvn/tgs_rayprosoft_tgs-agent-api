@@ -42,7 +42,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
 
-            var paging = new Paging.Paging<BannerInfo>
+            var paging = new Paging<BannerInfo>
             {
                 RowCount = 10,
                 Page = 0
@@ -57,7 +57,8 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             moqBackOfficeRepository
                 .Setup(fake => fake.QueryRejectedBannersAsync(It.Is<Guid>(x => x == query.BrandId)))
-                .Returns(new[] {
+                .Returns(new[]
+                {
                     new BannerInfo(
                         Guid.NewGuid(),
                         query.BrandId,
@@ -138,7 +139,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
 
-            var paging = new Paging.Paging<BannerInfo>
+            var paging = new Paging<BannerInfo>
             {
                 RowCount = 10,
                 Page = 0
@@ -169,7 +170,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
 
-            var paging = new Paging.Paging<BannerInfo>
+            var paging = new Paging<BannerInfo>
             {
                 RowCount = 10,
                 Page = 0
@@ -200,7 +201,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
 
-            var paging = new Paging.Paging<BannerInfo>
+            var paging = new Paging<BannerInfo>
             {
                 RowCount = 10,
                 Page = 0
@@ -231,7 +232,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
 
             var sut = new GetBannersQueryService(moqBackOfficeRepository.Object);
 
-            var paging = new Paging.Paging<BannerInfo>
+            var paging = new Paging<BannerInfo>
             {
                 RowCount = 10,
                 Page = 0
@@ -325,6 +326,28 @@ namespace TGS.Tests.BackendOffice.UnitTests
                 fake => fake.UpdateBannerAsync(
                     It.Is<Guid>(x => x == command.BannerId),
                     It.IsAny<BannerModifyInfo>(),
+                    It.Is<string>(x => x == command.Modifier)),
+                Times.Exactly(1));
+        }
+
+        [Test]
+        public async Task Can_Archive_banner()
+        {
+            var moqBackOfficeRepository = new Mock<IBackOfficeRepository>();
+
+            var sut = new ChangeBannerStatusCommandService(moqBackOfficeRepository.Object);
+
+            var command = new ChangeBannerStatusCommand(
+                Guid.NewGuid(),
+                4000,
+                "User1");
+
+            await sut.ExecuteAsync(command);
+
+            moqBackOfficeRepository.Verify(
+                fake => fake.ChangeStatusAsync(
+                    It.Is<Guid>(x => x == command.BannerId),
+                    It.IsAny<int>(),
                     It.Is<string>(x => x == command.Modifier)),
                 Times.Exactly(1));
         }
