@@ -154,8 +154,6 @@ namespace TGS.Apis.BackendOffice.Controllers
         }
 
 
-        [AllowAnonymous]
-        [IgnoreAntiforgeryToken]
         [HttpGet("exportDeposit/{brandId}")]
         public async Task<IActionResult> ExportDepositAsync(
             [FromServices] IGetService<ExportDepositForm, MemoryStream> queryService,

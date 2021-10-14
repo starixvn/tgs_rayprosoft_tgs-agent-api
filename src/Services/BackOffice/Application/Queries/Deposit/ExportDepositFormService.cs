@@ -54,14 +54,14 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                 Username = x.UserName,
                 Id = x.Id.ToString(),
                 ThirdPartyOrderNo = x.ThirdPartyOrderNo,
-                PaymentMethod = resource.GetString(resultPaymentMethods[x.Id].Name),
+                PaymentMethod = resource.GetString(resultPaymentMethods[x.PaymentMethodId].Name),
                 PaymentName = x.ChannelName,
                 Amount = x.Amount,
                 ApplicationTime = x.CreatedOn,
                 UpdateTime = x.UpdatedOn,
                 Status = resource.GetString(x.Status.ToString()) ?? x.Status.ToString(),
                 Remark = x.Remark
-            });
+            }).ToArray();
 
             var xlsx = exportData.ExportDepositLocalization("Deposit", result.Sum, resource);
 
