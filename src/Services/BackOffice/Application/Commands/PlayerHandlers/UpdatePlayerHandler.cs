@@ -50,7 +50,7 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.UpdateTypeNotFound);
             }
 
-            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode);
+            var player = await _service.GetPlayerAsync(p => p.PlayerCode == request.PlayerCode).ConfigureAwait(false);
 
             if (player == null)
             {
@@ -86,7 +86,9 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
                 return CreateInvalidResponse<MessageResponse>(Player.PhoneRequired);
             }
 
-            await _service.UpdatePlayerAsync(player, request);
+            await _service.UpdatePlayerAsync(player, request).ConfigureAwait(false);
+
+            _logger.LogInformation($" request.Type->{request.Type}||player.Status->{player.Status } || request.Status->{request.Status}");
             if (player.Status != request.Status)
             {
                 if (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist)
