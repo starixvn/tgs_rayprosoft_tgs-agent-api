@@ -88,13 +88,10 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             await _service.UpdatePlayerAsync(player, request);
 
-            if (player.Status != request.Status)
+            if (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist)
             {
-                if (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist)
-                {
-                    _logger.LogInformation("call KickPlayerAsync");
-                    await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
-                }
+                _logger.LogInformation("call KickPlayerAsync");
+                await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
             }
 
             return CreateValidResponse<MessageResponse>();
