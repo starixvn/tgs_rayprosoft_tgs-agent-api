@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Moq;
 using NUnit.Framework;
-using Tgs.Payment.Clients;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Models.Messages;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.Withdraw;
 using TGS.Services.BackOffice.Application.Queries.Withdraw;
 using TGS.Services.BackOffice.Domain;
@@ -54,6 +54,7 @@ namespace TGS.Tests.BackendOffice.UnitTests
             var formId = Guid.NewGuid();
             var brandPaymentId = Guid.NewGuid();
             var brandId = Guid.NewGuid();
+
             var command = new ReviewWithdrawFormCommand(
                 brandId,
                 formId,
@@ -204,7 +205,9 @@ namespace TGS.Tests.BackendOffice.UnitTests
                     It.Is<string>(x => x == playerCode),
                     It.Is<TransactionTypes>(x => x == transactionType),
                     It.Is<decimal>(x => x == amount),
-                    It.IsAny<string>()),
+                    It.IsAny<string>(),
+                    It.IsAny<string>(),
+                    It.IsAny<Guid?>()),
                 Times.Exactly(1));
         }
     }
