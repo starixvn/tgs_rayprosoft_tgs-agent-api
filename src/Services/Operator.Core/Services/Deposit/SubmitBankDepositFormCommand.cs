@@ -4,6 +4,7 @@ using System.IO;
 namespace TGS.Services.Operator.Services.Deposit
 {
     public record SubmitBankDepositFormCommand(
+        Guid BrandId,
         string PlayerCode,
         Guid FormId,
         string ContentType,
