@@ -61,7 +61,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                 UpdateTime = x.UpdatedOn,
                 Status = resource.GetString(x.Status.ToString()) ?? x.Status.ToString(),
                 Remark = x.Remark
-            }).ToArray();
+            });
 
             var xlsx = exportData.ExportDepositLocalization("Deposit", result.Sum, resource);
 
