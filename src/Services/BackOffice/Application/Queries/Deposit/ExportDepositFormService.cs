@@ -40,7 +40,7 @@ namespace TGS.Services.BackOffice.Application.Queries.Deposit
                      IsDesc = query.Paging.IsDesc,
                      Page = query.Paging.Page,
                      Rows = query.Paging.Rows,
-                     ShowAll = query.Paging.ShowAll,
+                     ShowAll = true,
                      SortBy = query.Paging.SortBy
                  });
 
