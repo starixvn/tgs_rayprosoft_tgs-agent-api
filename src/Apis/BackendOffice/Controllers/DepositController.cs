@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
@@ -72,8 +74,8 @@ namespace TGS.Apis.BackendOffice.Controllers
         /// <param name="paging">The paging.</param>
         /// <returns></returns>
         [HttpGet("{brandId}")]
-        public async Task<PagedResponse<DepositFormViewModel>> QueryDepositFormsAsync(
-            [FromServices] IGetService<DepositFormQuery, PagingResponse<DepositFormInfo>> queryService,
+        public async Task<DepositViewModel> QueryDepositFormsAsync(
+            [FromServices] IGetService<DepositFormQuery, DepositForms> queryService,
             Guid brandId,
             [FromQuery] DepositFormRequest request,
             [FromQuery] PageableRequest paging)
@@ -101,28 +103,30 @@ namespace TGS.Apis.BackendOffice.Controllers
 
             var result = await queryService.GetAsync(query).ConfigureAwait(false);
 
-            var response = new PagedResponse<DepositFormViewModel>
+            var response = new DepositViewModel()
             {
+
                 Valid = true,
                 TotalCount = result.TotalCount,
                 Items = result.Items
-                    .Select(form => new DepositFormViewModel
-                    {
-                        Id = form.Id,
-                        PlayerCode = form.PlayerCode,
-                        UserName = form.UserName,
-                        BrandId = form.BrandId,
-                        BrandPaymentId = form.BrandPaymentId,
-                        PaymentMethodId = form.PaymentMethodId,
-                        ChannelName = form.ChannelName,
-                        Status = form.Status.ToFlowState(),
-                        Amount = form.Amount,
-                        Remark = form.Remark,
-                        CreatedOn = form.CreatedOn,
-                        UpdatedOn = form.UpdatedOn,
-                        ThirdPartyOrderNo = form.ThirdPartyOrderNo
-                    })
-                    .ToArray()
+                .Select(form => new DepositFormViewModel
+                {
+                    Id = form.Id,
+                    PlayerCode = form.PlayerCode,
+                    UserName = form.UserName,
+                    BrandId = form.BrandId,
+                    BrandPaymentId = form.BrandPaymentId,
+                    PaymentMethodId = form.PaymentMethodId,
+                    ChannelName = form.ChannelName,
+                    Status = form.Status.ToFlowState(),
+                    Amount = form.Amount,
+                    Remark = form.Remark,
+                    CreatedOn = form.CreatedOn,
+                    UpdatedOn = form.UpdatedOn,
+                    ThirdPartyOrderNo = form.ThirdPartyOrderNo
+                })
+                .ToArray(),
+                Sum = result.Sum
             };
 
             return response;
@@ -151,6 +155,38 @@ namespace TGS.Apis.BackendOffice.Controllers
                 .ConfigureAwait(false);
 
             return CreateValidResponse<MessageResponse>();
+        }
+
+
+        [HttpGet("exportDeposit/{brandId}")]
+        public async Task<IActionResult> ExportDepositAsync(
+            [FromServices] IGetService<ExportDepositForm, MemoryStream> queryService,
+             Guid brandId,
+            [FromQuery] DepositFormRequest request,
+            [FromQuery] PageableRequest paging)
+        {
+            var createOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+            var updateOnRange = ((DateTimeOffset Begin, DateTimeOffset End)?)null;
+
+            if (request.BeginCreateOn != null && request.EndCreateOn != null)
+                createOnRange = (request.BeginCreateOn.Value, request.EndCreateOn.Value);
+
+            if (request.BeginUpdateOn != null && request.EndUpdateOn != null)
+                updateOnRange = (request.BeginUpdateOn.Value, request.EndUpdateOn.Value);
+
+            var query = new ExportDepositForm(
+                brandId,
+                request.UserName,
+                request.ChannelName,
+                request.ThirdPartyOrderNo,
+                request.FormId,
+                request.PaymentMethodId,
+                request.Status.ToPaymentFlowState(),
+                createOnRange,
+                updateOnRange,
+                paging);
+
+            return File(await queryService.GetAsync(query).ConfigureAwait(false), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Deposit.xlsx");
         }
     }
 }

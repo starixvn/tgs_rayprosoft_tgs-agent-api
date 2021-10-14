@@ -1,12 +1,11 @@
 ﻿using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -57,12 +56,14 @@ namespace TGS.Services.Operator.Services.Player
             await _statusValidator.ThrowIfBrandStatusIsNotOneOfAsync(query.BrandId, ValidStatus.Default);
 
             var playerCode = await _playerOperations.GetPlayerCodeByUsernameAsync(query.BrandId, query.UserName);
+
             if (playerCode.IsNullOrEmpty())
             {
                 throw new PlayerNotFoundException("");
             }
 
             var (salt, password) = await _playerQueries.GetSaltAndPasswordByPlayerCodeAsync(playerCode);
+
             if (!_passwordHandler.Verify(password, salt, query.Password))
             {
                 throw new InvalidCredentialsException("");
@@ -86,7 +87,7 @@ namespace TGS.Services.Operator.Services.Player
 
             var token = await GeneratePlayerJwtTokenAsync(
                 query.BrandId,
-                new PlayerTokenData()
+                new PlayerTokenData
                 {
                     PlayerCode = playerCode,
                     LoginRecordId = record.Id,
@@ -97,20 +98,22 @@ namespace TGS.Services.Operator.Services.Player
 
             await _playerRepository.PlayerLoginIpAsync(playerCode, query.IpAddress);
 
-            return new LoginInfo()
+            return new LoginInfo
             {
                 PlayerToken = token,
                 LoginTime = createdOn.ToUnixTimeMilliseconds()
             };
         }
 
-        private async Task<string> GeneratePlayerJwtTokenAsync(Guid brandId, PlayerTokenData playerTokenData, string site)
+        private async Task<string> GeneratePlayerJwtTokenAsync(
+            Guid brandId, PlayerTokenData playerTokenData, string site)
         {
             var data = await _tokenProvider.EncryptAsync(playerTokenData);
 
             var jti = Guid.NewGuid().ToString();
+
             var identity = new ClaimsIdentity(
-                new Claim[]
+                new[]
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, data),
                     new Claim(JwtRegisteredClaimNames.Jti, jti)

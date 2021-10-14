@@ -21,6 +21,12 @@ namespace TGS.Core.DataServices.Tgs.EntityTypeConfigurations
             builder.Property(c => c.BrandId)
                 .IsRequired();
 
+            builder.Property(c => c.ReviewedUserId);
+
+            builder.Property(c => c.ReviewedUserName);
+
+            builder.Property(c => c.ReviewedOn);
+
             builder.Property(c => c.Amount)
                 .HasPrecision(18, 6)
                 .IsRequired();

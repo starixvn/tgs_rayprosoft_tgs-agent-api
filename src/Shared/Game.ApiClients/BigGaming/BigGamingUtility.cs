@@ -1,25 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
+﻿using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 
 namespace TGS.Shared.Game.ApiClients.BigGaming
 {
     public static class BigGamingUtility
     {
-        private static readonly IHashProvider _hashProvider;
+        private static readonly IHashProvider _HashProvider;
 
         static BigGamingUtility()
         {
-            _hashProvider = new HashProvider();
+            _HashProvider = new HashProvider();
         }
 
         public static string GetSecretCode(string agentLoginIdPassword)
-        {
-            return _hashProvider.Hash(agentLoginIdPassword, HashAlgorithmKind.Sha1, HashStringKind.Base64);
-        }
+            => _HashProvider.Hash(agentLoginIdPassword, HashAlgorithmKind.Sha1, HashStringKind.Base64);
     }
 }

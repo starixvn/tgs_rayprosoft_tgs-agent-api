@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
@@ -46,7 +46,9 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
             var brandId = player.BrandId;
             var platform = request.Token.PlatformType;
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
-            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId, brandId,
+
+            var cultureCode = await _brandGameProviderOperations.MapCultureAsync(gameProviderId,
+                brandId,
                 request.Language);
 
             var gpc = await _gameProviderOperations.GetCachedGameProviderConfigurationAsync(gameProviderId,
@@ -59,13 +61,17 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Services
                     .GameProviderConfigurations.Habanero);
 
             var domain = platform == PlatformType.Mobile ? gpc.MobileEndpoint : gpc.DesktopEndpoint;
+
             var url = domain.AppendQueryString(game.EndpointPath)
                 .Replace("{BRANDID}", configuration.BrandId)
                 .Replace("{TOKEN}", encryptedToken)
                 .Replace("{CULTURE}", cultureCode)
                 .AppendQueryString($"keyname={game.ExternalId}");
 
-            return new() {Url = url};
+            return new()
+            {
+                Url = url
+            };
         }
     }
 }

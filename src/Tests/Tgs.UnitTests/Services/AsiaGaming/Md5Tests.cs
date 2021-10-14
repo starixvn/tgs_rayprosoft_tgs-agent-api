@@ -1,8 +1,8 @@
 ﻿using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 
 namespace TGS.UnitTests.Services.AsiaGaming
 {
@@ -15,13 +15,13 @@ namespace TGS.UnitTests.Services.AsiaGaming
         {
             _hashProvider = new HashProvider();
         }
-        
+
         [Test]
         public void Can_Encrypt()
         {
             var plainText = "aaa";
             var expectedResult = "47bce5c74f589f4867dbd57e9ca9f808";
-        
+
             var result = _hashProvider.Hash(plainText, HashAlgorithmKind.Md5, HashStringKind.Hex, Encoding.UTF8);
             result.Should().BeEquivalentTo(expectedResult);
         }

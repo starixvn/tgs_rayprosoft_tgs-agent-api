@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using TGS.Apis.AgentApi.Models;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
@@ -29,7 +29,8 @@ namespace TGS.Apis.AgentApi.Handlers.Auth
             _handler = handler;
         }
 
-        async Task<AuthResponse> IRequestHandler<AuthRequest, AuthResponse>.Handle(AuthRequest request,
+        async Task<AuthResponse> IRequestHandler<AuthRequest, AuthResponse>.Handle(
+            AuthRequest request,
             CancellationToken cancellationToken)
         {
             var brandId = await _brandOperations.GetBrandIdByApiKeyAsync(request.ApiKey);
@@ -48,10 +49,16 @@ namespace TGS.Apis.AgentApi.Handlers.Auth
             var signature = $"{brandId}:{currency}:{secretKey}";
             var expires = DateTime.Now.AddSeconds(Core.Models.Consts.TokenExpireSeconds.Jwt);
 
-            var token = _handler.GenerateToken(identity, Encoding.UTF8.GetBytes(signature),
-                Consts.Site, expires);
+            var token = _handler.GenerateToken(identity,
+                Encoding.UTF8.GetBytes(signature),
+                Consts.Site,
+                expires);
 
-            return new() {Token = token, ExpiredOn = new DateTimeOffset(expires).ToUnixTimeMilliseconds()};
+            return new()
+            {
+                Token = token,
+                ExpiredOn = new DateTimeOffset(expires).ToUnixTimeMilliseconds()
+            };
         }
     }
 }

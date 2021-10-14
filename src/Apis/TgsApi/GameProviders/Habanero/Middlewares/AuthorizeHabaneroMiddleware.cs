@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using TGS.Apis.TgsApi.GameProviders.Habanero.Exceptions;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Exceptions;
@@ -69,6 +69,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
 
             var ids = await _gameProviderOperations.GetGameProviderIdsByCredentialsAsync(clientId,
                 secretKey);
+
             if (ids == null || Consts.GameProvider.Habanero.NotEquals(ids.Code))
             {
                 throw new InvalidCredentialsException("invalid username and passkey");
@@ -122,6 +123,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             var gameProviderId = ids.Id;
             var gameProviderConfigurationId = ids.ConfigurationId;
             var bgpc = await _brandOperations.GetBrandGameProviderConfigurationAsync(brandId, gameProviderId);
+
             if (bgpc == null || bgpc.GameProviderConfigurationId != gameProviderConfigurationId)
             {
                 throw new InvalidCredentialsException("invalid username and passkey for brand configuration");
@@ -142,6 +144,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Habanero.Middlewares
             }
 
             Guid loginRecordId;
+
             try
             {
                 loginRecordId = await _tokenProvider.DecryptAsync<Guid>(token);

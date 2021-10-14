@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.WebUtilities;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
+using Tgs.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security.Enums;
 using TGS.Core.Models;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Services.Operations;
@@ -60,18 +60,28 @@ namespace TGS.Tests.ApiClients.GameProviders
                     .GameProviderConfigurations.JDB);
 
             var encryptedString = await _cryptoProvider.EncryptStringAsync(
-                jsonString, configuration.AESIv, configuration.AESKey, padding: PaddingMode.Zeros,
+                jsonString,
+                configuration.AESIv,
+                configuration.AESKey,
+                padding: PaddingMode.Zeros,
                 encoding: Encoding.UTF8);
 
             const string path = "api/jdb/entrance";
+
             return await ExecuteFormRequestAsync<BaseActionResponse>(
                 path,
-                new Dictionary<string, string> {{"x", ToUrlSafeAesEncryptedString(encryptedString)}});
+                new Dictionary<string, string>
+                {
+                    {
+                        "x", ToUrlSafeAesEncryptedString(encryptedString)
+                    }
+                });
         }
 
         private static string ToUrlSafeAesEncryptedString(string encryptedString)
         {
             var base64 = Convert.FromBase64String(encryptedString);
+
             return WebEncoders.Base64UrlEncode(base64);
         }
     }

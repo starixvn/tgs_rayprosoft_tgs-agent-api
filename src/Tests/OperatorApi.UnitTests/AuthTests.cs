@@ -4,7 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Services.Operations;
 using TGS.Services.Operations.Validators;
 using TGS.Services.Operator.Services.Auth;
@@ -47,6 +47,7 @@ namespace TGS.Tests.OperatorApi.UnitTests
 
             var brandId = Guid.NewGuid();
             var currency = "CNY";
+
             var identity = new ClaimsIdentity(
                 new[]
                 {

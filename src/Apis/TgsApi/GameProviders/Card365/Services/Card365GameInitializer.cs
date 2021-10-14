@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using TGS.Apis.TgsApi.Models.Interfaces;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Exceptions;
 using TGS.Core.Models.GameProviders.Settings;
@@ -42,8 +42,10 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         {
             _settingOperations = settingOperations ?? throw new ArgumentNullException(nameof(settingOperations));
             _playerOperations = playerOperations ?? throw new ArgumentNullException(nameof(playerOperations));
+
             _gameProviderOperations =
                 gameProviderOperations ?? throw new ArgumentNullException(nameof(gameProviderOperations));
+
             _brandGameProviderOperations = brandGameProviderOperations ??
                 throw new ArgumentNullException(nameof(brandGameProviderOperations));
             _currencyCodeMapper = currencyCodeMapper ?? throw new ArgumentNullException(nameof(currencyCodeMapper));
@@ -55,6 +57,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
         public async ValueTask<GetGameUrlResponse> GetGameUrlAsync(GetGameUrlRequest request)
         {
             var player = await _playerOperations.GetCachedPlayerAsync(request.Token.PlayerCode).ConfigureAwait(false);
+
             var gameProviderId = await _gameProviderOperations.GetGameProviderIdByCodeAsync(request.GameProviderCode)
                 .ConfigureAwait(false);
 
@@ -70,19 +73,32 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
                     $"No agent of '{player.BrandCode}' is found");
             }
 
-            var accessKey = await GetKeyAsync(configuration.ApiUrl, configuration.Cert, agent.AgentId,
-                configuration.Website, gameProviderId, player).ConfigureAwait(false);
+            var accessKey = await GetKeyAsync(configuration.ApiUrl,
+                configuration.Cert,
+                agent.AgentId,
+                configuration.Website,
+                gameProviderId,
+                player).ConfigureAwait(false);
 
             var language = await _brandGameProviderOperations
                 .MapCultureAsync(gameProviderId, player.BrandId, request.Language).ConfigureAwait(false);
 
-            var url = await GetGameUrlAsync(configuration.ApiUrl, configuration.Website, agent.AgentId, accessKey,
-                player, language, request.Token).ConfigureAwait(false);
+            var url = await GetGameUrlAsync(configuration.ApiUrl,
+                configuration.Website,
+                agent.AgentId,
+                accessKey,
+                player,
+                language,
+                request.Token).ConfigureAwait(false);
 
-            return new GetGameUrlResponse { Url = url };
+            return new GetGameUrlResponse
+            {
+                Url = url
+            };
         }
 
-        private async ValueTask<string> GetKeyAsync(Uri apiUrl, string cert, string agentId, string website,
+        private async ValueTask<string> GetKeyAsync(
+            Uri apiUrl, string cert, string agentId, string website,
             Guid gameProviderId, CachedPlayer player)
         {
             var currencyCode = await _currencyCodeMapper
@@ -106,10 +122,12 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
             }
 
             var status = (ServiceApiError)response.Status;
+
             throw new GameProviderApiErrorException($"status code: {response.Status}, message: {status}");
         }
 
-        private async ValueTask<string> GetGameUrlAsync(Uri apiUrl, string website, string agentId, string accessKey,
+        private async ValueTask<string> GetGameUrlAsync(
+            Uri apiUrl, string website, string agentId, string accessKey,
             CachedPlayer player, string language, PlayerTokenData token)
         {
             var encryptedToken = await _tokenProvider.EncryptAsync(token.LoginRecordId);
@@ -132,6 +150,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
             var collection = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
 
             var builder = new StringBuilder();
+
             foreach (var (key, value) in collection!)
             {
                 if (builder.Length > 0)
@@ -145,6 +164,7 @@ namespace TGS.Apis.TgsApi.GameProviders.Card365.Services
             }
 
             var queryString = builder.ToString();
+
             return $"{apiUrl.AbsoluteUri.TrimEnd('/')}/{website}/loginV2?{queryString}";
         }
     }

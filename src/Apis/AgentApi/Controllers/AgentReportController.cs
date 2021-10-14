@@ -36,19 +36,19 @@ namespace TGS.Apis.AgentApi.Controllers
         /// <param name="request"></param>
         /// <param name="pagingRequest"></param>
         /// <returns></returns>
-        [HttpGet("accountChanges")]
+        [HttpGet("accountchanges")]
         [Description("Get account changes")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<AgentAccountChangeModel>> GetAccountChangesAsync(
                    [FromQuery] GetAccountChangesRequest request,
-                   [FromQuery] PagingRequest pagingRequest)
+                   [FromQuery] PagingRequest pagingRequest,
+                   [FromQuery] Guid id)
         {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
             var brandId = HttpContext.Items.GetBrandId();
 
             var accountChangesRequest = new GetAgentAccountChangesRequest
             {
-                AgentId = agentTokenData.AgentId,
+                AgentId = id,
                 BrandId = brandId,
                 From = request.From,
                 To = request.To,
@@ -73,7 +73,7 @@ namespace TGS.Apis.AgentApi.Controllers
         /// Get account changes transaction types
         /// </summary>
         /// <returns></returns>
-        [HttpGet("accountChanges/TransactionTypes")]
+        [HttpGet("accountchanges/transactiontypes")]
         [Description("Get account changes transaction types")]
         public Task<Dictionary<int, string>> GetAccountChangesTransactionTypesAsync()
         {
@@ -199,17 +199,16 @@ namespace TGS.Apis.AgentApi.Controllers
         /// </summary>
         /// <param name="pagingRequest"></param>
         /// <returns></returns>
-        [HttpGet("teamInfo")]
+        [HttpGet("teaminfo")]
         [Description("Get team Information")]
         [AuthorizeAgentToken(AllowNullOrEmpty = false, NeedAuthorize = true)]
         public async Task<PagingResponse<TeamInfoModel>> GetTeamInformationAsync(
-            [FromQuery] PagingRequest pagingRequest)
+            [FromQuery] PagingRequest pagingRequest,
+            [FromQuery] Guid id)
         {
-            var agentTokenData = HttpContext.Items.GetAgentTokenData();
-
             var request = new GetAgentTeamInfoRequest
             {
-                AgentId = agentTokenData.AgentId,
+                AgentId = id,
                 Page = pagingRequest.Page,
                 Rows = pagingRequest.Rows,
                 OrderBy = pagingRequest.IsDesc ? SortOrder.Descending : SortOrder.Ascending,

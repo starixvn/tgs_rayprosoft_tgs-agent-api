@@ -15,7 +15,7 @@ using TGS.Apis.BackendOffice.Controllers.Messages.Users.Authentication;
 using TGS.Core.DataServices.Base.Interfaces;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 
 namespace TGS.Tests.BackendOffice.UnitTests.Controllers
 {
@@ -27,6 +27,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         public override void Setup()
         {
             base.Setup();
+
             _controller = new AuthenticateController(
                 _passwordHandlerMock.Object,
                 _antiForgeryMock.Object,
@@ -131,6 +132,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         {
             //SetupHttpContext();
             await _controller.LogoutAsync();
+
             _authenticationServiceMock.Verify(p =>
                 p.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<AuthenticationProperties>()));
         }
@@ -149,6 +151,7 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
                 .Returns(new Mock<ConnectionInfo>().Object);
 
             var httpResponse = new Mock<HttpResponse>();
+
             httpResponse.Setup(p => p.Cookies)
                 .Returns(new Mock<IResponseCookies>().Object);
 
@@ -159,28 +162,43 @@ namespace TGS.Tests.BackendOffice.UnitTests.Controllers
         private Mock<IServiceProvider> SetupServiceProviderMock()
         {
             _authenticationServiceMock
-                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(), It.IsAny<string>(), It.IsAny<ClaimsPrincipal>(),
+                .Setup(_ => _.SignInAsync(It.IsAny<HttpContext>(),
+                    It.IsAny<string>(),
+                    It.IsAny<ClaimsPrincipal>(),
                     It.IsAny<AuthenticationProperties>()))
                 .Returns(Task.FromResult(default(object)));
 
             _authenticationServiceMock
-                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(), It.IsAny<string>(),
+                .Setup(_ => _.SignOutAsync(It.IsAny<HttpContext>(),
+                    It.IsAny<string>(),
                     It.IsAny<AuthenticationProperties>()))
                 .Returns(Task.FromResult(default(object)));
 
             var serviceProviderMock = new Mock<IServiceProvider>();
+
             serviceProviderMock
                 .Setup(_ => _.GetService(typeof(IAuthenticationService)))
                 .Returns(_authenticationServiceMock.Object);
+
             return serviceProviderMock;
         }
 
         private Fixture CreateUserFixture()
         {
             var fixture = new Fixture();
+
             fixture.Customize<User>(u => u
-                .With(s => s.Role, new Role {Name = Generator.RandomString(5)})
-                .With(p => p.Department, new Department {Name = Generator.RandomString(5)}));
+                .With(s => s.Role,
+                    new Role
+                    {
+                        Name = Generator.RandomString(5)
+                    })
+                .With(p => p.Department,
+                    new Department
+                    {
+                        Name = Generator.RandomString(5)
+                    }));
+
             return fixture;
         }
     }

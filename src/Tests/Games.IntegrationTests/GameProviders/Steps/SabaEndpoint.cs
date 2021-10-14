@@ -8,19 +8,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TechTalk.SpecFlow;
-using Tgs.Logging;
 using TGS.Core.DataServices.Tgs;
 using TGS.Core.DataServices.Tgs.Extensions;
 using TGS.Core.Infrastructures.ApiClient;
 using TGS.Core.Infrastructures.Extensions;
-using TGS.Core.Infrastructures.Log;
 using TGS.Core.Infrastructures.Nats;
 using TGS.Core.Infrastructures.Redis;
-using TGS.Core.Infrastructures.Security;
 using TGS.Core.Models;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.GameProviders.Settings;
 using TGS.Core.Models.Tokens;
+using Tgs.Logging;
 using TGS.Services.Operations.Extensions;
 using TGS.Shared.Game.Models.Saba.Enums;
 using TGS.Shared.Game.Models.Saba.Incoming;
@@ -78,7 +76,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
                     .ProcessAllSubjects();
             });
 
-            services.AddSingleton<ITgsLog>(new Mock<ITgsLog>().Object);
+            services.AddSingleton(new Mock<ITgsLog>().Object);
 
             var isDev = configuration.GetValue<bool>("ApiUrls:IsDev");
 
@@ -103,7 +101,8 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         }
 
         [Given(@"player ""(.*)"" of brand ""(.*)"" with ""(.*)"" login via ""(.*)""")]
-        public Task GivenPlayerOfBrandWithLoginVia(string username, string brandCode,
+        public Task GivenPlayerOfBrandWithLoginVia(
+            string username, string brandCode,
             string currencyCode, PlatformType platformType) =>
             PlayerLoginAsync(_serviceProvider, username, platformType, brandCode, currencyCode);
 
@@ -145,6 +144,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var loginRecordId = GetLoginRecordId(playerCode, platform);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var gameProviderCurrencyCode = await db.GameProviderCurrencies
                 .AsQueryable()
                 .Where(c => c.GameProvider.Code == GameProviderCode && c.CurrencyCode == currencyCode)
@@ -221,6 +221,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
             var externalTransactionId = Get<string>(SR.ExternalTransactionId);
 
             var db = GetDb<ITgsRepository>(_serviceProvider);
+
             var ga = await (
                 from act in db.GameActions.AsQueryable()
                 join r in db.Rounds on act.RoundId equals r.Id
@@ -245,6 +246,7 @@ namespace TGS.Tests.Games.IntegrationTests.GameProviders.Steps
         {
             var key = $"{SR.PlayerTokenData}:{playerCode}:{platform}";
             var tokenData = Get<PlayerTokenData>(key);
+
             return tokenData?.LoginRecordId ?? Guid.Empty;
         }
 

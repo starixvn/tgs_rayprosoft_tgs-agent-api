@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using TGS.Core.Infrastructures.Security;
+using Tgs.Core.Infrastructures.Security;
 using TGS.ServiceUtility;
 
 namespace TGS.Services.Agent.Services.Agent
@@ -19,7 +19,8 @@ namespace TGS.Services.Agent.Services.Agent
             _passwordHandler = passwordHandler ?? throw new ArgumentNullException(nameof(passwordHandler));
         }
 
-        public async ValueTask<bool> GetAsync(ValidateAgentPasswordCommand query, CancellationToken cancellationToken = default)
+        public async ValueTask<bool> GetAsync(
+            ValidateAgentPasswordCommand query, CancellationToken cancellationToken = default)
         {
             var agent = await _agentRepository
                 .GetAgentByIdAsync(query.AgentId)

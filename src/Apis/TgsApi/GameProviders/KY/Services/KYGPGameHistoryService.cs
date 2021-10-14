@@ -6,15 +6,12 @@ using TGS.Apis.TgsApi.Commons.Services.GameProviderRecord;
 using TGS.Core.DataServices.Tgs.Models;
 using TGS.Core.Infrastructures.Extensions;
 using TGS.Core.Infrastructures.Json;
-using TGS.Core.Infrastructures.Security;
-using TGS.Core.Infrastructures.Security.Enums;
+using Tgs.Core.Infrastructures.Security;
 using TGS.Core.Models.Enums;
 using TGS.Core.Models.Services.Caches;
 using TGS.Services.GameOperations.Data;
 using TGS.Services.GameOperations.Models.Data;
 using TGS.Shared.Game.ApiClients.KY;
-using TGS.Shared.Game.ApiClients.MultiWallet.Defines;
-using TGS.Shared.Game.Models.KY.Commons;
 using TGS.Shared.Game.Models.KY.Incoming;
 using TGS.Shared.Game.Models.KY.Outgoing;
 
@@ -24,27 +21,33 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
     {
         ValueTask<KYGPGameRecordResponse> GameRecordAsync(KYGPGameRecordRequest source);
     }
+
     public class KYGPGameHistoryService : IKYGPGameHistoryService
     {
         private readonly IKYApiClient _client;
-        private readonly IKYService _service;
-        private readonly IJsonSerializationProvider _jsonSerializationProvider;
-        private readonly IGameRoundsProcessor _gameRoundsProcessor;
         private readonly IGameProviderRecordService _gameProviderRecordService;
+        private readonly IGameRoundsProcessor _gameRoundsProcessor;
         private readonly IHashProvider _hashProvider;
+        private readonly IJsonSerializationProvider _jsonSerializationProvider;
+        private readonly IKYService _service;
+
         public KYGPGameHistoryService(
-              IKYApiClient client,
-              IKYService service,
-              IJsonSerializationProvider jsonSerializationProvider,
-              IGameRoundsProcessor gameRoundsProcessor,
-              IGameProviderRecordService gameProviderRecordService,
-              IHashProvider hashProvider)
+            IKYApiClient client,
+            IKYService service,
+            IJsonSerializationProvider jsonSerializationProvider,
+            IGameRoundsProcessor gameRoundsProcessor,
+            IGameProviderRecordService gameProviderRecordService,
+            IHashProvider hashProvider)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _service = service ?? throw new ArgumentNullException(nameof(service));
-            _jsonSerializationProvider = jsonSerializationProvider ?? throw new ArgumentNullException(nameof(jsonSerializationProvider));
+
+            _jsonSerializationProvider = jsonSerializationProvider ??
+                throw new ArgumentNullException(nameof(jsonSerializationProvider));
             _gameRoundsProcessor = gameRoundsProcessor ?? throw new ArgumentNullException(nameof(gameRoundsProcessor));
-            _gameProviderRecordService = gameProviderRecordService ?? throw new ArgumentNullException(nameof(gameProviderRecordService));
+
+            _gameProviderRecordService = gameProviderRecordService ??
+                throw new ArgumentNullException(nameof(gameProviderRecordService));
             _hashProvider = hashProvider ?? throw new ArgumentNullException(nameof(hashProvider));
         }
 
@@ -53,11 +56,13 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             var configuration = await _service.GetConfigurationAsync().ConfigureAwait(false);
             var gameProviderId = await _service.GetGameProviderIdAsync().ConfigureAwait(false);
             var brandMerchant = await _service.GetBrandMerchant(source.BrandCode).ConfigureAwait(false);
-            var agentId = brandMerchant.AgentMappers.Where(x => x.CurrencyCode.IgnoreCaseEquals(source.CurrencyCode) && x.Status).FirstOrDefault()?.AgentId;
+
+            var agentId = brandMerchant.AgentMappers
+                .Where(x => x.CurrencyCode.IgnoreCaseEquals(source.CurrencyCode) && x.Status).FirstOrDefault()?.AgentId;
 
             if (string.IsNullOrEmpty(agentId))
             {
-                return new KYGPGameRecordResponse()
+                return new KYGPGameRecordResponse
                 {
                     Success = false
                 };
@@ -65,7 +70,7 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
 
             var dateTimeOffset = DateTimeOffset.UtcNow.AddHours(+8);
 
-            var data = new KYGameRecordRequest()
+            var data = new KYGameRecordRequest
             {
                 StartTime = source.StartTime.ToUnixTimeMilliseconds(),
                 EndTime = source.EndTime.ToUnixTimeMilliseconds()
@@ -79,15 +84,16 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
             var successCount = 0;
             var failCount = 0;
             var lastGameRecordTime = default(DateTimeOffset?);
+
             if (response.Data.Code == 0)
             {
                 var sysDateTimeOffset = DateTimeOffset.UtcNow;
 
-                for (int i = 0; i < response.Data.Count; i++)
+                for (var i = 0; i < response.Data.Count; i++)
                 {
                     count++;
 
-                    var gameRecord = new KYGameRecord()
+                    var gameRecord = new KYGameRecord
                     {
                         GameID = response.Data.List.GameID[i],
                         Account = response.Data.List.Accounts[i],
@@ -100,8 +106,10 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                         AllBet = Convert.ToDecimal(response.Data.List.AllBet[i]),
                         Profit = Convert.ToDecimal(response.Data.List.Profit[i]),
                         Revenue = Convert.ToDecimal(response.Data.List.Revenue[i]),
-                        GameStartTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameStartTime[i]), TimeSpan.FromHours(+8)),
-                        GameEndTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]), TimeSpan.FromHours(+8)),
+                        GameStartTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameStartTime[i]),
+                            TimeSpan.FromHours(+8)),
+                        GameEndTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]),
+                            TimeSpan.FromHours(+8)),
                         CardValue = response.Data.List.CardValue[i],
                         ChannelID = Convert.ToInt32(response.Data.List.ChannelID[i]),
                         LineCode = response.Data.List.LineCode[i]
@@ -110,16 +118,18 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                     var success = true;
                     var playerCode = gameRecord.Account.Split('_')[1];
 
-                    if (!players.TryGetValue(playerCode, out (Player Player, Guid? GameProviderConfigurationId) playerInfo))
+                    if (!players.TryGetValue(playerCode, out var playerInfo))
                     {
-                        playerInfo = await _gameProviderRecordService.GetPlayerInfoAsync(gameProviderId, playerCode).ConfigureAwait(false);
+                        playerInfo = await _gameProviderRecordService.GetPlayerInfoAsync(gameProviderId, playerCode)
+                            .ConfigureAwait(false);
                         players.Add(playerCode, playerInfo);
                     }
 
 
-                    if (!games.TryGetValue(gameRecord.KindID, out CachedGame game))
+                    if (!games.TryGetValue(gameRecord.KindID, out var game))
                     {
-                        game = await _service.GetCachedGameAsync(gameProviderId, gameRecord.KindID.ToString()).ConfigureAwait(false);
+                        game = await _service.GetCachedGameAsync(gameProviderId, gameRecord.KindID.ToString())
+                            .ConfigureAwait(false);
                         games.Add(response.Data.List.KindID[i], game);
                     }
 
@@ -133,22 +143,24 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                         successCount++;
                     }
 
-                    var result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData()
+                    var result = await _gameRoundsProcessor.ExecuteAsync(new GameRoundsData
                     {
                         ExternalRoundId = gameRecord.GameID,
                         GameProviderId = gameProviderId,
                         GameProviderCode = _service.GetGameProviderCode(),
-                        PlayerCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.PlayerCode,
-                        GameId = (game == null) ? -1 : game.Id,
+                        PlayerCode = playerInfo.Player == null ? string.Empty : playerInfo.Player.PlayerCode,
+                        GameId = game == null ? -1 : game.Id,
                         ExternalId = gameRecord.KindID.ToString(),
-                        CurrencyCode = (playerInfo.Player == null) ? string.Empty : playerInfo.Player.DefaultWalletCurrencyCode,
+                        CurrencyCode = playerInfo.Player == null
+                            ? string.Empty
+                            : playerInfo.Player.DefaultWalletCurrencyCode,
                         Status = RoundStatus.Closed,
                         GameProviderConfigurationId = playerInfo.GameProviderConfigurationId.GetValueOrDefault(),
-                        WalletId = (playerInfo.Player == null) ? Guid.Empty : playerInfo.Player.DefaultWalletId,
+                        WalletId = playerInfo.Player == null ? Guid.Empty : playerInfo.Player.DefaultWalletId,
                         CreatedOn = sysDateTimeOffset,
                         ClosedOn = sysDateTimeOffset,
                         UpdatedOn = sysDateTimeOffset,
-                        BrandId = (playerInfo.Player == null) ? Guid.Empty : playerInfo.Player.BrandId,
+                        BrandId = playerInfo.Player == null ? Guid.Empty : playerInfo.Player.BrandId,
                         ExternalCreatedOn = gameRecord.GameStartTime,
                         ExternalClosedOn = gameRecord.GameEndTime,
                         BetAmount = gameRecord.AllBet,
@@ -162,18 +174,21 @@ namespace TGS.Apis.TgsApi.GameProviders.KY.Services
                         AdditionalData = _jsonSerializationProvider.SerializeToString(gameRecord),
                         Success = success
                     });
-                    lastGameRecordTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]), TimeSpan.FromHours(+8));
+
+                    lastGameRecordTime = new DateTimeOffset(DateTime.Parse(response.Data.List.GameEndTime[i]),
+                        TimeSpan.FromHours(+8));
                 }
             }
 
-            var responses = new KYGPGameRecordResponse()
+            var responses = new KYGPGameRecordResponse
             {
-                Success = (response.Data.Code is 0 or 16),
+                Success = response.Data.Code is 0 or 16,
                 LastGameRecorTime = lastGameRecordTime,
-                Count = (response.Data.Code is 0 or 16) ? count : 0,
+                Count = response.Data.Code is 0 or 16 ? count : 0,
                 SuccessCount = successCount,
                 FailCount = failCount
             };
+
             return responses;
         }
     }
