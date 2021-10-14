@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
 using ExpectedObjects;
 using Moq;
@@ -13,7 +15,9 @@ using TGS.Clients.Promotion.Client;
 using TGS.Core.Infrastructures.Json;
 using TGS.Payment.ManualDeposit;
 using TGS.Services.Operator;
+using TGS.Services.Operator.Services.BrandPayments;
 using TGS.Services.Operator.Services.Deposit;
+using TGS.ServiceUtility;
 
 namespace TGS.Tests.OperatorApi.UnitTests
 {
@@ -284,10 +288,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqFileServiceClient = new Mock<IFileServiceClient>();
+            var moqBrandPaymentQueryService = new Mock<IQueryService<BrandPaymentsQuery, BrandPaymentInfo>>();
+            var moqGetPaymentService = new Mock<IGetService<GetPaymentQuery, PaymentInfo>>();
 
             var sut = new SubmitBankDepositFormCommandService(
                 moqPaymentServiceClient.Object,
-                moqFileServiceClient.Object);
+                moqFileServiceClient.Object,
+                moqBrandPaymentQueryService.Object,
+                moqGetPaymentService.Object);
 
             var brandId = Guid.NewGuid();
             var playerCode = "ThisIsPlayerCode";
@@ -302,6 +310,27 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 contentType,
                 fileStream,
                 id => "{}");
+
+            moqBrandPaymentQueryService
+                .Setup(fake => fake.QueryAsync(
+                    It.IsAny<BrandPaymentsQuery>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(new[] {
+                    new BrandPaymentInfo
+                    {
+                        TransferType = TransferType.Deposit
+                    }
+                }.ToAsyncEnumerable());
+
+            moqGetPaymentService
+                .Setup(fake => fake.GetAsync(
+                    It.IsAny<GetPaymentQuery>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.FromResult(
+                    new PaymentInfo
+                    {
+                        Code = "Manual"
+                    }));
 
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
@@ -343,10 +372,14 @@ namespace TGS.Tests.OperatorApi.UnitTests
         {
             var moqPaymentServiceClient = new Mock<IPaymentServiceClient>();
             var moqFileServiceClient = new Mock<IFileServiceClient>();
+            var moqBrandPaymentQueryService = new Mock<IQueryService<BrandPaymentsQuery, BrandPaymentInfo>>();
+            var moqGetPaymentService = new Mock<IGetService<GetPaymentQuery, PaymentInfo>>();
 
             var sut = new SubmitBankDepositFormCommandService(
                 moqPaymentServiceClient.Object,
-                moqFileServiceClient.Object);
+                moqFileServiceClient.Object,
+                moqBrandPaymentQueryService.Object,
+                moqGetPaymentService.Object);
 
             var brandId = Guid.NewGuid();
             var playerCode = "ThisIsPlayerCode";
@@ -361,6 +394,27 @@ namespace TGS.Tests.OperatorApi.UnitTests
                 contentType,
                 fileStream,
                 id => "{}");
+
+            moqBrandPaymentQueryService
+                .Setup(fake => fake.QueryAsync(
+                    It.IsAny<BrandPaymentsQuery>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(new[] {
+                    new BrandPaymentInfo
+                    {
+                        TransferType = TransferType.Deposit
+                    }
+                }.ToAsyncEnumerable());
+
+            moqGetPaymentService
+                .Setup(fake => fake.GetAsync(
+                    It.IsAny<GetPaymentQuery>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns(ValueTask.FromResult(
+                    new PaymentInfo
+                    {
+                        Code = "Manual"
+                    }));
 
             moqPaymentServiceClient
                 .Setup(fake => fake.GetDepositFormAsync(
