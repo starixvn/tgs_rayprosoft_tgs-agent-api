@@ -9,22 +9,26 @@ using TGS.Services.BackOffice.Application.Models.Player;
 using TGS.Services.BackOffice.Application.Resources;
 using TGS.Services.BackOffice.Infrastructure.DataService;
 using TGS.GameProviders.KickPlayerServer.Client;
+using Microsoft.Extensions.Logging;
 
 namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 {
     public class UpdatePlayerHandler : Handler<UpdatePlayerRequest, MessageResponse>
     {
+        private readonly ILogger<UpdatePlayerHandler> _logger;
         private readonly IAgentService _agentService;
         private readonly IPlayerService _service;
         private readonly IKickPlayerServiceClient _kickPlayerServiceClient;
 
         public UpdatePlayerHandler(
+            ILogger<UpdatePlayerHandler> logger,
             IPlayerService service,
             IAgentService agentService,
             IHttpContextAccessor accessor,
             IKickPlayerServiceClient kickPlayerServiceClient) :
             base(accessor)
         {
+            _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
             _service = service;
             _agentService = agentService;
             _kickPlayerServiceClient = kickPlayerServiceClient ?? throw new System.ArgumentNullException(nameof(kickPlayerServiceClient));
@@ -84,14 +88,19 @@ namespace TGS.Services.BackOffice.Application.Commands.PlayerHandlers
 
             await _service.UpdatePlayerAsync(player, request);
 
-            if (request.Type == updatePlayerType[0]
-                &&
-                player.Status != request.Status
-                && (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist))
-            {
-                await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
-            }
 
+            _logger.LogInformation("call KickPlayerAsync");
+            
+            await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
+            /*
+                 if (request.Type == updatePlayerType[0]
+                 &&
+                 player.Status != request.Status
+                 && (request.Status is PlayerStatus.Disabled or PlayerStatus.InBlacklist))
+             {
+                 await _kickPlayerServiceClient.KickPlayerAsync(request.PlayerCode).ConfigureAwait(false);
+             }
+            */
             return CreateValidResponse<MessageResponse>();
         }
     }
