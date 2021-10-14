@@ -3,11 +3,11 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Tgs.Payment.Clients;
 using TGS.Apis.BackendOffice.Controllers.Messages;
 using TGS.Apis.BackendOffice.Controllers.Messages.Deposit;
 using TGS.Apis.BackendOffice.Extensions;
 using TGS.Core.Models.Messages;
+using Tgs.Payment.Clients;
 using TGS.Services.BackOffice.Application.Commands.Deposit;
 using TGS.Services.BackOffice.Application.Queries.Deposit;
 using TGS.ServiceUtility;
@@ -50,8 +50,12 @@ namespace TGS.Apis.BackendOffice.Controllers
                     Amount = formDetail.Amount,
                     Remark = formDetail.Remark,
                     Status = formDetail.Status.ToFlowState(),
-                    ApplyInfo = string.IsNullOrWhiteSpace(formDetail.ApplyInfo) ? null : JsonDocument.Parse(formDetail.ApplyInfo),
-                    PaymentReturn = string.IsNullOrWhiteSpace(formDetail.PaymentReturn) ? null : JsonDocument.Parse(formDetail.PaymentReturn),
+                    ApplyInfo = string.IsNullOrWhiteSpace(formDetail.ApplyInfo)
+                        ? null
+                        : JsonDocument.Parse(formDetail.ApplyInfo),
+                    PaymentReturn = string.IsNullOrWhiteSpace(formDetail.PaymentReturn)
+                        ? null
+                        : JsonDocument.Parse(formDetail.PaymentReturn),
                     CreatedOn = formDetail.CreatedOn,
                     UpdatedOn = formDetail.UpdatedOn,
                     ThirdPartyOrderNo = formDetail.ThirdPartyOrderNo
