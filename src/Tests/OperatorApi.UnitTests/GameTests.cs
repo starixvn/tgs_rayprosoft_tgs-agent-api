@@ -647,10 +647,10 @@ namespace TGS.Tests.OperatorApi.UnitTests
             var result = await sut.QueryAsync(query).ToArrayAsync();
 
             // assert
-            foreach (var r in result)
-            {
-                Assert.That(gameTypes.Contains(r.Type));
-            }
+            var expected = games.Where(g => gameTypes.Contains(g.Type)).ToArray();
+
+            Assert.AreEqual(expected.Length, result.Length);
+            Assert.AreNotEqual(games.Length, result.Length);
         }
 
         [Test]
